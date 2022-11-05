@@ -128,7 +128,6 @@ public class OutpatientClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // NCH_PROFNL_CMPNT_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial

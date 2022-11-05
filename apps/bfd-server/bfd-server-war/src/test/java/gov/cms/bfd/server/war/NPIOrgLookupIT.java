@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import java.io.IOException;
@@ -15,5 +16,13 @@ public class NPIOrgLookupIT {
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
     Optional<String> orgDisplay = npiOrgLookup.retrieveNPIOrgDisplay(Optional.of("1497758544"));
     assertEquals("CUMBERLAND COUNTY HOSPITAL SYSTEM", orgDisplay.get());
+  }
+
+  /** Verifies that it returns a empty string for a non valid npiOrg Number */
+  @Test
+  public void VerifyANonValidNPIOrgReturnsEmpty() throws IOException {
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
+    Optional<String> orgDisplay = npiOrgLookup.retrieveNPIOrgDisplay(Optional.of("-497758544"));
+    assertTrue(orgDisplay.isEmpty());
   }
 }

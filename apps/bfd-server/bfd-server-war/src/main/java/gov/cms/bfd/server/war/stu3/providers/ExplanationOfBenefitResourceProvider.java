@@ -118,7 +118,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
   /** @param npiOrgLookup the {@link NPIOrgLookup} to use */
   @Inject
-  public void setnpiOrgLookup(NPIOrgLookup npiOrgLookup) {
+  public void setNpiOrgLookup(NPIOrgLookup npiOrgLookup) {
     this.npiOrgLookup = npiOrgLookup;
   }
 

@@ -141,6 +141,9 @@ public final class TransformerUtilsV2 {
   /** Tracks the NPI codes that have already had code lookup failures. */
   private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
 
+  /** Tracks the NPI codes that have already had code lookup failures. */
+  private static final String npiOrgDisplayDefault = "UNKNOWN";
+
   /**
    * @param beneficiary the {@link Beneficiary} to calculate the {@link Patient#getId()} value for
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
@@ -321,11 +324,7 @@ public final class TransformerUtilsV2 {
 
     // If this is an NPI perform the extra lookup
     if (C4BBPractitionerIdentifierType.NPI.equals(type)) {
-      if (npiOrgDisplay.isPresent()) {
-        response.setDisplay(npiOrgDisplay.get());
-      } else {
-        response.setDisplay("UNKNOWN");
-      }
+      response.setDisplay(npiOrgDisplay.orElse(npiOrgDisplayDefault));
     }
 
     return response;
@@ -3597,6 +3596,23 @@ public final class TransformerUtilsV2 {
    * @param eob The {@link ExplanationOfBenefit} to provider org details to
    * @param type The {@link C4BBIdentifierType} of the identifier slice
    * @param value The value of the identifier. If empty, this call is a no-op
+   * @param last dated The value of last updated.
+   */
+  static void addProviderSlice(
+      ExplanationOfBenefit eob,
+      C4BBOrganizationIdentifierType type,
+      String value,
+      Optional<Instant> lastUpdated) {
+    addProviderSlice(eob, type, Optional.of(value), Optional.empty(), lastUpdated);
+  }
+  /**
+   * Looks up or adds a contained {@link Organization} object to the current {@link
+   * ExplanationOfBenefit}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param eob The {@link ExplanationOfBenefit} to provider org details to
+   * @param type The {@link C4BBIdentifierType} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
@@ -3626,7 +3642,7 @@ public final class TransformerUtilsV2 {
         if (!npiOrgName.isEmpty()) {
           provider.setName(npiOrgName.get());
         } else {
-          provider.setName("UNKNOWN");
+          provider.setName(npiOrgDisplayDefault);
           if (value.isPresent())
             LOGGER.info("Organization not found for npi number:" + value.get());
           else LOGGER.info("Organization not found for empty npi nummber");

@@ -102,11 +102,11 @@ public class HHAClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
+    // ORG NPI NUM Display      => ExplanationOfBenefit.organization.display
     // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
     // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
     // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension

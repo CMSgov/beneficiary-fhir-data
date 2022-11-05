@@ -45,10 +45,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -1002,6 +1006,23 @@ public class HHAClaimTransformerV2Test {
             new DateType("2015-10-30"));
 
     assertTrue(compare.equalsDeep(ex));
+  }
+
+  /** Should have organization with correct fake display. */
+  @Test
+  public void shouldHaveOrganizationWithFakeDisplay() {
+    Optional<Resource> organization =
+        eob.getContained().stream()
+            .filter(o -> o.getResourceType().equals(ResourceType.Organization))
+            .findFirst();
+
+    Organization org = (Organization) organization.get();
+    Optional<Identifier> identifier =
+        org.getIdentifier().stream()
+            .filter(i -> i.getValue().equals(NPIOrgLookup.FAKE_NPI_NUMBER))
+            .findFirst();
+    assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
+    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
   }
 
   /**

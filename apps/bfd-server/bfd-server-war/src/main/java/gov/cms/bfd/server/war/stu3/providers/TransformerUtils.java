@@ -455,13 +455,8 @@ public final class TransformerUtils {
       String codingSystem,
       Optional<String> codingDisplay,
       String codingCode) {
-    IBaseExtension<?, ?> extension = fhirElement.addExtension();
-    extension.setUrl(extensionUrl);
-    if (!codingDisplay.isPresent())
-      extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
-    else
-      extension.setValue(
-          new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay.get()));
+    addExtensionCoding(
+        fhirElement, extensionUrl, codingSystem, codingDisplay.orElse(null), codingCode);
   }
 
   /**
@@ -803,15 +798,9 @@ public final class TransformerUtils {
    */
   static Reference createIdentifierReference(
       String identifierSystem, String identifierValue, Optional<String> npiOrgDisplay) {
-
-    if (!npiOrgDisplay.isEmpty()) {
-      return new Reference()
-          .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
-          .setDisplay(npiOrgDisplay.get());
-    } else {
-      return new Reference()
-          .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue));
-    }
+    return new Reference()
+        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setDisplay(npiOrgDisplay.orElse(null));
   }
 
   /**

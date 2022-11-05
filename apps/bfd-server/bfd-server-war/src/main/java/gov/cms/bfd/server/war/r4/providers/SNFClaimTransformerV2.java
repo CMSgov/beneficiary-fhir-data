@@ -105,7 +105,6 @@ public class SNFClaimTransformerV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        Optional.empty(),
         claimGroup.getLastUpdated());
 
     // add EOB information to fields that are common between the Inpatient and SNF claim types
