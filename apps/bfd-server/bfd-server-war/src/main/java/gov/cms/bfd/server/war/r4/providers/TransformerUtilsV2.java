@@ -142,7 +142,7 @@ public final class TransformerUtilsV2 {
   private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
 
   /** Tracks the NPI codes that have already had code lookup failures. */
-  private static final String npiOrgDisplayDefault = "UNKNOWN";
+  private static final String NPIORGNAMEDEFAULT = "UNKNOWN";
 
   /**
    * @param beneficiary the {@link Beneficiary} to calculate the {@link Patient#getId()} value for
@@ -324,7 +324,7 @@ public final class TransformerUtilsV2 {
 
     // If this is an NPI perform the extra lookup
     if (C4BBPractitionerIdentifierType.NPI.equals(type)) {
-      response.setDisplay(npiOrgDisplay.orElse(npiOrgDisplayDefault));
+      response.setDisplay(npiOrgDisplay.orElse(NPIORGNAMEDEFAULT));
     }
 
     return response;
@@ -3642,7 +3642,7 @@ public final class TransformerUtilsV2 {
         if (!npiOrgName.isEmpty()) {
           provider.setName(npiOrgName.get());
         } else {
-          provider.setName(npiOrgDisplayDefault);
+          provider.setName(NPIORGNAMEDEFAULT);
           if (value.isPresent())
             LOGGER.info("Organization not found for npi number:" + value.get());
           else LOGGER.info("Organization not found for empty npi nummber");
