@@ -183,11 +183,19 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               setUptimeToReceiving();
               final TMessage result = responseStream.next();
               metrics.getObjectsReceived().mark();
-              batch.put(sink.getDedupKeyForMessage(result), result);
-              if (batch.size() >= maxPerBatch) {
-                processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
+              if (sink.isValidMessage(result)) {
+                batch.put(sink.getClaimIdForMessage(result), result);
+                if (batch.size() >= maxPerBatch) {
+                  processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
+                }
+                lastProcessedTime = clock.millis();
+              } else {
+                log.info(
+                    "skipping invalid claim: claimType={} claimId={} seq={}",
+                    claimType,
+                    sink.getClaimIdForMessage(result),
+                    sink.getSequenceNumberForObject(result));
               }
-              lastProcessedTime = clock.millis();
             }
           } catch (GrpcResponseStream.StreamInterruptedException ex) {
             // If our thread is interrupted we cancel the stream so the server knows we're done

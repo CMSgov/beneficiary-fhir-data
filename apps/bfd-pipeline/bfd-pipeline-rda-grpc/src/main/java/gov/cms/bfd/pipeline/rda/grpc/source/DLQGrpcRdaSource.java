@@ -173,7 +173,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
             if (sequencePredicate.test(startingSequenceNumber, result)) {
               // It's a match, so check if we can successfully process it now.
-              batch.put(sink.getDedupKeyForMessage(result), result);
+              batch.put(sink.getClaimIdForMessage(result), result);
               int processed = submitBatchToSink(apiVersion, sink, batch);
               processResult.addCount(processed);
 

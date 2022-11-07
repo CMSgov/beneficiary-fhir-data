@@ -215,7 +215,7 @@ public class DLQGrpcRdaSourceTest {
 
     doReturn(MOCK_STREAM_A_MESSAGE).doReturn(null).when(mockStreamA).next();
 
-    doReturn("A").when(mockSink).getDedupKeyForMessage(MOCK_STREAM_A_MESSAGE);
+    doReturn("A").when(mockSink).getClaimIdForMessage(MOCK_STREAM_A_MESSAGE);
 
     doReturn(mockStreamA)
         .when(mockCaller)
