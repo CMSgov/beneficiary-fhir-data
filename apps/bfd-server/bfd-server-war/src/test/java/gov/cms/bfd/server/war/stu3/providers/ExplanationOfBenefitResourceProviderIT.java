@@ -18,7 +18,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -36,6 +39,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -217,11 +222,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingHHAClaim() throws FHIRException {
+  public void readEobForExistingHHAClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     HHAClaim claim =
         loadedRecords.stream()
@@ -237,7 +249,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    HHAClaimTransformerTest.assertMatches(claim, eob);
+    HHAClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -269,11 +281,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingHospiceClaim() throws FHIRException {
+  public void readEobForExistingHospiceClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     HospiceClaim claim =
         loadedRecords.stream()
@@ -289,7 +308,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    HospiceClaimTransformerTest.assertMatches(claim, eob);
+    HospiceClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -321,11 +340,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingInpatientClaim() throws FHIRException {
+  public void readEobForExistingInpatientClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     InpatientClaim claim =
         loadedRecords.stream()
@@ -341,7 +367,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    InpatientClaimTransformerTest.assertMatches(claim, eob);
+    InpatientClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -373,11 +399,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingOutpatientClaim() throws FHIRException {
+  public void readEobForExistingOutpatientClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     OutpatientClaim claim =
         loadedRecords.stream()
@@ -393,7 +426,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    OutpatientClaimTransformerTest.assertMatches(claim, eob);
+    OutpatientClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -519,11 +552,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingSNFClaim() throws FHIRException {
+  public void readEobForExistingSNFClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     SNFClaim claim =
         loadedRecords.stream()
@@ -539,7 +579,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    SNFClaimTransformerTest.assertMatches(claim, eob);
+    SNFClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -570,7 +610,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatient() throws FHIRException {
+  public void searchForEobsByExistingPatient() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -617,6 +657,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
      * and looks correct.
      */
 
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+
     CarrierClaim carrierClaim =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
@@ -643,7 +690,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0), transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -652,7 +699,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimType(searchResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -661,7 +710,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimType(searchResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -670,7 +721,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -688,7 +741,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0), transformerContext);
   }
 
   /**
@@ -699,7 +752,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException {
+  public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -721,6 +774,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .count(2)
             .returnBundle(Bundle.class)
             .execute();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 
@@ -811,7 +871,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimTypeFromList(combinedResults, ClaimType.HHA).get(0));
+        hhaClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.HHA).get(0),
+        transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -820,7 +882,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimTypeFromList(combinedResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -829,7 +893,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimTypeFromList(combinedResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -838,7 +904,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimTypeFromList(combinedResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -856,7 +924,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimTypeFromList(combinedResults, ClaimType.SNF).get(0));
+        snfClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.SNF).get(0),
+        transformerContext);
   }
 
   /**
@@ -979,7 +1049,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
+  public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1030,6 +1100,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
     assertNull(searchResults.getLink(Constants.LINK_FIRST));
     assertNull(searchResults.getLink(Constants.LINK_LAST));
 
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+
     /*
      * Verify that each of the expected claims (one for every claim type) is present
      * and looks correct.
@@ -1061,7 +1138,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0), transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -1070,7 +1147,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimType(searchResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -1079,7 +1158,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimType(searchResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -1088,7 +1169,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -1106,7 +1189,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0), transformerContext);
   }
 
   /**
@@ -1116,7 +1199,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
+  public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1151,6 +1234,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     /*
      * Verify that only the first and last links exist as there are no previous or
@@ -1192,7 +1282,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0), transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -1201,7 +1291,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimType(searchResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -1210,7 +1302,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimType(searchResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -1219,7 +1313,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -1237,7 +1333,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0), transformerContext);
   }
 
   /**
