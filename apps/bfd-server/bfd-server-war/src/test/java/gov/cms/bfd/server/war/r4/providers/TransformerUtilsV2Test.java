@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
@@ -22,10 +21,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 /** Tests the utility methods within the {@link TransformerUtilsV2}. */
@@ -133,7 +128,6 @@ public class TransformerUtilsV2Test {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         Optional.empty(),
-        Optional.empty(),
         ' ',
         ' ',
         Optional.empty(),
@@ -159,46 +153,6 @@ public class TransformerUtilsV2Test {
   }
 
   /**
-   * Ensures the fi_num is correctly mapped to an eob as an extension when the input
-   * fiscalIntermediaryNumber is present.
-   */
-  @Test
-  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenNpiOrgExistsExpectItOnEob() {
-
-    ExplanationOfBenefit eob = new ExplanationOfBenefit();
-
-    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
-        eob,
-        Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER),
-        Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME),
-        ' ',
-        ' ',
-        Optional.empty(),
-        "",
-        ' ',
-        Optional.empty(),
-        BigDecimal.ZERO,
-        BigDecimal.ZERO,
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty());
-
-    Optional<Resource> organization =
-        eob.getContained().stream()
-            .filter(o -> o.getResourceType().equals(ResourceType.Organization))
-            .findFirst();
-
-    Organization org = (Organization) organization.get();
-    Optional<Identifier> identifier =
-        org.getIdentifier().stream()
-            .filter(i -> i.getValue().equals(NPIOrgLookup.FAKE_NPI_NUMBER))
-            .findFirst();
-    assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
-  }
-
-  /**
    * Ensures the fi_num is not mapped to an eob as an extension when the input
    * fiscalIntermediaryNumber is not present.
    */
@@ -211,7 +165,6 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
-        Optional.empty(),
         Optional.empty(),
         ' ',
         ' ',
@@ -433,7 +386,6 @@ public class TransformerUtilsV2Test {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         Optional.empty(),
-        Optional.empty(),
         ' ',
         ' ',
         Optional.empty(),
@@ -475,7 +427,6 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
-        Optional.empty(),
         Optional.empty(),
         ' ',
         ' ',

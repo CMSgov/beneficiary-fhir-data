@@ -47,27 +47,4 @@ public class NPIOrgLookupTest {
         npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
-
-  /**
-   * Should not return Org Name when the parameter bfdServer.include.fake.drug.code is true and NPI
-   * Number is empty.
-   */
-  @Test
-  public void shouldNotReturnWhenNPINumberIsEmptyAndWhenConstructorSetToTrue() throws IOException {
-    NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
-    Optional<String> npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.empty());
-    assertEquals(false, npiOrgDisplay.isPresent());
-  }
-
-  /**
-   * Should not return Org Name when the parameter bfdServer.include.fake.drug.code is true and NPI
-   * Number is empty string.
-   */
-  @Test
-  public void shouldNotReturnWhenNPINumberIEmptyStringAndWhenConstructorSetToTrue()
-      throws IOException {
-    NPIOrgLookup npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
-    Optional<String> npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(""));
-    assertEquals(false, npiOrgDisplay.isPresent());
-  }
 }

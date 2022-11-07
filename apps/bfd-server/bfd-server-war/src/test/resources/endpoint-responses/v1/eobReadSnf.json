@@ -167,9 +167,8 @@
   "organization" : {
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "0000000000"
-    },
-    "display" : "Fake ORG Name"
+      "value" : "1111111111"
+    }
   },
   "facility" : {
     "extension" : [ {
@@ -182,9 +181,8 @@
     } ],
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "0000000000"
-    },
-    "display" : "Fake ORG Name"
+      "value" : "1111111111"
+    }
   },
   "information" : [ {
     "sequence" : 1,
