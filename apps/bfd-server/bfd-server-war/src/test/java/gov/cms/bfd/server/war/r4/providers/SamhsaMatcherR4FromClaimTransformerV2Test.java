@@ -5,6 +5,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -21,6 +22,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +75,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    *
    * @return the data
    */
-  public static Stream<Arguments> data() {
+  public static Stream<Arguments> data() throws IOException {
     // Load and transform the various claim types for testing
 
     ExplanationOfBenefit inpatientEob =
@@ -81,7 +83,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(InpatientClaim.class));
     String inpatientClaimType = TransformerUtilsV2.getClaimType(inpatientEob).toString();
 
@@ -90,7 +93,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(OutpatientClaim.class));
     String outpatientClaimType = TransformerUtilsV2.getClaimType(outpatientEob).toString();
 
@@ -99,7 +103,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(DMEClaim.class));
     String dmeClaimType = TransformerUtilsV2.getClaimType(dmeEob).toString();
 
@@ -108,7 +113,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(HHAClaim.class));
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
@@ -117,7 +123,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(HospiceClaim.class));
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();
 
@@ -126,7 +133,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(SNFClaim.class));
     String snfClaimType = TransformerUtilsV2.getClaimType(snfEob).toString();
 
@@ -135,7 +143,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(CarrierClaim.class));
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
@@ -144,7 +153,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(PartDEvent.class));
 
     String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();

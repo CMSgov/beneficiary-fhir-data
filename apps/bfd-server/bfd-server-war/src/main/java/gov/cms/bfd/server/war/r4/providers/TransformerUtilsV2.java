@@ -141,6 +141,9 @@ public final class TransformerUtilsV2 {
   /** Tracks the NPI codes that have already had code lookup failures. */
   private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
 
+  /** Tracks the NPI codes that have already had code lookup failures. */
+  private static final String NPI_ORG_DISPLAY_DEFAULT = "UNKNOWN";
+
   /**
    * @param beneficiary the {@link Beneficiary} to calculate the {@link Patient#getId()} value for
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
@@ -293,6 +296,35 @@ public final class TransformerUtilsV2 {
     // If this is an NPI perform the extra lookup
     if (C4BBPractitionerIdentifierType.NPI.equals(type)) {
       response.setDisplay(retrieveNpiCodeDisplay(value));
+    }
+
+    return response;
+  }
+
+  /**
+   * Used for creating Identifier references for Practitioners
+   *
+   * @param type the {@link C4BBPractitionerIdentifierType} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param value the {@link Identifier#getValue()} to use in {@link Reference#getIdentifier()}
+   * @param npiOrgDisplay the npi org Display
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createPractitionerIdentifierReferenceWithNpiOrg(
+      C4BBPractitionerIdentifierType type, String value, Optional<String> npiOrgDisplay) {
+    Reference response =
+        new Reference()
+            .setIdentifier(
+                new Identifier()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(
+                                new Coding(type.getSystem(), type.toCode(), type.getDisplay())))
+                    .setValue(value));
+
+    // If this is an NPI perform the extra lookup
+    if (C4BBPractitionerIdentifierType.NPI.equals(type)) {
+      response.setDisplay(npiOrgDisplay.orElse(NPI_ORG_DISPLAY_DEFAULT));
     }
 
     return response;
@@ -1989,6 +2021,72 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
+   * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
+   * CareTeamComponent} (via {@link ItemComponent#addCareTeamLinkId(int)}).
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param roleSystem the {@link String} role system to use for the care team system.
+   * @param roleCode the {@link String} role code to use for the care team code.
+   * @param roleDisplay the {@link String} role display to use for the care team display.
+   * @param roleDisplay the {@link Optional} npi org display to use for the care team npi org
+   *     display.
+   * @return the {@link CareTeamComponent} that was created/linked
+   */
+  private static CareTeamComponent addCareTeamPractitionerWithNpiOrg(
+      ExplanationOfBenefit eob,
+      C4BBPractitionerIdentifierType type,
+      String practitionerIdValue,
+      String roleSystem,
+      String roleCode,
+      String roleDisplay,
+      Optional<String> npiOrgDisplay) {
+    // Try to find a matching pre-existing entry.
+    CareTeamComponent careTeamEntry =
+        eob.getCareTeam().stream()
+            .filter(ctc -> ctc.getProvider().hasIdentifier())
+            .filter(ctc -> ctc.hasRole())
+            .filter(
+                ctc ->
+                    ctc.getProvider().getIdentifier().getType().getCoding().stream()
+                            .anyMatch(
+                                c ->
+                                    c.getSystem().equalsIgnoreCase(type.getSystem())
+                                        && c.getCode().equalsIgnoreCase(type.toCode()))
+                        && practitionerIdValue.equalsIgnoreCase(
+                            ctc.getProvider().getIdentifier().getValue()))
+            .filter(
+                ctc ->
+                    roleCode.equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getCode())
+                        && roleSystem.equalsIgnoreCase(
+                            ctc.getRole().getCodingFirstRep().getSystem()))
+            .findAny()
+            .orElse(null);
+
+    // If no match was found, add one to the EOB.
+    // <ID Value> => ExplanationOfBenefit.careTeam.provider
+    if (careTeamEntry == null) {
+      careTeamEntry = eob.addCareTeam();
+      // addItem adds and returns, so we want size() not size() + 1 here
+      careTeamEntry.setSequence(eob.getCareTeam().size());
+      careTeamEntry.setProvider(
+          createPractitionerIdentifierReferenceWithNpiOrg(
+              type, practitionerIdValue, npiOrgDisplay));
+
+      CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
+      careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
+      careTeamEntry.setRole(careTeamRoleConcept);
+    }
+
+    return careTeamEntry;
+  }
+
+  /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
    * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
    * CcwCodebookInterface)}, this also sets the {@link SupportingInformationComponent#getCode()}
@@ -2871,6 +2969,7 @@ public final class TransformerUtilsV2 {
    * @param system Coding System to use, either NPI or UPIN
    * @param role The care team member's role
    * @param id The NPI or UPIN coded as a string
+   * @param id of optional string
    */
   static Optional<CareTeamComponent> addCareTeamMember(
       ExplanationOfBenefit eob,
@@ -2882,6 +2981,44 @@ public final class TransformerUtilsV2 {
         i ->
             addCareTeamPractitioner(
                 eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay()));
+  }
+
+  /**
+   * Adds a member to @link ExplanationOfBenefit#getCareTeam() with npiOrgDisplay}
+   *
+   * <p>Used for Professional and Non-Clinician claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the Item component
+   * @param system Coding System to use, either NPI or UPIN
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   * @param npiOrgDisplay The NPI display as a optional string
+   */
+  static CareTeamComponent addCareTeamMemberWithNpiOrg(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
+      Optional<String> id,
+      Optional<String> npiOrgDisplay) {
+
+    CareTeamComponent careTeamEntry =
+        addCareTeamPractitionerWithNpiOrg(
+            eob, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay(), npiOrgDisplay);
+
+    // care team entry is at eob level so no need to create item link id
+    if (item == null) {
+      return careTeamEntry;
+    }
+
+    // ExplanationOfBenefit.careTeam.sequence => ExplanationOfBenefit.item.careTeamSequence
+    if (!item.getCareTeamSequence().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
+      item.addCareTeamSequence(careTeamEntry.getSequence());
+    }
+
+    return careTeamEntry;
   }
 
   /**
@@ -3029,6 +3166,7 @@ public final class TransformerUtilsV2 {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> npiOrgName,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -3056,7 +3194,8 @@ public final class TransformerUtilsV2 {
                     CcwCodebookVariable.FI_CLM_PROC_DT, procDt)));
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
-    addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
+    addProviderSlice(
+        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, npiOrgName, lastUpdated);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -3453,11 +3592,29 @@ public final class TransformerUtilsV2 {
    * @param eob The {@link ExplanationOfBenefit} to provider org details to
    * @param type The {@link C4BBIdentifierType} of the identifier slice
    * @param value The value of the identifier. If empty, this call is a no-op
+   * @param last dated The value of last updated.
+   */
+  static void addProviderSlice(
+      ExplanationOfBenefit eob,
+      C4BBOrganizationIdentifierType type,
+      String value,
+      Optional<Instant> lastUpdated) {
+    addProviderSlice(eob, type, Optional.of(value), Optional.empty(), lastUpdated);
+  }
+  /**
+   * Looks up or adds a contained {@link Organization} object to the current {@link
+   * ExplanationOfBenefit}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param eob The {@link ExplanationOfBenefit} to provider org details to
+   * @param type The {@link C4BBIdentifierType} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
+      Optional<String> npiOrgName,
       Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
@@ -3478,6 +3635,14 @@ public final class TransformerUtilsV2 {
       // Certain types have specific systems
       if (type == C4BBOrganizationIdentifierType.NPI) {
         id.setSystem(TransformerConstants.CODING_NPI_US);
+        if (!npiOrgName.isEmpty()) {
+          provider.setName(npiOrgName.get());
+        } else {
+          provider.setName(NPI_ORG_DISPLAY_DEFAULT);
+          if (value.isPresent())
+            LOGGER.info("Organization not found for npi number:" + value.get());
+          else LOGGER.info("Organization not found for empty npi nummber");
+        }
       }
 
       provider.addIdentifier(id);
@@ -3497,8 +3662,9 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
+      Optional<String> npiOrgName,
       Optional<Instant> lastupdated) {
-    addProviderSlice(eob, type, Optional.of(value), lastupdated);
+    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated);
   }
 
   /**
