@@ -151,9 +151,9 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
+          "value" : "1497758544"
         },
-        "display" : "Fake ORG Name"
+        "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
       },
       "facility" : {
         "extension" : [ {
@@ -166,9 +166,9 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
+          "value" : "1497758544"
         },
-        "display" : "Fake ORG Name"
+        "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
       },
       "information" : [ {
         "sequence" : 1,
@@ -1249,9 +1249,8 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "1811111111"
+        }
       },
       "facility" : {
         "extension" : [ {
@@ -1264,9 +1263,8 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "1811111111"
+        }
       },
       "information" : [ {
         "sequence" : 1,
@@ -1834,9 +1832,8 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "5555553305"
+        }
       },
       "facility" : {
         "extension" : [ {
@@ -1849,9 +1846,8 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "5555553305"
+        }
       },
       "information" : [ {
         "sequence" : 1,
@@ -2589,9 +2585,8 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "1111111111"
+        }
       },
       "facility" : {
         "extension" : [ {
@@ -2604,9 +2599,8 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "1111111111"
+        }
       },
       "information" : [ {
         "sequence" : 1,
@@ -3718,8 +3712,8 @@
           "url" : "http://hl7.org/fhir/sid/us-npi",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
-            "code" : "0000000000",
-            "display" : "Fake ORG Name"
+            "code" : "1497758544",
+            "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
           }
         } ],
         "sequence" : 2,
@@ -4151,9 +4145,8 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "999999999"
+        }
       },
       "facility" : {
         "extension" : [ {
@@ -4166,9 +4159,8 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "0000000000"
-        },
-        "display" : "Fake ORG Name"
+          "value" : "999999999"
+        }
       },
       "information" : [ {
         "sequence" : 1,

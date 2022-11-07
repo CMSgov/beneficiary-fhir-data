@@ -11,7 +11,6 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -19,7 +18,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -45,14 +43,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -84,15 +78,14 @@ public class HHAClaimTransformerV2Test {
   }
 
   @BeforeEach
-  public void before() throws IOException {
+  public void before() {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         HHAClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -1008,23 +1001,6 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /** Should have organization with correct fake display. */
-  @Test
-  public void shouldHaveOrganizationWithFakeDisplay() {
-    Optional<Resource> organization =
-        eob.getContained().stream()
-            .filter(o -> o.getResourceType().equals(ResourceType.Organization))
-            .findFirst();
-
-    Organization org = (Organization) organization.get();
-    Optional<Identifier> identifier =
-        org.getIdentifier().stream()
-            .filter(i -> i.getValue().equals(NPIOrgLookup.FAKE_NPI_NUMBER))
-            .findFirst();
-    assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
-  }
-
   /**
    * Serializes the EOB and prints to the command line
    *
@@ -1032,14 +1008,13 @@ public class HHAClaimTransformerV2Test {
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException, IOException {
+  public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
         HHAClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
             generateClaim());
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
