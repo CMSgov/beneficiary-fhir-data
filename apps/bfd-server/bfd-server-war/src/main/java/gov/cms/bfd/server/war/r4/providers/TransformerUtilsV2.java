@@ -2027,18 +2027,19 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
-   * @param eobItem the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
    * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
    *     in {@link CareTeamComponent#getProvider()}
    * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
    *     in {@link CareTeamComponent#getProvider()}
-   * @param careTeamRole the {@link ClaimCareteamrole} to use for the {@link
-   *     CareTeamComponent#getRole()}
+   * @param roleSystem the {@link String} role system to use for the care team system.
+   * @param roleCode the {@link String} role code to use for the care team code.
+   * @param roleDisplay the {@link String} role display to use for the care team display.
+   * @param roleDisplay the {@link Optional} npi org display to use for the care team npi org
+   *     display.
    * @return the {@link CareTeamComponent} that was created/linked
    */
   private static CareTeamComponent addCareTeamPractitionerWithNpiOrg(
       ExplanationOfBenefit eob,
-      ItemComponent eobItem,
       C4BBPractitionerIdentifierType type,
       String practitionerIdValue,
       String roleSystem,
@@ -2080,16 +2081,6 @@ public final class TransformerUtilsV2 {
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
       careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
       careTeamEntry.setRole(careTeamRoleConcept);
-    }
-
-    // care team entry is at eob level so no need to create item link id
-    if (eobItem == null) {
-      return careTeamEntry;
-    }
-
-    // ExplanationOfBenefit.careTeam.sequence => ExplanationOfBenefit.item.careTeamSequence
-    if (!eobItem.getCareTeamSequence().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
-      eobItem.addCareTeamSequence(careTeamEntry.getSequence());
     }
 
     return careTeamEntry;
@@ -3005,24 +2996,29 @@ public final class TransformerUtilsV2 {
    * @param id The NPI or UPIN coded as a string
    * @param npiOrgDisplay The NPI display as a optional string
    */
-  static Optional<CareTeamComponent> addCareTeamMemberWithNpiOrg(
+  static CareTeamComponent addCareTeamMemberWithNpiOrg(
       ExplanationOfBenefit eob,
       ItemComponent item,
       C4BBPractitionerIdentifierType type,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
       Optional<String> id,
       Optional<String> npiOrgDisplay) {
-    return id.map(
-        i ->
-            addCareTeamPractitionerWithNpiOrg(
-                eob,
-                item,
-                type,
-                i,
-                role.getSystem(),
-                role.toCode(),
-                role.getDisplay(),
-                npiOrgDisplay));
+
+    CareTeamComponent careTeamEntry =
+        addCareTeamPractitionerWithNpiOrg(
+            eob, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay(), npiOrgDisplay);
+
+    // care team entry is at eob level so no need to create item link id
+    if (item == null) {
+      return careTeamEntry;
+    }
+
+    // ExplanationOfBenefit.careTeam.sequence => ExplanationOfBenefit.item.careTeamSequence
+    if (!item.getCareTeamSequence().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
+      item.addCareTeamSequence(careTeamEntry.getSequence());
+    }
+
+    return careTeamEntry;
   }
 
   /**
