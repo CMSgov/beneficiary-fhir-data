@@ -1749,6 +1749,7 @@ final class TransformerTestUtils {
   static void assertEobCommonGroupInpOutHHAHospiceSNFEquals(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> organizationNpiDisplay,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -1761,11 +1762,6 @@ final class TransformerTestUtils {
       Optional<String> fiscalIntermediaryNumber,
       Optional<String> fiDocumentClaimControlNumber,
       Optional<String> fiOriginalClaimControlNumber) {
-
-    TransformerTestUtils.assertReferenceIdentifierEquals(
-        TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getOrganization());
-    TransformerTestUtils.assertReferenceIdentifierEquals(
-        TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getFacility());
 
     assertExtensionCodingEquals(
         CcwCodebookVariable.CLM_FAC_TYPE_CD, claimFacilityTypeCode, eob.getFacility());

@@ -37,7 +37,7 @@ final class HHAClaimTransformer {
             .time();
 
     if (!(claim instanceof HHAClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -48,7 +48,8 @@ final class HHAClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private static ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      HHAClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -80,6 +81,7 @@ final class HHAClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
