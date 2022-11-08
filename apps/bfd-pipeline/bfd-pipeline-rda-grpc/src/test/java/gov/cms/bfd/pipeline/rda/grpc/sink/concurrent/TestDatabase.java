@@ -111,7 +111,7 @@ public class TestDatabase {
     }
 
     @Override
-    public String getDedupKeyForMessage(Message message) {
+    public String getClaimIdForMessage(Message message) {
       return message.claimId;
     }
 

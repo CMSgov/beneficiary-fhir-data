@@ -260,7 +260,7 @@ public class AbstractClaimRdaSinkTest {
     }
 
     @Override
-    public String getDedupKeyForMessage(String object) {
+    public String getClaimIdForMessage(String object) {
       return null;
     }
 
