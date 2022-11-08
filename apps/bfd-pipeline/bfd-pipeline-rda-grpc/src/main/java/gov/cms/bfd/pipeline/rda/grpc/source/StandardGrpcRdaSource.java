@@ -39,6 +39,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   private final Optional<Long> startingSequenceNumber;
   /** Expected time before RDA API server drops its connection when it has nothing to send. */
   private final long minIdleMillisBeforeConnectionDrop;
+  /** The type of RDA API server to connect to. */
+  private final RdaSourceConfig.ServerType serverType;
 
   /**
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
@@ -64,7 +66,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         appMetrics,
         claimType,
         startingSequenceNumber,
-        config.getMinIdleMillisBeforeConnectionDrop());
+        config.getMinIdleMillisBeforeConnectionDrop(),
+        config.getServerType());
   }
 
   /**
@@ -91,7 +94,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber,
-      long minIdleMillisBeforeConnectionDrop) {
+      long minIdleMillisBeforeConnectionDrop,
+      RdaSourceConfig.ServerType serverType) {
     super(
         Preconditions.checkNotNull(channel),
         Preconditions.checkNotNull(caller),
@@ -101,13 +105,15 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
     this.clock = clock;
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
+    this.serverType = serverType;
   }
 
   /**
    * {@inheritDoc}
    *
-   * <p>This implementation reads starting sequence number from the database, gets the API version
-   * number from RDA API, then downloads several claims from the API.
+   * <p>This implementation always reads starting sequence number from the database. When configured
+   * to communicate with a remote API server it also gets the API version number from RDA API and
+   * downloads several claims from the API.
    *
    * @param sink to process batches of objects
    * @return true if all actions were completed successfully
@@ -115,7 +121,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    */
   @Override
   public boolean performSmokeTest(RdaSink<TMessage, TClaim> sink) throws Exception {
-    boolean successful = false;
     log.info("smoke test: starting");
 
     // Query the database to get a starting sequence number.  This verifies that the database is
@@ -124,29 +129,32 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
     log.info("smoke test: startingSequenceNumber={}", startingSequenceNumber);
 
-    // Call the RDA API version service to confirm the API is accessible.
-    final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
-    log.info("smoke test: apiVersion={}", apiVersion);
+    if (serverType == RdaSourceConfig.ServerType.Remote) {
+      // Call the RDA API version service to confirm the API is accessible.
+      final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+      log.info("smoke test: apiVersion={}", apiVersion);
 
-    // Doesn't use startingSequenceNumber because we should not block waiting for new data.
-    final GrpcResponseStream<TMessage> responseStream =
-        caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
-    try {
-      for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
-        final TMessage message = responseStream.next();
-        log.info(
-            "smoke test: successfully downloaded claim: seq={}",
-            sink.getSequenceNumberForObject(message));
-      }
-      successful = true;
-    } finally {
-      // be a nice client that lets the server know when we are leaving before the stream is done
-      if (successful && responseStream.hasNext()) {
-        responseStream.cancelStream("smoke test: finished");
+      // Doesn't use startingSequenceNumber because we should not block waiting for new data.
+      final GrpcResponseStream<TMessage> responseStream =
+          caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
+      boolean successful = false;
+      try {
+        for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
+          final TMessage message = responseStream.next();
+          log.info(
+              "smoke test: successfully downloaded claim: seq={}",
+              sink.getSequenceNumberForObject(message));
+        }
+        successful = true;
+      } finally {
+        // be a nice client that lets the server know when we are leaving before the stream is done
+        if (successful && responseStream.hasNext()) {
+          responseStream.cancelStream("smoke test: finished");
+        }
       }
     }
 
-    return successful;
+    return true;
   }
 
   /**
