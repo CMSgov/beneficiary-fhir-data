@@ -1,5 +1,5 @@
 locals {
-  synthea_developers = sort([for user in values(data.aws_iam_user.synthea) : user.arn])
+  synthea_developers = sort([for user in values(data.aws_iam_user.synthea) : user.user_name])
 }
 
 data "aws_ssm_parameter" "synthea" {
