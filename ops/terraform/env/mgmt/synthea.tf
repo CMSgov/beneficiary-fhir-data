@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "synthea" {
-  bucket = "bfd-synthea"
+  bucket = "bfd-mgmt-synthea"
 }
 
 resource "aws_s3_bucket_public_access_block" "synthea" {
