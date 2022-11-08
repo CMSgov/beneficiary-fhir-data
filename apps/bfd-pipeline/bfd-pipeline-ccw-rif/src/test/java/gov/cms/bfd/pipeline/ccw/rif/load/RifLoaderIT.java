@@ -28,8 +28,13 @@ import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateInterface;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateSynthea;
 import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -942,6 +947,129 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Tests {@link CcwRifLoadPreValidateInterface} against Synthea data will not have a {@link
+   * PreValidationProperties} object as part of the manifest, and a second time (same bucket) where
+   * the manifest includes a {@link PreValidationProperties} that is invalid per its XML Schema
+   * Definition (XSD).
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
+  @Test
+  public void testForSyntheaPreValidationSuccess() throws Exception {
+    List<StaticRifResource> samples =
+        Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources());
+    loadSample(samples);
+
+    CcwRifLoadPreValidateInterface preVal = new CcwRifLoadPreValidateSynthea();
+    preVal.init(PipelineTestUtils.get().getPipelineApplicationState());
+
+    DataSetManifest manifest =
+        new DataSetManifest(
+            Instant.now(),
+            0,
+            true,
+            "DummyIn",
+            "DummyOut",
+            new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
+
+    // setup the preValidationProperties; use values data that we know don't already exist
+    PreValidationProperties endStateProps = new PreValidationProperties();
+    endStateProps.setBeneIdStart(-1005006);
+    endStateProps.setBeneIdEnd(-1005018);
+    endStateProps.setClmGrpIdStart(0);
+    endStateProps.setClmGrpIdStart(0);
+    endStateProps.setPdeIdStart(0);
+    endStateProps.setCarrClmCntlNumStart(0);
+    endStateProps.setFiDocCntlNumStart("DUMMY_FI_DOC_CNTL");
+    endStateProps.setHicnStart("JUNK");
+    endStateProps.setMbiStart("JUNK");
+    manifest.setPreValidationProperties(endStateProps);
+    assertTrue(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, but use a bene_id_start that we know exists; corresponds to
+     * CHECK_BENE_RANGE query in {@link CcwRifLoadPreValidateSynthea}
+     */
+    endStateProps.setBeneIdStart(-1000006);
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, but use a bene_id_start that we know exists, but a
+     * carrier_claims.clm_id_start that we know does exist. corresponds to CHECK_CARR_CLAIM_CNTL_NUM
+     * query in {@link CcwRifLoadPreValidateSynthea} Should always succeed since CARR_CLM_CNTL_NUM
+     * does not seem to be populated from Synthea data.
+     */
+    endStateProps.setBeneIdStart(-1005006);
+    endStateProps.setClmIdStart(-100000493);
+    endStateProps.setClmIdEnd(-100050493);
+    endStateProps.setCarrClmCntlNumStart(-10);
+    manifest.setPreValidationProperties(endStateProps);
+    assertTrue(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, using a CLM_GRP_ID value that we know exists; corresponds to
+     * CHECK_CLAIMS_GROUP_ID query in {@link CcwRifLoadPreValidateSynthea}
+     */
+    endStateProps.setClmGrpIdStart(-100000793);
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, using a CLM_GRP_ID value that we know doesn't exists but a PDE_ID value
+     * that we know exists. corresponds to CHECK_PDE_CLAIMS_GROUP_ID query in {@link
+     * CcwRifLoadPreValidateSynthea}
+     */
+    endStateProps.setPdeIdStart(-100000806); // this will trip the check
+    endStateProps.setPdeIdEnd(-100000807);
+    endStateProps.setClmGrpIdStart(-105002822);
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+
+    // now make PDE_ID acceptable but trip on CLM_GRP_ID
+    endStateProps.setPdeIdStart(-100500806);
+    endStateProps.setPdeIdEnd(-100500807);
+    endStateProps.setClmGrpIdStart(-100002822); // this will trip the check
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, trapping on HICN_UNHASHED or MBI_NUM collisions in BENEFICIARIES
+     * tables. Unfortunately none of the Synthea test data has a value fro HICN_UNHASHED; test will
+     * have to vett MBI_NUM collision. Corresponds to CHECK_HICN_MBI_HASH query in {@link
+     * CcwRifLoadPreValidateSynthea}
+     */
+    endStateProps.setPdeIdStart(0);
+    endStateProps.setPdeIdEnd(0);
+    endStateProps.setClmGrpIdStart(0);
+    endStateProps.setMbiStart("1S00E00AA06");
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, trapping on HFI_DOC_CLM_CNTL_NUM collision in various claims
+     * Corresponds to CHECK_FI_DOC_CNTL query in {@link CcwRifLoadPreValidateSynthea}
+     */
+    endStateProps.setMbiStart("JUNK"); // reset back to one that will pass
+    endStateProps.setFiDocCntlNumStart("-100000421");
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+
+    /**
+     * re-run the same test, trapping on MBI_NUM collision in various Beneficiary tables.
+     * Corresponds to CHECK_MBI_DUPES query in {@link CcwRifLoadPreValidateSynthea}
+     */
+    endStateProps.setMbiStart("JUNK");
+    endStateProps.setFiDocCntlNumStart("JUNK"); // reset back to one that will pass
+    manifest.setPreValidationProperties(endStateProps);
+    assertTrue(preVal.isValid(manifest));
+    // re-run using a value that should trigger a 'hit' in beneficiary_history
+    endStateProps.setMbiStart("1S00E00AA06");
+    manifest.setPreValidationProperties(endStateProps);
+    assertFalse(preVal.isValid(manifest));
+  }
+
+  /**
    * Gets the stream for the specified file type from the SAMPLE_A data.
    *
    * @param fileType the file type to get from the SAMPLE_A data
@@ -1183,6 +1311,21 @@ public final class RifLoaderIT {
    * @param filesToLoad the {@link RifFile}s to load
    */
   private void loadSample(String sampleName, LoadAppOptions options, Stream<RifFile> filesToLoad) {
+    RifFilesEvent rifFilesEvent =
+        new RifFilesEvent(Instant.now(), false, filesToLoad.collect(Collectors.toList()));
+    loadSample(sampleName, options, rifFilesEvent);
+  }
+
+  /**
+   * Runs {@link RifLoader} against the specified {@link RifFile}s.
+   *
+   * @param sampleName a human-friendly name that will be logged to identify the data load being
+   *     kicked off here
+   * @param options the {@link LoadAppOptions} to use
+   * @param filesToLoad the {@link RifFile}s to load
+   */
+  private void loadSyntheaSample(
+      String sampleName, LoadAppOptions options, Stream<RifFile> filesToLoad) {
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(Instant.now(), false, filesToLoad.collect(Collectors.toList()));
     loadSample(sampleName, options, rifFilesEvent);
