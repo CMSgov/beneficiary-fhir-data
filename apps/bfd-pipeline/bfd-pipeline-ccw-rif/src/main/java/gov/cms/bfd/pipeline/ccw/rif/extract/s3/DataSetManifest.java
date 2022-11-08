@@ -278,7 +278,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     return getId().compareTo(o.getId());
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -369,7 +369,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.parentManifest = (DataSetManifest) parent;
     }
 
-    /** @see java.lang.Object#toString() */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
       StringBuilder builder = new StringBuilder();
@@ -509,7 +509,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return true;
     }
 
-    /** @see java.lang.Object#toString() */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
       StringBuilder builder = new StringBuilder();
@@ -858,7 +858,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.generated = value;
     }
 
-    /** @see java.lang.Object#toString() */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
