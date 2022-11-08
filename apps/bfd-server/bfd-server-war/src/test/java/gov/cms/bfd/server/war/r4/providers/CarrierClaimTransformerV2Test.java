@@ -1232,7 +1232,7 @@ public class CarrierClaimTransformerV2Test {
 
   /** Test that should not have a npi entry for organization. */
   @Test
-  public void shouldNotHaveNpiEntryForOrg() throws IOException {
+  public void shouldNotHaveNpiEntryForOrgWhenNoOrganizationNpi() throws IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -1283,7 +1283,8 @@ public class CarrierClaimTransformerV2Test {
 
   /** Test that should have a npi entry for organization. */
   @Test
-  public void shouldHaveANpiEntryForOrg() throws IOException {
+  public void shouldHaveAnNpiEntryForOrganizationWhenTheClaimsOrganizationNpiIsPresent()
+      throws IOException {
 
     C4BBPractitionerIdentifierType type = C4BBPractitionerIdentifierType.NPI;
     C4BBClaimProfessionalAndNonClinicianCareTeamRole role =
