@@ -995,10 +995,9 @@ public final class RifLoaderIT {
     assertFalse(preVal.isValid(manifest));
 
     /**
-     * re-run the same test, but use a bene_id_start that we know exists, but a
-     * carrier_claims.clm_id_start that we know does exist. corresponds to CHECK_CARR_CLAIM_CNTL_NUM
-     * query in {@link CcwRifLoadPreValidateSynthea} Should always succeed since CARR_CLM_CNTL_NUM
-     * does not seem to be populated from Synthea data.
+     * re-run the same test, but use a bene_id_start that we know does not exist, but a
+     * CARRIER_CLAIMS clm_id_start that we know does exist. corresponds to CHECK_CARR_CLAIM_CNTL_NUM
+     * query in {@link CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setBeneIdStart(-1005006);
     endStateProps.setClmIdStart(-100000493);
@@ -1035,8 +1034,7 @@ public final class RifLoaderIT {
 
     /**
      * re-run the same test, trapping on HICN_UNHASHED or MBI_NUM collisions in BENEFICIARIES
-     * tables. Unfortunately none of the Synthea test data has a value fro HICN_UNHASHED; test will
-     * have to vett MBI_NUM collision. Corresponds to CHECK_HICN_MBI_HASH query in {@link
+     * tables; test will vett MBI_NUM collision. Corresponds to CHECK_HICN_MBI_HASH query in {@link
      * CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setPdeIdStart(0);
