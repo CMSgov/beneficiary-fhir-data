@@ -385,6 +385,10 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   }
 
   /**
+   * Perform pre-validation for a data load if the {@link #preValidationProperties} has content. At
+   * this time, only Synthea-based {@link DataSetManifest} have content that can be used for
+   * pre-validation.
+   *
    * @param manifest the {@link DataSetManifest} that lists pre-validation properties to verify
    * @return <code>true</code> if all of the pre-validation parameters listed in the manifest do not
    *     introduce potential data loading issues, <code>false</code> if not
