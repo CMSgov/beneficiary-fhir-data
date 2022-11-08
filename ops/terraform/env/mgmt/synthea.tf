@@ -1,3 +1,16 @@
+locals {
+  synthea_developers = sort([for user in values(data.aws_iam_user.synthea) : user.arn])
+}
+
+data "aws_ssm_parameter" "synthea" {
+  name = "/bfd/global/terraform/sensitive/synthea_developers"
+}
+
+data "aws_iam_user" "synthea" {
+  for_each  = toset(split(" ", nonsensitive(data.aws_ssm_parameter.synthea.value)))
+  user_name = each.value
+}
+
 resource "aws_s3_bucket" "synthea" {
   bucket = "bfd-mgmt-synthea"
 }
@@ -59,4 +72,10 @@ resource "aws_iam_policy" "synthea" {
     ],
     "Version" : "2012-10-17"
   })
+}
+
+resource "aws_iam_group_membership" "synthea" {
+  name = "bfd-${local.env}-synthea"
+  group = aws_iam_group.synthea.name
+  users = local.synthea_developers
 }
