@@ -19,3 +19,33 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "synthea" {
     }
   }
 }
+
+resource "aws_iam_policy" "synthea" {
+  name = "bfd-${local.env}-synthea-rw-s3"
+  policy = jsonencode({
+    "Statement" : [
+      {
+        "Action" : [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          aws_s3_bucket.synthea.arn,
+        ]
+      },
+      {
+        "Action" : [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${aws_s3_bucket.synthea.arn}/*",
+        ]
+      }
+    ],
+    "Version" : "2012-10-17"
+  })
+}
