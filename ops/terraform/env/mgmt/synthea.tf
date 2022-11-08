@@ -20,6 +20,17 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "synthea" {
   }
 }
 
+resource "aws_iam_group" "synthea" {
+  name = "bfd-${local.env}-synthea"
+  path = "/"
+}
+
+resource "aws_iam_policy_attachment" "synthea" {
+  name       = "bfd-${local.env}-synthea"
+  groups     = [aws_iam_group.synthea.name]
+  policy_arn = aws_iam_policy.synthea.arn
+}
+
 resource "aws_iam_policy" "synthea" {
   name = "bfd-${local.env}-synthea-rw-s3"
   policy = jsonencode({
