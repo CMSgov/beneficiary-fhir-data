@@ -1,3 +1,4 @@
+# Get the users from ssm store and save them to a list for later
 locals {
   synthea_developers = sort([for user in values(data.aws_iam_user.synthea) : user.user_name])
 }
@@ -11,6 +12,7 @@ data "aws_iam_user" "synthea" {
   user_name = each.value
 }
 
+## Set up the bucket and its configuration
 resource "aws_s3_bucket" "synthea" {
   bucket = "bfd-mgmt-synthea"
 }
@@ -33,6 +35,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "synthea" {
   }
 }
 
+# Set up the synthea group, permissions, and users
 resource "aws_iam_group" "synthea" {
   name = "bfd-${local.env}-synthea"
   path = "/"
