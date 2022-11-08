@@ -89,8 +89,8 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 1. Install pre-commit hooks `mvn -f apps initialize`
 
 ### Native Setup
-1. Change to the `apps/bfd-data-fda` directory and `mvn clean install`. 
-2. Change to the `apps/bfd-data-npi` directory and `mvn clean install`.
+1. Change to the `apps/bfd-data-fda` directory and run `mvn clean install`. 
+2. Change to the `apps/bfd-data-npi` directory and run `mvn clean install`.
 3. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
 4. Set up a Postgres 14 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
     ```sh
