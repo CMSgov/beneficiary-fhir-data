@@ -11,6 +11,8 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -611,5 +613,32 @@ public class TransformerUtilsV2Test {
     assertEquals(inputStatus.toCode(), total.getCategory().getCoding().get(0).getCode());
     assertEquals(inputStatus.getDisplay(), total.getCategory().getCoding().get(0).getDisplay());
     assertEquals(inputStatus.getSystem(), total.getCategory().getCoding().get(0).getSystem());
+  }
+
+  /*
+   * Tests should have a care team entry with a npi org associated with it.
+   */
+  @Test
+  public void addCareTeamMemberWithNpiOrgShouldCreateCareTeamEntry() {
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    ExplanationOfBenefit.ItemComponent item = new ExplanationOfBenefit.ItemComponent();
+    eob.addItem(item);
+
+    C4BBPractitionerIdentifierType type = C4BBPractitionerIdentifierType.NPI;
+    C4BBClaimProfessionalAndNonClinicianCareTeamRole role =
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY;
+    String id = "123";
+    Optional<String> npiOrgDisplay = Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME);
+
+    CareTeamComponent careTeamEntry =
+        TransformerUtilsV2.addCareTeamMemberWithNpiOrg(eob, item, type, role, id, npiOrgDisplay);
+    assertEquals("primary", careTeamEntry.getRole().getCoding().get(0).getCode());
+    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
+    assertEquals(id, careTeamEntry.getProvider().getIdentifier().getValue());
+    assertEquals(
+        "npi", careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getCode());
+    assertEquals(
+        "National Provider Identifier",
+        careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
   }
 }

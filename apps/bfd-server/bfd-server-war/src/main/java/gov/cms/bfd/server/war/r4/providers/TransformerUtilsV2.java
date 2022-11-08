@@ -2991,7 +2991,7 @@ public final class TransformerUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
    * @param item the Item component
-   * @param system Coding System to use, either NPI or UPIN
+   * @param type to use, either NPI or UPIN
    * @param role The care team member's role
    * @param id The NPI or UPIN coded as a string
    * @param npiOrgDisplay The NPI display as a optional string
@@ -3001,12 +3001,12 @@ public final class TransformerUtilsV2 {
       ItemComponent item,
       C4BBPractitionerIdentifierType type,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
-      Optional<String> id,
+      String id,
       Optional<String> npiOrgDisplay) {
 
     CareTeamComponent careTeamEntry =
         addCareTeamPractitionerWithNpiOrg(
-            eob, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay(), npiOrgDisplay);
+            eob, type, id, role.getSystem(), role.toCode(), role.getDisplay(), npiOrgDisplay);
 
     // care team entry is at eob level so no need to create item link id
     if (item == null) {
