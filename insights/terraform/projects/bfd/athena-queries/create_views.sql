@@ -59,6 +59,12 @@ create or replace view api_requests_by_bene AS
 --       on whether there is overlap between the 10 new ab2d benes and the 5
 --       new bb2 benes and whether another parter such as bcda already requested
 --       some or all of the new benes on a previous day.
+--
+-- NOTE: We exclude calls to the patient by contract endpoint because while those
+--       calls are made by AB2D, the results are not returned to end users. Any end
+--       user requests related to that data will be made later via a call to the
+--       ExplanationOfBenefit endpoint.
+--
 create or replace view new_benes_by_day as
 select
     cast(day as date) as day,
