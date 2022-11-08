@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -16,6 +17,9 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -71,14 +75,15 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @BeforeEach
-  public void before() {
+  public void before() throws IOException {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         CarrierClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -94,7 +99,7 @@ public class CarrierClaimTransformerV2Test {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     CarrierClaim claim = generateClaim();
 
     assertMatches(
@@ -103,7 +108,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim));
   }
 
@@ -116,13 +122,14 @@ public class CarrierClaimTransformerV2Test {
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException {
+  public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
         CarrierClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
@@ -657,11 +664,11 @@ public class CarrierClaimTransformerV2Test {
     CareTeamComponent compare4 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             4,
-            "1497758544",
+            "0000000000",
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
             "Primary provider");
-    compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
+    compare4.getProvider().setDisplay("Fake ORG Name");
 
     assertTrue(compare4.equalsDeep(member4));
   }
@@ -674,7 +681,7 @@ public class CarrierClaimTransformerV2Test {
    * a total of 4 unique care team members.
    */
   @Test
-  public void shouldHaveFourCareTeamEntries() {
+  public void shouldHaveFourCareTeamEntries() throws IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -692,7 +699,8 @@ public class CarrierClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -1222,6 +1230,90 @@ public class CarrierClaimTransformerV2Test {
     assertEquals(0, eob.getProcedure().size());
   }
 
+  /** Test that should not have a npi entry for organization. */
+  @Test
+  public void shouldNotHaveNpiEntryForOrgWhenNoOrganizationNpi() throws IOException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    CarrierClaim claimWithoutNpi =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+
+    claimWithoutNpi.setLastUpdated(Instant.now());
+    claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
+    ExplanationOfBenefit genEob =
+        CarrierClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claimWithoutNpi);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    C4BBPractitionerIdentifierType type = C4BBPractitionerIdentifierType.NPI;
+    C4BBClaimProfessionalAndNonClinicianCareTeamRole role =
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY;
+
+    CareTeamComponent careTeamEntry =
+        eobWithoutNpi.getCareTeam().stream()
+            .filter(
+                ctc ->
+                    ctc.getProvider().getIdentifier().getType().getCoding().stream()
+                        .anyMatch(
+                            c ->
+                                c.getSystem().equalsIgnoreCase(type.getSystem())
+                                    && c.getCode().equalsIgnoreCase(type.toCode())))
+            .filter(
+                ctc ->
+                    role.toCode().equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getCode())
+                        && role.getSystem()
+                            .equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getSystem()))
+            .findAny()
+            .orElse(null);
+
+    assertEquals(null, careTeamEntry);
+  }
+
+  /** Test that should have a npi entry for organization. */
+  @Test
+  public void shouldHaveAnNpiEntryForOrganizationWhenTheClaimsOrganizationNpiIsPresent()
+      throws IOException {
+
+    C4BBPractitionerIdentifierType type = C4BBPractitionerIdentifierType.NPI;
+    C4BBClaimProfessionalAndNonClinicianCareTeamRole role =
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY;
+
+    CareTeamComponent careTeamEntry =
+        eob.getCareTeam().stream()
+            .filter(
+                ctc ->
+                    ctc.getProvider().getIdentifier().getType().getCoding().stream()
+                        .anyMatch(
+                            c ->
+                                c.getSystem().equalsIgnoreCase(type.getSystem())
+                                    && c.getCode().equalsIgnoreCase(type.toCode())))
+            .filter(
+                ctc ->
+                    role.toCode().equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getCode())
+                        && role.getSystem()
+                            .equalsIgnoreCase(ctc.getRole().getCodingFirstRep().getSystem()))
+            .findAny()
+            .orElse(null);
+    assertEquals("primary", careTeamEntry.getRole().getCoding().get(0).getCode());
+    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
+    assertEquals(
+        "npi", careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getCode());
+    assertEquals(
+        "National Provider Identifier",
+        careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
+  }
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link InpatientClaim}.
