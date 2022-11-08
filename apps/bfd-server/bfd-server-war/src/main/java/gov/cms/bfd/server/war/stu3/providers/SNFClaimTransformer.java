@@ -40,7 +40,7 @@ final class SNFClaimTransformer {
     if (!(claim instanceof SNFClaim)) throw new BadCodeMonkeyException();
 
     timer.stop();
-    return transformClaim((SNFClaim) claim);
+    return transformClaim((SNFClaim) claim, transformerContext);
   }
 
   /**
@@ -48,7 +48,8 @@ final class SNFClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private static ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      SNFClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -153,6 +154,7 @@ final class SNFClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

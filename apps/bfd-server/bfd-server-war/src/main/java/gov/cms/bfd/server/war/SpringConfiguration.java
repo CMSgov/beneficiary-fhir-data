@@ -13,6 +13,7 @@ import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -22,6 +23,7 @@ import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -70,6 +72,8 @@ public class SpringConfiguration {
    * should only be set to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+
+  public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
 
   public static final int TRANSACTION_TIMEOUT = 30;
 
@@ -388,6 +392,24 @@ public class SpringConfiguration {
       return FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     } else {
       return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    }
+  }
+
+  /**
+   * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
+   *
+   * @param includeFakeOrgName if true, the {@link NPIOrgLookup} will include a fake org name for
+   *     testing purposes.
+   * @return the {@link NPIOrgLookup} for the application.
+   */
+  @Bean
+  public NPIOrgLookup npiOrgLookup(
+      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") Boolean includeFakeOrgName)
+      throws IOException {
+    if (includeFakeOrgName) {
+      return NPIOrgLookup.createNpiOrgLookupForTesting();
+    } else {
+      return NPIOrgLookup.createNpiOrgLookupForProduction();
     }
   }
 }

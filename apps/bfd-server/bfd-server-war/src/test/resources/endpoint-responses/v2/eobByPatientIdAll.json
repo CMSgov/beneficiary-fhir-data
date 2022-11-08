@@ -40,9 +40,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1497758544"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -1605,9 +1606,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1811111111"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -2201,9 +2203,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "5555553305"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -3309,9 +3312,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1111111111"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -4975,9 +4979,9 @@
                 "display" : "National Provider Identifier"
               } ]
             },
-            "value" : "1497758544"
+            "value" : "0000000000"
           },
-          "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+          "display" : "Fake ORG Name"
         },
         "role" : {
           "coding" : [ {
@@ -5522,9 +5526,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "999999999"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",

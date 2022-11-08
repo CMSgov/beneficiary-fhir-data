@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -17,6 +18,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -76,14 +78,15 @@ public final class OutpatientClaimTransformerV2Test {
   }
 
   @BeforeEach
-  public void before() {
+  public void before() throws IOException {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         OutpatientClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -1367,13 +1370,14 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException {
+  public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
         OutpatientClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
