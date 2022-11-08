@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 
 /** The interface for CCW RIF Load pre-validation. */
@@ -14,9 +15,9 @@ public interface CcwRifLoadPreValidateInterface {
   /**
    * Validity will be what the implementation decides.
    *
-   * @param object a {@link Object} Java class/type
+   * @param dataSetManifest a {@link DataSetManifest}
    * @return {@link boolean} the validity status
    * @throws Exception if there is an issue during validation
    */
-  public boolean isValid(Object object) throws Exception;
+  public boolean isValid(DataSetManifest dataSetManifest) throws Exception;
 }

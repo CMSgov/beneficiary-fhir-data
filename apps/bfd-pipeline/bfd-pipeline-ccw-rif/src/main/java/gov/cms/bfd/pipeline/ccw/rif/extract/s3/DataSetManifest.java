@@ -36,7 +36,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlAttribute(name = "sequenceId", required = true)
   private int sequenceId;
 
-  /** A boolean denoting if this is synthetic data (true) or not (false). */
+  /** A boolean denoting if this is synthetic data (true) or not (false}. */
   @XmlAttribute(name = "syntheticData", required = false)
   private boolean syntheticData = false;
 
@@ -263,7 +263,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
-   * Sets the value of the syntheaEndStateProperties property.
+   * Sets the {@link #preValidationProperties}.
    *
    * @param value allowed object is {@link PreValidationProperties }
    */
@@ -652,7 +652,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the clmGrpIdStart property.
+     * Sets the {@link #clmGrpIdStart}.
      *
      * @param value {@link long} to set
      */
@@ -670,7 +670,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the pdeIdStart property.
+     * Sets the {@link #pdeIdStart}.
      *
      * @param value {@link long} to set
      */
@@ -688,7 +688,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the carrClmCntlNumStart property.
+     * Sets the {@link #carrClmCntlNumStart}.
      *
      * @param value {@link long} to set
      */
@@ -706,7 +706,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the fiDocCntlNumStart property.
+     * Sets the {@link #fiDocCntlNumStart}.
      *
      * @param value {@link String} to set
      */
@@ -724,7 +724,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the hicnStart property.
+     * Sets the {@link #hicnStart}.
      *
      * @param value allowed object is {@link String }
      */
@@ -742,7 +742,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the beneIdStart property.
+     * Sets the {@link #beneIdStart}.
      *
      * @param value {@link long} to set
      */
@@ -760,7 +760,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the clmIdStart property.
+     * Sets the {@link #clmIdStart}.
      *
      * @param value {@link long} to set
      */
@@ -778,7 +778,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the mbiStart property.
+     * Sets the {@link #mbiStart}.
      *
      * @param value allowed object is {@link String }
      */
@@ -796,7 +796,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the beneIdEnd property.
+     * Sets the {@link #beneIdEnd}.
      *
      * @param value {@link long} to set
      */
@@ -814,7 +814,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the clmIdEnd property.
+     * Sets the {@link #clmIdEnd}.
      *
      * @param value {@link long} to set
      */
@@ -832,7 +832,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the pdeIdEnd property.
+     * Sets the {@link #pdeIdEnd}.
      *
      * @param value {@link long} to set
      */
@@ -850,7 +850,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Sets the value of the generated property.
+     * Sets the {@link #generated}.
      *
      * @param value allowed object is {@link String }
      */

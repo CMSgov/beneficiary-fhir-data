@@ -106,24 +106,22 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
   }
 
   /**
-   * Override of {@link CcwRifLoadPreValidateInterface#isValid(Object)} which preforms assorted
-   * checks to assert that Synthea load can proceed.
+   * Override of {@link CcwRifLoadPreValidateInterface#isValid(DataSetManifest)} which preforms
+   * assorted checks to assert that Synthea load can proceed.
    *
-   * @param obj the generic {@link Object} that can be cast to a {@link DataSetManifest} which will
-   *     provide the various Synthea end-state property values that can be used to perform the
-   *     pre-validation.
+   * @param manifest the {@link DataSetManifest} which will provide the various Synthea end-state
+   *     property values that can be used to perform the pre-validation.
    * @return {@link boolean} asserting that the pre-validation succeeded (true) or failed (false).
    */
   @Override
-  public boolean isValid(Object obj) throws Exception {
+  public boolean isValid(DataSetManifest manifest) throws Exception {
     if (appState == null) {
       throw new BadCodeMonkeyException("Invalid state; missing PipelineApplicationState");
     }
-    if (!(obj instanceof DataSetManifest)) {
+    if (manifest == null) {
       throw new BadCodeMonkeyException(
-          String.format("Invalid object type [%s] passed to isValid", obj.getClass().getName()));
+          String.format("null DataSetManifest object passed to isValid"));
     }
-    DataSetManifest manifest = (DataSetManifest) obj;
     if (!manifest.getPreValidationProperties().isPresent()) {
       return true;
     }
@@ -285,6 +283,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         break;
       }
     } catch (Exception e) {
+      LOGGER.error(e.getMessage(), e);
       isValid = false;
     } finally {
       // clean up and/all db resources
