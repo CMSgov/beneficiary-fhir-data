@@ -1324,7 +1324,37 @@ module "glue-table-api-requests" {
       "name"    = "mdc_resources_returned_count",
       "type"    = "string",
       "comment" = ""
-    }
+    },
+    {
+      "name"    = "mdc_hapi_server_incoming_request_pre_process_timestamp_in_millis",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_hapi_server_incoming_request_post_process_timestamp_in_millis",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_hapi_server_incoming_request_pre_handle_timestamp_in_millis",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_hapi_server_outgoing_response_timestamp_in_millis",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_hapi_server_processing_completed_normally_timestamp_in_millis",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_hapi_server_processing_completed_timestamp_in_millis",
+      "type"    = "string",
+      "comment" = ""
+    },
   ]
 }
 

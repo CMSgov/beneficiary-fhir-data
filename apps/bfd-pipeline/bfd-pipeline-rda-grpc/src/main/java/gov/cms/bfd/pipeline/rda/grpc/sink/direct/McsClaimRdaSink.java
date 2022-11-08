@@ -31,7 +31,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
   }
 
   @Override
-  public String getDedupKeyForMessage(McsClaimChange object) {
+  public String getClaimIdForMessage(McsClaimChange object) {
     return object.getClaim().getIdrClmHdIcn();
   }
 

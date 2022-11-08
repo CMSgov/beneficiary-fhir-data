@@ -88,6 +88,7 @@ public class McsClaimRdaSinkTest {
         Arrays.asList(
             "McsClaimRdaSink.calls",
             "McsClaimRdaSink.change.latency.millis",
+            "McsClaimRdaSink.extract.latency.millis",
             "McsClaimRdaSink.failures",
             "McsClaimRdaSink.insertCount",
             "McsClaimRdaSink.lastSeq",

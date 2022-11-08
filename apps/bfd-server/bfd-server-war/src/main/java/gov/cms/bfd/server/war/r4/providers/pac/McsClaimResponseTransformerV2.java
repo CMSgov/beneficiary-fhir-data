@@ -37,7 +37,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
           "z", ClaimResponse.ClaimResponseStatus.CANCELLED,
           "9", ClaimResponse.ClaimResponseStatus.CANCELLED);
 
-  /** The known codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings */
+  /** The known MCS codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings */
   private static final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
       Map.ofEntries(
           Map.entry("a", ClaimResponse.RemittanceOutcome.QUEUED),

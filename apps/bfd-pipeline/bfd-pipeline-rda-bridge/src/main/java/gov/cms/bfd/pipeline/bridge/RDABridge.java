@@ -179,9 +179,6 @@ public class RDABridge {
       throw new IllegalArgumentException(
           "Unsupported mcs output file type '" + mcsOutputType + "'");
     } else {
-      final int FISS_ID = 0;
-      final int MCS_ID = 1;
-
       // Grab given ratios for fiss/mcs attribution output
       float fissRatio = config.floatOption(AppConfig.Fields.attributionFissRatio).orElse(1.0f);
 
@@ -190,12 +187,7 @@ public class RDABridge {
 
       float mcsProportion = 1.0f - fissProportion;
 
-      DataSampler<String> mbiSampler =
-          DataSampler.<String>builder()
-              .maxValues(config.intOption(AppConfig.Fields.attributionSetSize).orElse(10_000))
-              .registerSampleSet(FISS_ID, fissProportion)
-              .registerSampleSet(MCS_ID, mcsProportion)
-              .build();
+      DataSampler<String> mbiSampler;
 
       try (Sink<MessageOrBuilder> fissSink =
               sinkMap.get(fissOutputType).apply(new SinkArguments(fissOutputPath, fissSequence));
@@ -204,6 +196,32 @@ public class RDABridge {
         // Sorting the files so tests are more deterministic
         List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
         Collections.sort(fissSources);
+
+        // Sorting the files so tests are more deterministic
+        List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
+        Collections.sort(mcsSources);
+
+        // To get a good spread of data, we'll sample from each file, so each file gets its own
+        // sample ID
+        DataSampler.Builder<String> samplerBuilder =
+            DataSampler.<String>builder()
+                .maxValues(config.intOption(AppConfig.Fields.attributionSetSize).orElse(10_000));
+
+        int currentSampleId = 0;
+
+        for (int i = 0; i < fissSources.size(); ++i) {
+          samplerBuilder.registerSampleSet(currentSampleId++, fissProportion / fissSources.size());
+        }
+
+        for (int i = 0; i < mcsSources.size(); ++i) {
+          samplerBuilder.registerSampleSet(currentSampleId++, mcsProportion / mcsSources.size());
+        }
+
+        mbiSampler = samplerBuilder.build();
+
+        // Reset to first sample ID and iterate through sample IDs, make sure to start with
+        // FISS since we assigned those first earlier
+        currentSampleId = 0;
 
         for (String fissSource : fissSources) {
           executeTransformation(
@@ -214,12 +232,8 @@ public class RDABridge {
               mbiMap,
               fissSink,
               mbiSampler,
-              FISS_ID);
+              currentSampleId++);
         }
-
-        // Sorting the files so tests are more deterministic
-        List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
-        Collections.sort(mcsSources);
 
         for (String mcsSource : mcsSources) {
           executeTransformation(
@@ -230,7 +244,7 @@ public class RDABridge {
               mbiMap,
               mcsSink,
               mbiSampler,
-              MCS_ID);
+              currentSampleId++);
         }
       }
 

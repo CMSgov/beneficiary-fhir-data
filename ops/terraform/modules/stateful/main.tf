@@ -4,8 +4,9 @@
 locals {
   account_id                       = data.aws_caller_identity.current.account_id
   azs                              = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config                       = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
-  is_prod                          = substr(var.env_config.env, 0, 4) == "prod"
+  env                              = var.env
+  env_config                       = { env = local.env, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
+  is_prod                          = substr(var.env, 0, 4) == "prod"
   victor_ops_url                   = var.victor_ops_url
   enable_victor_ops                = local.is_prod # only wake people up for prod alarms
   cloudwatch_sns_topic_policy_spec = <<-EOF
@@ -57,24 +58,24 @@ EOF
 data "aws_caller_identity" "current" {}
 
 data "aws_s3_bucket" "logs" {
-  bucket = "bfd-${local.env_config.env}-logs-${local.account_id}"
+  bucket = "bfd-${local.env}-logs-${local.account_id}"
 }
 
 data "aws_s3_bucket" "etl" {
-  bucket = "bfd-${local.env_config.env}-etl-${local.account_id}"
+  bucket = "bfd-${local.env}-etl-${local.account_id}"
 }
 
 # vpc
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpc"]
+    values = ["bfd-${local.env}-vpc"]
   }
 }
 
 # kms 
 data "aws_kms_key" "master_key" {
-  key_id = "alias/bfd-${var.env_config.env}-cmk"
+  key_id = "alias/bfd-${local.env}-cmk"
 }
 
 # subnets
@@ -92,7 +93,7 @@ data "aws_subnet" "data_subnets" {
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpn-private"]
+    values = ["bfd-${local.env}-vpn-private"]
   }
 }
 
@@ -100,7 +101,7 @@ data "aws_security_group" "vpn" {
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-enterprise-tools"]
+    values = ["bfd-${local.env}-enterprise-tools"]
   }
 }
 
@@ -108,7 +109,7 @@ data "aws_security_group" "tools" {
 data "aws_security_group" "management" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-remote-management"]
+    values = ["bfd-${local.env}-remote-management"]
   }
 }
 
@@ -117,7 +118,7 @@ data "aws_security_group" "management" {
 #
 module "local_zone" {
   source     = "../resources/dns"
-  env_config = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id }
+  env_config = { env = var.env, vpc_id = data.aws_vpc.main.id }
   public     = false
 }
 
@@ -125,9 +126,8 @@ module "local_zone" {
 ## CloudWatch SNS Topics for Alarms
 #
 resource "aws_sns_topic" "cloudwatch_alarms" {
-  name              = "bfd-${var.env_config.env}-cloudwatch-alarms"
+  name              = "bfd-${local.env}-cloudwatch-alarms"
   display_name      = "BFD Cloudwatch Alarm. Created by Terraform."
-  tags              = var.env_config.tags
   kms_master_key_id = data.aws_kms_key.master_key.id
 }
 
@@ -145,9 +145,8 @@ resource "aws_sns_topic_subscription" "alarm" {
 }
 
 resource "aws_sns_topic" "cloudwatch_ok" {
-  name         = "bfd-${var.env_config.env}-cloudwatch-ok"
+  name         = "bfd-${local.env}-cloudwatch-ok"
   display_name = "BFD Cloudwatch OK notifications. Created by Terraform."
-  tags         = var.env_config.tags
 
   kms_master_key_id = data.aws_kms_key.master_key.arn
 }
@@ -165,13 +164,37 @@ resource "aws_sns_topic_subscription" "ok" {
   endpoint_auto_confirms = true
 }
 
+# Temporary CloudWatch Alarms SNS
+# TODO: Remove in BFD-1773
+resource "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-alert-testing"
+  display_name      = "BFD Cloudwatch Alarm. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_alert_testing" {
+  arn    = aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_alert_testing.arn, aws_sns_topic.cloudwatch_alarms_alert_testing.arn)
+}
+
+resource "aws_sns_topic" "cloudwatch_alarms_ok_testing" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-ok-testing"
+  display_name      = "BFD Cloudwatch OK notifications. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_ok_testing" {
+  arn    = aws_sns_topic.cloudwatch_alarms_ok_testing.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_ok_testing.arn, aws_sns_topic.cloudwatch_alarms_ok_testing.arn)
+}
+
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
 # provision these resources for all environments since the mechanism
 # by which we control access is through a manually provisioned
 # access key
 resource "aws_iam_policy" "etl_rw_s3" {
-  name        = "bfd-${local.env_config.env}-etl-rw-s3"
+  name        = "bfd-${local.env}-etl-rw-s3"
   description = "ETL read-write S3 policy"
 
   policy = <<EOF
@@ -205,16 +228,16 @@ EOF
 }
 
 resource "aws_iam_user" "etl" {
-  name = "bfd-${local.env_config.env}-etl"
+  name = "bfd-${local.env}-etl"
 }
 
 resource "aws_iam_group" "etl" {
-  name = "bfd-${local.env_config.env}-etl"
+  name = "bfd-${local.env}-etl"
   path = "/"
 }
 
 resource "aws_iam_group_membership" "etl" {
-  name = "bfd-${local.env_config.env}-etl"
+  name = "bfd-${local.env}-etl"
 
   users = [
     aws_iam_user.etl.name,
@@ -242,49 +265,41 @@ module "medicare_opt_out" {
 #
 
 resource "aws_cloudwatch_log_group" "var_log_messages" {
-  name       = "/bfd/${var.env_config.env}/var/log/messages"
+  name       = "/bfd/${local.env}/var/log/messages"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = local.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "var_log_secure" {
-  name       = "/bfd/${var.env_config.env}/var/log/secure"
+  name       = "/bfd/${local.env}/var/log/secure"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = local.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "bfd_pipeline_messages_txt" {
-  name       = "/bfd/${var.env_config.env}/bfd-pipeline/messages.txt"
+  name       = "/bfd/${local.env}/bfd-pipeline/messages.txt"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = var.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "bfd_server_access_txt" {
-  name       = "/bfd/${var.env_config.env}/bfd-server/access.txt"
+  name       = "/bfd/${local.env}/bfd-server/access.txt"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = var.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "bfd_server_access_json" {
-  name       = "/bfd/${var.env_config.env}/bfd-server/access.json"
+  name       = "/bfd/${local.env}/bfd-server/access.json"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = var.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "bfd_server_messages_json" {
-  name       = "/bfd/${var.env_config.env}/bfd-server/messages.json"
+  name       = "/bfd/${local.env}/bfd-server/messages.json"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = var.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "bfd_server_newrelic_agent" {
-  name       = "/bfd/${var.env_config.env}/bfd-server/newrelic_agent.log"
+  name       = "/bfd/${local.env}/bfd-server/newrelic_agent.log"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = var.env_config.tags
 }
 
 resource "aws_cloudwatch_log_group" "bfd_server_gc" {
-  name       = "/bfd/${var.env_config.env}/bfd-server/gc.log"
+  name       = "/bfd/${local.env}/bfd-server/gc.log"
   kms_key_id = data.aws_kms_key.master_key.arn
-  tags       = var.env_config.tags
 }

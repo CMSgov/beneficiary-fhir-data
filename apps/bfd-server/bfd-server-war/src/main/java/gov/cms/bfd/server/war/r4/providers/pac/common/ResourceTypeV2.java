@@ -14,8 +14,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
 
-  /** @return a name for use when building drop wizard metric names */
-  String getNameForMetrics();
+  /** @return A label for the resource type that uniquely identifies it */
+  String getTypeLabel();
 
   /**
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link

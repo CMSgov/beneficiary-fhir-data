@@ -351,7 +351,7 @@ public class StandardGrpcRdaSourceIT {
     }
 
     @Override
-    public String getDedupKeyForMessage(FissClaimChange object) {
+    public String getClaimIdForMessage(FissClaimChange object) {
       return object.getClaim().getDcn();
     }
 

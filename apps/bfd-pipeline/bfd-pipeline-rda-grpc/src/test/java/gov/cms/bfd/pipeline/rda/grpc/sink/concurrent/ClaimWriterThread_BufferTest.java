@@ -42,7 +42,7 @@ public class ClaimWriterThread_BufferTest {
 
     doReturn(mockMessage).when(mockEntry).getObject();
 
-    doReturn(mockClaimKey).when(mockSink).getDedupKeyForMessage(mockMessage);
+    doReturn(mockClaimKey).when(mockSink).getClaimIdForMessage(mockMessage);
 
     doReturn(mockClaim).when(mockSink).transformMessage(mockApiVersion, mockMessage);
 
@@ -75,7 +75,7 @@ public class ClaimWriterThread_BufferTest {
 
     doReturn(mockMessage).when(mockEntry).getObject();
 
-    doReturn(mockClaimKey).when(mockSink).getDedupKeyForMessage(mockMessage);
+    doReturn(mockClaimKey).when(mockSink).getClaimIdForMessage(mockMessage);
 
     doThrow(DataTransformer.TransformationException.class)
         .when(mockSink)

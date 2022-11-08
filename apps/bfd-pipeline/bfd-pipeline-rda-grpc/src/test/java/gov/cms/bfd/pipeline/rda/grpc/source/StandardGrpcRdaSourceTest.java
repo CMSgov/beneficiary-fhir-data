@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Throwables;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
 import io.grpc.CallOptions;
@@ -78,6 +79,8 @@ public class StandardGrpcRdaSourceTest {
   private static final Integer CLAIM_4 = 104;
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_5 = 105;
+  /** Integer used as a "claim" in the unit tests. */
+  private static final Integer INVALID_CLAIM = 106;
 
   /** String used as a RDA API "version" in the unit tests. */
   public static final String VERSION = "version";
@@ -122,9 +125,15 @@ public class StandardGrpcRdaSourceTest {
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
     lenient().doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
-    lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
+    lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getClaimIdForMessage(any());
     metrics = source.getMetrics();
     lenient().doReturn(BASE_TIME_FOR_TEST.toEpochMilli()).when(clock).millis();
+    lenient().doReturn(true).when(sink).isValidMessage(CLAIM_1);
+    lenient().doReturn(true).when(sink).isValidMessage(CLAIM_2);
+    lenient().doReturn(true).when(sink).isValidMessage(CLAIM_3);
+    lenient().doReturn(true).when(sink).isValidMessage(CLAIM_4);
+    lenient().doReturn(true).when(sink).isValidMessage(CLAIM_5);
+    lenient().doReturn(false).when(sink).isValidMessage(INVALID_CLAIM);
   }
 
   /** Verify that all expected metrics are defined and have expected names. */
@@ -143,6 +152,29 @@ public class StandardGrpcRdaSourceTest {
   }
 
   /**
+   * Verifies that {@link StandardGrpcRdaSource#performSmokeTest} performs all of the expected tests
+   * and returns success.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
+  @Test
+  public void testSmokeTestPerformsExpectedActions() throws Exception {
+    GrpcResponseStream<Integer> responseStream =
+        spy(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5));
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(responseStream)
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, RdaChange.MIN_SEQUENCE_NUM);
+
+    assertTrue(source.performSmokeTest(sink));
+
+    verify(caller).callVersionService(channel, CallOptions.DEFAULT);
+    verify(sink).readMaxExistingSequenceNumber();
+    verify(caller).callService(channel, CallOptions.DEFAULT, RdaChange.MIN_SEQUENCE_NUM);
+    verify(responseStream).cancelStream(anyString());
+  }
+
+  /**
    * Verify that normal (happy path) processing saves objects, updates all expected metrics, and
    * shuts down cleanly.
    *
@@ -151,7 +183,7 @@ public class StandardGrpcRdaSourceTest {
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
     doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
-    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
+    doReturn(createResponse(CLAIM_1, CLAIM_2, INVALID_CLAIM, CLAIM_3))
         .when(caller)
         .callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
     doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
@@ -160,7 +192,7 @@ public class StandardGrpcRdaSourceTest {
     final int result = source.retrieveAndProcessObjects(2, sink);
     assertEquals(3, result);
     assertMeterReading(1, "calls", metrics.getCalls());
-    assertMeterReading(3, "received", metrics.getObjectsReceived());
+    assertMeterReading(4, "received", metrics.getObjectsReceived());
     assertMeterReading(3, "stored", metrics.getObjectsStored());
     assertMeterReading(2, "batches", metrics.getBatches());
     assertMeterReading(1, "successes", metrics.getSuccesses());
@@ -168,7 +200,7 @@ public class StandardGrpcRdaSourceTest {
     // once at start, twice after a batch
     verify(source, times(3)).setUptimeToRunning();
     // once per object received
-    verify(source, times(3)).setUptimeToReceiving();
+    verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
     verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
@@ -380,6 +412,12 @@ public class StandardGrpcRdaSourceTest {
     verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
+  /**
+   * Verify that calling close triggers a channel shutdown and that calling it multiple times is
+   * safe.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
   @Test
   public void testClose() throws Exception {
     doReturn(channel).when(channel).shutdown();

@@ -45,7 +45,7 @@ public final class ClaimResponseTypeV2<TEntity>
    * Constructor is private to ensure only instances defined in this class are allowed.
    *
    * @param nameForParsing name used when parsing parameter string to find appropriate instance
-   * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
+   * @param typeLabel value returned by {@link ResourceTypeV2#getTypeLabel()}
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
@@ -56,7 +56,7 @@ public final class ClaimResponseTypeV2<TEntity>
    */
   private ClaimResponseTypeV2(
       String nameForParsing,
-      String nameForMetrics,
+      String typeLabel,
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
@@ -64,7 +64,7 @@ public final class ClaimResponseTypeV2<TEntity>
       ResourceTransformer<ClaimResponse> transformer) {
     super(
         nameForParsing,
-        nameForMetrics,
+        typeLabel,
         entityClass,
         entityMbiRecordAttribute,
         entityIdAttribute,
