@@ -52,7 +52,7 @@ public class RdaSinkTest {
     }
 
     @Override
-    public String getDedupKeyForMessage(Integer object) {
+    public String getClaimIdForMessage(Integer object) {
       return String.valueOf(object);
     }
 
