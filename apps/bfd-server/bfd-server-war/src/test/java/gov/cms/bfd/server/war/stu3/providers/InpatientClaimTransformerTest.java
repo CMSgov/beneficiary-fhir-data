@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
@@ -15,7 +14,6 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +34,7 @@ public final class InpatientClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException, IOException {
+  public void transformSampleARecord() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     InpatientClaim claim =
@@ -47,15 +45,14 @@ public final class InpatientClaimTransformerTest {
             .get();
     claim.setLastUpdated(Instant.now());
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
-
-    ExplanationOfBenefit eob = InpatientClaimTransformer.transform(transformerContext, claim);
-    assertMatches(claim, eob, transformerContext);
+    ExplanationOfBenefit eob =
+        InpatientClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+            claim);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -66,13 +63,9 @@ public final class InpatientClaimTransformerTest {
    *     from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     InpatientClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link InpatientClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      InpatientClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  static void assertMatches(InpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -161,7 +154,6 @@ public final class InpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

@@ -27,10 +27,9 @@
         } ]
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "0000000000"
+      "value" : "1811111111"
     } ],
-    "active" : true,
-    "name" : "Fake ORG Name"
+    "active" : true
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",

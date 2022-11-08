@@ -38,7 +38,7 @@ public class HHAClaimTransformerV2 {
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim, transformerContext);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
 
     timer.stop();
     return eob;
@@ -49,8 +49,7 @@ public class HHAClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      HHAClaim claimGroup, TransformerContext transformerContext) {
+  private static ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -106,7 +105,6 @@ public class HHAClaimTransformerV2 {
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
-    // ORG NPI NUM Display      => ExplanationOfBenefit.organization.display
     // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
     // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
     // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension
@@ -120,7 +118,6 @@ public class HHAClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
