@@ -15,10 +15,6 @@ ssm_client = boto3.client("ssm", config=boto_config)
 
 
 def handler(event, context):
-    if not WEBHOOK_URL:
-        print("WEBHOOK_URL was not defined, exiting...")
-        return
-
     if not ENV:
         print("ENV was not defined, exiting...")
         return
