@@ -46,6 +46,19 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   void updateLastSequenceNumber(long lastSequenceNumber);
 
   /**
+   * Hook to allow the {@link RdaSource} to avoid processing messages that are invalid and should
+   * not be stored. Specifically this is to filter out FISS claims with specific invalid DCN values.
+   * Adding the detection logic here allows it to be applied generically. Defaults to true so that
+   * no specific implementation is necessary for MCS claims.
+   *
+   * @param message Message received from the RDA API
+   * @return true if the message is valid and should be processed, false otherwise
+   */
+  default boolean isValidMessage(TMessage message) {
+    return true;
+  }
+
+  /**
    * Write the object to the data store and return the number of objects successfully written. The
    * count returned is just the most recent unreported processed count and for asynchronous sinks
    * can reflect values from previously submitted batches.
@@ -112,15 +125,14 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   }
 
   /**
-   * Used by callers to remove duplicates from a collection of objects prior to calling
-   * writeMessages. This key can be any unique string value but generally corresponds to a claim's
-   * primary key value. Callers should not depend on the exact value having any meaning outside of
-   * being unique.
+   * The primary key for the claim contained in the message. Used by callers to remove duplicates
+   * from a collection of objects prior to calling writeMessages. Callers may log this value so it
+   * must not contain any PII or PHI.
    *
    * @param object object to get a key from
    * @return a unique key to dedup objects of this type
    */
-  String getDedupKeyForMessage(TMessage object);
+  String getClaimIdForMessage(TMessage object);
 
   /**
    * Extract the sequence number from the message object and return it.
