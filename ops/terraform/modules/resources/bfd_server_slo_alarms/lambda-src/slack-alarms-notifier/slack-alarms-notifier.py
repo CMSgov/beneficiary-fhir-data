@@ -1,4 +1,3 @@
-# imports
 import json
 import os
 from urllib.error import URLError
@@ -12,6 +11,19 @@ ENV = os.environ.get("ENV", "")
 
 boto_config = Config(region_name=REGION)
 ssm_client = boto3.client("ssm", config=boto_config)
+
+
+def slack_escape_str(str_to_escape: str) -> str:
+    """Escapes a string such that Slack can properly display it.
+    See https://api.slack.com/reference/surfaces/formatting#escaping
+
+    Args:
+        str_to_escape (str): The string to escape
+
+    Returns:
+        str: A string escaped such that Slack can properly display it
+    """
+    return str_to_escape.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def handler(event, context):
@@ -33,6 +45,21 @@ def handler(event, context):
         return
 
     try:
+        alarm_info = json.loads(sns_message)
+    except json.JSONDecodeError:
+        print("SNS message body was not valid JSON")
+        return
+
+    try:
+        alarm_name = slack_escape_str(alarm_info["AlarmName"])
+        alarm_message = slack_escape_str(alarm_info["AlarmDescription"])
+        alarm_reason = slack_escape_str(alarm_info["NewStateReason"])
+        alarm_metric = slack_escape_str(alarm_info["Trigger"]["MetricName"])
+    except KeyError as exc:
+        print(f"Unable to retrieve alarm information from SNS message: {exc}")
+        return
+
+    try:
         wehbook_url = ssm_client.get_parameter(
             Name=f"/bfd/mgmt/common/sensitive/slack_webhook_bfd_test",
             WithDecryption=True,
@@ -44,7 +71,21 @@ def handler(event, context):
         return
 
     slack_message = {
-        "text": f"CloudWatch SLO Alarm alert received from {ENV} with message: {sns_message}"
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                        f"CloudWatch SLO Alarm alert received from `{ENV}` environment:\n"
+                        f"\t*Alarm Name:* `{alarm_name}`\n"
+                        f"\t*Alarm Reason:* `{alarm_reason}`\n"
+                        f"\t*Alarm Metric:* `{alarm_metric}`\n"
+                        f"\t*Alarm Message:* {alarm_message}\n"
+                    ),
+                },
+            }
+        ]
     }
 
     request = Request(wehbook_url, method="POST")
