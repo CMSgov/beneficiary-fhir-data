@@ -65,7 +65,7 @@ resource "aws_iam_policy" "kms_slack_alarms_notifier" {
                 "kms:Decrypt"
             ],
             "Resource": [
-                "${local.kms_key_arn}",
+                "${local.kms_key_arn}"
             ]
         }
     ]
@@ -88,7 +88,7 @@ resource "aws_iam_policy" "ssm_slack_alarms_notifier" {
                 "ssm:GetParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/*",
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/*"
             ]
         }
     ]
