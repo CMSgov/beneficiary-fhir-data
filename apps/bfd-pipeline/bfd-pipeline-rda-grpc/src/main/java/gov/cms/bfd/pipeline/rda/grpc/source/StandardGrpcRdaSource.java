@@ -115,6 +115,10 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    * to communicate with a remote API server it also gets the API version number from RDA API and
    * downloads several claims from the API.
    *
+   * <p>The connection tests are skipped for InProcess servers because those are not running during
+   * smoke test execution and so they cannot be tested. Also they do not have connection parameters
+   * or potential network issues to be tested.
+   *
    * @param sink to process batches of objects
    * @return true if all actions were completed successfully
    * @throws Exception if any of the actions threw an exception
