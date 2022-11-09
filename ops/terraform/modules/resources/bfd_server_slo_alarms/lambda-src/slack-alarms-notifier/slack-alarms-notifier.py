@@ -4,11 +4,15 @@ import os
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")
+import boto3
+from botocore.config import Config
+
+REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ENV = os.environ.get("ENV", "")
 
-boto_config = Config(region_name=region)
+boto_config = Config(region_name=REGION)
 ssm_client = boto3.client("ssm", config=boto_config)
+
 
 def handler(event, context):
     if not WEBHOOK_URL:
@@ -19,13 +23,24 @@ def handler(event, context):
         print("ENV was not defined, exiting...")
         return
 
+    try:
+        wehbook_url = ssm_client.get_parameter(
+            Name=f"/bfd/mgmt/common/sensitive/slack_webhook_bfd_test",
+            WithDecryption=True,
+        )["Parameter"]["Value"]
+    except KeyError as exc:
+        print(
+            f'SSM parameter "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test" not found: {exc.reason}'
+        )
+        return
+
     # Read message posted on SNS Topic
     sns_message = event["Records"]
     slack_message = {
         "text": f"CloudWatch SLO Alarm alert received from {ENV} with message: {sns_message}"
     }
 
-    request = Request(WEBHOOK_URL, method="POST")
+    request = Request(wehbook_url, method="POST")
     request.add_header("Content-Type", "application/json")
     try:
         with urlopen(

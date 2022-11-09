@@ -4,25 +4,14 @@ locals {
   lambda_timeout_seconds = 30
   lambda_name            = "slack-alarms-notifier"
 
-  kms_key_arn = data.aws_kms_key.cmk.arn
-  kms_key_id  = data.aws_kms_key.cmk.key_id
-
-  wehbook_url = data.aws_ssm_parameter.bfd_test_webhook_url.value
+  kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
+  kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
 }
 
 data "aws_caller_identity" "current" {}
 
-data "aws_kms_key" "cmk" {
-  key_id = "alias/bfd-${var.env}-cmk"
-}
-
 data "aws_kms_key" "mgmt_cmk" {
   key_id = "alias/bfd-mgmt-cmk"
-}
-
-data "aws_ssm_parameter" "bfd_test_webhook_url" {
-  name = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test"
-  with_decryption = true
 }
 
 data "aws_sns_topic" "cloudwatch_alarms_alert" {
@@ -63,6 +52,50 @@ resource "aws_iam_policy" "logs_slack_alarms_notifier" {
 EOF
 }
 
+resource "aws_iam_policy" "kms_slack_alarms_notifier" {
+  name        = "bfd-${var.env}-${local.lambda_name}-kms"
+  description = "Permissions to decrypt mgmt KMS key"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": [
+                "${local.kms_key_arn}",
+            ]
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "ssm_slack_alarms_notifier" {
+  name        = "bfd-${var.env}-${local.lambda_name}-ssm-parameters"
+  description = "Permissions to /bfd/mgmt/common/sensitive/* SSM hierarchies"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/*",
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role" "slack_alarms_notifier" {
   name        = "bfd-${var.env}-${local.lambda_name}"
   path        = "/"
@@ -84,7 +117,9 @@ resource "aws_iam_role" "slack_alarms_notifier" {
   EOF
 
   managed_policy_arns = [
-    aws_iam_policy.logs_slack_alarms_notifier.arn
+    aws_iam_policy.logs_slack_alarms_notifier.arn,
+    aws_iam_policy.kms_slack_alarms_notifier.arn,
+    aws_iam_policy.ssm_slack_alarms_notifier.arn
   ]
 }
 
@@ -92,7 +127,6 @@ resource "aws_lambda_function" "slack_alarms_notifier" {
   description   = "Sends a Slack notification whenever an SNS notification is received from SLO alarms"
   function_name = "bfd-${var.env}-${local.lambda_name}"
   tags          = { Name = "bfd-${var.env}-${local.lambda_name}" }
-  kms_key_arn   = local.kms_key_arn
 
   filename         = data.archive_file.slack_alarms_notifier.output_path
   source_code_hash = data.archive_file.slack_alarms_notifier.output_base64sha256
@@ -104,8 +138,7 @@ resource "aws_lambda_function" "slack_alarms_notifier" {
   timeout          = local.lambda_timeout_seconds
   environment {
     variables = {
-      WEBHOOK_URL = local.wehbook_url
-      ENV         = var.env
+      ENV = var.env
     }
   }
 
