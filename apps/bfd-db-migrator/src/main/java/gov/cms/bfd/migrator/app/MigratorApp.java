@@ -14,9 +14,6 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -55,57 +52,12 @@ public final class MigratorApp {
   static final List<String> hibernateValidationModelPackages =
       List.of("gov.cms.bfd.model.rda", "gov.cms.bfd.model.rif");
 
-  /** This {@link ProcessHandle#pid} value is the migrator app's current process id (pid). */
-  private static final String PID = Long.toString(ProcessHandle.current().pid());
-
-  /** The file name of the {@link #PID} file to externally signal the migrator app's status. */
-  private static final String PID_FILENAME = String.format("%s.pid", PID);
-
   /**
-   * This method is called to create a file that encodes the migrator app's process id as the file's
-   * name and stores the migrator app's status upon exit. This file should remain empty until the
-   * application has exited.
-   */
-  private static void createPidFile() {
-    try {
-      File pidFile = new File(PID_FILENAME);
-      if (pidFile.createNewFile()) {
-        LOGGER.info(String.format("Created new pid file %s", PID_FILENAME));
-      } else {
-        LOGGER.info(String.format("Found existing %s file", PID_FILENAME));
-      }
-    } catch (IOException e) {
-      LOGGER.error(
-          String.format("IOException Error when attempting to write the file %s", PID_FILENAME));
-    }
-  }
-
-  /**
-   * Provides an external signal of the migrator app's exit state in the form of the exit code
-   * written to the {@link #PID_FILENAME}.
-   *
-   * @param exitCode the code corresponding to the application's exit state
-   */
-  private static void writeExitCode(int exitCode) {
-    String message = Integer.toString(exitCode);
-    try {
-      FileWriter writer = new FileWriter(PID_FILENAME, false);
-      writer.write(message);
-      writer.close();
-    } catch (IOException e) {
-      LOGGER.error(
-          String.format("IOException Error when attempting to write to file %s", PID_FILENAME));
-    }
-  }
-
-  /**
-   * This terminates app and records exit code value via {@link System#exit(int)} and {@link
-   * #writeExitCode(int)}.
+   * This terminates app and records exit code value via {@link System#exit(int)}.
    *
    * @param exitCode the code corresponding to the application's exit state
    */
   private static void exitApp(int exitCode) {
-    writeExitCode(exitCode);
     System.exit(exitCode);
   }
 
@@ -116,7 +68,6 @@ public final class MigratorApp {
    *     via environment variables.
    */
   public static void main(String[] args) {
-    createPidFile();
     LOGGER.info("Successfully started");
 
     AppConfiguration appConfig = null;
