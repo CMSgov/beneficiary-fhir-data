@@ -123,6 +123,14 @@ resource "aws_iam_role" "slack_alarms_notifier" {
   ]
 }
 
+resource "aws_lambda_permission" "cloudwatch_alarms_alert_invoke_lambda" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.slack_alarms_notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = data.aws_sns_topic.cloudwatch_alarms_alert.arn
+}
+
 resource "aws_lambda_function" "slack_alarms_notifier" {
   description   = "Sends a Slack notification whenever an SNS notification is received from SLO alarms"
   function_name = "bfd-${var.env}-${local.lambda_name}"
