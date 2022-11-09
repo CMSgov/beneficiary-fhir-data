@@ -30,7 +30,7 @@ end_state_props_file = "end_state/end_state.properties"
 '''
 Mitre S3 bucket
 '''
-mitre_synthea_bucket = "bfd-synthea"
+mitre_synthea_bucket = "bfd-mgmt-synthea"
 
 '''
 Function to download proprietary Mitre mapping files from an S3 bucket; the files
