@@ -19,6 +19,7 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -123,7 +124,8 @@ public class StandardGrpcRdaSourceTest {
                 appMetrics,
                 "ints",
                 Optional.empty(),
-                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                RdaSourceConfig.ServerType.Remote));
     lenient().doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
     lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getClaimIdForMessage(any());
     metrics = source.getMetrics();
@@ -175,6 +177,35 @@ public class StandardGrpcRdaSourceTest {
   }
 
   /**
+   * Verifies that {@link StandardGrpcRdaSource#performSmokeTest} skips the RDA API tests when
+   * configured to use an {@link RdaSourceConfig.ServerType#InProcess} server.
+   *
+   * @throws Exception required in signature because tested method has checked exceptions
+   */
+  @Test
+  public void testSmokeTestSkipsCallsToInProcessServer() throws Exception {
+    source =
+        spy(
+            new StandardGrpcRdaSource<>(
+                clock,
+                channel,
+                caller,
+                () -> CallOptions.DEFAULT,
+                appMetrics,
+                "ints",
+                Optional.empty(),
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                RdaSourceConfig.ServerType.InProcess));
+
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
+
+    assertTrue(source.performSmokeTest(sink));
+
+    verifyNoInteractions(caller);
+    verify(sink).readMaxExistingSequenceNumber();
+  }
+
+  /**
    * Verify that normal (happy path) processing saves objects, updates all expected metrics, and
    * shuts down cleanly.
    *
@@ -223,7 +254,8 @@ public class StandardGrpcRdaSourceTest {
                 appMetrics,
                 "ints",
                 Optional.of(CONFIGURED_SEQUENCE_NUMBER),
-                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                RdaSourceConfig.ServerType.Remote));
     doReturn(createResponse(CLAIM_1))
         .when(caller)
         .callService(channel, CallOptions.DEFAULT, CONFIGURED_SEQUENCE_NUMBER - 1);
@@ -311,7 +343,8 @@ public class StandardGrpcRdaSourceTest {
                 appMetrics,
                 "ints",
                 Optional.empty(),
-                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP));
+                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                RdaSourceConfig.ServerType.Remote));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
