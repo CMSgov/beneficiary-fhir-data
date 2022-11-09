@@ -137,20 +137,15 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       // Doesn't use startingSequenceNumber because we should not block waiting for new data.
       final GrpcResponseStream<TMessage> responseStream =
           caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
-      boolean successful = false;
-      try {
-        for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
-          final TMessage message = responseStream.next();
-          log.info(
-              "smoke test: successfully downloaded claim: seq={}",
-              sink.getSequenceNumberForObject(message));
-        }
-        successful = true;
-      } finally {
-        // be a nice client that lets the server know when we are leaving before the stream is done
-        if (successful && responseStream.hasNext()) {
-          responseStream.cancelStream("smoke test: finished");
-        }
+      for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
+        final TMessage message = responseStream.next();
+        log.info(
+            "smoke test: successfully downloaded claim: seq={}",
+            sink.getSequenceNumberForObject(message));
+      }
+      // be a nice client that lets the server know when we are leaving before the stream is done
+      if (responseStream.hasNext()) {
+        responseStream.cancelStream("smoke test: finished");
       }
     }
 
