@@ -19,6 +19,19 @@ def handler(event, context):
         print("ENV was not defined, exiting...")
         return
 
+    # We take only the first record, if it exists
+    try:
+        record = event["Records"][0]
+    except IndexError:
+        print("Invalid SNS notification, no records found")
+        return
+
+    try:
+        sns_message = record["Sns"]["Message"]
+    except KeyError as exc:
+        print(f"No message found in SNS notification: {exc}")
+        return
+
     try:
         wehbook_url = ssm_client.get_parameter(
             Name=f"/bfd/mgmt/common/sensitive/slack_webhook_bfd_test",
@@ -30,8 +43,6 @@ def handler(event, context):
         )
         return
 
-    # Read message posted on SNS Topic
-    sns_message = event["Records"]
     slack_message = {
         "text": f"CloudWatch SLO Alarm alert received from {ENV} with message: {sns_message}"
     }
