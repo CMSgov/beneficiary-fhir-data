@@ -418,7 +418,7 @@ public class SNFClaimTransformerV2Test {
   }
 
   @Test
-  public void shouldHaveFourCharacterDRGClmDrgCdSupInfo() {
+  public void shouldHaveFourCharacterDRGClmDrgCdSupInfo() throws IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_FOUR_CHARACTER_DRG_CODE.getResources()));
@@ -434,7 +434,8 @@ public class SNFClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
