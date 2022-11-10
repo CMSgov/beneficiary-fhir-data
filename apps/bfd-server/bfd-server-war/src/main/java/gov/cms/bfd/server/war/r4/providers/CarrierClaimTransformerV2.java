@@ -244,13 +244,16 @@ public class CarrierClaimTransformerV2 {
         }
       }
 
-      // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
-      TransformerUtilsV2.addCareTeamMember(
-          eob,
-          item,
-          C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
-          line.getOrganizationNpi());
+      if (line.getOrganizationNpi().isPresent()) {
+        // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
+        TransformerUtilsV2.addCareTeamMemberWithNpiOrg(
+            eob,
+            item,
+            C4BBPractitionerIdentifierType.NPI,
+            C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
+            line.getOrganizationNpi().get(),
+            transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(line.getOrganizationNpi()));
+      }
 
       // CARR_LINE_RDCD_PMT_PHYS_ASTN_C => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(

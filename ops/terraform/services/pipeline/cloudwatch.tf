@@ -6,7 +6,7 @@ resource "aws_cloudwatch_dashboard" "bfd-pipeline-dashboard" {
 
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   name           = "bfd-${local.env}/bfd-pipeline/messages/count/error"
-  pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class != \"*grpc*\", message]"
+  pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message]"
   log_group_name = local.log_groups.messages
 
   metric_transformation {
