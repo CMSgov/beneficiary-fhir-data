@@ -39,6 +39,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   private final Optional<Long> startingSequenceNumber;
   /** Expected time before RDA API server drops its connection when it has nothing to send. */
   private final long minIdleMillisBeforeConnectionDrop;
+  /** The type of RDA API server to connect to. */
+  private final RdaSourceConfig.ServerType serverType;
 
   /**
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
@@ -64,7 +66,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         appMetrics,
         claimType,
         startingSequenceNumber,
-        config.getMinIdleMillisBeforeConnectionDrop());
+        config.getMinIdleMillisBeforeConnectionDrop(),
+        config.getServerType());
   }
 
   /**
@@ -91,7 +94,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber,
-      long minIdleMillisBeforeConnectionDrop) {
+      long minIdleMillisBeforeConnectionDrop,
+      RdaSourceConfig.ServerType serverType) {
     super(
         Preconditions.checkNotNull(channel),
         Preconditions.checkNotNull(caller),
@@ -101,13 +105,19 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
     this.clock = clock;
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
+    this.serverType = serverType;
   }
 
   /**
    * {@inheritDoc}
    *
-   * <p>This implementation reads starting sequence number from the database, gets the API version
-   * number from RDA API, then downloads several claims from the API.
+   * <p>This implementation always reads starting sequence number from the database. When configured
+   * to communicate with a remote API server it also gets the API version number from RDA API and
+   * downloads several claims from the API.
+   *
+   * <p>The connection tests are skipped for InProcess servers because those are not running during
+   * smoke test execution and so they cannot be tested. Also they do not have connection parameters
+   * or potential network issues to be tested.
    *
    * @param sink to process batches of objects
    * @return true if all actions were completed successfully
@@ -115,7 +125,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    */
   @Override
   public boolean performSmokeTest(RdaSink<TMessage, TClaim> sink) throws Exception {
-    boolean successful = false;
     log.info("smoke test: starting");
 
     // Query the database to get a starting sequence number.  This verifies that the database is
@@ -124,29 +133,27 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
     log.info("smoke test: startingSequenceNumber={}", startingSequenceNumber);
 
-    // Call the RDA API version service to confirm the API is accessible.
-    final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
-    log.info("smoke test: apiVersion={}", apiVersion);
+    if (serverType == RdaSourceConfig.ServerType.Remote) {
+      // Call the RDA API version service to confirm the API is accessible.
+      final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+      log.info("smoke test: apiVersion={}", apiVersion);
 
-    // Doesn't use startingSequenceNumber because we should not block waiting for new data.
-    final GrpcResponseStream<TMessage> responseStream =
-        caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
-    try {
+      // Doesn't use startingSequenceNumber because we should not block waiting for new data.
+      final GrpcResponseStream<TMessage> responseStream =
+          caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
       for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
         final TMessage message = responseStream.next();
         log.info(
             "smoke test: successfully downloaded claim: seq={}",
             sink.getSequenceNumberForObject(message));
       }
-      successful = true;
-    } finally {
       // be a nice client that lets the server know when we are leaving before the stream is done
-      if (successful && responseStream.hasNext()) {
+      if (responseStream.hasNext()) {
         responseStream.cancelStream("smoke test: finished");
       }
     }
 
-    return successful;
+    return true;
   }
 
   /**
@@ -183,11 +190,19 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               setUptimeToReceiving();
               final TMessage result = responseStream.next();
               metrics.getObjectsReceived().mark();
-              batch.put(sink.getDedupKeyForMessage(result), result);
-              if (batch.size() >= maxPerBatch) {
-                processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
+              if (sink.isValidMessage(result)) {
+                batch.put(sink.getClaimIdForMessage(result), result);
+                if (batch.size() >= maxPerBatch) {
+                  processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
+                }
+                lastProcessedTime = clock.millis();
+              } else {
+                log.info(
+                    "skipping invalid claim: claimType={} claimId={} seq={}",
+                    claimType,
+                    sink.getClaimIdForMessage(result),
+                    sink.getSequenceNumberForObject(result));
               }
-              lastProcessedTime = clock.millis();
             }
           } catch (GrpcResponseStream.StreamInterruptedException ex) {
             // If our thread is interrupted we cancel the stream so the server knows we're done

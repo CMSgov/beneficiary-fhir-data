@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -15,6 +16,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -37,7 +39,7 @@ public final class CarrierClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     CarrierClaim claim =
@@ -53,7 +55,8 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
@@ -63,7 +66,8 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
@@ -77,7 +81,7 @@ public final class CarrierClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void shouldHaveTwoCareTeamMembers() throws FHIRException {
+  public void shouldHaveTwoCareTeamMembers() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -94,7 +98,8 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
 
     assertEquals(2, eob.getCareTeam().size());
@@ -108,7 +113,7 @@ public final class CarrierClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleURecord() throws FHIRException {
+  public void transformSampleURecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     CarrierClaim claim =
@@ -123,7 +128,8 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob, Optional.of(true));
   }
