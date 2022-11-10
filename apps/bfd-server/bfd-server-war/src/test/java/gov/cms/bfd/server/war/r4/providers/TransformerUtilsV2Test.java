@@ -185,6 +185,7 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
         Optional.empty());
 
     Optional<Resource> organization =
@@ -519,6 +520,7 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
+        Optional.empty(),
         Optional.empty(),
         ' ',
         ' ',
