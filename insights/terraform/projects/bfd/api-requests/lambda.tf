@@ -41,7 +41,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
 
   lambda_timeout_seconds = 30
-  lambda_name            = "slack-alarms-notifier"
+  lambda_name            = "bfd-insights-error-slack"
 
   kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
   kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
@@ -58,13 +58,13 @@ data "aws_sns_topic" "cloudwatch_alarms_alert" {
   name = "bfd-${var.env}-cloudwatch-alarms-alert-testing"
 }
 
-data "archive_file" "slack_alarms_notifier" {
+data "archive_file" "bfd_insights_error_slack" {
   type        = "zip"
-  source_file = "${path.module}/lambda-src/slack-alarms-notifier/slack-alarms-notifier.py"
-  output_path = "${path.module}/lambda-src/slack-alarms-notifier/slack-alarms-notifier.zip"
+  source_file = "${path.module}/lambda-src/bfd-insights-error-slack.py"
+  output_path = "${path.module}/lambda-src/bfd-insights-error-slack.zip"
 }
 
-resource "aws_iam_policy" "logs_slack_alarms_notifier" {
+resource "aws_iam_policy" "logs_bfd_insights_error_slack" {
   name        = "bfd-${var.env}-${local.lambda_name}-logs"
   description = "Permissions to create and write to bfd-${var.env}-${local.lambda_name} logs"
   policy      = <<-EOF
@@ -91,7 +91,7 @@ resource "aws_iam_policy" "logs_slack_alarms_notifier" {
 EOF
 }
 
-resource "aws_iam_policy" "kms_slack_alarms_notifier" {
+resource "aws_iam_policy" "kms_bfd_insights_error_slack" {
   name        = "bfd-${var.env}-${local.lambda_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
   policy      = <<-EOF
@@ -112,7 +112,7 @@ resource "aws_iam_policy" "kms_slack_alarms_notifier" {
 EOF
 }
 
-resource "aws_iam_policy" "ssm_slack_alarms_notifier" {
+resource "aws_iam_policy" "ssm_bfd_insights_error_slack" {
   name        = "bfd-${var.env}-${local.lambda_name}-ssm-parameters"
   description = "Permissions to /bfd/mgmt/common/sensitive/* SSM hierarchies"
   policy      = <<-EOF
@@ -135,7 +135,7 @@ resource "aws_iam_policy" "ssm_slack_alarms_notifier" {
 EOF
 }
 
-resource "aws_iam_role" "slack_alarms_notifier" {
+resource "aws_iam_role" "bfd_insights_error_slack" {
   name        = "bfd-${var.env}-${local.lambda_name}"
   path        = "/"
   description = "Role for bfd-${var.env}-${local.lambda_name} Lambda"
@@ -156,9 +156,9 @@ resource "aws_iam_role" "slack_alarms_notifier" {
   EOF
 
   managed_policy_arns = [
-    aws_iam_policy.logs_slack_alarms_notifier.arn,
-    aws_iam_policy.kms_slack_alarms_notifier.arn,
-    aws_iam_policy.ssm_slack_alarms_notifier.arn
+    aws_iam_policy.logs_bfd_insights_error_slack.arn,
+    aws_iam_policy.kms_bfd_insights_error_slack.arn,
+    aws_iam_policy.ssm_bfd_insights_error_slack.arn
   ]
 }
 
@@ -171,15 +171,15 @@ resource "aws_lambda_permission" "bfd_insights_error_slack" {
   source_account = local.account_id
 }
 
-resource "aws_lambda_function" "slack_alarms_notifier" {
-  description   = "Sends a Slack notification whenever an SNS notification is received from SLO alarms"
+resource "aws_lambda_function" "bfd_insights_error_slack" {
+  description   = "Sends a Slack notification whenever a new file added to BFD Insights Error Folder"
   function_name = "bfd-${var.env}-${local.lambda_name}"
   tags          = { Name = "bfd-${var.env}-${local.lambda_name}" }
 
-  filename         = data.archive_file.slack_alarms_notifier.output_path
-  source_code_hash = data.archive_file.slack_alarms_notifier.output_base64sha256
+  filename         = data.archive_file.bfd_insights_error_slack.output_path
+  source_code_hash = data.archive_file.bfd_insights_error_slack.output_base64sha256
   architectures    = ["x86_64"]
-  handler          = "slack-alarms-notifier.handler"
+  handler          = "bfd_insights_error_slack.handler"
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
@@ -190,5 +190,5 @@ resource "aws_lambda_function" "slack_alarms_notifier" {
     }
   }
 
-  role = aws_iam_role.slack_alarms_notifier.arn
+  role = aws_iam_role.bfd_insights_error_slack.arn
 }
