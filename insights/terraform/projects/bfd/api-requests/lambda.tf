@@ -162,9 +162,7 @@ resource "aws_iam_role" "slack_alarms_notifier" {
   ]
 }
 
-# replacing
 resource "aws_lambda_permission" "bfd_insights_error_slack" {
-  # change statement id 
   statement_id   = "bfd-${local.env}-${local.service}-bfd-insights-error-slack-alert"
   action         = "lambda:InvokeFunction"
   function_name  = aws_lambda_function.bfd_insights_error_slack.arn
