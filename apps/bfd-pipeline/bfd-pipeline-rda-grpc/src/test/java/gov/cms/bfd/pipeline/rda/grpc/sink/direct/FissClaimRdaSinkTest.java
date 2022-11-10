@@ -36,6 +36,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -99,6 +100,41 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.writes.persisted",
             "FissClaimRdaSink.writes.total"),
         new ArrayList<>(appMetrics.getNames()));
+  }
+
+  /**
+   * Verifies that {@link FissClaimRdaSink#isValidMessage} correctly recognizes various valid and
+   * invalid DCN values.
+   */
+  @Test
+  public void testIsValidMessage() {
+    var cases =
+        Map.of(
+            "0",
+            false,
+            "0000",
+            false,
+            "010",
+            true,
+            "XXX",
+            true,
+            "1234567890123XXX",
+            true,
+            "XXX4",
+            true,
+            " 00000000000 ",
+            false,
+            "22239999999999XXX",
+            false,
+            "22230501299999XXX4",
+            false);
+    for (Map.Entry<String, Boolean> e : cases.entrySet()) {
+      var claimId = e.getKey();
+      var expected = e.getValue();
+      var message = FissClaimChange.newBuilder().setDcn(e.getKey()).build();
+      var actual = sink.isValidMessage(message);
+      assertEquals(expected, actual, "incorrect result for " + claimId);
+    }
   }
 
   @Test

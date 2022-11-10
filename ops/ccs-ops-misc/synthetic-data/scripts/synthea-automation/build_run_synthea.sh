@@ -12,7 +12,6 @@ help() {
   echo "--build_root, -b        : root directory for Synthea build (default /tmp)"
   echo "--target_env, -t        : comma-separated string, combination of: 'prod', 'test', 'prod-sbx' (default test)"
   echo "--synthea_jar, -j       : boolean (true/false) indicating to use Synthea Release jar file (default true)"
-  echo "--skip_validate, -v     : boolean (true/false) whether to skip pre-validation of previous Synthea run (default false)"
   echo "--cleanup, -c           : boolean (true/false) whether to perform 'pre' and 'post' file cleanup (default true)"
   echo "--num_future_months, -f : number of months into the future claims can have their claim dates set to (default 0)"
   exit 1;
@@ -29,8 +28,6 @@ TARGET_ENV="test"
 NUM_GENERATED_BENES=100
 # boolean indicating if Synthea will use its Release .jar file (true) or if we need to build Synthea
 SKIP_SYNTHEA_BUILD="true"
-# boolean if we should perform pre-validation of target env(s) db to check if we can proceed
-SKIP_VALIDATION="false"
 # boolean if we should generate future claim data
 GENERATE_FUTURE="false"
 # num of months into future for future claim lines
@@ -74,13 +71,6 @@ while [ $# -ge 1 ]; do
               fi
               shift
               ;;
-        -v|--skip_validate)
-              SKIP_VALIDATION=$(echo "$2" | tr '[:upper:]' '[:lower:]')
-              if [[ "${SKIP_VALIDATION}" != "true" && "${SKIP_VALIDATION}" != "false" ]]; then
-                echo "ERROR, Invalid boolean value for Synthea validation: ${SKIP_VALIDATION}" >&2; exit 1
-              fi
-              shift
-              ;;
         -c|--cleanup)
               CLEANUP=$(echo "$2" | tr '[:upper:]' '[:lower:]')
               if [[ "${CLEANUP}" != "true" && "${CLEANUP}" != "false" ]]; then
@@ -111,7 +101,6 @@ echo "BFD environment(s)          : ${TARGET_ENV}"
 echo "Num beneficiaries to create : ${NUM_GENERATED_BENES}"
 echo "Synthea build directory     : ${BUILD_ROOT_DIR}"
 echo "Use Synthea release jar     : ${SKIP_SYNTHEA_BUILD}"
-echo "Skip Synthea pre-validation : ${SKIP_VALIDATION}"
 echo "Perform file cleanup        : ${CLEANUP}"
 echo "Generate future months      : ${NUM_FUTURE_MONTHS}"
 echo "Generate future files       : ${GENERATE_FUTURE}"
@@ -124,7 +113,6 @@ TARGET_SYNTHEA_DIR=${BUILD_ROOT_DIR}/synthea
 # various Synthea generation and validation tasks.
 BEG_BENE_ID=
 END_BENE_ID=
-BFD_CHARACTERISTICS=
 
 # Need to support up to 3 concurrent environments (prod, prod-sbx, test) for a given run;
 # each environment uses a distinct S3 bucket; lower-case the TARGET_ENV string to ensure
@@ -187,8 +175,6 @@ BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
-# BFD characteristics file
-BFD_CHARACTERISTICS_FILE_NAME="characteristics.csv"
 # the directory for synthea output 
 BFD_SYNTHEA_OUTPUT_LOCATION="${TARGET_SYNTHEA_DIR}/output/bfd"
 # directory where Mitre synthea mapping files will be downlowded to.
@@ -207,13 +193,9 @@ clean_up() {
     # we want the git status to reflect no changes.
     rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES}"
     rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_END_STATE_PROPERTIES_ORIG}"
-    rm -f "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
     rm -fR "${BFD_SYNTHEA_AUTO_LOCATION}/__pycache__/"
-    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
     chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
-    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
     chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
-    chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
   fi
 }
 # we'll trap system interrupts and perform cleanup.
@@ -253,11 +235,8 @@ install_synthea_from_git(){
 # and associated python scripts do not need to be built, but will need read/execute.
 install_bfd_from_git(){
   # make sure the scripts are executable
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/generate-characteristics-file.py"
   chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/prepare-and-run-synthea.py"
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/validate-synthea-load.py"
   chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
-  chmod 744 "${BFD_SYNTHEA_AUTO_LOCATION}/ssmutil.py"
 }
 
 # Utility function to create a python virtual environment that will be used during the
@@ -316,12 +295,11 @@ download_props_file_from_s3(){
 # 2: location of synthea git repo
 # 3: number of beneficiaries to be generated
 # 4: environment to load/validate; either: test, prod-sbx, prod or comma-delimited string containing any of them
-# 5: (optional) boolean to skip validation (true); useful if re-generating a bad batch, defaults to False
 #
 prepare_and_run_synthea(){
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
-  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${UNIQUE_ENVS_PARAM}" "${NUM_FUTURE_MONTHS}" "${SKIP_VALIDATION}"
+  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${NUM_FUTURE_MONTHS}"
   deactivate
 }
 
@@ -391,56 +369,6 @@ wait_for_manifest_done(){
   deactivate
 }
 
-# Args:
-# 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
-# 2: bene id end (exclusive, taken from new output end state properties)
-# 3: file system location of synthea folder
-# 4: which environments to check, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
-do_load_validation(){
-  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
-  # now perform the validation of the run.
-  END_BENE_ID=$(cat "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_END_STATE_PROPERTIES}" |grep bene_id_start |sed 's/.*=//')
-  echo "END_BENE_ID=${END_BENE_ID}"
-
-  source .venv/bin/activate
-  python3 validate-synthea-load.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${TARGET_SYNTHEA_DIR}" "${UNIQUE_ENVS_PARAM}"
-  deactivate
-}
-
-# Args:
-# 1: bene id start (inclusive, taken from previous end state properties / synthea properties file)
-# 2: bene id end (exclusive, taken from new output end state properties)
-# 3: file system location to write the characteristics file
-# 4: which environment to check, should be a single value from the list of [test prd-sbx prod]
-#
-# script will check the number of lines written to the characteristics.csv file; if only the header row (row #1)
-# then we'll exit out.
-gen_characteristics_file(){
-  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
-  source .venv/bin/activate
-  python3 generate-characteristics-file.py "${BEG_BENE_ID}" "${END_BENE_ID}"  "${BFD_SYNTHEA_AUTO_LOCATION}" "${UNIQUE_ENVS_PARAM}"
-
-  # check the generated output file; must have more than just the header line
-  line_cnt=$(cat "${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}" |wc -l)
-  if [[ "$line_cnt" -gt 1 ]]; then
-    BFD_CHARACTERISTICS="${BFD_SYNTHEA_AUTO_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
-    echo "${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME} successfully discovered"
-  else
-    echo "failed to read meaningful data from: ${BFD_SYNTHEA_OUTPUT_LOCATION}/${BFD_CHARACTERISTICS_FILE_NAME}"
-  fi
-  deactivate
-}
-
-# Function to upload the new end state properties file to an S3 bucket; it also extracts
-# the newest bene_id_start variable for use in a later function/operation.
-upload_characteristics_file_to_s3(){
-  echo "upload ${BFD_CHARACTERISTICS_FILE_NAME} file to S3"
-  cd "${BFD_SYNTHEA_AUTO_LOCATION}"
-  source .venv/bin/activate
-  python3 ./s3_utilities.py "${BFD_SYNTHEA_AUTO_LOCATION}" "upload_characteristics"
-  deactivate
-}
-
 # Function to upload the new end state properties file to an S3 bucket; it also extracts
 # the newest bene_id_start variable for use in a later function/operation.
 upload_props_file_to_s3(){
@@ -492,25 +420,11 @@ upload_synthea_results_to_s3
 # the 0_manifest file to appear in the S3 bucket's /Done folder.
 wait_for_manifest_done
 
-# Invoke a function that executes a .py script that performs validation of data for
-# the just executed ETL pipeline load. We ALWAYS want to validate the results of
-# the completed run.
-do_load_validation
-
-# Invoke function that executes a .py script that generates a new synthea characteristics
-# file and uploads it to S3.
-if [[ -n ${BEG_BENE_ID} && -n ${END_BENE_ID} ]]; then
-  gen_characteristics_file
-else
-  error_exit "end state BENE_ID variables unset...exiting"
-fi
-
 # Invoke a function to upload the new end_state.properties file and the new characteristics.csv file
-if [[ -n ${BEG_BENE_ID} && -n ${BFD_CHARACTERISTICS} ]]; then
-  upload_characteristics_file_to_s3
+if [[ -n ${BEG_BENE_ID} ]]; then
   upload_props_file_to_s3
 else
-  error_exit "end state BEG_BENE_ID or BFD_CHARACTERISTICS variables unset...exiting"
+  error_exit "end state BEG_BENE_ID variables unset...exiting"
 fi
 
 # cleanup after ourselves...

@@ -44,7 +44,7 @@ public class SNFClaimTransformerV2 {
     }
 
     timer.stop();
-    return transformClaim((SNFClaim) claim);
+    return transformClaim((SNFClaim) claim, transformerContext);
   }
 
   /**
@@ -52,7 +52,8 @@ public class SNFClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private static ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      SNFClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -257,6 +258,7 @@ public class SNFClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
