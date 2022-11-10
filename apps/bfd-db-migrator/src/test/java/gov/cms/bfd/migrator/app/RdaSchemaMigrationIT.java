@@ -185,29 +185,27 @@ public class RdaSchemaMigrationIT {
     final RdaFissProcCode procCode0 =
         RdaFissProcCode.builder()
             .dcn(claim.getDcn())
-            .priority((short) 0)
+            .rdaPosition((short) 1)
             .procCode("P")
             .procFlag("F")
             .procDate(LocalDate.now())
-            .lastUpdated(Instant.now())
             .build();
     claim.getProcCodes().add(procCode0);
 
     final RdaFissProcCode procCode1 =
         RdaFissProcCode.builder()
             .dcn(claim.getDcn())
-            .priority((short) 1)
+            .rdaPosition((short) 2)
             .procCode("P")
             .procFlag("G")
             .procDate(LocalDate.now())
-            .lastUpdated(Instant.now())
             .build();
     claim.getProcCodes().add(procCode1);
 
     final RdaFissDiagnosisCode diagCode0 =
         RdaFissDiagnosisCode.builder()
             .dcn(claim.getDcn())
-            .priority((short) 0)
+            .rdaPosition((short) 1)
             .diagCd2("cd2")
             .diagPoaInd("Q")
             .build();
@@ -216,7 +214,7 @@ public class RdaSchemaMigrationIT {
     final RdaFissDiagnosisCode diagCode1 =
         RdaFissDiagnosisCode.builder()
             .dcn(claim.getDcn())
-            .priority((short) 1)
+            .rdaPosition((short) 2)
             .diagCd2("cd2")
             .diagPoaInd("R")
             .build();
@@ -225,7 +223,7 @@ public class RdaSchemaMigrationIT {
     final RdaFissPayer payer0 =
         RdaFissPayer.builder()
             .dcn(claim.getDcn())
-            .priority((short) 0)
+            .rdaPosition((short) 1)
             .payerType(RdaFissPayer.PayerType.BeneZ)
             .estAmtDue(new BigDecimal("1.23"))
             .build();
@@ -234,7 +232,7 @@ public class RdaSchemaMigrationIT {
     final RdaFissPayer payer1 =
         RdaFissPayer.builder()
             .dcn(claim.getDcn())
-            .priority((short) 1)
+            .rdaPosition((short) 2)
             .payerType(RdaFissPayer.PayerType.Insured)
             .estAmtDue(new BigDecimal("4.56"))
             .build();
@@ -257,9 +255,9 @@ public class RdaSchemaMigrationIT {
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
 
-    assertEquals("0:F,1:G", summarizeFissProcCodes(resultClaim));
-    assertEquals("0:Q,1:R", summarizeFissDiagCodes(resultClaim));
-    assertEquals("0:BeneZ:1.23,1:Insured:4.56", summarizeFissPayers(resultClaim));
+    assertEquals("1:F,2:G", summarizeFissProcCodes(resultClaim));
+    assertEquals("1:Q,2:R", summarizeFissDiagCodes(resultClaim));
+    assertEquals("1:BeneZ:1.23,2:Insured:4.56", summarizeFissPayers(resultClaim));
 
     // Remove a procCode and diagCode and modify the remaining ones, update, and read back to verify
     // all records updated correctly.
@@ -277,9 +275,9 @@ public class RdaSchemaMigrationIT {
             .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
             .getResultList()
             .get(0);
-    assertEquals("0:H", summarizeFissProcCodes(resultClaim));
-    assertEquals("1:S", summarizeFissDiagCodes(resultClaim));
-    assertEquals("1:Insured:7.89", summarizeFissPayers(resultClaim));
+    assertEquals("1:H", summarizeFissProcCodes(resultClaim));
+    assertEquals("2:S", summarizeFissDiagCodes(resultClaim));
+    assertEquals("2:Insured:7.89", summarizeFissPayers(resultClaim));
   }
 
   /**
@@ -297,16 +295,16 @@ public class RdaSchemaMigrationIT {
             .sequenceNumber(3L)
             .build();
 
-    claim.getDetails().add(quickMcsDetail(claim, 0, "P"));
-    RdaMcsDetail detail1 = quickMcsDetail(claim, 1, "Q");
+    claim.getDetails().add(quickMcsDetail(claim, 1, "P"));
+    RdaMcsDetail detail1 = quickMcsDetail(claim, 2, "Q");
     claim.getDetails().add(detail1);
-    RdaMcsDetail detail2 = quickMcsDetail(claim, 2, "R");
+    RdaMcsDetail detail2 = quickMcsDetail(claim, 3, "R");
     claim.getDetails().add(detail2);
 
-    RdaMcsDiagnosisCode diag0 = quickMcsDiagCode(claim, 0, "T");
+    RdaMcsDiagnosisCode diag0 = quickMcsDiagCode(claim, 1, "T");
     claim.getDiagCodes().add(diag0);
-    claim.getDiagCodes().add(quickMcsDiagCode(claim, 1, "U"));
-    RdaMcsDiagnosisCode diag2 = quickMcsDiagCode(claim, 2, "V");
+    claim.getDiagCodes().add(quickMcsDiagCode(claim, 2, "U"));
+    RdaMcsDiagnosisCode diag2 = quickMcsDiagCode(claim, 3, "V");
     claim.getDiagCodes().add(diag2);
 
     // Insert a record and read it back to verify some columns and that the detail records were
@@ -319,8 +317,8 @@ public class RdaSchemaMigrationIT {
         entityManager.createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class).getResultList();
     assertEquals(1, resultClaims.size());
     RdaMcsClaim resultClaim = resultClaims.get(0);
-    assertEquals("0:P,1:Q,2:R", summarizeMcsDetails(resultClaim));
-    assertEquals("0:T:0,1:U:1,2:V:2", summarizeMcsDiagCodes(resultClaim));
+    assertEquals("1:P,2:Q,3:R", summarizeMcsDetails(resultClaim));
+    assertEquals("1:T:1,2:U:2,3:V:3", summarizeMcsDiagCodes(resultClaim));
 
     // Remove a detail and diagCode and modify the remaining ones, update, and read back to verify
     // all records updated correctly.
@@ -338,8 +336,8 @@ public class RdaSchemaMigrationIT {
     assertEquals(1, resultClaims.size());
     resultClaim = resultClaims.get(0);
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
-    assertEquals("0:P,2:S", summarizeMcsDetails(resultClaim));
-    assertEquals("0:W:0,1:U:1", summarizeMcsDiagCodes(resultClaim));
+    assertEquals("1:P,3:S", summarizeMcsDetails(resultClaim));
+    assertEquals("1:W:1,2:U:2", summarizeMcsDiagCodes(resultClaim));
   }
 
   /** Ensure that the MBI cache relationships work properly in FISS claim entities. */
@@ -478,7 +476,7 @@ public class RdaSchemaMigrationIT {
                         .sequenceNumber(i)
                         .claimState("A")
                         .claimId(String.valueOf(i))
-                        .receivedDate(Instant.now())
+                        .lastUpdated(Instant.now())
                         .transactionDate(LocalDate.now())
                         .claimType(RdaApiProgress.ClaimType.FISS)
                         .locations(StringList.ofNonEmpty(String.valueOf(i)))
@@ -502,14 +500,14 @@ public class RdaSchemaMigrationIT {
    * Create a minimally populated {@link RdaMcsDetail} object for use in tests.
    *
    * @param claim parent claim
-   * @param priority column value
+   * @param idrDtlNumber column value
    * @param dtlStatus column value
    * @return the object
    */
-  private RdaMcsDetail quickMcsDetail(RdaMcsClaim claim, int priority, String dtlStatus) {
+  private RdaMcsDetail quickMcsDetail(RdaMcsClaim claim, int idrDtlNumber, String dtlStatus) {
     return RdaMcsDetail.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
-        .priority((short) priority)
+        .idrDtlNumber((short) idrDtlNumber)
         .idrDtlStatus(dtlStatus)
         .build();
   }
@@ -518,16 +516,16 @@ public class RdaSchemaMigrationIT {
    * Create a minimally populated {@link RdaMcsDiagnosisCode} object for use in tests.
    *
    * @param claim parent claim
-   * @param priority column value
+   * @param rdaPosition column value
    * @param icdType column value
    * @return the object
    */
-  private RdaMcsDiagnosisCode quickMcsDiagCode(RdaMcsClaim claim, int priority, String icdType) {
+  private RdaMcsDiagnosisCode quickMcsDiagCode(RdaMcsClaim claim, int rdaPosition, String icdType) {
     return RdaMcsDiagnosisCode.builder()
         .idrClmHdIcn(claim.getIdrClmHdIcn())
-        .priority((short) priority)
+        .rdaPosition((short) rdaPosition)
         .idrDiagIcdType(icdType)
-        .idrDiagCode(String.valueOf(priority))
+        .idrDiagCode(String.valueOf(rdaPosition))
         .build();
   }
 
@@ -541,7 +539,7 @@ public class RdaSchemaMigrationIT {
   private String summarizeFissProcCodes(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getProcCodes().stream(),
-        d -> format("%d:%s", d.getPriority(), d.getProcFlag()));
+        d -> format("%d:%s", d.getRdaPosition(), d.getProcFlag()));
   }
 
   /**
@@ -554,7 +552,7 @@ public class RdaSchemaMigrationIT {
   private String summarizeFissDiagCodes(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
-        d -> format("%d:%s", d.getPriority(), d.getDiagPoaInd()));
+        d -> format("%d:%s", d.getRdaPosition(), d.getDiagPoaInd()));
   }
 
   /**
@@ -567,7 +565,7 @@ public class RdaSchemaMigrationIT {
   private String summarizeFissPayers(RdaFissClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getPayers().stream(),
-        d -> format("%d:%s:%s", d.getPriority(), d.getPayerType(), d.getEstAmtDue()));
+        d -> format("%d:%s:%s", d.getRdaPosition(), d.getPayerType(), d.getEstAmtDue()));
   }
 
   /**
@@ -580,7 +578,7 @@ public class RdaSchemaMigrationIT {
   private String summarizeMcsDetails(RdaMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDetails().stream(),
-        d -> format("%d:%s", d.getPriority(), d.getIdrDtlStatus()));
+        d -> format("%d:%s", d.getIdrDtlNumber(), d.getIdrDtlStatus()));
   }
 
   /**
@@ -593,7 +591,7 @@ public class RdaSchemaMigrationIT {
   private String summarizeMcsDiagCodes(RdaMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
-        d -> format("%d:%s:%s", d.getPriority(), d.getIdrDiagIcdType(), d.getIdrDiagCode()));
+        d -> format("%d:%s:%s", d.getRdaPosition(), d.getIdrDiagIcdType(), d.getIdrDiagCode()));
   }
 
   /**

@@ -141,7 +141,7 @@ public class FissTransformer extends AbstractTransformer {
             .setRecdDtCymd("1970-01-01");
 
     // Build beneZ payer object
-    FissBeneZPayer.Builder payerBuilder = FissBeneZPayer.newBuilder();
+    FissBeneZPayer.Builder payerBuilder = FissBeneZPayer.newBuilder().setRdaPosition(1);
     consumeIfNotNull(
         mbiMap.get(beneId).getFirstName(),
         value -> payerBuilder.setBeneFirstName(String.format("%.10s", value)));
@@ -242,7 +242,9 @@ public class FissTransformer extends AbstractTransformer {
           .ifPresent(
               value -> {
                 FissDiagnosisCode.Builder diagBuilder =
-                    FissDiagnosisCode.newBuilder().setDiagCd2(value);
+                    FissDiagnosisCode.newBuilder()
+                        .setRdaPosition(claimBuilder.getFissDiagCodesCount() + 1)
+                        .setDiagCd2(value);
 
                 consumeIf(
                     data.get(Fiss.CLM_POA_IND_SW.get(INDEX)).orElse(null),
@@ -272,6 +274,7 @@ public class FissTransformer extends AbstractTransformer {
               value ->
                   claimBuilder.addFissProcCodes(
                       FissProcedureCode.newBuilder()
+                          .setRdaPosition(claimBuilder.getFissProcCodesCount() + 1)
                           .setProcCd(value)
                           .setProcDt(
                               data.getFromType(Fiss.PRCDR_DT.get(INDEX), Parser.Data.Type.DATE)

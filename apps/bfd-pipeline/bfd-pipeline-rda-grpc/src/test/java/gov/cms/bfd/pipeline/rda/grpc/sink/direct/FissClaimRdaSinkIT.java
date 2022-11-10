@@ -62,7 +62,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
           procCode0.setDcn(claim.getDcn());
-          procCode0.setPriority((short) 0);
+          procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
           procCode0.setProcDate(today);
@@ -70,7 +70,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
           diagCode0.setDcn(claim.getDcn());
-          diagCode0.setPriority((short) 0);
+          diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
           claim.getDiagCodes().add(diagCode0);
@@ -78,6 +78,7 @@ public class FissClaimRdaSinkIT {
           final FissProcedureCode procCodeMessage =
               FissProcedureCode.newBuilder()
                   .setProcCd("P")
+                  .setRdaPosition(1)
                   .setProcFlag("F")
                   .setProcDt("2022-01-03")
                   .build();
@@ -85,6 +86,7 @@ public class FissClaimRdaSinkIT {
           final FissDiagnosisCode diagCodeMessage =
               FissDiagnosisCode.newBuilder()
                   .setDiagCd2("cd2")
+                  .setRdaPosition(1)
                   .setDiagPoaIndUnrecognized("Q")
                   .build();
 
@@ -175,7 +177,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
           procCode0.setDcn(claim.getDcn());
-          procCode0.setPriority((short) 0);
+          procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
           procCode0.setProcDate(today);
@@ -183,7 +185,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
           diagCode0.setDcn(claim.getDcn());
-          diagCode0.setPriority((short) 0);
+          diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
           claim.getDiagCodes().add(diagCode0);
@@ -191,6 +193,7 @@ public class FissClaimRdaSinkIT {
           final FissProcedureCode procCodeMessage =
               FissProcedureCode.newBuilder()
                   .setProcCd("P")
+                  .setRdaPosition(1)
                   .setProcFlag("F")
                   .setProcDt(invalidDateFormat)
                   .build();
@@ -198,6 +201,7 @@ public class FissClaimRdaSinkIT {
           final FissDiagnosisCode diagCodeMessage =
               FissDiagnosisCode.newBuilder()
                   .setDiagCd2("cd2")
+                  .setRdaPosition(1)
                   .setDiagPoaIndUnrecognized("Q")
                   .build();
 
