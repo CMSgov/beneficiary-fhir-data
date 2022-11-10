@@ -354,7 +354,7 @@ public final class InpatientClaimTransformerV2Test {
   }
 
   @Test
-  public void shouldHaveClmDrgCdInfo() {
+  public void shouldHaveClmDrgCdInfo() throws IOException {
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode(
             "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", eob.getSupportingInfo());
@@ -379,7 +379,7 @@ public final class InpatientClaimTransformerV2Test {
   }
 
   @Test
-  public void shouldHaveFourCharacterClmDrgCdInfo() {
+  public void shouldHaveFourCharacterClmDrgCdInfo() throws IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_FOUR_CHARACTER_DRG_CODE.getResources()));
@@ -397,7 +397,8 @@ public final class InpatientClaimTransformerV2Test {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
