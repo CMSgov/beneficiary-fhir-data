@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class NumericGauges {
    * @param gaugeName name used to identify the gauge in the registry and the value store in this
    * @return a gauge registered with the registry
    */
-  public Gauge<?> getGaugeForName(MetricRegistry appMetrics, String gaugeName) {
-    return appMetrics.gauge(gaugeName, () -> getValueForName(gaugeName)::get);
+  public AtomicLong getGaugeForName(MeterRegistry appMetrics, String gaugeName) {
+    return appMetrics.gauge(gaugeName, getValueForName(gaugeName));
   }
 }

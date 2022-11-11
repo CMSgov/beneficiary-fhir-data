@@ -24,6 +24,12 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -82,6 +88,12 @@ public final class PipelineApplication {
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
+    CompositeMeterRegistry appMeters = new CompositeMeterRegistry();
+    appMeters.add(
+        new JmxMeterRegistry(JmxConfig.DEFAULT, io.micrometer.core.instrument.Clock.SYSTEM));
+    appMeters.add(new SimpleMeterRegistry());
+    new JvmMemoryMetrics().bindTo(appMeters);
+
     MetricRegistry appMetrics = new MetricRegistry();
     appMetrics.registerAll(new MemoryUsageGaugeSet());
     appMetrics.registerAll(new GarbageCollectorMetricSet());
@@ -122,7 +134,7 @@ public final class PipelineApplication {
     /*
      * Create all jobs and run their smoke tests.
      */
-    final var jobs = createAllJobs(appConfig, appMetrics, pooledDataSource);
+    final var jobs = createAllJobs(appConfig, appMeters, appMetrics, pooledDataSource);
     if (anySmokeTestFailed(jobs)) {
       LOGGER.info("Pipeline terminating due to smoke test failure.");
       pooledDataSource.close();
@@ -181,7 +193,10 @@ public final class PipelineApplication {
    * @return list of {@link PipelineJob}s to be registered
    */
   private static List<PipelineJob<?>> createAllJobs(
-      AppConfiguration appConfig, MetricRegistry appMetrics, HikariDataSource pooledDataSource) {
+      AppConfiguration appConfig,
+      MeterRegistry appMeters,
+      MetricRegistry appMetrics,
+      HikariDataSource pooledDataSource) {
     final var jobs = new ArrayList<PipelineJob<?>>();
 
     /*
@@ -192,6 +207,7 @@ public final class PipelineApplication {
       // persistence unit.
       final PipelineApplicationState appState =
           new PipelineApplicationState(
+              appMeters,
               appMetrics,
               pooledDataSource,
               PipelineApplicationState.PERSISTENCE_UNIT_NAME,
@@ -209,6 +225,7 @@ public final class PipelineApplication {
       // persistence unit.
       final PipelineApplicationState rdaAppState =
           new PipelineApplicationState(
+              appMeters,
               appMetrics,
               pooledDataSource,
               PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,

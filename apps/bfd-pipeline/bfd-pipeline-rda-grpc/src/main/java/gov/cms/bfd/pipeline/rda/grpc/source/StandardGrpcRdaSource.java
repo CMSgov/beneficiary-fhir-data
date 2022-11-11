@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
@@ -11,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -55,7 +55,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   public StandardGrpcRdaSource(
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
-      MetricRegistry appMetrics,
+      MeterRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
     this(
@@ -91,7 +91,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
-      MetricRegistry appMetrics,
+      MeterRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber,
       long minIdleMillisBeforeConnectionDrop,
@@ -189,7 +189,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             while (responseStream.hasNext()) {
               setUptimeToReceiving();
               final TMessage result = responseStream.next();
-              metrics.getObjectsReceived().mark();
+              metrics.getObjectsReceived().increment();
               if (sink.isValidMessage(result)) {
                 batch.put(sink.getClaimIdForMessage(result), result);
                 if (batch.size() >= maxPerBatch) {

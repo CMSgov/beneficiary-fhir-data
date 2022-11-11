@@ -75,6 +75,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
+		<micrometer.version>1.10.0</micrometer.version>
 		<metrics.version>4.2.12</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
@@ -199,6 +200,16 @@
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-jvm</artifactId>
 				<version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-core</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-jmx</artifactId>
+				<version>${micrometer.version}</version>
 			</dependency>
 
 			<!-- We lock down the versions of all the various Spring components that 
@@ -363,6 +374,12 @@
 				<artifactId>junit-jupiter-params</artifactId>
 				<version>${junit.version}</version>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-newrelic</artifactId>
+				<version>${micrometer.version}</version>
 			</dependency>
 
 			<dependency>

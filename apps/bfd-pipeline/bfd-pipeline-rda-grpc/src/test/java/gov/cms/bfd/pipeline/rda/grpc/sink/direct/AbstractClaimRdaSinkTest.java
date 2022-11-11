@@ -25,6 +25,10 @@ import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.distribution.CountAtBucket;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
@@ -61,12 +65,13 @@ public class AbstractClaimRdaSinkTest {
 
   @BeforeEach
   public void setUp() {
+    MeterRegistry meters = new SimpleMeterRegistry();
     MetricRegistry appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
-        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
+        new PipelineApplicationState(meters, appMetrics, dataSource, entityManagerFactory, clock);
     sink = spy(new TestClaimRdaSink(appState, RdaApiProgress.ClaimType.FISS, true));
     sink.getMetrics().setLatestSequenceNumber(0);
   }
@@ -185,13 +190,23 @@ public class AbstractClaimRdaSinkTest {
    */
   @Test
   public void testCloseResetsLatencyMetrics() throws Exception {
-    sink.getMetrics().getChangeAgeMillis().update(100L);
-    sink.getMetrics().getExtractAgeMillis().update(250L);
-    assertEquals(List.of(100L), getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
-    assertEquals(List.of(250L), getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
+    sink.getMetrics().getChangeAgeMillis().record(100L);
+    sink.getMetrics().getExtractAgeMillis().record(250L);
+    assertEquals(1, sink.getMetrics().getChangeAgeMillis().count());
+    assertEquals(1, sink.getMetrics().getExtractAgeMillis().count());
+    assertEquals(100, sink.getMetrics().getChangeAgeMillis().mean());
+    assertEquals(250, sink.getMetrics().getExtractAgeMillis().mean());
+    //    assertEquals(List.of(100L), getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
+    //    assertEquals(List.of(250L), getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
     sink.close();
-    assertEquals(List.of(0L, 100L), getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
-    assertEquals(List.of(0L, 250L), getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
+    assertEquals(2, sink.getMetrics().getChangeAgeMillis().count());
+    assertEquals(2, sink.getMetrics().getExtractAgeMillis().count());
+    assertEquals(50, sink.getMetrics().getChangeAgeMillis().mean());
+    assertEquals(125, sink.getMetrics().getExtractAgeMillis().mean());
+    //    assertEquals(List.of(0L, 100L),
+    // getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
+    //    assertEquals(List.of(0L, 250L),
+    // getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
   }
 
   /**
@@ -201,8 +216,11 @@ public class AbstractClaimRdaSinkTest {
    * @param histogram {@link Histogram} containing the values we want to extract
    * @return a {@link List} or {@link Long} containing all of the histogram values
    */
-  private List<Long> getHistogramValues(Histogram histogram) {
-    return Arrays.stream(histogram.getSnapshot().getValues()).boxed().collect(Collectors.toList());
+  private List<Long> getHistogramValues(DistributionSummary histogram) {
+    return Arrays.stream(histogram.takeSnapshot().histogramCounts())
+        .map(CountAtBucket::count)
+        .map(Double::longValue)
+        .collect(Collectors.toList());
   }
   /**
    * Helper method to create a {@link RdaChange} object with the given message.

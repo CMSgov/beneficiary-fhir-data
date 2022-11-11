@@ -7,16 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -57,8 +58,8 @@ public class AbstractRdaLoadJobTest {
   /** The {@link TestingLoadJob} used in the testing. */
   private TestingLoadJob job;
 
-  /** The {@link MetricRegistry} used in the testing. */
-  private MetricRegistry appMetrics;
+  /** The {@link MeterRegistry} used in the testing. */
+  private MeterRegistry appMetrics;
 
   /** The {@link Config} used in the testing. */
   private Config config;
@@ -78,7 +79,7 @@ public class AbstractRdaLoadJobTest {
             .runInterval(Duration.ofSeconds(10))
             .batchSize(3)
             .build();
-    appMetrics = new MetricRegistry();
+    appMetrics = new SimpleMeterRegistry();
     job = new TestingLoadJob(config, preJobTask, sourceFactory, sinkFactory, appMetrics);
   }
 
@@ -101,7 +102,10 @@ public class AbstractRdaLoadJobTest {
             "TestingLoadJob.failures",
             "TestingLoadJob.processed",
             "TestingLoadJob.successes"),
-        new ArrayList<>(appMetrics.getNames()));
+        appMetrics.getMeters().stream()
+            .map(meter -> meter.getId().getName())
+            .sorted()
+            .collect(Collectors.toList()));
   }
 
   /**
@@ -352,7 +356,7 @@ public class AbstractRdaLoadJobTest {
         Callable<RdaSource<Integer, Integer>> preJobTask,
         Callable<RdaSource<Integer, Integer>> sourceFactory,
         ThrowingFunction<RdaSink<Integer, Integer>, SinkTypePreference, Exception> sinkFactory,
-        MetricRegistry appMetrics) {
+        MeterRegistry appMetrics) {
       super(
           config,
           preJobTask,
