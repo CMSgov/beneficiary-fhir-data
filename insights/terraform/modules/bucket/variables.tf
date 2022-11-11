@@ -37,3 +37,10 @@ variable "folders" {
   type        = list(string)
   default     = ["databases"]
 }
+
+variable "bucket_key_enabled" {
+  description = "Toggle AWS S3 Bucket BucketKey"
+  default     = true
+  type        = bool
+
+}
