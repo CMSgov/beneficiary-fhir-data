@@ -214,6 +214,7 @@ public class McsTransformer extends AbstractTransformer {
               diagnosisCode ->
                   claimBuilder.addMcsDiagnosisCodes(
                       McsDiagnosisCode.newBuilder()
+                          .setRdaPosition(claimBuilder.getMcsDiagnosisCodesCount() + 1)
                           .setIdrClmHdIcn(icn)
                           .setIdrDiagCode(diagnosisCode)
                           .setIdrDiagIcdTypeEnum(

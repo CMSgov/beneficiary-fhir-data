@@ -61,13 +61,13 @@ public class McsClaimRdaSinkIT {
 
           final RdaMcsDetail detail = new RdaMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          detail.setPriority((short) 0);
+          detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          diagCode.setPriority((short) 0);
+          diagCode.setRdaPosition((short) 1);
           diagCode.setIdrDiagIcdType("T");
           diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);
@@ -165,13 +165,13 @@ public class McsClaimRdaSinkIT {
 
           final RdaMcsDetail detail = new RdaMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          detail.setPriority((short) 0);
+          detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          diagCode.setPriority((short) 0);
+          diagCode.setRdaPosition((short) 1);
           diagCode.setIdrDiagIcdType(invalidDiagIcdType);
           diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);

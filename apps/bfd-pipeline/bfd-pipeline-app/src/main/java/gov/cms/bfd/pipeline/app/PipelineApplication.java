@@ -263,10 +263,11 @@ public final class PipelineApplication {
             rifLoader);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
-            appState.getMetrics(),
+            appState,
             loadOptions.getExtractionOptions(),
             s3TaskManager,
-            dataSetMonitorListener);
+            dataSetMonitorListener,
+            loadOptions.getLoadOptions().isIdempotencyRequired());
 
     return ccwRifLoadJob;
   }

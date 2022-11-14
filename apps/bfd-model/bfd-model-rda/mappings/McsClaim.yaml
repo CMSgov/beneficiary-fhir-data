@@ -210,7 +210,7 @@ mappings:
         the mode the server was running in.
       dbName: api_source
     - name: idrAssignment
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_assignment
       comment: 'Claim Assignment Code: This code identifies the assignment code, as
         indicated on the submitted claim. For online claim entry, this value may be
@@ -218,7 +218,7 @@ mappings:
         range of ICN codes via the Entry Screen. However, the value can be manually
         generated, as necessary.'
     - name: idrClmLevelInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_clm_level_ind
       comment: 'Claim Level Indicator: This field carries the claim level indicator;
         indicating the claim is either adjusted, original or voided.'
@@ -228,12 +228,12 @@ mappings:
       comment: 'Non-covered Audit Number: This field carries the primary SCC audit
         number encounter as the claim was processed.'
     - name: idrHdrAuditInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_hdr_audit_ind
       comment: 'Audit Indicator: The value in this field indicates if the number displayed
         in the INT-HDR-AUDIT field is a header edit, detail edit, or an audit.'
     - name: idrUSplitReason
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_u_split_reason
       comment: 'Split Reason Code: The split reason code is used to indicate that
         the claim has been separated for processing either for a mandated split situation

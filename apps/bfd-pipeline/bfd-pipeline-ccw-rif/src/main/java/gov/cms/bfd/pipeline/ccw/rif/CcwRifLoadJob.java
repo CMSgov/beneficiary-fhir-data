@@ -14,9 +14,11 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -136,26 +138,32 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   private final ExtractionOptions options;
   private final DataSetMonitorListener listener;
   private final S3TaskManager s3TaskManager;
+  private final PipelineApplicationState appState;
+  private final boolean isIdempotentMode;
 
   private final DataSetQueue dataSetQueue;
 
   /**
    * Constructs a new {@link CcwRifLoadJob} instance.
    *
-   * @param appMetrics the {@link MetricRegistry} for the overall application
+   * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
+   * @param isIdempotentMode the {@link boolean} TRUE if running in idenpotent mode
    */
   public CcwRifLoadJob(
-      MetricRegistry appMetrics,
+      PipelineApplicationState appState,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
-      DataSetMonitorListener listener) {
-    this.appMetrics = appMetrics;
+      DataSetMonitorListener listener,
+      boolean isIdempotentMode) {
+    this.appState = appState;
+    this.appMetrics = appState.getMetrics();
     this.options = options;
     this.s3TaskManager = s3TaskManager;
     this.listener = listener;
+    this.isIdempotentMode = isIdempotentMode;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
@@ -238,6 +246,29 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     LOGGER.info(
         "Data set syntheticData indicator is: {}",
         String.valueOf(manifestToProcess.isSyntheticData()));
+
+    /*
+     * The {@link DataSetManifest} can have an optional element {@link PreValidationProperties}
+     * which contains elements that can be used to preform a pre-validation of values prior
+     * to beginning the actual processing (loading) of data.
+     *
+     * For example, checking if a range of bene_id(s) will cause a database key constraint
+     * violation during an INSERT operation. However, if running in idempotent
+     * mode, it will be acceptable to run 'as is' since this is probably a re-run
+     * of a previous load and does represent a pure INSERT(ing) of data.
+     */
+    if (manifestToProcess.getPreValidationProperties().isPresent()) {
+      boolean preValidationPropertiesOK = checkPreValidationProperties(manifestToProcess);
+
+      if (!preValidationPropertiesOK) {
+        if (isIdempotentMode) {
+          LOGGER.info("pre-validation failed, but running in IDEMPOTENT mode, so OK to continue");
+        } else {
+          throw new BadCodeMonkeyException("pre-validation failed!");
+        }
+      }
+    }
+
     List<S3RifFile> rifFiles =
         manifestToProcess.getEntries().stream()
             .map(
@@ -350,7 +381,33 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         return false;
       }
     }
-
     return true;
+  }
+
+  /**
+   * Perform pre-validation for a data load if the {@link #preValidationProperties} has content. At
+   * this time, only Synthea-based {@link DataSetManifest} have content that can be used for
+   * pre-validation.
+   *
+   * @param manifest the {@link DataSetManifest} that lists pre-validation properties to verify
+   * @return <code>true</code> if all of the pre-validation parameters listed in the manifest do not
+   *     introduce potential data loading issues, <code>false</code> if not
+   */
+  private boolean checkPreValidationProperties(DataSetManifest manifest) throws Exception {
+    LOGGER.info(
+        "PreValidationProperties found in manifest, ID: {}; verifying efficacy...",
+        manifest.getId());
+
+    // for now only Synthea manifests will have PreValidationProperties
+    if (!manifest.isSyntheticData()) {
+      return true;
+    }
+
+    // instantiate a pre-validation interface; in this case, CcwRifLoadPreValidateSynthea
+    CcwRifLoadPreValidateInterface preValInterface = new CcwRifLoadPreValidateSynthea();
+    // initialize the interface with the appState
+    preValInterface.init(appState);
+    // perform whatever vaidation is appropriate
+    return preValInterface.isValid(manifest);
   }
 }

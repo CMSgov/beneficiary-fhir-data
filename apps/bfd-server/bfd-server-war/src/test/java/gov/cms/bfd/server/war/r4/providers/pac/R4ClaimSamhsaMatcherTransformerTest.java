@@ -146,7 +146,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             .mapToObj(
                 i -> {
                   RdaFissDiagnosisCode diagCode = new RdaFissDiagnosisCode();
-                  diagCode.setPriority((short) i);
+                  diagCode.setRdaPosition((short) (i + 1));
                   diagCode.setDiagCd2(diagCodes.get(i));
 
                   return diagCode;
@@ -161,7 +161,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                 i -> {
                   RdaFissProcCode procCode = new RdaFissProcCode();
                   procCode.setProcDate(LocalDate.EPOCH);
-                  procCode.setPriority((short) i);
+                  procCode.setRdaPosition((short) (i + 1));
                   procCode.setProcCode(procCodes.get(i));
 
                   return procCode;
@@ -233,7 +233,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                   String[] dx = diagCodes.get(i).split(":");
 
                   RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
-                  diagCode.setPriority((short) i);
+                  diagCode.setRdaPosition((short) (i + 1));
                   diagCode.setIdrDiagIcdType(dx[0]);
                   diagCode.setIdrDiagCode(dx[1]);
 
@@ -249,7 +249,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                 i -> {
                   RdaMcsDetail procCode = new RdaMcsDetail();
                   procCode.setIdrDtlToDate(LocalDate.EPOCH);
-                  procCode.setPriority((short) i);
+                  procCode.setIdrDtlNumber((short) (i + 1));
                   procCode.setIdrProcCode(procCodes.get(i));
 
                   return procCode;
