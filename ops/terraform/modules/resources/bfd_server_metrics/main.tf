@@ -204,6 +204,52 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
   }
 }
 
+# Latency for EoB endpoints _with_ resources returned with partner client SSL as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_with_resources" {
+  for_each = local.filter_variations
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eob-all-with-resources/${each.value.name_suffix}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "${local.client_ssl_pattern} && ",
+    "$.mdc.resources_returned_count > 0 && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency/eob-all-with-resources"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_milliseconds"
+    dimensions = each.value.dimensions
+    unit       = "Milliseconds"
+  }
+}
+
+# Latency by KB for all EoB endpoints _with_ resources returned with partner client SSL as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all_with_resources" {
+  for_each = local.filter_variations
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/eob-all-with-resources/${each.value.name_suffix}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "${local.client_ssl_pattern} && ",
+    "$.mdc.resources_returned_count > 0 && ",
+    "$.mdc.http_access_response_duration_per_kb = *}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency-by-kb/eob-all-with-resources"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_per_kb"
+    dimensions = each.value.dimensions
+    unit       = "Milliseconds"
+  }
+}
+
 # Latency for all EoB endpoints with no resources returned (for SLOs) with partner client SSL as
 # dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_resources" {
