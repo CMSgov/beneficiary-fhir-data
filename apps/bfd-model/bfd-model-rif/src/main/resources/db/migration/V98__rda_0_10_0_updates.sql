@@ -4,5 +4,4 @@ alter table rda.fiss_claims add adm_date_cymd_text varchar(10);
 alter table rda.fiss_claims add stmt_cov_from_cymd_text varchar(10);
 alter table rda.fiss_claims add stmt_cov_to_cymd_text varchar(10);
 
-alter table rda.fiss_diagnosis_codes alter column diag_cd_2 drop not null;
-
+alter table rda.fiss_diagnosis_codes alter column diag_cd2 drop not null;
