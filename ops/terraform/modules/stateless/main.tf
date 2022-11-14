@@ -269,68 +269,6 @@ module "bfd_server_slo_alarms" {
   ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing.arn
 }
 
-# TODO: purge all access.txt 
-#all 
-module "bfd_server_metrics_all" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "all"
-    partner_regex = "*"
-  }
-}
-
-# bluebutton
-module "bfd_server_metrics_bb" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "bb"
-    partner_regex = "*BlueButton*"
-  }
-}
-
-# bcda
-module "bfd_server_metrics_bcda" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "bcda"
-    partner_regex = "*bcda*"
-  }
-}
-
-# dpc
-module "bfd_server_metrics_dpc" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "dpc"
-    partner_regex = "*dpc*"
-  }
-}
-
-# ab2d
-module "bfd_server_metrics_ab2d" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "ab2d"
-    partner_regex = "*ab2d*"
-  }
-}
-
-
 ## FHIR server alarms, partner specific
 #
 
