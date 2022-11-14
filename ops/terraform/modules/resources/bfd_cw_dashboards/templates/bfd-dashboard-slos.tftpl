@@ -142,7 +142,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency-by-kb/eob-all", { "label": "/v*/fhir/ExplanationOfBenefit ms/KB" } ]
+                    [ "${namespace}", "http-requests/latency-by-kb/eob-all-with-resources", { "label": "/v*/fhir/ExplanationOfBenefit ms/KB" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -181,7 +181,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency/eob-all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC" } ],
+                    [ "${namespace}", "http-requests/latency/eob-all-with-resources", "client_ssl", "${dpc_client_ssl}", { "label": "DPC" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D" } ]
                 ],
@@ -219,7 +219,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency-by-kb/eob-all", "client_ssl", "${dpc_client_ssl}", { "label": "DPC" } ],
+                    [ "${namespace}", "http-requests/latency-by-kb/eob-all-with-resources", "client_ssl", "${dpc_client_ssl}", { "label": "DPC" } ],
                     [ "...", "${bcda_client_ssl}", { "label": "BCDA" } ],
                     [ "...", "${ab2d_client_ssl}", { "label": "AB2D" } ]
                 ],
@@ -257,7 +257,7 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency-by-kb/eob-all", "client_ssl", "${bb_client_ssl}", { "label": "/v*/fhir/ExplanationOfBenefit ms/KB" } ]
+                    [ "${namespace}", "http-requests/latency-by-kb/eob-all-with-resources", "client_ssl", "${bb_client_ssl}", { "label": "/v*/fhir/ExplanationOfBenefit ms/KB" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
