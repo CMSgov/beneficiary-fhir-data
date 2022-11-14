@@ -1,7 +1,7 @@
 # Zip File containing Lambda script
 data "archive_file" "zip-archive-format-firehose-logs" {
   type        = "zip"
-  source_file  = "${path.module}/lambda_src/bfd-cw-to-flattened-json.py"
+  source_file = "${path.module}/lambda_src/bfd-cw-to-flattened-json.py"
   output_path = "${path.module}/lambda_src/${local.environment}/bfd-cw-to-flattened-json.zip"
 }
 
@@ -23,7 +23,7 @@ resource "aws_lambda_function" "lambda-function-format-firehose-logs" {
   source_code_hash               = data.archive_file.zip-archive-format-firehose-logs.output_base64sha256
 
   tags = { "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python" }
-  
+
   timeout = 300
 
   ephemeral_storage {
