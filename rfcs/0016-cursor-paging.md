@@ -1,17 +1,39 @@
-# RFC0006 - Cursor-Based Paging
+# RFC Proposal
+[RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: RFC0006 
-* Status: First Draft
+* RFC Proposal ID: `00016-cursor-paging.md`
 * Start Date: 2020-04-01
-* RFC PR: 
+* RFC PR: [beneficiary-fhir-data/rfcs#0016](https://github.com/CMSgov/beneficiary-fhir-data/pull/250)
 * JIRA Ticket(s):
+ * [BFD-109](https://jira.cms.gov/browse/BFD-109)
+
+## Status
+[Status]: #status
+
+* Status: Deferred
+* Implementation JIRA Ticket(s): **NONE**
+
+## Table of Contents
+[Table of Contents]: #table-of-contents
+
+* [RFC Proposal](#rfc-proposal)
+* [Status](#status)
+* [Table of Contents](#table-of-contents)
+* [Motivation](#motivation)
+* [Proposed Solution](#proposed-solution)
+* [Prior Art](#prior-art)
+* [Future Work](#future-work)
+* [References](#references)
     
+## Motivation
+[Motivation]: #motivation
+
 This RFC changes how the BFD handles requests for explanation of benefits (EOB). 
 Internally, it uses a more efficient database query to fetch EOBs. 
-For partners, it provides a way for BFD clients to request resources with lower timeouts and higher throughput.  
+For partners, it provides a way for BFD clients to request resources with lower timeouts and higher throughput.
 
-## Motivation
 The latency of the BFD's EOB search is directly related to the number of claims a beneficiary has. 
+
 Since the number of claims per beneficiary varies widely, a BFD client must set 10 to 30-second timeout on their EOB fetches to accommodate a large number of claims in the result set. 
 
 Paging is the term given to the technique to split a single large result set into many smaller result sets. 
@@ -26,6 +48,8 @@ The latency variability (also known as jitter) of a BFD EOB request leads to sev
 - Jitter adversely affects the throughput of a system. 
 
 ## Proposed Solution
+[Proposed Solution]: #proposed-solution
+
 The proposal is to replace the current offset paging algorithm with a cursor-based algorithm. 
 Internally, the BFD can implement cursor-based paging with an efficient seek query. 
 From a database perspective, the work done is nearly constant for each request. 
@@ -147,16 +171,21 @@ If this RFC is adopted, there will be phased rollout of cursor-based paging.
 
 
 ## Prior Art
-The proposal is base on a talk by Markus Winand’s “Pagination Done the PostgreSQL Way”. 
+[Prior Art]: #prior-art
+
+The proposal is base on a talk by Markus Winand’s "Pagination Done the PostgreSQL Way". 
 The slide deck is easy to follow and recommended for engineers who want to understand more about the seek technique. 
 
 ## Future Work
+[Future Work]: #future-work
+
 The BFD's team goals to improve latency, capacity, and throughput continue. 
 Significant areas for improvement remain. 
 This proposal improves the BFD's database queries but does not address other bottlenecks like JSON serialization. 
 With cursor paging, testing reveals much fewer latency spikes. Nevertheless, some spikes remain and require further investigations. 
 
 ## References
+[References]: #references
 
 1. ["Pagination Done the PostgreSQL Way"](https://wiki.postgresql.org/wiki/File:Pagination_Done_the_PostgreSQL_Way.pdf) by Markus Winands. 
 2. ["Experimental Paging"](https://github.com/CMSgov/beneficiary-fhir-data/tree/rick/paging-experiment) Cursor paging POC implementation
