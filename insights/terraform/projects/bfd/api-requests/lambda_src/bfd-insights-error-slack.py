@@ -26,13 +26,13 @@ def handler(event, context):
         return
 
     try:
-        file_key = record["object"]["key"]
+        file_key = record["s3"]["object"]["key"]
     except KeyError as exc:
         print(f"No bucket file found in event notification: {exc}")
         return
 
     try:
-        file_size = record["object"]["size"]
+        file_size = record["s3"]["object"]["size"]
     except KeyError as exc:
         print(f"No bucket file size found in event notification: {exc}")
         return

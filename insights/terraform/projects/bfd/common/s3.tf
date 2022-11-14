@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
   bucket              = "bfd-insights-bfd-app-logs"
-  hosted_zone_id      = "Z3AQBSTGFYJSTF"
   object_lock_enabled = false
   policy = jsonencode(
     {
