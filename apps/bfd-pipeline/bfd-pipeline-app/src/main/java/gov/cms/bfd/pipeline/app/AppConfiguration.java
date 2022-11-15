@@ -607,7 +607,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       if (dotIndex >= 0) {
         key = key.substring(dotIndex + 1);
       }
-      String envVarName = ENV_VAR_MICROMETER_CW_PREFIX + key;
+      String envVarName = ENV_VAR_MICROMETER_CW_PREFIX + key.toUpperCase();
       String envVarValue = System.getenv(envVarName);
       LOGGER.info(
           "CloudWatchConfig: envVarName={} hasValue={}",
