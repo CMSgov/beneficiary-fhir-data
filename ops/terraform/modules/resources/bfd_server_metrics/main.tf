@@ -214,7 +214,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_with_
   pattern = join("", [
     "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
     "${local.client_ssl_pattern} && ",
-    "$.mdc.resources_returned_count > 0 && ",
+    "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
   ])
 
@@ -237,7 +237,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
   pattern = join("", [
     "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
     "${local.client_ssl_pattern} && ",
-    "$.mdc.resources_returned_count > 0 && ",
+    "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_per_kb = *}"
   ])
 
