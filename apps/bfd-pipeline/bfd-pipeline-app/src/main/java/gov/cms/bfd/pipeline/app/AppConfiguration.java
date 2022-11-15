@@ -19,6 +19,7 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import io.micrometer.cloudwatch.CloudWatchConfig;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Optional;
@@ -281,6 +282,21 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
+
+  /** Prefix for environment variables containing Micrometer CloudWatch configuration settings. */
+  public static final String ENV_VAR_MICROMETER_CW_PREFIX = "MICROMETER_CW_OPT_";
+
+  /**
+   * Environment variable indicating whether Micrometer metrics should be sent to CloudWatch.
+   * Defaults to false.
+   */
+  public static final String ENV_VAR_MICROMETER_CW_ENABLED = "MICROMETER_CW_ENABLED";
+
+  /**
+   * Environment variable indicating whether Micrometer metrics should be sent to JMX. Defaults to
+   * false. Can be used when testing the pipeline locally to monitor metrics as the pipeline runs.
+   */
+  public static final String ENV_VAR_MICROMETER_JMX_ENABLED = "MICROMETER_JMX_ENABLED";
 
   /**
    * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
@@ -550,6 +566,39 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(mockServerConfig::s3Directory);
     return new RdaLoadOptions(
         jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
+  }
+
+  /**
+   * Checks environment variable to determine if the feed of Micrometer metrics to JMX should be
+   * enabled.
+   *
+   * @return true if the feed should be configured
+   */
+  public static boolean isJmxMetricsEnabled() {
+    return readEnvParsedOptional(ENV_VAR_MICROMETER_JMX_ENABLED, Boolean::parseBoolean)
+        .orElse(false);
+  }
+
+  /**
+   * Checks environment variable to determine if the feed of Micrometer metrics to CloudWatch should
+   * be enabled.
+   *
+   * @return true if the feed should be configured
+   */
+  public static boolean isCloudWatchMetricsEnabled() {
+    return readEnvParsedOptional(ENV_VAR_MICROMETER_CW_ENABLED, Boolean::parseBoolean)
+        .orElse(false);
+  }
+
+  /**
+   * Creates an implementation of {@link CloudWatchConfig} that looks for environment variables by
+   * adding the {@link AppConfiguration#ENV_VAR_MICROMETER_CW_PREFIX} to the configuration setting
+   * name.
+   *
+   * @return an instance of {@link CloudWatchConfig}
+   */
+  public static CloudWatchConfig getCloudWatchConfig() {
+    return key -> System.getenv(ENV_VAR_MICROMETER_CW_PREFIX + key);
   }
 
   /**

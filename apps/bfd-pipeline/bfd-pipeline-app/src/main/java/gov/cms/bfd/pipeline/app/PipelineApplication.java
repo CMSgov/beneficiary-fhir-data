@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import ch.qos.logback.classic.LoggerContext;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
@@ -24,6 +25,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
+import io.micrometer.cloudwatch.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
@@ -88,10 +90,19 @@ public final class PipelineApplication {
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
-    CompositeMeterRegistry appMeters = new CompositeMeterRegistry();
-    appMeters.add(
-        new JmxMeterRegistry(JmxConfig.DEFAULT, io.micrometer.core.instrument.Clock.SYSTEM));
+    final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
+    final var appMeters = new CompositeMeterRegistry();
     appMeters.add(new SimpleMeterRegistry());
+    if (AppConfiguration.isCloudWatchMetricsEnabled()) {
+      appMeters.add(
+          new CloudWatchMeterRegistry(
+              AppConfiguration.getCloudWatchConfig(),
+              micrometerClock,
+              new AmazonCloudWatchAsyncClient()));
+    }
+    if (AppConfiguration.isJmxMetricsEnabled()) {
+      appMeters.add(new JmxMeterRegistry(JmxConfig.DEFAULT, micrometerClock));
+    }
     new JvmMemoryMetrics().bindTo(appMeters);
 
     MetricRegistry appMetrics = new MetricRegistry();
