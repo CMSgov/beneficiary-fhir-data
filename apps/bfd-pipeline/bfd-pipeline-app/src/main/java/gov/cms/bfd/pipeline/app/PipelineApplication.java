@@ -108,6 +108,7 @@ public final class PipelineApplication {
 
     appMeters.add(new SimpleMeterRegistry());
     if (AppConfiguration.isCloudWatchMetricsEnabled()) {
+      LOGGER.info("Adding CloudWatchMeterRegistry...");
       final var cloudWatchRegistry =
           new CloudWatchMeterRegistry(
               AppConfiguration.getCloudWatchConfig(),

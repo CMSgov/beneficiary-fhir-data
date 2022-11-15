@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
+import com.google.common.base.Strings;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -26,6 +27,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Models the configuration options for the application.
@@ -38,6 +41,7 @@ import org.apache.commons.codec.binary.Hex;
  */
 public final class AppConfiguration extends BaseAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
+  static final Logger LOGGER = LoggerFactory.getLogger(AppConfiguration.class);
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -598,7 +602,15 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * @return an instance of {@link CloudWatchConfig}
    */
   public static CloudWatchConfig getCloudWatchConfig() {
-    return key -> System.getenv(ENV_VAR_MICROMETER_CW_PREFIX + key);
+    return key -> {
+      String envVarName = ENV_VAR_MICROMETER_CW_PREFIX + key;
+      String envVarValue = System.getenv(envVarName);
+      LOGGER.info(
+          "CloudWatchConfig: envVarName={} hasValue={}",
+          envVarName,
+          !Strings.isNullOrEmpty(envVarValue));
+      return envVarValue;
+    };
   }
 
   /**
