@@ -27,9 +27,14 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import io.micrometer.cloudwatch.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.config.NamingConvention;
+import io.micrometer.core.instrument.dropwizard.DropwizardConfig;
+import io.micrometer.core.instrument.dropwizard.DropwizardMeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.core.instrument.util.HierarchicalNameMapper;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -38,6 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,18 +97,29 @@ public final class PipelineApplication {
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
+    final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
     final var appMeters = new CompositeMeterRegistry();
+
+    final var commonTags =
+        List.of(
+            Tag.of("host", metricOptions.getHostname().orElse("unknown")),
+            Tag.of("appName", metricOptions.getNewRelicAppName().orElse("unknown")));
+
     appMeters.add(new SimpleMeterRegistry());
     if (AppConfiguration.isCloudWatchMetricsEnabled()) {
-      appMeters.add(
+      final var cloudWatchRegistry =
           new CloudWatchMeterRegistry(
               AppConfiguration.getCloudWatchConfig(),
               micrometerClock,
-              new AmazonCloudWatchAsyncClient()));
+              new AmazonCloudWatchAsyncClient());
+      cloudWatchRegistry.config().commonTags(commonTags);
+      appMeters.add(cloudWatchRegistry);
+      LOGGER.info("Added CloudWatchMeterRegistry.");
     }
     if (AppConfiguration.isJmxMetricsEnabled()) {
       appMeters.add(new JmxMeterRegistry(JmxConfig.DEFAULT, micrometerClock));
+      LOGGER.info("Added JmxMeterRegistry.");
     }
     new JvmMemoryMetrics().bindTo(appMeters);
 
@@ -111,7 +129,6 @@ public final class PipelineApplication {
     Slf4jReporter appMetricsReporter =
         Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
 
-    MetricOptions metricOptions = appConfig.getMetricOptions();
     if (metricOptions.getNewRelicMetricKey().isPresent()) {
       SenderConfiguration configuration =
           SenderConfiguration.builder(
@@ -134,9 +151,34 @@ public final class PipelineApplication {
               .build();
 
       newRelicReporter.start(metricOptions.getNewRelicMetricPeriod().orElse(15), TimeUnit.SECONDS);
+      LOGGER.info("Added NewRelicReporter.");
     }
 
-    appMetricsReporter.start(1, TimeUnit.HOURS);
+    DropwizardConfig dropwizardConfig =
+        new DropwizardConfig() {
+          @Nonnull
+          @Override
+          public String prefix() {
+            return "dropwizard";
+          }
+
+          @Override
+          public String get(@Nonnull String key) {
+            return null;
+          }
+        };
+    appMeters.add(
+        new DropwizardMeterRegistry(
+            dropwizardConfig, appMetrics, getHierarchicalNameMapper(commonTags), micrometerClock) {
+          @Nonnull
+          @Override
+          protected Double nullGaugeValue() {
+            return 0.0;
+          }
+        });
+    LOGGER.info("Added DropwizardMeterRegistry.");
+
+    appMetricsReporter.start(15, TimeUnit.SECONDS);
 
     // Create a pooled data source for use by any registered jobs.
     final HikariDataSource pooledDataSource =
@@ -168,6 +210,30 @@ public final class PipelineApplication {
      * for the PipelineManager to stop running jobs, and then check to see if we should exit
      * normally with 0 or abnormally with a non-0 because a job failed.
      */
+  }
+
+  /**
+   * Creates a {@link HierarchicalNameMapper} suitable for copying metrics from Micrometer into
+   * DropWizard. Ignores the common tags since those would just add noise to the metric names.
+   *
+   * @param commonTags tags to ignore when generating unique names
+   * @return a {@link HierarchicalNameMapper}
+   */
+  @Nonnull
+  private static HierarchicalNameMapper getHierarchicalNameMapper(List<Tag> commonTags) {
+    final var commonTagNames = commonTags.stream().map(Tag::getKey).collect(Collectors.toSet());
+    final var convention = NamingConvention.identity;
+    return (id, ignored) -> {
+      var tags =
+          id.getTags().stream()
+              .filter(t -> !commonTagNames.contains(t.getKey()))
+              .collect(Collectors.toList());
+      return id.getConventionName(convention)
+          + tags.stream()
+              .map(t -> "." + t.getKey() + "." + t.getValue())
+              .map(nameSegment -> nameSegment.replace(" ", "_"))
+              .collect(Collectors.joining(""));
+    };
   }
 
   /**
