@@ -178,7 +178,7 @@ public final class PipelineApplication {
         });
     LOGGER.info("Added DropwizardMeterRegistry.");
 
-    appMetricsReporter.start(15, TimeUnit.SECONDS);
+    appMetricsReporter.start(10, TimeUnit.MINUTES);
 
     // Create a pooled data source for use by any registered jobs.
     final HikariDataSource pooledDataSource =
