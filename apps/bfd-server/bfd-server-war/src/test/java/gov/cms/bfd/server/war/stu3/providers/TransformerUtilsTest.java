@@ -266,6 +266,23 @@ public final class TransformerUtilsTest {
         reference.getIdentifier().getType().getCoding().get(0).getSystem());
   }
 
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
+   * (gov.cms.bfd.server.war.stu3.providers.IdentifierType, String)} sets {@link Reference)}
+   * correctly.
+   */
+  @Test
+  public void createBundleWithoutPaging() {
+    // ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+
+    // RequestDetails requestDetails = new RequestDetails();
+    // OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+    // List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+
+    // Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+
+  }
+
   private boolean isCodingListNullOrEmpty(List<Coding> coding) {
     if (coding == null || coding.isEmpty() || coding.size() == 0) return true;
 

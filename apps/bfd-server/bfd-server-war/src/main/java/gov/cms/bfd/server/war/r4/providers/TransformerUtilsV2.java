@@ -1558,13 +1558,8 @@ public final class TransformerUtilsV2 {
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
 
-      // Add number of paginated resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resources);
-
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(bundle.getTotal());
     }
 
     /*
@@ -1586,6 +1581,10 @@ public final class TransformerUtilsV2 {
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
+
+    // Add number of resources to MDC logs
+    LoggingUtils.logResourceCountToMdc(bundle.getTotal());
+
     return bundle;
   }
 
