@@ -1,6 +1,6 @@
 # BFD Insights: BFD Project: Common Terraform
 #
-# Set up a common S3 bucket, Athena workgroup, and IAM resources
+# Set up a common S3 bucket, S3 inventory, Athena workgroup, and IAM resources
 
 locals {
   tags           = { business = "OEDA", application = "bfd-insights", project = "bfd" }
@@ -22,6 +22,59 @@ module "bucket" {
   sensitivity = "high"
   tags        = local.tags
   full_groups = [] # prevent bucket module from attempting to attach policy
+}
+
+
+#NOTE: The following data sources are included with a disabled aws s3 inventory for completeness
+#S3 Bucket Inventory resources should be supported by any AWS S3 bucket child module we provision
+#in the future.
+data "aws_kms_key" "cmk" {
+  for_each = local.envs
+  key_id   = "alias/bfd-${each.value}-cmk"
+}
+
+data "aws_s3_bucket" "admin" {
+  for_each = local.envs
+  bucket   = "bfd-${each.value}-admin-${data.aws_caller_identity.current.account_id}"
+}
+
+resource "aws_s3_bucket_inventory" "bucket" {
+  for_each = local.envs
+  bucket   = module.bucket.id
+  name     = each.value
+
+  included_object_versions = "Current"
+
+  schedule {
+    frequency = "Daily"
+  }
+
+  optional_fields = [
+    "BucketKeyStatus",
+    "ETag",
+    "EncryptionStatus",
+    "LastModifiedDate",
+  ]
+
+  enabled = false
+
+  destination {
+    bucket {
+      account_id = data.aws_caller_identity.current.account_id
+      format     = "CSV"
+      bucket_arn = data.aws_s3_bucket.admin[each.value].arn
+      prefix     = "s3-inventories"
+      encryption {
+        sse_kms {
+          key_id = data.aws_kms_key.cmk[each.value].arn
+        }
+      }
+    }
+  }
+
+  filter {
+    prefix = "databases/bfd-insights-bfd-${each.value}/"
+  }
 }
 
 # Creates Athena workgroup named "bfd"
@@ -65,9 +118,9 @@ resource "aws_glue_crawler" "cw-export" {
   description   = "Crawler for BFD cloudwatch exports"
   database_name = "bfd_cw_export"
   # role          = "arn:aws:iam::${data.aws_caller_identity.current}:role/bfd-insights/bfd-insights-bfd-glue-role"
-  role          = "bfd-insights/bfd-insights-bfd-glue-role"
+  role = "bfd-insights/bfd-insights-bfd-glue-role"
 
-  classifiers   = [
+  classifiers = [
     aws_glue_classifier.cw-export.name
   ]
 
