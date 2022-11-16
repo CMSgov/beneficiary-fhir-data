@@ -7,7 +7,7 @@ mappings:
     schema: rda
     primaryKeyColumns:
     - dcn
-    - priority
+    - rdaPosition
     columns:
     - name: dcn
       sqlType: varchar(23)
@@ -17,10 +17,11 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
-    - name: priority
+    - name: rdaPosition
       sqlType: smallint
       javaType: short
       nullable: false
+      dbName: rda_position
     - name: procCode
       sqlType: varchar(10)
       nullable: false
@@ -33,20 +34,10 @@ mappings:
     - name: procDate
       sqlType: date
       dbName: proc_date
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
-    - name: lastUpdated
-      sqlType: timestamp with time zone
-      dbName: last_updated
     comment: FISS Procedure Code
   transformations:
   - from: PARENT
     to: dcn
-  - from: INDEX
-    to: priority
   - from: procCd
     to: procCode
     optionalComponents: None
@@ -56,5 +47,3 @@ mappings:
   - from: rdaPosition
     transformer: UintToShort
     optionalComponents: None
-  - from: NOW
-    to: lastUpdated

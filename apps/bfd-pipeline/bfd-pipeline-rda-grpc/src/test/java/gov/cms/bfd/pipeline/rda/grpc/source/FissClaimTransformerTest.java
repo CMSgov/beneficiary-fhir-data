@@ -208,9 +208,14 @@ public class FissClaimTransformerTest {
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissProcCodes(
-            FissProcedureCode.newBuilder().setProcCd("code-1").setProcFlag("fl-1").build())
+            FissProcedureCode.newBuilder()
+                .setRdaPosition(1)
+                .setProcCd("code-1")
+                .setProcFlag("fl-1")
+                .build())
         .addFissProcCodes(
             FissProcedureCode.newBuilder()
+                .setRdaPosition(2)
                 .setProcCd("code-2")
                 .setProcFlag("fl-2")
                 .setProcDt("2021-07-06")
@@ -223,18 +228,16 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissProcCode code = new RdaFissProcCode();
     code.setDcn("dcn");
-    code.setPriority((short) 0);
+    code.setRdaPosition((short) 1);
     code.setProcCode("code-1");
     code.setProcFlag("fl-1");
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     code = new RdaFissProcCode();
     code.setDcn("dcn");
-    code.setPriority((short) 1);
+    code.setRdaPosition((short) 2);
     code.setProcCode("code-2");
     code.setProcFlag("fl-2");
     code.setProcDate(LocalDate.of(2021, 7, 6));
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -242,7 +245,7 @@ public class FissClaimTransformerTest {
         .setClaim(claimBuilder.build());
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getProcCodes(), transformed.getProcCodes(), RdaFissProcCode::getPriority);
+        claim.getProcCodes(), transformed.getProcCodes(), RdaFissProcCode::getRdaPosition);
   }
 
   /**
@@ -259,6 +262,7 @@ public class FissClaimTransformerTest {
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
+                .setRdaPosition(1)
                 .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED)
@@ -266,6 +270,7 @@ public class FissClaimTransformerTest {
                 .build())
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
+                .setRdaPosition(2)
                 .setDiagCd2("code-2")
                 .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
@@ -279,18 +284,16 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissDiagnosisCode code = new RdaFissDiagnosisCode();
     code.setDcn("dcn");
-    code.setPriority((short) 0);
+    code.setRdaPosition((short) 1);
     code.setDiagCd2("");
     code.setDiagPoaInd("W");
     code.setBitFlags("1234");
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     code = new RdaFissDiagnosisCode();
     code.setDcn("dcn");
-    code.setPriority((short) 1);
+    code.setRdaPosition((short) 2);
     code.setDiagCd2("code-2");
     code.setDiagPoaInd("N");
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -299,7 +302,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getDiagCodes(), transformed.getDiagCodes(), RdaFissDiagnosisCode::getPriority);
+        claim.getDiagCodes(), transformed.getDiagCodes(), RdaFissDiagnosisCode::getRdaPosition);
   }
 
   /**
@@ -318,6 +321,7 @@ public class FissClaimTransformerTest {
             FissPayer.newBuilder()
                 .setInsuredPayer(
                     FissInsuredPayer.newBuilder()
+                        .setRdaPosition(1)
                         .setPayersIdEnum(FissPayersCode.PAYERS_CODE_BLACK_LUNG)
                         .setPayersName("payers-name")
                         .setRelIndEnum(
@@ -351,7 +355,7 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissPayer payer = new RdaFissPayer();
     payer.setDcn("dcn");
-    payer.setPriority((short) 0);
+    payer.setRdaPosition((short) 1);
     payer.setPayerType(RdaFissPayer.PayerType.Insured);
     payer.setPayersId("H");
     payer.setPayersName("payers-name");
@@ -371,7 +375,6 @@ public class FissClaimTransformerTest {
     payer.setInsuredRelX12("13");
     payer.setInsuredDob(LocalDate.of(2021, 11, 22));
     payer.setInsuredDobText("11222021");
-    payer.setLastUpdated(claim.getLastUpdated());
     claim.getPayers().add(payer);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -380,7 +383,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getPriority);
+        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getRdaPosition);
   }
 
   /**
@@ -399,6 +402,7 @@ public class FissClaimTransformerTest {
             FissPayer.newBuilder()
                 .setBeneZPayer(
                     FissBeneZPayer.newBuilder()
+                        .setRdaPosition(1)
                         .setPayersIdEnum(FissPayersCode.PAYERS_CODE_BLACK_LUNG)
                         .setPayersName("payers-name")
                         .setRelIndEnum(
@@ -433,7 +437,7 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissPayer payer = new RdaFissPayer();
     payer.setDcn("dcn");
-    payer.setPriority((short) 0);
+    payer.setRdaPosition((short) 1);
     payer.setPayerType(RdaFissPayer.PayerType.BeneZ);
     payer.setPayersId("H");
     payer.setPayersName("payers-name");
@@ -453,7 +457,6 @@ public class FissClaimTransformerTest {
     payer.setTreatAuthCd("auth-code");
     payer.setInsuredSex("M");
     payer.setInsuredRelX12("13");
-    payer.setLastUpdated(claim.getLastUpdated());
     claim.getPayers().add(payer);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -462,7 +465,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getPriority);
+        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getRdaPosition);
   }
 
   /**
@@ -484,7 +487,7 @@ public class FissClaimTransformerTest {
                 .setBadtOperId("2")
                 .setBadtReas("3")
                 .setBadtCurrDateCymd("2021-12-03")
-                .setRdaPosition(0)
+                .setRdaPosition(1)
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
@@ -494,13 +497,12 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissAuditTrail auditTrail = new RdaFissAuditTrail();
     auditTrail.setDcn("dcn");
-    auditTrail.setPriority((short) 0);
+    auditTrail.setRdaPosition((short) 1);
     auditTrail.setBadtStatus("M");
     auditTrail.setBadtLoc("1");
     auditTrail.setBadtOperId("2");
     auditTrail.setBadtReas("3");
     auditTrail.setBadtCurrDate(LocalDate.of(2021, 12, 3));
-    auditTrail.setLastUpdated(claim.getLastUpdated());
     claim.getAuditTrail().add(auditTrail);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -509,7 +511,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getAuditTrail(), transformed.getAuditTrail(), RdaFissAuditTrail::getPriority);
+        claim.getAuditTrail(), transformed.getAuditTrail(), RdaFissAuditTrail::getRdaPosition);
   }
 
   @Test
@@ -2036,7 +2038,6 @@ public class FissClaimTransformerTest {
       assertEquals(1, claim.getAuditTrail().size());
       RdaFissAuditTrail answer = claim.getAuditTrail().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -2065,7 +2066,6 @@ public class FissClaimTransformerTest {
       assertEquals(1, claim.getPayers().size());
       RdaFissPayer answer = claim.getPayers().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -2095,7 +2095,6 @@ public class FissClaimTransformerTest {
       assertEquals(1, claim.getPayers().size());
       RdaFissPayer answer = claim.getPayers().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -2127,7 +2126,6 @@ public class FissClaimTransformerTest {
       assertEquals(1, claim.getProcCodes().size());
       RdaFissProcCode answer = claim.getProcCodes().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 
@@ -2175,7 +2173,6 @@ public class FissClaimTransformerTest {
       assertEquals(1, claim.getDiagCodes().size());
       RdaFissDiagnosisCode answer = claim.getDiagCodes().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
 

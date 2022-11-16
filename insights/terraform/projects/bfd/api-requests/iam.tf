@@ -11,8 +11,8 @@ data "aws_iam_group" "iam-group-bfd-analysts" {
 
 # CloudWatch Role
 resource "aws_iam_role" "iam-role-cloudwatch-logs" {
-  name               = "${local.full_name}-cloudwatch-logs-role"
-  description        = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
+  name        = "${local.full_name}-cloudwatch-logs-role"
+  description = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
   assume_role_policy = jsonencode(
     {
       Statement = [
@@ -57,13 +57,13 @@ resource "aws_iam_policy" "iam-policy-firehose" {
             "glue:GetTableVersion",
             "glue:GetTableVersions",
           ]
-          Effect   = "Allow"
+          Effect = "Allow"
           Resource = [
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:table/${module.database.name}/${module.glue-table-api-requests.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:database/${module.database.name}",
             "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:catalog"
           ]
-          Sid      = "GetGlueTable"
+          Sid = "GetGlueTable"
         },
         {
           Action = [
@@ -117,7 +117,7 @@ resource "aws_iam_role" "iam-role-firehose" {
   description           = ""
   path                  = "/"
   force_detach_policies = false
-  managed_policy_arns   = [
+  managed_policy_arns = [
     aws_iam_policy.iam-policy-firehose.arn,
   ]
   max_session_duration = 3600
@@ -142,13 +142,13 @@ resource "aws_iam_role" "iam-role-firehose" {
       {
         Statement = [
           {
-            Action   = "lambda:InvokeFunction"
-            Effect   = "Allow"
+            Action = "lambda:InvokeFunction"
+            Effect = "Allow"
             Resource = [
               "arn:aws:lambda:us-east-1:577373831711:function:${local.full_name}-cw-to-flattened-json",
               "arn:aws:lambda:us-east-1:577373831711:function:${local.full_name}-cw-to-flattened-json:$LATEST"
             ]
-            Sid      = "InvokeCW2Json"
+            Sid = "InvokeCW2Json"
           },
         ]
         Version = "2012-10-17"
@@ -181,32 +181,32 @@ resource "aws_iam_role" "iam-role-firehose-lambda" {
   inline_policy {
     name = "${local.full_name}-lambda-policy"
     policy = jsonencode({
-      "Version": "2012-10-17",
-      "Statement": [
-          {
-              "Effect": "Allow",
-              "Action": "logs:CreateLogGroup",
-              "Resource": "arn:aws:logs:us-east-1:577373831711:*"
-          },
-          {
-              "Effect": "Allow",
-              "Action": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-              ],
-              "Resource": [
-                  "arn:aws:logs:us-east-1:577373831711:log-group:/aws/lambda/${local.full_name}-cw-to-flattened-json:*"
-              ]
-          },
-          {
-              "Effect": "Allow",
-              "Action": [
-                  "firehose:PutRecordBatch"
-              ],
-              "Resource": [
-                  "arn:aws:firehose:us-east-1:577373831711:deliverystream/${local.full_name}-firehose-ingester"
-              ]
-          }
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : "logs:CreateLogGroup",
+          "Resource" : "arn:aws:logs:us-east-1:577373831711:*"
+        },
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Resource" : [
+            "arn:aws:logs:us-east-1:577373831711:log-group:/aws/lambda/${local.full_name}-cw-to-flattened-json:*"
+          ]
+        },
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "firehose:PutRecordBatch"
+          ],
+          "Resource" : [
+            "arn:aws:firehose:us-east-1:577373831711:deliverystream/${local.full_name}-firehose-ingester"
+          ]
+        }
       ]
     })
   }

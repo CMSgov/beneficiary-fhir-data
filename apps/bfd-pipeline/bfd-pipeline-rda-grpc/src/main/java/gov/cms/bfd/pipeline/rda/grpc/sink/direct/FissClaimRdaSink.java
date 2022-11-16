@@ -84,7 +84,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .claimId(claim.getDcn())
         .mbiRecord(claim.getMbiRecord())
         .claimState(String.valueOf(claim.getCurrStatus()))
-        .receivedDate(claim.getLastUpdated())
+        .lastUpdated(claim.getLastUpdated())
         .locations(new StringList().add(claim.getCurrLoc1()).addIfNonEmpty(claim.getCurrLoc2()))
         .transactionDate(claim.getCurrTranDate())
         .phase(change.getSource().getPhase())
