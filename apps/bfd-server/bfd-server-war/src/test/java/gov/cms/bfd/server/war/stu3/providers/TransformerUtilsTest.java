@@ -5,11 +5,29 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -18,6 +36,7 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -268,19 +287,43 @@ public final class TransformerUtilsTest {
 
   /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
-   * (gov.cms.bfd.server.war.stu3.providers.IdentifierType, String)} sets {@link Reference)}
-   * correctly.
+   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
+   * size correctly} correctly.
    */
   @Test
-  public void createBundleWithoutPaging() {
-    // ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+  public void createBundleWithoutPaging() throws IOException {
 
-    // RequestDetails requestDetails = new RequestDetails();
-    // OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
-    // List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
-    // Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
+    HHAClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(r -> (HHAClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+
+    FhirContext fhirContext = FhirContext.forDstu3();
+    ExplanationOfBenefit genEob =
+        HHAClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+    eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
+
+    Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+    assertEquals(1, bundle.getTotal());
   }
 
   private boolean isCodingListNullOrEmpty(List<Coding> coding) {
