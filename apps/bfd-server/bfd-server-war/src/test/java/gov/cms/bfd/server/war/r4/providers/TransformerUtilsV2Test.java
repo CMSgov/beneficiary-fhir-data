@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -16,8 +19,13 @@ import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
@@ -640,5 +648,37 @@ public class TransformerUtilsV2Test {
     assertEquals(
         "National Provider Identifier",
         careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
+   * (gov.cms.bfd.server.war.stu3.providers.IdentifierType, String)} sets {@link Reference)}
+   * correctly.
+   */
+  @Test
+  public void createBundleWithoutPaging() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+
+    Bundle bundle = TransformerUtilsV2.createBundle(paging, eobs, Instant.now());
+    assertEquals(0, bundle.getTotal());
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
+   * (gov.cms.bfd.server.war.stu3.providers.IdentifierType, String)} sets {@link Reference)}
+   * correctly.
+   */
+  @Test
+  public void createBundleWithPaging() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+
+    Bundle bundle = TransformerUtilsV2.createBundle(paging, eobs, Instant.now());
+    assertEquals(0, bundle.getTotal());
   }
 }

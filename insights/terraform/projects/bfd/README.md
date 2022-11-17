@@ -12,6 +12,8 @@ The following is a list of known discrepencies in the data, with dates and reaso
 
 * 09/02/22 - 09/09/22: Due to a typo in the column name, the
 `mdc_jpa_query_eobs_by_bene_id_snf_record_count` field was not being captured.
+* 10/11/22 - 11/17/22: The EOB calls have some cases where zero is returned for `mdc_resources_returned_count` even though there are in fact more than zero resources 
+returned in the payload.
 
 ## Known data limitations for bene_id
 
