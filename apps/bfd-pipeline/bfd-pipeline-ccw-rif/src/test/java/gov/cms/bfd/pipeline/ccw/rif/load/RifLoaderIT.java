@@ -955,6 +955,7 @@ public final class RifLoaderIT {
    *
    * @throws Exception (exceptions indicate test failure)
    */
+  @Disabled
   @Test
   public void testForSyntheaPreValidationSuccess() throws Exception {
     List<StaticRifResource> samples =
