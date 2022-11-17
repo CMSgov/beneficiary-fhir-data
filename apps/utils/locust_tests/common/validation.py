@@ -13,6 +13,14 @@ _DEFAULT_SLA_FAILSAFE = 10000
 _validation_goal: Optional["ValidationGoal"] = None
 """The SLA goals against which to measure the test run's results"""
 
+
+class ValidationResult(str, Enum):
+    """Enum representing the result of failure ratio and SLA validation"""
+
+    PASS = "PASSED"
+    FAILURE = "FAILURE"
+
+
 # TODO: Pull these values from production metrics (i.e. New Relic)
 class ValidationGoal(Enum):
     SLA_COVERAGE = (10, 100, 250)
@@ -51,34 +59,50 @@ def setup_failsafe_event(environment: Environment) -> None:
     gevent.spawn(_check_global_fail, environment, _DEFAULT_SLA_FAILSAFE)
 
 
-def check_sla_validation(environment: Environment) -> None:
-    """Checks the SLA numbers for various percentiles based on the given sla category name. This
-    function is ignored unless it is the main test thread or a non-distributed test.
-    """
-    if not _validation_goal:
-        return
+def check_validation_goals(environment: Environment) -> ValidationResult:
+    """Checks if either the failure ratio exceeds 0% and if any of the percentile SLAs specified by
+    the validation goal are exceeded. If exceeded, a validation result indicating failure is
+    returned; else a result indicating a pass is returned. This function is ignored unless it is the
+    main test thread or a non-distributed test. If _validation_goal is undefined, only failure ratio
+    is checked
 
+    Args:
+        environment (Environment): The Locust environment of the current test run
+
+    Returns:
+        ValidationResult: FAILURE if either failure ratio is greater than 0% or any SLA percentiles
+        exceed their static thresholds defined by the validation goal. PASS otherwise
+    """
     logger = logging.getLogger()
 
-    logger.info("Checking SLAs...")
-    sla_50 = _validation_goal.sla_50
-    sla_95 = _validation_goal.sla_95
-    sla_99 = _validation_goal.sla_99
-
+    logger.info("Checking overall failure ratio...")
     if environment.stats.total.fail_ratio > 0:
         logger.error("Test failed due to request failure ratio > 0%")
-        environment.process_exit_code = 1
-    elif environment.stats.total.get_response_time_percentile(0.50) > sla_50:
-        logger.error("Test failed due to 50th percentile response time > %d ms", sla_50)
-        environment.process_exit_code = 1
-    elif environment.stats.total.get_response_time_percentile(0.95) > sla_95:
-        logger.error("Test failed due to 95th percentile response time > %d ms", sla_95)
-        environment.process_exit_code = 1
-    elif environment.stats.total.get_response_time_percentile(0.99) > sla_99:
-        logger.error("Test failed due to 99th percentile response time > %d ms", sla_99)
-        environment.process_exit_code = 1
-    else:
+        return ValidationResult.FAILURE
+
+    logger.info("Failure ratio is 0%")
+
+    if _validation_goal:
+        sla_50 = _validation_goal.sla_50
+        sla_95 = _validation_goal.sla_95
+        sla_99 = _validation_goal.sla_99
+
+        logger.info("Checking 50%, 95% and 99% SLAs...")
+        if environment.stats.total.get_response_time_percentile(0.50) > sla_50:
+            logger.error("Test failed due to 50th percentile response time > %d ms", sla_50)
+            return ValidationResult.FAILURE
+
+        if environment.stats.total.get_response_time_percentile(0.95) > sla_95:
+            logger.error("Test failed due to 95th percentile response time > %d ms", sla_95)
+            return ValidationResult.FAILURE
+
+        if environment.stats.total.get_response_time_percentile(0.99) > sla_99:
+            logger.error("Test failed due to 99th percentile response time > %d ms", sla_99)
+            return ValidationResult.FAILURE
+
         logger.info("SLAs within acceptable bounds")
+
+    return ValidationResult.PASS
 
 
 def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:

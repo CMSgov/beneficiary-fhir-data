@@ -46,7 +46,7 @@ def _(environment: Environment, **kwargs) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
-    validation.check_sla_validation(environment)
+    validation.check_validation_goals(environment)
 
     logger = logging.getLogger()
 
@@ -77,6 +77,7 @@ def _(environment: Environment, **kwargs) -> None:
     finally:
         stats_writers.write_stats(stats_config, stats)
 
+
 def set_comparisons_metadata_path(path: str) -> None:
     """Sets the file path used to define metadata about stat comparisons (i.e. failure and warning
     percent ratio thresholds, etc.) for a given Locustfile/test suite. Should be called in the
@@ -87,6 +88,7 @@ def set_comparisons_metadata_path(path: str) -> None:
     """
     global _COMPARISONS_METADATA_PATH
     _COMPARISONS_METADATA_PATH = path
+
 
 class BFDUserBase(FastHttpUser):
     """Base Class for Locust tests against BFD.
