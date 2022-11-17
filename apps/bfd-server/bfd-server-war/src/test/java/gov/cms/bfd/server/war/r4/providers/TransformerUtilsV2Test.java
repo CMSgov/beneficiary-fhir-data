@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -717,7 +718,7 @@ public class TransformerUtilsV2Test {
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"1"});
     pagingParams.put("startIndex", new String[] {"1"});
 
-    requestDetails.setParameters(pagingParams);
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 

@@ -6,9 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
@@ -25,7 +27,9 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -294,6 +298,53 @@ public final class TransformerUtilsTest {
   public void createBundleWithoutPaging() throws IOException {
 
     RequestDetails requestDetails = mock(RequestDetails.class);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    HHAClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(r -> (HHAClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+
+    FhirContext fhirContext = FhirContext.forDstu3();
+    ExplanationOfBenefit genEob =
+        HHAClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+    eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
+
+    Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+    assertEquals(1, bundle.getTotal());
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
+   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
+   * with paging size correctly} correctly.
+   */
+  @Test
+  public void createBundleWithPaging() throws IOException {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<String, String[]>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"1"});
+    pagingParams.put("startIndex", new String[] {"1"});
+
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
     List<Object> parsedRecords =
