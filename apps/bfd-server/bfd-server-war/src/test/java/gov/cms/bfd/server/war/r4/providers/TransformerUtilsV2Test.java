@@ -715,6 +715,7 @@ public class TransformerUtilsV2Test {
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"1"});
+    pagingParams.put("startIndex", new String[] {"1"});
 
     requestDetails.setParameters(pagingParams);
 
