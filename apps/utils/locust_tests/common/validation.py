@@ -9,11 +9,9 @@ from locust.env import Environment
 from locust.runners import STATE_CLEANUP, STATE_STOPPED, STATE_STOPPING
 
 _DEFAULT_SLA_FAILSAFE = 10000
-"""Default failsafe, in ms, that the test's response time should not exceed.
-Used only if _VALIDATION_GOAL is unset."""
+"""Default failsafe, in ms, that the test's response time should not exceed"""
 _validation_goal: Optional["ValidationGoal"] = None
-"""The goals against which to measure these results. Note that if unset the failsafe
-validation will default to 10000ms"""
+"""The SLA goals against which to measure the test run's results"""
 
 # TODO: Pull these values from production metrics (i.e. New Relic)
 class ValidationGoal(Enum):
