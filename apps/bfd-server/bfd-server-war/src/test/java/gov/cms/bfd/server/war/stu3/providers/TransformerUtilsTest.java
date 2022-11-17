@@ -16,8 +16,12 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -292,7 +296,7 @@ public final class TransformerUtilsTest {
   /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
    * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * size correctly} correctly.
+   * size correctly.
    */
   @Test
   public void createBundleWithoutPaging() throws IOException {
@@ -328,19 +332,38 @@ public final class TransformerUtilsTest {
 
     Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
     assertEquals(1, bundle.getTotal());
+    assertEquals(1, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
 
   /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
    * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * with paging size correctly} correctly.
+   * size correctly.
    */
   @Test
-  public void createBundleWithPaging() throws IOException {
+  public void createBundleWithoutPagingWithZeroEobs() throws IOException {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+
+    Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+    assertEquals(0, bundle.getTotal());
+    assertEquals(0, Integer.parseInt(BfdMDC.get("resources_returned_count")));
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
+   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
+   * with paging size of 2 correctly.
+   */
+  @Test
+  public void createBundleWithPagingWithASizeOf2() throws IOException {
 
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
-    pagingParams.put(Constants.PARAM_COUNT, new String[] {"1"});
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
     pagingParams.put("startIndex", new String[] {"1"});
 
     when(requestDetails.getParameters()).thenReturn(pagingParams);
@@ -373,8 +396,78 @@ public final class TransformerUtilsTest {
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
+    HospiceClaim hospiceClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(r -> (HospiceClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+
+    fhirContext = FhirContext.forDstu3();
+    genEob =
+        HospiceClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            hospiceClaim);
+    parser = fhirContext.newJsonParser();
+    json = parser.encodeResourceToString(genEob);
+
+    eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
+
+    DMEClaim dmeClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+
+    fhirContext = FhirContext.forDstu3();
+    genEob =
+        DMEClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            dmeClaim);
+    parser = fhirContext.newJsonParser();
+    json = parser.encodeResourceToString(genEob);
+
+    eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
+
+    InpatientClaim inpatientClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof InpatientClaim)
+            .map(r -> (InpatientClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+
+    fhirContext = FhirContext.forDstu3();
+    genEob =
+        InpatientClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            inpatientClaim);
+    parser = fhirContext.newJsonParser();
+    json = parser.encodeResourceToString(genEob);
+
+    eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
+
     Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
-    assertEquals(1, bundle.getTotal());
+    assertEquals(4, bundle.getTotal());
+    assertEquals(2, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
 
   private boolean isCodingListNullOrEmpty(List<Coding> coding) {

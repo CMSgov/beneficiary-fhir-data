@@ -3354,9 +3354,13 @@ public final class TransformerUtils {
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
 
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(resources.size());
     }
 
     /*
@@ -3378,9 +3382,6 @@ public final class TransformerUtils {
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
-
-    // Add number of resources to MDC logs
-    LoggingUtils.logResourceCountToMdc(bundle.getTotal());
 
     return bundle;
   }
