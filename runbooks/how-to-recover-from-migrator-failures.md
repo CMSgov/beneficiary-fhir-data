@@ -1,6 +1,6 @@
 # How to Recover from `migrator` Failures
 
-Follow this runbook if the the deployment of `migrator` results in a non-zero (0) exit status or fails pre-deployment checks. The `migrator` only runs during the course of a deployment, and this runbook covers troubleshooting steps for application and non-application failures that might be encountered during a deployment.
+Follow this runbook if the the deployment of `migrator` fails pre-deployment checks **or** results in a non-zero (0) exit status. The `migrator` only runs during the course of a deployment, and this runbook covers troubleshooting steps for application and non-application failures that we may encounter during a deployment.
 
 **Table of Contents**
 
@@ -15,35 +15,40 @@ Follow this runbook if the the deployment of `migrator` results in a non-zero (0
 
 ### Undeployable State
 
-**NOTE**: _The failure modes impacting the deployability of the migrator are numerous and might include problems with AWS IAM permissions, network access, other outages in the AWS environment, availability of the Cloudbees Jenkins deployment services, and lingering issues in the logic serving the various Jenkinsfile resources or supporting global libraries. The troubleshooting steps below only deals with the most common error where errant messages persist in the SQS queue used for signaling between the BFD environments and Cloudbees Jenkins._
+**NOTE**: _The failure modes impacting the deployability of the migrator are numerous and can include problems with AWS IAM permissions, network access, other outages in the AWS environment, availability of the Cloudbees Jenkins deployment services, and lingering issues in the logic serving the various Jenkinsfile resources, and supporting global libraries. The troubleshooting steps below only deals with the most common error where errant messages persist in the SQS queue used for signaling between the BFD environments and Cloudbees Jenkins. For other areas of investigation, please see [the References section](#references) for a list of links to resources that might assist in investigating errors not covered here._
 
 The CI process failed to even attempt deployment of the migrator, resulting in message like one or more of the following:
 > Queue bfd-${env}-migrator has messages. Is there an old bfd-db-migrator instance running? Migrator deployment cannot proceed.
 
 > Halting Migrator Deployment. Check the SQS Queue bfd-${env}-migrator.
 
-This usually happens due to either a previous deployment failure, untidy development practices involving a migrator deployment, or other out-of-band deployment activity. At the time of this writing, the EC2 instance should exist little longer than the time it takes to execute the necessary migration(s). If a bfd-migrator EC2 instance exists at the time of deployment, this is anomalous. **Operators must verify that there is no ongoing migration under way before troubleshooting or attempting re-deployment.**
+Causes might include:
+- resources from a previously failed deployment that wasn't _cleaned up_
+- _untidy_ development practices involving a migrator deployment
+- other out-of-band deployment activity
+
+**NOTE**: **Operators must verify that there is no ongoing migration under way before troubleshooting or attempting re-deployment.** At the time of this writing, the EC2 instance should only exist for as long as it takes to execute the necessary migration(s) **unless** there is a failure. If a bfd-migrator EC2 instance exists at the time of deployment or persists _after_ the deployment, this is anomalous.
 
 #### Performance Steps
 
 <details><summary>More...</summary>
 
-1. Identify the problematic AWS SQS Queue `bfd-${env}-migrator`
-2. Analyze `available` messages if they exist
+1. Identify the problematic AWS SQS Queue from the relevant Jenkins log message, e.g. `bfd-${env}-migrator` 
+2. Fetch messages if they exist
     - <details><summary>through the console</summary>
 
         1. navigate to the [SQS panel](https://us-east-1.console.aws.amazon.com/sqs/v2/home?region=us-east-1#/queues)
         2. note the available messages count from this interface
         3. if there are more than 0 messages
             1. select the appropriate SQS queue `bfd-${env}-migrator`, e.g. `bfd-test-migrator`
-            2. from the queue interface, select `Send and receive messages`
-            3. next, select `Poll for Messages` and determine next steps
+            2. from the specific queue's interface, select `Send and receive messages`
+            3. select `Poll for Messages`
 
         </details>
 
     - <details><summary>through the cli</summary>
 
-        If the following doesn't return anything, there aren't any messages available:
+        If the following returns nothing, there are no messages available:
 
         ```sh
         queue_name=bfd-test-migrator # CHANGE AS NECESSARY
@@ -53,7 +58,24 @@ This usually happens due to either a previous deployment failure, untidy develop
 
         </details>
 
-3. Purge the AWS SQS Queue for **all** `available` or `in flight` messages
+3. Read messages
+    - if there is a message that contains a normal exit with a zero (0) return code, continue with step 4
+    - if there are messages that contains a non-zero return code, continue to troubleshoot with the instructions for the corresponding code:
+        - [for return code 1](#invalid-app-configuration-1)
+        - [for return code 2](#migration-failed-2)
+        - [for return code 3](#validation-failed-3)
+    - if there are no messages containing return codes **AND** a migrator instance exists, complete the following steps and continue to step 4:
+        - <details><summary>Ensure the migrator is not running</summary>
+
+            1. Identify the bfd-migrator instance for the environment
+            2. Connect to the EC2 instance via SSH
+            3. Inspect output of `sudo systemctl status bfd-db-migrator`
+            4. Ensure there is no active migration `sudo systemctl stop bfd-db-migrator`
+            5. _Optionally_ inspect logs: `view /bluebutton-data-pipeline/bluebutton-data-pipeline.log`
+
+            </details>
+
+4. Purge the AWS SQS Queue of **all** messages
 
     - <details><summary>through the console</summary>
    
@@ -74,11 +96,11 @@ This usually happens due to either a previous deployment failure, untidy develop
 
         </details>
 
-4. Attempt to re-deploy from Jenkins
-5. If failures persist
+5. Attempt to re-deploy from Jenkins
+6. If failures persist
    - further scrutinize the Jenkins logs for errors leading up to the migrator deployment
-   - verify AWS IAM permissions for the `cloudbees-jenkins` role and inspect the [AWS CloudTrails Errors Dashboard](https://splunk.cloud.cms.gov/en-US/app/cms_oeda_bfd_landing_page/cloudtrailerrors0) in splunk
-   - ensure the AWS isn't reporting any open issues in the [health dashboard](https://health.aws.amazon.com/health/home#/account/dashboard/open-issues)
+   - verify AWS IAM permissions for the `cloudbees-jenkins` role and inspect the [AWS CloudTrails Errors Dashboard][splunk-cloudtrail-errors] in splunk
+   - ensure AWS isn't reporting any open issues in the [health dashboard](https://health.aws.amazon.com/health/home#/account/dashboard/open-issues)
 
 </details>
 
@@ -89,9 +111,9 @@ The application failed to resolve full, error-free configuration for the given e
 
 Common causes might include:
 - permissions, connectivity problems in resolution of AWS SSM Parameter Store configuration values 
-- permissions, connectivity problems in accessing AWS Key Management Service CMKs
-- missing configuration from the `base` module
-- errors introduced in `ansible` or `terraform` templates
+- permissions, connectivity problems in accessing the AWS Key Management Service (KMS) Customer Managed Key (CMK)
+- erroneous or missing configuration from the `base` module
+- erroneous [`ansible`][migrator-ansible-role] or [`terraform`][migrator-terraform] templates
 
 #### Performance Steps
 
@@ -133,7 +155,9 @@ The application failed to apply the required flyway migration script or scripts 
 Causes might include:
 - development version of a migration was _inappropriately_ applied to an environment's database
 - other out-of-band changes were applied to the RDS cluster resulting in mismatching schema version or schema version hashes
-- tests failed to identify an error only impacting AWS Aurora PostgreSQL (but succeeds against HSQLDB and non-Aurora PostgreSQL)
+- tests failed to identify an error only impacting AWS Aurora PostgreSQL, but
+  - succeed against HSQLDB (uncommon)
+  - success against non-Aurora PostgreSQL (rare)
 
 #### Performance Steps
 
@@ -145,10 +169,10 @@ Causes might include:
 
         1. navigate to the appropriate CloudWatch Panel
 
-            - [test]( https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Ftest$252Fbfd-db-migrator$252Fmigrator-log.json)
-            - [prod-sbx](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Fprod-sbx$252Fbfd-db-migrator$252Fmigrator-log.json)
-            - [prod](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Fprod$252Fbfd-db-migrator$252Fmigrator-log.json)
-            - [all migrator log groups](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups$3FlogGroupNameFilter$3Dmigrator)
+            - [test][migrator-cw-logs-test]
+            - [prod-sbx][migrator-cw-logs-prod-sbx]
+            - [prod][migrator-cw-logs-prod]
+            - [all migrator log groups][migrator-cw-logs-all]
 
         2. select the appropriate instance (typically the top instance)
 
@@ -160,7 +184,8 @@ Causes might include:
         2. `view /bluebutton-data-pipeline/bluebutton-data-pipeline.log`
 
         </details>
-3. Support migration author in resolving the migration error: PR reviews, deployment support, etc
+
+3. Support migration author in resolving the migration error with PR feedback, deployment support, etc
 4. Purge SQS Message Queue as necessary before the next deployment (purge instructions [found here](#undeployable-state))
 
 </details>
@@ -182,10 +207,10 @@ The application failed to validate the Hibernate models against the currently ap
 
         1. navigate to the appropriate CloudWatch Panel
 
-            - [test]( https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Ftest$252Fbfd-db-migrator$252Fmigrator-log.json)
-            - [prod-sbx](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Fprod-sbx$252Fbfd-db-migrator$252Fmigrator-log.json)
-            - [prod](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Fprod$252Fbfd-db-migrator$252Fmigrator-log.json)
-            - [all migrator log groups](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups$3FlogGroupNameFilter$3Dmigrator)
+            - [test][migrator-cw-logs-test]
+            - [prod-sbx][migrator-cw-logs-prod-sbx]
+            - [prod][migrator-cw-logs-prod]
+            - [all migrator log groups][migrator-cw-logs-all]
 
         2. select the appropriate instance (typically the top instance)
 
@@ -193,20 +218,46 @@ The application failed to validate the Hibernate models against the currently ap
 
     - <details><summary>through the console</summary>
 
-        1. SSH to the instance
+        1. Connect to the EC2 instance via SSH
         2. `view /bluebutton-data-pipeline/bluebutton-data-pipeline.log`
 
         </details>
 
-3. Support migration author in resolving the validation error: PR reviews, deployment support, etc
+3. Support migration author in resolving the validation error with PR feedback, deployment support, etc
 4. Purge SQS Message Queue as necessary before the next deployment (purge instructions [found here](#undeployable-state))
 
 </details>
 
 ## References
-- [Original Migrator RFC Document](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/rfcs/0011-separate-flyway-from-pipeline.md)
-- [Migrator Java Artifact Source Code](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/apps/bfd-db-migrator)
-- [Monolithic Packer Manifest](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/packer/build_bfd-all.json)
-- [Migrator Terraform ](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/terraform/services/migrator)
-- [Migrator Ansible Role](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/ansible/roles/bfd-db-migrator)
-- [Migrator Ansible Playbook](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/ansible/playbooks-ccs/launch_bfd-db-migrator.yml)
+- [Original Migrator RFC Document][migrator-rfc]
+- [Migrator Java Artifact Source Code][migrator-java-source]
+- [Monolithic Packer Manifest][migrator-packer-manifest]
+- [Migrator Terraform][migrator-terraform]
+    - [Migrator cloud-init user-data Template][migrator-cloud-init]
+    - [Migrator-Specific Jenkins Deployment Logic][migrator-jenkins]
+- [Migrator Ansible Role][migrator-ansible-role]
+- [Migrator Ansible Playbook][migrator-ansible-playbook]
+- [Jenkins Global Pipeline Libraries][jenkins-global-pipeline-libraries]
+- [Migrator Cloud Watch Logs][migrator-cw-logs-all]
+    - [test][migrator-cw-logs-test]
+    - [prod-sbx][migrator-cw-logs-prod-sbx]
+    - [prod][migrator-cw-logs-prod]
+- [Splunk CloudTrail Errors][splunk-cloudtrail-errors] _(CMS VPN Required)_
+
+<!-- links in reference style for those destinations that may change over time -->
+[migrator-rfc]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/rfcs/0011-separate-flyway-from-pipeline.md "Original Migrator RFC Document"
+[migrator-java-source]: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/apps/bfd-db-migrator "Migrator Java Artifact Source Code"
+[migrator-packer-manifest]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/packer/build_bfd-all.json "Monolithic Packer Manifest"
+[migrator-terraform]: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/terraform/services/migrator "Migrator Terraform"
+[migrator-cloud-init]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/terraform/services/migrator/user-data.tftpl "Migrator cloud-init user-data Template"
+[migrator-jenkins]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/terraform/services/migrator/deploy.groovy "Migrator-Specific Jenkins Deployment Logic"
+[migrator-ansible-role]: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/ansible/roles/bfd-db-migrator "Migrator Ansible Role"
+[migrator-ansible-playbook]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/ansible/playbooks-ccs/launch_bfd-db-migrator.yml "Migrator Ansible Playbook"
+[jenkins-global-pipeline-libraries]: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/jenkins/global-pipeline-libraries "Jenkins Global Pipeline Libraries"
+
+[migrator-cw-logs-test]: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Ftest$252Fbfd-db-migrator$252Fmigrator-log.json "TEST Migrator CloudWatch Logs"
+[migrator-cw-logs-prod-sbx]: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Ftest$252Fbfd-db-migrator$252Fmigrator-log.json "PROD-SBX Migrator CloudWatch Logs"
+[migrator-cw-logs-prod]: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Fbfd$252Ftest$252Fbfd-db-migrator$252Fmigrator-log.json "PROD Migrator CloudWatch Logs"
+[migrator-cw-logs-all]: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups$3FlogGroupNameFilter$3Dmigrator "ALL Migrator CloudWatch Logs"
+
+[splunk-cloudtrail-errors]: https://splunk.cloud.cms.gov/en-US/app/cms_oeda_bfd_landing_page/cloudtrailerrors0 "Splunk CloudTrail Errors"
