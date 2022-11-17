@@ -3354,7 +3354,7 @@ public final class TransformerUtils {
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
-      // Add number of resources to MDC logs
+      // Add number of paginated resources to MDC logs
       LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
 
     } else {
