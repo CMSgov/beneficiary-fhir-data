@@ -3357,7 +3357,6 @@ public final class TransformerUtils {
 
       // Add number of paginated resources to MDC logs
       LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
-
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
 
