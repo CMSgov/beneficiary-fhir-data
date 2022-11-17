@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
@@ -32,7 +33,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -710,6 +713,11 @@ public class TransformerUtilsV2Test {
   public void createBundleWithPaging() throws IOException {
 
     RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<String, String[]>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"1"});
+
+    requestDetails.setParameters(pagingParams);
+
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
     List<Object> parsedRecords =
