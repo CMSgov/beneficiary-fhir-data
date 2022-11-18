@@ -4,36 +4,40 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import gov.cms.bfd.pipeline.app.MicrometerConfigHelper.PropertyMapping;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import io.micrometer.core.instrument.config.validate.InvalidReason;
 import io.micrometer.core.instrument.config.validate.Validated;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link MicrometerConfigHelper}. */
 public class MicrometerConfigHelperTest {
+  /** {@link PropertyMapping} with no default value. */
+  private final PropertyMapping mappingA = new PropertyMapping("a", "AA", Optional.empty());
+  /** {@link PropertyMapping} with a default value. */
+  private final PropertyMapping mappingB = new PropertyMapping("b", "BB", Optional.of("b default"));
   /** Values used by lookup function. */
   private final Map<String, String> values = Map.of("AA", "a matched");
   /** Object under test. */
   private final MicrometerConfigHelper helper =
-      new MicrometerConfigHelper(
-          Map.of("a", "AA", "b", "BB"), Map.of("BB", "b default"), values::get);
+      new MicrometerConfigHelper(List.of(mappingA, mappingB), values::get);
 
-  /** Verifies that {@link MicrometerConfigHelper#renameProperty} works as expected. */
+  /** Verifies that {@link MicrometerConfigHelper#findProperty} works as expected. */
   @Test
   public void shouldRenamePropertiesUsingMap() {
-    assertEquals(Optional.of("AA"), helper.renameProperty("a"));
-    assertEquals(Optional.of("BB"), helper.renameProperty("b"));
-    assertEquals(Optional.empty(), helper.renameProperty("c"));
+    assertEquals(Optional.of(mappingA), helper.findProperty("a"));
+    assertEquals(Optional.of(mappingB), helper.findProperty("b"));
+    assertEquals(Optional.empty(), helper.findProperty("c"));
   }
 
   /** Verifies that {@link MicrometerConfigHelper#lookupKey} works as expected. */
   @Test
   public void shouldUseDefaultValue() {
-    assertEquals(Optional.of("a matched"), helper.lookupKey("AA"));
-    assertEquals(Optional.of("b default"), helper.lookupKey("BB"));
-    assertEquals(Optional.empty(), helper.lookupKey("c"));
+    assertEquals(Optional.of("a matched"), helper.lookupKey(mappingA));
+    assertEquals(Optional.of("b default"), helper.lookupKey(mappingB));
   }
 
   /** Verifies that {@link MicrometerConfigHelper#get} uses default values when they are present. */

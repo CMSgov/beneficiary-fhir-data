@@ -105,13 +105,12 @@ public final class PipelineApplication {
             Tag.of("host", metricOptions.getHostname().orElse("unknown")),
             Tag.of("appName", metricOptions.getNewRelicAppName().orElse("unknown")));
 
-    if (AppConfiguration.isCloudWatchMetricsEnabled()) {
+    final var cloudwatchRegistryConfig = AppConfiguration.getCloudWatchRegistryConfig();
+    if (cloudwatchRegistryConfig.enabled()) {
       LOGGER.info("Adding CloudWatchMeterRegistry...");
       final var cloudWatchRegistry =
           new CloudWatchMeterRegistry(
-              AppConfiguration.getCloudWatchConfig(),
-              micrometerClock,
-              new AmazonCloudWatchAsyncClient());
+              cloudwatchRegistryConfig, micrometerClock, new AmazonCloudWatchAsyncClient());
       cloudWatchRegistry.config().commonTags(commonTags);
       appMeters.add(cloudWatchRegistry);
       LOGGER.info("Added CloudWatchMeterRegistry.");

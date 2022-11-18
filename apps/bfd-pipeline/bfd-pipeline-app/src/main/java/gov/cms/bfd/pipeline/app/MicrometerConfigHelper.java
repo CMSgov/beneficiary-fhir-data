@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import io.micrometer.core.instrument.config.validate.Validated;
 import io.micrometer.core.instrument.config.validate.ValidationException;
@@ -9,20 +10,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import lombok.AllArgsConstructor;
 
 /**
  * Micrometer uses interfaces for config objects and does not provide concrete implementation
  * classes for them. Since t This helper class provides facilities needed to create concrete
  * implementations that share common behavior.
  */
+@AllArgsConstructor
 public class MicrometerConfigHelper {
-  /** Maps property names to names compatible with the lookup function. */
-  private final Map<String, String> configKeyMap;
-  /** Maps names to default values. Names are those passed to the lookup function. */
-  private final Map<String, String> defaultValuesMap;
+  /** Maps property names to {@link MicrometerConfigHelper.PropertyMapping}s. */
+  private final Map<String, PropertyMapping> propertiesByName;
   /**
-   * Maps names to values in some way. Usually just {@code System::getenv} but in tests might be
-   * {@code Map::get}.
+   * Maps names to values in some way. Usually just {@code System#getenv} but in tests might be
+   * {@code Map#get}.
    */
   private final Function<String, String> valueLookupFunction;
 
@@ -30,28 +31,41 @@ public class MicrometerConfigHelper {
    * Constructs a new instance. A function is used to do environment variable lookup so that any
    * source of values can be used (for testing, etc).
    *
-   * @param configKeyMap maps property names to environment variable names
-   * @param defaultValuesMap provides default values for environment variables
+   * @param propertyMappings list of mappings {@link PropertyMapping} defines supported properties
    * @param valueLookupFunction used to look up environment variables
    */
   public MicrometerConfigHelper(
-      Map<String, String> configKeyMap,
-      Map<String, String> defaultValuesMap,
-      Function<String, String> valueLookupFunction) {
-    this.configKeyMap = configKeyMap;
-    this.defaultValuesMap = defaultValuesMap;
-    this.valueLookupFunction = valueLookupFunction;
+      List<PropertyMapping> propertyMappings, Function<String, String> valueLookupFunction) {
+    this(
+        propertyMappings.stream()
+            .collect(ImmutableMap.toImmutableMap(pm -> pm.propertyName, pm -> pm)),
+        valueLookupFunction);
   }
 
   /**
-   * Map the property name to a lookup name, look up the value or a default value. Intended for use
-   * in implementing the meter config's get method.
+   * Creates a copy of this object that differs only in the value lookup function. Intended for use
+   * in unit tests to plugin in a testable lookup function instead of relying on {@link
+   * System#getenv}.
+   *
+   * @param valueLookupFunction replacement lookup function
+   * @return instance with same config and default maps but new lookup function
+   */
+  @VisibleForTesting
+  MicrometerConfigHelper withValueLookupFunction(Function<String, String> valueLookupFunction) {
+    return new MicrometerConfigHelper(propertiesByName, valueLookupFunction);
+  }
+
+  /**
+   * Map the property name to a lookup name, look up the value and return it or a default value if
+   * the lookup fails. Unsupported properties also return null. Intended for use in implementing the
+   * {@link io.micrometer.core.instrument.config.MeterRegistryConfig#get} method.
    *
    * @param propertyName name of config property
-   * @return value or null if there is no value for the requested property
+   * @return value or null if there is no value for the requested property or property is
+   *     unsupported
    */
   public String get(String propertyName) {
-    return renameProperty(propertyName).flatMap(this::lookupKey).orElse(null);
+    return findProperty(propertyName).flatMap(this::lookupKey).orElse(null);
   }
 
   /**
@@ -63,7 +77,8 @@ public class MicrometerConfigHelper {
   public void throwIfConfigurationNotValid(Validated<?> result) {
     List<String> messages = new ArrayList<>();
     for (Validated.Invalid<?> failure : result.failures()) {
-      String envVarName = renameProperty(failure.getProperty()).orElse("unmatched");
+      String envVarName =
+          findProperty(failure.getProperty()).map(pm -> pm.lookupVariableName).orElse("unmatched");
       messages.add(
           String.format(
               "'%s'/'%s': '%s'", envVarName, failure.getProperty(), failure.getMessage()));
@@ -84,23 +99,34 @@ public class MicrometerConfigHelper {
    * @return corresponding name safe for use with lookup function
    */
   @VisibleForTesting
-  Optional<String> renameProperty(String propertyName) {
-    return Optional.ofNullable(configKeyMap.get(propertyName));
+  Optional<PropertyMapping> findProperty(String propertyName) {
+    return Optional.ofNullable(propertiesByName.get(propertyName));
   }
 
   /**
    * Looks up a value using the lookup function. If no value is found returns either a default value
    * (if defined) or an empty value.
    *
-   * @param key lookup function compatible key
+   * @param propertyMapping defines the property to look up
    * @return empty if no value is found or the value if one is found
    */
   @VisibleForTesting
-  Optional<String> lookupKey(String key) {
-    String value = valueLookupFunction.apply(key);
-    if (value == null) {
-      value = defaultValuesMap.get(key);
-    }
-    return Optional.ofNullable(value);
+  Optional<String> lookupKey(PropertyMapping propertyMapping) {
+    return Optional.ofNullable(valueLookupFunction.apply(propertyMapping.lookupVariableName))
+        .or(() -> propertyMapping.defaultValue);
+  }
+
+  /**
+   * Mappings determine how micrometer property names are mapped to lookup (usually environment
+   * variable) names and, optionally, a default value for undefined values.
+   */
+  @AllArgsConstructor
+  public static class PropertyMapping {
+    /** Property name used by micrometer config objects. */
+    private final String propertyName;
+    /** Lookup (env var) name used to look up the object. */
+    private final String lookupVariableName;
+    /** Default value (if any) for value if not found during lookup. */
+    private final Optional<String> defaultValue;
   }
 }
