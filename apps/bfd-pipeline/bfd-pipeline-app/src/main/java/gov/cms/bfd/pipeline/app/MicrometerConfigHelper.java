@@ -14,8 +14,8 @@ import lombok.AllArgsConstructor;
 
 /**
  * Micrometer uses interfaces for config objects and does not provide concrete implementation
- * classes for them. Since t This helper class provides facilities needed to create concrete
- * implementations that share common behavior.
+ * classes for them. This helper class provides facilities needed to create concrete implementations
+ * that can read properties from environment variables with different names and default values.
  */
 @AllArgsConstructor
 public class MicrometerConfigHelper {
