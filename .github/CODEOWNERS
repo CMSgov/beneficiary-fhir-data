@@ -2,7 +2,7 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell @mjburling
+@cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
 
 #BFD Pipeline and Server Codeowners
 /rfcs @cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
