@@ -46,7 +46,7 @@ def _(environment: Environment, **kwargs) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
-    validation.check_validation_goals(environment)
+    validation_result = validation.check_validation_goals(environment)
 
     logger = logging.getLogger()
 
@@ -74,6 +74,7 @@ def _(environment: Environment, **kwargs) -> None:
             stats,
         )
         stats.metadata.compare_result = final_result  # type: ignore
+        stats.metadata.validation_result = validation_result
     finally:
         stats_writers.write_stats(stats_config, stats)
 

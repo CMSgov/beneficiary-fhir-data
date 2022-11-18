@@ -17,8 +17,12 @@ _validation_goal: Optional["ValidationGoal"] = None
 class ValidationResult(str, Enum):
     """Enum representing the result of failure ratio and SLA validation"""
 
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    """Indicates that no validation ran on the given test run"""
     PASS = "PASSED"
+    """Indicates that the test run passed validation"""
     FAILURE = "FAILURE"
+    """Indicates that the test run failed validation"""
 
 
 # TODO: Pull these values from production metrics (i.e. New Relic)
