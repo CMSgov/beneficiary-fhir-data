@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
-import com.google.common.base.Strings;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -23,6 +22,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch.CloudWatchConfig;
 import java.io.Serializable;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
@@ -287,8 +287,34 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
-  /** Prefix for environment variables containing Micrometer CloudWatch configuration settings. */
-  public static final String ENV_VAR_MICROMETER_CW_PREFIX = "MICROMETER_CW_OPT_";
+  /**
+   * Environment variable containing the namespace name to use when sending Micrometer metrics to
+   * CloudWatch. This is a required environment variable.
+   */
+  public static final String ENV_VAR_MICROMETER_CW_NAMESPACE = "MICROMETER_CW_NAMESPACE";
+
+  /**
+   * Environment variable containing the update interval to use when sending Micrometer metrics to
+   * CloudWatch. The value must be in ISO-8601 format as parsed by {@link Duration#parse}. Default
+   * value is PT1M (1 minute). More frequent updates provide higher resolution but can also increase
+   * CW costs.
+   */
+  public static final String ENV_VAR_MICROMETER_CW_INTERVAL = "MICROMETER_CW_INTERVAL";
+
+  /**
+   * Instance of {@link MicrometerConfigHelper} used to create {@link CloudWatchConfig} instance.
+   * Contains the property name to environment variable name mappings for supported {@link
+   * CloudWatchConfig} properties as well as default values for some environment variables.
+   */
+  private static final MicrometerConfigHelper MICROMETER_CW_CONFIG_HELPER =
+      new MicrometerConfigHelper(
+          Map.of(
+              "cloudwatch.namespace",
+              ENV_VAR_MICROMETER_CW_NAMESPACE,
+              "cloudwatch.step",
+              ENV_VAR_MICROMETER_CW_INTERVAL),
+          Map.of(ENV_VAR_MICROMETER_CW_INTERVAL, "PT1M"),
+          System::getenv);
 
   /**
    * Environment variable indicating whether Micrometer metrics should be sent to CloudWatch.
@@ -595,26 +621,18 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   }
 
   /**
-   * Creates an implementation of {@link CloudWatchConfig} that looks for environment variables by
-   * adding the {@link AppConfiguration#ENV_VAR_MICROMETER_CW_PREFIX} to the configuration setting
-   * name.
+   * Creates an implementation of {@link CloudWatchConfig} that looks for environment variables to
+   * find values for properties. Environment variable lookup is done using {@link
+   * #MICROMETER_CW_CONFIG_HELPER}.
    *
    * @return an instance of {@link CloudWatchConfig}
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if any
+   *     required properties are missing or if any environment variables have invalid values.
    */
   public static CloudWatchConfig getCloudWatchConfig() {
-    return key -> {
-      int dotIndex = key.lastIndexOf('.');
-      if (dotIndex >= 0) {
-        key = key.substring(dotIndex + 1);
-      }
-      String envVarName = ENV_VAR_MICROMETER_CW_PREFIX + key.toUpperCase();
-      String envVarValue = System.getenv(envVarName);
-      LOGGER.info(
-          "CloudWatchConfig: envVarName={} hasValue={}",
-          envVarName,
-          !Strings.isNullOrEmpty(envVarValue));
-      return envVarValue;
-    };
+    final CloudWatchConfig config = MICROMETER_CW_CONFIG_HELPER::get;
+    MICROMETER_CW_CONFIG_HELPER.throwIfConfigurationNotValid(config.validate());
+    return config;
   }
 
   /**

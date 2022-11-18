@@ -33,7 +33,6 @@ import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.config.NamingConvention;
 import io.micrometer.core.instrument.dropwizard.DropwizardConfig;
 import io.micrometer.core.instrument.dropwizard.DropwizardMeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.core.instrument.util.HierarchicalNameMapper;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
@@ -106,7 +105,6 @@ public final class PipelineApplication {
             Tag.of("host", metricOptions.getHostname().orElse("unknown")),
             Tag.of("appName", metricOptions.getNewRelicAppName().orElse("unknown")));
 
-    appMeters.add(new SimpleMeterRegistry());
     if (AppConfiguration.isCloudWatchMetricsEnabled()) {
       LOGGER.info("Adding CloudWatchMeterRegistry...");
       final var cloudWatchRegistry =
@@ -122,7 +120,6 @@ public final class PipelineApplication {
       appMeters.add(new JmxMeterRegistry(JmxConfig.DEFAULT, micrometerClock));
       LOGGER.info("Added JmxMeterRegistry.");
     }
-    new JvmMemoryMetrics().bindTo(appMeters);
 
     MetricRegistry appMetrics = new MetricRegistry();
     appMetrics.registerAll(new MemoryUsageGaugeSet());
@@ -155,31 +152,12 @@ public final class PipelineApplication {
       LOGGER.info("Added NewRelicReporter.");
     }
 
-    DropwizardConfig dropwizardConfig =
-        new DropwizardConfig() {
-          @Nonnull
-          @Override
-          public String prefix() {
-            return "dropwizard";
-          }
-
-          @Override
-          public String get(@Nonnull String key) {
-            return null;
-          }
-        };
-    appMeters.add(
-        new DropwizardMeterRegistry(
-            dropwizardConfig, appMetrics, getHierarchicalNameMapper(commonTags), micrometerClock) {
-          @Nonnull
-          @Override
-          protected Double nullGaugeValue() {
-            return 0.0;
-          }
-        });
+    appMeters.add(getDropWizardMeterRegistry(appMetrics, commonTags, micrometerClock));
     LOGGER.info("Added DropwizardMeterRegistry.");
 
-    appMetricsReporter.start(10, TimeUnit.MINUTES);
+    new JvmMemoryMetrics().bindTo(appMeters);
+
+    appMetricsReporter.start(15, TimeUnit.MINUTES);
 
     // Create a pooled data source for use by any registered jobs.
     final HikariDataSource pooledDataSource =
@@ -211,6 +189,42 @@ public final class PipelineApplication {
      * for the PipelineManager to stop running jobs, and then check to see if we should exit
      * normally with 0 or abnormally with a non-0 because a job failed.
      */
+  }
+
+  /**
+   * Creayes a {@link DropwizardMeterRegistry} to transfer micrometer metrics into a {@link
+   * MetricRegistry}.
+   *
+   * @param appMetrics the {@link MetricRegistry} to receive metrics
+   * @param commonTags the {@link Tag}s to assign to all metrics
+   * @param micrometerClock the {@link io.micrometer.core.instrument.Clock} used to compute time
+   * @return the {@link DropwizardMeterRegistry}
+   */
+  private static DropwizardMeterRegistry getDropWizardMeterRegistry(
+      MetricRegistry appMetrics,
+      List<Tag> commonTags,
+      io.micrometer.core.instrument.Clock micrometerClock) {
+    DropwizardConfig dropwizardConfig =
+        new DropwizardConfig() {
+          @Nonnull
+          @Override
+          public String prefix() {
+            return "dropwizard";
+          }
+
+          @Override
+          public String get(@Nonnull String key) {
+            return null;
+          }
+        };
+    return new DropwizardMeterRegistry(
+        dropwizardConfig, appMetrics, getHierarchicalNameMapper(commonTags), micrometerClock) {
+      @Nonnull
+      @Override
+      protected Double nullGaugeValue() {
+        return 0.0;
+      }
+    };
   }
 
   /**
