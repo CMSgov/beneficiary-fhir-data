@@ -623,7 +623,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static CloudWatchConfig getCloudWatchRegistryConfig() {
     final CloudWatchConfig config = MICROMETER_CW_CONFIG_HELPER::get;
-    MICROMETER_CW_CONFIG_HELPER.throwIfConfigurationNotValid(config.validate());
+    if (config.enabled()) {
+      MICROMETER_CW_CONFIG_HELPER.throwIfConfigurationNotValid(config.validate());
+    }
     return config;
   }
 
