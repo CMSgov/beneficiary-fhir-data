@@ -125,18 +125,22 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    */
   @Override
   public boolean performSmokeTest(RdaSink<TMessage, TClaim> sink) throws Exception {
-    log.info("smoke test: starting");
+    log.info("smoke test: begin test: claimType={}", claimType);
 
     // Query the database to get a starting sequence number.  This verifies that the database is
     // accessible.
     final long startingSequenceNumber =
         sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
-    log.info("smoke test: startingSequenceNumber={}", startingSequenceNumber);
+    log.info(
+        "smoke test: read starting sequence number: claimType={} startingSequenceNumber={}",
+        claimType,
+        startingSequenceNumber);
 
     if (serverType == RdaSourceConfig.ServerType.Remote) {
       // Call the RDA API version service to confirm the API is accessible.
       final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
-      log.info("smoke test: apiVersion={}", apiVersion);
+      log.info(
+          "smoke test: read RDA API version: claimType={} apiVersion={}", claimType, apiVersion);
 
       // Doesn't use startingSequenceNumber because we should not block waiting for new data.
       final GrpcResponseStream<TMessage> responseStream =
@@ -144,7 +148,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
         final TMessage message = responseStream.next();
         log.info(
-            "smoke test: successfully downloaded claim: seq={}",
+            "smoke test: downloaded claim: claimType={} seq={}",
+            claimType,
             sink.getSequenceNumberForObject(message));
       }
       // be a nice client that lets the server know when we are leaving before the stream is done
@@ -152,6 +157,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         responseStream.cancelStream("smoke test: finished");
       }
     }
+
+    log.info("smoke test: end test: claimType={}", claimType);
 
     return true;
   }
