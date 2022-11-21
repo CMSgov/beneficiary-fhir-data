@@ -2,6 +2,9 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateInterface;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.lang.reflect.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -58,6 +61,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlTransient private String manifestKeyDoneLocation;
 
   /**
+   * Denotes the s3 key where the manifest and its files should be placed when it's processing is
+   * complete.
+   */
+  @XmlTransient private String manifestKeyFailLocation;
+
+  /**
    * Constructs a new {@link DataSetManifest} instance.
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
@@ -96,8 +105,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       int sequenceId,
       boolean syntheticData,
       List<DataSetManifestEntry> entries) {
-    // This appears to only be used in dead test code, so hardcoding the input/output locations to
-    // the old locations unless we need otherwise
+    // This appears to only be used in dead test code, so hardcoding the input/output
+    // locations to the old locations unless we need otherwise
     this(
         DateTimeFormatter.ISO_INSTANT.format(timestamp),
         sequenceId,
@@ -524,7 +533,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 
   /** Optional object that can be used to perform pre-validation during ETL pipeline processing. */
   @XmlAccessorType(XmlAccessType.FIELD)
-  public static final class PreValidationProperties {
+  public static class PreValidationProperties {
     /**
      * a {@link long} value denoting the lower-bound of claim group identifiers for the RIF dataset.
      */
@@ -596,6 +605,13 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     @XmlElement(name = "generated", required = false)
     protected String generated;
 
+    /**
+     * a {@link String} denoting the classname of a {@link CcwRifLoadPreValidateInterface} that can
+     * perform RIF Load pre-validation.
+     */
+    @XmlElement(name = "preval_classname", required = false)
+    protected String preValClassName;
+
     /** Create an instance of {@link PreValidationProperties } */
     public PreValidationProperties() {}
 
@@ -614,6 +630,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * @param clmIdEnd upper-bound bene_id range value to verify
      * @param pdeIdEnd upper-bound bene_id range value to verify
      * @param generated string denoting when the end state meta-data was generated
+     * @param preValClassName string identifying a {@link CcwRifLoadPreValidateInterface}
      */
     public PreValidationProperties(
         long clmGrpIdStart,
@@ -627,7 +644,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
         long beneIdEnd,
         long clmIdEnd,
         long pdeIdEnd,
-        String generated) {
+        String generated,
+        String preValClassName) {
       this.clmGrpIdStart = clmGrpIdStart;
       this.pdeIdStart = pdeIdStart;
       this.carrClmCntlNumStart = carrClmCntlNumStart;
@@ -640,6 +658,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.clmIdEnd = clmIdEnd;
       this.pdeIdEnd = pdeIdEnd;
       this.generated = generated;
+      this.preValClassName = preValClassName;
     }
 
     /**
@@ -858,6 +877,66 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.generated = value;
     }
 
+    /**
+     * Sets the {@link #preValClassName}.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setPreValClassName(String value) {
+      this.preValClassName = value;
+    }
+
+    /**
+     * Gets the {@link #preValClassName}.
+     *
+     * @return value is {@link String }
+     */
+    public Optional<String> getPreValClassName() {
+      return this.preValClassName != null && this.preValClassName.length() > 0
+          ? Optional.of(this.preValClassName)
+          : Optional.empty();
+    }
+
+    /**
+     * Method to construct a {@link CcwRifLoadPreValidateInterface} using reflection to construct a
+     * java {@link Class} based on text provided either in the overRideValue {@link String} value or
+     * defined in the {@link DataSetManifest}.
+     *
+     * @param overRideValue {@link String} denoting a Java {@link Class} that implements the {@link
+     *     CcwRifLoadPreValidateInterface}
+     * @return {@link Optional } value for {@link CcwRifLoadPreValidateInterface }
+     * @throws BadCodeMonkeyException if any problems arise
+     */
+    public Optional<CcwRifLoadPreValidateInterface> getPreValidationInterface(
+        Optional<String> overRideValue) {
+      String className =
+          overRideValue.isPresent()
+              ? overRideValue.get()
+              : preValClassName != null ? preValClassName : "";
+
+      if (className == null || className.length() < 1) {
+        return Optional.empty();
+      }
+      CcwRifLoadPreValidateInterface rslt = null;
+      try {
+        Class<?> clazz = Class.forName(className);
+        for (Class<?> iFace : clazz.getInterfaces()) {
+          if (iFace.getSimpleName().equals("CcwRifLoadPreValidateInterface")) {
+            rslt = (CcwRifLoadPreValidateInterface) clazz.getDeclaredConstructor().newInstance();
+          }
+        }
+      } catch (ClassNotFoundException
+          | NoSuchMethodException
+          | SecurityException
+          | InstantiationException
+          | InvocationTargetException
+          | IllegalAccessException e) {
+        throw new BadCodeMonkeyException(
+            "Failed to instantiate specified CcwRifLoadPreValidateInterface: " + className);
+      }
+      return rslt != null ? Optional.of(rslt) : Optional.empty();
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {
@@ -886,6 +965,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       sb.append(pdeIdEnd);
       sb.append(", generated=");
       sb.append(generated);
+      sb.append(", preValClassName=");
+      sb.append(preValClassName);
       sb.append("]");
       return sb.toString();
     }

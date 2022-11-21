@@ -28,6 +28,9 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
   /** new a handle to the {@link PipelineApplicationState} provide by the init method. */
   private PipelineApplicationState appState = null;
 
+  /** A {@link boolean} flag denoting that pre-validation has failed. */
+  private boolean preValidationFailed = false;
+
   /** SQL used to perform range checking on provided begin-end bene_id values. */
   private static final String CHECK_BENE_RANGE =
       "select count(bene_id) from beneficiaries " + "where bene_id <= ? and bene_id > ? limit 1";
@@ -302,6 +305,10 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         }
       }
     }
-    return isValid;
+    if (isValid) {
+      return true;
+    }
+    preValidationFailed = true;
+    return false;
   }
 }
