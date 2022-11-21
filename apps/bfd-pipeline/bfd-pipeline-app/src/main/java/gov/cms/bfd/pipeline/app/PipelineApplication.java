@@ -156,7 +156,7 @@ public final class PipelineApplication {
 
     new JvmMemoryMetrics().bindTo(appMeters);
 
-    appMetricsReporter.start(15, TimeUnit.MINUTES);
+    appMetricsReporter.start(1, TimeUnit.HOURS);
 
     // Create a pooled data source for use by any registered jobs.
     final HikariDataSource pooledDataSource =
