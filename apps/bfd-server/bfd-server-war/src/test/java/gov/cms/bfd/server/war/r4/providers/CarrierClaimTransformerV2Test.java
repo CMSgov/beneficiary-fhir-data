@@ -148,12 +148,11 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void shouldHaveBillingNPINum() throws Exception {
     // We just want to make sure it is set
-    assertNotNull(eob.getBillablePeriod());
+    assertNotNull(eob.getProvider().getIdentifier());
     assertEquals(
-        (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"),
-        eob.getBillablePeriod().getStart());
-    assertEquals(
-        (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"), eob.getBillablePeriod().getEnd());
+        "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+        eob.getProvider().getIdentifier().getSystem());
+    assertEquals("123456789", eob.getProvider().getIdentifier().getValue());
   }
 
   @Test
