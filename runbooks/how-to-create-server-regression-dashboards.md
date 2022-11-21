@@ -91,6 +91,10 @@ data.
       where
         metadata.hash = '85d93b342368c8f57f8e78ea6c56979ad5e32901776aaeaffdd8467e4cee1df9'
         and contains(metadata.tags, 'master')
+        and (
+           metadata.validation_result = 'PASSED'
+           or metadata.validation_result = 'NOT_APPLICABLE'
+        )
       order by metadata.timestamp asc
       ```
 
@@ -136,6 +140,10 @@ data.
       where
         metadata.hash = '71a5310d52e0ffb8c03dc74cdee7bf635bc7fbd75dfe1d8f647fcfb11e5b65ce'
         and contains(metadata.tags, 'master')
+        and (
+           metadata.validation_result = 'PASSED'
+           or metadata.validation_result = 'NOT_APPLICABLE'
+        )
       order by metadata.timestamp asc
       ```
 
@@ -181,6 +189,10 @@ data.
       where
         metadata.hash = '727a44e865e717728ac409e8e23a7e13ce73a155874f3832a0caef1fde17e95c'
         and contains(metadata.tags, 'master')
+        and (
+           metadata.validation_result = 'PASSED'
+           or metadata.validation_result = 'NOT_APPLICABLE'
+        )
       order by metadata.timestamp asc
       ```
 
