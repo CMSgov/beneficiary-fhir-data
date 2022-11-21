@@ -932,7 +932,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
           | InvocationTargetException
           | IllegalAccessException e) {
         throw new BadCodeMonkeyException(
-            "Failed to instantiate specified CcwRifLoadPreValidateInterface: " + className);
+            String.format(
+                "Failed to create CcwRifLoadPreValidateInterface from: {}. error: {}",
+                className,
+                e.getMessage()));
       }
       return rslt != null ? Optional.of(rslt) : Optional.empty();
     }
