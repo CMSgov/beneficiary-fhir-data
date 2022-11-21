@@ -93,10 +93,10 @@ public class MicrometerConfigHelper {
   }
 
   /**
-   * Converts a property name into a name compatible with the lookup function.
+   * Finds the {@link PropertyMapping} corresponding to a Micrometer config property name.
    *
-   * @param propertyName name of a meter config property
-   * @return corresponding name safe for use with lookup function
+   * @param propertyName name of a Micrometer config property
+   * @return corresponding {@link PropertyMapping} or empty if none matches the property name
    */
   @VisibleForTesting
   Optional<PropertyMapping> findProperty(String propertyName) {
@@ -112,13 +112,13 @@ public class MicrometerConfigHelper {
    */
   @VisibleForTesting
   Optional<String> lookupKey(PropertyMapping propertyMapping) {
-    return Optional.ofNullable(valueLookupFunction.apply(propertyMapping.lookupVariableName))
-        .or(() -> propertyMapping.defaultValue);
+    final String value = valueLookupFunction.apply(propertyMapping.lookupVariableName);
+    return Optional.ofNullable(value).or(() -> propertyMapping.defaultValue);
   }
 
   /**
    * Mappings determine how micrometer property names are mapped to lookup (usually environment
-   * variable) names and, optionally, a default value for undefined values.
+   * variable) names and, optionally, a default value to use when the lookup returns null.
    */
   @AllArgsConstructor
   public static class PropertyMapping {
