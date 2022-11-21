@@ -170,7 +170,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyPeriodPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyPeriod();
+    verifyPeriod("partA");
   }
 
   @Test
@@ -282,7 +282,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyPeriodPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
-    verifyPeriod();
+    verifyPeriod("partB");
   }
 
   @Test
@@ -513,6 +513,12 @@ public final class CoverageTransformerV2Test {
   }
 
   @Test
+  public void verifyPeriodPartD() {
+    transformCoverage(MedicareSegment.PART_D, false);
+    verifyPeriod("partD");
+  }
+
+  @Test
   public void verifyPayorPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyPayor();
@@ -613,10 +619,20 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(typ));
   }
 
-  private static void verifyPeriod() {
+  private static void verifyPeriod(String coverageType) {
     Period per = coverage.getPeriod();
     Period compare = new Period();
-    TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("1963-10-03"));
+
+    if (coverageType.equals("partA")) {
+      TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("2020-03-17"));
+      TransformerUtilsV2.setPeriodEnd(compare, LocalDate.parse("2020-06-17"));
+    } else if (coverageType.equals("partB")) {
+      TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("2021-07-17"));
+      TransformerUtilsV2.setPeriodEnd(compare, LocalDate.parse("2022-08-17"));
+    } else if (coverageType.equals("partD")) {
+      TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("2021-02-17"));
+      TransformerUtilsV2.setPeriodEnd(compare, LocalDate.parse("2022-11-17"));
+    }
     assertTrue(compare.equalsDeep(per));
   }
 
@@ -723,7 +739,7 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
-    verifyPeriod();
+    verifyPeriod("Part A");
     verifyPayor();
   }
 
@@ -741,7 +757,7 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
-    verifyPeriod();
+    verifyPeriod("Part B");
     verifyPayor();
   }
 
@@ -772,6 +788,7 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
+    verifyPeriod("Part D");
     verifyPayor();
   }
 
