@@ -62,6 +62,7 @@ def gitCommitId
 def gitRepoUrl
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
+def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
@@ -263,6 +264,7 @@ try {
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
 								error('Migrator deployment failed')
 							}
 						}
@@ -387,6 +389,7 @@ try {
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
 								error('Migrator deployment failed')
 							}
 						}
@@ -496,6 +499,7 @@ try {
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
 								error('Migrator deployment failed')
 							}
 						}
