@@ -19,7 +19,7 @@ class ValidationResult(str, Enum):
 
     NOT_APPLICABLE = "NOT_APPLICABLE"
     """Indicates that no validation ran on the given test run"""
-    PASS = "PASSED"
+    PASSED = "PASSED"
     """Indicates that the test run passed validation"""
     FAILURE = "FAILURE"
     """Indicates that the test run failed validation"""
@@ -106,7 +106,7 @@ def check_validation_goals(environment: Environment) -> ValidationResult:
 
         logger.info("SLAs within acceptable bounds")
 
-    return ValidationResult.PASS
+    return ValidationResult.PASSED
 
 
 def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:
