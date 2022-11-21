@@ -174,7 +174,7 @@ public class CarrierClaimTransformerV2 {
         new Reference()
             .setIdentifier(
                 TransformerUtilsV2.createIdentifier(
-                    CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, claimGroup.getCarrierNumber())));
+                    CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, claimGroup.getCarrierClaimBlgNpiNumber().get())));
 
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
