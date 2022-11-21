@@ -146,6 +146,17 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
+  public void shouldHaveBillingNPINum() throws Exception {
+    // We just want to make sure it is set
+    assertNotNull(eob.getBillablePeriod());
+    assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"),
+        eob.getBillablePeriod().getStart());
+    assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"), eob.getBillablePeriod().getEnd());
+  }
+
+  @Test
   public void shouldHaveIdentifiers() {
     assertEquals(2, eob.getIdentifier().size());
 

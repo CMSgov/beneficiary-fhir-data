@@ -6,11 +6,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.*;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
-import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -21,6 +18,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.Reference;
 
 /**
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -170,6 +168,13 @@ public class CarrierClaimTransformerV2 {
     eob.addExtension(
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
+
+    // CARR_CLM_BLG_NPI_NUM => ExplanationOfBenefit.provider.identifier
+    eob.setProvider(
+        new Reference()
+            .setIdentifier(
+                TransformerUtilsV2.createIdentifier(
+                    CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, claimGroup.getCarrierNumber())));
 
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
