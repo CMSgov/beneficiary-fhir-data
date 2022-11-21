@@ -102,6 +102,16 @@ public class BfdMDC {
     getMDCAdapter().put(formatMDCKey(key), value);
   }
 
+  /**
+   * Wrapper for {@link MDC#get(String)}, except that we format the key.
+   *
+   * @param key Key for later finding the value
+   * @return Value put into MDC
+   */
+  public static String get(String key) {
+    return getMDCAdapter().get(formatMDCKey(key));
+  }
+
   /** Wrapper for {@link org.slf4j.MDC#clear()}. */
   public static void clear() {
     getMDCAdapter().clear();
