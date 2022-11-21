@@ -62,14 +62,17 @@
 		</dependency>
 
 		<dependency>
+			<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
 		</dependency>
                 <dependency>
+			<!-- Used to transmit metrics to JMX for local testing. -->
                         <groupId>io.micrometer</groupId>
                         <artifactId>micrometer-registry-jmx</artifactId>
                 </dependency>
                 <dependency>
+			<!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
                         <groupId>io.micrometer</groupId>
                         <artifactId>micrometer-registry-cloudwatch</artifactId>
                 </dependency>

@@ -87,7 +87,7 @@ public class StandardGrpcRdaSourceTest {
   /** String used as a RDA API "version" in the unit tests. */
   public static final String VERSION = "version";
 
-  /** A MetricRegistry used to verify metrics. */
+  /** A MeterRegistry used to verify metrics. */
   private MeterRegistry appMetrics;
   /** A mock clock used to when testing the idle time for dropped connection exceptions. */
   @Mock private Clock clock;

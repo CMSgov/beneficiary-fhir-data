@@ -28,8 +28,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Models the configuration options for the application.
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class AppConfiguration extends BaseAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
-  static final Logger LOGGER = LoggerFactory.getLogger(AppConfiguration.class);
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -289,8 +286,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
   /**
-   * Environment variable containing the namespace name to use when sending Micrometer metrics to
-   * CloudWatch. This is a required environment variable.
+   * Environment variable containing the namespace to use when sending Micrometer metrics to
+   * CloudWatch. This is a required environment variable if {@link #ENV_VAR_KEY_CCW_RIF_JOB_ENABLED}
+   * is set to true.
    */
   public static final String ENV_VAR_MICROMETER_CW_NAMESPACE = "MICROMETER_CW_NAMESPACE";
 
@@ -315,7 +313,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String ENV_VAR_MICROMETER_JMX_ENABLED = "MICROMETER_JMX_ENABLED";
 
   /**
-   * Instance of {@link MicrometerConfigHelper} used to create {@link CloudWatchConfig} instance.
+   * Instance of {@link MicrometerConfigHelper} used to create a {@link CloudWatchConfig} instance.
    * Contains the property name to environment variable name mappings for supported {@link
    * CloudWatchConfig} properties as well as default values for some environment variables.
    */

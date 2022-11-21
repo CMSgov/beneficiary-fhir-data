@@ -191,7 +191,7 @@ public final class PipelineApplication {
   }
 
   /**
-   * Creayes a {@link DropwizardMeterRegistry} to transfer micrometer metrics into a {@link
+   * Creates a {@link DropwizardMeterRegistry} to transfer micrometer metrics into a {@link
    * MetricRegistry}.
    *
    * @param appMetrics the {@link MetricRegistry} to receive metrics

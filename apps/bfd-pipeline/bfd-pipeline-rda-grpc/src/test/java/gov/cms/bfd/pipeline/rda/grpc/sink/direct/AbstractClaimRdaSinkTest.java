@@ -16,7 +16,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.MessageError;
@@ -25,16 +24,13 @@ import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
-import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.distribution.CountAtBucket;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -209,19 +205,6 @@ public class AbstractClaimRdaSinkTest {
     // getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
   }
 
-  /**
-   * Extracts the array of long values from the {@link Histogram} and converts them into a list of
-   * {link Long}s.
-   *
-   * @param histogram {@link Histogram} containing the values we want to extract
-   * @return a {@link List} or {@link Long} containing all of the histogram values
-   */
-  private List<Long> getHistogramValues(DistributionSummary histogram) {
-    return Arrays.stream(histogram.takeSnapshot().histogramCounts())
-        .map(CountAtBucket::count)
-        .map(Double::longValue)
-        .collect(Collectors.toList());
-  }
   /**
    * Helper method to create a {@link RdaChange} object with the given message.
    *
