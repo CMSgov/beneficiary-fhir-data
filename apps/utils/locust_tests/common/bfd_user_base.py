@@ -67,14 +67,17 @@ def _(environment: Environment, **kwargs) -> None:
     stats = stats_collector.collect_stats()
 
     try:
-        final_result = stats_compare.do_stats_comparison(
+        compare_result = stats_compare.do_stats_comparison(
             environment,
             stats_config,
             stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH,
             stats,
         )
-        stats.metadata.compare_result = final_result  # type: ignore
+        stats.metadata.compare_result = compare_result  # type: ignore
         stats.metadata.validation_result = validation_result
+
+        logger.info("Final comparison result was: %s", compare_result.value)
+        logger.info("Final validation result was: %s", validation_result.value)
     finally:
         stats_writers.write_stats(stats_config, stats)
 
