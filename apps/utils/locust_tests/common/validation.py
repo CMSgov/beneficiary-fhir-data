@@ -21,7 +21,7 @@ class ValidationResult(str, Enum):
     """Indicates that no validation ran on the given test run"""
     PASSED = "PASSED"
     """Indicates that the test run passed validation"""
-    FAILURE = "FAILURE"
+    FAILED = "FAILED"
     """Indicates that the test run failed validation"""
 
 
@@ -82,7 +82,7 @@ def check_validation_goals(environment: Environment) -> ValidationResult:
     logger.info("Checking overall failure ratio...")
     if environment.stats.total.fail_ratio > 0:
         logger.error("Test failed due to request failure ratio > 0%")
-        return ValidationResult.FAILURE
+        return ValidationResult.FAILED
 
     logger.info("Failure ratio is 0%")
 
@@ -94,15 +94,15 @@ def check_validation_goals(environment: Environment) -> ValidationResult:
         logger.info("Checking 50%, 95% and 99% SLAs...")
         if environment.stats.total.get_response_time_percentile(0.50) > sla_50:
             logger.error("Test failed due to 50th percentile response time > %d ms", sla_50)
-            return ValidationResult.FAILURE
+            return ValidationResult.FAILED
 
         if environment.stats.total.get_response_time_percentile(0.95) > sla_95:
             logger.error("Test failed due to 95th percentile response time > %d ms", sla_95)
-            return ValidationResult.FAILURE
+            return ValidationResult.FAILED
 
         if environment.stats.total.get_response_time_percentile(0.99) > sla_99:
             logger.error("Test failed due to 99th percentile response time > %d ms", sla_99)
-            return ValidationResult.FAILURE
+            return ValidationResult.FAILED
 
         logger.info("SLAs within acceptable bounds")
 
