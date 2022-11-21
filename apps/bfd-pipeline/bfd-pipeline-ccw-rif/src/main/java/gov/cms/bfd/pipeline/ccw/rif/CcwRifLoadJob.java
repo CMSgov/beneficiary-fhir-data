@@ -93,7 +93,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
 
   /**
    * The directory name that failed RIF data sets are moved to {@link
-   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
+   * #S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS} will be moved to in S3.
    */
   public static final String S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS = "Synthetic/Failed";
 
