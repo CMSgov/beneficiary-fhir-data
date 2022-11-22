@@ -925,19 +925,27 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
             rslt = (CcwRifLoadPreValidateInterface) clazz.getDeclaredConstructor().newInstance();
           }
         }
-      } catch (ClassNotFoundException
-          | NoSuchMethodException
+      } catch (ClassNotFoundException e) {
+        throw new BadCodeMonkeyException(
+            String.format(
+                "Failed to create CcwRifLoadPreValidateInterface; class '%s' not found!",
+                className));
+      } catch (NoSuchMethodException
           | SecurityException
           | InstantiationException
           | InvocationTargetException
           | IllegalAccessException e) {
         throw new BadCodeMonkeyException(
             String.format(
-                "Failed to create CcwRifLoadPreValidateInterface from: {}. error: {}",
-                className,
-                e.getMessage()));
+                "Failed to create CcwRifLoadPreValidateInterface; error: %s", e.getMessage()));
       }
-      return rslt != null ? Optional.of(rslt) : Optional.empty();
+      if (rslt == null) {
+        throw new BadCodeMonkeyException(
+            String.format(
+                "specified class '%s' does not support CcwRifLoadPreValidateInterface!",
+                className));
+      }
+      return Optional.of(rslt);
     }
 
     /** {@inheritDoc} */

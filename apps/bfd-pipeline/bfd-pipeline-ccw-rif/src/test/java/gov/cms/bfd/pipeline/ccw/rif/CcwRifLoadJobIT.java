@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -16,6 +17,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -256,14 +258,11 @@ public final class CcwRifLoadJobIT {
    * @throws Exception (exceptions indicate test failure)
    */
   @Test
-  public void syntheticDataSetWithCustomPreValidationTestFailure() throws Exception {
+  public void syntheticDataSetPreValidationFailedTest() throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
-      /*
-       * Create the (empty) bucket to run against, and populate it with
-       * two data sets.
-       */
+      // Create (empty) bucket to run against, and populate it with a data set.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
       ExtractionOptions options =
           new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
@@ -282,21 +281,11 @@ public final class CcwRifLoadJobIT {
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER),
               new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT));
 
-      PreValidationProperties preValProps = new PreValidationProperties();
-      preValProps.setBeneIdStart(0);
-      preValProps.setBeneIdEnd(0);
-      preValProps.setCarrClmCntlNumStart(0);
-      preValProps.setClmGrpIdStart(0);
-      preValProps.setClmIdEnd(0);
-      preValProps.setClmIdStart(0);
-      preValProps.setFiDocCntlNumStart("JUNK");
-      preValProps.setHicnStart("JUNK");
-      preValProps.setMbiStart("JUNK");
-      preValProps.setPdeIdEnd(0);
-      preValProps.setPdeIdStart(0);
-      // set things up to force a failure; this class's isValid returns false (not valid)
-      preValProps.setPreValClassName(
-          "gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockRifLoadPreValidationSynthea");
+      /** set things up to force a failure; this mock class's isValid() returns false (not valid) */
+      PreValidationProperties preValProps =
+          generatePreValidationProperties(
+              Optional.of(
+                  "gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockRifLoadPreValidationSynthea"));
       manifest.setPreValidationProperties(preValProps);
 
       putSampleFilesInTestBucket(
@@ -369,13 +358,213 @@ public final class CcwRifLoadJobIT {
   }
 
   /**
+   * Tests {@link CcwRifLoadJob} when run with data in the Synthetic/Incoming folder(s). The
+   * pre-validation class does not exist so an exception is thrown. Data should remain in the
+   * Synthetic/Incoming folder.
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
+  @Test
+  public void syntheticDataSetWithNonExistentPreValidationClass() throws Exception {
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    Bucket bucket = null;
+    try {
+      // Create (empty) bucket to run against, and populate it
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
+      LOGGER.info(
+          "Bucket created: '{}:{}'",
+          s3Client.getS3AccountOwner().getDisplayName(),
+          bucket.getName());
+
+      DataSetManifest manifest =
+          new DataSetManifest(
+              Instant.now().minus(1, ChronoUnit.DAYS),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+
+      /** set things up to force an exception by specifying a non-existent pre-validation class */
+      PreValidationProperties preValProps =
+          generatePreValidationProperties(Optional.of("foo.bar.junk.PreValidationTrash"));
+      manifest.setPreValidationProperties(preValProps);
+
+      putSampleFilesInTestBucket(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          manifest,
+          List.of(StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+
+      // Run the job.
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState(),
+              options,
+              s3TaskManager,
+              listener,
+              false);
+      // Process dataset; should throw exception
+      Throwable exception =
+          assertThrows(
+              BadCodeMonkeyException.class,
+              () -> {
+                ccwJob.call();
+              });
+      assertEquals(
+          "Failed to create CcwRifLoadPreValidateInterface; class 'foo.bar.junk.PreValidationTrash' not found!",
+          exception.getMessage());
+
+      // Verify what was handed off to the DataSetMonitorListener.
+      assertEquals(0, listener.getNoDataAvailableEvents());
+      assertEquals(0, listener.getDataEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
+
+      // Verify that the datasets still exist in the /Incoming bucket folder.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          2,
+          java.time.Duration.ofSeconds(10));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
+
+    } finally {
+      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+    }
+  }
+
+  /**
+   * Tests {@link CcwRifLoadJob} when run with data in the Synthetic/Incoming folder(s). The
+   * pre-validation class is a valid class but it does not implement the {@link
+   * CcwRifLoadPreValidateInterface} so an exception is thrown. Data should remain in the
+   * Synthetic/Incoming folder.
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
+  @Test
+  public void syntheticDataSetWithNoPreValidationInterface() throws Exception {
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    Bucket bucket = null;
+    try {
+      // Create (empty) bucket to run against, and populate it
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
+      LOGGER.info(
+          "Bucket created: '{}:{}'",
+          s3Client.getS3AccountOwner().getDisplayName(),
+          bucket.getName());
+
+      DataSetManifest manifest =
+          new DataSetManifest(
+              Instant.now().minus(1, ChronoUnit.DAYS),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+
+      /**
+       * set things up to force an exception by specifying a pre-validation class that resolves to a
+       * valid Java class, but the class does not implement the {@link
+       * CcwRifLoadPreValidateInterface} so it throws an exception.
+       */
+      PreValidationProperties preValProps =
+          generatePreValidationProperties(
+              Optional.of("gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities"));
+      manifest.setPreValidationProperties(preValProps);
+
+      putSampleFilesInTestBucket(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          manifest,
+          List.of(StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+
+      // Run the job.
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState(),
+              options,
+              s3TaskManager,
+              listener,
+              false);
+      // Process dataset; should throw exception
+      Throwable exception =
+          assertThrows(
+              BadCodeMonkeyException.class,
+              () -> {
+                ccwJob.call();
+              });
+      assertEquals(
+          "specified class 'gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities' does not support CcwRifLoadPreValidateInterface!",
+          exception.getMessage());
+
+      // Verify what was handed off to the DataSetMonitorListener.
+      assertEquals(0, listener.getNoDataAvailableEvents());
+      assertEquals(0, listener.getDataEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
+
+      // Verify that the datasets still exist in the /Incoming bucket folder.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          2,
+          java.time.Duration.ofSeconds(10));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
+
+    } finally {
+      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+    }
+  }
+
+  /**
    * Tests {@link CcwRifLoadJob} when run with data in the Synthetic/Incoming folder(s). Data should
    * be read and moved into the respective Synthetic/Done folder(s).
    *
    * @throws Exception (exceptions indicate test failure)
    */
   @Test
-  public void syntheticDataSetWithDefaultPreValidationTestSuccess() throws Exception {
+  public void syntheticDataSetUsingDefaultPreValidationTest() throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
@@ -401,18 +590,11 @@ public final class CcwRifLoadJobIT {
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER),
               new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT));
 
-      PreValidationProperties preValProps = new PreValidationProperties();
-      preValProps.setBeneIdStart(0);
-      preValProps.setBeneIdEnd(0);
-      preValProps.setCarrClmCntlNumStart(0);
-      preValProps.setClmGrpIdStart(0);
-      preValProps.setClmIdEnd(0);
-      preValProps.setClmIdStart(0);
-      preValProps.setFiDocCntlNumStart("JUNK");
-      preValProps.setHicnStart("JUNK");
-      preValProps.setMbiStart("JUNK");
-      preValProps.setPdeIdEnd(0);
-      preValProps.setPdeIdStart(0);
+      /**
+       * set things up to to use a default implementation of the Synthea {@link
+       * CcwRifLoadPreValidateInterface} by not providing a class name.
+       */
+      PreValidationProperties preValProps = generatePreValidationProperties(Optional.empty());
       manifest.setPreValidationProperties(preValProps);
 
       putSampleFilesInTestBucket(
@@ -482,6 +664,32 @@ public final class CcwRifLoadJobIT {
     } finally {
       if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
+  }
+
+  /**
+   * Utility method to create {@link PreValidationProperties} object that can be used in various
+   * tests for Synthea pre-validation tasks.
+   *
+   * @param className optional {@link String} denoting Java class that will be instantiated
+   * @returns {@link PreValidationProperties}
+   */
+  private PreValidationProperties generatePreValidationProperties(Optional<String> className) {
+    PreValidationProperties preValProps = new PreValidationProperties();
+    preValProps.setBeneIdStart(0);
+    preValProps.setBeneIdEnd(0);
+    preValProps.setCarrClmCntlNumStart(0);
+    preValProps.setClmGrpIdStart(0);
+    preValProps.setClmIdEnd(0);
+    preValProps.setClmIdStart(0);
+    preValProps.setFiDocCntlNumStart("JUNK");
+    preValProps.setHicnStart("JUNK");
+    preValProps.setMbiStart("JUNK");
+    preValProps.setPdeIdEnd(0);
+    preValProps.setPdeIdStart(0);
+    if (className.isPresent()) {
+      preValProps.setPreValClassName(className.get());
+    }
+    return preValProps;
   }
 
   /**
