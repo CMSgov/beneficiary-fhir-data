@@ -4,6 +4,7 @@
 import json
 import logging
 import ssl
+import sys
 from typing import Callable, Dict, List, Optional, Union
 
 from locust import FastHttpUser, events
@@ -34,6 +35,17 @@ def _(environment: Environment, **kwargs) -> None:
         return
 
     validation.setup_failsafe_event(environment)
+
+    test_host: str = environment.parsed_options.host
+    if test_host.endswith(("/", "\\")):
+        logger = logging.getLogger()
+        logger.error(
+            "--host must not end with any trailing slashes. "
+            "Please remove the slashes and try again."
+        )
+
+        environment.process_exit_code = 1
+        sys.exit()
 
 
 @events.quitting.add_listener
