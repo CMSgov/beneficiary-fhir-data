@@ -192,17 +192,11 @@ public class AbstractClaimRdaSinkTest {
     assertEquals(1, sink.getMetrics().getExtractAgeMillis().count());
     assertEquals(100, sink.getMetrics().getChangeAgeMillis().mean());
     assertEquals(250, sink.getMetrics().getExtractAgeMillis().mean());
-    //    assertEquals(List.of(100L), getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
-    //    assertEquals(List.of(250L), getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
     sink.close();
     assertEquals(2, sink.getMetrics().getChangeAgeMillis().count());
     assertEquals(2, sink.getMetrics().getExtractAgeMillis().count());
     assertEquals(50, sink.getMetrics().getChangeAgeMillis().mean());
     assertEquals(125, sink.getMetrics().getExtractAgeMillis().mean());
-    //    assertEquals(List.of(0L, 100L),
-    // getHistogramValues(sink.getMetrics().getChangeAgeMillis()));
-    //    assertEquals(List.of(0L, 250L),
-    // getHistogramValues(sink.getMetrics().getExtractAgeMillis()));
   }
 
   /**
