@@ -76,6 +76,8 @@ Tests are run by invoking Locust locally, either via the `locust` binary or via 
 
 > **Note 2:** The arguments here can also be defined via environment variables, similarly to Locust's built-in arguments.
 
+> **Note 3:** `--host`, a Locust-provided parameter, _must_ include the protocol (i.e. HTTP/HTTPS), port and **no trailing slashes**. For example, `https://google.com` is a _valid_ value for `--host` whereas `https://google.com/` **is not**!
+
 | Command Line | Environment Variable | Config File | Required? | Default Value | Description |
 | - | - | - | - | - | - |
 | `--client-cert-path` | `LOCUST_BFD_CLIENT_CERT_PATH` | `client-cert-path` | Yes | N/A |  The path to the PEM file we copied/modified earlier |
