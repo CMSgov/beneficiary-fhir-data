@@ -106,7 +106,7 @@ particular BFD Server host.
      --spawn-rate=<SPAWN_RATE> \
      --spawned-runtime="<RUNTIME>" \
      --client-cert-path="$CLIENT_CERT_PATH" \
-     --database-uri="$DATABASE_CONSTR"
+     --database-connection-string="$DATABASE_CONSTR"
      --headless
    ```
 
@@ -215,7 +215,7 @@ particular BFD Server host.
       --spawn-rate=<SPAWN_RATE> \
       --spawned-runtime="<RUNTIME>" \
       --client-cert-path="$CLIENT_CERT_PATH" \
-      --database-uri="$DATABASE_CONSTR"
+      --database-connection-string="$DATABASE_CONSTR"
       --headless
     ```
 
@@ -360,7 +360,7 @@ particular BFD Server host.
       --spawn-rate=<SPAWN_RATE> \
       --spawned-runtime="<RUNTIME>" \
       --client-cert-path="$CLIENT_CERT_PATH" \
-      --database-uri="$DATABASE_CONSTR"
+      --database-connection-string="$DATABASE_CONSTR"
       --headless
     ```
 
