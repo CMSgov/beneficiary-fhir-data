@@ -44,8 +44,8 @@ public class MicrometerConfigHelper {
 
   /**
    * Creates a copy of this object that differs only in the value lookup function. Intended for use
-   * in unit tests to plugin in a testable lookup function instead of relying on {@link
-   * System#getenv}.
+   * in unit tests to plug in a testable lookup function (like {@link Map::get}) instead of an
+   * untestable one like {@link System#getenv}.
    *
    * @param valueLookupFunction replacement lookup function
    * @return instance with same config and default maps but new lookup function
@@ -56,11 +56,12 @@ public class MicrometerConfigHelper {
   }
 
   /**
-   * Map the property name to a lookup name, look up the value and return it or a default value if
-   * the lookup fails. Unsupported properties also return null. Intended for use in implementing the
-   * {@link io.micrometer.core.instrument.config.MeterRegistryConfig#get} method.
+   * Maps the Micrometer property name to a lookup name, looks up the value using the lookup name,
+   * and returns the value or a default value if the lookup fails. Unsupported properties also
+   * return null. Intended for use in implementing the {@link
+   * io.micrometer.core.instrument.config.MeterRegistryConfig#get} method.
    *
-   * @param propertyName name of config property
+   * @param propertyName name of micrometer config property
    * @return value or null if there is no value for the requested property or property is
    *     unsupported
    */
