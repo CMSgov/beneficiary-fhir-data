@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
 import static java.lang.String.format;
 
 import com.amazonaws.regions.Regions;
@@ -197,10 +196,13 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
 
     private RdaService.Version createVersion() {
       RdaService.Version.VersionBuilder versionBuilder = RdaService.Version.builder();
+      RdaService.Version defaultVersion = versionBuilder.build();
+
       if (serverMode == ServerMode.S3) {
-        versionBuilder.version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION));
+        versionBuilder.version(
+            format("S3:%d:%s", System.currentTimeMillis(), defaultVersion.getVersion()));
       } else {
-        versionBuilder.version(format("Random:%d:%s", randomSeed, RDA_PROTO_VERSION));
+        versionBuilder.version(format("Random:%d:%s", randomSeed, defaultVersion.getVersion()));
       }
       return versionBuilder.build();
     }
