@@ -141,7 +141,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setProvTypFacilCd(randomAlphaNumeric(1, 1)));
     optional(() -> claim.setProvEmerInd(randomAlphaNumeric(1, 1)));
     optional(() -> claim.setProvDeptId(randomAlphaNumeric(3, 3)));
-    optional(() -> claim.setMedaProvId(randomAlphaNumeric(13, 13)));
+    optional(
+        () -> {
+          claim.setMedaProvId(randomAlphaNumeric(13, 13));
+          claim.setMedaProv6(claim.getMedaProvId().substring(0, 6));
+        });
     optional(() -> claim.setTotalChargeAmount(randomAmount()));
     optional(() -> claim.setRecdDtCymd(randomDate()));
     optional(() -> claim.setCurrTranDtCymd(randomDate()));
