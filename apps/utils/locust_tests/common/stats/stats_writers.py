@@ -50,8 +50,9 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
         raise ValueError("AggregatedStats instance must have metadata to write to file")
 
     stats_hash = stats.metadata.hash
+    stats_timestamp = stats.metadata.timestamp
     parent_path = stats_config.stats_store_file_path or "./"
-    full_path = os.path.join(parent_path, f"{int(time.time())}-{stats_hash}.stats.json")
+    full_path = os.path.join(parent_path, f"{stats_timestamp}-{stats_hash}.stats.json")
     with open(
         full_path,
         mode="x",
@@ -85,13 +86,14 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
         raise ValueError("--stats-store-s3-table must be specified")
 
     stats_hash = stats.metadata.hash
+    stats_timestamp = stats.metadata.timestamp
     s3_path = "/".join(
         [
             "databases",
             stats_config.stats_store_s3_database,
             stats_config.stats_store_s3_table,
             f"hash={stats_hash}",
-            f"{int(time.time())}.stats.json",
+            f"{stats_timestamp}.stats.json",
         ]
     )
     try:
