@@ -43,7 +43,7 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: true
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 600 # 10 minutes
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 120 # 2 minutes
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 20

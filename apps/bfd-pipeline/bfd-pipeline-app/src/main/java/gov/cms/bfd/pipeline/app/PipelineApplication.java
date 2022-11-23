@@ -159,7 +159,10 @@ public final class PipelineApplication {
     boolean anyTestFailed = false;
     for (PipelineJob<?> job : jobs) {
       try {
-        if (!job.isSmokeTestSuccessful()) {
+        LOGGER.info("smoke test running: job={}", job.getType());
+        if (job.isSmokeTestSuccessful()) {
+          LOGGER.info("smoke test successful: job={}", job.getType());
+        } else {
           anyTestFailed = true;
           LOGGER.error("smoke test reported failure: job={}", job.getType());
         }
