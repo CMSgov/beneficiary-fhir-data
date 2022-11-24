@@ -305,7 +305,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         }
       }
     }
-   preValidationFailed = !isValid;
-   return isValid;
+    preValidationFailed = !isValid;
+    return isValid;
   }
 }

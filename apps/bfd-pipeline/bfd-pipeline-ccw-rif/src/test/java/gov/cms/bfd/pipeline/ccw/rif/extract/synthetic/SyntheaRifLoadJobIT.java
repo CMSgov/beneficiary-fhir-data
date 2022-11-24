@@ -1,4 +1,4 @@
-package gov;
+package gov.cms.bfd.pipeline.ccw.rif.extract.synthetic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +40,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Integration tests for {@link CcwRifLoadJob}. */
+/** Integration tests for Synthea pre-validation bucket handling. */
 public final class SyntheaRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
@@ -102,6 +102,7 @@ public final class SyntheaRifLoadJobIT {
               new DataSetManifestEntry("beneficiary.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
+      /* create {@link PreValidationProperties} that includes a bene_id that is already in db */
       PreValidationProperties preValProps = new PreValidationProperties();
       preValProps.setBeneIdStart(-1000006); // this one exists in db...should trigger failure
       preValProps.setBeneIdEnd(-1000010);
@@ -116,6 +117,7 @@ public final class SyntheaRifLoadJobIT {
       preValProps.setPdeIdStart(0);
       manifest.setPreValidationProperties(preValProps);
 
+      // upload data to Synthea S3 bucket
       putSampleFilesInTestBucket(
           s3Client,
           bucket,
@@ -177,6 +179,138 @@ public final class SyntheaRifLoadJobIT {
           s3Client.doesObjectExist(
               bucket.getName(),
               CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
+
+    } finally {
+      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+    }
+  }
+
+  /**
+   * Tests {@link CcwRifLoadJob} when run with data in the Synthetic/Incoming folder(s). Data should
+   * be read and moved into the respective Synthetic/Failed folder(s).
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
+  @Test
+  public void syntheticDataSetPreValidationIdempotentSucceedsTest() throws Exception {
+    // load data into db
+    loadSample(
+        List.of(
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2011,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2012,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2013,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2014,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2015,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2016,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2017,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2018,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2019,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2020,
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
+        CcwRifLoadTestUtils.getLoadOptions());
+
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    Bucket bucket = null;
+    try {
+      // Create (empty) bucket to run against, and populate it with a data set.
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
+      LOGGER.info(
+          "Bucket created: '{}:{}'",
+          s3Client.getS3AccountOwner().getDisplayName(),
+          bucket.getName());
+
+      DataSetManifest manifest =
+          new DataSetManifest(
+              Instant.now().minus(1, ChronoUnit.DAYS),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+              new DataSetManifestEntry("beneficiary.rif", RifFileType.BENEFICIARY),
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+
+      /* create {@link PreValidationProperties} that includes a bene_id that is already in db */
+      PreValidationProperties preValProps = new PreValidationProperties();
+      preValProps.setBeneIdStart(-1000006); // this one exists in db...should trigger failure
+      preValProps.setBeneIdEnd(-1000010);
+      preValProps.setCarrClmCntlNumStart(0);
+      preValProps.setClmGrpIdStart(0);
+      preValProps.setClmIdEnd(0);
+      preValProps.setClmIdStart(0);
+      preValProps.setFiDocCntlNumStart("JUNK");
+      preValProps.setHicnStart("JUNK");
+      preValProps.setMbiStart("JUNK");
+      preValProps.setPdeIdEnd(0);
+      preValProps.setPdeIdStart(0);
+      manifest.setPreValidationProperties(preValProps);
+
+      // upload data to Synthea S3 bucket
+      putSampleFilesInTestBucket(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          manifest,
+          List.of(
+              StaticRifResource.SAMPLE_SYNTHEA_BENES2021.getResourceUrl(),
+              StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
+
+      // Run the job.
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState(),
+              options,
+              s3TaskManager,
+              listener,
+              true); // run in idempotent mode
+      // Process dataset
+      ccwJob.call();
+
+      // Verify what was handed off to the DataSetMonitorListener; there should
+      // be no events since the pre-validation failure short-circuits everything.
+      assertEquals(0, listener.getNoDataAvailableEvents());
+      assertEquals(1, listener.getDataEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
+
+      // Verify that the datasets were moved to their respective 'failed' locations.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          0,
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+          1 + manifest.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiary.rif"));
+      assertTrue(
+          s3Client.doesObjectExist(
+              bucket.getName(),
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
                   + "/"
                   + manifest.getTimestampText()
                   + "/carrier.rif"));
