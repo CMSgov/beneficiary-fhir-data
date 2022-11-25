@@ -57,8 +57,8 @@ public final class SyntheaRifLoadJobIT {
   };
 
   /**
-   * Tests {@link CcwRifLoadJob} when run with data in the Synthetic/Incoming folder(s). Data should
-   * be read and moved into the respective Synthetic/Failed folder(s).
+   * Tests {@link CcwRifLoadJob} when run using data in the Synthetic/Incoming folder(s). Data
+   * should be read and moved into the respective Synthetic/Failed folder(s).
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -184,13 +184,15 @@ public final class SyntheaRifLoadJobIT {
                   + "/carrier.rif"));
 
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (bucket != null) {
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      }
     }
   }
 
   /**
-   * Tests {@link CcwRifLoadJob} when run with data in the Synthetic/Incoming folder(s). Data should
-   * be read and moved into the respective Synthetic/Failed folder(s).
+   * Tests {@link CcwRifLoadJob} when run in idempotent mode using data in the Synthetic/Incoming
+   * folder(s). Data should be read and moved into the respective Synthetic/Done folder(s).
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -316,7 +318,9 @@ public final class SyntheaRifLoadJobIT {
                   + "/carrier.rif"));
 
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (bucket != null) {
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      }
     }
   }
 
