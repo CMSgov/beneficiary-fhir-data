@@ -418,29 +418,11 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
       return true;
     }
 
-    CcwRifLoadPreValidateInterface preValInterface = null;
-    /**
-     * we are processing Synthea data...it is possible that a specialied
-     * CcwRifLoadPreValidateInterface has been 'pre-loaded' into the maifest; if not, create one.
-     * Then invoke the validation.
-     */
-    if (manifest
-        .getPreValidationProperties()
-        .get()
-        .getPreValidationInterface(Optional.empty())
-        .isEmpty()) {
-      // instantiate a pre-validation interface; in this case, CcwRifLoadPreValidateSynthea
-      preValInterface = new CcwRifLoadPreValidateSynthea();
-      // initialize the interface with the appState
-      preValInterface.init(appState);
-    } else {
-      preValInterface =
-          manifest
-              .getPreValidationProperties()
-              .get()
-              .getPreValidationInterface(Optional.empty())
-              .get();
-    }
+    /** we are processing Synthea data...setup a pre-validation interface. */
+    CcwRifLoadPreValidateInterface preValInterface = new CcwRifLoadPreValidateSynthea();
+    // initialize the interface with the appState
+    preValInterface.init(appState);
+
     // perform whatever vaidation is appropriate
     LOGGER.info(
         "Synthea pre-validation being performed by: {}...", preValInterface.getClass().getName());

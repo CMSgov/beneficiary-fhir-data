@@ -2,8 +2,6 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateInterface;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -601,16 +599,9 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     @XmlElement(name = "pde_id_end", required = true)
     protected long pdeIdEnd;
 
-    /** a {@link String} denoting the timestamp of the RIF dataset. */
+    /** a {@link String} timestamp denoting when Synthea dataset was generated . */
     @XmlElement(name = "generated", required = false)
     protected String generated;
-
-    /**
-     * a {@link String} denoting the classname of a {@link CcwRifLoadPreValidateInterface} that can
-     * perform RIF Load pre-validation.
-     */
-    @XmlElement(name = "preval_classname", required = false)
-    protected String preValClassName;
 
     /** Create an instance of {@link PreValidationProperties } */
     public PreValidationProperties() {}
@@ -630,7 +621,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * @param clmIdEnd upper-bound bene_id range value to verify
      * @param pdeIdEnd upper-bound bene_id range value to verify
      * @param generated string denoting when the end state meta-data was generated
-     * @param preValClassName string identifying a {@link CcwRifLoadPreValidateInterface}
      */
     public PreValidationProperties(
         long clmGrpIdStart,
@@ -644,8 +634,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
         long beneIdEnd,
         long clmIdEnd,
         long pdeIdEnd,
-        String generated,
-        String preValClassName) {
+        String generated) {
       this.clmGrpIdStart = clmGrpIdStart;
       this.pdeIdStart = pdeIdStart;
       this.carrClmCntlNumStart = carrClmCntlNumStart;
@@ -658,11 +647,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.clmIdEnd = clmIdEnd;
       this.pdeIdEnd = pdeIdEnd;
       this.generated = generated;
-      this.preValClassName = preValClassName;
     }
 
     /**
-     * Gets the value of the clmGrpIdStart property.
+     * Gets the value of the {@link #clmGrpIdStart} property.
      *
      * @return value {@link long }
      */
@@ -680,7 +668,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the pdeIdStart property.
+     * Gets the value of the {@link #pdeIdStart} property.
      *
      * @return value {@link long }
      */
@@ -698,7 +686,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the carrClmCntlNumStart property.
+     * Gets the value of the {@link #carrClmCntlNumStart} property.
      *
      * @return value {@link long }
      */
@@ -716,7 +704,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the fiDocCntlNumStart property.
+     * Gets the value of the {@link #fiDocCntlNumStart} property.
      *
      * @return value {@link String}
      */
@@ -734,7 +722,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the hicnStart property.
+     * Gets the value of the {@link #hicnStart} property.
      *
      * @return possible object is {@link String }
      */
@@ -752,7 +740,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the beneIdStart property.
+     * Gets the value of the {@link #beneIdStart} property.
      *
      * @return value {@link long }
      */
@@ -770,7 +758,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the clmIdStart property.
+     * Gets the value of the {@link #clmIdStart} property.
      *
      * @return value {@link long }
      */
@@ -788,7 +776,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the mbiStart property.
+     * Gets the value of the {@link #mbiStart} property.
      *
      * @return possible object is {@link String }
      */
@@ -806,7 +794,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the beneIdEnd property.
+     * Gets the value of the {@link #beneIdEnd} property.
      *
      * @return value {@link long }
      */
@@ -824,7 +812,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the clmIdEnd property.
+     * Gets the value of the {@link #clmIdEnd} property.
      *
      * @return value {@link long }
      */
@@ -842,7 +830,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the pdeIdEnd property.
+     * Gets the value of the {@link #pdeIdEnd} property.
      *
      * @return value {@link long }
      */
@@ -860,7 +848,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the generated property.
+     * Gets the value of the {@link #generated} property.
      *
      * @return possible object is {@link String }
      */
@@ -875,77 +863,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      */
     public void setGenerated(String value) {
       this.generated = value;
-    }
-
-    /**
-     * Sets the {@link #preValClassName}.
-     *
-     * @param value allowed object is {@link String }
-     */
-    public void setPreValClassName(String value) {
-      this.preValClassName = value;
-    }
-
-    /**
-     * Gets the {@link #preValClassName}.
-     *
-     * @return value is {@link String }
-     */
-    public Optional<String> getPreValClassName() {
-      return this.preValClassName != null && this.preValClassName.length() > 0
-          ? Optional.of(this.preValClassName)
-          : Optional.empty();
-    }
-
-    /**
-     * Method to construct a {@link CcwRifLoadPreValidateInterface} using reflection to construct a
-     * java {@link Class} based on text provided either in the overRideValue {@link String} value or
-     * defined in the {@link DataSetManifest}.
-     *
-     * @param overRideValue {@link String} denoting a Java {@link Class} that implements the {@link
-     *     CcwRifLoadPreValidateInterface}
-     * @return {@link Optional } value for {@link CcwRifLoadPreValidateInterface }
-     * @throws BadCodeMonkeyException if any problems arise
-     */
-    public Optional<CcwRifLoadPreValidateInterface> getPreValidationInterface(
-        Optional<String> overRideValue) {
-      String className =
-          overRideValue.isPresent()
-              ? overRideValue.get()
-              : preValClassName != null ? preValClassName : "";
-
-      if (className == null || className.length() < 1) {
-        return Optional.empty();
-      }
-      CcwRifLoadPreValidateInterface rslt = null;
-      try {
-        Class<?> clazz = Class.forName(className);
-        for (Class<?> iFace : clazz.getInterfaces()) {
-          if (iFace.getSimpleName().equals("CcwRifLoadPreValidateInterface")) {
-            rslt = (CcwRifLoadPreValidateInterface) clazz.getDeclaredConstructor().newInstance();
-          }
-        }
-      } catch (ClassNotFoundException e) {
-        throw new BadCodeMonkeyException(
-            String.format(
-                "Failed to create CcwRifLoadPreValidateInterface; class '%s' not found!",
-                className));
-      } catch (NoSuchMethodException
-          | SecurityException
-          | InstantiationException
-          | InvocationTargetException
-          | IllegalAccessException e) {
-        throw new BadCodeMonkeyException(
-            String.format(
-                "Failed to create CcwRifLoadPreValidateInterface; error: %s", e.getMessage()));
-      }
-      if (rslt == null) {
-        throw new BadCodeMonkeyException(
-            String.format(
-                "specified class '%s' does not support CcwRifLoadPreValidateInterface!",
-                className));
-      }
-      return Optional.of(rslt);
     }
 
     /** {@inheritDoc} */
@@ -976,8 +893,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       sb.append(pdeIdEnd);
       sb.append(", generated=");
       sb.append(generated);
-      sb.append(", preValClassName=");
-      sb.append(preValClassName);
       sb.append("]");
       return sb.toString();
     }
