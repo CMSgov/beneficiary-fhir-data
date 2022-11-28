@@ -15,9 +15,9 @@ and deploying migrations more robust and efficient.
 ## Status
 [Status]: #status
 
-* Status: Proposed
+* Status: Implemented
 * Implementation JIRA Ticket(s):
-  * [BFD-XXXX](https://jira.cms.gov/browse/BFD-XXXX)
+  * [BFD-1560](https://jira.cms.gov/browse/BFD-1560)
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
