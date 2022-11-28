@@ -10,8 +10,6 @@ import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Builder;
 import lombok.Value;
@@ -24,28 +22,12 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
+  public static final String RDA_PROTO_VERSION = "0.10";
 
   private final Config config;
 
   public RdaService(Config config) {
     this.config = config;
-  }
-
-  /**
-   * Gets the default API Version to use from the VERSION.txt file that was packaged in the jar
-   *
-   * @return The default RDA API version from the packaged VERSION.txt
-   */
-  public static String defaultApiVersion() {
-    try (InputStream in = Version.class.getClassLoader().getResourceAsStream("VERSION.txt")) {
-      if (in != null) {
-        return new String(in.readAllBytes()).trim();
-      } else {
-        throw new IllegalStateException("Missing the proto VERSION.txt file");
-      }
-    } catch (IOException e) {
-      throw new IllegalStateException("Missing the proto VERSION.txt file");
-    }
   }
 
   @Override
@@ -152,7 +134,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   @Value
   @Builder
   public static class Version {
-    @Builder.Default String version = defaultApiVersion();
+    @Builder.Default String version = RDA_PROTO_VERSION;
     @Builder.Default String commitId = "";
     @Builder.Default String buildTime = "";
 

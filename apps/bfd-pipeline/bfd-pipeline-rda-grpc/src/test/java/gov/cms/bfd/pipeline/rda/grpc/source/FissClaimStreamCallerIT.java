@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -72,7 +73,9 @@ public class FissClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller();
-              assertEquals("0.10.0", caller.callVersionService(channel, CallOptions.DEFAULT));
+              assertEquals(
+                  RdaService.RDA_PROTO_VERSION,
+                  caller.callVersionService(channel, CallOptions.DEFAULT));
 
               final GrpcResponseStream<FissClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
