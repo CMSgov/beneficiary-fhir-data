@@ -107,15 +107,15 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   }
 
   /**
-   * Creates an instance for use in unit tests. Setting optionalTrue to true causes all optional
+   * Creates an instance for use in unit tests. Setting optionalOverride to true causes all optional
    * fields to be added to the claim. This is useful in some tests.
    *
    * @param seed seed for the PRNG
-   * @param optionalTrue true if all optional fields should be populated
+   * @param optionalOverride true if all optional fields should be populated
    */
   @VisibleForTesting
-  RandomFissClaimGenerator(long seed, boolean optionalTrue, Clock clock) {
-    super(seed, optionalTrue, clock);
+  RandomFissClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
+    super(seed, optionalOverride, clock);
   }
 
   public FissClaim randomClaim() {
@@ -129,7 +129,8 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   }
 
   private void addRandomFieldValues(FissClaim.Builder claim) {
-    claim.setDcn(randomDigit(5, 8)).setHicNo(randomDigit(12, 12));
+    claim.setDcn(randomDigit(5, 8));
+    claim.setHicNo(randomDigit(12, 12));
     claim.setCurrStatusEnum(randomEnum(FissClaimStatusEnums));
     oneOf(
         () -> claim.setCurrLoc1Enum(randomEnum(FissProcessingTypeEnums)),

@@ -88,15 +88,15 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   }
 
   /**
-   * Creates an instance for use in unit tests. Setting optionalTrue to true causes all optional
+   * Creates an instance for use in unit tests. Setting optionalOverride to true causes all optional
    * fields to be added to the claim. This is useful in some tests.
    *
    * @param seed seed for the PRNG
-   * @param optionalTrue true if all optional fields should be populated
+   * @param optionalOverride true if all optional fields should be populated
    * @param clock clock to generate current time/date values (needed for tests)
    */
-  public RandomMcsClaimGenerator(long seed, boolean optionalTrue, Clock clock) {
-    super(seed, optionalTrue, clock);
+  public RandomMcsClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
+    super(seed, optionalOverride, clock);
   }
 
   public McsClaim randomClaim() {
