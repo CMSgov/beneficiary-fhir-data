@@ -51,6 +51,7 @@ public final class SyntheaRifLoadJobIT {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
+  /** log a message after every test finishes. */
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
@@ -238,7 +239,7 @@ public final class SyntheaRifLoadJobIT {
 
       /* create {@link PreValidationProperties} that includes a bene_id that is already in db */
       PreValidationProperties preValProps = new PreValidationProperties();
-      preValProps.setBeneIdStart(-1000006); // this one exists in db...should trigger failure
+      preValProps.setBeneIdStart(-1000006); // this one exists in db...but OK since idempotent mode
       preValProps.setBeneIdEnd(-1000010);
       preValProps.setCarrClmCntlNumStart(0);
       preValProps.setClmGrpIdStart(0);
@@ -276,13 +277,14 @@ public final class SyntheaRifLoadJobIT {
       // Process dataset
       ccwJob.call();
 
-      // Verify what was handed off to the DataSetMonitorListener; there should
-      // be no events since the pre-validation failure short-circuits everything.
+      // Verify what was handed off to the DataSetMonitorListener; there should be
+      // no failure events since the pre-validation ran in idempotent mode which
+      // means it is acceptable to have a bene_id overlaps.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(1, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
 
-      // Verify that the datasets were moved to their respective 'failed' locations.
+      // Verify that the datasets were moved to their respective 'completed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
