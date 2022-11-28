@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9"
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10"
 				 timestamp="2525-02-13T10:10:10Z" sequenceId="1">
 	<entry name="bene_0.csv" type="BENEFICIARY" exportType="INSERT" />
 </dataSetManifest>
