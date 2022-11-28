@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
@@ -45,6 +46,7 @@ public class ClaimDao {
    * @param <T> The entity type being retrieved.
    * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
+  @Trace
   public <T> T getEntityById(ResourceTypeV2<?, T> resourceType, String id) {
     final Class<T> entityClass = resourceType.getEntityClass();
     final String entityIdAttribute = resourceType.getEntityIdAttribute();
@@ -82,6 +84,7 @@ public class ClaimDao {
    * @param <T> The entity type being retrieved.
    * @return A list of entities of type T retrieved matching the given parameters.
    */
+  @Trace
   public <T> List<T> findAllByMbiAttribute(
       ResourceTypeV2<?, T> resourceType,
       String mbiSearchValue,

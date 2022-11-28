@@ -1,7 +1,7 @@
 # Firehose Data Stream
 resource "aws_kinesis_firehose_delivery_stream" "firehose-ingester" {
-  name           = "${local.full_name}-firehose-ingester"
-  destination    = "extended_s3"
+  name        = "${local.full_name}-firehose-ingester"
+  destination = "extended_s3"
 
   extended_s3_configuration {
     bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
@@ -62,7 +62,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose-ingester" {
 
 # CloudWatch Log Subscription
 resource "aws_cloudwatch_log_subscription_filter" "cloudwatch-access-log-subscription" {
-  name            = "${local.full_name}-access-log-subscription"
+  name = "${local.full_name}-access-log-subscription"
   # Set the log group name so that if we use an environment ending in "-dev", it will get logs from
   # the "real" log group for that environment. So we could make an environment "prod-sbx-dev" that
   # we can use for development, and it will read from the "prod-sbx" environment.

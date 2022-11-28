@@ -1564,7 +1564,7 @@ public final class TransformerUtilsV2 {
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resources);
 
       // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(bundle.getTotal());
+      LoggingUtils.logResourceCountToMdc(resources.size());
     }
 
     /*

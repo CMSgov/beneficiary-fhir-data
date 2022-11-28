@@ -204,6 +204,52 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
   }
 }
 
+# Latency for EoB endpoints _with_ resources returned with partner client SSL as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_with_resources" {
+  for_each = local.filter_variations
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eob-all-with-resources/${each.value.name_suffix}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "${local.client_ssl_pattern} && ",
+    "$.mdc.resources_returned_count != 0 && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency/eob-all-with-resources"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_milliseconds"
+    dimensions = each.value.dimensions
+    unit       = "Milliseconds"
+  }
+}
+
+# Latency by KB for all EoB endpoints _with_ resources returned with partner client SSL as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all_with_resources" {
+  for_each = local.filter_variations
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/eob-all-with-resources/${each.value.name_suffix}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "${local.client_ssl_pattern} && ",
+    "$.mdc.resources_returned_count != 0 && ",
+    "$.mdc.http_access_response_duration_per_kb = *}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency-by-kb/eob-all-with-resources"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_per_kb"
+    dimensions = each.value.dimensions
+    unit       = "Milliseconds"
+  }
+}
+
 # Latency for all EoB endpoints with no resources returned (for SLOs) with partner client SSL as
 # dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_resources" {
@@ -225,46 +271,5 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_re
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
     unit       = "Milliseconds"
-  }
-}
-
-# This metric filter is deprecrated, but an existing CloudWatch alarm (bfd-${env}-server-all-500s)
-# depends on it.
-# TODO: Remove this metric filter in BFD-1773
-resource "aws_cloudwatch_log_metric_filter" "deprecated_http_requests_count_500" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/count-500/all"
-  log_group_name = local.log_groups.access
-
-  pattern = join("", [
-    "{($.mdc.http_access_request_clientSSL_DN = \"*\") && ",
-    "($.mdc.http_access_response_status = 500)}"
-  ])
-
-  metric_transformation {
-    name          = "http-requests/count-500/all"
-    namespace     = local.namespace
-    value         = "1"
-    default_value = "0"
-  }
-}
-
-# This metric filter is deprecrated, but an existing CloudWatch alarm
-# (bfd-${env}-server-all-eob-6s-p95) depends on it. 
-# TODO: Remove this metric filter in BFD-1773
-resource "aws_cloudwatch_log_metric_filter" "deprecated_http_requests_latency_eob_all" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eobAll/all"
-  log_group_name = local.log_groups.access
-
-  pattern = join("", [
-    "{($.mdc.http_access_request_clientSSL_DN = \"*\") && ",
-    "($.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\") && ",
-    "($.mdc.http_access_response_duration_milliseconds = *)}"
-  ])
-
-  metric_transformation {
-    name          = "http-requests/latency/eobAll/all"
-    namespace     = local.namespace
-    value         = "$.mdc.http_access_response_duration_milliseconds"
-    default_value = null
   }
 }

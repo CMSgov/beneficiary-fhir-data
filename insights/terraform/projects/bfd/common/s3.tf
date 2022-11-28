@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "bfd-insights-bfd-app-logs" {
   bucket              = "bfd-insights-bfd-app-logs"
-  hosted_zone_id      = "Z3AQBSTGFYJSTF"
   object_lock_enabled = false
   policy = jsonencode(
     {
@@ -96,6 +95,18 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
       filter_prefix       = "databases/bfd-insights-bfd-${lambda_function.key}/bfd_insights_bfd_${replace(lambda_function.key, "-", "_")}_server_regression/"
       filter_suffix       = ".stats.json"
       id                  = "bfd-${lambda_function.key}-server-regression-glue-trigger"
+      lambda_function_arn = lambda_function.value.arn
+    }
+  }
+  dynamic "lambda_function" {
+    for_each = data.aws_lambda_function.bfd_insights_error_slack
+
+    content {
+      events = [
+        "s3:ObjectCreated:*",
+      ]
+      filter_prefix       = "databases/bfd-insights-bfd-${lambda_function.key}/bfd_insights_bfd_prod_api_requests_errors/"
+      id                  = "bfd-${lambda_function.key}-bfd-insights-error-slack"
       lambda_function_arn = lambda_function.value.arn
     }
   }
