@@ -128,6 +128,11 @@ public final class RifLayout {
       if ("HHA".contains(sheetName) && "CLM_HHA_TOT_VISIT_CNT".equals(rifColumnName))
         rifColumnLength = Optional.of(4);
 
+      // Temporary Code for CCW Additions. These will go away
+      if ("HHA,Hospice".contains(sheetName) && "CLAIM_QUERY_CODE".equals(rifColumnName)) continue;
+      // Temporary Code for CCW Additions. These will go away
+      if ("Carrier".contains(sheetName) && "CARR_CLM_BLG_NPI_NUM".equals(rifColumnName)) continue;
+
       rifFields.add(
           new RifField(
               rifColumnName,
