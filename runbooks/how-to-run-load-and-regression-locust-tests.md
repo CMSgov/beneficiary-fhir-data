@@ -6,7 +6,7 @@ particular BFD Server host.
 - [How to Run the Regression and Load Test Suites](#how-to-run-the-regression-and-load-test-suites)
   - [Glossary](#glossary)
   - [FAQ](#faq)
-    - [I specified `--host` with a valid URL like so `https://example.com/`, but my tests aren't running. What am I doing wrong?](#i-specified---host-with-a-valid-url-like-so-httpsexamplecom-but-my-tests-arent-running-what-am-i-doing-wrong)
+    - [I specified `--host` with a valid URL like so `example.com`, but my tests aren't running. What am I doing wrong?](#i-specified---host-with-a-valid-url-like-so-examplecom-but-my-tests-arent-running-what-am-i-doing-wrong)
   - [Prerequisites](#prerequisites)
   - [Instructions](#instructions)
     - [How to Run the Regression Suite Locally Against a Local BFD Server](#how-to-run-the-regression-suite-locally-against-a-local-bfd-server)
@@ -23,14 +23,14 @@ particular BFD Server host.
 
 ## FAQ
 
-### I specified `--host` with a valid URL like so `https://example.com/`, but my tests aren't running. What am I doing wrong?
+### I specified `--host` with a valid URL like so `example.com`, but my tests aren't running. What am I doing wrong?
 
 Firstly, `--host` is a default [Locust argument][locust-args] that is a _bit_ of a misnomer; valid
 `--host` values _must_ include the protocol (i.e. `https`), hostname (i.e. `example.com`) and,
-optionally, the port in the following format: `PROTOCOL://HOSTNAME:PORT`. Additionally, **trailing**
-**slashes _must_ be omitted** as Locust does not trim them when sending requests. Historically, the
-inclusion of trailing slashes has been problematic, so any tests ran from the `locusts_tests`
-project will immediately exit and log an error if trailing slashes are found in `--host`.
+optionally, the port in the following format: `PROTOCOL://HOSTNAME:PORT`. Be aware that _Locust_
+does not trim trailing slashes after the `PORT`; however, we have implemented a check for trailing
+slashes in `--host` and remove them ourselves. So, it is recommended that `--host` does not include
+any trailing characters after `PORT` as well.
 
 ## Prerequisites
 
