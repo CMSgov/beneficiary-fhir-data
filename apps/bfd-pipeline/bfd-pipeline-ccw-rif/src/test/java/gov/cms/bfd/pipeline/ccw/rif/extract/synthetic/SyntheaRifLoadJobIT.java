@@ -33,7 +33,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +61,9 @@ public final class SyntheaRifLoadJobIT {
   /**
    * Tests {@link CcwRifLoadJob} when run using data in the Synthetic/Incoming folder(s). Data
    * should be read and moved into the respective Synthetic/Failed folder(s).
+   *
+   * <p>Note: For (https://jira.cms.gov/browse/BFD-2223) this test will be temporarily disabled and
+   * re-enabled them once Synthea is updated for the new fields
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -192,6 +199,9 @@ public final class SyntheaRifLoadJobIT {
   /**
    * Tests {@link CcwRifLoadJob} when run in idempotent mode using data in the Synthetic/Incoming
    * folder(s). Data should be read and moved into the respective Synthetic/Done folder(s).
+   *
+   * <p>Note: For (https://jira.cms.gov/browse/BFD-2223) this test will be temporarily disabled and
+   * re-enabled them once Synthea is updated for the new fields
    *
    * @throws Exception (exceptions indicate test failure)
    */

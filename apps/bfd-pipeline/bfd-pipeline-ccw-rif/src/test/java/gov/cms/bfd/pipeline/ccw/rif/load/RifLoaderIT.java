@@ -995,9 +995,10 @@ public final class RifLoaderIT {
    * the manifest includes a {@link PreValidationProperties} that is invalid per its XML Schema
    * Definition (XSD).
    *
+   * <p>Note: For (https://jira.cms.gov/browse/BFD-2223) this test will be temporarily disabled and
+   * re-enabled them once Synthea is updated for the new fields
+   *
    * @throws Exception (exceptions indicate test failure)
-   *     <p>Note: For (https://jira.cms.gov/browse/BFD-2223) this test will be temporarily disabled
-   *     and re-enabled them once Synthea is updated for the new fields
    */
   @Disabled
   @Test
