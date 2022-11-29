@@ -1,5 +1,22 @@
 # API Changelog
 
+## BFD-2222: Add Provider Billing NPI Number to Carrier in V2
+
+Add the Provider NPI Billing NPI Number to V2 Carrier claims.
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "provider" : {
+        "identifier" : {
+             "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+              "value" : "123456789"
+       }
+      },
+    ...
+  }
+```
+
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 
