@@ -152,7 +152,7 @@ public class CarrierClaimTransformerV2Test {
     assertEquals(
         "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
         eob.getProvider().getIdentifier().getSystem());
-    assertEquals("123456789", eob.getProvider().getIdentifier().getValue());
+    assertEquals("1234567890", eob.getProvider().getIdentifier().getValue());
   }
 
   @Test

@@ -8,6 +8,9 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -170,12 +173,15 @@ public class CarrierClaimTransformerV2 {
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
     // CARR_CLM_BLG_NPI_NUM => ExplanationOfBenefit.provider.identifier
-    eob.setProvider(
-        new Reference()
-            .setIdentifier(
-                TransformerUtilsV2.createIdentifier(
-                    CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM,
-                    claimGroup.getCarrierClaimBlgNpiNumber().get())));
+    claimGroup
+        .getCarrierClaimBlgNpiNumber()
+        .ifPresent(
+            value ->
+                eob.setProvider(
+                    new Reference()
+                        .setIdentifier(
+                            TransformerUtilsV2.createIdentifier(
+                                CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, value))));
 
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
