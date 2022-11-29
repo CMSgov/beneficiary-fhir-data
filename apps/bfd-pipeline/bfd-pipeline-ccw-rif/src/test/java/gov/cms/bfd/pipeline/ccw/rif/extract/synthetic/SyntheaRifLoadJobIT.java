@@ -33,10 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +60,7 @@ public final class SyntheaRifLoadJobIT {
    *
    * @throws Exception (exceptions indicate test failure)
    */
+  @Disabled
   @Test
   public void syntheticDataSetPreValidationFailedTest() throws Exception {
     // load data into db
@@ -197,6 +195,7 @@ public final class SyntheaRifLoadJobIT {
    *
    * @throws Exception (exceptions indicate test failure)
    */
+  @Disabled
   @Test
   public void syntheticDataSetPreValidationIdempotentSucceedsTest() throws Exception {
     // load data into db

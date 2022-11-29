@@ -996,6 +996,8 @@ public final class RifLoaderIT {
    * Definition (XSD).
    *
    * @throws Exception (exceptions indicate test failure)
+   *     <p>Note: For (https://jira.cms.gov/browse/BFD-2223) this test will be temporarily disabled
+   *     and re-enabled them once Synthea is updated for the new fields
    */
   @Disabled
   @Test

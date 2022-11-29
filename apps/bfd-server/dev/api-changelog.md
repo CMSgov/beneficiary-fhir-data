@@ -1,5 +1,20 @@
 # API Changelog
 
+## BFD-2223: Map Coverage Period start and end for A,B,D claims in V2
+
+Added mapping for Coverage Period start and end dates
+```json
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  "period" : {
+    "start" : "2020-03-17",
+    "end" : "2020-06-17"
+    },
+  ...
+  }
+```
+
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 
