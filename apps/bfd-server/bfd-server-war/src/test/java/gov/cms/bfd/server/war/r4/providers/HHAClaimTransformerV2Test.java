@@ -150,6 +150,47 @@ public class HHAClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2015-06-23"), eob.getBillablePeriod().getEnd());
   }
 
+  /**
+   * This test is to make sure the billable period is not set if claim query code is null.
+   *
+   * @throws Exception
+   */
+  public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    HHAClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(r -> (HHAClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    claim.setClaimQueryCode(Optional.empty());
+
+    claim.setLastUpdated(Instant.now());
+
+    ExplanationOfBenefit genEob =
+        HHAClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    // We just want to make sure it is set
+    assertNull(eob.getBillablePeriod());
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNull(extension);
+  }
+
   @Test
   public void shouldReferencePatient() {
     assertNotNull(eob.getPatient());
