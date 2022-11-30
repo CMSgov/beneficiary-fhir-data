@@ -537,11 +537,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
   evaluation_periods  = "1"
   period              = "900"
   extended_statistic  = "p99"
-  threshold           = "110"
+  threshold           = "585"
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute BULK latency exceeded WARNING SLO ",
-    "threshold of 110 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "threshold of 585 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -568,11 +568,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
   evaluation_periods  = "1"
   period              = "900"
   extended_statistic  = "p99"
-  threshold           = "160"
+  threshold           = "740"
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute NON-BULK latency exceeded ALERT ",
-    "SLO threshold of 160 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 740 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -599,11 +599,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
   evaluation_periods  = "1"
   period              = "900"
   extended_statistic  = "p99"
-  threshold           = "110"
+  threshold           = "520"
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute NON-BULK latency exceeded WARNING ",
-    "SLO threshold of 110 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 520 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
