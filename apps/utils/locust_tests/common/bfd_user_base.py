@@ -3,6 +3,7 @@
 
 import json
 import logging
+import re
 import ssl
 from typing import Callable, Dict, List, Optional, Union
 
@@ -34,6 +35,10 @@ def _(environment: Environment, **kwargs) -> None:
         return
 
     validation.setup_failsafe_event(environment)
+
+    # Remove trailing slashes as Locust does not do so itself
+    host_no_trailing_slash = re.sub("[\\/]*$", "", environment.host)
+    environment.host = host_no_trailing_slash
 
 
 @events.quitting.add_listener
