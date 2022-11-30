@@ -854,6 +854,8 @@ public final class RifFilesProcessorTest {
     assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get().charValue());
     assertEquals("23443453453", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals("34534535535", claimGroup.getFiOriginalClaimControlNumber().get());
+
+    // Testing for a four digit code for DiagnosisRelatedGroupCd.
     assertEquals("6455", claimGroup.getDiagnosisRelatedGroupCd().get());
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
