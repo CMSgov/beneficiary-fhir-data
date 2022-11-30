@@ -698,6 +698,7 @@ public final class RifLoaderIT {
    * <p>This test ensures that changes to RifLoader that break compatibility with Synthea-generated
    * data are flagged.
    */
+  @Disabled
   @Test
   public void loadSyntheaData() {
     List<StaticRifResource> samples =
