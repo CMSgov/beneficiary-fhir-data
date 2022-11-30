@@ -5,6 +5,8 @@ particular BFD Server host.
 
 - [How to Run the Regression and Load Test Suites](#how-to-run-the-regression-and-load-test-suites)
   - [Glossary](#glossary)
+  - [FAQ](#faq)
+    - [I specified `--host` with a valid URL like so `example.com`, but my tests aren't running. What am I doing wrong?](#i-specified---host-with-a-valid-url-like-so-examplecom-but-my-tests-arent-running-what-am-i-doing-wrong)
   - [Prerequisites](#prerequisites)
   - [Instructions](#instructions)
     - [How to Run the Regression Suite Locally Against a Local BFD Server](#how-to-run-the-regression-suite-locally-against-a-local-bfd-server)
@@ -19,8 +21,16 @@ particular BFD Server host.
 | :--------------------------: | :------------------------------------------------------------------------------: |
 | [Locust](https://locust.io/) | A load testing library that allows for performance tests to be written in Python |
 
-<!-- ## FAQ -->
-<!-- This section should contain frequently-asked-questions as sub-headers with answers as sub-paragraphs. Since this is a living document, this section should be added to as needed. -->
+## FAQ
+
+### I specified `--host` with a valid URL like so `example.com`, but my tests aren't running. What am I doing wrong?
+
+Firstly, `--host` is a default [Locust argument][locust-args] that is a _bit_ of a misnomer; valid
+`--host` values _must_ include the protocol (i.e. `https`), hostname (i.e. `example.com`) and,
+optionally, the port in the following format: `PROTOCOL://HOSTNAME:PORT`. Be aware that _Locust_
+does not trim trailing slashes after the `PORT`; however, we have implemented a check for trailing
+slashes in `--host` and remove them ourselves. So, it is recommended that `--host` does not include
+any trailing characters after `PORT` as well.
 
 ## Prerequisites
 
@@ -42,7 +52,10 @@ particular BFD Server host.
 ### How to Run the Regression Suite Locally Against a Local BFD Server
 
 > **Note:** These steps assume you have followed the top-level README.md's steps for running BFD
-> locally (including running the database using PostgreSQL in Docker)
+> locally (including running the database using PostgreSQL in Docker).
+>
+> Additionally, it is _highly_ recommended to read the entirety of the `locust_test` `README.md`
+> before continuing.
 
 1. Navigate to the root of the `beneficiary-fhir-data` repository in any terminal application
 2. From the root of the `beneficiary-fhir-data` repository, set `BFD_ROOT` to the current working
@@ -106,7 +119,7 @@ particular BFD Server host.
      --spawn-rate=<SPAWN_RATE> \
      --spawned-runtime="<RUNTIME>" \
      --client-cert-path="$CLIENT_CERT_PATH" \
-     --database-uri="$DATABASE_CONSTR"
+     --database-connection-string="$DATABASE_CONSTR"
      --headless
    ```
 
@@ -118,6 +131,9 @@ particular BFD Server host.
 
 > **Note:** These steps assume you will be testing against the `TEST` environment, but you are able
 > to test against _all_ SDLC environments following these instructions.
+>
+> Additionally, it is _highly_ recommended to read the entirety of the `locust_test` `README.md`
+> before continuing.
 
 1. Set `BFD_ENV` to the environment you want to test:
 
@@ -215,7 +231,7 @@ particular BFD Server host.
       --spawn-rate=<SPAWN_RATE> \
       --spawned-runtime="<RUNTIME>" \
       --client-cert-path="$CLIENT_CERT_PATH" \
-      --database-uri="$DATABASE_CONSTR"
+      --database-connection-string="$DATABASE_CONSTR"
       --headless
     ```
 
@@ -237,6 +253,9 @@ particular BFD Server host.
 
 > **Note:** These steps assume you will be testing against the `TEST` environment, but you are able
 > to test against _all_ SDLC environments following these instructions.
+>
+> Additionally, it is _highly_ recommended to read the entirety of the `locust_test` `README.md`
+> before continuing.
 
 1. First, detach an instance from the desired environment under test's auto-scaling group:
    1. Go to the AWS website and sign-in
@@ -360,7 +379,7 @@ particular BFD Server host.
       --spawn-rate=<SPAWN_RATE> \
       --spawned-runtime="<RUNTIME>" \
       --client-cert-path="$CLIENT_CERT_PATH" \
-      --database-uri="$DATABASE_CONSTR"
+      --database-connection-string="$DATABASE_CONSTR"
       --headless
     ```
 
@@ -512,3 +531,5 @@ particular BFD Server host.
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_failures.csv
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_stats.csv
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_stats_history.csv
+
+[locust-args]: https://docs.locust.io/en/stable/configuration.html
