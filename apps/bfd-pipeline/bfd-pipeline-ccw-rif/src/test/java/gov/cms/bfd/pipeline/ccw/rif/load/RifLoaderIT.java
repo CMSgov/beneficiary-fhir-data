@@ -698,6 +698,7 @@ public final class RifLoaderIT {
    * <p>This test ensures that changes to RifLoader that break compatibility with Synthea-generated
    * data are flagged.
    */
+  // Todo: Re-enable this test after we get new data from synthea on the new fields coming in.
   @Disabled
   @Test
   public void loadSyntheaData() {
@@ -955,6 +956,7 @@ public final class RifLoaderIT {
    *
    * @throws Exception (exceptions indicate test failure)
    */
+  // Todo: Re-enable this test after we get new data from synthea on the new fields coming in.
   @Disabled
   @Test
   public void testForSyntheaPreValidationSuccess() throws Exception {

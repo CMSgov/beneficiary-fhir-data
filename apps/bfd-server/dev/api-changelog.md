@@ -14,6 +14,7 @@ The claim query code data is captured and presented in the HHA and Hospice V2 ap
       }
     } ]
  }
+ 
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 
