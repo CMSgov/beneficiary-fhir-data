@@ -101,7 +101,7 @@ public final class TransformerConstants {
   /**
    * Used to notify end users when they receive {@link Patient} records impacted by <a
    * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>. See the documentation on <code>
-   * LoadAppOptions.isFilteringNonNullAndNon2022Benes()</code> for details
+   * LoadAppOptions.isFilteringNonNullAndNon2023Benes()</code> for details
    */
   public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT =
       "delayed-backdated-enrollment";
