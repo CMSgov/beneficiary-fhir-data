@@ -25,11 +25,11 @@
 /insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @malessi
 
 #PACA Pipeline Codeowners
-/apps/bfd-pipeline/bfd-pipeline-rda-* @ericbuckley @brianburton @kyrobbins @mjburling
+/apps/bfd-pipeline/bfd-pipeline-rda-* @brianburton @kyrobbins @mjburling
 #PACA Server Transformer Codeowners
-/apps/bfd-server/bfd-server-war/**/pac @ericbuckley @brianburton @kyrobbins @mjburling
+/apps/bfd-server/bfd-server-war/**/pac @brianburton @kyrobbins @mjburling
 # PACA Models
-/apps/bfd-model/bfd-model-rda @ericbuckley @brianburton @kyrobbins @mjburling
+/apps/bfd-model/bfd-model-rda @brianburton @kyrobbins @mjburling
 
 #GitHub Actions Workflows
 /.github/workflows @keithdadkins @mjburling @malessi
