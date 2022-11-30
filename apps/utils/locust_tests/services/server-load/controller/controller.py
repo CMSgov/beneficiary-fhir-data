@@ -118,7 +118,7 @@ def _main():
             f"--host={test_host}",
             f"--users={max_users}",
             f"--spawn-rate={user_spawn_rate}",
-            f"--database-uri={db_dsn}",
+            f"--database-connection-string={db_dsn}",
             "--master",
             "--master-bind-port=5557",
             "--client-cert-path=/tmp/bfd_test_cert.pem",

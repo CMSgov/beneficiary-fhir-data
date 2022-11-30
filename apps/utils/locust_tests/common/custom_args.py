@@ -16,15 +16,16 @@ def register_custom_args(parser: LocustArgumentParser):
         env_var="LOCUST_BFD_CLIENT_CERT_PATH",
     )
     parser.add_argument(
-        "--database-uri",
+        "--database-connection-string",
         type=str,
         required=True,
         help=(
-            'Specfies database URI path, ex: "https://<nodeIp>:7443 or'
-            ' https://<environment>.bfd.cms.gov" (Required)'
+            "Specifies database connection string including username, url-encoded password, URI,"
+            " port and DB schema; ex: postgres://USERNAME:URL_ENCODED_PASSWORD@URI:PORT/SCHEMA."
+            " Required"
         ),
-        dest="database_uri",
-        env_var="LOCUST_BFD_DATABASE_URI",
+        dest="database_constr",
+        env_var="LOCUST_BFD_DATABASE_CONNECTION_STRING",
     )
     parser.add_argument(
         "--spawned-runtime",
