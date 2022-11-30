@@ -321,6 +321,29 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_no_
   }
 }
 
+# Latency for Claim endpoints _with_ resources returned with partner client SSL as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_with_resources" {
+  for_each = local.filter_variations
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/claim-all-with-resources/${each.value.name_suffix}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_all}\" && ",
+    "${local.client_ssl_pattern} && ",
+    "$.mdc.resources_returned_count != 0 && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency/claim-all-with-resources"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_milliseconds"
+    dimensions = each.value.dimensions
+    unit       = "Milliseconds"
+  }
+}
+
 # Latency by KB for all ClaimResponse endpoints _with_ resources returned with partner client SSL as dimension
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claimresponse_all_with_resources" {
   for_each = local.filter_variations
@@ -361,6 +384,29 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
 
   metric_transformation {
     name       = "http-requests/latency/claimresponse-all-no-resources"
+    namespace  = local.namespace
+    value      = "$.mdc.http_access_response_duration_milliseconds"
+    dimensions = each.value.dimensions
+    unit       = "Milliseconds"
+  }
+}
+
+# Latency for ClaimResponse endpoints _with_ resources returned with partner client SSL as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse_all_with_resources" {
+  for_each = local.filter_variations
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/claimresponse-all-with-resources/${each.value.name_suffix}"
+  log_group_name = local.log_groups.access
+
+  pattern = join("", [
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
+    "${local.client_ssl_pattern} && ",
+    "$.mdc.resources_returned_count != 0 && ",
+    "$.mdc.http_access_response_duration_milliseconds = *}"
+  ])
+
+  metric_transformation {
+    name       = "http-requests/latency/claimresponse-all-with-resources"
     namespace  = local.namespace
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
