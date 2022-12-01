@@ -127,7 +127,7 @@ def handler(event, context):
             "locust",
             f"--locustfile={os.path.join(locust_tests_dir, 'high_volume_suite.py')}",
             f"--host={invoke_event.host}",
-            f"--database-uri={db_dsn}",
+            f"--database-connection-string={db_dsn}",
             f"--client-cert-path={cert_path}",
             "--worker",
             f"--master-host={invoke_event.controller_ip}",
