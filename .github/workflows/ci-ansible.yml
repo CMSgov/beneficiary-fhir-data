@@ -11,7 +11,7 @@ on:
 
 jobs:
   test-ansible-role:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       image_tag: ${{ inputs.image_tag }}
     steps:

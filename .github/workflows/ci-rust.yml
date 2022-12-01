@@ -12,7 +12,7 @@ jobs:
         project:
           - name: db-query-checker
             directory: apps/utils/db-query-checker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         # Note: This only affects `run` steps; not actions.
@@ -62,7 +62,7 @@ jobs:
         project:
           - name: db-query-checker
             directory: apps/utils/db-query-checker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         # Note: This only affects `run` steps; not actions.
