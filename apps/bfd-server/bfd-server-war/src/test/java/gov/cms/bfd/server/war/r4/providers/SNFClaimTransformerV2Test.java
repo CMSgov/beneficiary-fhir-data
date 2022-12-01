@@ -408,6 +408,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests to make sure a four digit DiagnosisRelatedGroupCd exists for snf claims. */
   @Test
   public void shouldHaveFourCharacterDRGClmDrgCdSupInfo() throws IOException {
     List<Object> parsedRecords =

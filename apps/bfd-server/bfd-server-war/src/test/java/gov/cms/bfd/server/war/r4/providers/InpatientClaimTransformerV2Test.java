@@ -378,6 +378,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests to make sure a four digit DiagnosisRelatedGroupCd exists for inpatient claims. */
   @Test
   public void shouldHaveFourCharacterClmDrgCdInfo() throws IOException {
     List<Object> parsedRecords =
