@@ -14,7 +14,7 @@ message FissDiagnosisCode {
   // subsequently. For copybooks where this field contains up to twenty five diagnosis’ occurrences, the first
   // occurrence describes the principle diagnosis, the second through twenty fifth occurrences describe the
   // additional/secondary diagnosis. Other copybooks identify this field as the patient’s second diagnosis code.
-  string diag_cd_2 = 1;
+  optional string diag_cd_2 = 1;
 
   // Diagnosis Present On Admission (POA) Indicator:
   //

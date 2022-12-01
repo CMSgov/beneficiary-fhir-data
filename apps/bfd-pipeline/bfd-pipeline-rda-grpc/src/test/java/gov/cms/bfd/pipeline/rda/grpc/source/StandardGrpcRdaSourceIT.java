@@ -108,7 +108,7 @@ public class StandardGrpcRdaSourceIT {
   private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"apiSource\" : \"0.10\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
@@ -154,7 +154,7 @@ public class StandardGrpcRdaSourceIT {
           + "}";
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"apiSource\" : \"0.10\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
