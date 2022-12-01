@@ -428,54 +428,6 @@ public final class InpatientClaimTransformerV2Test {
   }
 
   @Test
-  public void shouldHaveFourCharacterClmDrgCdInfo() throws IOException {
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(
-            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_FOUR_CHARACTER_DRG_CODE.getResources()));
-
-    InpatientClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
-            .findFirst()
-            .get();
-
-    claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit genEob =
-        InpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
-    IParser parser = fhirContext.newJsonParser();
-    String json = parser.encodeResourceToString(genEob);
-    eob = parser.parseResource(ExplanationOfBenefit.class, json);
-    SupportingInformationComponent sic =
-        TransformerTestUtilsV2.findSupportingInfoByCode(
-            "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", eob.getSupportingInfo());
-
-    SupportingInformationComponent compare =
-        TransformerTestUtilsV2.createSupportingInfo(
-            // We don't care what the sequence number is here
-            sic.getSequence(),
-            // Category
-            Arrays.asList(
-                new Coding(
-                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-                    "info",
-                    "Information"),
-                new Coding(
-                    "https://bluebutton.cms.gov/resources/codesystem/information",
-                    "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
-                    "Claim Diagnosis Related Group Code (or MS-DRG Code)")),
-            // Code
-            new Coding("https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "6955", null));
-    assertTrue(compare.equalsDeep(sic));
-  }
-
-  @Test
   public void shouldHaveClmMcoPdSwSupInfo() {
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode(
