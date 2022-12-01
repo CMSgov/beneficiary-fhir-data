@@ -52,6 +52,11 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
+			<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>

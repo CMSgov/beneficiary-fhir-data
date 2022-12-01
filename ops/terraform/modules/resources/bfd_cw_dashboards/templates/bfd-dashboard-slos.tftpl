@@ -474,7 +474,7 @@
             "type": "metric",
             "x": 0,
             "y": 24,
-            "width": 24,
+            "width": 11,
             "height": 6,
             "properties": {
                 "metrics": [
@@ -487,6 +487,47 @@
                 "region": "us-east-1",
                 "stat": "Sum",
                 "period": 3600,
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "label": "Alerting Threshold",
+                            "value": 90
+                        },
+                        {
+                            "label": "Warning Threshold",
+                            "value": 50
+                        }
+                    ]
+                },
+                "yAxis": {
+                    "left": {
+                        "showUnits": false,
+                        "label": "Percent"
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                },
+                "title": "/v*/fhir/* 1-hour Error rate (HTTP 5XX)"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 11,
+            "y": 24,
+            "width": 13,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m2/m1)", "label": "Error %", "id": "e1" } ],
+                    [ "${namespace}", "http-requests/count/all", { "id": "m1", "visible": false } ],
+                    [ ".", "http-requests/count/500-responses", { "id": "m2", "visible": false } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 86400,
                 "annotations": {
                     "horizontal": [
                         {
@@ -508,7 +549,7 @@
                         "showUnits": false
                     }
                 },
-                "title": "/v*/fhir/* 1-hour Error rate (HTTP 5XX)"
+                "title": "/v*/fhir/* 24-hour Error rate (HTTP 5XX)"
             }
         }
     ]
