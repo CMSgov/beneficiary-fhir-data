@@ -29,10 +29,17 @@ abstract class AbstractRandomClaimGenerator {
   /**
    * The {@link Random} object instance to use for deciding optional logic
    *
-   * <p>{@link #optional(Runnable)} logic is done with a separate {@link Random} instance so that if
-   * a field is made optional, it doesn't affect its generated value.
+   * <p>{@link #optional(Runnable)} logic is done with a separate {@link Random} instance to
+   * minimize the impact to other random value generations
    */
   private final Random randomOpt;
+  /**
+   * The {@link Random} object instance to use for deciding oneOf logic
+   *
+   * <p>{@link #oneOf(Runnable...)} logic is done with a separate {@link Random} instance to
+   * minimize the impact to other random value generations
+   */
+  private final Random randomOneOf;
   /**
    * Denotes if all {@link #optional(Runnable)} or {@link #optionalOneOf(Runnable...)} should be
    * executed
@@ -58,6 +65,7 @@ abstract class AbstractRandomClaimGenerator {
   AbstractRandomClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
     this.randomValue = new Random(seed);
     this.randomOpt = new Random(seed);
+    this.randomOneOf = new Random(seed);
     this.optionalOverride = optionalOverride;
     this.clock = clock;
   }
@@ -211,7 +219,7 @@ abstract class AbstractRandomClaimGenerator {
    * @param actions variadic list of possible actions to trigger
    */
   protected void oneOf(Runnable... actions) {
-    final int index = randomOpt.nextInt(actions.length);
+    final int index = randomOneOf.nextInt(actions.length);
     actions[index].run();
   }
 

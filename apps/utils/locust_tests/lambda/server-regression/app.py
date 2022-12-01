@@ -188,7 +188,7 @@ def handler(event, context):
             f"--users={invoke_event.users}",
             f"--spawn-rate={invoke_event.spawn_rate}",
             f"--spawned-runtime={invoke_event.spawned_runtime}",
-            f"--database-uri={db_dsn}",
+            f"--database-connection-string={db_dsn}",
             f"--client-cert-path={cert_path}",
             "--stats-store-s3",
             f"--stats-env={environment}",
