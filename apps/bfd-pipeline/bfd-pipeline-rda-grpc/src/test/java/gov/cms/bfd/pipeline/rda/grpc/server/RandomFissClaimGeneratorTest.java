@@ -168,7 +168,10 @@ public class RandomFissClaimGeneratorTest {
             + "  \"mbiSubmBeneIndUnrecognized\": \"z\",\n"
             + "  \"adjMbiIndUnrecognized\": \"n\",\n"
             + "  \"adjMbi\": \"0st6z50nj07\",\n"
-            + "  \"medicalRecordNo\": \"j\"\n"
+            + "  \"medicalRecordNo\": \"j\",\n"
+            + "  \"stmtCovFromCymdText\": \"2021-04-08\",\n"
+            + "  \"stmtCovToCymdText\": \"2021-04-26\",\n"
+            + "  \"admDateCymdText\": \"2021-04-29\"\n"
             + "}",
         json);
   }
