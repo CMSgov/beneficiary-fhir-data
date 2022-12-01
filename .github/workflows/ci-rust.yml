@@ -24,17 +24,17 @@ jobs:
       # Try to use cache from this or ancestor branches.
       # Also sets a hook that will cache this build after the job is complete.
       - name: 'Cache cargo registry'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo index'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo build'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ${{ matrix.project.directory }}/target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
@@ -74,17 +74,17 @@ jobs:
       # Try to use cache from this or ancestor branches.
       # Also sets a hook that will cache this build after the job is complete.
       - name: 'Cache cargo registry'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo index'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo build'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ${{ matrix.project.directory }}/target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
