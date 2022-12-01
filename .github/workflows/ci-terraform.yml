@@ -15,7 +15,7 @@ jobs:
       files: ${{ steps.workflow_files.outputs.files }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
       - id: workflow_files
@@ -33,7 +33,7 @@ jobs:
         tf_resources: [stateless, stateful]
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: 'Run terraform init'
         uses: hashicorp/terraform-github-actions@master
         with:
