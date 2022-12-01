@@ -2,8 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
@@ -12,6 +10,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +50,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
       GrpcStreamCaller<TMessage> caller,
       String claimType,
       Supplier<CallOptions> callOptionsFactory,
-      MetricRegistry appMetrics) {
+      MeterRegistry appMetrics) {
     this.channel = channel;
     this.caller = caller;
     this.claimType = claimType;
@@ -66,7 +66,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
    * @throws ProcessingException If there was an issue processing the objects.
    */
   protected int tryRetrieveAndProcessObjects(Processor logic) throws ProcessingException {
-    metrics.getCalls().mark();
+    metrics.getCalls().increment();
     boolean interrupted = false;
     Exception error = null;
     int processed = 0;
@@ -88,7 +88,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
       if (isInterrupted(error)) {
         interrupted = true;
       } else {
-        metrics.getFailures().mark();
+        metrics.getFailures().increment();
         throw new ProcessingException(error, processed);
       }
     }
@@ -97,7 +97,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
       log.warn("{} claim processing interrupted with processedCount {}", claimType, processed);
     }
 
-    metrics.getSuccesses().mark();
+    metrics.getSuccesses().increment();
     return processed;
   }
 
@@ -167,17 +167,17 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
    * and when a batch has been written.
    */
   protected void setUptimeToRunning() {
-    metrics.uptimeValue.set(10);
+    metrics.uptime.set(10);
   }
 
   /** Indicates service is actively receiving a batch of data. */
   protected void setUptimeToReceiving() {
-    metrics.uptimeValue.set(20);
+    metrics.uptime.set(20);
   }
 
   /** Indicates service is not running. */
   protected void setUptimeToStopped() {
-    metrics.uptimeValue.set(0);
+    metrics.uptime.set(0);
   }
 
   /**
@@ -200,8 +200,8 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
         batch.size(),
         processed);
     batch.clear();
-    metrics.batches.mark();
-    metrics.objectsStored.mark(processed);
+    metrics.batches.increment();
+    metrics.objectsStored.increment(processed);
     setUptimeToRunning();
     return processed;
   }
@@ -215,29 +215,26 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   @VisibleForTesting
   protected static class Metrics {
     /** Number of times the source has been called to retrieve data from the RDA API. */
-    private final Meter calls;
+    private final Counter calls;
     /** Number of calls that successfully called service and stored results. */
-    private final Meter successes;
+    private final Counter successes;
     /** Number of calls that ended in some sort of failure. */
-    private final Meter failures;
+    private final Counter failures;
     /** Number of objects that have been received from the RDA API. */
-    private final Meter objectsReceived;
+    private final Counter objectsReceived;
     /**
      * Number of objects that have been successfully stored by the sink. Generally <code>
      * batches * maxPerBatch</code>
      */
-    private final Meter objectsStored;
+    private final Counter objectsStored;
     /**
      * Number of batches/transactions used to store the objects. Generally <code>
      * objectsReceived / maxPerBatch</code>
      */
-    private final Meter batches;
-
-    /** Used to provide a metric indicating whether the service is running. */
-    private final Gauge<?> uptime;
+    private final Counter batches;
 
     /** Holds the value that is reported in the update gauge. */
-    private final AtomicLong uptimeValue;
+    private final AtomicLong uptime;
 
     /**
      * Constructor to create a Metrics object
@@ -246,17 +243,16 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
      * @param appMetrics The {@link MetricRegistry} used to create the needed metrics tools.
      * @param claimType The type of claim this {@link Metrics} object will gather metrics for.
      */
-    private Metrics(Class<?> baseClass, MetricRegistry appMetrics, String claimType) {
+    private Metrics(Class<?> baseClass, MeterRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(baseClass.getSimpleName(), claimType);
-      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
-      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
-      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
-      objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
-      objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
-      batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
+      calls = appMetrics.counter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.counter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.counter(MetricRegistry.name(base, "failures"));
+      objectsReceived = appMetrics.counter(MetricRegistry.name(base, "objects", "received"));
+      objectsStored = appMetrics.counter(MetricRegistry.name(base, "objects", "stored"));
+      batches = appMetrics.counter(MetricRegistry.name(base, "batches"));
       final String uptimeGaugeName = MetricRegistry.name(base, "uptime");
       uptime = GAUGES.getGaugeForName(appMetrics, uptimeGaugeName);
-      uptimeValue = GAUGES.getValueForName(uptimeGaugeName);
     }
   }
 }
