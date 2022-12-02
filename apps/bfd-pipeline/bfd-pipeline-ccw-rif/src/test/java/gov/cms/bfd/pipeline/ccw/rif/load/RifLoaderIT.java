@@ -739,6 +739,9 @@ public final class RifLoaderIT {
    *
    * <p>This test ensures that changes to RifLoader that break compatibility with Synthea-generated
    * data are flagged.
+   *
+   * <p>Note: For (https://jira.cms.gov/browse/BFD-2222) this test will be temporarily disabled and
+   * re-enabled them once Synthea is updated for the new fields
    */
   @Disabled
   @Test

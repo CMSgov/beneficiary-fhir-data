@@ -117,6 +117,12 @@
       "value" : "CMS"
     }
   },
+  "provider" : {
+    "identifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+      "value" : "1234567890"
+    }
+  },
   "referral" : {
     "identifier" : {
       "type" : {
