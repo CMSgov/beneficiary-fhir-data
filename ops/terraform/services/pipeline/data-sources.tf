@@ -15,6 +15,14 @@ data "aws_security_group" "vpn" {
   }
 }
 
+data "aws_security_group" "enterprise_tools" {
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-${local.env}-enterprise-tools"]
+  }
+}
+
 # TODO: this is a temporary work-around until versioning becomes a reality
 # the following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided

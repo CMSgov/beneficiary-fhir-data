@@ -63,6 +63,7 @@ locals {
   rds_writer_endpoint   = data.external.rds.result["Endpoint"]
   vpc_id                = data.aws_vpc.main.id
   vpn_security_group_id = data.aws_security_group.vpn.id
+  ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   subnet_id             = data.aws_subnet.main.id
 }
 
@@ -108,7 +109,8 @@ resource "aws_instance" "this" {
 
   vpc_security_group_ids = [
     aws_security_group.app.id,
-    local.vpn_security_group_id
+    local.vpn_security_group_id,
+    local.ent_tools_sg_id
   ]
 
   capacity_reservation_specification {
