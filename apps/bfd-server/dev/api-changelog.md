@@ -1,5 +1,20 @@
 # API Changelog
 
+## BFD-2221: Claim Query Code added to HHA and Hospice claims in V2
+The claim query code data is captured and presented in the HHA and Hospice V2 api responses.
+
+```json
+ "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ]
+ }
+ 
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 
