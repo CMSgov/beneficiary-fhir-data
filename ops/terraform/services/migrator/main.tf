@@ -24,6 +24,7 @@ locals {
   kms_key_arn           = data.aws_kms_key.cmk.arn
   kms_key_id            = data.aws_kms_key.cmk.key_id
   vpn_security_group_id = data.aws_security_group.vpn.id
+  ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   rds_writer_endpoint   = data.external.rds.result["Endpoint"]
   account_id            = data.aws_caller_identity.current.account_id
 
@@ -61,7 +62,7 @@ resource "aws_instance" "this" {
   ebs_optimized               = true
 
   subnet_id              = data.aws_subnet.main.id
-  vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this[0].id]
+  vpc_security_group_ids = [local.vpn_security_group_id, aws_security_group.this[0].id, local.ent_tools_sg_id]
 
   root_block_device {
     tags                  = merge(local.default_tags, { snapshot = "true" }) # TODO: Consider removing the tag from migrator instances

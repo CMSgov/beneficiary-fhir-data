@@ -48,6 +48,19 @@ locals {
     datapoints   = "1"
   }
 
+  # Used by alarms for RDA claim ingestion latency metrics.  Metric time unit is milliseconds.
+  # 28800000 ms == 8 hours
+  rda_pipeline_latency_alert = {
+    period       = "300"
+    eval_periods = "1"
+    threshold    = "28800000"
+    datapoints   = "1"
+    metrics = [
+      { sink_name = "FissClaimRdaSink", claim_type = "fiss" },
+      { sink_name = "McsClaimRdaSink", claim_type = "mcs" },
+    ]
+  }
+
   log_groups = {
     messages = "/bfd/${local.env}/bfd-pipeline/messages.txt"
   }
@@ -63,6 +76,7 @@ locals {
   rds_writer_endpoint   = data.external.rds.result["Endpoint"]
   vpc_id                = data.aws_vpc.main.id
   vpn_security_group_id = data.aws_security_group.vpn.id
+  ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   subnet_id             = data.aws_subnet.main.id
 }
 
@@ -108,7 +122,8 @@ resource "aws_instance" "this" {
 
   vpc_security_group_ids = [
     aws_security_group.app.id,
-    local.vpn_security_group_id
+    local.vpn_security_group_id,
+    local.ent_tools_sg_id
   ]
 
   capacity_reservation_specification {

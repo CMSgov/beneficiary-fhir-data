@@ -91,6 +91,7 @@ public class RandomFissClaimGeneratorTest {
             + "  \"currLoc1Unrecognized\": \"d\",\n"
             + "  \"stmtCovFromCymd\": \"2021-02-21\",\n"
             + "  \"stmtCovToCymd\": \"2021-01-31\",\n"
+            + "  \"medaProv6\": \"w5sp0f\",\n"
             + "  \"lobCdEnum\": \"BILL_FACILITY_TYPE_SPECIAL_FACILITY_OR_HOSPITAL_ASC_SURGERY\",\n"
             + "  \"servTypeCdForClinicsEnum\": \"BILL_CLASSIFICATION_FOR_CLINICS_HOSPITAL_BASED_OR_INDEPENDENT_RENAL_DIALYSIS_FACILITY\",\n"
             + "  \"freqCdEnum\": \"BILL_FREQUENCY_REPLACEMENT_OF_PRIOR_CLAIM\",\n"
