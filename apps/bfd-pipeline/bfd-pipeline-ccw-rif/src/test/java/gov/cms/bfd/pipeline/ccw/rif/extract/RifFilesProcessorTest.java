@@ -916,6 +916,7 @@ public final class RifFilesProcessorTest {
     assertEquals(LocalDate.of(2014, 7, 06), claimGroup.getClaimHospiceStartDate().get());
     assertEquals("38875439343923937", claimGroup.getFiOriginalClaimControlNumber().get());
     assertEquals("2718813985998", claimGroup.getFiDocumentClaimControlNumber().get());
+    assertEquals('3', claimGroup.getClaimQueryCode().get());
 
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -980,7 +981,7 @@ public final class RifFilesProcessorTest {
     assertEquals(LocalDate.of(2015, 6, 23), claimGroup.getCareStartDate().get());
     // assertEquals("308683096577486", claimGroup.getFiDocumentClaimControlNumber().get());
     // assertEquals("10493204767560565", claimGroup.getFiOriginalClaimControlNumber().get());
-
+    assertEquals('3', claimGroup.getClaimQueryCode().get());
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
     HHAClaimLine claimLine = claimGroup.getLines().get(0);
