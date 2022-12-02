@@ -190,7 +190,7 @@ abstract class AbstractRandomClaimGenerator {
   }
 
   /**
-   * ets the current {@link RandomValueContext} and triggers the action 50% of the time (or always
+   * Creates a new {@link RandomValueContext} and triggers the action 50% of the time (or always
    * if optionalOverride has been set).
    *
    * @param action action to trigger half the time
