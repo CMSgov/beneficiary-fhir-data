@@ -1,5 +1,37 @@
 # API Changelog
 
+## BFD-2222: Add Provider Billing NPI Number to Carrier in V2
+
+Add the Provider NPI Billing NPI Number to V2 Carrier claims.
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "provider" : {
+        "identifier" : {
+             "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+              "value" : "123456789"
+       }
+      },
+    ...
+  }
+```
+
+## BFD-2221: Claim Query Code added to HHA and Hospice claims in V2
+The claim query code data is captured and presented in the HHA and Hospice V2 api responses.
+
+```json
+ "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ]
+ }
+
 ## BFD-2310: Add Eob.SubType for Institutional Claims in V2
 Added the subtype to the different claims types.  For  Inpatient, SNF, Hospice and HHA Claims it will be set to "Inpatient" and for Outpatient claims it will be set to "Outpatient".
 
