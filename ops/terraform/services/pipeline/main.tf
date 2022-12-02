@@ -48,6 +48,19 @@ locals {
     datapoints   = "1"
   }
 
+  # Used by alarms for RDA claim ingestion latency metrics.  Metric time unit is milliseconds.
+  # 28800000 ms == 8 hours
+  rda_pipeline_latency_alert = {
+    period       = "300"
+    eval_periods = "1"
+    threshold    = "28800000"
+    datapoints   = "1"
+    metrics = [
+      { sink_name = "FissClaimRdaSink", claim_type = "fiss" },
+      { sink_name = "McsClaimRdaSink", claim_type = "mcs" },
+    ]
+  }
+
   log_groups = {
     messages = "/bfd/${local.env}/bfd-pipeline/messages.txt"
   }
