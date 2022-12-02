@@ -84,8 +84,9 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-max-claim-latency-exceeded" {
   metric_name = "${local.rda_pipeline_latency_alert.metrics[count.index].sink_name}.extract.latency.millis.max"
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.ok_actions
+  # TODO: Address in BFD-2146 with info/notice escalations.
+  # alarm_actions =
+  # ok_actions    =
 
   datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
   treat_missing_data  = "notBreaching"
