@@ -68,3 +68,25 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
   datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
   treat_missing_data  = "notBreaching"
 }
+
+# Creates alarms for FissClaimRdaSink.extract.latency.millis.max and 
+# McsClaimRdaSink.extract.latency.millis.max.
+resource "aws_cloudwatch_metric_alarm" "pipeline-max-claim-latency-exceeded" {
+  count               = length(local.rda_pipeline_latency_alert.metrics)
+  alarm_name          = "bfd-${local.env}-pipeline-max-${local.rda_pipeline_latency_alert.metrics[count.index].claim_type}-claim-latency-exceeded"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = local.rda_pipeline_latency_alert.eval_periods
+  period              = local.rda_pipeline_latency_alert.period
+  statistic           = "Maximum"
+  threshold           = local.rda_pipeline_latency_alert.threshold
+  alarm_description   = "${local.rda_pipeline_latency_alert.metrics[count.index].claim_type} claim processing is falling behind (max latency exceeded) in APP-ENV: bfd-${local.env}"
+
+  metric_name = "${local.rda_pipeline_latency_alert.metrics[count.index].sink_name}.extract.latency.millis.max"
+  namespace   = "bfd-${local.env}/bfd-pipeline"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.ok_actions
+
+  datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
+  treat_missing_data  = "notBreaching"
+}
