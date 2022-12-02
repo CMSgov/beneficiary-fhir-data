@@ -173,6 +173,7 @@ public class TransformerUtilsV2Test {
         Optional.of(fiNum),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -207,6 +208,7 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         BigDecimal.ZERO,
         BigDecimal.ZERO,
+        Optional.empty(),
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -249,6 +251,7 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         BigDecimal.ZERO,
         BigDecimal.ZERO,
+        Optional.empty(),
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -473,7 +476,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        Optional.of(fiClmProcDt));
+        Optional.of(fiClmProcDt),
+        Optional.empty());
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -516,6 +520,7 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -526,6 +531,39 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNull(fiClmProcDtExtension);
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is not mapped to an eob as an extension when the input
+   * fiscalIntermediaryClaimProcessDate is not present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenClaimQueryCodeExists() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.of('3'));
+
+    assertNotNull(eob.getBillablePeriod());
+    assertFalse(eob.getBillablePeriod().isEmpty());
   }
 
   /** Verifies that createCoding can take a Character type value and create a Coding from it. */

@@ -15,6 +15,22 @@ Added mapping for Coverage Period start and end dates
   }
 ```
 
+## BFD-2221: Claim Query Code added to HHA and Hospice claims in V2
+The claim query code data is captured and presented in the HHA and Hospice V2 api responses.
+
+```json
+ "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ]
+ }
+```
+
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 
@@ -78,6 +94,7 @@ New Mapping in V2:
         "name" : "Fake ORG Name"
       }
 ```
+
 
 ## BFD-2145: Removal of duplicated careteam member entries and their extensions.
 Corrected an issue where duplicate entries for a provider were being supplied in the Explanation of Benefit careTeam element, making it cumbersome to process and link care team members to items.

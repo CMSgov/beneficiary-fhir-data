@@ -25,7 +25,6 @@ mappings:
     - name: diagCd2
       sqlType: varchar(7)
       minLength: 0
-      nullable: false
       dbName: diag_cd2
     - name: diagPoaInd
       sqlType: varchar(1)
