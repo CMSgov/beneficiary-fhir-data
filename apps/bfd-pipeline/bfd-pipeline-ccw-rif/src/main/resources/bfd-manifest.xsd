@@ -26,7 +26,7 @@
               <xs:element name="bene_id_end" type="xs:long" />
               <xs:element name="clm_id_end" type="xs:long" />
               <xs:element name="pde_id_end" type="xs:long" />
-              <xs:element name="generated" type="xs:string" minOccurs="0" maxOccurs="1" />             
+              <xs:element name="generated" type="xs:string" minOccurs="0" maxOccurs="1" />          
             </xs:sequence>
           </xs:complexType>
         </xs:element>

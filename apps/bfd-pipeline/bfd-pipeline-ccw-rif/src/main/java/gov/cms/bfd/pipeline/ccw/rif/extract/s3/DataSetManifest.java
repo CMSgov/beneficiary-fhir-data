@@ -58,6 +58,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlTransient private String manifestKeyDoneLocation;
 
   /**
+   * Denotes the s3 key where the manifest and its files should be placed when it's processing is
+   * complete.
+   */
+  @XmlTransient private String manifestKeyFailLocation;
+
+  /**
    * Constructs a new {@link DataSetManifest} instance.
    *
    * @param timestampText the value to use for {@link #getTimestampText()}
@@ -96,8 +102,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       int sequenceId,
       boolean syntheticData,
       List<DataSetManifestEntry> entries) {
-    // This appears to only be used in dead test code, so hardcoding the input/output locations to
-    // the old locations unless we need otherwise
+    // This appears to only be used in dead test code, so hardcoding the input/output
+    // locations to the old locations unless we need otherwise
     this(
         DateTimeFormatter.ISO_INSTANT.format(timestamp),
         sequenceId,
@@ -524,7 +530,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 
   /** Optional object that can be used to perform pre-validation during ETL pipeline processing. */
   @XmlAccessorType(XmlAccessType.FIELD)
-  public static final class PreValidationProperties {
+  public static class PreValidationProperties {
     /**
      * a {@link long} value denoting the lower-bound of claim group identifiers for the RIF dataset.
      */
@@ -592,7 +598,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     @XmlElement(name = "pde_id_end", required = true)
     protected long pdeIdEnd;
 
-    /** a {@link String} denoting the timestamp of the RIF dataset. */
+    /** a {@link String} timestamp denoting when Synthea dataset was generated . */
     @XmlElement(name = "generated", required = false)
     protected String generated;
 
@@ -643,7 +649,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the clmGrpIdStart property.
+     * Gets the value of the {@link #clmGrpIdStart} property.
      *
      * @return value {@link long }
      */
@@ -661,7 +667,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the pdeIdStart property.
+     * Gets the value of the {@link #pdeIdStart} property.
      *
      * @return value {@link long }
      */
@@ -679,7 +685,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the carrClmCntlNumStart property.
+     * Gets the value of the {@link #carrClmCntlNumStart} property.
      *
      * @return value {@link long }
      */
@@ -697,7 +703,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the fiDocCntlNumStart property.
+     * Gets the value of the {@link #fiDocCntlNumStart} property.
      *
      * @return value {@link String}
      */
@@ -715,7 +721,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the hicnStart property.
+     * Gets the value of the {@link #hicnStart} property.
      *
      * @return possible object is {@link String }
      */
@@ -733,7 +739,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the beneIdStart property.
+     * Gets the value of the {@link #beneIdStart} property.
      *
      * @return value {@link long }
      */
@@ -751,7 +757,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the clmIdStart property.
+     * Gets the value of the {@link #clmIdStart} property.
      *
      * @return value {@link long }
      */
@@ -769,7 +775,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the mbiStart property.
+     * Gets the value of the {@link #mbiStart} property.
      *
      * @return possible object is {@link String }
      */
@@ -787,7 +793,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the beneIdEnd property.
+     * Gets the value of the {@link #beneIdEnd} property.
      *
      * @return value {@link long }
      */
@@ -805,7 +811,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the clmIdEnd property.
+     * Gets the value of the {@link #clmIdEnd} property.
      *
      * @return value {@link long }
      */
@@ -823,7 +829,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the pdeIdEnd property.
+     * Gets the value of the {@link #pdeIdEnd} property.
      *
      * @return value {@link long }
      */
@@ -841,7 +847,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Gets the value of the generated property.
+     * Gets the value of the {@link #generated} property.
      *
      * @return possible object is {@link String }
      */

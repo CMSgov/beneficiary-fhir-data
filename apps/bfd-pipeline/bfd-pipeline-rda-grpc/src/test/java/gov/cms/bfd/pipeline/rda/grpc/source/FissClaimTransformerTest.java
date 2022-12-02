@@ -145,7 +145,9 @@ public class FissClaimTransformerTest {
     claim.setPracLocState("ls");
     claim.setPracLocZip("123456789012345");
     claim.setStmtCovFromDate(LocalDate.of(2020, 2, 3));
+    claim.setStmtCovFromDateText("2020-02-03");
     claim.setStmtCovToDate(LocalDate.of(2021, 4, 5));
+    claim.setStmtCovToDateText("2021-04-05");
     claim.setLobCd("1");
     claim.setServTypeCd("6");
     claim.setServTypeCdMapping(RdaFissClaim.ServTypeCdMapping.Clinic);
@@ -174,7 +176,9 @@ public class FissClaimTransformerTest {
         .setPracLocState("ls")
         .setPracLocZip("123456789012345")
         .setStmtCovFromCymd("2020-02-03")
+        .setStmtCovFromCymdText("2020-02-03")
         .setStmtCovToCymd("2021-04-05")
+        .setStmtCovToCymdText("2021-04-05")
         .setLobCdEnum(FissBillFacilityType.BILL_FACILITY_TYPE_HOSPITAL)
         .setServTypeCdForClinicsEnum(
             FissBillClassificationForClinics
