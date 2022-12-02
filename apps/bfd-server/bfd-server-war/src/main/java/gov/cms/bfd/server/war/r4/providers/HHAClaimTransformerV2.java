@@ -132,7 +132,8 @@ public class HHAClaimTransformerV2 {
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
-        claimGroup.getFiscalIntermediaryClaimProcessDate());
+        claimGroup.getFiscalIntermediaryClaimProcessDate(),
+        claimGroup.getClaimQueryCode());
 
     // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
     TransformerUtilsV2.addInformationWithCode(
