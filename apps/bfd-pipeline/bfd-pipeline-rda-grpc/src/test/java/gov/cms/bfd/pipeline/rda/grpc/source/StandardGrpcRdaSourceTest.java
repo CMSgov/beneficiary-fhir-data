@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Throwables;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -33,6 +32,8 @@ import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
@@ -40,11 +41,11 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,8 +87,8 @@ public class StandardGrpcRdaSourceTest {
   /** String used as a RDA API "version" in the unit tests. */
   public static final String VERSION = "version";
 
-  /** A MetricRegistry used to verify metrics. */
-  private MetricRegistry appMetrics;
+  /** A MeterRegistry used to verify metrics. */
+  private MeterRegistry appMetrics;
   /** A mock clock used to when testing the idle time for dropped connection exceptions. */
   @Mock private Clock clock;
   /** A mock stream caller used to simulate data returned from the RDA API server. */
@@ -113,7 +114,7 @@ public class StandardGrpcRdaSourceTest {
    */
   @BeforeEach
   public void setUp() throws Exception {
-    appMetrics = new MetricRegistry();
+    appMetrics = new SimpleMeterRegistry();
     source =
         spy(
             new StandardGrpcRdaSource<>(
@@ -150,7 +151,10 @@ public class StandardGrpcRdaSourceTest {
             "StandardGrpcRdaSource.ints.objects.stored",
             "StandardGrpcRdaSource.ints.successes",
             "StandardGrpcRdaSource.ints.uptime"),
-        new ArrayList<>(appMetrics.getNames()));
+        appMetrics.getMeters().stream()
+            .map(meter -> meter.getId().getName())
+            .sorted()
+            .collect(Collectors.toList()));
   }
 
   /**

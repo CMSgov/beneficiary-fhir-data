@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.model.rda.MessageError;
@@ -8,6 +7,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,7 +55,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       BiPredicate<Long, TMessage> sequencePredicate,
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
-      MetricRegistry appMetrics,
+      MeterRegistry appMetrics,
       String claimType) {
     this(
         entityManager,
@@ -87,7 +87,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
-      MetricRegistry appMetrics,
+      MeterRegistry appMetrics,
       String claimType) {
     super(
         Preconditions.checkNotNull(channel),
@@ -169,7 +169,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
           if (responseStream.hasNext()) {
             setUptimeToReceiving();
             final TMessage result = responseStream.next();
-            metrics.getObjectsReceived().mark();
+            metrics.getObjectsReceived().increment();
 
             if (sequencePredicate.test(startingSequenceNumber, result)) {
               // It's a match, so check if we can successfully process it now.

@@ -2,8 +2,10 @@ package gov.cms.bfd.pipeline.app;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.DataSourceComponents;
@@ -11,6 +13,8 @@ import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import io.micrometer.cloudwatch.CloudWatchConfig;
+import io.micrometer.core.instrument.config.MissingRequiredConfigurationException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +23,8 @@ import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.apache.commons.codec.DecoderException;
@@ -161,6 +167,29 @@ public final class AppConfigurationIT {
             .lines()
             .collect(Collectors.joining("\n"));
     assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
+  }
+
+  /** Verifies that micrometer settings are correctly extracted using environment variable names. */
+  @Test
+  public void testCloudWatchMicrometerConfigSettings() {
+    final var envVars = new HashMap<String, String>();
+    final var helper =
+        AppConfiguration.MICROMETER_CW_CONFIG_HELPER.withValueLookupFunction(envVars::get);
+    final CloudWatchConfig config = helper::get;
+    assertEquals("cloudwatch", config.prefix());
+
+    // confirm the defaults work as expected
+    assertFalse(config.enabled());
+    assertEquals(Duration.ofMinutes(1), config.step());
+    assertThrows(MissingRequiredConfigurationException.class, () -> config.namespace());
+
+    // confirm explicit values are parsed correctly
+    envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_ENABLED, "true");
+    envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_INTERVAL, "PT28S");
+    envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_NAMESPACE, "my-namespace");
+    assertTrue(config.enabled());
+    assertEquals(Duration.ofSeconds(28), config.step());
+    assertEquals("my-namespace", config.namespace());
   }
 
   /**
