@@ -156,9 +156,17 @@ mappings:
     - name: stmtCovFromDate
       sqlType: date
       dbName: stmt_cov_from_date
+    - name: stmtCovFromDateText
+      sqlType: varchar(10)
+      comment: Coverage From Date Raw Text
+      dbName: stmt_cov_from_date_text
     - name: stmtCovToDate
       sqlType: date
       dbName: stmt_cov_to_date
+    - name: stmtCovToDateText
+      sqlType: varchar(10)
+      comment: Coverage To Date Raw Text
+      dbName: stmt_cov_to_date_text
     - name: lobCd
       sqlType: varchar(1)
       dbName: lob_cd
@@ -259,6 +267,10 @@ mappings:
       sqlType: date
       comment: Admission Date
       dbName: adm_date
+    - name: admDateText
+      sqlType: varchar(10)
+      comment: Admission Date Raw Text
+      dbName: adm_date_text
     - name: admSource
       sqlType: varchar(1)
       comment: 'Source of Admission: This field identifies the way a patient was referred
@@ -461,8 +473,12 @@ mappings:
   - from: pracLocZip
   - from: stmtCovFromCymd
     to: stmtCovFromDate
+  - from: stmtCovFromCymdText
+    to: stmtCovFromDateText
   - from: stmtCovToCymd
     to: stmtCovToDate
+  - from: stmtCovToCymdText
+    to: stmtCovToDateText
   - from: lobCd
     transformer: MessageEnum
     transformerOptions:
@@ -536,6 +552,8 @@ mappings:
     to: paidDt
   - from: admDateCymd
     to: admDate
+  - from: admDateCymdText
+    to: admDateText
   - from: admSource
     transformer: MessageEnum
     transformerOptions:

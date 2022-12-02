@@ -19,7 +19,8 @@ locals {
     claimresponse_no_resources_latency    = "http-requests/latency/claimresponse-all-no-resources"
     claimresponse_resources_latency       = "http-requests/latency/claimresponse-all-with-resources"
     claimresponse_resources_latency_by_kb = "http-requests/latency-by-kb/claimresponse-all-with-resources"
-    all_error_rate                        = "http-requests/count/500-responses"
+    all_responses_count                   = "http-requests/count/all"
+    all_http500s_count                    = "http-requests/count/500-responses"
   }
 
   partners = {
@@ -59,6 +60,29 @@ locals {
   }
 
   all_partners = merge(local.partners.bulk, local.partners.non_bulk)
+
+  error_slo_configs = {
+    slo_http500_percent_1hr_alert = {
+      type      = "alert"
+      period    = 1 * 60 * 60
+      threshold = "90"
+    }
+    slo_http500_percent_1hr_warning = {
+      type      = "warning"
+      period    = 1 * 60 * 60
+      threshold = "50"
+    }
+    slo_http500_percent_24hr_alert = {
+      type      = "alert"
+      period    = 24 * 60 * 60
+      threshold = "0.01"
+    }
+    slo_http500_percent_24hr_warning = {
+      type      = "warning"
+      period    = 24 * 60 * 60
+      threshold = "0.001"
+    }
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
@@ -543,11 +567,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
   evaluation_periods  = "1"
   period              = "900"
   extended_statistic  = "p99"
-  threshold           = "110"
+  threshold           = "585"
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute BULK latency exceeded WARNING SLO ",
-    "threshold of 110 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "threshold of 585 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -574,11 +598,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
   evaluation_periods  = "1"
   period              = "900"
   extended_statistic  = "p99"
-  threshold           = "160"
+  threshold           = "740"
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute NON-BULK latency exceeded ALERT ",
-    "SLO threshold of 160 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 740 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -605,11 +629,11 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
   evaluation_periods  = "1"
   period              = "900"
   extended_statistic  = "p99"
-  threshold           = "110"
+  threshold           = "520"
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute NON-BULK latency exceeded WARNING ",
-    "SLO threshold of 110 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 520 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -1046,46 +1070,52 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_la
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_alert" {
-  alarm_name          = "${local.app}-${var.env}-slo-http500-count-mean-1hr-alert"
-  comparison_operator = "GreaterThanThreshold"
+resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
+  for_each = local.error_slo_configs
+
+  alarm_name          = "${local.app}-${var.env}-${replace(each.key, "_", "-")}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
-  period              = "3600"
-  statistic           = "Average"
-  threshold           = "0.0001"
+  threshold           = each.value.threshold
 
   alarm_description = join("", [
-    "Percent HTTP 500 (error) responses over 1 hour exceeded ALERT SLO threshold of 0.01% for ",
-    "${local.app} in ${var.env} environment"
+    "Percent HTTP 500 (error) responses over ${each.value.period / (60 * 60)} hour(s) exceeded ",
+    "${upper(each.value.type)} SLO threshold of ${each.value.threshold}% for ${local.app} in ",
+    "${var.env} environment"
   ])
 
-  metric_name = local.metrics.all_error_rate
-  namespace   = local.namespace
+  metric_query {
+    id          = "e1"
+    expression  = "m2/m1*100"
+    label       = "Error Rate"
+    return_data = "true"
+  }
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.ok_arn
+  metric_query {
+    id = "m1"
 
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
+    metric {
+      metric_name = local.metrics.all_responses_count
+      namespace   = local.namespace
+      period      = each.value.period
+      stat        = "Sum"
+      unit        = "Count"
+    }
+  }
 
-resource "aws_cloudwatch_metric_alarm" "slo_http500_count_mean_1hr_warning" {
-  alarm_name          = "${local.app}-${var.env}-slo-http500-count-mean-1hr-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "3600"
-  statistic           = "Average"
-  threshold           = "0.00001"
+  metric_query {
+    id = "m2"
 
-  alarm_description = join("", [
-    "Percent HTTP 500 (error) responses over 1 hour exceeded WARNING SLO threshold of 0.001% for ",
-    "${local.app} in ${var.env} environment"
-  ])
+    metric {
+      metric_name = local.metrics.all_http500s_count
+      namespace   = local.namespace
+      period      = each.value.period
+      stat        = "Sum"
+      unit        = "Count"
+    }
+  }
 
-  metric_name = local.metrics.all_error_rate
-  namespace   = local.namespace
-
-  alarm_actions = local.warning_arn
+  alarm_actions = each.value.type == "alert" ? local.alert_arn : local.warning_arn
   ok_actions    = local.ok_arn
 
   datapoints_to_alarm = "1"

@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -11,6 +10,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -66,7 +67,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory,
       Callable<RdaSource<TResponse, TClaim>> sourceFactory,
       ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception> sinkFactory,
-      MetricRegistry appMetrics,
+      MeterRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
     this.preJobTaskFactory = Preconditions.checkNotNull(preJobTaskFactory);
@@ -139,7 +140,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     int processedCount = 0;
     Exception error = null;
     try {
-      metrics.calls.mark();
+      metrics.calls.increment();
       try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
           RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
@@ -150,15 +151,15 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     } catch (Exception ex) {
       error = ex;
     }
-    metrics.processed.mark(processedCount);
+    metrics.processed.increment(processedCount);
     final long stopMillis = System.currentTimeMillis();
     logger.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
     if (error != null) {
-      metrics.failures.mark();
+      metrics.failures.increment();
       logger.error("processing aborted by an exception: message={}", error.getMessage(), error);
       throw new ProcessingException(error, processedCount);
     }
-    metrics.successes.mark();
+    metrics.successes.increment();
     return processedCount;
   }
 
@@ -286,20 +287,20 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
   @VisibleForTesting
   static class Metrics {
     /** Number of times the job has been called. */
-    private final Meter calls;
+    private final Counter calls;
     /** Number of calls that completed successfully. */
-    private final Meter successes;
+    private final Counter successes;
     /** Number of calls that ended in some sort of failure. */
-    private final Meter failures;
+    private final Counter failures;
     /** Number of objects that have been successfully processed. */
-    private final Meter processed;
+    private final Counter processed;
 
-    private Metrics(MetricRegistry appMetrics, Class<?> jobClass) {
+    private Metrics(MeterRegistry appMetrics, Class<?> jobClass) {
       final String base = jobClass.getSimpleName();
-      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
-      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
-      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
-      processed = appMetrics.meter(MetricRegistry.name(base, "processed"));
+      calls = appMetrics.counter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.counter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.counter(MetricRegistry.name(base, "failures"));
+      processed = appMetrics.counter(MetricRegistry.name(base, "processed"));
     }
   }
 }
