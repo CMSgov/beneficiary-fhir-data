@@ -697,6 +697,9 @@ public final class RifLoaderIT {
    *
    * <p>This test ensures that changes to RifLoader that break compatibility with Synthea-generated
    * data are flagged.
+   *
+   * <p>Note: For (https://jira.cms.gov/browse/BFD-2222) this test will be temporarily disabled and
+   * re-enabled them once Synthea is updated for the new fields
    */
   @Disabled
   @Test
@@ -952,6 +955,9 @@ public final class RifLoaderIT {
    * PreValidationProperties} object as part of the manifest, and a second time (same bucket) where
    * the manifest includes a {@link PreValidationProperties} that is invalid per its XML Schema
    * Definition (XSD).
+   *
+   * <p>Note: For (https://jira.cms.gov/browse/BFD-2222) this test will be temporarily disabled and
+   * re-enabled them once Synthea is updated for the new fields
    *
    * @throws Exception (exceptions indicate test failure)
    */
