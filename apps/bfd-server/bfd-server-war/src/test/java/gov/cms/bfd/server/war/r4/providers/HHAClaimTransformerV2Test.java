@@ -183,7 +183,7 @@ public class HHAClaimTransformerV2Test {
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
 
-    // We just want to make sure it is set
+    // We just want to make sure it is not set
     assertNull(eob.getBillablePeriod());
     Extension extension =
         eob.getBillablePeriod()
