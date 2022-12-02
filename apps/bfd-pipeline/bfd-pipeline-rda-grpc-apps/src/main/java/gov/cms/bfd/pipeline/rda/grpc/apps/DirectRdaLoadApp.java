@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -61,6 +62,7 @@ public class DirectRdaLoadApp {
     System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
     try (PipelineApplicationState appState =
         new PipelineApplicationState(
+            new SimpleMeterRegistry(),
             metrics,
             pooledDataSource,
             PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,

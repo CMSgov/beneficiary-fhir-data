@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaCh
       ThrowingFunction<
               RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>, SinkTypePreference, Exception>
           sinkFactory,
-      MetricRegistry appMetrics) {
+      MeterRegistry appMetrics) {
     super(config, preJobTaskFactory, sourceFactory, sinkFactory, appMetrics, LOGGER);
   }
 }

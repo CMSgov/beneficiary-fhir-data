@@ -34,6 +34,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -87,6 +88,7 @@ public final class PipelineTestUtils {
     DatabaseSchemaManager.createOrUpdateSchema(DatabaseTestUtils.initUnpooledDataSource());
     this.pipelineApplicationState =
         new PipelineApplicationState(
+            new SimpleMeterRegistry(),
             testMetrics,
             DatabaseTestUtils.get().getUnpooledDataSource(),
             DEFAULT_MAX_POOL_SIZE,
