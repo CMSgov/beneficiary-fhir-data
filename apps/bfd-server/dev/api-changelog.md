@@ -1,5 +1,22 @@
 # API Changelog
 
+## BFD-2222: Add Provider Billing NPI Number to Carrier in V2
+
+Add the Provider NPI Billing NPI Number to V2 Carrier claims.
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "provider" : {
+        "identifier" : {
+             "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+              "value" : "123456789"
+       }
+      },
+    ...
+  }
+```
+
 ## BFD-2221: Claim Query Code added to HHA and Hospice claims in V2
 The claim query code data is captured and presented in the HHA and Hospice V2 api responses.
 
