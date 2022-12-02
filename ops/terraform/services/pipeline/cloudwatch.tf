@@ -81,7 +81,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-max-claim-latency-exceeded" {
   threshold           = local.rda_pipeline_latency_alert.threshold
   alarm_description   = "${local.rda_pipeline_latency_alert.metrics[count.index].claim_type} claim processing is falling behind (max latency exceeded) in APP-ENV: bfd-${local.env}"
 
-  metric_name = "${local.rda_pipeline_latency_alert.metrics[count.index].sink_name}.extract.latency.millis.max"
+  metric_name = "${local.rda_pipeline_latency_alert.metrics[count.index].sink_name}.change.latency.millis.avg"
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
   # TODO: Address in BFD-2146 with info/notice escalations.
