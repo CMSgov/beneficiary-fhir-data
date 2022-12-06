@@ -269,6 +269,15 @@ module "bfd_server_slo_alarms" {
   ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing.arn
 }
 
+module "bfd_server_log_alarms" {
+  source = "../resources/bfd_server_log_alarms"
+  env    = var.env_config.env
+  # Using conditional logic here to make this module easier to move out of stateless in future
+  # stateless/stateful refactoring
+  alarm_notification_arn = var.env_config.env == "prod" ? data.aws_sns_topic.cloudwatch_alarms.arn : null
+  ok_notification_arn    = var.env_config.env == "prod" ? data.aws_sns_topic.cloudwatch_ok.arn : null
+}
+
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {
