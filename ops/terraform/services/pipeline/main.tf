@@ -75,6 +75,12 @@ locals {
   alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : []
   ok_actions    = local.is_prod ? [data.aws_sns_topic.ok[0].arn] : []
 
+  # The log availability alarm will post an incident in prod; in other envs it will get posted
+  # to #bfd-test 
+  # TODO: Replace testing SNS topic in BFD-2244
+  log_availability_alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm.arn]
+  log_availability_ok_actions = local.is_prod ? [data.aws_sns_topic.ok[0].arn] : [data.aws_sns_topic.bfd_test_slack_ok.arn]
+
   # data-source resolution
   ami_id                = data.aws_ami.main.image_id
   availability_zone     = data.external.rds.result["WriterAZ"]
