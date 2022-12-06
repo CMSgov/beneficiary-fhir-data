@@ -2,10 +2,22 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
 
   lambda_timeout_seconds = 30
-  lambda_name            = "slack-alarms-notifier"
+  lambda_name            = "cloudwatch-alarms-slack-notifier"
 
   kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
   kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
+
+  lambda_configs_by_channel = {
+    bfd_test = {
+      sns_topic        = data.aws_sns_topic.cloudwatch_alarms_alert
+      webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test"
+    }
+  }
+
+  lambdas = {
+    for k, v in local.lambda_configs_by_channel :
+    k => merge(v, { full_name = "${local.lambda_name}-${replace(k, "_", "-")}" })
+  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -19,15 +31,17 @@ data "aws_sns_topic" "cloudwatch_alarms_alert" {
   name = "bfd-${var.env}-cloudwatch-alarms-alert-testing"
 }
 
-data "archive_file" "slack_alarms_notifier" {
+data "archive_file" "this" {
   type        = "zip"
-  source_file = "${path.module}/lambda-src/slack-alarms-notifier/slack-alarms-notifier.py"
-  output_path = "${path.module}/lambda-src/slack-alarms-notifier/slack-alarms-notifier.zip"
+  source_file = "${path.module}/lambda-src/cw_alarms_slack_notifier.py"
+  output_path = "${path.module}/lambda-src/cw_alarms_slack_notifier.zip"
 }
 
-resource "aws_iam_policy" "logs_slack_alarms_notifier" {
-  name        = "bfd-${var.env}-${local.lambda_name}-logs"
-  description = "Permissions to create and write to bfd-${var.env}-${local.lambda_name} logs"
+resource "aws_iam_policy" "logs" {
+  for_each = local.lambdas
+
+  name        = "bfd-${var.env}-${each.value.full_name}-logs"
+  description = "Permissions to create and write to bfd-${var.env}-${each.value.full_name} logs"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -44,7 +58,7 @@ resource "aws_iam_policy" "logs_slack_alarms_notifier" {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "arn:aws:logs:us-east-1:${local.account_id}:log-group:/aws/lambda/bfd-${var.env}-${local.lambda_name}:*"
+                "arn:aws:logs:us-east-1:${local.account_id}:log-group:/aws/lambda/bfd-${var.env}-${each.value.full_name}:*"
             ]
         }
     ]
@@ -52,8 +66,10 @@ resource "aws_iam_policy" "logs_slack_alarms_notifier" {
 EOF
 }
 
-resource "aws_iam_policy" "kms_slack_alarms_notifier" {
-  name        = "bfd-${var.env}-${local.lambda_name}-kms"
+resource "aws_iam_policy" "kms" {
+  for_each = local.lambdas
+
+  name        = "bfd-${var.env}-${each.value.full_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
   policy      = <<-EOF
 {
@@ -73,8 +89,10 @@ resource "aws_iam_policy" "kms_slack_alarms_notifier" {
 EOF
 }
 
-resource "aws_iam_policy" "ssm_slack_alarms_notifier" {
-  name        = "bfd-${var.env}-${local.lambda_name}-ssm-parameters"
+resource "aws_iam_policy" "ssm" {
+  for_each = local.lambdas
+
+  name        = "bfd-${var.env}-${each.value.full_name}-ssm-parameters"
   description = "Permissions to /bfd/mgmt/common/sensitive/* SSM hierarchies"
   policy      = <<-EOF
 {
@@ -96,10 +114,12 @@ resource "aws_iam_policy" "ssm_slack_alarms_notifier" {
 EOF
 }
 
-resource "aws_iam_role" "slack_alarms_notifier" {
-  name        = "bfd-${var.env}-${local.lambda_name}"
+resource "aws_iam_role" "this" {
+  for_each = local.lambdas
+
+  name        = "bfd-${var.env}-${each.value.full_name}"
   path        = "/"
-  description = "Role for bfd-${var.env}-${local.lambda_name} Lambda"
+  description = "Role for bfd-${var.env}-${each.value.full_name} Lambda"
 
   assume_role_policy = <<-EOF
   {
@@ -117,44 +137,51 @@ resource "aws_iam_role" "slack_alarms_notifier" {
   EOF
 
   managed_policy_arns = [
-    aws_iam_policy.logs_slack_alarms_notifier.arn,
-    aws_iam_policy.kms_slack_alarms_notifier.arn,
-    aws_iam_policy.ssm_slack_alarms_notifier.arn
+    aws_iam_policy.logs[each.key].arn,
+    aws_iam_policy.kms[each.key].arn,
+    aws_iam_policy.ssm[each.key].arn
   ]
 }
 
-resource "aws_lambda_permission" "cloudwatch_alarms_alert_invoke_lambda" {
+resource "aws_lambda_permission" "this" {
+  for_each = local.lambdas
+
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.slack_alarms_notifier.function_name
+  function_name = aws_lambda_function.this[each.key].function_name
   principal     = "sns.amazonaws.com"
-  source_arn    = data.aws_sns_topic.cloudwatch_alarms_alert.arn
+  source_arn    = each.value.sns_topic.arn
 }
 
-resource "aws_lambda_function" "slack_alarms_notifier" {
-  description   = "Sends a Slack notification whenever an SNS notification is received from SLO alarms"
-  function_name = "bfd-${var.env}-${local.lambda_name}"
-  tags          = { Name = "bfd-${var.env}-${local.lambda_name}" }
+resource "aws_sns_topic_subscription" "this" {
+  for_each = local.lambdas
 
-  filename         = data.archive_file.slack_alarms_notifier.output_path
-  source_code_hash = data.archive_file.slack_alarms_notifier.output_base64sha256
+  topic_arn = each.value.sns_topic.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.this[each.key].arn
+}
+
+resource "aws_lambda_function" "this" {
+  for_each = local.lambdas
+
+  description   = "Sends a Slack notification whenever an SNS notification is received from a CloudWatch Alarm"
+  function_name = "bfd-${var.env}-${each.value.full_name}"
+  tags          = { Name = "bfd-${var.env}-${each.value.full_name}" }
+
+  filename         = data.archive_file.this.output_path
+  source_code_hash = data.archive_file.this.output_base64sha256
   architectures    = ["x86_64"]
-  handler          = "slack-alarms-notifier.handler"
+  handler          = "cw_alarms_slack_notifier.handler"
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
   timeout          = local.lambda_timeout_seconds
   environment {
     variables = {
-      ENV = var.env
+      ENV              = var.env
+      WEBHOOK_SSM_PATH = each.value.webhook_ssm_path
     }
   }
 
-  role = aws_iam_role.slack_alarms_notifier.arn
-}
-
-resource "aws_sns_topic_subscription" "cloudwatch_alarms_alert_subscription" {
-  topic_arn = data.aws_sns_topic.cloudwatch_alarms_alert.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.slack_alarms_notifier.arn
+  role = aws_iam_role.this[each.key].arn
 }
