@@ -48,6 +48,13 @@ locals {
     datapoints   = "1"
   }
 
+  pipeline_log_availability = {
+    period       = 1 * 60 * 60 # 1 hour 
+    eval_periods = 1
+    threshold    = 0
+    datapoints   = 1
+  }
+
   # Used by alarms for RDA claim ingestion latency metrics.  Metric time unit is milliseconds.
   # 28800000 ms == 8 hours
   rda_pipeline_latency_alert = {
