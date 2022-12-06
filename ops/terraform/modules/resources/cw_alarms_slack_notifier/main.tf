@@ -12,6 +12,10 @@ locals {
       sns_topic        = data.aws_sns_topic.cloudwatch_alarms_alert
       webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test"
     }
+    bfd_notices = {
+      sns_topic        = data.aws_sns_topic.cloudwatch_alarms_slack_bfd_notices
+      webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_notices"
+    }
   }
 
   lambdas = {
@@ -29,6 +33,10 @@ data "aws_kms_key" "mgmt_cmk" {
 data "aws_sns_topic" "cloudwatch_alarms_alert" {
   # TODO: Replace this with the non-temporary variant of the CloudWatch alarms SNS topic
   name = "bfd-${var.env}-cloudwatch-alarms-alert-testing"
+}
+
+data "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {
+  name = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-notices"
 }
 
 data "archive_file" "this" {
