@@ -301,3 +301,8 @@ module "bfd_dashboards" {
   dashboard_name = var.dashboard_name
   env            = var.env_config.env
 }
+
+module "cw_alarms_slack_notifier" {
+  source = "../resources/cw_alarms_slack_notifier"
+  env    = var.env_config.env
+}
