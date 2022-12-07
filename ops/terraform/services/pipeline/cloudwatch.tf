@@ -111,7 +111,6 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-log-availability-1hr" {
   }
 
   alarm_actions = local.log_availability_alarm_actions
-  ok_actions    = local.log_availability_ok_actions
 
   datapoints_to_alarm = local.pipeline_log_availability.datapoints
   treat_missing_data  = "notBreaching"
