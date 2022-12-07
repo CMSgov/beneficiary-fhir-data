@@ -27,6 +27,24 @@ locals {
     ]
   }
   vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
+
+  # Specifying per-environment alarms here rather than through variables and in each env-specific
+  # stateless module as it will be easier to lift this out when stateless/stateful is refactored
+  log_alarms_topic_arns_by_env = {
+    prod = {
+      alarm = data.aws_sns_topic.cloudwatch_alarms.arn
+      ok    = data.aws_sns_topic.cloudwatch_ok.arn
+    }
+    # TODO: Replace testing SNS topics in BFD-2244
+    prod-sbx = {
+      alarm = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+      ok    = data.aws_sns_topic.cloudwatch_ok_testing.arn
+    }
+    test = {
+      alarm = null
+      ok    = null
+    }
+  }
 }
 
 
@@ -269,10 +287,22 @@ module "bfd_server_slo_alarms" {
   ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing.arn
 }
 
+module "bfd_server_log_alarms" {
+  source                 = "../resources/bfd_server_log_alarms"
+  env                    = var.env_config.env
+  alarm_notification_arn = local.log_alarms_topic_arns_by_env[var.env_config.env].alarm
+  ok_notification_arn    = local.log_alarms_topic_arns_by_env[var.env_config.env].ok
+}
+
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {
   source         = "../resources/bfd_cw_dashboards"
   dashboard_name = var.dashboard_name
   env            = var.env_config.env
+}
+
+module "cw_alarms_slack_notifier" {
+  source = "../resources/cw_alarms_slack_notifier"
+  env    = var.env_config.env
 }
