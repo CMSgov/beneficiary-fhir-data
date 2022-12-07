@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 class AbstractRandomClaimGeneratorTest {
@@ -16,39 +17,48 @@ class AbstractRandomClaimGeneratorTest {
   /** The fully developed set of random data that could potentially be produced. */
   private static final Map<String, Object> expected =
       Map.of(
-          "randomInt", 21,
-          "randomNumericString", "645716924393",
-          "randomAlphaNumericString", "3j69rwcr5khj",
-          "randomEnum", TestGenerator.MyEnums.TWO,
-          "randomCharacter", 'e',
-          "randomAlphaString", "sfrzcdxbhvcp",
-          "randomDate", "2021-05-22",
-          "randomAmount", "16.17");
+          "randomInt", 32,
+          "randomNumericString", "544365311023",
+          "randomAlphaNumericString", "fh3kxnp73k4s",
+          "randomEnum", TestGenerator.MyEnums.ONE,
+          "randomCharacter", 'd',
+          "randomAlphaString", "ddpwfcrncqsb",
+          "randomDate", "2021-05-05",
+          "randomAmount", "411.57");
 
   /**
-   * Check that for any given min/max/optional settings, the randomly generated data remains stable,
-   * producing the same data each time (with some variation in value length due to min/max)
+   * Check that for any given configuration for a generated claim, the generated claims follow a
+   * stable random value generation pattern.
    *
-   * <p>Cycles through using {@link AbstractRandomClaimGenerator#optional(Runnable)} for different
-   * actions in different combinations to ensure data consistency.
+   * <p>The test checks that altering the min/max values for a string just changes the length, and
+   * not the values themselves (aside from obvious truncation)
+   *
+   * <p>This test also checks that setting a value using always(), optional(), or even not setting
+   * the field at all also has no affect on the other generated field values
    */
   @Test
   void changingAttributesTest() {
     Clock clock = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
 
-    // Try all the different optional combinations
+    // Try all the different field combinations
     for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; ++i) {
-      TestGenerator generator = new TestGenerator(5L, false, clock);
+      // Try always(), optional(), and even skipping the field entirely
+      for (int j = 0; j < TestGenerator.TestingState.values().length; ++j) {
+        TestGenerator.TestingState testingState = TestGenerator.TestingState.values()[j];
+        TestGenerator generator = new TestGenerator(5L, false, clock);
 
-      Map<String, Object> randomData = generator.generateRandomMap((byte) i, i % 12, 12, 33);
+        Map<String, Object> randomData =
+            generator.generateRandomMap((byte) i, testingState, i % 12, 12, 33);
 
-      assertSubsetOf(expected, randomData);
+        assertSubsetOf(expected, randomData);
+      }
     }
 
     // Try again with optional overridden and max string lengths
     TestGenerator generator = new TestGenerator(5L, true, clock);
 
-    Map<String, Object> randomData = generator.generateRandomMap((byte) 0, 12, 12, 33);
+    Map<String, Object> randomData =
+        generator.generateRandomMap((byte) 0, TestGenerator.TestingState.ALWAYS, 12, 12, 33);
 
     assertSubsetOf(expected, randomData);
   }
@@ -103,13 +113,27 @@ class AbstractRandomClaimGeneratorTest {
   }
 
   /** Special derived class for testing purposes */
-  private static class TestGenerator extends AbstractRandomClaimGenerator {
+  private static class TestGenerator extends AbstractRandomClaimGenerator<Map<String, Object>> {
 
+    private byte fieldMask;
+    private TestingState testingState;
+    private int min;
+    private int max;
+    private int maxInt;
+
+    /** Test enum for random enum selection */
     private enum MyEnums {
       ONE,
       TWO,
       THREE,
       FOUR
+    }
+
+    /** Helper enum for executing various testing states */
+    private enum TestingState {
+      ALWAYS,
+      OPTIONAL,
+      MISSING
     }
 
     TestGenerator(long seed, boolean optionalOverride, Clock clock) {
@@ -119,37 +143,85 @@ class AbstractRandomClaimGeneratorTest {
     /**
      * Generates the random test data to use in testing.
      *
+     * @param fieldMask A mask that dictates which fields are selected for altered testing
      * @param min The minimum length of generated string values.
      * @param max The maximum length of generated string values.
      * @param maxInt The maximum value for randomly generated integers.
      * @return A {@link Map} of randomly generated data.
      */
-    public Map<String, Object> generateRandomMap(byte optionalMask, int min, int max, int maxInt) {
+    public Map<String, Object> generateRandomMap(
+        byte fieldMask, TestingState testingState, int min, int max, int maxInt) {
+      this.fieldMask = fieldMask;
+      this.testingState = testingState;
+      this.min = min;
+      this.max = max;
+      this.maxInt = maxInt;
+
+      setSequence(0);
+      return createRandomClaim();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<String, Object> createRandomClaim() {
       Map<String, Object> randomData = new HashMap<>();
 
-      Runnable[] actions = {
-        () -> randomData.put("randomAlphaNumericString", randomAlphaNumeric(min, max)),
-        () -> randomData.put("randomAlphaString", randomLetter(min, max)),
-        () -> randomData.put("randomNumericString", randomDigit(min, max)),
-        () -> randomData.put("randomCharacter", randomChar("abcdef")),
-        () -> randomData.put("randomEnum", randomEnum(enumValues(MyEnums.values()))),
-        () -> randomData.put("randomAmount", randomAmount()),
-        () -> randomData.put("randomDate", randomDate()),
-        () -> randomData.put("randomInt", randomInt(maxInt))
+      FieldSet[] fieldSets = {
+        new FieldSet("randomAlphaNumericString", () -> randomAlphaNumeric(min, max)),
+        new FieldSet("randomAlphaString", () -> randomLetter(min, max)),
+        new FieldSet("randomNumericString", () -> randomDigit(min, max)),
+        new FieldSet("randomCharacter", () -> randomChar("abcdef")),
+        new FieldSet("randomEnum", () -> randomEnum(enumValues(MyEnums.values()))),
+        new FieldSet("randomAmount", this::randomAmount),
+        new FieldSet("randomDate", this::randomDate),
+        new FieldSet("randomInt", () -> randomInt(maxInt))
       };
 
-      // Apply the optional() logic based on the given mask
-      for (int i = 0; i < actions.length; i++) {
-        Runnable action = actions[i];
+      // Based on the mask, we will alter the testing state of certain fields
+      for (int i = 0; i < fieldSets.length; i++) {
+        FieldSet fieldSet = fieldSets[i];
 
-        if (((optionalMask >> i) & 1) == 1) {
-          optional(action);
+        // If this is a field that should have an altered testing state
+        if (((fieldMask >> i) & 1) == 1) {
+          // Check how the field should be tested
+          switch (testingState) {
+            case ALWAYS:
+              always(
+                  fieldSet.propertyName,
+                  () -> randomData.put(fieldSet.propertyName, fieldSet.valueSupplier.get()));
+              break;
+            case OPTIONAL:
+              optional(
+                  fieldSet.propertyName,
+                  () -> randomData.put(fieldSet.propertyName, fieldSet.valueSupplier.get()));
+              break;
+            case MISSING:
+            default:
+              // Do not add the field at all.
+              break;
+          }
         } else {
-          action.run();
+          // Or if this is not a field marked by the mask, just test it normally
+          always(
+              fieldSet.propertyName,
+              () -> randomData.put(fieldSet.propertyName, fieldSet.valueSupplier.get()));
         }
       }
 
       return randomData;
+    }
+  }
+
+  /** Helper class for storing different test field logic and their associated property name */
+  private static class FieldSet {
+    /** The name of the field being set */
+    private final String propertyName;
+    /** The logic used to supply the field value */
+    private final Supplier<Object> valueSupplier;
+
+    private FieldSet(String propertyName, Supplier<Object> valueSupplier) {
+      this.propertyName = propertyName;
+      this.valueSupplier = valueSupplier;
     }
   }
 }

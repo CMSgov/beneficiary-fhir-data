@@ -5,13 +5,24 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * The base class provides common functionality used by the FISS and MCS claim generators to create
  * random claim data.
+ *
+ * <p>To keep the randomly generated values stable, each field should be set using it's own path,
+ * defined by the propertyName of {@link #always(String, Runnable)}, {@link #optional(String,
+ * Runnable)}, {@link #oneOf(String, Runnable...)}, and {@link #optionalOneOf(String, Runnable...)}.
+ * The {@link Random} object is specific to each field path and is seeded using the {@link #seed},
+ * {@link #sequence}, and currently stored {@link #path}.
+ *
+ * @param <T> The type of claim this generate generates.
  */
-abstract class AbstractRandomClaimGenerator {
+abstract class AbstractRandomClaimGenerator<T> {
   /**
    * Characters of the alphabet (left out vowels to avoid real word generation, and ambiguous
    * letters like 'l').
@@ -24,36 +35,28 @@ abstract class AbstractRandomClaimGenerator {
   /** The maximum number of days in the past that a random date value can be generated for */
   private static final int MAX_DAYS_AGO = 180;
 
-  /** The {@link Random} object instance to use for generating random values */
-  private final Random randomValue;
+  /** The base seed value used for all generated random values */
+  private final long seed;
+
   /**
-   * The {@link Random} object instance to use for deciding optional logic
-   *
-   * <p>{@link #optional(Runnable)} logic is done with a separate {@link Random} instance to
-   * minimize the impact to other random value generations
-   */
-  private final Random randomOpt;
-  /**
-   * The {@link Random} object instance to use for deciding oneOf logic
-   *
-   * <p>{@link #oneOf(Runnable...)} logic is done with a separate {@link Random} instance to
-   * minimize the impact to other random value generations
-   */
-  private final Random randomOneOf;
-  /**
-   * Denotes if all {@link #optional(Runnable)} or {@link #optionalOneOf(Runnable...)} should be
-   * executed
+   * Denotes if all {@link #optional(String, Runnable)} or {@link #optionalOneOf(String,
+   * Runnable...)} should be executed regardless of random results.
    */
   private final boolean optionalOverride;
   /** The {@link Clock} object to use with generating time based values */
   private final Clock clock;
 
+  /** The sequence number of the generated claim, which regulates randomness between claims */
+  private int sequence;
+
   /**
-   * The global {@link RandomValueContext} to use when generating random values
+   * A path that will be used to randomly generate values.
    *
-   * <p>This is used in combination with {@link #optional(Runnable)}
+   * <p>The path should be updated for each value being generated, ensuring each field has a
+   * different random, but stable, value. The path is used along with the {@link #seed} and {@link
+   * #sequence} to seed the {@link Random} object used to generate field values.
    */
-  private RandomValueContext context;
+  private final Stack<String> path;
 
   /**
    * Constructs an instance.
@@ -63,12 +66,44 @@ abstract class AbstractRandomClaimGenerator {
    * @param clock Clock to generate current time/date values (needed for tests)
    */
   AbstractRandomClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    this.randomValue = new Random(seed);
-    this.randomOpt = new Random(seed);
-    this.randomOneOf = new Random(seed);
+    this.seed = seed;
     this.optionalOverride = optionalOverride;
     this.clock = clock;
+    this.sequence = 0;
+    this.path = new Stack<>();
   }
+
+  /**
+   * Set the starting sequence value.
+   *
+   * <p>This value is used to alter the random values generated between two different claims.
+   *
+   * @param sequence The sequence number to start generating claims from.
+   */
+  public void setSequence(int sequence) {
+    this.sequence = sequence;
+  }
+
+  /**
+   * Generates a random claim, prefixing the {@link #path} with the current sequence number to
+   * ensure uniqueness between sequential claims.
+   *
+   * <p>Each call to this method increments the value of {@link #sequence}, ensuring unique, random,
+   * but stable, values between claims.
+   *
+   * @return The generated claim.
+   */
+  public T randomClaim() {
+    // Add the sequence value to the beginning of our path
+    PathLayer pathLayer = addLayer(String.format("[%d]", sequence++));
+    // Create the claim
+    T randomClaim = createRandomClaim();
+    // Remove the sequence value when we're done
+    pathLayer.remove();
+    return randomClaim;
+  }
+
+  public abstract T createRandomClaim();
 
   /**
    * RDA API enums always define a special value that the protobuf API intends as a special
@@ -93,14 +128,7 @@ abstract class AbstractRandomClaimGenerator {
    * @return The random integer value.
    */
   protected int randomInt(int maxValue) {
-    RandomValueContext ctx = context;
-
-    if (ctx == null) {
-      // Creating a RandomValueContext, even for simple values, creates stability throughout
-      ctx = new RandomValueContext(randomValue.nextInt());
-    }
-
-    return ctx.randomInteger(maxValue);
+    return createContext().randomInteger(maxValue);
   }
 
   /**
@@ -143,13 +171,7 @@ abstract class AbstractRandomClaimGenerator {
    * @return random YYYY-MM-DD date string.
    */
   protected String randomDate() {
-    RandomValueContext ctx = context;
-
-    if (ctx == null) {
-      // Creating a RandomValueContext, even for simple values, creates stability throughout
-      ctx = new RandomValueContext(randomValue.nextInt());
-    }
-
+    RandomValueContext ctx = createContext();
     final LocalDate date = LocalDate.now(clock).minusDays(ctx.randomInteger(MAX_DAYS_AGO));
     return date.toString();
   }
@@ -161,80 +183,149 @@ abstract class AbstractRandomClaimGenerator {
    * @return random decimal string.
    */
   protected String randomAmount() {
-    RandomValueContext ctx = context;
-
-    if (ctx == null) {
-      // Creating a RandomValueContext, even for simple values, creates stability throughout
-      ctx = new RandomValueContext(randomValue.nextInt());
-    }
-
-    return ctx.randomAmount();
+    return createContext().randomAmount();
   }
 
   /**
    * Selects a random enum value from the list and returns it.
    *
    * @param values all possible values
-   * @param <T> the enum type
+   * @param <TEnum> the enum type
    * @return one of the values selected at random
    */
-  protected <T> T randomEnum(List<T> values) {
-    RandomValueContext ctx = context;
-
-    if (ctx == null) {
-      // Creating a RandomValueContext, even for simple values, creates stability throughout
-      ctx = new RandomValueContext(randomValue.nextInt());
-    }
-
+  protected <TEnum> TEnum randomEnum(List<TEnum> values) {
+    RandomValueContext ctx = createContext();
     return values.get(ctx.randomInteger(values.size()));
   }
 
   /**
-   * Creates a new {@link RandomValueContext} and triggers the action 50% of the time (or always if
-   * optionalOverride has been set).
+   * Creates a {@link RandomValueContext} using the current {@link #seed}, {@link #sequence}, and
+   * {@link #path} attributes that can be used to generate random values.
    *
-   * @param action action to trigger half the time
+   * @return The created {@link RandomValueContext}.
    */
-  protected void optional(Runnable action) {
-    final RandomValueContext oldContext = context;
-    // By storing a context every time, this creates stability regardless of if the optional logic
-    // is executed or not.
-    context = new RandomValueContext(randomValue.nextInt());
-    boolean shouldRun = randomOpt.nextBoolean();
+  private RandomValueContext createContext() {
+    return createContext(null);
+  }
+
+  /**
+   * Creates a {@link RandomValueContext} using the current {@link #seed}, {@link #sequence}, and
+   * {@link #path} attributes that can be used to generate random values.
+   *
+   * @param prefix An optional (nullable) prefix that can be used for accessory random values, such
+   *     as determining if an optional() value should be added.
+   * @return The created {@link RandomValueContext}.
+   */
+  private RandomValueContext createContext(String prefix) {
+    String prefixString = prefix != null && !prefix.isBlank() ? prefix + "." : "";
+    String propertyPath =
+        prefixString + path.stream().filter(Objects::nonNull).collect(Collectors.joining("."));
+    return new RandomValueContext(seed + sequence + propertyPath.hashCode());
+  }
+
+  /**
+   * Helper method to add a new layer to the current {@link #path}, returning a {@link PathLayer}
+   * object that can be used to reset the path again to just before the layer was applied.
+   *
+   * @param propertyName The property name to add to the path.
+   * @return A {@link PathLayer} object that can be used to {@link PathLayer#remove()} the added
+   *     layer.
+   */
+  private PathLayer addLayer(String propertyName) {
+    if (propertyName != null && !propertyName.isBlank()) {
+      path.push(propertyName);
+      return path::pop;
+    }
+
+    return () -> {
+      // Don't pop any values if we didn't add any
+    };
+  }
+
+  /**
+   * Adds a new layer to the {@link #path} using the propertyName, which will affect the random
+   * values generated in the given action, then resets the {@link #path} to its prior state just
+   * before this method was invoked.
+   *
+   * @param propertyName The property name to add to the {@link #path}.
+   * @param action The {@link Runnable} action to execute, which should include calls methods within
+   *     this class to generate random values.
+   */
+  protected void always(String propertyName, Runnable action) {
+    PathLayer pathLayer = addLayer(propertyName);
+
+    action.run();
+
+    pathLayer.remove();
+  }
+
+  /**
+   * Adds a new layer to the {@link #path} using the propertyName, which will affect the random
+   * values generated in the given action, then resets the {@link #path} to its prior state just
+   * before this method was invoked.
+   *
+   * @param propertyName The property name to add to the {@link #path}.
+   * @param action The {@link Runnable} action to execute, which should include calls methods within
+   *     this class to generate random values.
+   */
+  protected void optional(String propertyName, Runnable action) {
+    PathLayer pathLayer = addLayer(propertyName);
+
+    boolean shouldRun = createContext("Optional").randomBoolean();
 
     if (optionalOverride || shouldRun) {
       action.run();
     }
 
-    context = oldContext;
+    pathLayer.remove();
   }
 
   /**
    * Used when one of several possible values should be generated. Usually used for enums. The
    * possibilities are triggered with equal probability.
    *
-   * <p>Sets the {@link RandomValueContext} if it has not already been set, or uses the existing one
-   * if it is.
+   * <p>Adds a new layer to the {@link #path} using the propertyName, which will affect the random
+   * values generated in the given action, then resets the {@link #path} to its prior state just
+   * before this method was invoked.
    *
-   * @param actions variadic list of possible actions to trigger
+   * @param propertyName The property name to add to the {@link #path}.
+   * @param actions A variable list of {@link Runnable} actions to execute, which should include
+   *     calls methods within this class to generate random values.
    */
-  protected void oneOf(Runnable... actions) {
-    final int index = randomOneOf.nextInt(actions.length);
+  protected void oneOf(String propertyName, Runnable... actions) {
+    PathLayer pathLayer = addLayer(propertyName);
+
+    final int index = createContext("OneOf").randomInteger(actions.length);
+
     actions[index].run();
+
+    pathLayer.remove();
   }
 
   /**
    * Used when an optional field can have one of several possible values (usually used for enums).
    *
-   * <p>Sets the current {@link RandomValueContext} and triggers the action 50% of the time (or
-   * always if optionalOverride has been set).
+   * <p>Adds a new layer to the {@link #path} using the propertyName, which will affect the random
+   * values generated in the given action, then resets the {@link #path} to its prior state just
+   * before this method was invoked.
    *
    * <p>When a value is triggered the possibilities are selected with equal probability.
    *
-   * @param actions variadic list of possible actions to trigger
+   * @param propertyName The property name to add to the {@link #path}.
+   * @param actions A variable list of {@link Runnable} actions to execute, which should include
+   *     calls methods within this class to generate random values.
    */
-  protected void optionalOneOf(Runnable... actions) {
-    optional(() -> oneOf(actions));
+  protected void optionalOneOf(String propertyName, Runnable... actions) {
+    PathLayer pathLayer = addLayer(propertyName);
+
+    boolean shouldRun = createContext("Optional").randomBoolean();
+    final int index = createContext("OneOf").randomInteger(actions.length);
+
+    if (optionalOverride || shouldRun) {
+      actions[index].run();
+    }
+
+    pathLayer.remove();
   }
 
   /**
@@ -253,14 +344,7 @@ abstract class AbstractRandomClaimGenerator {
    * @return A random character from the provided sequence.
    */
   protected char randomChar(String characters) {
-    RandomValueContext ctx = context;
-
-    if (ctx == null) {
-      // Creating a RandomValueContext, even for simple values, creates stability throughout
-      ctx = new RandomValueContext(randomValue.nextInt());
-    }
-
-    return ctx.randomChar(characters);
+    return createContext().randomChar(characters);
   }
 
   /**
@@ -272,14 +356,7 @@ abstract class AbstractRandomClaimGenerator {
    * @return The generated random string.
    */
   private String randomString(String characters, int minLength, int maxLength) {
-    RandomValueContext ctx = context;
-
-    if (ctx == null) {
-      // Creating a RandomValueContext, even for simple values, creates stability throughout
-      ctx = new RandomValueContext(randomValue.nextInt());
-    }
-
-    return ctx.randomString(characters, minLength, maxLength);
+    return createContext().randomString(characters, minLength, maxLength);
   }
 
   /** Provides an isolated context for creating a subset of random data. */
@@ -288,7 +365,7 @@ abstract class AbstractRandomClaimGenerator {
     /** The {@link Random} instance for this context */
     private final Random random;
 
-    public RandomValueContext(int seed) {
+    public RandomValueContext(long seed) {
       random = new Random(seed);
     }
 
@@ -345,5 +422,13 @@ abstract class AbstractRandomClaimGenerator {
     public int randomInteger(int maxValue) {
       return maxValue == 0 ? 0 : random.nextInt(maxValue);
     }
+
+    public boolean randomBoolean() {
+      return random.nextBoolean();
+    }
+  }
+
+  interface PathLayer {
+    void remove();
   }
 }
