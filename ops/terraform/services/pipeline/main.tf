@@ -79,7 +79,6 @@ locals {
   # to #bfd-test 
   # TODO: Replace testing SNS topic in BFD-2244
   log_availability_alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm.arn]
-  log_availability_ok_actions = local.is_prod ? [data.aws_sns_topic.ok[0].arn] : [data.aws_sns_topic.bfd_test_slack_ok.arn]
 
   # The max claim latency alarm sends notifications to #bfd-notices upon entering the ALARM state
   max_claim_latency_alarm_actions = [data.aws_sns_topic.bfd_notices_slack_alarm.arn]
