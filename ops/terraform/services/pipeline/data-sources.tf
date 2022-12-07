@@ -111,3 +111,8 @@ data "aws_sns_topic" "bfd_test_slack_alarm" {
 data "aws_sns_topic" "bfd_test_slack_ok" {
   name  = "bfd-${local.env}-cloudwatch-alarms-ok-testing"
 }
+
+# TODO: this needs to be defined in common
+data "aws_sns_topic" "bfd_notices_slack_alarm" {
+  name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
+}
