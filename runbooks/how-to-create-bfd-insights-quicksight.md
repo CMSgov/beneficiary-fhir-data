@@ -18,7 +18,7 @@ the right.
         - Database: `bfd-insights-bfd-prod`
         - Table: `new_benes_by_day`
         - Select
-    - "Finish datset creation" modal
+    - "Finish dataset creation" modal
         - Select "Import to SPICE for quicker analysis"
         - Check "Email owners when a refresh fails"
         - Select "Edit/Preview data"
