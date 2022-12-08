@@ -8,6 +8,7 @@ from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ENV = os.environ.get("ENV", "")
+WEBHOOK_SSM_PATH = os.environ.get("WEBHOOK_SSM_PATH", "")
 
 boto_config = Config(region_name=REGION)
 ssm_client = boto3.client("ssm", config=boto_config)
@@ -29,6 +30,10 @@ def slack_escape_str(str_to_escape: str) -> str:
 def handler(event, context):
     if not ENV:
         print("ENV was not defined, exiting...")
+        return
+
+    if not WEBHOOK_SSM_PATH:
+        print("WEBHOOK_SSM_PATH was not defined, exiting...")
         return
 
     # We take only the first record, if it exists
@@ -61,13 +66,11 @@ def handler(event, context):
 
     try:
         wehbook_url = ssm_client.get_parameter(
-            Name=f"/bfd/mgmt/common/sensitive/slack_webhook_bfd_test",
+            Name=WEBHOOK_SSM_PATH,
             WithDecryption=True,
         )["Parameter"]["Value"]
     except KeyError as exc:
-        print(
-            f'SSM parameter "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test" not found: {exc.reason}'
-        )
+        print(f"SSM parameter {WEBHOOK_SSM_PATH} not found: {exc.reason}")
         return
 
     slack_message = {
@@ -77,7 +80,7 @@ def handler(event, context):
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"CloudWatch SLO Alarm alert received from `{ENV}` environment:\n"
+                        f"CloudWatch Alarm alert received from `{ENV}` environment:\n"
                         f"\t*Alarm Name:* `{alarm_name}`\n"
                         f"\t*Alarm Reason:* `{alarm_reason}`\n"
                         f"\t*Alarm Metric:* `{alarm_metric}`\n"

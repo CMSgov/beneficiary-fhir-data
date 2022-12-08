@@ -36,6 +36,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_cloudwatch_dashboard.bfd-pipeline-dashboard](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 | [aws_cloudwatch_log_metric_filter.pipeline-messages-datasetfailed-count](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_metric_filter) | resource |
 | [aws_cloudwatch_log_metric_filter.pipeline-messages-error-count](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_metric_filter) | resource |
+| [aws_cloudwatch_metric_alarm.pipeline-max-claim-latency-exceeded](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.pipeline-messages-datasetfailed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.pipeline-messages-error](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_iam_access_key.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key) | resource |

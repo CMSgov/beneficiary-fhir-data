@@ -59,6 +59,7 @@ public class RandomFissClaimGeneratorTest {
             + "  }],\n"
             + "  \"stmtCovFromCymd\": \"2021-04-08\",\n"
             + "  \"stmtCovToCymd\": \"2021-04-26\",\n"
+            + "  \"medaProv6\": \"5w0h94\",\n"
             + "  \"lobCdEnum\": \"BILL_FACILITY_TYPE_INTERMEDIATE_CASE\",\n"
             + "  \"servTypCdUnrecognized\": \"v\",\n"
             + "  \"freqCdUnrecognized\": \"m\",\n"
