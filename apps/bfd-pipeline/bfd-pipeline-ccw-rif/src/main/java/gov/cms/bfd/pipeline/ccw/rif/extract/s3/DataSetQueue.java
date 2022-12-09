@@ -173,6 +173,7 @@ public final class DataSetQueue {
 
     // Everything checks out. Add it to the list!
     manifestsToProcess.add(manifest);
+    LOGGER.debug("adding manifest to list to process, {}", manifest.toString());
   }
 
   /**

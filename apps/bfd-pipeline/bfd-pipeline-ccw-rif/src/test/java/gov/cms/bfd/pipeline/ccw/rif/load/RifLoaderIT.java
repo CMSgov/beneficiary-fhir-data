@@ -147,6 +147,19 @@ public final class RifLoaderIT {
           beneficiaryFromDb.getMbiHash().orElse(null),
           "Beneficiary has incorrect mbiHash");
       assertEquals(expectedHicn, beneficiaryFromDb.getHicn(), "Beneficiary has incorrect HICN");
+      assertEquals(
+          LocalDate.of(2020, 3, 17), beneficiaryFromDb.getPartACoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2020, 6, 17), beneficiaryFromDb.getPartACoverageEndDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2021, 7, 17), beneficiaryFromDb.getPartBCoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2022, 8, 17), beneficiaryFromDb.getPartBCoverageEndDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2021, 2, 17), beneficiaryFromDb.getPartDCoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2022, 11, 17), beneficiaryFromDb.getPartDCoverageEndDate().orElse(null));
+
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -201,6 +214,21 @@ public final class RifLoaderIT {
           beneficiaryFromDb.getMbiHash().orElse(null),
           "Beneficiary has incorrect mbiHash");
       assertEquals(expectedHicn, beneficiaryFromDb.getHicn(), "Beneficiary has incorrect HICN");
+
+      // Validate Medicare Coverage Dates
+      assertEquals(
+          LocalDate.of(2020, 3, 17), beneficiaryFromDb.getPartACoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2020, 6, 17), beneficiaryFromDb.getPartACoverageEndDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2021, 7, 17), beneficiaryFromDb.getPartBCoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2022, 8, 17), beneficiaryFromDb.getPartBCoverageEndDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2021, 2, 17), beneficiaryFromDb.getPartDCoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2022, 11, 17), beneficiaryFromDb.getPartDCoverageEndDate().orElse(null));
+
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -409,6 +437,20 @@ public final class RifLoaderIT {
           Optional.of("401441595efcc68bc5b26f4e88bd9fa550004e068d69ff75761ab946ec553a02"),
           beneficiaryFromDb.getMbiHash(),
           "Beneficiary has mbiHash");
+      // Validate Medicare Coverage Dates
+      assertEquals(
+          LocalDate.of(2020, 3, 17), beneficiaryFromDb.getPartACoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2020, 6, 17), beneficiaryFromDb.getPartACoverageEndDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2021, 7, 17), beneficiaryFromDb.getPartBCoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2022, 8, 17), beneficiaryFromDb.getPartBCoverageEndDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2021, 2, 17), beneficiaryFromDb.getPartDCoverageStartDate().orElse(null));
+      assertEquals(
+          LocalDate.of(2022, 11, 17), beneficiaryFromDb.getPartDCoverageEndDate().orElse(null));
+
       // A recent lastUpdated timestamp
       assertTrue(beneficiaryFromDb.getLastUpdated().isPresent(), "Expected a lastUpdated field");
       beneficiaryFromDb

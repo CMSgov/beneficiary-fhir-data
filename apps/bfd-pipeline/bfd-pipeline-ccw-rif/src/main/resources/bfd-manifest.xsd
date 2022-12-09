@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
-	targetNamespace="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9"
+	targetNamespace="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="dataSetManifest">
     <xs:complexType>
