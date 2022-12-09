@@ -1,5 +1,5 @@
 locals {
-  tags    = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
+  tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
 }
 
 # subnets
@@ -13,7 +13,7 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
-# kms master key 
+# kms master key
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
@@ -29,7 +29,7 @@ resource "aws_security_group" "base" {
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
-  ingress = [] # Make the ingress empty for this SG. 
+  ingress = [] # Make the ingress empty for this SG.
 
   egress {
     from_port   = 0
@@ -74,7 +74,7 @@ resource "aws_security_group_rule" "allow_db_access" {
 resource "aws_launch_template" "main" {
   name                   = "bfd-${var.env_config.env}-${var.role}"
   description            = "Template for the ${var.env_config.env} environment ${var.role} servers"
-  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], aws_security_group.app[*].id)
+  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.tool_sg], aws_security_group.app[*].id)
   key_name               = var.launch_config.key_name
   image_id               = var.launch_config.ami_id
   instance_type          = var.launch_config.instance_type
@@ -126,14 +126,14 @@ resource "aws_launch_template" "main" {
 ## Autoscaling group
 #
 resource "aws_autoscaling_group" "main" {
-  # Generate a new group on every revision of the launch template. 
+  # Generate a new group on every revision of the launch template.
   # This does a simple version of a blue/green deployment
   name             = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
   desired_capacity = var.asg_config.desired
   max_size         = var.asg_config.max
   min_size         = var.asg_config.min
 
-  # If an lb is defined, wait for the ELB 
+  # If an lb is defined, wait for the ELB
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 

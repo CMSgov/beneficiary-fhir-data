@@ -48,12 +48,40 @@ locals {
     datapoints   = "1"
   }
 
+  pipeline_log_availability = {
+    period       = 1 * 60 * 60 # 1 hour 
+    eval_periods = 1
+    threshold    = 0
+    datapoints   = 1
+  }
+
+  # Used by alarms for RDA claim ingestion latency metrics.  Metric time unit is milliseconds.
+  # 28800000 ms == 8 hours
+  rda_pipeline_latency_alert = {
+    period       = "300"
+    eval_periods = "1"
+    threshold    = "28800000"
+    datapoints   = "1"
+    metrics = [
+      { sink_name = "FissClaimRdaSink", claim_type = "fiss" },
+      { sink_name = "McsClaimRdaSink", claim_type = "mcs" },
+    ]
+  }
+
   log_groups = {
     messages = "/bfd/${local.env}/bfd-pipeline/messages.txt"
   }
 
   alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : []
   ok_actions    = local.is_prod ? [data.aws_sns_topic.ok[0].arn] : []
+
+  # The log availability alarm will post an incident in prod; in other envs it will get posted
+  # to #bfd-test 
+  # TODO: Replace testing SNS topic in BFD-2244
+  log_availability_alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm.arn]
+
+  # The max claim latency alarm sends notifications to #bfd-notices upon entering the ALARM state
+  max_claim_latency_alarm_actions = [data.aws_sns_topic.bfd_notices_slack_alarm.arn]
 
   # data-source resolution
   ami_id                = data.aws_ami.main.image_id
@@ -63,6 +91,7 @@ locals {
   rds_writer_endpoint   = data.external.rds.result["Endpoint"]
   vpc_id                = data.aws_vpc.main.id
   vpn_security_group_id = data.aws_security_group.vpn.id
+  ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   subnet_id             = data.aws_subnet.main.id
 }
 
@@ -108,7 +137,8 @@ resource "aws_instance" "this" {
 
   vpc_security_group_ids = [
     aws_security_group.app.id,
-    local.vpn_security_group_id
+    local.vpn_security_group_id,
+    local.ent_tools_sg_id
   ]
 
   capacity_reservation_specification {

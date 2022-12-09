@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -12,13 +11,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -51,15 +51,16 @@ public class DLQGrpcRdaSourceTest {
   /** Mock {@link GrpcStreamCaller} to use in testing. */
   @Mock private GrpcStreamCaller<Long> mockCaller;
 
-  /** Mock {@link MetricRegistry} to use in testing. */
-  @Mock private MetricRegistry mockMetrics;
-
   /** Mock {@link DLQGrpcRdaSource.DLQDao} to use in testing. */
   @Mock private DLQGrpcRdaSource.DLQDao mockDao;
+
+  /** {@link MetricRegistry} to use in testing. */
+  private MeterRegistry meters;
 
   /** Set up the mocks prior to each test. */
   @BeforeEach
   public void setUp() {
+    meters = new SimpleMeterRegistry();
     doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
@@ -111,7 +112,7 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
+                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -145,7 +146,7 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
+                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -177,12 +178,8 @@ public class DLQGrpcRdaSourceTest {
     final String claimType = "fiss";
     final MessageError.ClaimType type = MessageError.ClaimType.FISS;
     final CallOptions mockCallOptions = mock(CallOptions.class);
-    final Meter mockMeter = mock(Meter.class);
 
     doReturn(0).when(mockSink).getProcessedCount();
-
-    // Set up metrics mock for meters
-    doReturn(mockMeter).when(mockMetrics).meter(anyString());
 
     // Set up config mocks, needs to return fake call options and channel
     doReturn(mockCallOptions).when(mockConfig).createCallOptions();
@@ -193,7 +190,7 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, mockMetrics, claimType));
+                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
 
     doNothing().when(sourceSpy).setUptimeToReceiving();
 

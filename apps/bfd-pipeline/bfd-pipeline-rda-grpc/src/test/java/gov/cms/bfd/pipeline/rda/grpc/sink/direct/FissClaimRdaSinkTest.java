@@ -29,14 +29,16 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -62,12 +64,14 @@ public class FissClaimRdaSinkTest {
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
   @Mock private FissClaimTransformer transformer;
+  private MeterRegistry meters;
   private MetricRegistry appMetrics;
   private FissClaimRdaSink sink;
   private long nextSeq = 0L;
 
   @BeforeEach
   public void setUp() {
+    meters = new SimpleMeterRegistry();
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
@@ -75,7 +79,7 @@ public class FissClaimRdaSinkTest {
     doReturn(transformer).when(transformer).withMbiCache(any());
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
-        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
+        new PipelineApplicationState(meters, appMetrics, dataSource, entityManagerFactory, clock);
     sink = new FissClaimRdaSink(appState, transformer, true);
     sink.getMetrics().setLatestSequenceNumber(0);
     nextSeq = 0L;
@@ -99,7 +103,10 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.writes.merged",
             "FissClaimRdaSink.writes.persisted",
             "FissClaimRdaSink.writes.total"),
-        new ArrayList<>(appMetrics.getNames()));
+        meters.getMeters().stream()
+            .map(meter -> meter.getId().getName())
+            .sorted()
+            .collect(Collectors.toList()));
   }
 
   /**
