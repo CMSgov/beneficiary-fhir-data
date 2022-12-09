@@ -15,6 +15,14 @@ data "aws_security_group" "vpn" {
   }
 }
 
+data "aws_security_group" "enterprise_tools" {
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-${local.env}-enterprise-tools"]
+  }
+}
+
 # TODO: this is a temporary work-around until versioning becomes a reality
 # the following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
@@ -90,4 +98,15 @@ data "aws_sns_topic" "alarm" {
 data "aws_sns_topic" "ok" {
   count = local.is_prod ? 1 : 0
   name  = "bfd-${local.env}-cloudwatch-ok"
+}
+
+# TODO: this needs to be defined in common
+# TODO: this will be replaced in BFD-2244
+data "aws_sns_topic" "bfd_test_slack_alarm" {
+  name  = "bfd-${local.env}-cloudwatch-alarms-alert-testing"
+}
+
+# TODO: this needs to be defined in common
+data "aws_sns_topic" "bfd_notices_slack_alarm" {
+  name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
 }
