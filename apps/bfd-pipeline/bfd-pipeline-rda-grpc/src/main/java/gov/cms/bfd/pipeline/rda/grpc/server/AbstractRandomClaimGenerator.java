@@ -428,7 +428,9 @@ abstract class AbstractRandomClaimGenerator<T> {
     }
   }
 
+  /** Helper class for managing path layers */
   interface PathLayer {
+    /** Should remove a path layer only if one was previously added. */
     void remove();
   }
 }

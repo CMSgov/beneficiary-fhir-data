@@ -41,14 +41,13 @@ class AbstractRandomClaimGeneratorTest {
     Clock clock = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
 
     // Try all the different field combinations
-    for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; ++i) {
+    for (int fieldMask = Byte.MIN_VALUE; fieldMask <= Byte.MAX_VALUE; ++fieldMask) {
       // Try always(), optional(), and even skipping the field entirely
-      for (int j = 0; j < TestGenerator.TestingState.values().length; ++j) {
-        TestGenerator.TestingState testingState = TestGenerator.TestingState.values()[j];
+      for (TestGenerator.TestingState testingState : TestGenerator.TestingState.values()) {
         TestGenerator generator = new TestGenerator(5L, false, clock);
 
         Map<String, Object> randomData =
-            generator.generateRandomMap((byte) i, testingState, i % 12, 12, 33);
+            generator.generateRandomMap((byte) fieldMask, testingState, fieldMask % 12, 12, 33);
 
         assertSubsetOf(expected, randomData);
       }
