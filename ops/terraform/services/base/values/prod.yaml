@@ -11,7 +11,8 @@
 /bfd/prod/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/prod/common/nonsensitive/rds_backup_retention_period: 21 # in days TODO: is a 21 day retention period sensible default?
 /bfd/prod/common/nonsensitive/rds_iam_database_authentication_enabled: false
-/bfd/prod/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
+# /bfd/prod/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster #TODO: revert after BFD-2324 has concluded
+/bfd/prod/common/nonsensitive/rds_cluster_identifier: bfd-2324b-aurora-cluster
 /bfd/prod/common/nonsensitive/rds_instance_class: db.r5.12xlarge
 /bfd/prod/common/nonsensitive/rds_instance_count: 4
 /bfd/prod/common/nonsensitive/rds_master_username: bfduser
@@ -37,7 +38,7 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_interval: PT1M
 ## PIPELINE CCW
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
 ## PIPELINE+RDA

@@ -1,4 +1,4 @@
-variable "ami_id" {
+variable "ami_id_override" {
   description = "Provided AMI ID for the migrator."
   type        = string
   default     = null

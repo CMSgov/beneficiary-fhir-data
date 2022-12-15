@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+
 # add a timestamp to this scripts log output and redirect to both console and logfile
 exec > >(
 	while read line; do

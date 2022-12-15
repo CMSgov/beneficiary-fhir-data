@@ -38,7 +38,7 @@ locals {
   vpc_name               = local.nonsensitive_common_config["vpc_name"]
 
   # Deploy Time Configuration
-  ami_id                                      = var.ami_id # TODO: Consider storing AMI in SSM
+  ami_id                                      = data.aws_ami.main.image_id
   migrator_instance_count                     = var.create_migrator_instance ? 1 : 0
   migrator_monitor_enabled                    = var.migrator_monitor_enabled_override != null ? var.migrator_monitor_enabled_override : true
   migrator_monitor_heartbeat_interval_seconds = var.migrator_monitor_heartbeat_interval_seconds_override != null ? var.migrator_monitor_heartbeat_interval_seconds_override : 300
