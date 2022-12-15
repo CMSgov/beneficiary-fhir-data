@@ -84,10 +84,34 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-max-claim-latency-exceeded" {
   metric_name = "${local.rda_pipeline_latency_alert.metrics[count.index].sink_name}.change.latency.millis.avg"
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
-  # TODO: Address in BFD-2146 with info/notice escalations.
-  # alarm_actions =
-  # ok_actions    =
+  alarm_actions = local.max_claim_latency_alarm_actions
 
   datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "pipeline-log-availability-1hr" {
+  alarm_name          = "bfd-${local.env}-pipeline-log-availability-1hr"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = local.pipeline_log_availability.eval_periods
+  period              = local.pipeline_log_availability.period
+  statistic           = "Sum"
+  threshold           = local.pipeline_log_availability.threshold
+
+  alarm_description = join("", [
+    "Pipeline logs have not been submitted to CloudWatch in 1 hour, pipeline has likely shutdown ",
+    "in APP-ENV: bfd-${local.env}"
+  ])
+
+  metric_name = "IncomingLogEvents"
+  namespace   = "AWS/Logs"
+
+  dimensions = {
+    LogGroupName = "/bfd/${local.env}/bfd-pipeline/messages.txt"
+  }
+
+  alarm_actions = local.log_availability_alarm_actions
+
+  datapoints_to_alarm = local.pipeline_log_availability.datapoints
   treat_missing_data  = "notBreaching"
 }
