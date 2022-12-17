@@ -44,7 +44,6 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
   alarm_actions = local.alarm_actions
-  ok_actions    = local.ok_actions
 
   datapoints_to_alarm = local.pipeline_messages_error.datapoints
   treat_missing_data  = "notBreaching"
@@ -63,7 +62,6 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
   alarm_actions = local.alarm_actions
-  ok_actions    = local.ok_actions
 
   datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
   treat_missing_data  = "notBreaching"
