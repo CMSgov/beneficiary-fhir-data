@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
+import static gov.cms.bfd.pipeline.app.AppConfiguration.MICROMETER_CW_ALLOWED_METRIC_NAMES;
+
 import ch.qos.logback.classic.LoggerContext;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClient;
 import com.codahale.metrics.MetricRegistry;
@@ -30,6 +32,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.core.instrument.config.NamingConvention;
 import io.micrometer.core.instrument.dropwizard.DropwizardConfig;
 import io.micrometer.core.instrument.dropwizard.DropwizardMeterRegistry;
@@ -111,7 +114,11 @@ public final class PipelineApplication {
       final var cloudWatchRegistry =
           new CloudWatchMeterRegistry(
               cloudwatchRegistryConfig, micrometerClock, new AmazonCloudWatchAsyncClient());
-      cloudWatchRegistry.config().commonTags(commonTags);
+      cloudWatchRegistry
+          .config()
+          .meterFilter(
+              MeterFilter.denyUnless(
+                  id -> MICROMETER_CW_ALLOWED_METRIC_NAMES.contains(id.getName())));
       appMeters.add(cloudWatchRegistry);
       LOGGER.info("Added CloudWatchMeterRegistry.");
     }

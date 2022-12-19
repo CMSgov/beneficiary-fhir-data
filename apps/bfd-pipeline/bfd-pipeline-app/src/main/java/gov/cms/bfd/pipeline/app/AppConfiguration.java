@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -311,6 +312,15 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * false. Can be used when testing the pipeline locally to monitor metrics as the pipeline runs.
    */
   public static final String ENV_VAR_MICROMETER_JMX_ENABLED = "MICROMETER_JMX_ENABLED";
+
+  /**
+   * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
+   * allowed list avoids increasing AWS charges as new metrics are defined for use in NewRelic that
+   * are not necessary in Cloudwatch. These need to be the base metric names, not one of the several
+   * auto-generated aggregate metric names with suffixes like {@code .avg}.
+   */
+  public static Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
+      Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
    * Instance of {@link MicrometerConfigHelper} used to create a {@link CloudWatchConfig} instance.
