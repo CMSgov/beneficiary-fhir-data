@@ -1,5 +1,20 @@
 # API Changelog
 
+## BFD-2223: Map Coverage Period start and end for A,B,D claims in V2
+
+Added mapping for Coverage Period start and end dates
+```json
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  "period" : {
+    "start" : "2020-03-17",
+    "end" : "2020-06-17"
+    },
+  ...
+}
+```
+
 ## BFD-2222: Add Provider Billing NPI Number to Carrier in V2
 
 Add the Provider NPI Billing NPI Number to V2 Carrier claims.
