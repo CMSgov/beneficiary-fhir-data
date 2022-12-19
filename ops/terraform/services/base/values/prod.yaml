@@ -33,6 +33,9 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_user: bb-etl
 /bfd/${env}/pipeline/nonsensitive/instance_type: m5.4xlarge
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_interval: PT1M
 ## PIPELINE CCW
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true

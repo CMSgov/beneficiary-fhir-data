@@ -1,10 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
@@ -16,9 +12,14 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       RdaApiProgress.ClaimType claimType,
       boolean autoUpdateLastSeq) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
-    metrics = new Metrics(getClass(), appState.getMetrics());
+    metrics = new Metrics(getClass(), appState.getMeters());
     clock = appState.getClock();
     logger = LoggerFactory.getLogger(getClass());
     this.claimType = claimType;
@@ -181,10 +182,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public int writeClaims(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
     final long maxSeq = maxSequenceInBatch(claims);
     try {
-      metrics.calls.mark();
+      metrics.calls.increment();
       updateLatencyMetrics(claims);
       mergeBatch(maxSeq, claims);
-      metrics.objectsMerged.mark(claims.size());
+      metrics.objectsMerged.increment(claims.size());
       logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
@@ -193,11 +194,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           maxSeq,
           error.getMessage(),
           error);
-      metrics.failures.mark();
+      metrics.failures.increment();
       throw new ProcessingException(error, 0);
     }
-    metrics.successes.mark();
-    metrics.objectsWritten.mark(claims.size());
+    metrics.successes.increment();
+    metrics.objectsWritten.increment(claims.size());
     return claims.size();
   }
 
@@ -306,10 +307,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       throws DataTransformer.TransformationException {
     try {
       var change = transformMessageImpl(apiVersion, message);
-      metrics.transformSuccesses.mark();
+      metrics.transformSuccesses.increment();
       return change;
     } catch (DataTransformer.TransformationException transformationException) {
-      metrics.transformFailures.mark();
+      metrics.transformFailures.increment();
       try {
         writeError(apiVersion, message, transformationException);
       } catch (IOException e) {
@@ -349,8 +350,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param changes collection of claims to write to the database
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
+    final Instant startTime = Instant.now();
     boolean commit = false;
-    final Timer.Context timerContext = metrics.dbUpdateTime.time();
     int insertCount = 0;
 
     try {
@@ -377,9 +378,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         entityManager.getTransaction().rollback();
       }
       entityManager.clear();
-      timerContext.stop();
-      metrics.dbBatchSize.update(changes.size());
-      metrics.insertCount.update(insertCount);
+      metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
+      metrics.dbBatchSize.record(changes.size());
+      metrics.insertCount.record(insertCount);
     }
   }
 
@@ -409,14 +410,14 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     for (RdaChange<TClaim> claim : claims) {
       final long changeMillis = claim.getTimestamp().toEpochMilli();
       final long changeAge = Math.max(0L, nowMillis - changeMillis);
-      metrics.changeAgeMillis.update(changeAge);
+      metrics.changeAgeMillis.record(changeAge);
 
       final LocalDate extractDate = claim.getSource().getExtractDate();
       if (extractDate != null) {
         final ZonedDateTime extractTime = extractDate.atStartOfDay().atZone(clock.getZone());
         final long extractMillis = extractTime.toInstant().toEpochMilli();
         final long extractAge = Math.max(0L, nowMillis - extractMillis);
-        metrics.extractAgeMillis.update(extractAge);
+        metrics.extractAgeMillis.record(extractAge);
       }
     }
   }
@@ -427,8 +428,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * executions.
    */
   private void resetLatencyMetrics() {
-    metrics.changeAgeMillis.update(0L);
-    metrics.extractAgeMillis.update(0L);
+    metrics.changeAgeMillis.record(0L);
+    metrics.extractAgeMillis.record(0L);
   }
 
   /**
@@ -440,41 +441,41 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @VisibleForTesting
   static class Metrics {
     /** Number of times the sink has been called to store objects. */
-    private final Meter calls;
+    private final Counter calls;
     /** Number of calls that successfully stored the objects. */
-    private final Meter successes;
+    private final Counter successes;
     /** Number of calls that failed to store the objects. */
-    private final Meter failures;
+    private final Counter failures;
     /** Number of objects written. */
-    private final Meter objectsWritten;
+    private final Counter objectsWritten;
     /** Number of objects stored using <code>persist()</code>. */
-    private final Meter objectsPersisted;
+    private final Counter objectsPersisted;
     /** Number of objects stored using <code>merge()</code> */
-    private final Meter objectsMerged;
+    private final Counter objectsMerged;
     /** Number of objects successfully transformed. */
-    private final Meter transformSuccesses;
+    private final Counter transformSuccesses;
     /** Number of objects which failed to be transformed. */
-    private final Meter transformFailures;
+    private final Counter transformFailures;
     /**
      * Milliseconds between change timestamp and current time, measures the latency between BFD
      * ingestion and when RDA ingestion.
      */
-    private final Histogram changeAgeMillis;
+    private final DistributionSummary changeAgeMillis;
     /**
      * Milliseconds between extract date and current time, measures the latency between BFD
      * ingestion and when the MAC processes the data .
      */
-    private final Histogram extractAgeMillis;
+    private final DistributionSummary extractAgeMillis;
     /** Tracks the elapsed time when we write claims to the database. */
     private final Timer dbUpdateTime;
     /** Tracks the number of updates per database transaction. */
-    private final Histogram dbBatchSize;
+    private final DistributionSummary dbBatchSize;
     /** Latest sequnce number from writing a batch. * */
-    private final Gauge<?> latestSequenceNumber;
+    private final AtomicLong latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
     /** The number of insert statements executed */
-    private final Histogram insertCount;
+    private final DistributionSummary insertCount;
 
     /**
      * Initializes all the metrics.
@@ -482,26 +483,26 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
      * @param klass used to derive metric names
      * @param appMetrics where to store the metrics
      */
-    private Metrics(Class<?> klass, MetricRegistry appMetrics) {
+    private Metrics(Class<?> klass, MeterRegistry appMetrics) {
       final String base = klass.getSimpleName();
-      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
-      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
-      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
-      objectsWritten = appMetrics.meter(MetricRegistry.name(base, "writes", "total"));
-      objectsPersisted = appMetrics.meter(MetricRegistry.name(base, "writes", "persisted"));
-      objectsMerged = appMetrics.meter(MetricRegistry.name(base, "writes", "merged"));
-      transformSuccesses = appMetrics.meter(MetricRegistry.name(base, "transform", "successes"));
-      transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
+      calls = appMetrics.counter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.counter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.counter(MetricRegistry.name(base, "failures"));
+      objectsWritten = appMetrics.counter(MetricRegistry.name(base, "writes", "total"));
+      objectsPersisted = appMetrics.counter(MetricRegistry.name(base, "writes", "persisted"));
+      objectsMerged = appMetrics.counter(MetricRegistry.name(base, "writes", "merged"));
+      transformSuccesses = appMetrics.counter(MetricRegistry.name(base, "transform", "successes"));
+      transformFailures = appMetrics.counter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
-          appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+          appMetrics.summary(MetricRegistry.name(base, "change", "latency", "millis"));
       extractAgeMillis =
-          appMetrics.histogram(MetricRegistry.name(base, "extract", "latency", "millis"));
+          appMetrics.summary(MetricRegistry.name(base, "extract", "latency", "millis"));
       dbUpdateTime = appMetrics.timer(MetricRegistry.name(base, "writes", "elapsed"));
-      dbBatchSize = appMetrics.histogram(MetricRegistry.name(base, "writes", "batchSize"));
+      dbBatchSize = appMetrics.summary(MetricRegistry.name(base, "writes", "batchSize"));
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
-      insertCount = appMetrics.histogram(MetricRegistry.name(base, "insertCount"));
+      insertCount = appMetrics.summary(MetricRegistry.name(base, "insertCount"));
     }
 
     /**

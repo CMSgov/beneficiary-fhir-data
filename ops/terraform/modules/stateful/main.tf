@@ -188,6 +188,17 @@ resource "aws_sns_topic_policy" "cloudwatch_alarms_ok_testing" {
   policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_ok_testing.arn, aws_sns_topic.cloudwatch_alarms_ok_testing.arn)
 }
 
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
+  display_name      = "BFD Cloudwatch Alarms notices to #bfd-notices. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_notices" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn)
+}
+
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
 # provision these resources for all environments since the mechanism
