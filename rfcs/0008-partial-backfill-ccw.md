@@ -21,7 +21,7 @@ Adding that fucntionality will be a moderate-to-major architectural change for B
 
 * Status: Deferred
 * Implementation JIRA Ticket(s):
-    * [BLUEBUTTON-0001](https://jira.cms.gov/browse/BLUEBUTTON-0001)
+    * [BFD-589: Epic: Partial Backfill of CCW Records](https://jira.cms.gov/browse/BFD-589)
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
