@@ -141,7 +141,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setProvTypFacilCd(randomAlphaNumeric(1, 1)));
     optional(() -> claim.setProvEmerInd(randomAlphaNumeric(1, 1)));
     optional(() -> claim.setProvDeptId(randomAlphaNumeric(3, 3)));
-    optional(() -> claim.setMedaProvId(randomAlphaNumeric(13, 13)));
+    optional(
+        () -> {
+          claim.setMedaProvId(randomAlphaNumeric(13, 13));
+          claim.setMedaProv6(claim.getMedaProvId().substring(0, 6));
+        });
     optional(() -> claim.setTotalChargeAmount(randomAmount()));
     optional(() -> claim.setRecdDtCymd(randomDate()));
     optional(() -> claim.setCurrTranDtCymd(randomDate()));
@@ -154,8 +158,18 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setPracLocCity(randomAlphaNumeric(1, 100)));
     optional(() -> claim.setPracLocState(randomLetter(2, 2)));
     optional(() -> claim.setPracLocZip(randomDigit(1, 15)));
-    optional(() -> claim.setStmtCovFromCymd(randomDate()));
-    optional(() -> claim.setStmtCovToCymd(randomDate()));
+    optional(
+        () -> {
+          String date = randomDate();
+          claim.setStmtCovFromCymd(date);
+          claim.setStmtCovFromCymdText(date);
+        });
+    optional(
+        () -> {
+          String date = randomDate();
+          claim.setStmtCovToCymd(date);
+          claim.setStmtCovToCymdText(date);
+        });
     oneOf(
         () -> claim.setLobCdEnum(randomEnum(FissBillFacilityTypeEnums)),
         () -> claim.setLobCdUnrecognized(randomAlphaNumeric(1, 1)));
@@ -185,7 +199,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
         () -> claim.setCancAdjCdUnrecognized(randomAlphaNumeric(1, 1)));
     optional(() -> claim.setOriginalXrefDcn(randomAlphaNumeric(1, 23)));
     optional(() -> claim.setPaidDtCymd(randomDate()));
-    optional(() -> claim.setAdmDateCymd(randomDate()));
+    optional(
+        () -> {
+          String date = randomDate();
+          claim.setAdmDateCymd(date);
+          claim.setAdmDateCymdText(date);
+        });
     oneOf(
         () -> claim.setAdmSourceEnum(randomEnum(FissSourceOfAdmissionEnums)),
         () -> claim.setAdmSourceUnrecognized(randomAlphaNumeric(1, 1)));
@@ -257,8 +276,8 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private void addRandomDiagnosisCodes(FissClaim.Builder claim) {
     final int count = randomInt(MAX_DIAG_CODES);
     for (int i = 1; i <= count; ++i) {
-      FissDiagnosisCode.Builder diagCode =
-          FissDiagnosisCode.newBuilder().setDiagCd2(randomLetter(1, 7));
+      FissDiagnosisCode.Builder diagCode = FissDiagnosisCode.newBuilder();
+      optional(() -> diagCode.setDiagCd2(randomLetter(1, 7)));
       oneOf(
           () ->
               diagCode.setDiagPoaIndEnum(randomEnum(FissDiagnosisPresentOnAdmissionIndicatorEnums)),

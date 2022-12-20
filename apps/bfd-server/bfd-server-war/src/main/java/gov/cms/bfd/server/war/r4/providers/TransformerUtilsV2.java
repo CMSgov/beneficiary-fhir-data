@@ -1408,10 +1408,6 @@ public final class TransformerUtilsV2 {
     // log which NPI codes we couldn't find a match for in our downloaded NPI file
     if (!npiCodeLookupMissingFailures.contains(npiCode)) {
       npiCodeLookupMissingFailures.add(npiCode);
-      LOGGER.info(
-          "No NPI code display value match found for NPI code {} in resource {}.",
-          npiCode,
-          "NPI_Coded_Display_Values_Tab.txt");
     }
 
     return null;

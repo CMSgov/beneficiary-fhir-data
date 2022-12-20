@@ -18,7 +18,7 @@ the right.
         - Database: `bfd-insights-bfd-prod`
         - Table: `new_benes_by_day`
         - Select
-    - "Finish datset creation" modal
+    - "Finish dataset creation" modal
         - Select "Import to SPICE for quicker analysis"
         - Check "Email owners when a refresh fails"
         - Select "Edit/Preview data"
@@ -77,6 +77,32 @@ the right.
           - Save
         - Select "Publish & Visualize"
 3. Analysis screen.
+    - Create Calculated Fields that Require Aggregation Functions (must be added to the _Analysis_,
+      not the Dataset)
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_total`
+        - Calculation: `sum({bfd_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_ab2d`
+        - Calculation: `sum({ab2d_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_bb2`
+        - Calculation: `sum({bb2_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_bcda`
+        - Calculation: `sum({bcda_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_dpc`
+        - Calculation: `sum({dpc_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_bulk`
+        - Calculation: `sum({bulk_new_benes}, [yearMonth])`
+        - Save
     - Create the "All APIs" sheet. (Use the + symbol to add a new sheet)
       - Add a new visualization of type "Stacked area line chart" and configure:
         - X axis: `day`
@@ -166,6 +192,19 @@ the right.
           - monthly_running_count_dpc -> `DPC`
           - monthly_running_count_bulk -> `Bulk APIs`
           - monthly_running_count_total -> `All APIs`
+      - Add a new visualization of type "Table" and configure:
+        - Group by: `yearMonth`
+        - Value: `monthly_unique_count_*`
+        - Title: `New Unique Medicare Enrollees`
+        - Group-by column names:
+          - yearMonth -> `Month`
+        - Value column names:
+          - monthly_unique_count_ab2d -> `AB2D`
+          - monthly_unique_count_bb2 -> `BB2`
+          - monthly_unique_count_bcda -> `BCDA`
+          - monthly_unique_count_dpc -> `DPC`
+          - monthly_unique_count_bulk -> `Bulk APIs`
+          - monthly_unique_count_total -> `All APIs`
     - Create the "Daily" sheet. (Use the + symbol to add a new sheet)
       - Add a new visualization of type "KPI" and configure:
         - Value: bfd_new_benes (Sum)

@@ -59,6 +59,7 @@ public class RandomFissClaimGeneratorTest {
             + "  }],\n"
             + "  \"stmtCovFromCymd\": \"2021-04-08\",\n"
             + "  \"stmtCovToCymd\": \"2021-04-26\",\n"
+            + "  \"medaProv6\": \"5w0h94\",\n"
             + "  \"lobCdEnum\": \"BILL_FACILITY_TYPE_INTERMEDIATE_CASE\",\n"
             + "  \"servTypCdUnrecognized\": \"v\",\n"
             + "  \"freqCdUnrecognized\": \"m\",\n"
@@ -167,7 +168,10 @@ public class RandomFissClaimGeneratorTest {
             + "  \"mbiSubmBeneIndUnrecognized\": \"z\",\n"
             + "  \"adjMbiIndUnrecognized\": \"n\",\n"
             + "  \"adjMbi\": \"0st6z50nj07\",\n"
-            + "  \"medicalRecordNo\": \"j\"\n"
+            + "  \"medicalRecordNo\": \"j\",\n"
+            + "  \"stmtCovFromCymdText\": \"2021-04-08\",\n"
+            + "  \"stmtCovToCymdText\": \"2021-04-26\",\n"
+            + "  \"admDateCymdText\": \"2021-04-29\"\n"
             + "}",
         json);
   }

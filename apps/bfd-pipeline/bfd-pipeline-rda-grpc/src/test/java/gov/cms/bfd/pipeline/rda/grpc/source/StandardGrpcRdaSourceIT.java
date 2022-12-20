@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +23,8 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -108,7 +109,7 @@ public class StandardGrpcRdaSourceIT {
   private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"apiSource\" : \"0.10\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
@@ -154,7 +155,7 @@ public class StandardGrpcRdaSourceIT {
           + "}";
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"apiSource\" : \"0.4\",\n"
+          + "  \"apiSource\" : \"0.10\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
@@ -201,12 +202,12 @@ public class StandardGrpcRdaSourceIT {
   private final FissClaimTransformer transformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
   private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
-  private MetricRegistry appMetrics;
+  private MeterRegistry appMetrics;
   private JsonCaptureSink sink;
 
   @BeforeEach
   public void setUp() throws Exception {
-    appMetrics = new MetricRegistry();
+    appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
   }
 

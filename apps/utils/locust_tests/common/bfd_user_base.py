@@ -3,6 +3,7 @@
 
 import json
 import logging
+import re
 import ssl
 from typing import Callable, Dict, List, Optional, Union
 
@@ -35,6 +36,10 @@ def _(environment: Environment, **kwargs) -> None:
 
     validation.setup_failsafe_event(environment)
 
+    # Remove trailing slashes as Locust does not do so itself
+    host_no_trailing_slash = re.sub("[\\/]*$", "", environment.host)
+    environment.host = host_no_trailing_slash
+
 
 @events.quitting.add_listener
 def _(environment: Environment, **kwargs) -> None:
@@ -46,7 +51,7 @@ def _(environment: Environment, **kwargs) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
-    validation.check_sla_validation(environment)
+    validation_result = validation.check_validation_goals(environment)
 
     logger = logging.getLogger()
 
@@ -67,15 +72,20 @@ def _(environment: Environment, **kwargs) -> None:
     stats = stats_collector.collect_stats()
 
     try:
-        final_result = stats_compare.do_stats_comparison(
+        compare_result = stats_compare.do_stats_comparison(
             environment,
             stats_config,
             stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH,
             stats,
         )
-        stats.metadata.compare_result = final_result  # type: ignore
+        stats.metadata.compare_result = compare_result  # type: ignore
+        stats.metadata.validation_result = validation_result
+
+        logger.info("Final comparison result was: %s", compare_result.value)
+        logger.info("Final validation result was: %s", validation_result.value)
     finally:
         stats_writers.write_stats(stats_config, stats)
+
 
 def set_comparisons_metadata_path(path: str) -> None:
     """Sets the file path used to define metadata about stat comparisons (i.e. failure and warning
@@ -87,6 +97,7 @@ def set_comparisons_metadata_path(path: str) -> None:
     """
     global _COMPARISONS_METADATA_PATH
     _COMPARISONS_METADATA_PATH = path
+
 
 class BFDUserBase(FastHttpUser):
     """Base Class for Locust tests against BFD.

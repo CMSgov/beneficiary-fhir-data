@@ -35,6 +35,14 @@ data "aws_security_group" "vpn" {
   }
 }
 
+data "aws_security_group" "enterprise_tools" {
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-${local.env}-enterprise-tools"]
+  }
+}
+
 data "aws_security_group" "rds" {
   vpc_id = data.aws_vpc.main.id
   filter {

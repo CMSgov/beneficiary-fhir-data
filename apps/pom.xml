@@ -75,6 +75,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
+		<micrometer.version>1.10.0</micrometer.version>
 		<metrics.version>4.2.12</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
@@ -95,7 +96,7 @@
 		<jackson-datatype-jsr310.version>2.13.4</jackson-datatype-jsr310.version>
 
 		<mockito.version>4.8.1</mockito.version>
-		<postgresql.version>42.5.0</postgresql.version>
+		<postgresql.version>42.5.1</postgresql.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
 		<slf4j.version>2.0.3</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
@@ -200,6 +201,31 @@
 				<artifactId>metrics-jvm</artifactId>
 				<version>${metrics.version}</version>
 			</dependency>
+			<dependency>
+				<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-core</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Used to transmit metrics to JMX for local testing. -->
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-jmx</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-cloudwatch</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Used to transmit metrics to NewRelic for alerts and dashboards. -->
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-newrelic</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+
 
 			<!-- We lock down the versions of all the various Spring components that 
 				child projects use, as incompatibility problems with Spring are common. -->

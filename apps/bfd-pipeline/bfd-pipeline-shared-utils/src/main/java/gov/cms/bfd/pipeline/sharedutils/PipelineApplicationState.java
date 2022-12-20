@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ public final class PipelineApplicationState implements AutoCloseable {
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
   public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
+  private final MeterRegistry meters;
   private final MetricRegistry metrics;
   private final HikariDataSource pooledDataSource;
   private final EntityManagerFactory entityManagerFactory;
@@ -37,11 +39,13 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param clock the clock
    */
   public PipelineApplicationState(
+      MeterRegistry meters,
       MetricRegistry metrics,
       HikariDataSource pooledDataSource,
       String persistenceUnitName,
       Clock clock) {
     this(
+        meters,
         metrics,
         pooledDataSource,
         createEntityManagerFactory(pooledDataSource, persistenceUnitName),
@@ -61,12 +65,14 @@ public final class PipelineApplicationState implements AutoCloseable {
    */
   @VisibleForTesting
   public PipelineApplicationState(
+      MeterRegistry meters,
       MetricRegistry metrics,
       DataSource dataSource,
       int maxPoolSize,
       String persistenceUnitName,
       Clock clock) {
     this(
+        meters,
         metrics,
         createPooledDataSource(dataSource, maxPoolSize, metrics),
         persistenceUnitName,
@@ -85,10 +91,12 @@ public final class PipelineApplicationState implements AutoCloseable {
    */
   @VisibleForTesting
   public PipelineApplicationState(
+      MeterRegistry meters,
       MetricRegistry metrics,
       HikariDataSource pooledDataSource,
       EntityManagerFactory entityManagerFactory,
       Clock clock) {
+    this.meters = meters;
     this.metrics = metrics;
     this.pooledDataSource = pooledDataSource;
     this.entityManagerFactory = entityManagerFactory;
@@ -168,6 +176,11 @@ public final class PipelineApplicationState implements AutoCloseable {
     EntityManagerFactory entityManagerFactory =
         Persistence.createEntityManagerFactory(persistenceUnitName, hibernateProperties);
     return entityManagerFactory;
+  }
+
+  /** @return the {@link MeterRegistry} for the application */
+  public MeterRegistry getMeters() {
+    return meters;
   }
 
   /** @return the {@link MetricRegistry} for the application */

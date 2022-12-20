@@ -19,6 +19,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -81,6 +82,7 @@ public class LoadRdaJsonApp {
                 }
                 try (PipelineApplicationState appState =
                     new PipelineApplicationState(
+                        new SimpleMeterRegistry(),
                         metrics,
                         pooledDataSource,
                         PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,

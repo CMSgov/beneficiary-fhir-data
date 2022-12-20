@@ -2,34 +2,34 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell @mjburling
+@cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
 
 #BFD Pipeline and Server Codeowners
-/rfcs @cbrunefearless @mackec1 @keithdadkins @christrotteradhoc @lsmitchell @mjburling
-/ops @keithdadkins @christrotteradhoc @mjburling @malessi
-/apps @cbrunefearless @mackec1 @christrotteradhoc @lsmitchell
+/rfcs @cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
+/ops @keithdadkins @mjburling @malessi
+/apps @cbrunefearless @mackec1 @mjburling @lsmitchell
 
 #BFD Performance Testing Utilities
-/apps/utils/locust_tests @christrotteradhoc @lsmitchell @mjburling @malessi
+/apps/utils/locust_tests @lsmitchell @mjburling @malessi
 
 #BFD Insights Codeowners
-/insights @keithdadkins @mackec1 @christrotteradhoc @lsmitchell @mjburling @malessi
+/insights @keithdadkins @mackec1 @lsmitchell @mjburling @malessi
 
 #BCDA Insights Codeowners
-/insights/terraform/projects/bcda @keithdadkins @mjburling @christrotteradhoc @malessi
+/insights/terraform/projects/bcda @keithdadkins @mjburling @malessi
 
 #AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @sharshar-sb @keithdadkins @mjburling @christrotteradhoc @malessi
+/insights/terraform/projects/ab2d @sharshar-sb @keithdadkins @mjburling @malessi
 
 #BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @christrotteradhoc @malessi
+/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @malessi
 
 #PACA Pipeline Codeowners
-/apps/bfd-pipeline/bfd-pipeline-rda-* @ericbuckley @brianburton @kyrobbins @christrotteradhoc
+/apps/bfd-pipeline/bfd-pipeline-rda-* @brianburton @kyrobbins @mjburling
 #PACA Server Transformer Codeowners
-/apps/bfd-server/bfd-server-war/**/pac @ericbuckley @brianburton @kyrobbins @christrotteradhoc
+/apps/bfd-server/bfd-server-war/**/pac @brianburton @kyrobbins @mjburling
 # PACA Models
-/apps/bfd-model/bfd-model-rda @ericbuckley @brianburton @kyrobbins @christrotteradhoc
+/apps/bfd-model/bfd-model-rda @brianburton @kyrobbins @mjburling
 
 #GitHub Actions Workflows
-/.github/workflows @keithdadkins @mjburling @christrotteradhoc @malessi
+/.github/workflows @keithdadkins @mjburling @malessi
