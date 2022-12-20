@@ -21,9 +21,13 @@
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
+    * [Proposed Solution: Detailed Design](#proposed-solution-detailed-design)
+    * [Proposed Solution: Unresolved Questions](#proposed-solution-unresolved-questions)
+    * [Proposed Solution: Drawbacks](#proposed-solution-drawbacks)
+    * [Proposed Solution: Notable Alternatives](#proposed-solution-notable-alternatives)
 * [Prior Art](#prior-art)
-* [Future Work](#future-work)
-* [References](#references)
+* [Future Possibilities](#future-possibilities)
+* [Addendums](#addendums)
     
 ## Motivation
 [Motivation]: #motivation
@@ -169,6 +173,27 @@ If this RFC is adopted, there will be phased rollout of cursor-based paging.
 2. Cursor based paging is the default. Offset is still supported but its use is depricated.  
 3. Cursor based paging is the only type of paging supported. Offset based paging is removed.  
 
+### Proposed Solution: Detailed Design
+[Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
+
+### Proposed Solution: Unresolved Questions
+[Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
+
+* With regards to the proposed implementation:
+  1. How would these results hold up under a more realistic workload?
+  2. Does this entail moving our bulk users to this model? How might it impact their total EOBs/second throughput?
+  3. What about how this will fail during DB updates, where the DB replicas are experiencing lag and not consistent with each other? Is it any worse than the current behavior?
+* It's mentioned latency will be reduced with the proposed paging implementation. Is throughput also addressed? 
+* Please provide more context on how jitter adversely affects the throughput of a system.
+* In the proposed solution from the database perspective, what SQL is being executed? Current SQL queries? DB cursors? Or just seek based paging? 
+
+
+### Proposed Solution: Drawbacks
+[Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
+
+### Proposed Solution: Notable Alternatives
+[Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
+
 
 ## Prior Art
 [Prior Art]: #prior-art
@@ -176,16 +201,16 @@ If this RFC is adopted, there will be phased rollout of cursor-based paging.
 The proposal is base on a talk by Markus Winand’s "Pagination Done the PostgreSQL Way". 
 The slide deck is easy to follow and recommended for engineers who want to understand more about the seek technique. 
 
-## Future Work
-[Future Work]: #future-work
+## Future Possibilities
+[Future Possibilities]: #future-possibilities
 
 The BFD's team goals to improve latency, capacity, and throughput continue. 
 Significant areas for improvement remain. 
 This proposal improves the BFD's database queries but does not address other bottlenecks like JSON serialization. 
 With cursor paging, testing reveals much fewer latency spikes. Nevertheless, some spikes remain and require further investigations. 
 
-## References
-[References]: #references
+## Addendums
+[Addendums]: #addendums
 
 1. ["Pagination Done the PostgreSQL Way"](https://wiki.postgresql.org/wiki/File:Pagination_Done_the_PostgreSQL_Way.pdf) by Markus Winands. 
 2. ["Experimental Paging"](https://github.com/CMSgov/beneficiary-fhir-data/tree/rick/paging-experiment) Cursor paging POC implementation
