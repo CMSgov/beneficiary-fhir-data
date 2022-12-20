@@ -9,6 +9,12 @@
 
 This proposal strengthens the guarantee made by the use of the _elements parameter for the **fhir/ExplanationOfBenefit** endpoint.
 
+## Status
+[Status]: #status
+
+* Status: Deferred
+* Implementation JIRA Ticket(s): **NONE**
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
@@ -49,7 +55,7 @@ This proposal changes `not obliged` to `obliged` in the FHIR specification for t
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
-How much will this save us?
+* How much will this save us?
 
 As part of a larger effort to reduce job times from days to minutes, AB2D is constructing a performance test harness
 which will at its basic element, perform a single EOB retrieval.  Anecdotally, BFD EOB retrievals have been calibrated
