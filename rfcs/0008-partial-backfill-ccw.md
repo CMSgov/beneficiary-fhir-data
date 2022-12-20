@@ -7,15 +7,6 @@
 * JIRA Ticket(s):
     * [BFD-589: Epic: Partial Backfill of CCW Records](https://jira.cms.gov/browse/BFD-589)
 
-
-<!--
-Write a brief summary here: a one paragraph explanation of the feature. Try to structure it like an "elevator pitch": it should provide readers with a high-level understanding of the goals and proposed solution.
-
-Please note: many of the other sections below will not be needed for some proposals;
-  don't waste time writing responses that don't deliver real value.
-For any such not-needed section, simply write in "N/A".
--->
-
 BFD recently started receiving new claim fields from the CCW for new and updated claims,
   but has not yet "backfilled" those fields into claims that were inserted prior to the change.
 The CCW team will, hopefully early in 2021,
@@ -25,11 +16,18 @@ However, that backfill data will all be in new RIF layouts,
 BFD does not support such layouts and will need to.
 Adding that fucntionality will be a moderate-to-major architectural change for BFD.
 
+## Status
+[Status]: #status
+
+* Status: Deferred
+* Implementation JIRA Ticket(s):
+    * [BLUEBUTTON-0001](https://jira.cms.gov/browse/BLUEBUTTON-0001)
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -248,14 +246,9 @@ It's worth noting that AWS does appear to offer managed variants for both Airflo
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
-TODO
-
 Collect a list of action items to be resolved or officially deferred before this RFC is submitted for final comment, including:
 
-* What parts of the design do you expect to resolve through the RFC process before this gets merged?
-* What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-* What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
-
+* For Design Option C, what exactly is being proposed? The current explanation is a bit vague. 
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
