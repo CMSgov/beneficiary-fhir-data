@@ -20,8 +20,7 @@ Adding that fucntionality will be a moderate-to-major architectural change for B
 [Status]: #status
 
 * Status: Deferred
-* Implementation JIRA Ticket(s):
-    * [BFD-589: Epic: Partial Backfill of CCW Records](https://jira.cms.gov/browse/BFD-589)
+* Implementation JIRA Ticket(s): **NONE**
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
