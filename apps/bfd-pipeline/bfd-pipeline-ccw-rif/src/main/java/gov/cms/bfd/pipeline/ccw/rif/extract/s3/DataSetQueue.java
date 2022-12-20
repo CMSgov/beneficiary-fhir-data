@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
@@ -22,11 +23,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
 public final class DataSetQueue {
@@ -94,37 +94,18 @@ public final class DataSetQueue {
     newManifests.removeAll(knownInvalidManifests);
     newManifests.removeAll(recentlyProcessedManifests);
     newManifests.removeAll(
-        manifestsToProcess.stream().map(m -> m.getId()).collect(Collectors.toSet()));
-    newManifests.stream()
-        .forEach(
-            manifestId -> {
-              String manifestS3Key =
-                  manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
-              DataSetManifest manifest = null;
-              try {
-                manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
-              } catch (JAXBException e) {
-                /*
-                 * We want to terminate the ETL load process if an invalid manifest was found
-                 * such as a incorrect version number
-                 */
-                LOGGER.error(
-                    "Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
-                    manifestS3Key,
-                    e.toString());
-                knownInvalidManifests.add(manifestId);
-                throw new RuntimeException(e);
-              }
-
-              // Finally, ensure that the manifest passes the options filter.
-              if (!options.getDataSetFilter().test(manifest)) {
-                LOGGER.debug("Skipping data set that doesn't pass filter: {}", manifest.toString());
-                return;
-              }
-
-              // Everything checks out. Add it to the list!
-              manifestsToProcess.add(manifest);
-            });
+        manifestsToProcess.stream().map(DataSetManifest::getId).collect(Collectors.toSet()));
+    // Add manifests from Incoming
+    newManifests.forEach(
+        manifestId ->
+            addManifestToList(
+                manifestId, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)));
+    // Add manifests from Synthetic/Incoming
+    newManifests.forEach(
+        manifestId ->
+            addManifestToList(
+                manifestId,
+                manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)));
 
     /*
      * Any manifests that weren't found have presumably been processed and
@@ -144,8 +125,59 @@ public final class DataSetQueue {
   }
 
   /**
+   * Adds a manifest to the list of manifests to load if it meets filtering criteria and is not a
+   * future manifest.
+   *
+   * @param manifestId the manifest id
+   * @param manifestS3Key the manifest s3 key
+   */
+  private void addManifestToList(
+      DataSetManifest.DataSetManifestId manifestId, String manifestS3Key) {
+    DataSetManifest manifest;
+
+    // If the keyspace we're scanning doesnt exist, bail early
+    if (!s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), manifestS3Key)) {
+      LOGGER.warn(
+          "Unable to find keyspace {} in bucket {} while scanning for manifests.",
+          manifestS3Key,
+          options.getS3BucketName());
+      return;
+    }
+
+    try {
+      manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
+    } catch (JAXBException | SAXException e) {
+      /*
+       * We want to terminate the ETL load process if an invalid manifest was found
+       * such as a incorrect version number
+       */
+      LOGGER.error(
+          "Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
+          manifestS3Key,
+          e.toString());
+      knownInvalidManifests.add(manifestId);
+      throw new RuntimeException(e);
+    }
+
+    // Skip future dates, so we can hold (synthetic) data to load in the future
+    if (manifestId.isFutureManifest()) {
+      // Don't log to avoid noise from hundreds of skipped pending future files
+      return;
+    }
+
+    // Finally, ensure that the manifest passes the options filter.
+    if (!options.getDataSetFilter().test(manifest)) {
+      LOGGER.debug("Skipping data set that doesn't pass filter: {}", manifest.toString());
+      return;
+    }
+
+    // Everything checks out. Add it to the list!
+    manifestsToProcess.add(manifest);
+  }
+
+  /**
    * @return the {@link DataSetManifestId}s for the manifests that are found in S3 under the {@value
-   *     #S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
    */
   private Set<DataSetManifestId> listPendingManifests() {
     Timer.Context timerS3Scanning =
@@ -181,7 +213,9 @@ public final class DataSetQueue {
            * that it starts with a valid timestamp.
            */
           DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(key);
-          if (manifestId != null) manifestIds.add(manifestId);
+          if (manifestId != null) {
+            manifestIds.add(manifestId);
+          }
         } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
           completedManifestsCount++;
         }
@@ -208,19 +242,31 @@ public final class DataSetQueue {
    *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
    *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
    *     production, and care should be taken to account for its possibility.
+   * @throws SAXException Any {@link SAXException}s that are encountered will be bubbled up. These
+   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
+   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
+   *     production, and care should be taken to account for its possibility.
    */
   public static DataSetManifest readManifest(
       AmazonS3 s3Client, ExtractionOptions options, String manifestToProcessKey)
-      throws JAXBException {
+      throws JAXBException, SAXException {
     try (S3Object manifestObject =
         s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
       DataSetManifest manifest =
-          (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestObject.getObjectContent());
+          DataSetManifestFactory.newInstance().parseManifest(manifestObject.getObjectContent());
+      // Setup the manifest incoming/outgoing location
+      if (manifestToProcessKey.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
+        manifest.setManifestKeyIncomingLocation(
+            CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS);
+        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
+      } else {
+        manifest.setManifestKeyIncomingLocation(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
+        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
+      }
 
       return manifest;
+
     } catch (AmazonServiceException e) {
       /*
        * This could likely be retried, but we don't currently support

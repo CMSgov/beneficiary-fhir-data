@@ -3,18 +3,22 @@ package gov.cms.bfd.server.war.r4.providers;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -27,16 +31,16 @@ import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformerV2 {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link PartDEvent} to transform
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
@@ -44,7 +48,8 @@ final class PartDEventTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
+    ExplanationOfBenefit eob =
+        transformClaim((PartDEvent) claim, transformerContext.getDrugCodeDisplayLookup());
 
     timer.stop();
     return eob;
@@ -52,10 +57,12 @@ final class PartDEventTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link PartDEvent} to transform
+   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
-  private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      PartDEvent claimGroup, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
@@ -69,15 +76,18 @@ final class PartDEventTransformerV2 {
     //                  => ExplanationOfBenefit.insurance.coverage (reference)
     // BENE_ID          => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION     => ExplanationOfBenefit.status
+    // SRVC_DT          => ExplanationOfBenefit.billablePeriod.start
+    // SRVC_DT          => ExplanationOfBenefit.billablePeriod.end
+
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
         eob,
         claimGroup.getEventId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.PDE,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_D,
-        Optional.empty(),
-        Optional.empty(),
+        Optional.of(claimGroup.getPrescriptionFillDate()),
+        Optional.of(claimGroup.getPrescriptionFillDate()),
         Optional.empty(),
         claimGroup.getFinalAction());
 
@@ -250,6 +260,18 @@ final class PartDEventTransformerV2 {
             C4BBAdjudication.DRUG_COST,
             claimGroup.getTotalPrescriptionCost()));
 
+    // TOT_RX_CST_AMT => ExplanationOfBenefit.total
+    TransformerUtilsV2.addTotal(
+        eob,
+        TransformerUtilsV2.createTotalAdjudicationAmountSlice(
+            C4BBAdjudication.DRUG_COST, Optional.of(claimGroup.getTotalPrescriptionCost())));
+
+    // Benefit Payment Status Slice for CARIN compliance
+    TransformerUtilsV2.addTotal(
+        eob,
+        TransformerUtilsV2.createTotalAdjudicationStatusAmountSlice(
+            C4BBAdjudicationStatus.OTHER, Optional.of(BigDecimal.ZERO)));
+
     // RPTD_GAP_DSCNT_NUM => ExplanationOfBenefit.item.adjudication.amount
     TransformerUtilsV2.addAdjudication(
         rxItem,
@@ -279,7 +301,8 @@ final class PartDEventTransformerV2 {
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            TransformerUtilsV2.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
+            drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(
+                Optional.of(claimGroup.getNationalDrugCode())),
             claimGroup.getNationalDrugCode()));
 
     // QTY_DSPNSD_NUM => ExplanationOfBenefit.item.quantity
@@ -335,6 +358,8 @@ final class PartDEventTransformerV2 {
             TransformerUtilsV2.createIdentifierReference(
                 identifierType, claimGroup.getServiceProviderId()));
       }
+
+      TransformerUtilsV2.setProviderNumber(eob, claimGroup.getServiceProviderId());
     }
 
     /*
@@ -363,13 +388,6 @@ final class PartDEventTransformerV2 {
           CcwCodebookVariable.DSPNSNG_STUS_CD,
           claimGroup.getDispensingStatusCode());
     }
-
-    // DRUG_CVRG_STUS_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.DRUG_CVRG_STUS_CD,
-        CcwCodebookVariable.DRUG_CVRG_STUS_CD,
-        claimGroup.getDrugCoverageStatusCode());
 
     // ADJSTMT_DLTN_CD => => ExplanationOfBenefit.supportingInfo.code
     if (claimGroup.getAdjustmentDeletionCode().isPresent()) {

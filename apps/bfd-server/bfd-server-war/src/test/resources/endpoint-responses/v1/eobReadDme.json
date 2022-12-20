@@ -198,7 +198,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R5555"
+        "code" : "B04",
+        "display" : "MONKEYPOX"
       } ]
     },
     "type" : [ {
@@ -213,7 +214,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R6666"
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
       } ]
     }
   }, {
@@ -221,7 +223,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "G6666"
+        "code" : "A25",
+        "display" : "RAT-BITE FEVERS"
       } ]
     }
   } ],
@@ -245,7 +248,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cnt",
       "valueQuantity" : {
-        "value" : 60,
+        "value" : 60.234,
         "unit" : "Number of services",
         "system" : "https://bluebutton.cms.gov/resources/variables/dmerc_line_mtus_cd",
         "code" : "3"
@@ -279,8 +282,8 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "667159747",
-        "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+        "code" : "000000000",
+        "display" : "Fake Diluent - WATER"
       }
     } ],
     "sequence" : 1,

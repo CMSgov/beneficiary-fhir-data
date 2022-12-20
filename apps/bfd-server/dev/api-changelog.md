@@ -1,5 +1,794 @@
 # API Changelog
 
+## BFD-1923: Add Org Name Display to Organizations in V2
+Add the display name for NPI Organizations to the contained resource for organizations.
+
+Old Organization Resource Mapping Display Name in V2:
+```json
+      "contained" : [ {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+        },
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "PRN"
+            } ]
+          },
+          "value" : "999999"
+        }, {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "0000000000"
+        } ],
+        "active" : true,
+      } ],
+```
+
+New Mapping in V2:
+```json
+      "contained" : [ {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+        },
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "PRN"
+            } ]
+          },
+          "value" : "999999"
+        }, {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "0000000000"
+        } ],
+        "active" : true,
+        "name" : "Fake ORG Name"
+      }
+```
+
+## BFD-2145: Removal of duplicated careteam member entries and their extensions.
+Corrected an issue where duplicate entries for a provider were being supplied in the Explanation of Benefit careTeam element, making it cumbersome to process and link care team members to items.
+
+Old careteam member entry:
+```json
+"careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }],{
+    "sequence" : 2,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }]} 
+    }]
+```
+
+New careteam member entry:
+```json
+"careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }]}
+    }]
+```
+
+## BFD-1895: Add CARIN conformant coding system in Procedure Coding list element in V2
+
+Add an additional coding for ICD procedure codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. .http://www.cms.gov/Medicare/Coding/ICD10).
+The existing coding has been left in place for backwards compatibility.
+
+New diagnosis:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "procedure" : [{
+        "sequence" : 1,
+        "date" : "2016-01-16T00:00:00+00:00",
+        "procedureCodeableConcept" : {
+            "coding" : [
+                { "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+                "code" : "4A0204Z",
+                "display": "MEASUREMENT OF CARDIAC ELECTRICAL ACTIVITY, OPEN APPROACH"
+                }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10",
+                "code" : "4A0204Z",
+                "display": "MEASUREMENT OF CARDIAC ELECTRICAL ACTIVITY, OPEN APPROACH"
+                }
+        ]},
+        ...
+      ]},
+    ...
+  }
+```
+
+## BFD-1894: Add CARIN conformant coding system in Diagnosis Coding list element in V2
+
+Add an additional coding for ICD diagnoses codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. http://hl7.org/fhir/sid/icd-10-cm).
+The existing coding has been left in place for backwards compatibility.
+
+New diagnosis:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "diagnosis" : [{
+        "sequence" : 1,
+        "diagnosisCodeableConcept" : {
+            "coding" : [
+                { "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "A00",
+                "display": "CHOLERA"
+                }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10",
+                "code" : "A00",
+                "display": "CHOLERA"
+                }
+        ]},
+        ...
+      ]},
+    ...
+  }
+```
+
+## BFD-1916: Map FI Claim Action Code in V2
+
+FI Claim Action Code data has been mapped for V2. This data is now available in the extensions for SNF and Inpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Action Code Example:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "extension": [{
+       ...
+          {
+            "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+            "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)"
+            }
+          },
+        ...
+      }]
+    ...
+  }
+```
+
+## BFD-1917: Map FI Claim Process Date in V1 and V2
+
+FI Claim Process Date data has been mapped for V2. This data is now available in the extensions for SNF, HHA, Hospice, Inpatient and Outpatient claims. Note the mapping was completed for V2 only; not mapped in V1.
+
+FI Claim Process Date Example:
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+     "extension": [{
+      ...
+        {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+        "valueDate" : "2014-02-07"
+        },
+      ...
+    }]
+  ...
+  }
+```
+
+## BFD-1620: Add Total Slices for CARIN Compliance
+
+Adds two slices for C4BBAdjudication and C4BBPayerAdjudicationStatus to be in compliance with CARIN.
+
+C4BBAdjudication example:
+```json
+  "resource" : {
+    "resourceType" : "ExplanationOfBenefit",
+    ...
+      "item" : [ {
+        ...
+          "total" : [ {
+              "category" : {
+                "coding" : [ {
+                  "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                  "code" : "drugcost",
+                  "display" : "Drug Cost"
+                } ]
+              },
+              "amount" : {
+                "value" : 550.0,
+                "currency" : "USD"
+              }
+        }
+        ...
+      }
+    ...
+  }
+```
+        
+
+C4BBPayerAdjudicationStatus example:
+```json
+  "resource" : {
+    "resourceType" : "ExplanationOfBenefit",
+    ...
+      "item" : [ {
+        ...
+        "adjudication" : [ {
+            ...
+            "category" : {
+              "coding" : [ {
+                "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+                "code" : "other",
+                "display" : "Other"
+              } ]
+            },
+            "amount" : {
+              "value" : 0,
+              "currency" : "USD"
+            }
+          }
+        ...
+      }
+    ...
+  }
+```
+
+## BFD-1519: Map Revenue Center Unit Count in V2
+
+This extension was not previously available in the v2 claims for revenue center unit count. The
+following claim types will have this extension available: Inpatient, Outpatient, HHA, Hospice, and SNF claims.  Since we already mapped drug code to eob.item.quantity in v2 and we can't cause a backwards-incompatible change, we solved this by making a new extension and assigning claimLine.getUnitCount to valueQuantity in the extension. 
+```json
+  "item" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+          "valueQuantity" : {
+            "value" : 1
+          }
+        } ],
+```
+
+## BFD-1672: Add FI_DOC_CLM_CNTL_NUM extension to v2 adjudicated institutional claims
+
+This extension was not previously available in the v2 claims for institutional based ExplanationOfBenefit resources.  This
+extension is now available in the extensions for Inpatient, Outpatient, HHA, Hospice, and SNF claims.
+```json
+  "extension" : [ {
+    //...
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "1234567890123"
+    }
+  },
+  //...
+```
+
+## BFD-1529: Populate Part B Termination Code Correctly
+
+Previously the Part B coverage termination code was always the same as the Part A coverage termination code.
+The data will now reflect the proper Part B termination code.
+
+## BFD-1422 Remove Duplicate Primary Payer Codes
+
+Removed duplicate primary payer code from API output for DME claims:
+```
+{
+          "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            "code" : "E",
+            "display" : "Workers' compensation"
+          }
+}
+```
+
+## BFD-1403 Update patient discharge status code mapping
+
+Update mapping for patient discharge status coding for HHA, Inpatient and Hospice. Previously, the patient discharge status code in the EOB FHIR response was incorrectly being populated by the claim frequency code data field. The value for the patient discharge status code is now correctly being populated by the patient discharge status code data field.
+For Inpatient:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "51",
+        "display" : "Discharged/transferred to a Hospice – medical facility."
+      } ]
+    }
+```
+
+For Hospice:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+```
+
+For HHA:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+ ```
+
+## BFD-1664 Upgrade HAPI-FHIR to version 5.7.2
+
+The hapi-fhir dependencies that BFD relies on to serve FHIR responses has been upgraded from version 4.1.0 to version 5.7.2. There are no changes to the responses to resource requests with this upgrade. The metadata response has changed as follows:
+
+ * 'searchInclude' and 'searchRevInclude' are now included in the metadata output for all resources.
+ * 'fhirVersion' has been updated from 4.0.0 to 4.0.1
+ * The 'StructureDefinition' resource is no longer available. For more information please see the [hapi changelog entry](https://hapifhir.io/hapi-fhir/docs/introduction/changelog_2020.html).
+ * Various minor fixes including removal of duplicate elements.
+
+For more information see the [HAPI FHIR Release Notes](https://github.com/hapifhir/hapi-fhir/releases)
+
+## BFD-1461 Implement Handling for Null Enrollment Reference Years
+
+ * Following FHIR mapping changes were made:
+
+  * For V1 and V2, if there is a reference year, return data normally.  For V1 and V2, if there is a NULL reference year, do NOT return data that is associated with that specific reference year. All other data is returned as expected.  If there is a null reference year the following fields will not be present.
+
+```
+  {
+     "url":"https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+     "valueDate":"2018"
+  },
+  {
+     "url":"https://bluebutton.cms.gov/resources/variables/dual_01...12",
+     "valueCoding":{
+        "system":"https://bluebutton.cms.gov/resources/variables/dual_01...12",
+        "code":"**",
+        "display":"Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+     }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/buyin01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/buyin01...12",
+         "code":"C",
+         "display":"Part A and Part B state buy-in"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/ptdcntrct01/yyyy-1...yyy-12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/ptdcntrct01...12",
+         "code":"S4607"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/ptdpbpid01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/ptdpbpid01...12",
+         "code":"003"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/sgmtid01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/sgmtid01...12",
+         "code":"000"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/cstshr01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/cstshr01...12",
+         "code":"00",
+         "display":"Not Medicare enrolled for the month"
+      }
+   },
+   {
+      "url":"https://bluebutton.cms.gov/resources/variables/rdsind01...12",
+      "valueCoding":{
+         "system":"https://bluebutton.cms.gov/resources/variables/rdsind01...12",
+         "code":"Y",
+         "display":"Employer subsidized for the retired beneficiary"
+      }
+   }
+  ```
+  
+## BFD-874 Fix diagnosis.sequence in V1 and V2
+
+* The Following FHIR mapping changes were made:
+
+For both V1 and V2 eob.diagnosis.sequence is now correctly populated. This can now be utilized whenever a DRG is reported.
+
+```
+  "diagnosis" : [ {
+    "sequence" : 1,
+    ...,
+  }]
+ ```
+  
+## BFD-1582 Remove spurious coverage contracts
+
+Removed hardcoded coverage contracts that were inadvertantly introduced in V1 and V2 during testing.
+
+The contract that was removed in V1:
+
+```
+"contract" : [ {
+        "id" : "ptc-contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1 reference"
+      } ]
+```
+
+The contract that was removed in V2:
+
+```
+"contract" : [ {
+        "id" : "contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1"
+      } ]
+```
+
+## BFD-1423 Remove Duplicate Drug Status Code
+
+Removed duplicate drug status coding from API output for PDE claims:
+There will only be one of these:
+```
+ "category" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code" : "info",
+            "display" : "Information"
+          }, {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "display" : "Drug Coverage Status Code"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "code" : "C",
+            "display" : "Covered"
+          } ]
+        }
+}
+```
+
+## BFD-1477 Map Provider for PDE
+
+* Following FHIR mapping changes were made:
+
+	* eob.provider, in PDE, is mapped using serviceProviderId (the pharmacy id) in v2
+```
+  "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "value" : "1023011079"
+        }
+   },
+ ```
+
+## BFD-1424 Fix mtus code
+
+Added a new extension with the correct url/system for MTUS Code and kept the old extension with the MTUS Code value that had the incorrect url/system of MTUS Count:
+The old coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+}, 
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+}
+```
+The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+        "code" : "3"
+      }
+},
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+```
+
+## BFD-1446: Added focal field to v2
+
+For V2, set eob.insurance.focal to 'true' for all eob.insurance.coverage elements
+
+This is a Boolean field and should be set to either true or false. The definition of the field is this: "Coverage to be used for adjudication". There will only be one insurance per claim at this time. This fix applies to V2 only.
+
+````
+ "insurance" : [ {
+    "focal" : true,
+    ...,
+ }]
+````
+
+## BFD-1383 Update V2 line item allowed charge amount mapping
+
+Previously, the allowed charge amount in the EOB FHIR response was incorrectly being populated by the submitted charge amount data field. The value for allowed charge amount is now being populated correctly by the respective allowed charge amount data field. Note that this is only for v2
+For DME the new allowed charge amount looks like:
+````
+"amount" : {
+    "value" : 129.45,
+    "currency" : "USD"
+}
+````
+
+For Carrier:
+````
+"amount" : {
+    "value" : 47.84,
+    "currency" : "USD"
+}
+````
+
+## BFD-1516: Map Hospice Period Count in V2
+
+Added mapping for Hospice Period count
+BENE_HOSPC_PRD_CNT => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
+    }
+  }
+  ...
+}
+```
+
+## BFD-1517: Map FI Number in V2
+
+Added mapping for Fiscal Intermediary Number
+FI_NUM => ExplanationOfBenefit.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added information will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "8299"
+    }
+  }
+  ...
+}
+```
+
+## BFD-1518: Map Revenue Center Status Indicator Code in V2
+
+Added mapping for Revenue Status Code:
+REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+
+This field was mapped in v1 but missing in v2, so this change is to achieve parity for this field.
+
+The newly added extension will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "item" : [ {
+    ...
+    "revenue" : {
+          "extension" : [ {
+            "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+            "valueCoding" : {
+              "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+              "code" : "A",
+              "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+            }
+          } ],
+          ...
+    },
+    ...
+  } ],
+  ...
+}
+```
+
+## BFD-1566: Add Patient.meta.tag entry for Some Patients
+
+Our system has delayed the processing of demographic and enrollment data
+  for some persons who had previously been enrolled in Medicare
+  but are not enrolled in Medicare for the current year.
+This delay is due to errors in
+  how that data has been sent to our system for processing
+  that only impact such persons.
+Only around 0.3% of persons we have records for are impacted by this issue.
+
+Nevertheless, for such impacted persons,
+  their `Patient` resources are being tagged,
+  as follows:
+
+```
+{
+  "resourceType": "Patient",
+  ...
+  "meta": {
+    ...
+    "tag": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/codesystem/tags",
+        "code": "delayed-backdated-enrollment",
+        "display": "Impacted by delayed backdated enrollment data."
+      }
+    ]
+  },
+  ...
+```
+
+## BFD-1338: Add 2021 CPT Codes for SAMHSA Filtering
+
+Added three new codes to `codes-cpt.csv`:
+```
+G1028
+G2215
+G2216
+```
+
+These new codes allow for enhanced SAMHSA filtering for the v1 and v2 endpoints to remain compliant with SAMHSA data sharing policy.
+
 ## BLUEBUTTON-865: Adding Carrier & DME Tax Numbers to ExplanationOfBenefit resource
 
 A new optional flag has been added that will cause tax numbers from a claim to be included in response `ExplanationOfBenefit` resources.
@@ -692,4 +1481,3 @@ Future updates may add `Coding.display` values for additional fields.
 	* The "FIXME this should be mapped as a valueQuantity, not a valueCoding" issues were addressed by creating a new common method for adding quantities to an extension instead of codeable concepts for these fields. The new method is called addExtensionValueQuantity in TransformerUtils.
 	* The "FIXME this should be mapped as an extension valueIdentifier instead of as a valueCodeableConcept" issues were addressed by creating a new common method for adding identifiers to an extension instead of a codeable concept for these fields. The new method is called addExtensionValueIdentifier in TransformerUtils.
 	* The "FIXME: check if this field is non-nullable and if not remove the 'if' check" issues were addressed by comparing the fields to their definition in the rif-layout-and-fhir-mapping.xlsx file. Most fields were found to be non-nullable and so the "if" check was removed.
- 

@@ -1,0 +1,70 @@
+---
+##
+# Applies and verifies the role on the container being used for the test case.
+##
+
+# Apply the role.
+- hosts: bfd-server-load
+  tasks:
+    - name: Install Prerequisites
+      package:
+        name:
+          - procps
+          - awscli
+          - jq
+        state: present
+      become: true
+
+    - name: Archive server-load Application
+      archive:
+        path: ../../../../../apps/utils/locust_tests
+        dest: files/locust_tests.zip
+        format: zip
+      become: false
+      delegate_to: localhost
+
+    - name: Create Git Repo Directory
+      file:
+        path: /beneficiary-fhir-data/apps/utils
+        state: directory
+        owner: root
+        group: root
+      become: true
+
+    - name: Copy and Unarchive Local Repository
+      unarchive:
+        src: files/locust_tests.zip
+        dest: /beneficiary-fhir-data/apps/utils
+        owner: root
+        group: root
+      become: true
+
+    - name: Apply Role
+      import_role:
+        name: bfd-server-load
+      vars:
+        env: dev
+        git_repo_root: /beneficiary-fhir-data
+        server_load_dir: /opt/bfd-server-load
+        server_load_max_spawned_nodes: 0
+        server_load_max_spawned_users: 0
+        server_load_test_runtime_limit: 0
+        server_load_coasting_time: 0
+
+    - name: Ensure Service Is Running
+      service:
+        name: bfd-server-load
+        state: started
+        enabled: yes
+      changed_when: false
+      become: true
+
+    - name: Evaluate server-load exit code
+      shell: >-
+        systemctl show bfd-server-load.service --property=ExecStart \
+        | xargs -n1
+        | grep status=
+      retries: 10
+      delay: 6
+      register: exit_status
+      until: exit_status.stdout == 'status=0'

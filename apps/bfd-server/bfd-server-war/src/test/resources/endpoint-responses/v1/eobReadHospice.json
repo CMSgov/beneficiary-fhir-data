@@ -82,8 +82,9 @@
   "organization" : {
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "999999999"
-    }
+      "value" : "0000000000"
+    },
+    "display" : "Fake ORG Name"
   },
   "facility" : {
     "extension" : [ {
@@ -96,8 +97,9 @@
     } ],
     "identifier" : {
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "999999999"
-    }
+      "value" : "0000000000"
+    },
+    "display" : "Fake ORG Name"
   },
   "information" : [ {
     "sequence" : 1,
@@ -210,7 +212,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R5555"
+        "code" : "72761",
+        "display" : "ROTATOR CUFF RUPTURE"
       } ]
     },
     "type" : [ {
@@ -225,7 +228,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R6666"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       } ]
     }
   }, {
@@ -233,7 +237,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     },
     "type" : [ {
@@ -248,7 +253,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {

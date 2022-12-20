@@ -1,0 +1,46 @@
+---
+##
+# Applies and verifies the role on the container being used for the test case.
+##
+
+# Apply the role.
+- hosts: bfd-db-migrator
+  tasks:
+    - name: Install Prerequisites
+      package:
+        name:
+          - procps
+          - awscli
+          - jq
+        state: present
+      become: true
+    - name: Apply Role
+      import_role:
+        name: bfd-db-migrator
+      vars:
+        env: dev
+        db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAPSHOT/bfd-db-migrator-1.0.0-SNAPSHOT.zip"
+        db_migrator_db_url: jdbc:postgresql://db:5432/fhirdb
+        db_migrator_db_username: bfd
+        db_migrator_db_password: bfd
+        db_migrator_dir: /opt/bfd-db-migrator
+        migrator_monitor_enabled: false
+        migrator_monitor_heartbeat_interval_seconds: 15
+
+    - name: Ensure Service Is Running
+      service:
+        name: bfd-db-migrator
+        state: started
+        enabled: yes
+      changed_when: false
+      become: true
+
+    - name: Evaluate migrator exit code
+      shell: >-
+        systemctl show bfd-db-migrator.service --property=ExecStart \
+        | xargs -n1
+        | grep status=
+      retries: 10
+      delay: 6
+      register: exit_status
+      until: exit_status.stdout == 'status=0'

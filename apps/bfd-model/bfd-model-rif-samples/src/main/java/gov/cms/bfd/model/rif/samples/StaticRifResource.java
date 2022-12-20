@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,12 +22,19 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 /** Enumerates the sample RIF resources available on the classpath. */
 public enum StaticRifResource {
   SAMPLE_A_BENES(
       resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
+
+  SAMPLE_A_BENES_WITHOUT_REFERENCE_YEAR(
+      resourceUrl("rif-static-samples/sample-a-beneficiaries-without-reference-year.txt"),
+      RifFileType.BENEFICIARY,
+      1),
 
   SAMPLE_A_BENES_WITH_BACKSLASH(
       resourceUrl("rif-static-samples/sample-a-beneficiaries-with-backslash.txt"),
@@ -50,6 +58,11 @@ public enum StaticRifResource {
 
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
+  SAMPLE_A_CARRIER_MULTIPLE_LINES(
+      resourceUrl("rif-static-samples/sample-a-bcarrier-multiple-lines.txt"),
+      RifFileType.CARRIER,
+      7),
+
   SAMPLE_A_INPATIENT(
       resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
@@ -66,91 +79,10 @@ public enum StaticRifResource {
 
   SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
-  SAMPLE_B_BENES(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
+  SAMPLE_A_MULTIPLE_ROWS_SAME_BENE(
+      resourceUrl("rif-static-samples/sample-a-multiple-entries-same-bene.txt"),
       RifFileType.BENEFICIARY,
-      100),
-
-  SAMPLE_B_CARRIER(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"),
-      RifFileType.CARRIER,
-      4378),
-
-  SAMPLE_B_INPATIENT(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
-      RifFileType.INPATIENT,
-      49),
-
-  SAMPLE_B_OUTPATIENT(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "outpatient_test.rif"),
-      RifFileType.OUTPATIENT,
-      829),
-
-  SAMPLE_B_SNF(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"),
-      RifFileType.SNF,
-      14),
-
-  SAMPLE_B_HOSPICE(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hospice_test.rif"),
-      RifFileType.HOSPICE,
-      10),
-
-  SAMPLE_B_HHA(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"),
-      RifFileType.HHA,
-      51),
-
-  SAMPLE_B_DME(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"),
-      RifFileType.DME,
-      248),
-
-  SAMPLE_B_PDE(
-      localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"),
-      RifFileType.PDE,
-      5714),
-
-  SAMPLE_C_BENES(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"),
-      RifFileType.BENEFICIARY,
-      1000000),
-
-  SAMPLE_C_CARRIER(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "carrier_test.rif"),
-      RifFileType.CARRIER,
-      32943217),
-
-  SAMPLE_C_DME(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "dme_test.rif"),
-      RifFileType.DME,
-      2320363),
-
-  SAMPLE_C_HHA(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"), RifFileType.HHA, 228623),
-
-  SAMPLE_C_HOSPICE(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hospice_test.rif"),
-      RifFileType.HOSPICE,
-      106462),
-
-  SAMPLE_C_INPATIENT(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "inpatient_test.rif"),
-      RifFileType.INPATIENT,
-      384616),
-
-  SAMPLE_C_OUTPATIENT(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "outpatient_test.rif"),
-      RifFileType.OUTPATIENT,
-      6195549),
-
-  SAMPLE_C_PDE(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"),
-      RifFileType.PDE,
-      67566673),
-
-  SAMPLE_C_SNF(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175),
+      6),
 
   SAMPLE_U_BENES(
       resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
@@ -167,6 +99,54 @@ public enum StaticRifResource {
       1),
 
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
+
+  /**
+   * The ({@code SAMPLE_SYNTHEA_*}) set of test fixture files were generated using <a
+   * href="https://github.com/synthetichealth/synthea/wiki/Getting-Started">Synthea</a>. To recreate
+   * these files, perform the following steps after installing Synthea as per the developer
+   * instructions in the linked site above:
+   *
+   * <ol>
+   *   <li>Generate the files: {@code ./run_synthea -s 1010 -cs 0 -r 20210520 -e 20210520 -p 20
+   *       --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10
+   *       --generate.only_alive_patients=true -a 70-80}
+   *   <li>Minimize the files: {@code ./gradlew rifMinimize}
+   *   <li>Copy the files to the bfd resource dir: {@code cp output/bfd_min/*
+   *       $BFD_HOME/apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea}
+   * </ol>
+   */
+  SAMPLE_SYNTHEA_BENES2011(
+      resourceUrl("rif-synthea/beneficiary_2011.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2012(
+      resourceUrl("rif-synthea/beneficiary_2012.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2013(
+      resourceUrl("rif-synthea/beneficiary_2013.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2014(
+      resourceUrl("rif-synthea/beneficiary_2014.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2015(
+      resourceUrl("rif-synthea/beneficiary_2015.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2016(
+      resourceUrl("rif-synthea/beneficiary_2016.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2017(
+      resourceUrl("rif-synthea/beneficiary_2017.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2018(
+      resourceUrl("rif-synthea/beneficiary_2018.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2019(
+      resourceUrl("rif-synthea/beneficiary_2019.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2020(
+      resourceUrl("rif-synthea/beneficiary_2020.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_BENES2021(
+      resourceUrl("rif-synthea/beneficiary_2021.csv"), RifFileType.BENEFICIARY, -1),
+  SAMPLE_SYNTHEA_CARRIER(resourceUrl("rif-synthea/carrier.csv"), RifFileType.CARRIER, -1),
+  SAMPLE_SYNTHEA_INPATIENT(resourceUrl("rif-synthea/inpatient.csv"), RifFileType.INPATIENT, -1),
+  SAMPLE_SYNTHEA_OUTPATIENT(resourceUrl("rif-synthea/outpatient.csv"), RifFileType.OUTPATIENT, -1),
+  SAMPLE_SYNTHEA_SNF(resourceUrl("rif-synthea/snf.csv"), RifFileType.SNF, -1),
+  SAMPLE_SYNTHEA_HOSPICE(resourceUrl("rif-synthea/hospice.csv"), RifFileType.HOSPICE, -1),
+  SAMPLE_SYNTHEA_HHA(resourceUrl("rif-synthea/hha.csv"), RifFileType.HHA, -1),
+  SAMPLE_SYNTHEA_DME(resourceUrl("rif-synthea/dme.csv"), RifFileType.DME, -1),
+  SAMPLE_SYNTHEA_PDE(resourceUrl("rif-synthea/pde.csv"), RifFileType.PDE, -1),
+  SAMPLE_SYNTHEA_BENEHISTORY(
+      resourceUrl("rif-synthea/beneficiary_history.csv"), RifFileType.BENEFICIARY_HISTORY, -1),
 
   SYNTHETIC_BENEFICIARY_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
@@ -323,27 +303,6 @@ public enum StaticRifResource {
       RifFileType.OUTPATIENT,
       27955),
 
-  SAMPLE_MCT_BENES(
-      resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
-
-  SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40),
-
-  SAMPLE_MCT_UPDATE_1_BENES(
-      resourceUrl("rif-static-samples/sample-mct-update-1-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      8),
-
-  SAMPLE_MCT_UPDATE_2_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-2-pde.txt"), RifFileType.PDE, 40),
-
-  SAMPLE_MCT_UPDATE_3_BENES(
-      resourceUrl("rif-static-samples/sample-mct-update-3-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      2),
-
-  SAMPLE_MCT_UPDATE_3_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-3-pde.txt"), RifFileType.PDE, 7),
-
   SAMPLE_HICN_MULT_BENES(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
@@ -365,13 +324,18 @@ public enum StaticRifResource {
    *
    * @param resourceUrlSupplier the value to use for {@link #getResourceSupplier()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
-   * @param recordCount the value to use for {@link #getRecordCount()}
+   * @param recordCount the value to use for {@link #getRecordCount()}. If the supplied value is
+   *     negative the size will be computed by scanning the file.
    */
   private StaticRifResource(
       Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, int recordCount) {
     this.resourceUrlSupplier = resourceUrlSupplier;
     this.rifFileType = rifFileType;
-    this.recordCount = recordCount;
+    if (recordCount < 0) {
+      this.recordCount = computeRecordCount();
+    } else {
+      this.recordCount = recordCount;
+    }
   }
 
   /** @return the {@link URL} to the resource's contents */
@@ -386,9 +350,44 @@ public enum StaticRifResource {
     return rifFileType;
   }
 
-  /** @return the number of beneficiaries/claims/drug events in the RIF file */
+  /** @return the number of beneficiaries/claims/drug events in the RIF file excluding line items */
   public int getRecordCount() {
     return recordCount;
+  }
+
+  /**
+   * Compute the number of records in the RIF file. Takes account of the configured id column so
+   * that, e.g., the count would return the count of claims rather than the count of all claim
+   * lines.
+   *
+   * @return the count of records
+   */
+  private int computeRecordCount() {
+    RifFile file = toRifFile();
+    String idColumn = null;
+    if (getRifFileType().getIdColumn() != null) {
+      idColumn = getRifFileType().getIdColumn().toString();
+    }
+    try {
+      Iterable<CSVRecord> records =
+          CSVFormat.RFC4180
+              .withDelimiter('|')
+              .withHeader()
+              .parse(new InputStreamReader(file.open(), file.getCharset()));
+      Set<String> uniqueIds = new HashSet<>();
+      int i = 0;
+      for (CSVRecord record : records) {
+        if (idColumn != null) {
+          uniqueIds.add(record.get(idColumn));
+        } else {
+          uniqueIds.add(Integer.toString(i++));
+        }
+      }
+      return uniqueIds.size();
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Unable to open resource: " + resourceUrlSupplier.get().toString(), e);
+    }
   }
 
   /** @return a {@link RifFile} based on this {@link StaticRifResource} */

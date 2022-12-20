@@ -1,0 +1,50 @@
+mappings:
+- id: McsDiagnosisCode
+  messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode
+  entityClassName: gov.cms.bfd.model.rda.RdaMcsDiagnosisCode
+  table:
+    name: mcs_diagnosis_codes
+    schema: rda
+    primaryKeyColumns:
+    - idrClmHdIcn
+    - rdaPosition
+    columns:
+    - name: idrClmHdIcn
+      sqlType: varchar(15)
+      nullable: false
+      dbName: idr_clm_hd_icn
+      comment: 'Internal Claim Control Number: This field contains a numeric value
+        that identifies a claim throughout the processing cycle and allows for a linkage
+        between the claim and the beneficiary for whom it was submitted.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: idrDiagIcdType
+      sqlType: varchar(1)
+      dbName: idr_diag_icd_type
+      comment: 'Claim Diagnosis Code Qualifier: This field carries a claim diagnosis
+        code qualifier.'
+    - name: idrDiagCode
+      sqlType: varchar(7)
+      minLength: 0
+      nullable: false
+      dbName: idr_diag_code
+      comment: 'Diagnosis Code - Primary and Secondary: For the H99YB338 and H99YBID1
+        copybooks, this is the number of the diagnosis code(s) used on the service
+        for which that line item was performed. The primary and secondary fields denote
+        the ICD-9 diagnosis codes in the Diagnosis fields numbers 1 and 2 of 4 (the
+        first and second Diagnosis Codes listed by the provider), at the claim level.'
+  transformations:
+  - from: PARENT
+    to: idrClmHdIcn
+  - from: idrDiagIcdType
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: idrDiagCode
+    optionalComponents: None

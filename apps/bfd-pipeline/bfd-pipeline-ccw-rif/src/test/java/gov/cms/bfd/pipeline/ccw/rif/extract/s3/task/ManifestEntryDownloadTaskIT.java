@@ -1,13 +1,15 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
@@ -23,8 +25,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,9 @@ public final class ManifestEntryDownloadTaskIT {
           new DataSetManifest(
               Instant.now(),
               0,
+              false,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 
       // upload beneficiary sample file to S3 bucket created above
@@ -79,7 +83,9 @@ public final class ManifestEntryDownloadTaskIT {
                   manifest.getEntries().get(0).getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
       s3TaskManager =
-          new S3TaskManager(new MetricRegistry(), new ExtractionOptions(options.getS3BucketName()));
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              new ExtractionOptions(options.getS3BucketName()));
       LOGGER.info(
           "Downloading '{}' to '{}'...",
           objectRequest.getKey(),
@@ -95,10 +101,10 @@ public final class ManifestEntryDownloadTaskIT {
       String downloadedFileMD5ChkSum =
           downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
       LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
-      Assert.assertEquals(
-          "Checksum doesn't match on downloaded file " + objectRequest.getKey(),
+      assertEquals(
           downloadedFileMD5ChkSum,
-          generatedMD5ChkSum);
+          generatedMD5ChkSum,
+          "Checksum doesn't match on downloaded file " + objectRequest.getKey());
       LOGGER.info(
           "Downloaded '{}' to '{}'.",
           objectRequest.getKey(),

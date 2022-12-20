@@ -1,7 +1,9 @@
 package gov.cms.bfd.model.codebook.data;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.model.codebook.data.CcwCodebookVariable}. */
 public final class CcwCodebookVariableTest {
@@ -11,7 +13,7 @@ public final class CcwCodebookVariableTest {
    */
   @Test
   public void constants() {
-    Assert.assertTrue(CcwCodebookVariable.values().length > 0);
+    assertTrue(CcwCodebookVariable.values().length > 0);
   }
 
   /**
@@ -21,7 +23,7 @@ public final class CcwCodebookVariableTest {
   @Test
   public void getVariable() {
     for (CcwCodebookVariable variableEnum : CcwCodebookVariable.values()) {
-      Assert.assertNotNull(variableEnum.getVariable());
+      assertNotNull(variableEnum.getVariable());
     }
   }
 }

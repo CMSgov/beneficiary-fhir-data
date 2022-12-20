@@ -1,8 +1,5 @@
-##
+## ELB v1 and v2 CloudWatch alarms
 #
-# NOTE: This module is for defining ELB v1 and v2 CloudWatch alarms
-#
-##
 
 locals {
   alarm_actions = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
@@ -26,13 +23,13 @@ resource "aws_cloudwatch_metric_alarm" "healthy_hosts" {
     LoadBalancerName = var.load_balancer_name
   }
 
-  # We should always have a measure of the number of healthy hosts - alert if not
+  # we should always have a measure of the number of healthy hosts - alert if not
   treat_missing_data = "breaching"
   alarm_actions      = local.alarm_actions
   ok_actions         = local.ok_actions
 }
 
-#
+
 # Classic ELB metrics
 #
 
@@ -54,7 +51,7 @@ resource "aws_cloudwatch_metric_alarm" "clb_spillover_count" {
   unit              = "Count"
   alarm_description = "Spillover alarm for ELB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
 
-  # A missing spillover count means that we haven't spillover - that's good! Don't alert.
+  # a missing spillover count means that we haven't spillover - that's good! don't alert.
   treat_missing_data = "notBreaching"
   alarm_actions      = local.alarm_actions
   ok_actions         = local.ok_actions
@@ -78,8 +75,7 @@ resource "aws_cloudwatch_metric_alarm" "clb_clb_surge_queue_length" {
   unit              = "Count"
   alarm_description = "Surge queue exceeded for ELB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
 
-  # An undefined surge queue length is good - we haven't had to queue any requests recently, so
-  # don't alert
+  # an undefined surge queue length is good - we haven't had to queue any requests recently, so don't alert
   treat_missing_data = "notBreaching"
 
   alarm_actions = local.alarm_actions
@@ -87,8 +83,7 @@ resource "aws_cloudwatch_metric_alarm" "clb_clb_surge_queue_length" {
 }
 
 
-#
-# ALB metrics
+## ALB metrics
 #
 
 resource "aws_cloudwatch_metric_alarm" "alb_alb_high_latency" {

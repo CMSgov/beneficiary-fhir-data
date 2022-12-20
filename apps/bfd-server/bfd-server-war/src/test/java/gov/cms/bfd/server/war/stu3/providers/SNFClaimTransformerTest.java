@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
@@ -9,10 +13,10 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -20,8 +24,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer}. */
 public final class SNFClaimTransformerTest {
@@ -33,7 +36,7 @@ public final class SNFClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     SNFClaim claim =
@@ -43,9 +46,16 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        SNFClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
-    assertMatches(claim, eob);
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+
+    ExplanationOfBenefit eob = SNFClaimTransformer.transform(transformerContext, claim);
+
+    assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -55,16 +65,20 @@ public final class SNFClaimTransformerTest {
    * @param claim the {@link SNFClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     SNFClaim}
+   * @param transformerContext the {@link TransformerContext} that was generated from the specified
+   *     {@link SNFClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      SNFClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.SNF,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -137,6 +151,7 @@ public final class SNFClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
@@ -150,7 +165,7 @@ public final class SNFClaimTransformerTest {
         claim.getFiDocumentClaimControlNumber(),
         claim.getFiOriginalClaimControlNumber());
 
-    Assert.assertEquals(6, eob.getDiagnosis().size());
+    assertEquals(6, eob.getDiagnosis().size());
 
     CCWProcedure ccwProcedure =
         new CCWProcedure(
@@ -159,16 +174,15 @@ public final class SNFClaimTransformerTest {
         ccwProcedure.getFhirSystem().toString(),
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
-    Assert.assertEquals(
-        Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+    assertEquals(
+        TransformerUtils.convertToDate(claim.getProcedure1Date().get()),
         eob.getProcedure().get(0).getDate());
 
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(1, eob.getItem().size());
     SNFClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
-
-    Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
+    assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHasCoding(
         CcwCodebookVariable.REV_CNTR, claimLine1.getRevenueCenter(), eobItem0.getRevenue());

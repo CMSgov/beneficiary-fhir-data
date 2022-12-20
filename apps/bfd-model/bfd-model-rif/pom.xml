@@ -24,14 +24,14 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the 
+			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
 				model classes in the gov.cms.bfd.model.rif package. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-codegen-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the 
+			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
 				model classes in the gov.cms.bfd.model.rif package. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-codegen</artifactId>
@@ -41,7 +41,6 @@
 				systems. -->
 			<scope>provided</scope>
 		</dependency>
-
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 				frameworks in Java. -->
@@ -53,23 +52,25 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 		</dependency>
-
+		<dependency>
+			<!-- Used for annotating JPA model entities. -->
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
 		<dependency>
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.7</version>
+			<version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Used to parse and read the RIF data files. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>4.0.1</version>
 		</dependency>
 		<dependency>
 			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
@@ -78,8 +79,8 @@
 			<groupId>org.hibernate.javax.persistence</groupId>
 		</dependency>
 		<dependency>
-			<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes 
-				for JPA entities. This happens happens automagically via javac's annotation 
+			<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
+				for JPA entities. This happens happens automagically via javac's annotation
 				processor. -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-jpamodelgen</artifactId>
@@ -89,6 +90,8 @@
 					<artifactId>jboss-logging</artifactId>
 				</exclusion>
 			</exclusions>
+
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's 
@@ -131,19 +134,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-		<dependency>
-			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager 
-				class. -->
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>7.8.1</version>
-		</dependency>
-
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -170,14 +164,5 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<pluginManagement>
-			<plugins>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-		</plugins>
-	</build>
 
 </project>

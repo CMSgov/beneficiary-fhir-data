@@ -4,7 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -23,8 +23,8 @@ public final class ExtractionOptions implements Serializable {
    * @param s3BucketName the value to use for {@link #getS3BucketName()}
    * @param allowedRifFileType the value to use for {@link #getDataSetFilter()}
    */
-  public ExtractionOptions(String s3BucketName, RifFileType allowedRifFileType) {
-    this(s3BucketName, allowedRifFileType, null);
+  public ExtractionOptions(String s3BucketName, Optional<RifFileType> allowedRifFileType) {
+    this(s3BucketName, allowedRifFileType, Optional.empty());
   }
 
   /**
@@ -35,10 +35,12 @@ public final class ExtractionOptions implements Serializable {
    * @param s3ListMaxKeys the value to use for {@link #getS3ListMaxKeys()}
    */
   public ExtractionOptions(
-      String s3BucketName, RifFileType allowedRifFileType, Integer s3ListMaxKeys) {
+      String s3BucketName,
+      Optional<RifFileType> allowedRifFileType,
+      Optional<Integer> s3ListMaxKeys) {
     this.s3BucketName = s3BucketName;
-    this.allowedRifFileType = allowedRifFileType;
-    this.s3ListMaxKeys = s3ListMaxKeys;
+    this.allowedRifFileType = allowedRifFileType.orElse(null);
+    this.s3ListMaxKeys = s3ListMaxKeys.orElse(null);
   }
 
   /**
@@ -48,7 +50,7 @@ public final class ExtractionOptions implements Serializable {
    * @param s3BucketName the value to use for {@link #getS3BucketName()}
    */
   public ExtractionOptions(String s3BucketName) {
-    this(s3BucketName, null);
+    this(s3BucketName, Optional.empty());
   }
 
   /** @return the AWS {@link Regions} that should be used when interacting with S3 */
@@ -59,7 +61,7 @@ public final class ExtractionOptions implements Serializable {
      * and add a new constructor param here for it.
      */
 
-    return S3Utilities.REGION_DEFAULT;
+    return SharedS3Utilities.REGION_DEFAULT;
   }
 
   /** @return the name of the AWS S3 bucket to monitor */
@@ -68,13 +70,13 @@ public final class ExtractionOptions implements Serializable {
   }
 
   /**
-   * @return the single {@link RifFileType} that the application should process, or <code>null
-   *     </code> if it should process all {@link RifFileType}s (when set, any data sets that do not
-   *     <strong>only</strong> contain the specified {@link RifFileType} will be skipped by the
-   *     application)
+   * @return the single {@link RifFileType} that the application should process, or {@link
+   *     Optional#empty()} if it should process all {@link RifFileType}s (when set, any data sets
+   *     that do not <strong>only</strong> contain the specified {@link RifFileType} will be skipped
+   *     by the application)
    */
-  public RifFileType getAllowedRifFileType() {
-    return allowedRifFileType;
+  public Optional<RifFileType> getAllowedRifFileType() {
+    return Optional.ofNullable(allowedRifFileType);
   }
 
   /**

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum McsAuditIndicator {
+  AUDIT_INDICATOR_AUDIT_NUMBER = 0              [(string_value) = "A"];
+
+  AUDIT_INDICATOR_DETAIL_EDIT_NUMBER = 1        [(string_value) = "D"];
+
+  AUDIT_INDICATOR_HEADER_EDIT_NUMBER = 2        [(string_value) = "H"];
+
+  AUDIT_INDICATOR_IDR_HDR_AUDIT_IS_ZEROES = 3   [(string_value) = " "];
+}

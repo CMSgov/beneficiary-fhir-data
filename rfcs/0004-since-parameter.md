@@ -12,9 +12,17 @@
 This RFC proposal adds features to BFD's API to allow BFD's partners to implement the Bulk Export `_since` parameter. 
 The proposal discusses these new features as well as the logic that BFD's partners need to implement the `_since` parameter correctly. 
 
+## Status
+[Status]: #status
+
+* Status: Implemented
+* Implementation JIRA Ticket(s):
+    * [BLUEBUTTON-1506](https://jira.cms.gov/browse/BLUEBUTTON-1506)
+
 ## Table of Contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)

@@ -11,35 +11,35 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.FileWriter;
+import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -63,6 +63,18 @@ public class SpringConfiguration {
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
+  /**
+   * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
+   * that is used for integration testing. When this property is set to the string 'true', this fake
+   * drug code will be appended to the drug code lookup map to avoid test failures that result from
+   * unexpected changes to the external drug code file in {@link
+   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}. This property defaults to false and
+   * should only be set to true when the server is under test in a local environment.
+   */
+  public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+
+  public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
+
   public static final int TRANSACTION_TIMEOUT = 30;
 
   /**
@@ -102,150 +114,30 @@ public class SpringConfiguration {
       @Value("${" + PROP_DB_SCHEMA_APPLY + ":false}") String schemaApplyText,
       MetricRegistry metricRegistry) {
     HikariDataSource poolingDataSource;
-    if (url.startsWith(DatabaseTestHelper.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
-      poolingDataSource = createTestDatabaseIfNeeded(url, connectionsMaxText, metricRegistry);
+    if (url.startsWith(DatabaseTestUtils.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
+      poolingDataSource =
+          (HikariDataSource)
+              DatabaseTestUtils.createTestDatabase(
+                  url,
+                  PROP_DB_URL,
+                  PROP_DB_USERNAME,
+                  PROP_DB_PASSWORD,
+                  connectionsMaxText,
+                  metricRegistry);
     } else {
       poolingDataSource = new HikariDataSource();
       poolingDataSource.setJdbcUrl(url);
       if (username != null && !username.isEmpty()) poolingDataSource.setUsername(username);
       if (password != null && !password.isEmpty()) poolingDataSource.setPassword(password);
-      configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
+      DatabaseUtils.configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
     }
 
     // Wrap the pooled DataSource in a proxy that records performance data.
-    ProxyDataSource proxyDataSource =
-        ProxyDataSourceBuilder.create(poolingDataSource)
-            .name("BFD-Data")
-            .listener(new QueryLoggingListener())
-            .proxyResultSet()
-            .build();
-
-    // Create/upgrade the DB schema, if specified.
-    boolean schemaApply = Boolean.parseBoolean(schemaApplyText);
-    if (schemaApply) {
-      DatabaseSchemaManager.createOrUpdateSchema(proxyDataSource);
-    }
-
-    return proxyDataSource;
-  }
-
-  /**
-   * Some of the DBs we support using in local development and testing require special handling.
-   * This method takes care of that.
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  private static HikariDataSource createTestDatabaseIfNeeded(
-      String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    /*
-     * Note: Eventually, we may add support for other test DB types, but
-     * right now only in-memory HSQL DBs are supported.
-     */
-    if (url.endsWith(":hsqldb:mem")) {
-      return createTestDatabaseIfNeededForHsql(url, connectionsMaxText, metricRegistry);
-    } else {
-      throw new BadCodeMonkeyException("Unsupported test URL: " + url);
-    }
-  }
-
-  /**
-   * Handles {@link #createTestDatabaseIfNeeded(String, String, MetricRegistry)} for HSQL. We need
-   * to special-case the HSQL DBs that are supported by our tests, so that they get handled
-   * correctly. Specifically, we need to ensure that the HSQL Server is started up, so that our test
-   * code can access the DB directly. In addition, we need to ensure that connection details to that
-   * HSQL server get written out somewhere that the test code can find it.
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  private static HikariDataSource createTestDatabaseIfNeededForHsql(
-      String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
-    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
-
-    // Create the DataSource to connect to that shiny new DB.
-    HikariDataSource dataSourcePool = new HikariDataSource();
-    dataSourcePool.setDataSource(dataSource);
-    configureDataSource(dataSourcePool, connectionsMaxText, metricRegistry);
-
-    /*
-     * Write out the DB properties for <code>ServerTestUtils</code> to use.
-     */
-    Properties testDbProps = new Properties();
-    testDbProps.setProperty(PROP_DB_URL, dataSourceComponents.getUrl());
-    testDbProps.setProperty(PROP_DB_USERNAME, dataSourceComponents.getUsername());
-    testDbProps.setProperty(PROP_DB_PASSWORD, dataSourceComponents.getPassword());
-    Path testDbPropsPath = findTestDatabaseProperties();
-    try {
-      testDbProps.store(new FileWriter(testDbPropsPath.toFile()), null);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-
-    return dataSourcePool;
-  }
-
-  /**
-   * @return the {@link Path} to the {@link Properties} file in <code>target/server-work</code> that
-   *     the test DB connection properties will be written out to
-   */
-  public static Path findTestDatabaseProperties() {
-    Path serverRunDir = Paths.get("target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      throw new IllegalStateException(
-          "Unable to find 'server-work' directory. Working directory: "
-              + Paths.get(".").toAbsolutePath());
-
-    Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");
-    return testDbPropertiesPath;
-  }
-
-  /**
-   * @param poolingDataSource the {@link HikariDataSource} to be configured, which must already have
-   *     its basic connection properties (URL, username, password) configured
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  private static void configureDataSource(
-      HikariDataSource poolingDataSource,
-      String connectionsMaxText,
-      MetricRegistry metricRegistry) {
-    int connectionsMax;
-    try {
-      connectionsMax = Integer.parseInt(connectionsMaxText);
-    } catch (NumberFormatException e) {
-      connectionsMax = -1;
-    }
-    if (connectionsMax < 1) {
-      // Assign a reasonable default value, if none was specified.
-      connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
-    }
-
-    poolingDataSource.setMaximumPoolSize(connectionsMax);
-
-    /*
-     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-     * strongly worded letter instructing it to avoid sequential scans whenever
-     * possible.
-     */
-    if (poolingDataSource.getJdbcUrl() != null
-        && poolingDataSource.getJdbcUrl().contains("postgre"))
-      poolingDataSource.setConnectionInitSql(
-          "set application_name = 'bfd-server'; set enable_seqscan = false;");
-
-    poolingDataSource.setRegisterMbeans(true);
-    poolingDataSource.setMetricRegistry(metricRegistry);
-
-    /*
-     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-     * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
-     */
-    poolingDataSource.setLeakDetectionThreshold(60 * 1000);
+    return ProxyDataSourceBuilder.create(poolingDataSource)
+        .name("BFD-Data")
+        .listener(new QueryLoggingListener())
+        .proxyResultSet()
+        .build();
   }
 
   /**
@@ -269,7 +161,7 @@ public class SpringConfiguration {
     LocalContainerEntityManagerFactoryBean containerEmfBean =
         new LocalContainerEntityManagerFactoryBean();
     containerEmfBean.setDataSource(dataSource);
-    containerEmfBean.setPackagesToScan("gov.cms.bfd.model.rif");
+    containerEmfBean.setPackagesToScan("gov.cms.bfd.model");
     containerEmfBean.setPersistenceProvider(new HibernatePersistenceProvider());
     containerEmfBean.setJpaProperties(jpaProperties());
     containerEmfBean.afterPropertiesSet();
@@ -279,7 +171,13 @@ public class SpringConfiguration {
   /** @return the {@link Properties} to configure Hibernate and JPA with */
   private Properties jpaProperties() {
     Properties extraProperties = new Properties();
-    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    /*
+     * Hibernate validation is being disabled in the applications so that
+     * validation failures do not prevent the server from starting.
+     * With the implementation of RFC-0011 this validation will be moved
+     * to a more appropriate stage of the deployment.
+     */
+    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.NONE);
 
     /*
      * These configuration settings will set Hibernate to log all SQL
@@ -341,19 +239,77 @@ public class SpringConfiguration {
   }
 
   /**
+   * Determines if the fhir resources related to partially adjudicated claims data should be
+   * accessible via the fhir api service.
+   *
+   * @return True if the resources should be available to consume, False otherwise.
+   */
+  private static boolean isPacResourcesEnabled() {
+    return Boolean.TRUE
+        .toString()
+        .equalsIgnoreCase(System.getProperty("bfdServer.pac.enabled", "false"));
+  }
+
+  /**
+   * Determines if the fhir resources related to partially adjudicated claims data will accept
+   * {@link gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when
+   * enabled will simplify rotation of hash values.
+   *
+   * @return True if the resources should use oldHash values in queries, False otherwise.
+   */
+  public static boolean isPacOldMbiHashEnabled() {
+    return Boolean.TRUE
+        .toString()
+        .equalsIgnoreCase(System.getProperty("bfdServer.pac.oldMbiHash.enabled", "false"));
+  }
+
+  /**
+   * Determines the type of claim sources to enable for constructing PAC resources ({@link
+   * org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}.
+   *
+   * @return The {@link Set} of enabled source types (i.e. FISS/MCS).
+   */
+  public static Set<String> getEnabledPacResourceTypes() {
+    return Stream.of(System.getProperty("bfdServer.pac.claimSourceTypes", "").split(","))
+        .filter(Strings::isNotBlank)
+        .map(String::toLowerCase)
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Creates a new r4 resource provider list.
+   *
    * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
+   * @param r4CoverageResourceProvider the r4 coverage resource provider
+   * @param r4EOBResourceProvider the r4 eob resource provider
+   * @param r4ClaimResourceProvider the r4 claim resource provider
+   * @param r4ClaimResponseResourceProvider the r4 claim response resource provider
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
   public List<IResourceProvider> r4ResourceProviders(
       R4PatientResourceProvider r4PatientResourceProvider,
       R4CoverageResourceProvider r4CoverageResourceProvider,
-      R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider) {
+      R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
+      R4ClaimResourceProvider r4ClaimResourceProvider,
+      R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
+    if (isPacResourcesEnabled()) {
+      Set<String> allowedResourceTypes = getEnabledPacResourceTypes();
+
+      // If there are no enabled source types, this endpoint will never return anything, so don't
+      // add it
+      if (!allowedResourceTypes.isEmpty()) {
+        r4ClaimResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
+        r4ResourceProviders.add(r4ClaimResourceProvider);
+        r4ClaimResponseResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
+        r4ResourceProviders.add(r4ClaimResponseResourceProvider);
+      }
+    }
     return r4ResourceProviders;
   }
 
@@ -419,5 +375,41 @@ public class SpringConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
+  }
+
+  /**
+   * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
+   * drug codes.
+   *
+   * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a fake
+   *     drug code for testing purposes.
+   * @return the {@link FdaDrugCodeDisplayLookup} for the application.
+   */
+  @Bean
+  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
+      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeDrugCode) {
+    if (includeFakeDrugCode) {
+      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    } else {
+      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    }
+  }
+
+  /**
+   * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
+   *
+   * @param includeFakeOrgName if true, the {@link NPIOrgLookup} will include a fake org name for
+   *     testing purposes.
+   * @return the {@link NPIOrgLookup} for the application.
+   */
+  @Bean
+  public NPIOrgLookup npiOrgLookup(
+      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") Boolean includeFakeOrgName)
+      throws IOException {
+    if (includeFakeOrgName) {
+      return NPIOrgLookup.createNpiOrgLookupForTesting();
+    } else {
+      return NPIOrgLookup.createNpiOrgLookupForProduction();
+    }
   }
 }

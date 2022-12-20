@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,8 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.flipkart.zjsonpatch.JsonDiff;
-import com.google.gson.JsonArray;
+import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -19,6 +21,7 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -46,110 +49,157 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.hibernate.internal.SessionFactoryRegistry;
+import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Integration tests for comparing changes in the JSON from our endpoint responses. This test code
- * relies on the assumption that SAMPLE_A will have at least one bene and that every bene in it will
- * have >= 1 EOB of every type.
+ * This set of tests compare the application's current responses to a set of previously-recorded
+ * responses. This achieves several goals:
+ *
+ * <ul>
+ *   <li>It helps us to ensure that we're not accidentally changing the application's responses
+ *   <li>It helps us to maintain backwards compatibility.
+ *   <li>As any changes in an operation's output will have to include a change to the recorded
+ *       response, it makes it much easier to tell what our PRs are actually doing.
+ * </ul>
+ *
+ * <p>There SHALL be a 1:1 relationship between test cases here and the application's operations;
+ * every supported operation should have a test case.
+ *
+ * <p>Note that our responses include timestamps and have other differences from request to request
+ * (e.g. element ordering). Each test case must ignore or otherwise work around such differences so
+ * that tests work reliably.
+ *
+ * <p>To re-generate the recorded responses, re-enable the {@link
+ * EndpointJsonResponseComparatorIT#generateApprovedResponseFiles()} "test case" and run it. It will
+ * regenerate ALL operation recordings. It's then your responsibility to ensure that only MEANINGFUL
+ * differences to those responses are included in your PR, by clearing out any incidental noise,
+ * e.g. timestamps.
  */
-@RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorIT {
 
-  @Parameters(name = "endpointId = {0}")
-  public static Object[][] data() {
-    return new Object[][] {
-      {"metadata", (Supplier<String>) EndpointJsonResponseComparatorIT::metadata},
-      {"patientRead", (Supplier<String>) EndpointJsonResponseComparatorIT::patientRead},
-      {
-        "patientReadWithIncludeIdentifiers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::patientReadWithIncludeIdentifiers
-      },
-      {"patientSearchById", (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchById},
-      {
-        "patientSearchByIdWithIncludeIdentifiers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchByIdWithIncludeIdentifiers
-      },
-      {
-        "patientByIdentifier",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier
-      },
-      {
-        "patientByIdentifierWithIncludeIdentifiers",
-        (Supplier<String>)
-            EndpointJsonResponseComparatorIT::patientByIdentifierWithIncludeIdentifiers
-      },
-      {"coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead},
-      {
-        "coverageSearchByPatientId",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId
-      },
-      {"eobByPatientIdAll", (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdAll},
-      {
-        "eobByPatientIdPaged",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdPaged
-      },
-      {"eobReadCarrier", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrier},
-      {
-        "eobReadCarrierWithTaxNumbers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithTaxNumbers
-      },
-      {"eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDme},
-      {
-        "eobReadDmeWithTaxNumbers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDmeWithTaxNumbers
-      },
-      {"eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHha},
-      {"eobReadHospice", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHospice},
-      {"eobReadInpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadInpatient},
-      {"eobReadOutpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadOutpatient},
-      {"eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadPde},
-      {"eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadSnf}
-    };
+  public static Stream<Arguments> data() {
+    return Stream.of(
+        arguments("metadata", (Supplier<String>) EndpointJsonResponseComparatorIT::metadata),
+        arguments("patientRead", (Supplier<String>) EndpointJsonResponseComparatorIT::patientRead),
+        arguments(
+            "patientReadWithIncludeIdentifiers",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::patientReadWithIncludeIdentifiers),
+        arguments(
+            "patientSearchById",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchById),
+        arguments(
+            "patientSearchByIdWithIncludeIdentifiers",
+            (Supplier<String>)
+                EndpointJsonResponseComparatorIT::patientSearchByIdWithIncludeIdentifiers),
+        arguments(
+            "patientByIdentifier",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier),
+        arguments(
+            "patientByIdentifierWithoutReferenceYear",
+            (Supplier<String>)
+                EndpointJsonResponseComparatorIT::patientByIdentifierWithoutReferenceYear),
+        arguments(
+            "patientByIdentifierWithIncludeIdentifiers",
+            (Supplier<String>)
+                EndpointJsonResponseComparatorIT::patientByIdentifierWithIncludeIdentifiers),
+        arguments(
+            "coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead),
+        arguments(
+            "coverageReadWithoutReferenceYear",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::coverageReadWithoutReferenceYear),
+        arguments(
+            "coverageSearchByPatientId",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId),
+        arguments(
+            "eobByPatientIdAll",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdAll),
+        arguments(
+            "eobByPatientIdPaged",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdPaged),
+        arguments(
+            "eobReadCarrier", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrier),
+        arguments(
+            "eobReadCarrierWithTaxNumbers",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithTaxNumbers),
+        arguments(
+            "eobReadCarrierMultipleLines",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithMultipleLines),
+        arguments("eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDme),
+        arguments(
+            "eobReadDmeWithTaxNumbers",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDmeWithTaxNumbers),
+        arguments("eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHha),
+        arguments(
+            "eobReadHospice", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHospice),
+        arguments(
+            "eobReadInpatient",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadInpatient),
+        arguments(
+            "eobReadOutpatient",
+            (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadOutpatient),
+        arguments("eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadPde),
+        arguments("eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadSnf));
   }
 
-  private final String endpointId;
-  private final Supplier<String> endpointOperation;
   private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
 
+  private static final Set<String> IGNORED_PATHS =
+      ImmutableSet.of(
+          "\"/id\"",
+          "\"/date\"",
+          "\"/link/[0-9]/url\"",
+          "\"/implementation/url\"",
+          "\"/entry/[0-9]/fullUrl\"",
+          "\"/meta\"",
+          "\"/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta\"",
+          "\"/procedure/[0-9]/date\"",
+          "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
+          "\"/software/version\"");
+
   /**
-   * Parameterized test constructor: JUnit will construct a new instance of this class for every
-   * top-level element returned by the {@link #data()} {@link Parameters} test data generator, and
-   * then run the test cases in this class using that specific test data element.
-   *
-   * @param endpointId the name of the operation being tested, which is also used to locate the
-   *     "approved" operation response file in the src/test/resources/endpoint-responses source
-   *     directory
-   * @param endpointOperation the operation to be tested
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
    */
-  public EndpointJsonResponseComparatorIT(String endpointId, Supplier<String> endpointOperation) {
-    this.endpointId = endpointId;
-    this.endpointOperation = endpointOperation;
+  @BeforeAll
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @AfterEach
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
    * Generates current endpoint response files, comparing them to the corresponding approved
    * responses.
    */
-  @Test
-  public void verifyCorrectEndpointResponse() {
+  @ParameterizedTest(name = "endpointId = {0}")
+  @MethodSource("data")
+  public void verifyCorrectEndpointResponse(String endpointId, Supplier<String> endpointOperation) {
     Path targetResponseDir = getTargetResponseDir();
 
     // Call the server endpoint and save its result out to a file corresponding to
@@ -164,9 +214,10 @@ public final class EndpointJsonResponseComparatorIT {
    * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
    * the <code>@Ignore</code> annotation and running this method as JUnit.
    */
-  @Ignore
-  @Test
-  public void generateApprovedResponseFiles() {
+  @Disabled
+  @ParameterizedTest(name = "endpointId = {0}")
+  @MethodSource("data")
+  public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
     Path approvedResponseDir = getApprovedResponseDir();
 
     // Call the server endpoint and save its result out to a file corresponding to
@@ -285,6 +336,7 @@ public final class EndpointJsonResponseComparatorIT {
     Collections.sort(
         searchParams,
         new Comparator<JsonNode>() {
+          /** {@inheritDoc} */
           @Override
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("name").toString();
@@ -357,6 +409,7 @@ public final class EndpointJsonResponseComparatorIT {
     Collections.sort(
         diagnosisTypes,
         new Comparator<JsonNode>() {
+          /** {@inheritDoc} */
           @Override
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("coding").get(0).get("code").toString();
@@ -386,7 +439,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String patientRead() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -408,7 +462,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String patientReadWithIncludeIdentifiers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -437,7 +492,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String patientSearchById() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -451,7 +507,10 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(Patient.class)
-        .where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+        .where(
+            Patient.RES_ID
+                .exactly()
+                .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return sortPatientIdentifiers(jsonInterceptor.getResponse());
@@ -465,7 +524,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String patientSearchByIdWithIncludeIdentifiers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -487,7 +547,10 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(Patient.class)
-        .where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+        .where(
+            Patient.RES_ID
+                .exactly()
+                .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return sortPatientIdentifiers(jsonInterceptor.getResponse());
@@ -499,7 +562,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String patientByIdentifier() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -526,12 +590,46 @@ public final class EndpointJsonResponseComparatorIT {
   /**
    * @return the results of the {@link
    *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   */
+  public static String patientByIdentifierWithoutReferenceYear() {
+
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Patient.class)
+        .where(
+            Patient.IDENTIFIER
+                .exactly()
+                .systemAndIdentifier(
+                    TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+        .returnBundle(Bundle.class)
+        .execute();
+    return sortPatientIdentifiers(jsonInterceptor.getResponse());
+  }
+
+  /**
+   * @return the results of the {@link
+   *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
    *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
    *     "hicn,mbi"
    */
   public static String patientByIdentifierWithIncludeIdentifiers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -586,9 +684,9 @@ public final class EndpointJsonResponseComparatorIT {
       patient = parsedJson;
     } else if (rootResourceType.asText().equals("Bundle")) {
       JsonNode entries = parsedJson.at("/entry");
-      Assert.assertEquals(1, entries.size());
+      assertEquals(1, entries.size());
       patient = entries.at("/0/resource");
-      Assert.assertEquals("Patient", patient.get("resourceType").asText());
+      assertEquals("Patient", patient.get("resourceType").asText());
     } else {
       throw new IllegalArgumentException("Unsupported resourceType: " + rootResourceType.asText());
     }
@@ -634,7 +732,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String coverageRead() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -655,12 +754,40 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
+   *     CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   */
+  public static String coverageReadWithoutReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .read()
+        .resource(Coverage.class)
+        .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
    *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
    *     operation
    */
   public static String coverageSearchByPatientId() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -684,12 +811,44 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
+   *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
+   *     operation
+   */
+  public static String coverageSearchByPatientIdWithNullReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Coverage.class)
+        .where(
+            Coverage.BENEFICIARY.hasId(
+                TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+        .returnBundle(Bundle.class)
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
    *     ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam,
    *     String, ca.uhn.fhir.rest.method.RequestDetails)} operation
    */
   public static String eobByPatientIdAll() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -716,7 +875,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobByPatientIdPaged() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -746,11 +906,52 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadCarrierWithTaxNumbers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
+
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setHeaders(requestHeader);
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    CarrierClaim carrClaim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * This is a integration tests to make sure CareTeamComponent entries and their extensions are not
+   * duplicated when there are multiple carrier claim lines present
+   *
+   * @return the results of the {@link
+   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
+   *     multiple Carrier claims lines, with the {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>false
+   *     </code>
+   */
+  public static String eobReadCarrierWithMultipleLines() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "false");
 
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
     extraParamsInterceptor.setHeaders(requestHeader);
@@ -778,7 +979,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadCarrier() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -806,7 +1008,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadDmeWithTaxNumbers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     RequestHeaders requestHeader =
@@ -838,7 +1041,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadDme() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -864,7 +1068,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadHha() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -890,7 +1095,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadHospice() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -916,7 +1122,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadInpatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -942,7 +1149,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadOutpatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -968,7 +1176,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadPde() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -994,7 +1203,8 @@ public final class EndpointJsonResponseComparatorIT {
    */
   public static String eobReadSnf() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -1026,66 +1236,12 @@ public final class EndpointJsonResponseComparatorIT {
     String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode beforeNode = null;
-    try {
-      beforeNode = mapper.readTree(approvedJson);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + approvedJson, e);
-    }
-    JsonNode afterNode = null;
-    try {
-      afterNode = mapper.readTree(newJson);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + newJson, e);
-    }
-    JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
-
-    // Filter out diffs that we don't care about (due to changing with each call)
-    // such as "lastUpdated" fields, the port on URLs, etc. ...
-    NodeFilteringConsumer consumer =
-        new NodeFilteringConsumer(
-            new NodeFilter() {
-              @Override
-              public boolean apply(JsonNode node) {
-                Pattern p = getIgnoredPathsRegex();
-                Matcher m = p.matcher(node.get("path").toString());
-                return m.matches();
-              }
-            });
-
-    diff.forEach(consumer);
-    if (diff.size() > 0) {
-      for (int i = 0; i < diff.size(); i++) {
-        Assert.assertEquals("{}", diff.get(i).toString());
-      }
-    }
-  }
-
-  /** @return a regex pattern for ignored JSON paths */
-  private static Pattern getIgnoredPathsRegex() {
-    StringBuilder pattern = new StringBuilder();
-    pattern.append("\"/id\"");
-    pattern.append("|\"/date\"");
-    pattern.append("|\"/link/[0-9]/url\"");
-    pattern.append("|\"/implementation/url\"");
-    pattern.append("|\"/entry/[0-9]/fullUrl\"");
-    pattern.append("|\"/meta\"");
-    pattern.append("|\"/meta/lastUpdated\"");
-    pattern.append("|\"/entry/[0-9]/resource/meta/lastUpdated\"");
-    pattern.append("|\"/entry/[0-9]/resource/meta\"");
-    pattern.append("|\"/procedure/[0-9]/date\"");
-    pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
-    pattern.append("|\"/software/version\"");
-
-    return Pattern.compile(pattern.toString());
+    AssertUtils.assertJsonEquals(approvedJson, newJson, IGNORED_PATHS);
   }
 
   /** @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON */
   private static IGenericClient createFhirClientAndSetEncoding() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
     fhirClient.setEncoding(EncodingEnum.JSON);
 
     return fhirClient;
@@ -1193,6 +1349,7 @@ public final class EndpointJsonResponseComparatorIT {
       this.f = f;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void accept(JsonNode t) {
       if (f.apply(t)) {
@@ -1200,14 +1357,5 @@ public final class EndpointJsonResponseComparatorIT {
         node.removeAll();
       }
     }
-  }
-
-  /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    ServerTestUtils.cleanDatabaseServer();
-    // FIXME temporary workaround to free up ram. Details on this can be found at
-    // https://jira.cms.gov/browse/BLUEBUTTON-797
-    SessionFactoryRegistry.INSTANCE.clearRegistrations();
   }
 }

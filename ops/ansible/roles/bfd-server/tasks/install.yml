@@ -1,18 +1,23 @@
 ---
-
 - name: Install Pre-requisites
   yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    # Needed to supply `keytool` and also to run the app server.
-    - java-1.8.0-openjdk-devel
+    pkg:
+      - java-11-openjdk-devel
+      - iptables
   become: true
 
 - name: Create Server User
   user:
     name: "{{ data_server_user }}"
     shell: /bin/false
+  become: true
+
+- name: Add server user to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: "{{ data_server_user }} ALL=(ALL) NOPASSWD: /sbin/iptables"
+    validate: /usr/sbin/visudo -cf %s
   become: true
 
 - name: Create Server Directory
@@ -24,10 +29,32 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
-- name: Copy BFD Server Launcher
-  copy:
+
+# Create the temp directory if and only if it's missing. (Don't want to
+# accidentally change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ data_server_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: data_server_tmp_dir is defined
+
+- name: Create Custom Temp Directory
+  file:
+    path: "{{ data_server_tmp_dir }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
+
+- name: Copy and Unzip BFD Server Launcher
+  unarchive:
     src: "{{ data_server_launcher }}"
-    dest: "{{ data_server_dir }}/{{ data_server_launcher | basename }}"
+    dest: "{{ data_server_dir }}"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
   become: true
 
 - name: Copy BFD Server WAR
@@ -35,19 +62,6 @@
     src: "{{ data_server_war }}"
     dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
   become: true
-
-# FIXME: Switch to the maven_artifact module after we move to the CCS.
-- name: Download New Relic Java Agent Bundle
-  get_url:
-    url: 'https://search.maven.org/remotecontent?filepath=com/newrelic/agent/java/newrelic-java/5.6.0/newrelic-java-5.6.0.zip'
-    dest: /tmp/newrelic-java.zip
-
-- name: Unzip New Relic Java Agent Bundle
-  unarchive:
-    src: /tmp/newrelic-java.zip
-    dest: /tmp
-    creates: /tmp/newrelic
-    remote_src: true
 
 - name: Create New Relic Directories
   file:
@@ -61,14 +75,31 @@
     - "{{ data_server_dir }}/newrelic"
     - "{{ data_server_dir }}/newrelic/extensions"
 
+- name: Find New Relic Agent
+  find:
+    paths: "{{ data_server_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+    pattern: newrelic-agent*.jar
+  register: find_nra
+
 - name: Copy New Relic Java Agent
   copy:
-    src: /tmp/newrelic/newrelic.jar
+    src: "{{ item.path }}"
     dest: "{{ data_server_dir }}/newrelic/newrelic.jar"
     remote_src: true
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
+  with_items:
+    - "{{ find_nra.files }}"
+  become: true
+
+- name: Copy New Relic Java Agent Config
+  template:
+    src: 'newrelic.yml.j2'
+    dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r
   become: true
 
 - name: Configure New Relic Extensions
@@ -85,15 +116,4 @@
   template:
     src: 'bfd-server.j2'
     dest: /etc/logrotate.d/bfd-server
-  become: true
-
-- name: Add selinux file context to allow log rotation
-  sefcontext:
-    target: "{{ data_server_dir }}(/.*json|/.*log)?"
-    setype: var_log_t
-    state: present
-  become: true
-
-- name: Apply selinux file context
-  command: "restorecon -rv {{ data_server_dir }}"
   become: true

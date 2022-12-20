@@ -16,12 +16,13 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>4.1.0</hapi-fhir.version>
+		<hapi-fhir.version>6.2.0</hapi-fhir.version>
 	</properties>
 
 	<modules>
 		<module>bfd-server-launcher-sample</module>
 		<module>bfd-server-launcher</module>
+		<module>bfd-server-shared-utils</module>
 		<module>bfd-server-war</module>
 	</modules>
 
@@ -34,29 +35,22 @@
 				<artifactId>bfd-model-rif</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
-				<!-- Used as a logging backed/target for SLF4J. -->
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-				<version>1.2.3</version>
-			</dependency>
-			<dependency>
-				<!-- Provides an HTTP request log for Jetty. -->
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-access</artifactId>
-				<version>1.2.3</version>
+				<!-- Provides the JPA entities used to represent the Blue Button API
+					backend's data in the database. -->
+				<groupId>gov.cms.bfd</groupId>
+				<artifactId>bfd-model-rda</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<!-- The test framework used for unit and integration tests. -->
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
-				<scope>test</scope>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>4.0.1</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<!-- Provides sample data used in tests. -->
+	<!-- Provides sample data used in tests. -->
 				<groupId>gov.cms.bfd</groupId>
 				<artifactId>bfd-model-rif-samples</artifactId>
 				<version>${project.version}</version>
@@ -69,6 +63,11 @@
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency> 
+				<groupId>gov.cms.bfd.data.fda.utility</groupId> 
+				<artifactId>bfd-data-fda</artifactId> 
+				<version>1.0-SNAPSHOT</version> 
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -79,6 +78,11 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-shared-utils</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency> 
+			<groupId>gov.cms.bfd.data.npi</groupId>
+			<artifactId>bfd-data-npi</artifactId> 
+			<version>1.0-SNAPSHOT</version> 
 		</dependency>
 	</dependencies>
 

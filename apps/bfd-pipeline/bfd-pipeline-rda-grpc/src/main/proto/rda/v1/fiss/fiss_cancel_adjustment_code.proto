@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Cancel Adjustment Code
+enum FissCancelAdjustmentCode {
+  CANCEL_ADJUSTMENT_CODE_HOME_HEALTH_PROSPECTIVE_PAYMENT_SYSTEM_FINAL_NOT_RECEIVED = 0  [(string_value) = "B"];
+
+  CANCEL_ADJUSTMENT_CODE_COVERAGE = 1                                                   [(string_value) = "C"];
+
+  CANCEL_ADJUSTMENT_CODE_DUPLICATE = 2                                                  [(string_value) = "D"];
+
+  CANCEL_ADJUSTMENT_CODE_PROVIDER_CANCELLED_EPISODE = 3                                 [(string_value) = "E"];
+
+  CANCEL_ADJUSTMENT_CODE_FISCAL_INTERMEDIARY_CANCELLED_EPISODE = 4                      [(string_value) = "F"];
+
+  CANCEL_ADJUSTMENT_CODE_OTHER = 5                                                      [(string_value) = "H"];
+
+  CANCEL_ADJUSTMENT_CODE_PLAN_TRANSFER = 6                                              [(string_value) = "P"];
+
+  CANCEL_ADJUSTMENT_CODE_SCRAMBLE_HIC = 7                                               [(string_value) = "S"];
+}

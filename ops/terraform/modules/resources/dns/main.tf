@@ -1,9 +1,7 @@
 # Create a zone, public or private
-# 
 resource "aws_route53_zone" "main" {
   name          = var.public ? var.parent != null ? "${var.name}.${var.parent.name}" : var.name : "bfd-${var.env_config.env}.local"
   comment       = var.public ? "BFD public zone for ${var.env_config.env}." : "BFD private zone for ${var.env_config.env}."
-  tags          = var.env_config.tags
   force_destroy = true
 
   # VPC is only valid for private zones
@@ -16,7 +14,6 @@ resource "aws_route53_zone" "main" {
 }
 
 # Create a NS record that points to the main zone in the parent zone
-#
 resource "aws_route53_record" "parent" {
   count   = var.parent != null ? 1 : 0
   zone_id = var.parent.zone_id
@@ -27,7 +24,6 @@ resource "aws_route53_record" "parent" {
 }
 
 # Create an A apex record for the zone
-#
 resource "aws_route53_record" "apex" {
   count   = var.apex_record != null ? 1 : 0
   zone_id = aws_route53_zone.main.zone_id
@@ -42,7 +38,6 @@ resource "aws_route53_record" "apex" {
 }
 
 # Create A-records for the zone
-#
 resource "aws_route53_record" "a" {
   count   = length(var.a_records)
   zone_id = aws_route53_zone.main.zone_id

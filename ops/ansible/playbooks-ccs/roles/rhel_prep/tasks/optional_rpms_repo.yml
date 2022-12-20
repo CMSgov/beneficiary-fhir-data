@@ -1,4 +1,0 @@
----
-- name: Add optional RHEL repo
-  become: yes
-  command: yum-config-manager --enable rhel-7-server-optional-rpms

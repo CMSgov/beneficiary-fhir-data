@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.codahale.metrics.servlets.AdminServlet;
 import java.io.IOException;
 import java.util.Optional;
@@ -8,8 +10,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Verifies that the metrics {@link AdminServlet} works as expected (as configured in web.xml). */
 public final class MetricsAdminServletIT {
@@ -23,12 +24,13 @@ public final class MetricsAdminServletIT {
   public void ping() throws ClientProtocolException, IOException {
     try (CloseableHttpClient httpClient =
         HttpClients.custom()
-            .setSSLContext(ServerTestUtils.createSslContext(Optional.of(ClientSslIdentity.TRUSTED)))
+            .setSSLContext(
+                ServerTestUtils.get().createSslContext(Optional.of(ClientSslIdentity.TRUSTED)))
             .build(); ) {
       HttpGet pingGet =
-          new HttpGet(String.format("%s/metrics/ping", ServerTestUtils.getServerBaseUrl()));
+          new HttpGet(String.format("%s/metrics/ping", ServerTestUtils.get().getServerBaseUrl()));
       try (CloseableHttpResponse pingResponse = httpClient.execute(pingGet); ) {
-        Assert.assertEquals(200, pingResponse.getStatusLine().getStatusCode());
+        assertEquals(200, pingResponse.getStatusLine().getStatusCode());
       }
     }
   }
@@ -43,12 +45,14 @@ public final class MetricsAdminServletIT {
   public void metrics() throws ClientProtocolException, IOException {
     try (CloseableHttpClient httpClient =
         HttpClients.custom()
-            .setSSLContext(ServerTestUtils.createSslContext(Optional.of(ClientSslIdentity.TRUSTED)))
+            .setSSLContext(
+                ServerTestUtils.get().createSslContext(Optional.of(ClientSslIdentity.TRUSTED)))
             .build(); ) {
       HttpGet metricsGet =
-          new HttpGet(String.format("%s/metrics/metrics", ServerTestUtils.getServerBaseUrl()));
+          new HttpGet(
+              String.format("%s/metrics/metrics", ServerTestUtils.get().getServerBaseUrl()));
       try (CloseableHttpResponse metricsResponse = httpClient.execute(metricsGet); ) {
-        Assert.assertEquals(200, metricsResponse.getStatusLine().getStatusCode());
+        assertEquals(200, metricsResponse.getStatusLine().getStatusCode());
       }
     }
   }

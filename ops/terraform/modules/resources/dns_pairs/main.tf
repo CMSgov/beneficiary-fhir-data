@@ -1,5 +1,6 @@
-# Create weighted A-record pairs with 0-100 for weights. 
+# Create weighted A-record pairs with 0-100 for weights.
 #
+
 resource "aws_route53_record" "record_a" {
   for_each = var.weights
   zone_id  = var.zone_id

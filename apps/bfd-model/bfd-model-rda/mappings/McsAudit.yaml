@@ -1,0 +1,53 @@
+mappings:
+- id: McsAudit
+  messageClassName: gov.cms.mpsm.rda.v1.mcs.McsAudit
+  entityClassName: gov.cms.bfd.model.rda.RdaMcsAudit
+  table:
+    name: mcs_audits
+    schema: rda
+    primaryKeyColumns:
+    - idrClmHdIcn
+    - rdaPosition
+    columns:
+    - name: idrClmHdIcn
+      sqlType: varchar(15)
+      nullable: false
+      dbName: idr_clm_hd_icn
+      comment: 'Internal Claim Control Number: This field contains a numeric value
+        that identifies a claim throughout the processing cycle and allows for a linkage
+        between the claim and the beneficiary for whom it was submitted.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: idrJAuditNum
+      sqlType: int
+      dbName: idr_j_audit_num
+      comment: 'Cutback Audit: This item is used to identify the audit number, which
+        indicates the reason for denial.'
+    - name: idrJAuditInd
+      sqlType: varchar(1)
+      dbName: idr_j_audit_ind
+      comment: 'Cutback Audit Indicator: The value in this field indicates if the
+        number displayed in the J-AUDIT-NUM field is an audit or edit'
+    - name: idrJAuditDisp
+      sqlType: varchar(1)
+      dbName: idr_j_audit_disp
+      comment: 'Cutback Audit Disposition: This item is used to identify the disposition
+        of the J-AUDIT-NUM field.'
+  transformations:
+  - from: PARENT
+    to: idrClmHdIcn
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: idrJAuditNum
+  - from: idrJAuditInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditIndicator
+  - from: idrJAuditDisp
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditDisposition

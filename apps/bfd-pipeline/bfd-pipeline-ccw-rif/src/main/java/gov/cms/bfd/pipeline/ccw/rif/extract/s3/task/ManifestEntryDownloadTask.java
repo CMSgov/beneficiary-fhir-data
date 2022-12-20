@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
@@ -65,7 +64,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
               options.getS3BucketName(),
               String.format(
                   "%s/%s/%s",
-                  CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+                  manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
                   manifestEntry.getParentManifest().getTimestampText(),
                   manifestEntry.getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
@@ -119,6 +118,9 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
    *
    * @param downloadedS3File the {@link InputStream} of the file just downloaded from S3
    * @return Base64 encoded md5 value
+   * @throws IOException if there is an issue reading or closing the downloaded file
+   * @throws NoSuchAlgorithmException if there is an issue getting the specified message digest
+   *     algorithm
    */
   public static String computeMD5ChkSum(InputStream downloadedS3File)
       throws IOException, NoSuchAlgorithmException {

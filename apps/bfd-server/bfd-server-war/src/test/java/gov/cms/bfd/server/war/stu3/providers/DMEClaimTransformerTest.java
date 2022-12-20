@@ -1,6 +1,12 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -9,7 +15,8 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.math.BigDecimal;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +25,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
 public final class DMEClaimTransformerTest {
@@ -31,7 +37,7 @@ public final class DMEClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     DMEClaim claim =
@@ -42,7 +48,13 @@ public final class DMEClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        DMEClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+        DMEClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
     assertMatches(claim, eob, Optional.of(true));
   }
 
@@ -67,7 +79,7 @@ public final class DMEClaimTransformerTest {
         claim.getClaimId(),
         claim.getBeneficiaryId(),
         ClaimType.DME,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
         Optional.of(claim.getDateThrough()),
@@ -92,11 +104,11 @@ public final class DMEClaimTransformerTest {
     TransformerTestUtils.assertAdjudicationTotalAmountEquals(
         CcwCodebookVariable.PRPAYAMT, claim.getPrimaryPayerPaidAmount(), eob);
 
-    Assert.assertEquals(3, eob.getDiagnosis().size());
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(3, eob.getDiagnosis().size());
+    assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     DMEClaimLine claimLine1 = claim.getLines().get(0);
-    Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), eobItem0.getSequence());
 
     TransformerTestUtils.assertExtensionIdentifierEquals(
         CcwCodebookVariable.SUPLRNUM, claimLine1.getProviderBillingNumber(), eobItem0);
@@ -124,9 +136,9 @@ public final class DMEClaimTransformerTest {
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
     if (includedTaxNumbers.orElse(false)) {
-      Assert.assertNotNull(taxNumberCareTeamEntry);
+      assertNotNull(taxNumberCareTeamEntry);
     } else {
-      Assert.assertNull(taxNumberCareTeamEntry);
+      assertNull(taxNumberCareTeamEntry);
     }
 
     TransformerTestUtils.assertHcpcsCodes(

@@ -3,16 +3,30 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Professional And Non Clinician Care Team Roles <a
  * href="http://hl7.org/fhir/us/carin-bb/STU1/ValueSet-C4BBClaimProfessionalAndNonClinicianCareTeamRole.html">ValueSet:
- * C4BB Claim Professional And Non Clinician Care Team Role</a>
+ * C4BB Claim Professional And Non Clinician Care Team Role</a>.
  */
 public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
+  /** The primary care provider. * */
   PRIMARY,
+  /** Supervising care provider. * */
   SUPERVISOR,
+  /** The performing or rendering provider. * */
   PERFORMING,
+  /**
+   * A purchased service occurs when one provider purchases a service from another provider and then
+   * provides it to the patient, e.g. a diagnostic exam. *
+   */
   PURCHASED_SERVICE,
+  /** The referring physician. * */
   REFERRING,
+  /** Other role on the care team. * */
   OTHER;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
       case PRIMARY:
@@ -24,6 +38,11 @@ public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
     }
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case PRIMARY:
@@ -43,6 +62,11 @@ public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case PRIMARY:
@@ -62,6 +86,11 @@ public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case PRIMARY:

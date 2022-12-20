@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v8"
-	timestamp="2020-09-03T12:00:00Z" sequenceId="0">
-
-    <entry name="sample-mct-update-6-beneficiaries.txt" type="BENEFICIARY" exportType="INSERT" />
-    <entry name="sample-mct-update-6-pde-new-benes.txt" type="PDE" exportType="INSERT" />
-	<entry name="sample-mct-update-6-pde.txt" type="PDE" exportType="UPDATE" />
-
-</dataSetManifest>

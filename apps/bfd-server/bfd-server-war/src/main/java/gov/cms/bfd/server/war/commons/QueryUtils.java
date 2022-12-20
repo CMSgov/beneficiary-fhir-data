@@ -1,8 +1,15 @@
 package gov.cms.bfd.server.war.commons;
 
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import java.util.Date;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -19,9 +26,11 @@ public class QueryUtils {
    */
   public static Predicate createLastUpdatedPredicate(
       CriteriaBuilder cb, Root<?> root, DateRangeParam range) {
-    final Path<Date> lastUpdatedPath = root.get("lastUpdated");
-    final Date lowerBound = range.getLowerBoundAsInstant();
-    final Date upperBound = range.getUpperBoundAsInstant();
+    final Path<Instant> lastUpdatedPath = root.get("lastUpdated");
+    final Instant lowerBound =
+        range.getLowerBoundAsInstant() == null ? null : range.getLowerBoundAsInstant().toInstant();
+    final Instant upperBound =
+        range.getUpperBoundAsInstant() == null ? null : range.getUpperBoundAsInstant().toInstant();
     Predicate lowerBoundPredicate;
     Predicate upperBoundPredicate;
 
@@ -67,21 +76,72 @@ public class QueryUtils {
   }
 
   /**
+   * Create a predicate for an arbitrary date expression based on the specified parameter range.
+   * When any condition is supplied the value must be not-null to be accepted. When no condition is
+   * supplied nulls will be accepted.
+   *
+   * @param builder {@link CriteriaBuilder} used to create various things
+   * @param dateRange {@link DateRangeParam} specifying the date bounds
+   * @param dateExpression {@link Expression} or {@link Path} defining the date to test
+   * @return a {@link Predicate} to evaluate the data range
+   */
+  public static Predicate createDateRangePredicate(
+      CriteriaBuilder builder, DateRangeParam dateRange, Expression<LocalDate> dateExpression) {
+    final List<Predicate> predicates = new ArrayList<>();
+
+    final DateParam lowerBound = dateRange.getLowerBound();
+    if (lowerBound != null) {
+      final LocalDate from =
+          lowerBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
+      if (ParamPrefixEnum.GREATERTHAN.equals(lowerBound.getPrefix())) {
+        predicates.add(builder.greaterThan(dateExpression, from));
+      } else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS.equals(lowerBound.getPrefix())) {
+        predicates.add(builder.greaterThanOrEqualTo(dateExpression, from));
+      } else {
+        throw new IllegalArgumentException(
+            String.format("Unsupported prefix supplied %s", lowerBound.getPrefix()));
+      }
+    }
+
+    final DateParam upperBound = dateRange.getUpperBound();
+    if (upperBound != null) {
+      final LocalDate to = upperBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
+      if (ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(upperBound.getPrefix())) {
+        predicates.add(builder.lessThanOrEqualTo(dateExpression, to));
+      } else if (ParamPrefixEnum.LESSTHAN.equals(upperBound.getPrefix())) {
+        predicates.add(builder.lessThan(dateExpression, to));
+      } else {
+        throw new IllegalArgumentException(
+            String.format("Unsupported prefix supplied %s", upperBound.getPrefix()));
+      }
+    }
+
+    if (predicates.size() > 0) {
+      final Predicate notNull = builder.isNotNull(dateExpression);
+      predicates.add(0, notNull);
+    }
+
+    return builder.and(predicates.toArray(new Predicate[0]));
+  }
+
+  /**
    * Create a predicate for the lastUpdate field based on the passed range.
    *
    * @param lastUpdated date to test. Maybe null.
    * @param range to base test against. Maybe null.
    * @return true iff within the range specified
    */
-  public static boolean isInRange(Date lastUpdated, DateRangeParam range) {
+  public static boolean isInRange(Instant lastUpdated, DateRangeParam range) {
     if (range == null || range.isEmpty()) {
       return true;
     }
     // The null lastUpdated is considered to be a very early time for this calculation
-    final long lastUpdatedMillis = lastUpdated == null ? 0L : lastUpdated.getTime();
+    final long lastUpdatedMillis = lastUpdated == null ? 0L : lastUpdated.toEpochMilli();
 
     if (range.getLowerBound() != null) {
-      final long lowerBoundMillis = range.getLowerBoundAsInstant().getTime();
+      final long lowerBoundMillis = range.getLowerBoundAsInstant().toInstant().toEpochMilli();
       switch (range.getLowerBound().getPrefix()) {
         case GREATERTHAN:
           if (lastUpdatedMillis <= lowerBoundMillis) {

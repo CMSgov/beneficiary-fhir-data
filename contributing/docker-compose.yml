@@ -3,13 +3,25 @@ version: '3.3'
 services:
 
   local_bfddb:
-    image: postgres:9.6
+    image: postgres:12
     environment:
       POSTGRES_DB: bfd
       POSTGRES_USER: bfd
       POSTGRES_PASSWORD: InsecureLocalDev
     ports:
       - "5433:5432"
+  local_minio:
+    image: minio/minio 
+    environment:
+      MINIO_ROOT_USER: bfdLocalS3Dev
+      MINIO_ROOT_PASSWORD: bfdLocalS3Dev
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    expose:
+      - "9000"
+      - "9001"
   bfd:
     build:
       context: ./docker
@@ -29,3 +41,4 @@ services:
       - "1337:${BFD_PORT}"
     depends_on:
       - local_bfddb
+      

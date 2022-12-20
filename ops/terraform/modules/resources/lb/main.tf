@@ -1,25 +1,16 @@
-# LB
-# 
 # Create an internal application LB with TCP listeners. 
 #
+
 locals {
   tags       = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
   log_prefix = "${var.role}_elb_access_logs"
 }
 
-##
-# Find context
-##
-
-# Accounts 
-#
+# accounts
 data "aws_caller_identity" "current" {}
 data "aws_elb_service_account" "main" {}
 
-# Subnets
-# 
-# Subnets are created by CCS VPC setup
-#
+# subnets
 data "aws_subnet" "app_subnets" {
   count             = length(var.env_config.azs)
   vpc_id            = var.env_config.vpc_id
@@ -31,19 +22,14 @@ data "aws_subnet" "app_subnets" {
 }
 
 # S3 bucket for logs
-#
 data "aws_s3_bucket" "logs" {
   bucket = var.log_bucket
 }
 
-##
-# Create resources
-##
+## RESOURCES
+#
 
-# LB 
-#
-# A ELB v1 TCP allows the EC2 instance to terminate the TLS connection, matching the HealthApt environment. 
-#
+# classic ELB 
 resource "aws_elb" "main" {
   name = "bfd-${var.env_config.env}-${var.role}"
   tags = local.tags
@@ -80,8 +66,7 @@ resource "aws_elb" "main" {
   }
 }
 
-# Security Group for LB
-#
+# security group
 resource "aws_security_group" "lb" {
   name        = "bfd-${var.env_config.env}-${var.role}-lb"
   description = "Allow access to the ${var.role} load-balancer"
@@ -96,6 +81,18 @@ resource "aws_security_group" "lb" {
     description = var.ingress.description
   }
 
+  # add ingress rules for each prefix list id
+  dynamic "ingress" {
+    for_each = var.ingress.prefix_list_ids
+    content {
+      from_port       = var.ingress.port
+      protocol        = "tcp"
+      to_port         = var.ingress.port
+      prefix_list_ids = [ingress.value]
+      description     = var.ingress.description
+    }
+  }
+
   egress {
     from_port   = var.egress.port
     to_port     = var.egress.port
@@ -105,8 +102,7 @@ resource "aws_security_group" "lb" {
   }
 }
 
-# Policy for S3 log access
-# 
+# policy for S3 log access
 resource "aws_s3_bucket_policy" "logs" {
   bucket = data.aws_s3_bucket.logs.id
 
@@ -118,10 +114,25 @@ resource "aws_s3_bucket_policy" "logs" {
     {
       "Effect": "Allow",
       "Principal": {
-          "AWS": ["${data.aws_elb_service_account.main.arn}"]
+          "AWS": "${data.aws_elb_service_account.main.arn}"
       },
       "Action": "s3:PutObject",
       "Resource": "arn:aws:s3:::${var.log_bucket}/*"
+    },
+    {
+      "Sid": "AllowSSLRequestsOnly",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+          "arn:aws:s3:::${var.log_bucket}",
+          "arn:aws:s3:::${var.log_bucket}/*"
+      ],
+      "Condition": {
+          "Bool": {
+              "aws:SecureTransport": "false"
+          }
+      }
     }
   ]
 }

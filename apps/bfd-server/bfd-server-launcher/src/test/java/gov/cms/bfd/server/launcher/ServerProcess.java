@@ -1,10 +1,9 @@
 package gov.cms.bfd.server.launcher;
 
-import java.io.BufferedReader;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import gov.cms.bfd.ProcessOutputConsumer;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -13,15 +12,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +26,18 @@ import org.slf4j.LoggerFactory;
 public final class ServerProcess implements AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerProcess.class);
 
+  /** The log message for when the war was started. */
   private static final String LOG_MESSAGE_WAR_STARTED = "Johnny 5 is alive on SLF4J!";
 
+  /** The App process under test. */
   private Process appProcess;
+  /** Consumes the app stdout for validation. */
   private ProcessOutputConsumer appRunConsumer;
+  /** The thread for running the {@link #appRunConsumer}. */
   private Thread appRunConsumerThread;
+  /** The server uri to use. */
   private URI serverUri;
+  /** The process output value. */
   private Optional<Integer> exitValue;
 
   /**
@@ -54,14 +57,14 @@ public final class ServerProcess implements AutoCloseable {
     }
 
     // Read the app's output.
-    this.appRunConsumer = new ProcessOutputConsumer(appProcess, Optional.empty());
+    this.appRunConsumer = new ProcessOutputConsumer(appProcess);
     this.appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
 
     // Wait for it to start both Jetty and the app.
     try {
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
-      Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasJettyStarted(appRunConsumer));
+      Awaitility.await().atMost(Durations.TEN_SECONDS).until(() -> hasWarStarted(appRunConsumer));
     } catch (ConditionTimeoutException e) {
       // Add some additional logging detail.
       throw new ConditionTimeoutException(
@@ -77,11 +80,11 @@ public final class ServerProcess implements AutoCloseable {
             Pattern.MULTILINE);
     String logText = appRunConsumer.getStdoutContents().toString();
     Matcher serverUriMatcher = serverUriPattern.matcher(logText);
-    Assert.assertTrue(
+    assertTrue(
+        serverUriMatcher.find(),
         String.format(
             "Unable to find server start message (/%s/) in log:\n%s",
-            serverUriPattern.pattern(), logText),
-        serverUriMatcher.find());
+            serverUriPattern.pattern(), logText));
     try {
       this.serverUri = new URI(serverUriMatcher.group(1));
     } catch (URISyntaxException e) {
@@ -89,7 +92,11 @@ public final class ServerProcess implements AutoCloseable {
     }
   }
 
-  /** @return the local {@link URI} that the server is accessible at */
+  /**
+   * Gets the {@link #serverUri}.
+   *
+   * @return the local {@link URI} that the server is accessible at
+   */
   public URI getServerUri() {
     return serverUri;
   }
@@ -105,7 +112,7 @@ public final class ServerProcess implements AutoCloseable {
     return appRunConsumer.getStdoutContents().toString();
   }
 
-  /** @see java.lang.AutoCloseable#close() */
+  /** {@inheritDoc} */
   @Override
   public void close() {
     if (appProcess != null) {
@@ -137,6 +144,8 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Gets the {@link #exitValue}.
+   *
    * @return the server process' result code if it's stopped, or {@link Optional#empty()} if it has
    *     not
    */
@@ -145,12 +154,14 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Sets up a {@link ProcessBuilder} that can run the app for testing.
+   *
    * @param warPath the {@link Path} to the WAR file to run with the server
    * @param jvmDebugOptions the {@link JvmDebugOptions} to use
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
   static ProcessBuilder createAppProcessBuilder(Path warPath, JvmDebugOptions jvmDebugOptions) {
-    String[] command = createCommandForCapsule(jvmDebugOptions);
+    String[] command = createCommandForLauncher(jvmDebugOptions);
     LOGGER.debug("About to launch server with command: {}", Arrays.toString(command));
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
@@ -177,29 +188,22 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Creates the command to launch the server.
+   *
    * @param jvmDebugOptions the {@link JvmDebugOptions} to use
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
-   *     the application via its <code>.x</code> capsule executable
+   *     the application via its <code>.x</code> executable wrapper script
    */
-  static String[] createCommandForCapsule(JvmDebugOptions jvmDebugOptions) {
+  static String[] createCommandForLauncher(JvmDebugOptions jvmDebugOptions) {
     try {
-      Path javaBinDir = Paths.get(System.getProperty("java.home")).resolve("bin");
-      Path javaBin = javaBinDir.resolve("java");
-
-      Path buildTargetDir = Paths.get(".", "target");
-      Path appJar =
-          Files.list(buildTargetDir)
+      Path assemblyDirectory =
+          Files.list(Paths.get(".", "target", "server-work"))
               .filter(f -> f.getFileName().toString().startsWith("bfd-server-launcher-"))
-              .filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar"))
               .findFirst()
               .get();
+      Path serverLauncherScript = assemblyDirectory.resolve("bfd-server-launcher.sh");
 
-      List<List<String>> commandTokens =
-          Arrays.asList(
-              Arrays.asList(javaBin.toString()),
-              Arrays.asList(jvmDebugOptions.buildJvmOptions()),
-              Arrays.asList("-jar", appJar.toAbsolutePath().toString()));
-      return commandTokens.stream().flatMap(List::stream).toArray(String[]::new);
+      return new String[] {serverLauncherScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -216,7 +220,7 @@ public final class ServerProcess implements AutoCloseable {
      * We have to use reflection and external commands here to work around this ridiculous JDK bug:
      * https://bugs.openjdk.java.net/browse/JDK-5101298.
      */
-    if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
+    if (process.getClass().getName().equals("java.lang.ProcessImpl")) {
       try {
         Field pidField = process.getClass().getDeclaredField("pid");
         pidField.setAccessible(true);
@@ -248,9 +252,11 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Checks if jetty has started by scanning the app server output for a specific message.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that Jetty has started, <code>
-   *     false</code> if not
+   *          false</code> if not
    */
   static boolean hasJettyStarted(ProcessOutputConsumer appRunConsumer) {
     return appRunConsumer
@@ -260,6 +266,8 @@ public final class ServerProcess implements AutoCloseable {
   }
 
   /**
+   * Checks if the war app has started by scanning the app server output for a specific message.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that the sample WAR application
    *     has started, <code>false</code> if not
@@ -268,73 +276,7 @@ public final class ServerProcess implements AutoCloseable {
     return appRunConsumer.getStdoutContents().toString().contains(LOG_MESSAGE_WAR_STARTED);
   }
 
-  /**
-   * Managing external processes is tricky: at the OS level, all processes' output is sent to a
-   * buffer. If that buffer fills up (because you're not reading the output), the process will block
-   * -- forever. To avoid that, it's best to always have a separate thread running that consumes a
-   * process' output. This {@link ProcessOutputConsumer} is designed to allow for just that.
-   */
-  public static final class ProcessOutputConsumer implements Runnable {
-    private final BufferedReader stdoutReader;
-    private final StringBuffer stdoutContents;
-    private final Optional<PrintStream> teeTarget;
-
-    /**
-     * Constructs a new {@link ProcessOutputConsumer} instance.
-     *
-     * @param process the {@link ProcessOutputConsumer} whose output should be consumed
-     */
-    public ProcessOutputConsumer(Process process) {
-      this(process, Optional.empty());
-    }
-
-    /**
-     * Constructs a new {@link ProcessOutputConsumer} instance.
-     *
-     * @param process the {@link ProcessOutputConsumer} whose output should be consumed
-     * @param out
-     */
-    public ProcessOutputConsumer(Process process, Optional<PrintStream> teeTarget) {
-      /*
-       * Note: we're only grabbing STDOUT, because we're assuming that STDERR has been piped
-       * to/merged with it. If that's not the case, you'd need a separate thread consuming that
-       * stream, too.
-       */
-
-      InputStream stdout = process.getInputStream();
-      this.stdoutReader = new BufferedReader(new InputStreamReader(stdout));
-      this.stdoutContents = new StringBuffer();
-      this.teeTarget = teeTarget;
-    }
-
-    /** @see java.lang.Runnable#run() */
-    @Override
-    public void run() {
-      /*
-       * Note: This will naturally stop once the process exits (due to the null check below).
-       */
-
-      try {
-        String line;
-        while ((line = stdoutReader.readLine()) != null) {
-          stdoutContents.append(line);
-          stdoutContents.append('\n');
-
-          if (teeTarget.isPresent()) teeTarget.get().println(line);
-        }
-      } catch (IOException e) {
-        LOGGER.warn("Error reading server process output.", e);
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    /** @return a {@link StringBuffer} that contains the <code>STDOUT</code> contents so far */
-    public StringBuffer getStdoutContents() {
-      return stdoutContents;
-    }
-  }
-
-  /** Models the <code>suspend=<y/n></code> option is JVM debug settings. */
+  /** Models the <code>suspend=y/n</code> option is JVM debug settings. */
   public static enum JvmDebugAttachMode {
     /** The JVM will wait at launch for a debugger to be attached, before proceeding. */
     WAIT_FOR_ATTACH,
@@ -357,15 +299,18 @@ public final class ServerProcess implements AutoCloseable {
 
   /** Models the various JVM debug settings and options. */
   public static final class JvmDebugOptions {
+    /** If debug mode is on. */
     private final JvmDebugEnableMode debugEnableMode;
+    /** If debug mode is attached. */
     private final JvmDebugAttachMode debugAttachMode;
+    /** The port to attach on. */
     private final Integer port;
 
     /**
      * Constructs a new {@link JvmDebugOptions} instance.
      *
-     * @param debugEnableMode whether or not to enable debugging (must be
-     *        {@link JvmDebugEnableMode#DISABLED for this particular constructor)
+     * @param debugEnableMode whether or not to enable debugging (must be {@link
+     *     JvmDebugEnableMode#DISABLED} for this particular constructor)
      */
     public JvmDebugOptions(JvmDebugEnableMode debugEnableMode) {
       // Use the other constructor if you want debugging enabled.
@@ -393,7 +338,11 @@ public final class ServerProcess implements AutoCloseable {
         throw new IllegalArgumentException();
     }
 
-    /** @return the JVM launch options represented by this {@link JvmDebugOptions}' settings */
+    /**
+     * Builds the jvm options.
+     *
+     * @return the JVM launch options represented by this {@link JvmDebugOptions}' settings
+     */
     public String[] buildJvmOptions() {
       if (debugEnableMode == JvmDebugEnableMode.DISABLED) return new String[] {};
 

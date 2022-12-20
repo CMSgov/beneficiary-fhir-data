@@ -410,6 +410,46 @@ All MBI values are now updated to conform to the MBI standard format, with the e
     https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-pde-2016.rif 
   ``` 
 
+9. The following is a summary of the changes related to update  2021-05-15-NegativeClaimAndEventIds:
+   Claim ids are changed to negative for synthetic claims.  Event ids are changed to negative for 
+   for synthetic pdes
+
+  ``` 
+  $ wget \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/0_manifest.xml \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-beneficiary-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-beneficiary-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-beneficiary-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-carrier-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-inpatient-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-2000-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-2001-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-2002-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-2015-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-outpatient-2016-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-pde-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-pde-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2021-05-15-NegativeClaimAndEventIds/synthetic-pde-2016.rif 
+``` 
+
 
 The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/beneficiary-fhir-data:bfd-model-rif-samples/dev](./).
 
@@ -474,3 +514,41 @@ data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
 data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 11.  Compared the data in these files to real values in prod and made sure it made sense.  Again DID NOT use real prod data.
 12.  Uploaded all of these files in Test, Prod-sandbox, and Prod.
+
+### Synthea Data Set Details
+09/09/2021 - Generated Synthea data set from the following properities file that is located at: `[./synthea/synthea.properities-08092021](./synthea/synthea.properities-08092021)`.
+
+exporter.bfd.export = true
+exporter.bfd.config_file = export/bfd_field_values.tsv
+exporter.bfd.bene_id_start = -10000000000000
+exporter.bfd.clm_id_start = -10000000000000
+exporter.bfd.clm_grp_id_start = -100000000
+exporter.bfd.pde_id_start = -10000000000
+exporter.bfd.mbi_start = 1S00-E00-AA01 - the next mbi start should be 1S00-E00-FZ01
+exporter.bfd.hicn_start = T01000000A
+exporter.bfd.partd_contract_start = Z0001
+exporter.bfd.partd_contract_count = 10
+
+Ran the synthea utility with the following command:
+    ./run_synthea -s 0 -cs 0 -r 20210808 -p 10000 --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10 --generate.only_alive_patients=true -a 65-80
+
+01/18/2022 - Generated Synthea data set covering nationwide beneficiaries from the following properities file that is located at: `[./synthea/synthea.properities-01182022](./synthea/synthea.properities-01182022)`.
+
+exporter.bfd.export = false
+exporter.bfd.require_code_maps = true
+exporter.bfd.bene_id_start = -10000000010000
+exporter.bfd.clm_id_start = -10000003175478
+exporter.bfd.clm_grp_id_start = -103422538
+exporter.bfd.pde_id_start = -10000247060
+exporter.bfd.fi_doc_cntl_num_start = -100000000
+exporter.bfd.carr_clm_cntl_num_start = -100000000
+exporter.bfd.mbi_start = 1S00-E00-GA00
+exporter.bfd.hicn_start = T01020000A
+exporter.bfd.partd_contract_start = Z1000
+exporter.bfd.partd_contract_count = 10
+exporter.bfd.clia_labs_start = 00A0000000
+
+Ran the synthea utility with the following command:
+    ./national.sh 10000
+
+To determine the parameters in synthea.properties for the next synthea release look at the end state properties file located at `[./synthea/synthea.properities-01182022](./synthea/synthea.properities-01182022)` and run the queries located in `[./bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql](./bfd-model/bfd-model-rif/src/main/resources/db/scripts/Query_synthetic_id_ranges.sql).

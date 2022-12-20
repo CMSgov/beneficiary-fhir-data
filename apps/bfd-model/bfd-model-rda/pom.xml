@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-model-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>bfd-model-rda</artifactId>
+    <packaging>jar</packaging>
+
+    <description>
+        Provides shared helpers and model classes related to the RDA stream data.
+    </description>
+
+    <properties>
+        <!-- These models will be generated automatically in the near future;
+        ignore this project since effort here will be wasted. -->
+        <checkstyle.skip>true</checkstyle.skip>
+    </properties>
+
+    <dependencies>
+        <!-- Hibernate / JPA -->
+        <dependency>
+            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
+                Hibernate is used for that in the BFD projects.) -->
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <groupId>org.hibernate.javax.persistence</groupId>
+        </dependency>
+        <!-- Compile Time -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Required for JSONB support. -->
+        <dependency>
+            <!-- Used to serialize and deserialize objects to JSON. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Adds java-8 types to jackson. -->
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson-datatype-jdk8.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Adds java-8 date/time classes to jackson. -->
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson-datatype-jsr310.version}</version>
+        </dependency>
+        <!-- Testing -->
+        <dependency>
+            <!-- Used to run our unit and integration tests. -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- In-memory database that can be used for testing. -->
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Logback is used as the logging target/backend for SLF4J during tests:
+                    all logging events will be sent to it. -->
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <mappingPath>${project.basedir}/mappings</mappingPath>
+                    <outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>entities</goal>
+                            <goal>sql</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

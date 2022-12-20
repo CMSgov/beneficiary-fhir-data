@@ -1,0 +1,66 @@
+mappings:
+- id: McsLocation
+  messageClassName: gov.cms.mpsm.rda.v1.mcs.McsLocation
+  entityClassName: gov.cms.bfd.model.rda.RdaMcsLocation
+  table:
+    name: mcs_locations
+    schema: rda
+    primaryKeyColumns:
+    - idrClmHdIcn
+    - rdaPosition
+    columns:
+    - name: idrClmHdIcn
+      sqlType: varchar(15)
+      nullable: false
+      dbName: idr_clm_hd_icn
+      comment: 'Internal Claim Control Number: This field contains a numeric value
+        that identifies a claim throughout the processing cycle and allows for a linkage
+        between the claim and the beneficiary for whom it was submitted.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: idrLocClerk
+      sqlType: varchar(4)
+      dbName: idr_loc_clerk
+      comment: 'Clerk ID: This item is used to identify the operator who last updated
+        the information on the location audit trailer.'
+    - name: idrLocCode
+      sqlType: varchar(3)
+      dbName: idr_loc_code
+      comment: 'Location Code: This value represents the completion /pending status
+        of a claim. Values, with assigned definitions, define the point at which a
+        claim resides during the entire adjudication process.
+
+        Locations are used to control the path the claim will take through the system
+        from the initial activation to finalization. The system automatically moves
+        claims from one location to another during the batch cycle. A claim may also
+        be manually transferred from one location to another.'
+    - name: idrLocDate
+      sqlType: date
+      dbName: idr_loc_date
+      comment: 'Location Date: This field contains the date that the claim was in
+        a specific location in the system (as noted in the related location field
+        W-INT-LOC-CODE). There are 11 occurrences of this field on the claim history
+        record. It provides the date for the audit trail of the locations that the
+        claim has passed through during processing.'
+    - name: idrLocActvCode
+      sqlType: varchar(1)
+      dbName: idr_loc_actv_code
+      comment: 'Location Activity Code: This field carries a system-assigned activity
+        code, indicating the activity performed on the pending claim record for the
+        indicated location segment.'
+  transformations:
+  - from: PARENT
+    to: idrClmHdIcn
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: idrLocClerk
+  - from: idrLocCode
+  - from: idrLocDate
+  - from: idrLocActvCode
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsLocationActivityCode

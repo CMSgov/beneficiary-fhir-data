@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/fiss/fiss_bene_z_payer.proto";
+import "rda/v1/fiss/fiss_insured_payer.proto";
+
+// FISS Payer
+message FissPayer {
+  oneof payer {
+    FissBeneZPayer beneZPayer = 1;
+    FissInsuredPayer insuredPayer = 2;
+  }
+}

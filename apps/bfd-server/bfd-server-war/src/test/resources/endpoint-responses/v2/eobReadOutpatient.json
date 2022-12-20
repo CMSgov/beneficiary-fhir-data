@@ -27,9 +27,10 @@
         } ]
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "1497758544"
+      "value" : "0000000000"
     } ],
-    "active" : true
+    "active" : true,
+    "name" : "Fake ORG Name"
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -38,6 +39,15 @@
       "code" : "W",
       "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "32490593716374487"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2011-02-18"
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
@@ -50,6 +60,12 @@
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "3"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "15444"
     }
   } ],
   "identifier" : [ {
@@ -299,8 +315,13 @@
     "sequence" : 1,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R5555"
+        "code" : "A40",
+        "display" : "STREPTOCOCCAL SEPSIS"
       } ]
     },
     "type" : [ {
@@ -314,8 +335,13 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "I9999"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {
@@ -329,8 +355,13 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A06",
+        "display" : "AMEBIASIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     },
     "type" : [ {
@@ -344,8 +375,13 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A15",
+        "display" : "RESPIRATORY TUBERCULOSIS"
       } ]
     },
     "type" : [ {
@@ -359,8 +395,13 @@
     "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R1122"
+        "code" : "A37",
+        "display" : "WHOOPING COUGH"
       } ]
     },
     "type" : [ {
@@ -373,23 +414,43 @@
   } ],
   "procedure" : [ {
     "sequence" : 1,
-    "date" : "2016-01-16T00:00:00-05:00",
+    "date" : "2016-01-16T00:00:00+00:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://www.cms.gov/Medicare/Coding/ICD10",
+        "code" : "CD1YYZZ",
+        "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "0AABBZZ"
+        "code" : "CD1YYZZ",
+        "display" : "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"
       } ]
     }
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-b-567834"
     }
   } ],
   "item" : [ {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+      "valueQuantity" : {
+        "value" : 111
+      }
+    } ],
     "sequence" : 25,
     "careTeamSequence" : [ 4 ],
     "revenue" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+          "code" : "A",
+          "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+        }
+      } ],
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
         "code" : "1"
@@ -400,7 +461,8 @@
         "url" : "http://hl7.org/fhir/sid/ndc",
         "valueCoding" : {
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "987654321"
+          "code" : "000000000",
+          "display" : "Fake Diluent - WATER"
         }
       } ],
       "coding" : [ {

@@ -26,17 +26,48 @@ public final class MappingSpec {
    * readable chained-setter style of construction.
    */
 
+  /** The name of the Java package that the mapping is occurring for and in. */
   private String packageName;
+  /** The {@link RifLayout} whose fields will be mapped. */
   private RifLayout rifLayout;
+  /** The claim entity being mapped. */
   private String headerEntity;
+  /** The name of the SQL table that the {@link #getHeaderEntity()} instances will be stored in. */
   private String headerTable;
+  /**
+   * The name of the {@link Entity} field that should be used as the {@link Id} in the {@link
+   * #getHeaderEntity()} {@link Entity}.
+   */
   private String headerEntityIdField;
+  /**
+   * The name of the {@link Entity} {@link GeneratedValue} field that should be used as the {@link
+   * Id} in the {@link #getHeaderEntity()} {@link Entity}.
+   */
   private String headerEntityGeneratedIdField;
+  /**
+   * If the RIF layout has child line fields that should be stored separately from its parent header
+   * fields.
+   */
   private boolean hasLines = false;
-  private boolean hasBeneficiaryMonthly = false;
+  /** If the RIF layout is for a Beneficiary entity. */
+  private boolean isBeneficiaryEntity = false;
+  /**
+   * The name of the SQL table that the {@link #getLineEntity()} instances will be stored in, if
+   * any.
+   */
   private String lineTable;
+  /**
+   * The name of the field in the {@link #getLineEntity()} {@link Entity} that should be used for
+   * the identifying line number, if any.
+   */
+  private String lineEntityLineNumberField;
+  /** The db sequence number generator name. */
+  private String sequenceNumberGeneratorName;
+  /** The fields in {@link #getHeaderEntity()} that should be marked as {@link Transient}. */
   private List<String> headerEntityTransientFields;
+  /** The additional database fields for the {@link #getHeaderEntity()}. */
   private List<RifField> headerEntityAdditionalDatabaseFields;
+  /** A list of {@link String} parameters defining the inner join relationship for the entity. */
   private List<InnerJoinRelationship> innerJoinRelationship;
 
   /**
@@ -52,17 +83,27 @@ public final class MappingSpec {
     this.innerJoinRelationship = new ArrayList<InnerJoinRelationship>();
   }
 
-  /** @return the name of the Java package that the mapping is occurring for and in */
+  /**
+   * Gets the {@link #packageName}.
+   *
+   * @return the name of the Java package that the mapping is occurring for and in
+   */
   public String getPackageName() {
     return packageName;
   }
 
-  /** @return the {@link RifLayout} whose fields will be mapped */
+  /**
+   * Gets the {@link #rifLayout}.
+   *
+   * @return the {@link RifLayout} whose fields will be mapped
+   */
   public RifLayout getRifLayout() {
     return rifLayout;
   }
 
   /**
+   * Sets the {@link #rifLayout}.
+   *
    * @param rifLayout the new value for {@link #getRifLayout()}
    * @return the {@link MappingSpec} whose rifLayout is set
    */
@@ -72,22 +113,28 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the ClassName of the Java {@link Enum} that all of the RIF field definitions will be
-   *     placed in
+   * Gets the ClassName of the Java {@link Enum} that all the RIF field definitions will be placed
+   * in.
+   *
+   * @return the classname of the enum
    */
   public ClassName getColumnEnum() {
     return ClassName.get(packageName, headerEntity + "Column");
   }
 
   /**
-   * @return the {@link ClassName} of the JPA {@link Entity} class that will be used to store data
-   *     from this RIF layout for the header fields
+   * Gets the {@link ClassName} of the JPA {@link Entity} class that will be used to store data from
+   * this RIF layout for the header fields.
+   *
+   * @return the classname of the entity
    */
   public ClassName getHeaderEntity() {
     return ClassName.get(packageName, headerEntity);
   }
 
   /**
+   * Sets the {@link #headerEntity}.
+   *
    * @param headerEntity the new value for {@link #getHeaderEntity()}
    * @return the {@link MappingSpec} whose headerEntity is set
    */
@@ -97,6 +144,8 @@ public final class MappingSpec {
   }
 
   /**
+   * Gets the {@link #headerTable}.
+   *
    * @return the name of the SQL table that the {@link #getHeaderEntity()} instances will be stored
    *     in
    */
@@ -104,13 +153,20 @@ public final class MappingSpec {
     return headerTable;
   }
 
-  /** @param headerTable the new value for {@link #getHeaderTable()} */
+  /**
+   * Sets the {@link #headerTable}.
+   *
+   * @param headerTable the new value for {@link #getHeaderTable()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
   public MappingSpec setHeaderTable(String headerTable) {
     this.headerTable = headerTable;
     return this;
   }
 
   /**
+   * Gets the {@link #headerEntityIdField}.
+   *
    * @return the name of the {@link Entity} field that should be used as the {@link Id} in the
    *     {@link #getHeaderEntity()} {@link Entity}
    */
@@ -118,13 +174,20 @@ public final class MappingSpec {
     return headerEntityIdField;
   }
 
-  /** @param headerEntityIdField the new value for {@link #getHeaderEntityIdField()} */
+  /**
+   * Sets the {@link #headerEntityIdField}.
+   *
+   * @param headerEntityIdField the new value for {@link #getHeaderEntityIdField()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
   public MappingSpec setHeaderEntityIdField(String headerEntityIdField) {
     this.headerEntityIdField = headerEntityIdField;
     return this;
   }
 
   /**
+   * Gets the {@link #headerEntityGeneratedIdField}.
+   *
    * @return the name of the {@link Entity} {@link GeneratedValue} field that should be used as the
    *     {@link Id} in the {@link #getHeaderEntity()} {@link Entity}
    */
@@ -133,6 +196,8 @@ public final class MappingSpec {
   }
 
   /**
+   * Sets the {@link #headerEntityGeneratedIdField}.
+   *
    * @param headerEntityGeneratedIdField the new value for {@link
    *     #getHeaderEntityGeneratedIdField()}
    * @return this {@link MappingSpec} instance, for call-chaining purposes
@@ -143,15 +208,21 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the name of the field in the {@link #getHeaderEntity()} {@link Entity} that should be
-   *     used to store and refer to the child {@link #getLineEntity()} {@link Entity}s, if any
+   * Gets the name of the field in the {@link #getHeaderEntity()} {@link Entity} that should be used
+   * to store and refer to the child {@link #getLineEntity()} {@link Entity}s.
+   *
+   * @return the name of the field for line entities
    */
   public String getHeaderEntityLinesField() {
-    if (!hasLines) throw new IllegalStateException();
+    if (!hasLines) {
+      throw new IllegalStateException();
+    }
     return "lines";
   }
 
   /**
+   * Determines if {@link #hasLines}.
+   *
    * @return <code>true</code> if the RIF layout has child line fields that should be stored
    *     separately from its parent header fields, <code>false</code> if not
    */
@@ -160,6 +231,8 @@ public final class MappingSpec {
   }
 
   /**
+   * Sets {@link #hasLines}.
+   *
    * @param hasLines the new value for {@link #getHasLines()}
    * @return the {@link MappingSpec} whose hasLines is set
    */
@@ -169,42 +242,58 @@ public final class MappingSpec {
   }
 
   /**
-   * @return <code>true</code> if the RIF layout has child line fields that should be stored
-   *     separately from its parent header fields, <code>false</code> if not
+   * Determines if {@link #isBeneficiaryEntity}.
+   *
+   * @return <code>true</code> if the RIF layout is for the <code>Beneficiary</code> entity, <code>
+   *     false</code> if it's not
    */
-  public boolean getHasBeneficiaryMonthly() {
-    return hasBeneficiaryMonthly;
+  public boolean isBeneficiaryEntity() {
+    return isBeneficiaryEntity;
   }
 
   /**
-   * @param hasBeneficiaryMonthly the new value for {@link #setHasBeneficiaryMonthly(boolean)}
-   * @return the {@link MappingSpec} whose hasBeneficiaryMonthly will be set
+   * Sets {@link #isBeneficiaryEntity}.
+   *
+   * @param isBeneficiaryEntity the new value for {@link #isBeneficiaryEntity()}
+   * @return this {@link MappingSpec}, for call chaining purposes
    */
-  public MappingSpec setHasBeneficiaryMonthly(boolean hasBeneficiaryMonthly) {
-    this.hasBeneficiaryMonthly = hasBeneficiaryMonthly;
+  public MappingSpec setIsBeneficiaryEntity(boolean isBeneficiaryEntity) {
+    this.isBeneficiaryEntity = isBeneficiaryEntity;
     return this;
   }
 
-  /** @return the index of the last header field in {@link #getRifLayout()} */
+  /**
+   * Calculates the index of the last header field in {@link #getRifLayout()}.
+   *
+   * @return the index of the last header field
+   */
   public int calculateLastHeaderFieldIndex() {
     return hasLines ? (calculateFirstLineFieldIndex() - 1) : (rifLayout.getRifFields().size() - 1);
   }
 
-  /** @return the index of the first line field in {@link #getRifLayout()} */
+  /**
+   * Calculate the index of the first line field in {@link #getRifLayout()}.
+   *
+   * @return the index of the first line field
+   */
   public int calculateFirstLineFieldIndex() {
     if (!hasLines) throw new IllegalStateException();
 
     for (int fieldIndex = 0; fieldIndex < rifLayout.getRifFields().size(); fieldIndex++) {
       RifField field = rifLayout.getRifFields().get(fieldIndex);
-      if (field.getJavaFieldName().equals(getLineEntityLineNumberField())) return fieldIndex;
+      if (field.getRifColumnName().equalsIgnoreCase(getLineEntityLineNumberField())) {
+        return fieldIndex;
+      }
     }
 
     throw new IllegalStateException();
   }
 
   /**
-   * @return the name of the JPA {@link Entity} class that will be used to store data from this RIF
-   *     layout for the line fields, if any
+   * Gets the name of the JPA {@link Entity} class that will be used to store data from this RIF
+   * layout for the line fields, if any.
+   *
+   * @return the name of the JPA {@link Entity} class, if any
    */
   public ClassName getLineEntity() {
     if (!hasLines) throw new IllegalStateException();
@@ -212,15 +301,19 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the name of the JPA {@link Entity} class that will be used to store data from this RIF
-   *     layout for the line fields, if any
+   * Gets the name of the JPA {@link Entity} class that will be used to store data from this RIF
+   * layout for the line fields, if any.
+   *
+   * @return the name of the JPA {@link Entity} class, if any
    */
   public ClassName getBeneficiaryMonthlyEntity() {
-    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
+    if (!isBeneficiaryEntity) throw new IllegalStateException();
     return ClassName.get(packageName, "BeneficiaryMonthly");
   }
 
   /**
+   * Gets the {@link #lineTable}.
+   *
    * @return the name of the SQL table that the {@link #getLineEntity()} instances will be stored
    *     in, if any
    */
@@ -229,7 +322,12 @@ public final class MappingSpec {
     return lineTable;
   }
 
-  /** @param lineTable the new value for {@link #getLineTable()} */
+  /**
+   * Sets the {@link #lineTable}.
+   *
+   * @param lineTable the new value for {@link #getLineTable()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
   public MappingSpec setLineTable(String lineTable) {
     if (!hasLines) throw new IllegalStateException();
     this.lineTable = lineTable;
@@ -237,8 +335,9 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the ClassName of the JPA {@link IdClass} for the {@link #getLineEntity()} {@link
-   *     Entity}, if any
+   * Gets the ClassName of the JPA {@link IdClass} for the {@link #getLineEntity()} {@link Entity}.
+   *
+   * @return the line entity id class name
    */
   public ClassName getLineEntityIdClass() {
     if (!hasLines) throw new IllegalStateException();
@@ -246,8 +345,10 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the name of the field in the {@link #getLineEntity()} {@link Entity} that should be
-   *     used to store and refer to the child {@link #getLineEntity()} {@link Entity}s, if any
+   * Gets the name of the field in the {@link #getLineEntity()} {@link Entity} that should be used
+   * to store and refer to the child {@link #getLineEntity()} {@link Entity}s.
+   *
+   * @return the name of the line entity parent field
    */
   public String getLineEntityParentField() {
     if (!hasLines) throw new IllegalStateException();
@@ -255,39 +356,64 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the name of the field in the {@link #getBeneficiaryMonthlyEntityParentField()} {@link
-   *     Entity} that should be used to store and refer to the parentBeneficiary {@link
-   *     #getBeneficiaryMonthlyEntityParentField()} {@link Entity}s, if any
+   * Gets the name of the field in the {@link Entity} that should be used to store and refer to the
+   * parentBeneficiary {@link Entity}s.
+   *
+   * @return the beneficiary monthly entity parent field
    */
   public String getBeneficiaryMonthlyEntityParentField() {
-    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
+    if (!isBeneficiaryEntity) throw new IllegalStateException();
     return "parentBeneficiary";
   }
 
   /**
+   * Sets the {@link #lineEntityLineNumberField}.
+   *
+   * @param lineEntityLineNumberField the name of the field in the {@link #getLineEntity()} {@link
+   *     Entity} that should be used for the identifying line number
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
+  public MappingSpec setLineEntityLineNumberField(String lineEntityLineNumberField) {
+    if (!hasLines) throw new IllegalStateException();
+    this.lineEntityLineNumberField = lineEntityLineNumberField;
+    return this;
+  }
+
+  /**
+   * Gets the {@link #lineEntityLineNumberField}.
+   *
    * @return the name of the field in the {@link #getLineEntity()} {@link Entity} that should be
    *     used for the identifying line number, if any
    */
   public String getLineEntityLineNumberField() {
+    // use Java field name since there is no uniformity among column names for line #
     if (!hasLines) throw new IllegalStateException();
-    return "lineNumber";
+    return lineEntityLineNumberField;
   }
 
   /**
-   * @return the name of the field in the {@link #getEntityBeneficiaryMonthlyField()} {@link Entity}
-   *     that should be used for the identifying yearMonth, if any
+   * Gets the name of the field in the {@link Entity} that should be used for the identifying
+   * yearMonth.
+   *
+   * @return the beneficiary monthly entity field
    */
   public String getEntityBeneficiaryMonthlyField() {
-    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
-    return "yearMonth";
+    if (!isBeneficiaryEntity) throw new IllegalStateException();
+    return "YEAR_MONTH";
   }
 
-  /** @return the fields in {@link #getHeaderEntity()} that should be marked as {@link Transient} */
+  /**
+   * Gets the {@link #headerEntityTransientFields}.
+   *
+   * @return the fields in {@link #getHeaderEntity()} that should be marked as {@link Transient}
+   */
   public List<String> getHeaderEntityTransientFields() {
     return headerEntityTransientFields;
   }
 
   /**
+   * Sets the {@link #headerEntityTransientFields}.
+   *
    * @param headerEntityTransientFields the new value for {@link #getHeaderEntityTransientFields()}
    * @return this {@link MappingSpec} instance, for call-chaining purposes
    */
@@ -297,12 +423,18 @@ public final class MappingSpec {
     return this;
   }
 
-  /** @return the fields in {@link #getHeaderEntity()} that should be marked as {@link Transient} */
+  /**
+   * Gets the {@link #headerEntityAdditionalDatabaseFields}.
+   *
+   * @return the fields in {@link #getHeaderEntity()} that should be marked as {@link Transient}
+   */
   public List<RifField> getHeaderEntityAdditionalDatabaseFields() {
     return headerEntityAdditionalDatabaseFields;
   }
 
   /**
+   * Sets the {@link #headerEntityAdditionalDatabaseFields}.
+   *
    * @param headerEntityAdditionalDatabaseFields the new value for {@link
    *     #getHeaderEntityAdditionalDatabaseFields()}
    * @return this {@link MappingSpec} instance, for call-chaining purposes
@@ -315,22 +447,47 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the {@link ClassName} for the class to be built that will contain parsing code for the
-   *     layout
+   * Sets the {@link #sequenceNumberGeneratorName}.
+   *
+   * @param sequenceNumberGeneratorName the db sequence number generator name {@link
+   *     #getSequenceNumberGeneratorName()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
+  public MappingSpec setSequenceNumberGeneratorName(String sequenceNumberGeneratorName) {
+    this.sequenceNumberGeneratorName = sequenceNumberGeneratorName;
+    return this;
+  }
+
+  /**
+   * Gets the {@link #sequenceNumberGeneratorName}.
+   *
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
+  public String getSequenceNumberGeneratorName() {
+    return sequenceNumberGeneratorName;
+  }
+
+  /**
+   * Gets the {@link ClassName} for the class to be built that will contain parsing code for the
+   * layout.
+   *
+   * @return the class name for the parser
    */
   public ClassName getParserClass() {
     return ClassName.get(packageName, headerEntity + "Parser");
   }
 
   /**
-   * @return the {@link ClassName} for the class to be built that will contain CSV writing for the
-   *     layout
+   * Gets the {@link ClassName} for the class to be built that will contain CSV writing for the
+   * layout.
+   *
+   * @return the csv writer class name
    */
   public ClassName getCsvWriterClass() {
     return ClassName.get(packageName, headerEntity + "CsvWriter");
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -348,11 +505,17 @@ public final class MappingSpec {
     builder.append(hasLines);
     builder.append(", lineTable=");
     builder.append(lineTable);
+    if (hasLines) {
+      builder.append(", lineEntityLineNumber=");
+      builder.append(lineEntityLineNumberField);
+    }
     builder.append("]");
     return builder.toString();
   }
 
   /**
+   * Determines if there are any {@link #innerJoinRelationship}s.
+   *
    * @return <code>true</code> if the RIF layout has an inner join relationship <code>false</code>
    *     if not
    */
@@ -361,6 +524,8 @@ public final class MappingSpec {
   }
 
   /**
+   * Sets the {@link #innerJoinRelationship}.
+   *
    * @param innerJoinRelationship a list of {@link String} parameters defining the inner join
    *     relationship for the entity
    * @return this {@link MappingSpec} instance, for call-chaining purposes
@@ -370,12 +535,18 @@ public final class MappingSpec {
     return this;
   }
 
-  /** @return the list of {@link #innerJoinRelationship}s */
+  /**
+   * Gets the {@link #innerJoinRelationship}.
+   *
+   * @return the list of {@link #innerJoinRelationship}s
+   */
   public List<InnerJoinRelationship> getInnerJoinRelationship() {
     return this.innerJoinRelationship;
   }
 
   /**
+   * Gets the class name for the specified entity name.
+   *
    * @param entity the {@link String} entity for which to return the {@link ClassName} for
    * @return the {@link ClassName} of the provided {@link String} entity
    */

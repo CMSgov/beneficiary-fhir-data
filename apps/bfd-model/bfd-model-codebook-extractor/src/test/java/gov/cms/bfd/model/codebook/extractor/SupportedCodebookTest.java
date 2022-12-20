@@ -1,5 +1,8 @@
 package gov.cms.bfd.model.codebook.extractor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.ValueGroup;
@@ -9,8 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,12 +65,12 @@ public class SupportedCodebookTest {
      * assert their presence just to get alerted if something interesting changes
      * with the data or parsing.
      */
-    Assert.assertTrue(duplicatedVariableIds.contains("BENE_ID"));
-    Assert.assertTrue(duplicatedVariableIds.contains("DOB_DT"));
-    Assert.assertTrue(duplicatedVariableIds.contains("GNDR_CD"));
+    assertTrue(duplicatedVariableIds.contains("BENE_ID"));
+    assertTrue(duplicatedVariableIds.contains("DOB_DT"));
+    assertTrue(duplicatedVariableIds.contains("GNDR_CD"));
 
     // Blow up if anything more than those known problems appears.
-    Assert.assertEquals(87, duplicatedVariableIds.size());
+    assertEquals(87, duplicatedVariableIds.size());
   }
 
   /**

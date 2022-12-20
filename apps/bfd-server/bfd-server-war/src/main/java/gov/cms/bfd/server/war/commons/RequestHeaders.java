@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 /**
  * A per request instance holds all resource (FHIR) request headers, such as: "includeIdentifiers"
- * {@link #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} "includeAddressFields" {@link
- * #CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS} which serve as part of BFD API
+ * {@link CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} "includeAddressFields" {@link
+ * CommonHeaders#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} which serve as part of BFD API
  */
 public class RequestHeaders {
   RequestDetails requestDetails;
@@ -35,11 +35,7 @@ public class RequestHeaders {
         });
   }
 
-  /**
-   * instantiate an empty RH, used by tests
-   *
-   * @param requestDetails
-   */
+  /** instantiate an empty RH, used by tests */
   private RequestHeaders() {}
 
   /**
@@ -161,7 +157,7 @@ public class RequestHeaders {
 
   /**
    * check if request contains header includeIdentifiers {@link
-   * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
+   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
    *
    * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
    */
@@ -172,7 +168,7 @@ public class RequestHeaders {
 
   /**
    * check if request contains header includeIdentifiers {@link
-   * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
+   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
    *
    * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
    */
@@ -183,7 +179,7 @@ public class RequestHeaders {
 
   /**
    * check if request contains header includeIdentifiers {@link
-   * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'
+   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'
    *
    * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
    */

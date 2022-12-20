@@ -63,20 +63,13 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     return Optional.empty();
   }
 
-  /**
-   * @return Returns true if the pageSize either startIndex is present (i.e. paging is requested),
-   *     false if neither present.
-   */
+  /** {@inheritDoc} */
   @Override
   public boolean isPagingRequested() {
     return pageSize.isPresent() || startIndex.isPresent();
   }
 
-  /**
-   * @return Returns the pageSize as an integer. Note: if the pageSize does not exist but the
-   *     startIndex does (paging is requested) default to pageSize of 10.
-   * @throws InvalidRequestException HTTP 400: indicates a pageSize less than 0 was provided
-   */
+  /** {@inheritDoc} */
   @Override
   public int getPageSize() {
     if (!isPagingRequested()) throw new BadCodeMonkeyException();
@@ -90,6 +83,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     return pageSize.get();
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isFirstPage() {
     return getStartIndex() == 0;

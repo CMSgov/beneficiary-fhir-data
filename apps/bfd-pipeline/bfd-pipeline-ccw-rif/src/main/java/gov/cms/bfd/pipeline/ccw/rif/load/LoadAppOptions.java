@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
+import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
-import javax.sql.DataSource;
 
 /** Models the user-configurable application options. */
 public final class LoadAppOptions implements Serializable {
@@ -20,133 +22,45 @@ public final class LoadAppOptions implements Serializable {
   public static final int DEFAULT_LOADER_THREADS =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
-  private final int hicnHashIterations;
-  private final byte[] hicnHashPepper;
-  private final String databaseUrl;
-  private final String databaseUsername;
-  private final char[] databasePassword;
-  private final DataSource databaseDataSource;
+  private final IdHasher.Config idHasherConfig;
   private final int loaderThreads;
   private final boolean idempotencyRequired;
-  private final boolean fixupsEnabled;
-  private final int fixupThreads;
+  private final boolean filteringNonNullAndNon2022Benes;
+
+  /**
+   * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
+   * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
+   * simultaneously.
+   */
+  private final int recordBatchSize;
 
   /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
-   * @param hicnHashIterations the value to use for {@link #getHicnHashIterations()}
-   * @param hicnHashPepper the value to use for {@link #getHicnHashPepper()}
-   * @param databaseUrl the value to use for {@link #getDatabaseUrl()}
-   * @param databaseUsername the value to use for {@link #getDatabaseUsername()}
-   * @param databasePassword the value to use for {@link #getDatabasePassword()}
+   * @param idHasherConfig the value to use for {@link #getIdHasherConfig()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
-   * @param fixupsEnabled the value to use for {@link #isFixupsEnabled()}
-   * @param fixupThreads the value fot use for {@link #getFixupThreads()}
+   * @param filterNon2022Benes the filter non 2022 benes
+   * @param recordBatchSize the load batch size
    */
   public LoadAppOptions(
-      int hicnHashIterations,
-      byte[] hicnHashPepper,
-      String databaseUrl,
-      String databaseUsername,
-      char[] databasePassword,
+      IdHasher.Config idHasherConfig,
       int loaderThreads,
       boolean idempotencyRequired,
-      boolean fixupsEnabled,
-      int fixupThreads) {
+      boolean filterNon2022Benes,
+      int recordBatchSize) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
-    this.hicnHashIterations = hicnHashIterations;
-    this.hicnHashPepper = hicnHashPepper;
-    this.databaseUrl = databaseUrl;
-    this.databaseUsername = databaseUsername;
-    this.databasePassword = databasePassword;
-    this.databaseDataSource = null;
+    this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
-    this.fixupsEnabled = fixupsEnabled;
-    this.fixupThreads = fixupThreads;
+    this.filteringNonNullAndNon2022Benes = filterNon2022Benes;
+    this.recordBatchSize = recordBatchSize;
   }
 
-  /**
-   * Constructs a new {@link LoadAppOptions} instance.
-   *
-   * @param hicnHashIterations the value to use for {@link #getHicnHashIterations()}
-   * @param hicnHashPepper the value to use for {@link #getHicnHashPepper()}
-   * @param databaseDataSource the value to use for {@link #getDatabaseDataSource()}
-   * @param loaderThreads the value to use for {@link #getLoaderThreads()}
-   * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
-   * @param fixupsEnabled the value to use for {@link #isFixupsEnabled()}
-   * @param fixupThreads the value fot use for {@link #getFixupThreads()}
-   */
-  public LoadAppOptions(
-      int hicnHashIterations,
-      byte[] hicnHashPepper,
-      DataSource databaseDataSource,
-      int loaderThreads,
-      boolean idempotencyRequired,
-      boolean fixupsEnabled,
-      int fixupThreads) {
-    if (loaderThreads < 1) throw new IllegalArgumentException();
-
-    this.hicnHashIterations = hicnHashIterations;
-    this.hicnHashPepper = hicnHashPepper;
-    this.databaseUrl = null;
-    this.databaseUsername = null;
-    this.databasePassword = null;
-    this.databaseDataSource = databaseDataSource;
-    this.loaderThreads = loaderThreads;
-    this.idempotencyRequired = idempotencyRequired;
-    this.fixupsEnabled = fixupsEnabled;
-    this.fixupThreads = fixupThreads;
-  }
-
-  /**
-   * @return the number of <code>PBKDF2WithHmacSHA256</code> iterations to use when hashing
-   *     beneficiary HICNs
-   */
-  public int getHicnHashIterations() {
-    return hicnHashIterations;
-  }
-
-  /**
-   * @return the shared secret pepper to use (in lieu of a salt) with <code>PBKDF2WithHmacSHA256
-   *     </code> when hashing beneficiary HICNs
-   */
-  public byte[] getHicnHashPepper() {
-    return hicnHashPepper;
-  }
-
-  /**
-   * @return the JDBC URL of the database to load into, or <code>null</code> if {@link
-   *     #getDatabaseDataSource()} is used, instead
-   */
-  public String getDatabaseUrl() {
-    return databaseUrl;
-  }
-
-  /**
-   * @return the database username to connect as when loading data, or <code>null</code> if {@link
-   *     #getDatabaseDataSource()} is used, instead
-   */
-  public String getDatabaseUsername() {
-    return databaseUsername;
-  }
-
-  /**
-   * @return the database password to connect with when loading data, or <code>null</code> if {@link
-   *     #getDatabaseDataSource()} is used, instead
-   */
-  public char[] getDatabasePassword() {
-    return databasePassword;
-  }
-
-  /**
-   * @return a {@link DataSource} for the database to connect to when loading data, or <code>null
-   *     </code> if {@link #getDatabaseUrl()} is used, instead
-   */
-  public DataSource getDatabaseDataSource() {
-    return databaseDataSource;
+  /** @return the configuration settings used when hashing beneficiary HICNs */
+  public IdHasher.Config getIdHasherConfig() {
+    return idHasherConfig;
   }
 
   /**
@@ -155,6 +69,15 @@ public final class LoadAppOptions implements Serializable {
    */
   public int getLoaderThreads() {
     return loaderThreads;
+  }
+
+  /**
+   * Gets the number of {@link RifRecordEvent}s that will be included in each processing batch.
+   *
+   * @return the batch size
+   */
+  public int getRecordBatchSize() {
+    return recordBatchSize;
   }
 
   /**
@@ -170,21 +93,25 @@ public final class LoadAppOptions implements Serializable {
   }
 
   /**
-   * Feature flag for fixups processing
+   * Gets if the filtering for non-null and 2022 benes is active or not.
    *
-   * @return is enabled
-   */
-  public boolean isFixupsEnabled() {
-    return fixupsEnabled;
-  }
-
-  /**
-   * Feature flag for fixups processing
+   * <p>As part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>, we want a filtering
+   * mechanism in our loads such some {@link Beneficiary}s are temporarily skipped: only those with
+   * a {@link Beneficiary#getBeneEnrollmentReferenceYear()} of "2022" or where the reference year is
+   * <code>null</code> will be processed (which, during the calendar year of 2022, is most of them).
+   * As part of this filtering, we are implementing an assumption that no non-2022 <code>INSERT
+   * </code> {@link Beneficiary} records will be received, as skipping those would also require
+   * skipping their associated claims, which is additional complexity that we want to avoid. If any
+   * such records are encountered, the load will go boom. This filtering is an inelegant hack to
+   * workaround upstream data issues, and will hopefully only be in place very temporarily. See the
+   * code that uses this field in {@link RifLoader} for details. This filtering is being made
+   * configurable so as to not invalidate all of our existing test coverage.
    *
-   * @return is enabled
+   * @return filtering is enabled when this field is <code>true</code>, and disabled when it's
+   *     <code>false</code>
    */
-  public int getFixupThreads() {
-    return fixupThreads;
+  public boolean isFilteringNonNullAndNon2022Benes() {
+    return filteringNonNullAndNon2022Benes;
   }
 
   /** @see java.lang.Object#toString() */
@@ -192,25 +119,15 @@ public final class LoadAppOptions implements Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("LoadAppOptions [hicnHashIterations=");
-    builder.append(hicnHashIterations);
+    builder.append(idHasherConfig.getHashIterations());
     builder.append(", hicnHashPepper=");
-    builder.append("***");
-    builder.append(", databaseUrl=");
-    builder.append(databaseUrl);
-    builder.append(", databaseUsername=");
-    builder.append("***");
-    builder.append(", databasePassword=");
-    builder.append("***");
-    builder.append(", databaseDataSource=");
     builder.append("***");
     builder.append(", loaderThreads=");
     builder.append(loaderThreads);
     builder.append(", idempotencyRequired=");
     builder.append(idempotencyRequired);
-    builder.append(", fixupEnabled=");
-    builder.append(fixupsEnabled);
-    builder.append(", fixupThreads=");
-    builder.append(fixupThreads);
+    builder.append(", filteringNonNullAndNon2022Benes=");
+    builder.append(filteringNonNullAndNon2022Benes);
     builder.append("]");
     return builder.toString();
   }

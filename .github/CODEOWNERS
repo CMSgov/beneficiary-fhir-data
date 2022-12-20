@@ -2,24 +2,34 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@jzulim @cbrunefearless @mackec1 @keithdadkins @rtravitz
+@cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
 
 #BFD Pipeline and Server Codeowners
-/rfcs @jzulim @cbrunefearless @mackec1 @keithdadkins @rtravitz
-/ops @jzulim @keithdadkins @njdister @rtravitz
-/apps @jzulim @cbrunefearless @mackec1 @rtravitz
+/rfcs @cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
+/ops @keithdadkins @mjburling @malessi
+/apps @cbrunefearless @mackec1 @mjburling @lsmitchell
+
+#BFD Performance Testing Utilities
+/apps/utils/locust_tests @lsmitchell @mjburling @malessi
 
 #BFD Insights Codeowners
-/insights @jzulim @keithdadkins @njdister @mackec1 @rtravitz
+/insights @keithdadkins @mackec1 @lsmitchell @mjburling @malessi
 
 #BCDA Insights Codeowners
-/insights/terraform/projects/bcda @msnook @orenfromberg
+/insights/terraform/projects/bcda @keithdadkins @mjburling @malessi
 
 #AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger
+/insights/terraform/projects/ab2d @sharshar-sb @keithdadkins @mjburling @malessi
 
 #BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @njdister @jzulim
+/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @malessi
 
-#DCGEO Pipeline Codeowners
-/apps/bfd-pipeline/bfd-pipeline-rda-grpc @ericbuckley @brianburton
+#PACA Pipeline Codeowners
+/apps/bfd-pipeline/bfd-pipeline-rda-* @brianburton @kyrobbins @mjburling
+#PACA Server Transformer Codeowners
+/apps/bfd-server/bfd-server-war/**/pac @brianburton @kyrobbins @mjburling
+# PACA Models
+/apps/bfd-model/bfd-model-rda @brianburton @kyrobbins @mjburling
+
+#GitHub Actions Workflows
+/.github/workflows @keithdadkins @mjburling @malessi

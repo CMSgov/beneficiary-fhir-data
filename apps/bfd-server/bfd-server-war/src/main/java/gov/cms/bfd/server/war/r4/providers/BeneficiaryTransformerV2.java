@@ -99,9 +99,23 @@ final class BeneficiaryTransformerV2 {
 
     Patient patient = new Patient();
 
+    /*
+     * Notify end users when they receive Patient records impacted by
+     * https://jira.cms.gov/browse/BFD-1566. See the documentation on
+     * LoadAppOptions.isFilteringNonNullAndNon2022Benes() for details.
+     */
+    if (!beneficiary.getSkippedRifRecords().isEmpty()) {
+      patient
+          .getMeta()
+          .addTag(
+              TransformerConstants.CODING_SYSTEM_BFD_TAGS,
+              TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
+              TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY);
+    }
+
     // Required values not directly mapped
     patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
-    patient.setId(beneficiary.getBeneficiaryId());
+    patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
 
     // BENE_ID => patient.identifier
     TransformerUtilsV2.addIdentifierSlice(
@@ -111,7 +125,7 @@ final class BeneficiaryTransformerV2 {
             null,
             TransformerConstants.PATIENT_MB_ID_DISPLAY,
             "MB"),
-        Optional.of(beneficiary.getBeneficiaryId()),
+        Optional.of(String.valueOf(beneficiary.getBeneficiaryId())),
         Optional.of(TransformerConstants.CODING_BBAPI_BENE_ID));
 
     // Unhashed MBI
@@ -262,93 +276,9 @@ final class BeneficiaryTransformerV2 {
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       patient.addExtension(
           TransformerUtilsV2.createExtensionDate(
-              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-    }
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear().get()));
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_01,
-              beneficiary.getMedicaidDualEligibilityJanCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_02,
-              beneficiary.getMedicaidDualEligibilityFebCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_03,
-              beneficiary.getMedicaidDualEligibilityMarCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_04,
-              beneficiary.getMedicaidDualEligibilityAprCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_05,
-              beneficiary.getMedicaidDualEligibilityMayCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_06,
-              beneficiary.getMedicaidDualEligibilityJunCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_07,
-              beneficiary.getMedicaidDualEligibilityJulCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_08,
-              beneficiary.getMedicaidDualEligibilityAugCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_09,
-              beneficiary.getMedicaidDualEligibilitySeptCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_10,
-              beneficiary.getMedicaidDualEligibilityOctCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_11,
-              beneficiary.getMedicaidDualEligibilityNovCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_12,
-              beneficiary.getMedicaidDualEligibilityDecCode()));
+      transformMedicaidDualEligibility(patient, beneficiary);
     }
 
     // Last Updated => Patient.meta.lastUpdated
@@ -394,6 +324,55 @@ final class BeneficiaryTransformerV2 {
           .setDisplay("Patient's Medicare number")
           .addExtension(identifierCurrencyExtension);
     }
+  }
+
+  /**
+   * @param patient the FHIR {@link Patient} resource to add to
+   * @param beneficiary the value for {@link Beneficiary)}
+   */
+  private static void transformMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
+    // Monthly Medicare-Medicaid dual eligibility codes
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_01, beneficiary.getMedicaidDualEligibilityJanCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_03, beneficiary.getMedicaidDualEligibilityMarCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_04, beneficiary.getMedicaidDualEligibilityAprCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_05, beneficiary.getMedicaidDualEligibilityMayCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_06, beneficiary.getMedicaidDualEligibilityJunCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_07, beneficiary.getMedicaidDualEligibilityJulCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_08, beneficiary.getMedicaidDualEligibilityAugCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_09, beneficiary.getMedicaidDualEligibilitySeptCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_10, beneficiary.getMedicaidDualEligibilityOctCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_11, beneficiary.getMedicaidDualEligibilityNovCode());
+    addPatientExtension(
+        patient, CcwCodebookVariable.DUAL_12, beneficiary.getMedicaidDualEligibilityDecCode());
+  }
+
+  /**
+   * Sets the Coverage.relationship Looks up or adds a contained {@link Identifier} object to the
+   * current {@link Patient}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param patient The {@link Patient} to Patient details
+   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the Coverage
+   * @param optVal The {@link String} value associated with the Coverage
+   */
+  static void addPatientExtension(
+      Patient patient, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
+    optVal.ifPresent(
+        value ->
+            patient.addExtension(
+                TransformerUtilsV2.createExtensionCoding(patient, ccwVariable, value)));
   }
 
   /** Enumerates the options for the currency of an {@link Identifier}. */

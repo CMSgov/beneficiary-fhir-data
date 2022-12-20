@@ -1,0 +1,144 @@
+mappings:
+  - id: FissClaim
+    messageClassName: gov.cms.mpsm.rda.v1.fiss.FissClaim
+    entityClassName: gov.cms.test.FissClaim
+    transformerClassName: gov.cms.test.FissClaimTransformer
+    table:
+      name: FissClaims
+      schema: pre_adj
+      quoteNames: true
+      primaryKeyColumns:
+        - dcn
+      columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+        - name: sequenceNumber
+          sqlType: bigint
+          nullable: false
+        - name: currStatus
+          sqlType: varchar(1)
+          javaType: char
+          nullable: false
+        - name: provStateCd
+          sqlType: varchar(2)
+        - name: medaProvId
+          sqlType: varchar(13)
+          comment: |
+            Medicare Provider ID:
+            
+            <p>The Medicare Provider ID consists of the following:
+            
+            <ul>
+              <li>Provider State Code
+              <li>Provider Type Facility Code
+              <li>Provider Emergency Indicator
+              <li>Provider Department Identification
+            </ul>
+        - name: medaProv_6
+          sqlType: varchar(6)
+        - name: totalChargeAmount
+          sqlType: decimal(11,2)
+        - name: receivedDate
+          sqlType: date
+        - name: lastUpdated
+          sqlType: timestamp with time zone
+        - name: pracLocAddr1
+          sqlType: varchar(max)
+        - name: lobCd
+          sqlType: varchar(1)
+        - name: servTypeCdMapping
+          enumType: ServTypeCdMapping
+          sqlType: varchar(20)
+        - name: servTypeCd
+          sqlType: varchar(1)
+        - name: freqCd
+          sqlType: varchar(1)
+        - name: apiSource
+          sqlType: varchar(24)
+          comment: "String specifying the source of the data contained in this record. Generally this will be the version string returned by the RDA API server but when populating data from mock server it will also include information about the mode the server was running in."
+        - name: paidDt
+          sqlType: date
+          comment: "Paid Date"
+        - name: admSource
+          sqlType: char(1)
+          comment: "Source of Admission"
+      joins:
+        - fieldName: mbiRecord
+          entityClass: gov.cms.bfd.model.rda.Mbi
+          joinColumnName: mbiId
+          joinType: ManyToOne
+          fetchType: EAGER
+    enumTypes:
+      - name: ServTypeCdMapping
+        values:
+          - Normal
+          - Clinic
+          - SpecialFacility
+          - Unrecognized
+    transformations:
+      - from: dcn
+        optionalComponents: None
+      - from: seq
+        to: sequenceNumber
+        optionalComponents: None
+      - from: currStatus
+        optionalComponents: None
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissClaimStatus
+          extractorOptions: RejectUnrecognized
+      - from: provStateCd
+      - from: medaProvId
+      - from: medaProv6
+        to: medaProv_6
+      - from: totalChargeAmount
+      - from: recdDtCymd
+        to: receivedDate
+      - from: pracLocAddr1
+      - from: lobCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType
+      # The servTypeCdMapping is set to one of 4 enum values depending on which of the 4
+      # oneof fields has a value in the FissClaim message.
+      - from: servTypeCdEnum
+        to: servTypeCdMapping
+        transformer: EnumValueIfPresent
+        transformerOptions:
+          enumName: ServTypeCdMapping
+          enumValue: Normal
+      # The servTypeCd value is set from one of 2 possible values in a oneof within the FissClaim.
+      - from: servTypeCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassification
+          hasUnrecognized: false
+      - from: servTypeCdForClinics
+        to: servTypeCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics
+          hasUnrecognized: false
+      - from: freqCd
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissBillFrequency
+        to: paidDt
+      - from: admSource
+        transformer: MessageEnum
+        transformerOptions:
+          enumClass: gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission
+      - from: NOW
+        to: lastUpdated
+    arrays:
+      - from: fissProcCodes
+        to: procCodes
+        mapping: FissProcCode
+        namePrefix: "procCode"
+      - from: fissPayers
+        to: payers
+        mapping: FissPayer
+        namePrefix: "payer"
+    externalTransformations:
+      - applyMbiCache

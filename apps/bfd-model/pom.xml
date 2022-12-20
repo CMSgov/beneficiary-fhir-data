@@ -15,11 +15,18 @@
 			A parent POM for the bfd-model-* projects, which provide shared/library code for the BFD applications.
 	</description>
 
+	<properties>
+		<poi.version>5.2.3</poi.version>
+		<javapoet.version>1.13.0</javapoet.version>
+	</properties>
+
 	<modules>
 		<module>bfd-model-codebook-extractor</module>
 		<module>bfd-model-codebook-data</module>
 		<module>bfd-model-codegen-annotations</module>
 		<module>bfd-model-codegen</module>
+                <module>bfd-model-dsl-codegen</module>
+		<module>bfd-model-rda</module>
 		<module>bfd-model-rif</module>
 		<module>bfd-model-rif-samples</module>
 	</modules>
@@ -31,22 +38,19 @@
 					frameworks in Java. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.7</version>
+				<version>${slf4j.version}</version>
 			</dependency>
-
+			
 			<dependency>
-				<!-- Used to run our unit and integration tests. -->
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
-				<scope>test</scope>
+				<!-- Used to read the Excel file that provides the RIF column/field definitions. -->
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>${poi.version}</version>
 			</dependency>
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>9.4.1208</version>
-				<scope>test</scope>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${poi.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -64,14 +68,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-					</configuration>
-				</plugin>
 				<plugin>
 					<artifactId>maven-scm-plugin</artifactId>
 					<configuration>

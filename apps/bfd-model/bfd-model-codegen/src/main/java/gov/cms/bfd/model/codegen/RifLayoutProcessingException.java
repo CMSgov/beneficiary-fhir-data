@@ -10,6 +10,7 @@ import javax.lang.model.element.Element;
 public final class RifLayoutProcessingException extends RuntimeException {
   private static final long serialVersionUID = -7030975478260105688L;
 
+  /** The field or package that was the source of the exception. */
   private final Element element;
 
   /**
@@ -27,7 +28,11 @@ public final class RifLayoutProcessingException extends RuntimeException {
     this.element = element;
   }
 
-  /** @return */
+  /**
+   * Gets the element.
+   *
+   * @return the element
+   */
   public Element getElement() {
     return element;
   }

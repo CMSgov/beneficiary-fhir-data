@@ -19,19 +19,24 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -55,7 +60,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,14 +75,16 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
 
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private SamhsaMatcher samhsaMatcher;
+  private Stu3EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
+  private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  private NPIOrgLookup npiOrgLookup;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -92,9 +98,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link SamhsaMatcher} to use */
+  /** @param samhsaMatcher the {@link Stu3EobSamhsaMatcher} to use */
   @Inject
-  public void setSamhsaFilterer(SamhsaMatcher samhsaMatcher) {
+  public void setSamhsaFilterer(Stu3EobSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
@@ -104,7 +110,19 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
+  /** @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use */
+  @Inject
+  public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+  }
+
+  /** @param npiOrgLookup the {@link NPIOrgLookup} to use */
+  @Inject
+  public void setNpiOrgLookup(NPIOrgLookup npiOrgLookup) {
+    this.npiOrgLookup = npiOrgLookup;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return ExplanationOfBenefit.class;
@@ -168,7 +186,13 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
             .time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
@@ -180,7 +204,21 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
         eobIdType
             .get()
             .getTransformer()
-            .transform(metricRegistry, claimEntity, Optional.of(includeTaxNumbers));
+            .transform(
+                new TransformerContext(
+                    metricRegistry,
+                    Optional.of(includeTaxNumbers),
+                    drugCodeDisplayLookup,
+                    npiOrgLookup),
+                claimEntity);
+
+    // Add bene_id to MDC logs
+    if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+      String beneficiaryId = eob.getPatient().getReference().replace("Patient/", "");
+      if (!Strings.isNullOrEmpty(beneficiaryId)) {
+        LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      }
+    }
     return eob;
   }
 
@@ -198,7 +236,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
-   *     SamhsaMatcher} to filter out all SAMHSA-related claims from the results
+   *     Stu3EobSamhsaMatcher} to filter out all SAMHSA-related claims from the results
    * @param lastUpdated an {@link OptionalParam} that specifies a date range for the lastUpdated
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
@@ -237,7 +275,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
      * later.
      */
 
-    String beneficiaryId = patient.getIdPart();
+    Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimType> claimTypes = parseTypeParam(type);
     Boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
@@ -265,6 +303,11 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
+      // Add bene_id to MDC logs when _lastUpdated filter is in effect
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
@@ -278,56 +321,74 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
           transformToEobs(
               ClaimType.CARRIER,
               findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.DME))
       eobs.addAll(
           transformToEobs(
               ClaimType.DME,
               findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.HHA))
       eobs.addAll(
           transformToEobs(
               ClaimType.HHA,
               findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.HOSPICE))
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
               findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.INPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
               findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.OUTPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.PDE))
       eobs.addAll(
           transformToEobs(
               ClaimType.PDE,
               findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
           transformToEobs(
               ClaimType.SNF,
               findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              Optional.of(includeTaxNumbers),
+              drugCodeDisplayLookup,
+              npiOrgLookup));
 
-    if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
+    if (Boolean.parseBoolean(excludeSamhsa)) {
+      filterSamhsa(eobs);
+    }
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneficiaryId);
+    LoggingUtils.logBeneIdToMdc(beneficiaryId);
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -366,10 +427,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
   private <T> List<T> findClaimTypeByPatient(
-      ClaimType claimType,
-      String patientId,
-      DateRangeParam lastUpdated,
-      DateRangeParam serviceDate) {
+      ClaimType claimType, Long patientId, DateRangeParam lastUpdated, DateRangeParam serviceDate) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
     Root root = criteria.from(claimType.getEntityClass());
@@ -401,21 +459,27 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     } finally {
       eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtils.recordQueryInMdc(
-          String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
+          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
     }
 
     if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
-      final Date lowerBound = serviceDate.getLowerBoundAsInstant();
-      final Date upperBound = serviceDate.getUpperBoundAsInstant();
+      final Instant lowerBound =
+          serviceDate.getLowerBoundAsInstant() != null
+              ? serviceDate.getLowerBoundAsInstant().toInstant()
+              : null;
+      final Instant upperBound =
+          serviceDate.getUpperBoundAsInstant() != null
+              ? serviceDate.getUpperBoundAsInstant().toInstant()
+              : null;
       final java.util.function.Predicate<LocalDate> lowerBoundCheck =
           lowerBound == null
               ? (date) -> true
               : (date) ->
                   compareLocalDate(
                       date,
-                      lowerBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                      lowerBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.getLowerBound().getPrefix());
       final java.util.function.Predicate<LocalDate> upperBoundCheck =
           upperBound == null
@@ -423,7 +487,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
               : (date) ->
                   compareLocalDate(
                       date,
-                      upperBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                      upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.getUpperBound().getPrefix());
       return claimEntities.stream()
           .filter(
@@ -445,9 +509,20 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    */
   @Trace
   private List<ExplanationOfBenefit> transformToEobs(
-      ClaimType claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
+      ClaimType claimType,
+      List<?> claims,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
     return claims.stream()
-        .map(c -> claimType.getTransformer().transform(metricRegistry, c, includeTaxNumbers))
+        .map(
+            c ->
+                claimType
+                    .getTransformer()
+                    .transform(
+                        new TransformerContext(
+                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
+                        c))
         .collect(Collectors.toList());
   }
 
@@ -556,9 +631,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   /**
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out the HTTP header that controls this setting
-   * @return <code>true</code> if {@link CarrierClaimColumn#TAX_NUM} and {@link
-   *     DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>false</code> if
-   *     not (defaults to <code>false</code>)
+   * @return <code>true</code> if {@link gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} and
+   *     {@link gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the
+   *     results, <code>false</code> if not (defaults to <code>false</code>)
    */
   public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
     /*

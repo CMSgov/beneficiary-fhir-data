@@ -8,11 +8,6 @@ variable "fhir_ami" {
   type        = string
 }
 
-variable "etl_ami" {
-  description = "ETL server AMI"
-  type        = string
-}
-
 variable "ssh_key_name" {
   description = "SSH Key"
   type        = string
@@ -32,4 +27,14 @@ variable "is_public" {
   description = "If true, open the FHIR data end-point to the public Internet"
   type        = bool
   default     = false
+}
+
+variable "dashboard_name" {
+  description = "Name of the bfd cloudwatch dashboards"
+  type        = string
+}
+
+variable "dashboard_namespace" {
+  description = "The namespace in which the dashboards live in"
+  type        = string
 }

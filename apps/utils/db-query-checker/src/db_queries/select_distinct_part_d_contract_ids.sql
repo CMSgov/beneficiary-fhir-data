@@ -1,0 +1,3 @@
+SELECT DISTINCT partd_contract_number_id
+FROM beneficiary_monthly
+WHERE partd_contract_number_id IS NOT NULL

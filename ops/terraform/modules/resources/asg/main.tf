@@ -1,16 +1,8 @@
 locals {
-  tags    = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
-  is_prod = substr(var.env_config.env, 0, 4) == "prod"
+  tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
 }
 
-##
-# Data providers
-##
-
-# Subnets
-# 
-# Subnets are created by CCS VPC setup
-#
+# subnets
 data "aws_subnet" "app_subnets" {
   count             = length(var.env_config.azs)
   vpc_id            = var.env_config.vpc_id
@@ -21,32 +13,23 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
-# KMS 
-#
-# The customer master key is created outside of this script
-#
+# kms master key
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
 
-##
-# Create Resources
-##
-
-#
-# Security groups
+## Security groups
 #
 
-# Base security group with egress 
-#
+# base
 resource "aws_security_group" "base" {
   name        = "bfd-${var.env_config.env}-${var.role}-base"
   description = "Allow CI access to app servers"
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
-  ingress = [] # Make the ingress empty for this SG. 
+  ingress = [] # Make the ingress empty for this SG.
 
   egress {
     from_port   = 0
@@ -56,8 +39,7 @@ resource "aws_security_group" "base" {
   }
 }
 
-# Callers access to the app
-#
+# app server
 resource "aws_security_group" "app" {
   count       = var.lb_config == null ? 0 : 1
   name        = "bfd-${var.env_config.env}-${var.role}-app"
@@ -73,8 +55,7 @@ resource "aws_security_group" "app" {
   }
 }
 
-# App access to the database
-#
+# database
 resource "aws_security_group_rule" "allow_db_access" {
   count       = var.db_config == null ? 0 : 1
   type        = "ingress"
@@ -87,13 +68,13 @@ resource "aws_security_group_rule" "allow_db_access" {
   source_security_group_id = aws_security_group.app[0].id # Every instance in the ASG
 }
 
-##
-# Launch template
-##
+
+## Launch Template
+#
 resource "aws_launch_template" "main" {
   name                   = "bfd-${var.env_config.env}-${var.role}"
   description            = "Template for the ${var.env_config.env} environment ${var.role} servers"
-  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], aws_security_group.app[*].id)
+  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.tool_sg], aws_security_group.app[*].id)
   key_name               = var.launch_config.key_name
   image_id               = var.launch_config.ami_id
   instance_type          = var.launch_config.instance_type
@@ -104,7 +85,7 @@ resource "aws_launch_template" "main" {
   }
 
   placement {
-    tenancy = local.is_prod ? "dedicated" : "default"
+    tenancy = "default"
   }
 
   monitoring {
@@ -112,7 +93,7 @@ resource "aws_launch_template" "main" {
   }
 
   block_device_mappings {
-    device_name = "/dev/sda1"
+    device_name = "/dev/xvda"
     ebs {
       volume_type           = "gp2"
       volume_size           = var.launch_config.volume_size
@@ -141,19 +122,18 @@ resource "aws_launch_template" "main" {
   }
 }
 
-##
-# Autoscaling group
-##
+
+## Autoscaling group
+#
 resource "aws_autoscaling_group" "main" {
-  # Generate a new group on every revision of the launch template. 
+  # Generate a new group on every revision of the launch template.
   # This does a simple version of a blue/green deployment
-  #
   name             = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
   desired_capacity = var.asg_config.desired
   max_size         = var.asg_config.max
   min_size         = var.asg_config.min
 
-  # If an lb is defined, wait for the ELB 
+  # If an lb is defined, wait for the ELB
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
@@ -178,6 +158,12 @@ resource "aws_autoscaling_group" "main" {
     "GroupTotalInstances",
   ]
 
+  warm_pool {
+    pool_state                  = "Stopped"
+    min_size                    = var.asg_config.min
+    max_group_prepared_capacity = var.asg_config.max_warm
+  }
+
   dynamic "tag" {
     for_each = local.tags
     content {
@@ -198,9 +184,9 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
-##
-# Autoscaling policies and Cloudwatch alarms
-##
+
+## Autoscaling Policies and Cloudwatch Alarms
+#
 resource "aws_autoscaling_policy" "high-cpu" {
   name                      = "bfd-${var.env_config.env}-${var.role}-high-cpu-policy"
   autoscaling_group_name    = aws_autoscaling_group.main.name
@@ -283,9 +269,9 @@ resource "aws_cloudwatch_metric_alarm" "low-cpu" {
   alarm_actions     = [aws_autoscaling_policy.low-cpu.arn]
 }
 
-##
-# Autoscaling notifications
-##
+
+## Autoscaling Notifications
+#
 resource "aws_autoscaling_notification" "asg_notifications" {
   count = var.asg_config.sns_topic_arn != "" ? 1 : 0
 

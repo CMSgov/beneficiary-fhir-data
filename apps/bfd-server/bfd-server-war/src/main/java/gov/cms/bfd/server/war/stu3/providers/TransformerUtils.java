@@ -2,9 +2,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Strings;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -32,15 +36,18 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
@@ -52,8 +59,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -64,13 +70,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -113,7 +119,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -128,7 +133,7 @@ public final class TransformerUtils {
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
    *
-   * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
+   * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
    */
   private static final Set<CcwCodebookInterface> codebookLookupMissingFailures = new HashSet<>();
 
@@ -138,15 +143,12 @@ public final class TransformerUtils {
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
    *
-   * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
+   * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
    */
   private static final Set<CcwCodebookInterface> codebookLookupDuplicateFailures = new HashSet<>();
 
-  /** Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file. */
-  private static Map<String, String> ndcProductMap = null;
-
-  /** Tracks the national drug codes that have already had code lookup failures. */
-  private static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
+  /** Tracks the icd codes that have already had code lookup failures. */
+  private static final Set<String> icdCodeLookupMissingFailures = new HashSet<>();
 
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
@@ -182,7 +184,7 @@ public final class TransformerUtils {
      * `ExplanationOfBenefit.total.category` once this mapping is moved to STU4.
      */
 
-    String extensionUrl = calculateVariableReferenceUrl(categoryVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(categoryVariable);
     Money adjudicationTotalAmount = createMoney(amountValue);
     Extension adjudicationTotalEextension = new Extension(extensionUrl, adjudicationTotalAmount);
 
@@ -247,7 +249,7 @@ public final class TransformerUtils {
     CodeableConcept financialTypeConcept =
         TransformerUtils.createCodeableConcept(
             TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-            calculateVariableReferenceUrl(financialType));
+            CCWUtils.calculateVariableReferenceUrl(financialType));
     financialTypeConcept.getCodingFirstRep().setDisplay(financialType.getVariable().getLabel());
 
     BenefitComponent financialEntry = new BenefitComponent(financialTypeConcept);
@@ -388,6 +390,9 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds a {@link Diagnosis} to the provided {@link ExplanationOfBenefit} and modifies the {@link
+   * ItemComponent} with a sequence number identifier.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the specified {@link ItemComponent} is a child
    *     of
    * @param item the {@link ItemComponent} to add an {@link ItemComponent#getDiagnosisLinkId()}
@@ -427,6 +432,31 @@ public final class TransformerUtils {
     else
       extension.setValue(
           new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay));
+  }
+
+  /**
+   * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
+   * will be set to a {@link CodeableConcept} containing a single {@link Coding}, with the specified
+   * system and code.
+   *
+   * <p>Data Architecture Note: The {@link CodeableConcept} might seem extraneous -- why not just
+   * add the {@link Coding} directly to the {@link Extension}? The main reason for doing it this way
+   * is consistency: this is what FHIR seems to do everywhere.
+   *
+   * @param fhirElement the FHIR element to add the {@link Extension} to
+   * @param extensionUrl the {@link Extension#getUrl()} to use
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingDisplay the {@link Coding#getDisplay()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   */
+  static void addExtensionCoding(
+      IBaseHasExtensions fhirElement,
+      String extensionUrl,
+      String codingSystem,
+      Optional<String> codingDisplay,
+      String codingCode) {
+    addExtensionCoding(
+        fhirElement, extensionUrl, codingSystem, codingDisplay.orElse(null), codingCode);
   }
 
   /**
@@ -590,6 +620,12 @@ public final class TransformerUtils {
   }
 
   /**
+   * Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier has a
+   * data type of StringType that does not constrain itself to numeric. So this convenience method
+   * will continue to exist as a means to create a {@link ExplanationOfBenefit#getId()} whose claim
+   * ID is not numeric. This non-numeric handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
+   *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
@@ -598,6 +634,17 @@ public final class TransformerUtils {
    */
   public static String buildEobId(ClaimType claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimType claimType, Long claimId) {
+    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
@@ -643,8 +690,8 @@ public final class TransformerUtils {
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
    *     Beneficiary}
    */
-  public static IdDt buildPatientId(String beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
+  public static IdDt buildPatientId(Long beneficiaryId) {
+    return new IdDt(Patient.class.getSimpleName(), String.valueOf(beneficiaryId));
   }
 
   /**
@@ -657,6 +704,24 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
+   *     Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Long beneficiaryId) {
+    return new IdDt(
+        Coverage.class.getSimpleName(),
+        String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * Internally BFD treats beneficiaryId as a Long (db bigint); however, within FHIR, an {@link
+   * ca.uhn.fhir.model.primitive.IdDt} does not constrain itself to numeric. So this convenience
+   * method will continue to exist as a means to create a non-numeric IdDt. This non-numeric
+   * handling may be used in integration tests to trigger {@link
+   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
    *     Coverage#getId()} for
@@ -718,6 +783,24 @@ public final class TransformerUtils {
     return new Reference()
         .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+  }
+
+  /**
+   * Setting identifier reference when npiorgdisplay is passed in.
+   *
+   * @param identifierSystem the {@link Identifier#getSystem()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param identifierValue the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param npiOrgDisplay the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createIdentifierReference(
+      String identifierSystem, String identifierValue, Optional<String> npiOrgDisplay) {
+    return new Reference()
+        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setDisplay(npiOrgDisplay.orElse(null));
   }
 
   /**
@@ -801,7 +884,7 @@ public final class TransformerUtils {
 
     Identifier identifier = createIdentifier(ccwVariable, identifierValue.get());
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, identifier);
 
     return extension;
@@ -830,7 +913,7 @@ public final class TransformerUtils {
 
     Identifier identifier =
         new Identifier()
-            .setSystem(calculateVariableReferenceUrl(ccwVariable))
+            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue);
     return identifier;
   }
@@ -858,18 +941,18 @@ public final class TransformerUtils {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
-    try {
-      String stringDate = dateYear.get().toString() + "-01-01";
-      Date date1 = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
-      DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
-      String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
-      extension = new Extension(extensionUrl, dateYearValue);
-
-    } catch (ParseException e) {
-      throw new InvalidRifValueException(
-          String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
+    if (!dateYear.isPresent()) {
+      throw new NoSuchElementException();
     }
-
+    try {
+      String stringDate = String.format("%04d", dateYear.get().intValue());
+      DateType dateYearValue = new DateType(stringDate);
+      String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+      extension = new Extension(extensionUrl, dateYearValue);
+    } catch (DataFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to create DateType with reference year: '%s'.", dateYear.get()), e);
+    }
     return extension;
   }
 
@@ -889,7 +972,7 @@ public final class TransformerUtils {
       quantity = new Quantity().setValue((BigDecimal) quantityValue.get());
     else throw new BadCodeMonkeyException();
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, quantity);
 
     return extension;
@@ -922,7 +1005,7 @@ public final class TransformerUtils {
       Quantity quantity) {
     if (!unitCode.isPresent()) return;
 
-    quantity.setSystem(calculateVariableReferenceUrl(ccwVariable));
+    quantity.setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable));
 
     String unitCodeString;
     if (unitCode.get() instanceof String) unitCodeString = (String) unitCode.get();
@@ -950,7 +1033,7 @@ public final class TransformerUtils {
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
@@ -974,7 +1057,7 @@ public final class TransformerUtils {
     Coding coding = createCoding(rootResource, ccwVariable, yearMonth, code.get());
 
     String extensionUrl =
-        String.format("%s/%s", calculateVariableReferenceUrl(ccwVariable), yearMonth);
+        String.format("%s/%s", CCWUtils.calculateVariableReferenceUrl(ccwVariable), yearMonth);
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
@@ -1044,7 +1127,7 @@ public final class TransformerUtils {
    */
   private static CodeableConcept createCodeableConceptForFieldId(
       IAnyResource rootResource, String codingSystem, CcwCodebookInterface ccwVariable) {
-    String code = calculateVariableReferenceUrl(ccwVariable);
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Coding coding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
     return new CodeableConcept().addCoding(coding);
@@ -1068,7 +1151,7 @@ public final class TransformerUtils {
     else if (code instanceof String) codeString = code.toString().trim();
     else throw new BadCodeMonkeyException("Unsupported: " + code);
 
-    String system = calculateVariableReferenceUrl(ccwVariable);
+    String system = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     String display;
     if (ccwVariable.getVariable().getValueGroups().isPresent())
@@ -1097,7 +1180,7 @@ public final class TransformerUtils {
     else if (code instanceof String) codeString = code.toString().trim();
     else throw new BadCodeMonkeyException("Unsupported: " + code);
 
-    String system = calculateVariableReferenceUrl(ccwVariable);
+    String system = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     String display;
     if (ccwVariable.getVariable().getValueGroups().isPresent())
@@ -1121,18 +1204,6 @@ public final class TransformerUtils {
 
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
-   * @return the public URL at which documentation for the specified {@link CcwCodebookInterface} is
-   *     published
-   */
-  static String calculateVariableReferenceUrl(CcwCodebookInterface ccwVariable) {
-    return String.format(
-        "%s/%s",
-        TransformerConstants.BASE_URL_CCW_VARIABLES,
-        ccwVariable.getVariable().getId().toLowerCase());
-  }
-
-  /**
-   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
    *     specified {@link CcwCodebookInterface}
    */
@@ -1144,7 +1215,7 @@ public final class TransformerUtils {
      * about what the specific adjudication they're looking at means.
      */
 
-    String conceptCode = calculateVariableReferenceUrl(ccwVariable);
+    String conceptCode = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     CodeableConcept categoryConcept =
         createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, conceptCode);
     categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
@@ -1162,7 +1233,7 @@ public final class TransformerUtils {
   static AdjudicationComponent createAdjudicationWithReason(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object reasonCode) {
     // Cheating here, since they use the same URL.
-    String categoryConceptCode = calculateVariableReferenceUrl(ccwVariable);
+    String categoryConceptCode = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     CodeableConcept category =
         createCodeableConcept(
@@ -1262,7 +1333,7 @@ public final class TransformerUtils {
    * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
    *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
    */
-  static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
+  static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
     return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
@@ -1272,8 +1343,8 @@ public final class TransformerUtils {
    * @return a {@link Reference} to the {@link Patient} resource that matches the specified
    *     parameters
    */
-  static Reference referencePatient(String patientId) {
-    return new Reference(String.format("Patient/%s", patientId));
+  static Reference referencePatient(Long patientId) {
+    return new Reference(String.format("Patient/%d", patientId));
   }
 
   /**
@@ -1300,9 +1371,7 @@ public final class TransformerUtils {
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
   static void setPeriodEnd(Period period, LocalDate date) {
-    period.setEnd(
-        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        TemporalPrecisionEnum.DAY);
+    period.setEnd(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1310,9 +1379,7 @@ public final class TransformerUtils {
    * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
    */
   static void setPeriodStart(Period period, LocalDate date) {
-    period.setStart(
-        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        TemporalPrecisionEnum.DAY);
+    period.setStart(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1558,9 +1625,11 @@ public final class TransformerUtils {
        * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
        * field so if this is updated you'll need to update that as well.
        */
+      int maxSequence = eob.getDiagnosis().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
       eob.addDiagnosis()
           .setPackageCode(
-              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd));
+              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd))
+          .setSequence(maxSequence + 1);
     }
   }
 
@@ -1646,15 +1715,15 @@ public final class TransformerUtils {
    * @param claimType {@link ClaimType} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
-   * @param dateFrom CLM_FROM_DT
-   * @param dateThrough CLM_THRU_DT
+   * @param dateFrom CLM_FROM_DT || SRVC_DT (For Part D Events)
+   * @param dateThrough CLM_THRU_DT || SRVC_DT (For Part D Events)
    * @param paymentAmount CLM_PMT_AMT
    * @param finalAction FINAL_ACTION
    */
   static void mapEobCommonClaimHeaderData(
       ExplanationOfBenefit eob,
-      String claimId,
-      String beneficiaryId,
+      Long claimId,
+      Long beneficiaryId,
       ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
@@ -1666,8 +1735,8 @@ public final class TransformerUtils {
     eob.setId(buildEobId(claimType, claimId));
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
+    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
 
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
@@ -1725,7 +1794,7 @@ public final class TransformerUtils {
    */
   static void mapEobCommonGroupCarrierDME(
       ExplanationOfBenefit eob,
-      String beneficiaryId,
+      Long beneficiaryId,
       String carrierNumber,
       Optional<String> clinicalTrialNumber,
       BigDecimal beneficiaryPartBDeductAmount,
@@ -1828,7 +1897,7 @@ public final class TransformerUtils {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      String claimId,
+      Long claimId,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,
@@ -1851,7 +1920,8 @@ public final class TransformerUtils {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode) {
+      Optional<String> nationalDrugCode,
+      String drugCodeName) {
 
     SimpleQuantity serviceCnt = new SimpleQuantity();
     serviceCnt.setValue(serviceCount);
@@ -1941,7 +2011,7 @@ public final class TransformerUtils {
 
       Extension hctHgbObservationReference =
           new Extension(
-              calculateVariableReferenceUrl(CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM),
+              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM),
               new Reference(hctHgbObservation));
       item.addExtension(hctHgbObservationReference);
     }
@@ -1951,7 +2021,7 @@ public final class TransformerUtils {
           item,
           TransformerConstants.CODING_NDC,
           TransformerConstants.CODING_NDC,
-          TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode.get()),
+          drugCodeName,
           nationalDrugCode.get());
     }
 
@@ -2151,6 +2221,7 @@ public final class TransformerUtils {
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
       Optional<String> organizationNpi,
+      Optional<String> organizationNpiDisplay,
       char claimFacilityTypeCode,
       char claimFrequencyCode,
       Optional<String> claimNonPaymentReasonCode,
@@ -2167,10 +2238,10 @@ public final class TransformerUtils {
     if (organizationNpi.isPresent()) {
       eob.setOrganization(
           TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+              TransformerConstants.CODING_NPI_US, organizationNpi.get(), organizationNpiDisplay));
       eob.setFacility(
           TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, organizationNpi.get()));
+              TransformerConstants.CODING_NPI_US, organizationNpi.get(), organizationNpiDisplay));
     }
 
     eob.getFacility()
@@ -2311,10 +2382,32 @@ public final class TransformerUtils {
   /**
    * Extract the Diagnosis values for codes 1-12
    *
-   * @param diagnosisPrincipalCode
-   * @param diagnosisPrincipalCodeVersion
+   * @param diagnosisPrincipalCode the diagnosis principal code
+   * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
    * @param diagnosis1Code through diagnosis12Code
    * @param diagnosis1CodeVersion through diagnosis12CodeVersion
+   * @param diagnosis2Code the diagnosis 2 code
+   * @param diagnosis2CodeVersion the diagnosis 2 code version
+   * @param diagnosis3Code the diagnosis 3 code
+   * @param diagnosis3CodeVersion the diagnosis 3 code version
+   * @param diagnosis4Code the diagnosis 4 code
+   * @param diagnosis4CodeVersion the diagnosis 4 code version
+   * @param diagnosis5Code the diagnosis 5 code
+   * @param diagnosis5CodeVersion the diagnosis 5 code version
+   * @param diagnosis6Code the diagnosis 6 code
+   * @param diagnosis6CodeVersion the diagnosis 6 code version
+   * @param diagnosis7Code the diagnosis 7 code
+   * @param diagnosis7CodeVersion the diagnosis 7 code version
+   * @param diagnosis8Code the diagnosis 8 code
+   * @param diagnosis8CodeVersion the diagnosis 8 code version
+   * @param diagnosis9Code the diagnosis 9 code
+   * @param diagnosis9CodeVersion the diagnosis 9 code version
+   * @param diagnosis10Code the diagnosis 10 code
+   * @param diagnosis10CodeVersion the diagnosis 10 code version
+   * @param diagnosis11Code the diagnosis 11 code
+   * @param diagnosis11CodeVersion the diagnosis 11 code version
+   * @param diagnosis12Code the diagnosis 12 code
+   * @param diagnosis12CodeVersion the diagnosis 12 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractDiagnoses1Thru12(
@@ -2375,12 +2468,34 @@ public final class TransformerUtils {
   /**
    * Extract the Diagnosis values for codes 1-12
    *
-   * @param diagnosisAdmittingCode
-   * @param diagnosisAdmittingCodeVersion
-   * @param diagnosisPrincipalCode
-   * @param diagnosisPrincipalCodeVersion
+   * @param diagnosisAdmittingCode the diagnosis admitting code
+   * @param diagnosisAdmittingCodeVersion the diagnosis admitting code version
+   * @param diagnosisPrincipalCode the diagnosis principal code
+   * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
    * @param diagnosis1Code through diagnosis12Code
    * @param diagnosis1CodeVersion through diagnosis12CodeVersion
+   * @param diagnosis2Code the diagnosis 2 code
+   * @param diagnosis2CodeVersion the diagnosis 2 code version
+   * @param diagnosis3Code the diagnosis 3 code
+   * @param diagnosis3CodeVersion the diagnosis 3 code version
+   * @param diagnosis4Code the diagnosis 4 code
+   * @param diagnosis4CodeVersion the diagnosis 4 code version
+   * @param diagnosis5Code the diagnosis 5 code
+   * @param diagnosis5CodeVersion the diagnosis 5 code version
+   * @param diagnosis6Code the diagnosis 6 code
+   * @param diagnosis6CodeVersion the diagnosis 6 code version
+   * @param diagnosis7Code the diagnosis 7 code
+   * @param diagnosis7CodeVersion the diagnosis 7 code version
+   * @param diagnosis8Code the diagnosis 8 code
+   * @param diagnosis8CodeVersion the diagnosis 8 code version
+   * @param diagnosis9Code the diagnosis 9 code
+   * @param diagnosis9CodeVersion the diagnosis 9 code version
+   * @param diagnosis10Code the diagnosis 10 code
+   * @param diagnosis10CodeVersion the diagnosis 10 code version
+   * @param diagnosis11Code the diagnosis 11 code
+   * @param diagnosis11CodeVersion the diagnosis 11 code version
+   * @param diagnosis12Code the diagnosis 12 code
+   * @param diagnosis12CodeVersion the diagnosis 12 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractDiagnoses1Thru12(
@@ -2441,11 +2556,36 @@ public final class TransformerUtils {
 
     return diagnoses;
   }
+
   /**
    * Extract the Diagnosis values for codes 13-25
    *
    * @param diagnosis13Code through diagnosis25Code
    * @param diagnosis13CodeVersion through diagnosis25CodeVersion
+   * @param diagnosis14Code the diagnosis 14 code
+   * @param diagnosis14CodeVersion the diagnosis 14 code version
+   * @param diagnosis15Code the diagnosis 15 code
+   * @param diagnosis15CodeVersion the diagnosis 15 code version
+   * @param diagnosis16Code the diagnosis 16 code
+   * @param diagnosis16CodeVersion the diagnosis 16 code version
+   * @param diagnosis17Code the diagnosis 17 code
+   * @param diagnosis17CodeVersion the diagnosis 17 code version
+   * @param diagnosis18Code the diagnosis 18 code
+   * @param diagnosis18CodeVersion the diagnosis 18 code version
+   * @param diagnosis19Code the diagnosis 19 code
+   * @param diagnosis19CodeVersion the diagnosis 19 code version
+   * @param diagnosis20Code the diagnosis 20 code
+   * @param diagnosis20CodeVersion the diagnosis 20 code version
+   * @param diagnosis21Code the diagnosis 21 code
+   * @param diagnosis21CodeVersion the diagnosis 21 code version
+   * @param diagnosis22Code the diagnosis 22 code
+   * @param diagnosis22CodeVersion the diagnosis 22 code version
+   * @param diagnosis23Code the diagnosis 23 code
+   * @param diagnosis23CodeVersion the diagnosis 23 code version
+   * @param diagnosis24Code the diagnosis 24 code
+   * @param diagnosis24CodeVersion the diagnosis 24 code version
+   * @param diagnosis25Code the diagnosis 25 code
+   * @param diagnosis25CodeVersion the diagnosis 25 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractDiagnoses13Thru25(
@@ -2506,10 +2646,32 @@ public final class TransformerUtils {
   /**
    * Extract the External Diagnosis values for codes 1-12
    *
-   * @param diagnosisExternalFirstCode
-   * @param diagnosisExternalFirstCodeVersion
+   * @param diagnosisExternalFirstCode the diagnosis external first code
+   * @param diagnosisExternalFirstCodeVersion the diagnosis external first code version
    * @param diagnosisExternal1Code through diagnosisExternal12Code
    * @param diagnosisExternal1CodeVersion through diagnosisExternal12CodeVersion
+   * @param diagnosisExternal2Code the diagnosis external 2 code
+   * @param diagnosisExternal2CodeVersion the diagnosis external 2 code version
+   * @param diagnosisExternal3Code the diagnosis external 3 code
+   * @param diagnosisExternal3CodeVersion the diagnosis external 3 code version
+   * @param diagnosisExternal4Code the diagnosis external 4 code
+   * @param diagnosisExternal4CodeVersion the diagnosis external 4 code version
+   * @param diagnosisExternal5Code the diagnosis external 5 code
+   * @param diagnosisExternal5CodeVersion the diagnosis external 5 code version
+   * @param diagnosisExternal6Code the diagnosis external 6 code
+   * @param diagnosisExternal6CodeVersion the diagnosis external 6 code version
+   * @param diagnosisExternal7Code the diagnosis external 7 code
+   * @param diagnosisExternal7CodeVersion the diagnosis external 7 code version
+   * @param diagnosisExternal8Code the diagnosis external 8 code
+   * @param diagnosisExternal8CodeVersion the diagnosis external 8 code version
+   * @param diagnosisExternal9Code the diagnosis external 9 code
+   * @param diagnosisExternal9CodeVersion the diagnosis external 9 code version
+   * @param diagnosisExternal10Code the diagnosis external 10 code
+   * @param diagnosisExternal10CodeVersion the diagnosis external 10 code version
+   * @param diagnosisExternal11Code the diagnosis external 11 code
+   * @param diagnosisExternal11CodeVersion the diagnosis external 11 code version
+   * @param diagnosisExternal12Code the diagnosis external 12 code
+   * @param diagnosisExternal12CodeVersion the diagnosis external 12 code version
    * @return the {@link Diagnosis}es that can be extracted from the specified
    */
   public static List<Diagnosis> extractExternalDiagnoses1Thru12(
@@ -2601,6 +2763,78 @@ public final class TransformerUtils {
    * @param procedure1Code through procedure25Code,
    * @param procedure1CodeVersion through procedure25CodeVersion
    * @param procedure1Date through procedure25Date
+   * @param procedure2Code the procedure 2 code
+   * @param procedure2CodeVersion the procedure 2 code version
+   * @param procedure2Date the procedure 2 date
+   * @param procedure3Code the procedure 3 code
+   * @param procedure3CodeVersion the procedure 3 code version
+   * @param procedure3Date the procedure 3 date
+   * @param procedure4Code the procedure 4 code
+   * @param procedure4CodeVersion the procedure 4 code version
+   * @param procedure4Date the procedure 4 date
+   * @param procedure5Code the procedure 5 code
+   * @param procedure5CodeVersion the procedure 5 code version
+   * @param procedure5Date the procedure 5 date
+   * @param procedure6Code the procedure 6 code
+   * @param procedure6CodeVersion the procedure 6 code version
+   * @param procedure6Date the procedure 6 date
+   * @param procedure7Code the procedure 7 code
+   * @param procedure7CodeVersion the procedure 7 code version
+   * @param procedure7Date the procedure 7 date
+   * @param procedure8Code the procedure 8 code
+   * @param procedure8CodeVersion the procedure 8 code version
+   * @param procedure8Date the procedure 8 date
+   * @param procedure9Code the procedure 9 code
+   * @param procedure9CodeVersion the procedure 9 code version
+   * @param procedure9Date the procedure 9 date
+   * @param procedure10Code the procedure 10 code
+   * @param procedure10CodeVersion the procedure 10 code version
+   * @param procedure10Date the procedure 10 date
+   * @param procedure11Code the procedure 11 code
+   * @param procedure11CodeVersion the procedure 11 code version
+   * @param procedure11Date the procedure 11 date
+   * @param procedure12Code the procedure 12 code
+   * @param procedure12CodeVersion the procedure 12 code version
+   * @param procedure12Date the procedure 12 date
+   * @param procedure13Code the procedure 13 code
+   * @param procedure13CodeVersion the procedure 13 code version
+   * @param procedure13Date the procedure 13 date
+   * @param procedure14Code the procedure 14 code
+   * @param procedure14CodeVersion the procedure 14 code version
+   * @param procedure14Date the procedure 14 date
+   * @param procedure15Code the procedure 15 code
+   * @param procedure15CodeVersion the procedure 15 code version
+   * @param procedure15Date the procedure 15 date
+   * @param procedure16Code the procedure 16 code
+   * @param procedure16CodeVersion the procedure 16 code version
+   * @param procedure16Date the procedure 16 date
+   * @param procedure17Code the procedure 17 code
+   * @param procedure17CodeVersion the procedure 17 code version
+   * @param procedure17Date the procedure 17 date
+   * @param procedure18Code the procedure 18 code
+   * @param procedure18CodeVersion the procedure 18 code version
+   * @param procedure18Date the procedure 18 date
+   * @param procedure19Code the procedure 19 code
+   * @param procedure19CodeVersion the procedure 19 code version
+   * @param procedure19Date the procedure 19 date
+   * @param procedure20Code the procedure 20 code
+   * @param procedure20CodeVersion the procedure 20 code version
+   * @param procedure20Date the procedure 20 date
+   * @param procedure21Code the procedure 21 code
+   * @param procedure21CodeVersion the procedure 21 code version
+   * @param procedure21Date the procedure 21 date
+   * @param procedure22Code the procedure 22 code
+   * @param procedure22CodeVersion the procedure 22 code version
+   * @param procedure22Date the procedure 22 date
+   * @param procedure23Code the procedure 23 code
+   * @param procedure23CodeVersion the procedure 23 code version
+   * @param procedure23Date the procedure 23 date
+   * @param procedure24Code the procedure 24 code
+   * @param procedure24CodeVersion the procedure 24 code version
+   * @param procedure24Date the procedure 24 date
+   * @param procedure25Code the procedure 25 code
+   * @param procedure25CodeVersion the procedure 25 code version
+   * @param procedure25Date the procedure 25 date
    * @return the {@link CCWProcedure}es that can be extracted from the specified claim types
    */
   public static List<CCWProcedure> extractCCWProcedures(
@@ -2807,6 +3041,7 @@ public final class TransformerUtils {
    * Retrieves the Diagnosis display value from a Diagnosis code look up file
    *
    * @param icdCode - Diagnosis code
+   * @return the icd code display
    */
   public static String retrieveIcdCodeDisplay(String icdCode) {
 
@@ -2827,9 +3062,9 @@ public final class TransformerUtils {
       return icdCodeDisplay;
     }
 
-    // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeLookupMissingFailures.contains(icdCode)) {
-      drugCodeLookupMissingFailures.add(icdCode);
+    // log which ICD codes we couldn't find a match for in our downloaded ICD file
+    if (!icdCodeLookupMissingFailures.contains(icdCode)) {
+      icdCodeLookupMissingFailures.add(icdCode);
       LOGGER.info(
           "No ICD code display value match found for ICD code {} in resource {}.",
           icdCode,
@@ -2873,6 +3108,7 @@ public final class TransformerUtils {
    * Retrieves the NPI display value from an NPI code look up file
    *
    * @param npiCode - NPI code
+   * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
 
@@ -2896,13 +3132,53 @@ public final class TransformerUtils {
     // log which NPI codes we couldn't find a match for in our downloaded NPI file
     if (!npiCodeLookupMissingFailures.contains(npiCode)) {
       npiCodeLookupMissingFailures.add(npiCode);
-      LOGGER.info(
-          "No NPI code display value match found for NPI code {} in resource {}.",
-          npiCode,
-          "NPI_Coded_Display_Values_Tab.txt");
     }
 
     return null;
+  }
+
+  /**
+   * Gets the reference variable
+   *
+   * @param ccwCodebookVariable the {@ CcwCodebookVariable} to get the url
+   * @return url as a string
+   */
+  static String getReferenceUrl(CcwCodebookVariable ccwCodebookVariable) {
+    return CCWUtils.calculateVariableReferenceUrl(ccwCodebookVariable);
+  }
+
+  /**
+   * Checks to see if there is a extension that already exists in the careteamcomponent so a
+   * duplicate entry for extension is not added
+   *
+   * @param careTeamComponent - Careteam component
+   * @param referenceUrl the {@link String} is the reference url to compare
+   * @param codeValue - the {@link String} is the code value to compare
+   * @return {@link Boolean} whether it was found or not
+   */
+  public static boolean careTeamHasMatchingExtension(
+      CareTeamComponent careTeamComponent, String referenceUrl, String codeValue) {
+
+    if (!Strings.isNullOrEmpty(referenceUrl)
+        && !Strings.isNullOrEmpty(codeValue)
+        && careTeamComponent.getExtension().size() > 0) {
+
+      List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
+
+      for (Extension ext : extensions) {
+        Coding coding = null;
+
+        if (ext.getValue() instanceof Coding) {
+          coding = (Coding) ext.getValue();
+        }
+
+        if (coding != null && coding.getCode().equals(codeValue)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -2958,6 +3234,7 @@ public final class TransformerUtils {
    * Retrieves the Procedure code and display value from a Procedure code look up file
    *
    * @param procedureCode - Procedure code
+   * @return the procedure code display
    */
   public static String retrieveProcedureCodeDisplay(String procedureCode) {
 
@@ -3022,96 +3299,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Retrieves the PRODUCTNDC and SUBSTANCENAME from the FDA NDC Products file which was downloaded
-   * during the build process
-   *
-   * @param claimDrugCode - NDC value in claim records
-   */
-  public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
-
-    /*
-     * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
-     * characters
-     */
-    if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) return null;
-
-    /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire NDC file the first time and put in a Map
-    if (ndcProductMap == null) {
-      ndcProductMap = readFDADrugCodeFile();
-    }
-
-    String claimDrugCodeReformatted = null;
-
-    claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
-
-    if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
-      String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
-      return ndcSubstanceName;
-    }
-
-    // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
-      drugCodeLookupMissingFailures.add(claimDrugCode);
-      LOGGER.info(
-          "No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
-          claimDrugCode,
-          "fda_products_utf8.tsv");
-    }
-
-    return null;
-  }
-
-  /**
-   * Reads all the <code>PRODUCTNDC</code> and <code>SUBSTANCENAME</code> fields from the FDA NDC
-   * Products file which was downloaded during the build process.
-   *
-   * <p>See {@link FDADrugDataUtilityApp} for details.
-   */
-  public static Map<String, String> readFDADrugCodeFile() {
-    Map<String, String> ndcProductHashMap = new HashMap<String, String>();
-    try (final InputStream ndcProductStream =
-            Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
-        final BufferedReader ndcProductsIn =
-            new BufferedReader(new InputStreamReader(ndcProductStream))) {
-      /*
-       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
-       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
-       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
-       * SUBSTANCENAME
-       */
-      String line = "";
-      ndcProductsIn.readLine();
-      while ((line = ndcProductsIn.readLine()) != null) {
-        String ndcProductColumns[] = line.split("\t");
-        String nationalDrugCodeManufacturer =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-        String nationalDrugCodeIngredient =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(
-                    ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                4,
-                '0');
-        // ndcProductColumns[3] - Proprietary Name
-        // ndcProductColumns[13] - Substance Name
-        ndcProductHashMap.put(
-            String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-            ndcProductColumns[3] + " - " + ndcProductColumns[13]);
-      }
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NDC code data.", e);
-    }
-    return ndcProductHashMap;
-  }
-
-  /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
    *     includeTaxNumbers whether or not to include tax numbers in the result (see {@link
@@ -3120,10 +3307,19 @@ public final class TransformerUtils {
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      MetricRegistry metricRegistry, Object rifRecord, Optional<Boolean> includeTaxNumbers) {
+      MetricRegistry metricRegistry,
+      Object rifRecord,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
-        return claimType.getTransformer().transform(metricRegistry, rifRecord, includeTaxNumbers);
+        return claimType
+            .getTransformer()
+            .transform(
+                new TransformerContext(
+                    metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
+                rifRecord);
       }
     }
 
@@ -3142,7 +3338,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -3154,8 +3350,14 @@ public final class TransformerUtils {
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
+
+      // Add number of paginated resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(resources.size());
     }
 
     /*
@@ -3164,18 +3366,18 @@ public final class TransformerUtils {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Date maxBundleDate =
+    Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
-            .max(Date::compareTo)
+            .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
-                ? transactionTime
-                : maxBundleDate);
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -3191,7 +3393,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
+      List<IBaseResource> resources, LinkBuilder paging, Instant transactionTime) {
     Bundle bundle = new Bundle();
     TransformerUtils.addResourcesToBundle(bundle, resources);
     paging.addLinks(bundle);
@@ -3204,18 +3406,22 @@ public final class TransformerUtils {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Date maxBundleDate =
+    Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
-            .max(Date::compareTo)
+            .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
-                ? transactionTime
-                : maxBundleDate);
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
+
+    // Add number of resources to MDC logs
+    LoggingUtils.logResourceCountToMdc(bundle.getTotal());
+
     return bundle;
   }
 
@@ -3256,7 +3462,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Records the JPA query details in {@link MDC}.
+   * Records the JPA query details in {@link BfdMDC}.
    *
    * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
    * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
@@ -3264,14 +3470,14 @@ public final class TransformerUtils {
    */
   public static void recordQueryInMdc(
       String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query.%s", queryId);
-    MDC.put(
-        String.format("%s.duration_nanoseconds", keyPrefix),
+    String keyPrefix = String.format("jpa_query_%s", queryId);
+    BfdMDC.put(
+        String.format("%s_duration_nanoseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds));
-    MDC.put(
-        String.format("%s.duration_milliseconds", keyPrefix),
+    BfdMDC.put(
+        String.format("%s_duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
-    MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**
@@ -3280,10 +3486,10 @@ public final class TransformerUtils {
    * @param resource is the FHIR resource to set lastUpdate
    * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
    */
-  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+  public static void setLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     resource
         .getMeta()
-        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
+        .setLastUpdated(Date.from(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED)));
   }
 
   /**
@@ -3293,12 +3499,15 @@ public final class TransformerUtils {
    * @param resource is the FHIR resource to update
    * @param lastUpdated is the lastUpdated value from the entity
    */
-  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     lastUpdated.ifPresent(
         newDate -> {
-          Date currentDate = resource.getMeta().getLastUpdated();
-          if (currentDate != null && newDate.after(currentDate)) {
-            resource.getMeta().setLastUpdated(newDate);
+          Instant currentDate =
+              resource.getMeta().getLastUpdated() != null
+                  ? resource.getMeta().getLastUpdated().toInstant()
+                  : null;
+          if (currentDate != null && newDate.isAfter(currentDate)) {
+            resource.getMeta().setLastUpdated(Date.from(newDate));
           }
         });
   }
