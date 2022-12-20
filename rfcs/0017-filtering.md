@@ -19,6 +19,7 @@ This proposal strengthens the guarantee made by the use of the _elements paramet
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposal](#proposal)
