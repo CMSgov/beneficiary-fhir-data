@@ -3,22 +3,45 @@ package gov.cms.bfd.server.war.commons.carin;
 /**
  * CARIN ValueSet for Adjudications <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
- * Adjudication<a>
+ * Adjudication</a>.
  */
 public enum C4BBAdjudication {
+  /** The total submitted amount for the claim or group or line item. */
   SUBMITTED,
+  /**
+   * The portion of the cost of this service that was deemed not eligible by the insurer because the
+   * service or member was not covered by the subscriber contract.
+   */
   NONCOVERED,
+  /** Amount deducted from the eligible amount prior to adjudication. */
   DEDUCTIBLE,
+  /** The amount paid to the provider. */
   PAID_TO_PROVIDER,
+  /** The amount paid to patient. */
   PAID_TO_PATIENT,
+  /** The amount paid by the patient at the point of service. */
   PAID_BY_PATIENT,
+  /** The reduction in the payment amount to reflect the carrier as a secondary payer. */
   PRIOR_PAYER_PAID,
+  /** The coinsurance amount. */
   COINSURANCE,
+  /** The amount of the discount. */
   DISCOUNT,
+  /**
+   * Price paid for the drug excluding mfr or other discounts. It typically is the sum of the
+   * following components: ingredient cost, dispensing fee, sales tax, and vaccine administration.
+   */
   DRUG_COST,
+  /** The benefit amount. */
   BENEFIT,
+  /** Amount of the change which is considered for adjudication. */
   ELIGIBLE;
 
+  /**
+   * Gets the system uri.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
         // These are HL7
@@ -33,6 +56,11 @@ public enum C4BBAdjudication {
     }
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case SUBMITTED:
@@ -64,6 +92,11 @@ public enum C4BBAdjudication {
     }
   }
 
+  /**
+   * Gets the display string.
+   *
+   * @return the display string
+   */
   public String getDisplay() {
     switch (this) {
       case SUBMITTED:
@@ -95,6 +128,11 @@ public enum C4BBAdjudication {
     }
   }
 
+  /**
+   * Gets the definition.
+   *
+   * @return the definition
+   */
   public String getDefinition() {
     switch (this) {
       case SUBMITTED:

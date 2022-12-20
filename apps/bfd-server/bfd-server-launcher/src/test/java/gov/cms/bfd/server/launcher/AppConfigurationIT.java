@@ -1,5 +1,10 @@
 package gov.cms.bfd.server.launcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,8 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit(ish) tests for {@link AppConfiguration}.
@@ -29,7 +33,6 @@ public final class AppConfigurationIT {
    * @throws InterruptedException (indicates a test error)
    * @throws ClassNotFoundException (indicates a test error)
    * @throws URISyntaxException (indicates a test error)
-   * @throws DecoderException (indicates a test error)
    */
   @Test
   public void normalUsage()
@@ -67,27 +70,30 @@ public final class AppConfigurationIT {
      */
     String output = "";
     if (testAppExitCode != 0) output = collectOutput(testApp);
-    Assert.assertEquals(
-        String.format("Wrong exit code. Output[\n%s]\n", output), 0, testAppExitCode);
+    assertEquals(0, testAppExitCode, String.format("Wrong exit code. Output[\n%s]\n", output));
 
     ObjectInputStream testAppOutput = new ObjectInputStream(testApp.getErrorStream());
     AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
-    Assert.assertNotNull(testAppConfig);
-    Assert.assertEquals(
+    assertNotNull(testAppConfig);
+    assertEquals(
         Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_PORT)),
         testAppConfig.getPort());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEYSTORE),
         testAppConfig.getKeystore().toString());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUSTSTORE),
         testAppConfig.getTruststore().toString());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_WAR),
         testAppConfig.getWar().toString());
   }
 
-  /** @return the local {@link Path} to this project/module */
+  /**
+   * Gets the project directory.
+   *
+   * @return the local {@link Path} to this project/module
+   */
   static Path getProjectDirectory() {
     /*
      * The working directory for tests will either be the module directory or their parent
@@ -103,6 +109,8 @@ public final class AppConfigurationIT {
   }
 
   /**
+   * Resolves the real file name for a {@link Path}.
+   *
    * @param path the {@link Path} to resolve the real {@link Path#getFileName()} of
    * @return the real {@link Path#getFileName()} of the specified {@link Path}
    */
@@ -127,17 +135,19 @@ public final class AppConfigurationIT {
     ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
     Process testApp = testAppBuilder.start();
 
-    Assert.assertNotEquals(0, testApp.waitFor());
+    assertNotEquals(0, testApp.waitFor());
     String testAppError =
         new BufferedReader(new InputStreamReader(testApp.getErrorStream()))
             .lines()
             .collect(Collectors.joining("\n"));
-    Assert.assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
+    assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
   }
 
   /**
-   * @return a {@link ProcessBuilder} that will launch {@link #main(String[])} as a separate JVM
-   *     process
+   * Create a {@link ProcessBuilder} that will launch {@link #main(String[])} as a separate JVM
+   * process.
+   *
+   * @return a {@link ProcessBuilder} for the main app entry
    */
   private static ProcessBuilder createProcessBuilderForTestDriver() {
     Path java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
@@ -152,6 +162,8 @@ public final class AppConfigurationIT {
   }
 
   /**
+   * Collect output from the test app's stdout.
+   *
    * @param process the {@link Process} to collect the output of
    * @return the output of the specified {@link Process} in a format suitable for debugging
    */

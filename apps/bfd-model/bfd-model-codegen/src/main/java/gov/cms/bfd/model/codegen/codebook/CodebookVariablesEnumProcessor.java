@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,21 +59,28 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
    */
   private static final boolean DEBUG = true;
 
+  /** The list of log messages to write out. */
   private final List<String> logMessages = new LinkedList<>();
 
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes() */
+  /**
+   * {@inheritDoc} @see javax.annotation.processing.AbstractProcessor#getSupportedAnnotationTypes()
+   */
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return ImmutableSet.of(CodebookVariableEnumGeneration.class.getName());
   }
 
-  /** @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion() */
+  /**
+   * {@inheritDoc} @see javax.annotation.processing.AbstractProcessor#getSupportedSourceVersion()
+   */
   @Override
   public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latestSupported();
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see javax.annotation.processing.AbstractProcessor#process(java.util.Set,
    *     javax.annotation.processing.RoundEnvironment)
    */
@@ -82,6 +90,10 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
       logNote(
           "Processing triggered for '%s' on root elements '%s'.",
           annotations, roundEnv.getRootElements());
+      logNote("Processor sysprop java.class.path: " + System.getProperty("java.class.path"));
+      logNote(
+          "Processor classloader URLs: "
+              + Arrays.toString(((URLClassLoader) getClass().getClassLoader()).getURLs()));
 
       Set<? extends Element> annotatedElements =
           roundEnv.getElementsAnnotatedWith(CodebookVariableEnumGeneration.class);
@@ -111,6 +123,8 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
   }
 
   /**
+   * Generates source files from the specified annotated package.
+   *
    * @param annotatedPackage the {@link PackageElement} to process that has been annotated with
    *     {@link CodebookVariableEnumGeneration}
    * @throws IOException An {@link IOException} may be thrown if errors are encountered trying to
@@ -267,8 +281,6 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
   /**
    * Reports the specified log message.
    *
-   * @param associatedElement the Java AST {@link Element} that the log entry should be associated
-   *     with, or <code>null</code>
    * @param messageFormat the log message format {@link String}
    * @param messageArguments the log message format arguments
    */

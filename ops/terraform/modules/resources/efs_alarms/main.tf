@@ -1,11 +1,8 @@
 ##
-#
-# NOTE: This module is for defining EFS CloudWatch alarms
-#
-##
+# EFS CloudWatch alarms
 
 resource "aws_cloudwatch_metric_alarm" "burst_credit_balance_too_low" {
-  alarm_name          = "${var.app}-${var.env}-efs_check_burst_credit_balance_too_low"
+  alarm_name          = "${var.app}-${var.env}-efs-check-burst-credit-balance-too-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "BurstCreditBalance"
@@ -28,7 +25,7 @@ resource "aws_cloudwatch_metric_alarm" "burst_credit_balance_too_low" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "percent_io_limit_too_high" {
-  alarm_name          = "${var.app}-${var.env}-efs-io_limit_too_high"
+  alarm_name          = "${var.app}-${var.env}-efs-io-limit-too-high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "3"
   metric_name         = "PercentIOLimit"
@@ -37,7 +34,7 @@ resource "aws_cloudwatch_metric_alarm" "percent_io_limit_too_high" {
   statistic           = "Maximum"
 
   dimensions = {
-    FileSystemId = var.efs_name
+    FileSystemId = var.filesystem_id
   }
 
   alarm_description = "I/O limit has been reached, consider using Max I/O performance mode in: ${var.app}-${var.env}"
@@ -51,7 +48,7 @@ resource "aws_cloudwatch_metric_alarm" "percent_io_limit_too_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "client_connections" {
-  alarm_name          = "${var.app}-${var.env}-efs_client_connections_too_high"
+  alarm_name          = "${var.app}-${var.env}-efs-client-connections-too-high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "3"
   metric_name         = "ClientConnections"
@@ -72,4 +69,3 @@ resource "aws_cloudwatch_metric_alarm" "client_connections" {
   alarm_actions = [var.cloudwatch_notification_arn]
   ok_actions    = [var.cloudwatch_notification_arn]
 }
-

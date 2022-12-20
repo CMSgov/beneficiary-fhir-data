@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,25 +26,22 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
  */
 final class InpatientClaimTransformer {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link InpatientClaim} to transform
-   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(InpatientClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof InpatientClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -54,7 +52,8 @@ final class InpatientClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      InpatientClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -63,7 +62,7 @@ final class InpatientClaimTransformer {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimType.INPATIENT,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -195,6 +194,7 @@ final class InpatientClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -298,7 +298,7 @@ final class InpatientClaimTransformer {
 
     for (InpatientClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
-      item.setSequence(claimLine.getLineNumber().intValue());
+      item.setSequence(claimLine.getLineNumber());
 
       TransformerUtils.mapHcpcs(
           eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());

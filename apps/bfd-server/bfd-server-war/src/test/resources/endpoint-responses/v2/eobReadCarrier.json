@@ -227,9 +227,9 @@
             "display" : "National Provider Identifier"
           } ]
         },
-        "value" : "1497758544"
+        "value" : "0000000000"
       },
-      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+      "display" : "Fake ORG Name"
     },
     "role" : {
       "coding" : [ {
@@ -274,8 +274,13 @@
     "sequence" : 1,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H5555"
+        "code" : "A02",
+        "display" : "OTHER SALMONELLA INFECTIONS"
       } ]
     },
     "type" : [ {
@@ -289,8 +294,13 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A06",
+        "display" : "AMEBIASIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H8888"
+        "code" : "A06",
+        "display" : "AMEBIASIS"
       } ]
     },
     "type" : [ {
@@ -304,8 +314,13 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B04",
+        "display" : "MONKEYPOX"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H66666"
+        "code" : "B04",
+        "display" : "MONKEYPOX"
       } ]
     },
     "type" : [ {
@@ -319,8 +334,13 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B05",
+        "display" : "MEASLES"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H77777"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     },
     "type" : [ {
@@ -334,8 +354,13 @@
     "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H12345"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {
@@ -347,6 +372,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-b-567834"
     }
@@ -362,6 +388,13 @@
       "valueCoding" : {
         "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
         "code" : "3"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display" : "Services"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/betos_cd",
@@ -408,7 +441,8 @@
         "url" : "http://hl7.org/fhir/sid/ndc",
         "valueCoding" : {
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "49035044700"
+          "code" : "000000000",
+          "display" : "Fake Diluent - WATER"
         }
       } ],
       "coding" : [ {
@@ -461,7 +495,7 @@
       } ]
     },
     "quantity" : {
-      "value" : 1
+      "value" : 1.0
     },
     "adjudication" : [ {
       "category" : {
@@ -611,7 +645,7 @@
         } ]
       },
       "amount" : {
-        "value" : 75.0,
+        "value" : 47.84,
         "currency" : "USD"
       }
     } ]

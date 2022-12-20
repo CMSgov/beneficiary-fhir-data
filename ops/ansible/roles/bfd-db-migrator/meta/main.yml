@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  author: Karl M. Davis
+  description: This Ansible role can be used to install and configure the bfd-db-migrator application on a system.
+  company: Centers for Medicare and Medicaid Services
+  license: 'Public Domain / CC0'
+  min_ansible_version: 2.2
+  platforms:
+  - name: EL
+    versions:
+      - 7
+  galaxy_tags: []
+dependencies: []

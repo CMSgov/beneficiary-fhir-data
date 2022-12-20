@@ -27,9 +27,10 @@
         } ]
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "1811111111"
+      "value" : "0000000000"
     } ],
-    "active" : true
+    "active" : true,
+    "name" : "Fake ORG Name"
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -38,6 +39,15 @@
       "code" : "W",
       "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "08683096577486"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2015-10-30"
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
@@ -50,6 +60,12 @@
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "2"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "15999"
     }
   } ],
   "identifier" : [ {
@@ -201,7 +217,8 @@
     "code" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-        "code" : "1"
+        "code" : "30",
+        "display" : "Still patient."
       } ]
     }
   }, {
@@ -318,7 +335,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "H5555"
+        "code" : "53081",
+        "display" : "ESOPHAGEAL REFLUX"
       } ]
     },
     "type" : [ {
@@ -332,8 +350,13 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "H8888"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     },
     "type" : [ {
@@ -347,8 +370,13 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B05",
+        "display" : "MEASLES"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "B05",
+        "display" : "MEASLES"
       } ]
     },
     "type" : [ {
@@ -362,8 +390,13 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       } ]
     },
     "type" : [ {
@@ -375,14 +408,29 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-b-567834"
     }
   } ],
   "item" : [ {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+      "valueQuantity" : {
+        "value" : 1
+      }
+    } ],
     "sequence" : 1,
     "careTeamSequence" : [ 2 ],
     "revenue" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+          "code" : "A",
+          "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+        }
+      } ],
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
         "code" : "0023",

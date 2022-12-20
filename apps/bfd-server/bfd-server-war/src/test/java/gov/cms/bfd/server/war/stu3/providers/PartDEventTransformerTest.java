@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -9,6 +13,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.sql.Date;
@@ -19,8 +24,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer}. */
 public final class PartDEventTransformerTest {
@@ -32,43 +36,49 @@ public final class PartDEventTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        PartDEventTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
     assertMatches(claim, eob);
   }
 
   @Test
-  public void transformSampleARecordWithNPI() throws FHIRException {
+  public void transformSampleARecordWithNPI() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "01";
     String serviceProviderCode = IdentifierType.NPI.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithUPIN() throws FHIRException {
+  public void transformSampleARecordWithUPIN() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "06";
     String serviceProviderCode = IdentifierType.UPIN.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithNCPDP() throws FHIRException {
+  public void transformSampleARecordWithNCPDP() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "07";
     String serviceProviderCode = IdentifierType.NCPDP.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
+  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "08";
     String serviceProviderCode = IdentifierType.SL.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
-  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
+  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "11";
     String serviceProviderCode = IdentifierType.TAX.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
@@ -80,12 +90,18 @@ public final class PartDEventTransformerTest {
    * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
    * and {@link String serviceProviderCode}.
    */
-  private void checkOrgAndFacility(
-      String serviceProviderIdQualiferCode, String serviceProviderCode) {
+  private void checkOrgAndFacility(String serviceProviderIdQualiferCode, String serviceProviderCode)
+      throws IOException {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
+        PartDEventTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -120,10 +136,10 @@ public final class PartDEventTransformerTest {
         claim.getEventId(),
         claim.getBeneficiaryId(),
         ClaimType.PDE,
-        claim.getClaimGroupId().toPlainString(),
+        String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_D,
-        Optional.empty(),
-        Optional.empty(),
+        Optional.of(claim.getPrescriptionFillDate()),
+        Optional.of(claim.getPrescriptionFillDate()),
         Optional.empty(),
         claim.getFinalAction());
 
@@ -136,15 +152,17 @@ public final class PartDEventTransformerTest {
         claim.getPlanBenefitPackageId(),
         eob.getInsurance().getCoverage());
 
-    Assert.assertEquals("01", claim.getServiceProviderIdQualiferCode());
-    Assert.assertEquals("01", claim.getPrescriberIdQualifierCode());
+    assertEquals("01", claim.getServiceProviderIdQualiferCode());
+    assertEquals("01", claim.getPrescriberIdQualifierCode());
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        TransformerUtils.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()),
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 
@@ -153,7 +171,7 @@ public final class PartDEventTransformerTest {
         V3ActCode.RXDINV.toCode(),
         rxItem.getDetail().get(0).getType().getCoding());
 
-    Assert.assertEquals(
+    assertEquals(
         Date.valueOf(claim.getPrescriptionFillDate()), rxItem.getServicedDateType().getValue());
 
     TransformerTestUtils.assertReferenceEquals(
@@ -285,7 +303,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN");
+          claim.getNationalDrugCode(), FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

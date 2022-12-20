@@ -17,12 +17,18 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 /** Models the RIF field layout data. */
 public final class RifLayout {
+  /**
+   * The name of this {@link RifLayout} (i.e. the name of the sheet in the {@link Workbook} that
+   * defines it).
+   */
   private final String name;
+  /** The ordered {@link List} of {@link RifField}s that comprise this {@link RifLayout}. */
   private final List<RifField> rifFields;
 
   /**
    * Constructs a new {@link RifLayout} instance.
    *
+   * @param name the name of this {@link RifLayout}
    * @param rifFields the value to use for {@link #getRifFields()}
    */
   public RifLayout(String name, List<RifField> rifFields) {
@@ -31,14 +37,19 @@ public final class RifLayout {
   }
 
   /**
-   * @return the name of this {@link RifLayout} (i.e. the name of the sheet in the {@link Workbook}
-   *     that defines it)
+   * Gets the {@link #name}.
+   *
+   * @return the name of this {@link RifLayout}
    */
   public String getName() {
     return name;
   }
 
-  /** @return the ordered {@link List} of {@link RifField}s that comprise this {@link RifLayout} */
+  /**
+   * Gets the {@link #rifFields}.
+   *
+   * @return the ordered {@link List} of {@link RifField}s that comprise this {@link RifLayout}
+   */
   public List<RifField> getRifFields() {
     return rifFields;
   }
@@ -89,12 +100,12 @@ public final class RifLayout {
       RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
       @SuppressWarnings("deprecation")
       Optional<Integer> rifColumnLength =
-          row.getCell(2).getCellTypeEnum() == CellType.NUMERIC
+          row.getCell(2).getCellType() == CellType.NUMERIC
               ? Optional.of((int) row.getCell(2).getNumericCellValue())
               : Optional.empty();
       @SuppressWarnings("deprecation")
       Optional<Integer> rifColumnScale =
-          row.getCell(3).getCellTypeEnum() == CellType.NUMERIC
+          row.getCell(3).getCellType() == CellType.NUMERIC
               ? Optional.of((int) row.getCell(3).getNumericCellValue())
               : Optional.empty();
 
@@ -133,12 +144,14 @@ public final class RifLayout {
   }
 
   /**
+   * Parses a boolean value from the specified {@link Cell}.
+   *
    * @param cell the {@link Cell} to try and extract a <code>boolean</code> from
    * @return the <code>boolean</code> value that was in the specified {@link Cell}
    */
   @SuppressWarnings("deprecation")
   private static boolean parseBoolean(Cell cell) {
-    if (cell.getCellTypeEnum() == CellType.BOOLEAN) return cell.getBooleanCellValue();
+    if (cell.getCellType() == CellType.BOOLEAN) return cell.getBooleanCellValue();
     else
       /*
        * I had some trouble with actual Boolean values stored in the
@@ -149,6 +162,8 @@ public final class RifLayout {
   }
 
   /**
+   * Parses a {@link URL} from the specified {@link Cell}.
+   *
    * @param cell the {@link Cell} to try and extract a {@link URL} from
    * @return the hyperlinked {@link URL} that was in the specified {@link Cell}, or <code>null
    *     </code>
@@ -166,13 +181,26 @@ public final class RifLayout {
 
   /** Models a specific field in a RIF layout. */
   public static final class RifField {
+    /** The name of the RIF column in RIF export data files. */
     private final String rifColumnName;
+    /** The type of the RIF column, as specified in the data dictionary. */
     private final RifColumnType rifColumnType;
+    /**
+     * The length (or, for <code>NUM</code> columns, the precision) of the RIF column, as specified
+     * in the data dictionary.
+     */
     private final Integer rifColumnLength;
+    /** The scale of the RIF column, as specified in the data dictionary. */
     private final Integer rifColumnScale;
+    /** If the rif column must be populated or not. */
     private final boolean rifColumnOptional;
+    /** The field's data dictionary entry; may be empty if no entry exists. */
     private final URL dataDictionaryEntry;
+    /**
+     * A brief label/description of the RIF column, which may be empty for some {@link RifField}s.
+     */
     private final String rifColumnLabel;
+    /** The java entity property name associated with the JPA <code>Entity</code>. */
     private final String javaFieldName;
 
     /**
@@ -196,17 +224,26 @@ public final class RifLayout {
         URL dataDictionaryEntry,
         String rifColumnLabel,
         String javaFieldName) {
-      if (Strings.isNullOrEmpty(rifColumnName))
-        throw new IllegalArgumentException("Missing 'Column Name'.");
-      if (rifColumnType == null) throw new IllegalArgumentException("Missing 'Type'.");
-      if (rifColumnLength.isPresent() && rifColumnLength.get() < 0)
-        throw new IllegalArgumentException("Invalid 'Length'.");
-      if (rifColumnScale.isPresent() && rifColumnScale.get() < 0)
-        throw new IllegalArgumentException("Invalid 'Scale'.");
-      if (Objects.isNull(javaFieldName))
-        throw new IllegalArgumentException("Missing 'Column Label/Value'.");
-      if (Strings.isNullOrEmpty(javaFieldName))
-        throw new IllegalArgumentException("Missing 'Java Field Name'.");
+      if (Strings.isNullOrEmpty(rifColumnName)) {
+        throw new IllegalArgumentException("Missing 'Column Name'");
+      }
+      if (rifColumnType == null) {
+        throw new IllegalArgumentException("Missing 'Type' for column name: " + rifColumnName);
+      }
+      if (rifColumnLength.isPresent() && rifColumnLength.get() < 0) {
+        throw new IllegalArgumentException("Invalid 'Length' for column name: " + rifColumnName);
+      }
+      if (rifColumnScale.isPresent() && rifColumnScale.get() < 0) {
+        throw new IllegalArgumentException("Invalid 'Scale' for column name: " + rifColumnName);
+      }
+      if (Objects.isNull(javaFieldName)) {
+        throw new IllegalArgumentException(
+            "Missing 'Column Label/Value' for column name: " + rifColumnName);
+      }
+      if (Strings.isNullOrEmpty(javaFieldName)) {
+        throw new IllegalArgumentException(
+            "Missing 'Java Field Name' for column name: " + rifColumnName);
+      }
 
       this.rifColumnName = rifColumnName;
       this.rifColumnType = rifColumnType;
@@ -218,17 +255,27 @@ public final class RifLayout {
       this.javaFieldName = javaFieldName;
     }
 
-    /** @return the name of the RIF column in RIF export data files */
+    /**
+     * Gets the {@link #rifColumnName}.
+     *
+     * @return the name of the RIF column in RIF export data files
+     */
     public String getRifColumnName() {
       return rifColumnName;
     }
 
-    /** @return the type of the RIF column, as specified in the data dictionary */
+    /**
+     * Gets the {@link #rifColumnType}.
+     *
+     * @return the type of the RIF column, as specified in the data dictionary
+     */
     public RifColumnType getRifColumnType() {
       return rifColumnType;
     }
 
     /**
+     * Gets the {@link #rifColumnLength}.
+     *
      * @return the length (or, for <code>NUM</code> columns, the precision) of the RIF column, as
      *     specified in the data dictionary, or {@link Optional#empty()} if none is defined
      */
@@ -237,6 +284,8 @@ public final class RifLayout {
     }
 
     /**
+     * Gets the {@link #rifColumnScale}.
+     *
      * @return the scale of the RIF column, as specified in the data dictionary, or {@link
      *     Optional#empty()} if none is defined
      */
@@ -245,19 +294,27 @@ public final class RifLayout {
     }
 
     /**
-     * @return <code>true</code> if the specified RIF column's value is sometimes blank, <code>false
-     *     </code> if it is always populated
+     * Returns if {@link #rifColumnOptional}.
+     *
+     * @return <code>true</code> if the specified RIF column's value is sometimes blank, <code>
+     *     false     </code> if it is always populated
      */
     public boolean isRifColumnOptional() {
       return rifColumnOptional;
     }
 
-    /** @return the field's data dictionary entry, if any */
+    /**
+     * Gets the {@link #dataDictionaryEntry}.
+     *
+     * @return the field's data dictionary entry, if any
+     */
     public Optional<URL> getDataDictionaryEntry() {
       return Optional.ofNullable(dataDictionaryEntry);
     }
 
     /**
+     * Gets the {@link #rifColumnLabel}.
+     *
      * @return a brief label/description of the RIF column, which may be empty for some {@link
      *     RifField}s
      */
@@ -265,20 +322,47 @@ public final class RifLayout {
       return rifColumnLabel;
     }
 
-    /** @return the name of the JPA <code>Entity</code> field to store this RIF column's data in */
+    /**
+     * Gets the {@link #javaFieldName}.
+     *
+     * @return the java entity property name associated with the JPA <code>Entity</code>
+     */
     public String getJavaFieldName() {
       return javaFieldName;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("RifField: { ");
+      sb.append("columnName=")
+          .append(rifColumnName)
+          .append(", ")
+          .append("columnType=")
+          .append(rifColumnType != null ? rifColumnType.toString() : "N/A")
+          .append(", ")
+          .append("javaName=")
+          .append(javaFieldName != null ? javaFieldName : "N/A")
+          .append(" }");
+      return sb.toString();
     }
   }
 
   /** Enumerates the various RIF column types. */
   public static enum RifColumnType {
+    /** Represents a character column. */
     CHAR,
-
+    /** Represents a date column. */
     DATE,
-
+    /** Represents a numeric column. */
     NUM,
-
-    TIMESTAMP;
+    /** Represents a timestamp column. */
+    TIMESTAMP,
+    /** Represents a big integer column. */
+    BIGINT,
+    /** Represents a small integer column. */
+    SMALLINT,
+    /** Represents an integer column. */
+    INTEGER;
   }
 }

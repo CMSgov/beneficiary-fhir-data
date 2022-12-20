@@ -37,17 +37,22 @@
 properties([
 	parameters([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
-		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
-		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
+		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
+		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
+		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
+		booleanParam(name: 'skip_migrator_deployment', description: 'When true, blow past the migrator deployment in test. Non-trunk/non-master only.', defaultValue: false),
+		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def deployEnvironment
+def awsCredentials
 def scriptForApps
 def scriptForDeploys
+def migratorScripts
+def serverScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -55,6 +60,9 @@ def amiIds
 def currentStage
 def gitCommitId
 def gitRepoUrl
+def awsRegion = 'us-east-1'
+def verboseMaven = params.verbose_mvn_logging
+def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
@@ -124,161 +132,446 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 
 // begin pipeline
 try {
-	stage('Prepare') {
-		currentStage = "${env.STAGE_NAME}"
-		node {
-			// Grab the commit that triggered the build.
-			checkout scm
+	// See ops/jenkins/cbc-build-push.sh for this image's definition.
+	podTemplate(
+		containers: [
+			containerTemplate(
+				name: 'bfd-cbc-build',
+				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6', // TODO: consider a smarter solution for resolving this image
+				command: 'cat',
+				ttyEnabled: true,
+				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
+				resourceRequestCpu: '8000m',
+				resourceLimitCpu: '8000m',
+				resourceLimitMemory: '16384Mi',
+				resourceRequestMemory: '16384Mi'
+			)], serviceAccount: 'bfd') {
+		node(POD_LABEL) {
+			stage('Prepare') {
+				currentStage = env.STAGE_NAME
+				container('bfd-cbc-build') {
+					// Grab the commit that triggered the build.
+					checkout scm
 
-			// Load the child Jenkinsfiles.
-			scriptForApps = load('apps/build.groovy')
-			scriptForDeploys = load('ops/deploy-ccs.groovy')
+					// Load the child Jenkinsfiles.
+					scriptForApps = load('apps/build.groovy')
+					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
-			// Find the most current AMI IDs (if any).
-			amiIds = null
-			amiIds = scriptForDeploys.findAmis()
+					// terraservice deployments...
+					migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
+					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
-			// These variables track our decision on whether or not to deploy to prod-like envs.
-			canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-			willDeployToProdEnvs = false
+					awsAuth.assumeRole()
 
-			// Get the current commit id 
-			gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+					// Find the most current AMI IDs (if any).
+					amiIds = null
+					amiIds = scriptForDeploys.findAmis()
 
-			// Get the remote repo url. This assumes we are using git+https not git+ssh.
-			gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
-
-			// Send notifications that the build has started
-			sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
-		}
-	}
-
-	/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
-	value if the build is a PR as the BRANCH_NAME var is populated with the build 
-	name during PR builds. 
-	*/
-	stage('Set Branch Name') {
-		currentStage = "${env.STAGE_NAME}"
-		script {
-			if (env.BRANCH_NAME.startsWith('PR')) {
-				gitBranchName = env.CHANGE_BRANCH
-			} else {
-				gitBranchName = env.BRANCH_NAME
-			}
-		}
-	}
-
-	stage('Build Platinum AMI') {
-		currentStage = "${env.STAGE_NAME}"
-		if (params.build_platinum || amiIds.platinumAmiId == null) {
-			milestone(label: 'stage_build_platinum_ami_start')
-			node {
-				amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
-			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
-		}
-	}
-
-	stage('Deploy mgmt') {
-		currentStage = "${env.STAGE_NAME}"
-		if (canDeployToProdEnvs && params.deploy_management) {
-			lock(resource: 'env_management', inversePrecendence: true) {
-				milestone(label: 'stage_management_jenkins_start')
-
-				node {
-					scriptForDeploy.deployManagement(amiIds)
-				}
-			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
-		}
-	}
-
-	stage('Build Apps') {
-		currentStage = "${env.STAGE_NAME}"
-		milestone(label: 'stage_build_apps_start')
-
-		node {
-			build_env = deployEnvironment
-			appBuildResults = scriptForApps.build(build_env)
-		}
-	}
-
-
-	stage('Build App AMIs') {
-		currentStage = "${env.STAGE_NAME}"
-		milestone(label: 'stage_build_app_amis_test_start')
-
-		node {
-			amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
-		}
-	}
-
-	stage('Deploy to TEST') {
-		currentStage = "${env.STAGE_NAME}"
-		lock(resource: 'env_test', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_test_start')
-
-			node {
-				scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			}
-		}
-	}
-
-	stage('Manual Approval') {
-		currentStage = "${env.STAGE_NAME}"
-		if (canDeployToProdEnvs) {
-			/*
-			* Unless it was explicitly requested at the start of the build, prompt for confirmation before
-			* deploying to production environments.
-			*/
-			if (!params.deploy_prod_skip_confirm) {
-				/*
-				* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-				* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-				* an exception will be thrown.
-				*/
-				try {
-					input 'Deploy to production environments (prod-sbx, prod)?'
-					willDeployToProdEnvs = true
-				} catch(err) {
+					// These variables track our decision on whether or not to deploy to prod-like envs.
+					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
 					willDeployToProdEnvs = false
-					echo 'User opted not to deploy to prod-like envs.'
+
+					// Get the current commit id
+					gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+					// Get the remote repo url. This assumes we are using git+https not git+ssh.
+					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+
+					// Send notifications that the build has started
+					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
-		}
-	}
 
-	stage('Deploy to PROD-SBX') {
-		currentStage = "${env.STAGE_NAME}"
-		if (willDeployToProdEnvs) {
-			lock(resource: 'env_prod_sbx', inversePrecendence: true) {
-				milestone(label: 'stage_deploy_prod_sbx_start')
-
-				node {
-					scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
+			value if the build is a PR as the BRANCH_NAME var is populated with the build
+			name during PR builds.
+			*/
+			stage('Set Branch Name') {
+				currentStage = env.STAGE_NAME
+				script {
+					if (env.BRANCH_NAME.startsWith('PR')) {
+						gitBranchName = env.CHANGE_BRANCH
+					} else {
+						gitBranchName = env.BRANCH_NAME
+					}
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
-		}
-	}
 
-	stage('Deploy to PROD') {
-		currentStage = "${env.STAGE_NAME}"
-		if (willDeployToProdEnvs) {
-			lock(resource: 'env_prod', inversePrecendence: true) {
-				milestone(label: 'stage_deploy_prod_start')
+			stage('Build Platinum AMI') {
+				currentStage = env.STAGE_NAME
+				if (params.build_platinum || amiIds.platinumAmiId == null) {
+					milestone(label: 'stage_build_platinum_ami_start')
 
-				node {
-					scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+					container('bfd-cbc-build') {
+						amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+
+			stage('Build Apps') {
+				if (!params.use_latest_images) {
+					currentStage = env.STAGE_NAME
+					milestone(label: 'stage_build_apps_start')
+
+					container('bfd-cbc-build') {
+						appBuildResults = scriptForApps.build(verboseMaven)
+					}
+				}
+			}
+
+			stage('Build App AMIs') {
+				if (!params.use_latest_images) {
+					currentStage = env.STAGE_NAME
+					milestone(label: 'stage_build_app_amis_test_start')
+
+					container('bfd-cbc-build') {
+						amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+					}
+				}
+			}
+
+			bfdEnv = 'test'
+			stage('Deploy Base to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_base_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/base"
+						)
+					}
+				}
+			}
+
+			stage('Deploy Migrator to TEST') {
+				currentStage = env.STAGE_NAME
+				if (!params.skip_migrator_deployment || env.BRANCH == "master" ) {
+					lock(resource: 'env_test') {
+						milestone(label: 'stage_deploy_test_migration_start')
+						container('bfd-cbc-build') {
+
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion
+							)
+
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
+							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
+								error('Migrator deployment failed')
+							}
+						}
+					}
+				}
+			}
+
+			stage('Deploy Pipeline to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_pipeline_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/pipeline",
+							tfVars: [
+								ami_id_override: amiIds.bfdPipelineAmiId
+							]
+						)
+					}
+				}
+			}
+
+			stage('Deploy Server to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_start')
+
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
+
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server/server-regression",
+							tfVars: [
+								docker_image_tag_override: params.server_regression_image_override
+							]
+						)
+
+						awsAuth.assumeRole()
+						hasRegressionRunSucceeded = serverScripts.runServerRegression(
+							bfdEnv: bfdEnv,
+							gitBranchName: gitBranchName
+						)
+
+						if (hasRegressionRunSucceeded) {
+							println 'Regression suite passed, proceeding to next stage...'
+						} else {
+							try {
+								input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+								echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+							} catch(err) {
+								error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+							}
+						}
+					}
+				}
+			}
+
+			stage('Manual Approval') {
+				currentStage = env.STAGE_NAME
+				if (canDeployToProdEnvs) {
+					/*
+					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
+					* deploying to production environments.
+					*/
+					if (!params.deploy_prod_skip_confirm) {
+						/*
+						* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+						* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+						* an exception will be thrown.
+						*/
+						try {
+							input 'Deploy to production environments (prod-sbx, prod)?'
+							willDeployToProdEnvs = true
+						} catch(err) {
+							willDeployToProdEnvs = false
+							echo 'User opted not to deploy to prod-like envs.'
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
+				}
+			}
+
+			bfdEnv = 'prod-sbx'
+			stage('Deploy Base to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_base_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
+			stage('Deploy Migrator to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_migration_start')
+						container('bfd-cbc-build') {
+
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion
+							)
+
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
+							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
+								error('Migrator deployment failed')
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
+			stage('Deploy Pipeline to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_pipeline_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+									ami_id_override: amiIds.bfdPipelineAmiId
+								]
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
+			stage('Deploy Server to PROD-SBX') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_prod_sbx_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
+
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+									docker_image_tag_override: params.server_regression_image_override
+								]
+							)
+
+							awsAuth.assumeRole()
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
+							)
+
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
+
+
+			bfdEnv = 'prod'
+			stage('Deploy Base to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_base_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
+			stage('Deploy Migrator to PROD') {
+				currentStage = env.STAGE_NAME
+
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_migration_start')
+						container('bfd-cbc-build') {
+
+							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion
+							)
+
+							if (migratorDeploymentSuccessful) {
+								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
+							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
+								error('Migrator deployment failed')
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
+			stage('Deploy Pipeline to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_pipeline_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+									ami_id_override: amiIds.bfdPipelineAmiId
+								]
+							)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
+
+			stage('Deploy Server to PROD') {
+				currentStage = env.STAGE_NAME
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_start')
+
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
+
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+									docker_image_tag_override: params.server_regression_image_override
+								]
+							)
+
+							awsAuth.assumeRole()
+							hasRegressionRunSucceeded = serverScripts.runServerRegression(
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
+							)
+
+							if (hasRegressionRunSucceeded) {
+								println 'Regression suite passed, proceeding to next stage...'
+							} else {
+								try {
+									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								} catch(err) {
+									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
+								}
+							}
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
 		}
 	}
 } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){

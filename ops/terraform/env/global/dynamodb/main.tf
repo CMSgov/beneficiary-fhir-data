@@ -1,5 +1,6 @@
 provider "aws" {
-  region = "us-east-1"
+  version = "~> 3.44.0"
+  region  = "us-east-1"
 }
 
 resource "aws_dynamodb_table" "state_table" {

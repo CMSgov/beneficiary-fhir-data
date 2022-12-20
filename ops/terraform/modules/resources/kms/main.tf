@@ -33,10 +33,10 @@ resource "aws_kms_alias" "app-config-key-alias" {
 
 # kms key admin policy
 resource "aws_iam_policy" "kms-key-admin" {
-    name        = "kms-key-admin"
-    path        = "/"
-    description = "KMS Key admin policy"
-    policy      = <<POLICY
+  name        = "kms-key-admin"
+  path        = "/"
+  description = "KMS Key admin policy"
+  policy      = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -71,13 +71,13 @@ POLICY
 
 # key admins group
 resource "aws_iam_group" "kms-key-admins" {
-    name = "kms-key-admins"
-    path = "/"
+  name = "kms-key-admins"
+  path = "/"
 }
 
 # attach key admin policy to the kms-key-admins group
 resource "aws_iam_policy_attachment" "kms-key-admin-policy-attachment" {
-    name       = "kms-key-admin-policy-attachment"
-    policy_arn = aws_iam_policy.kms-key-admin
-    groups     = aws_iam_group.kms-key-admins
+  name       = "kms-key-admin-policy-attachment"
+  policy_arn = aws_iam_policy.kms-key-admin
+  groups     = aws_iam_group.kms-key-admins
 }

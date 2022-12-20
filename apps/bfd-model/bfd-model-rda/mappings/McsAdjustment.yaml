@@ -1,0 +1,88 @@
+mappings:
+- id: McsAdjustment
+  messageClassName: gov.cms.mpsm.rda.v1.mcs.McsAdjustment
+  entityClassName: gov.cms.bfd.model.rda.RdaMcsAdjustment
+  table:
+    name: mcs_adjustments
+    schema: rda
+    primaryKeyColumns:
+    - idrClmHdIcn
+    - rdaPosition
+    columns:
+    - name: idrClmHdIcn
+      sqlType: varchar(15)
+      nullable: false
+      dbName: idr_clm_hd_icn
+      comment: 'Internal Claim Control Number: This field contains a numeric value
+        that identifies a claim throughout the processing cycle and allows for a linkage
+        between the claim and the beneficiary for whom it was submitted.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: idrAdjDate
+      sqlType: date
+      dbName: idr_adj_date
+      comment: 'Date the Trailer Was Modified: This is the date on which the last
+        change was made on the adjustment information contained within the X Trailer
+        segment.'
+    - name: idrXrefIcn
+      sqlType: varchar(15)
+      dbName: idr_xref_icn
+      comment: 'Cross-reference Internal Control Number: XREF-ICN: This field is used
+        on split claims and/or full-claim adjustments. For all other instances the
+        field is zero filled.
+
+        One of the following ICN values display in this field:
+
+        For adjustment claims, this field carries the ICN of the claim it replaced.
+
+        For split claims this field carries the ICN of the mother claim.'
+    - name: idrAdjClerk
+      sqlType: varchar(4)
+      dbName: idr_adj_clerk
+      comment: 'Adjustment Clerk Identifier: This field contains the identification
+        number of the clerk initiating the change.'
+    - name: idrInitCcn
+      sqlType: varchar(15)
+      dbName: idr_init_ccn
+      comment: 'Initiating Correspondence Control Number (CCN) Number: This field
+        is used for adjustment claims only. It carries the correspondence control
+        number associated to the review request letter.'
+    - name: idrAdjChkWrtDt
+      sqlType: date
+      dbName: idr_adj_chk_wrt_dt
+      comment: 'Check Write Date: The date on which the adjustment claim check was
+        written. This field is populated only on the original claim X Trailer.'
+    - name: idrAdjBEombAmt
+      sqlType: decimal(7,2)
+      dbName: idr_adj_b_eomb_amt
+      comment: 'Adjust Claim Beneficiary EOMB Amount: For each adjusted claim, this
+        is the net amount of payment to the beneficiary of all payments and previous
+        adjustments to the claim. Net amount equals total beneficiary previous payment
+        minus total beneficiary return checks.
+
+        This amount appears only on the original claim.'
+    - name: idrAdjPEombAmt
+      sqlType: decimal(7,2)
+      dbName: idr_adj_p_eomb_amt
+      comment: 'Adjust Claim Provider EOMB Amount: For each adjusted claim, this is
+        the net amount of payment to the provider of all payments and previous adjustments
+        to the claim. Net amount equals total provider previous payment minus total
+        provider return checks.
+
+        This amount appears only on the original claim.'
+  transformations:
+  - from: PARENT
+    to: idrClmHdIcn
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: idrAdjDate
+  - from: idrXrefIcn
+  - from: idrAdjClerk
+  - from: idrInitCcn
+  - from: idrAdjChkWrtDt
+  - from: idrAdjBEombAmt
+  - from: idrAdjPEombAmt

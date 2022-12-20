@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1;
+
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+// The source of where a claim change comes from.
+message RecordSource {
+  // The phase number (P1, P2, or P3) from the file name of the IDR extract file.
+  optional string phase = 1;
+
+  // The ISO date of the batch cycle for the IDR extract file.
+  optional string extract_date = 2;
+
+  // The phase sequence number.
+  //
+  // The Phase I Sequence is set to zeros on new day claims and increments on pending claims not
+  // in an approved to pay location when the claim moves to a new pending location or has had a
+  // location date change since the last batch cycle.
+  //
+  // For Phase II and Phase III, this field is zeros
+  optional uint32 phase_seq_num = 3;
+
+  // The ISO timestamp of when the IDR extract file was transmitted.
+  optional string transmission_timestamp = 4;
+}

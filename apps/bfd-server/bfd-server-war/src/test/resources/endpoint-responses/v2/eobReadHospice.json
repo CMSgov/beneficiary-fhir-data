@@ -27,9 +27,10 @@
         } ]
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "999999999"
+      "value" : "0000000000"
     } ],
-    "active" : true
+    "active" : true,
+    "name" : "Fake ORG Name"
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -38,6 +39,15 @@
       "code" : "V",
       "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "2718813985998"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2014-10-07"
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
@@ -50,6 +60,17 @@
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "1"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "6666"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
     }
   } ],
   "identifier" : [ {
@@ -255,7 +276,8 @@
     "code" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
-        "code" : "1"
+        "code" : "30",
+        "display" : "Still patient."
       } ]
     }
   }, {
@@ -284,7 +306,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R5555"
+        "code" : "72761",
+        "display" : "ROTATOR CUFF RUPTURE"
       } ]
     },
     "type" : [ {
@@ -298,8 +321,13 @@
     "sequence" : 2,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R6666"
+        "code" : "B30",
+        "display" : "VIRAL CONJUNCTIVITIS"
       } ]
     },
     "type" : [ {
@@ -313,8 +341,13 @@
     "sequence" : 3,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R2222"
+        "code" : "B01",
+        "display" : "VARICELLA [CHICKENPOX]"
       } ]
     },
     "type" : [ {
@@ -328,8 +361,13 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
+      }, {
         "system" : "http://hl7.org/fhir/sid/icd-10",
-        "code" : "R3333"
+        "code" : "A52",
+        "display" : "LATE SYPHILIS"
       } ]
     },
     "type" : [ {
@@ -341,6 +379,7 @@
     } ]
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }

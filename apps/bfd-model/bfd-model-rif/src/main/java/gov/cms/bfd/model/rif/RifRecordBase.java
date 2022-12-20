@@ -1,11 +1,30 @@
 package gov.cms.bfd.model.rif;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Optional;
 
-/** Common interface for RifRecords */
+/** Common interface for RifRecords. */
 public interface RifRecordBase {
-  Optional<Date> getLastUpdated();
+  /**
+   * Gets the last updated time.
+   *
+   * @return the last updated time
+   */
+  Optional<Instant> getLastUpdated();
 
-  void setLastUpdated(Date lastUpdated);
+  /**
+   * Sets the last updated time.
+   *
+   * @param lastUpdated the last updated time
+   */
+  default void setLastUpdated(Instant lastUpdated) {
+    setLastUpdated(lastUpdated != null ? Optional.of(lastUpdated) : Optional.empty());
+  }
+
+  /**
+   * Sets the last updated time.
+   *
+   * @param lastUpdated the last updated time
+   */
+  void setLastUpdated(Optional<Instant> lastUpdated);
 }

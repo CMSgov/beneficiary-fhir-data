@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Adjustment Requestor Identification
+enum FissAdjustmentRequestorCode {
+  ADJUSTMENT_REQUESTOR_CODE_FISCAL_INTERMEDIARY = 0       [(string_value) = "F"];
+
+  ADJUSTMENT_REQUESTOR_CODE_HOSPITAL_PROVIDER = 1         [(string_value) = "H"];
+
+  ADJUSTMENT_REQUESTOR_CODE_PEER_REVIEW_ORGANIZATION = 2  [(string_value) = "P"];
+
+  ADJUSTMENT_REQUESTOR_CODE_SYSTEM = 3                    [(string_value) = "S"];
+}

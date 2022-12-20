@@ -2,7 +2,7 @@ locals {
   tags      = {business = "OEDA", application = "bfd-insights", project="ab2d"}
   project   = "ab2d"
   database  = "ab2d"
-  partitions = [{name="dt", type="string", comment="Approximate delivery time"}]
+  partitions = [{name="dt", type=string, comment="Approximate delivery time"}]
 }
 
 data "aws_caller_identity" "current" {}

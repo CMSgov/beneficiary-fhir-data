@@ -71,7 +71,7 @@ public class V1Server extends RestfulServer {
     setServerConformanceProvider(capabilityStatementProvider);
   }
 
-  /** @see ca.uhn.fhir.rest.server.RestfulServer#initialize() */
+  /** {@inheritDoc} */
   @SuppressWarnings("unchecked")
   @Override
   protected void initialize() throws ServletException {
@@ -113,5 +113,9 @@ public class V1Server extends RestfulServer {
     // Default to XML and pretty printing.
     setDefaultResponseEncoding(EncodingEnum.JSON);
     setDefaultPrettyPrint(false);
+
+    // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
+    // executed
+    registerInterceptor(new TimerInterceptor());
   }
 }

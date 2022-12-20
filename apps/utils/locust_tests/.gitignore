@@ -1,0 +1,23 @@
+# Python cache files
+**/__pycache__
+
+# Local performance statistics
+**/*.stats.json
+
+# Repository Locust configuration
+locust.conf
+
+# Un-ignore workspace settings for VSCode
+# .vscode is ignored by default via parent .gitignores, so we must unignore the directory
+# (due to .gitignore's handling of directory exclusions, see https://git-scm.com/docs/gitignore#_pattern_format)
+!/.vscode
+# We ignore everything under .vscode, preferring to explicitly unignore certain files (such as settings.json)
+.vscode/**/*
+!/.vscode/settings.json
+!/.vscode/extensions.json
+
+# Un-ignore root .editorconfig
+!.editorconfig
+
+# Un-ignore root .pylintrc
+!.pylintrc

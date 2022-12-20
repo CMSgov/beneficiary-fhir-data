@@ -1,0 +1,5 @@
+[
+<#list value as v>
+  "${v}"<#if v?has_next>,</#if>
+</#list>
+]

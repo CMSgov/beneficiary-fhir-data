@@ -1,0 +1,335 @@
+mappings:
+- id: McsDetail
+  messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDetail
+  entityClassName: gov.cms.bfd.model.rda.RdaMcsDetail
+  table:
+    name: mcs_details
+    schema: rda
+    primaryKeyColumns:
+    - idrClmHdIcn
+    - idrDtlNumber
+    columns:
+    - name: idrClmHdIcn
+      sqlType: varchar(15)
+      nullable: false
+      dbName: idr_clm_hd_icn
+      comment: 'Internal Claim Control Number: This field contains a numeric value
+        that identifies a claim throughout the processing cycle and allows for a linkage
+        between the claim and the beneficiary for whom it was submitted.'
+    - name: idrDtlNumber
+      sqlType: smallint
+      javaType: short
+      dbName: idr_dtl_number
+      nullable: false
+      comment: 'This field contains the sequence number of the detail record. Up to 50 detail records can be included.'
+    - name: idrDtlStatus
+      sqlType: varchar(1)
+      dbName: idr_dtl_status
+    - name: idrDtlFromDate
+      sqlType: date
+      dbName: idr_dtl_from_date
+      comment: 'Starting Date of Service: This field carries the date on which a particular
+        service was first rendered.'
+    - name: idrDtlToDate
+      sqlType: date
+      dbName: idr_dtl_to_date
+      comment: 'Ending Date of Service: This field indicates the last date on which
+        a particular service was rendered for a specific claim case.'
+    - name: idrProcCode
+      sqlType: varchar(5)
+      dbName: idr_proc_code
+      comment: 'Procedure Code: This field carries the procedure code received from
+        CWF in the 13-trailer.'
+    - name: idrModOne
+      sqlType: varchar(2)
+      dbName: idr_mod_one
+      comment: 'First Procedure Code Modifier: This is first procedure modifier. In
+        addition to the normal pricing criteria, the system allows claims examiners
+        to use modifier codes to further qualify billed procedures. In some cases,
+        the modifier requires special handling for pricing the service; in other cases,
+        the modifier is used for further documentation of the performed service.
+
+        The two types of modifiers, as referred to in the MCS, are statistical and
+        pricing. There are two types of statistical modifiers. Some statistical modifiers
+        are documentation modifiers and do not affect pricing although they may affect
+        processing. Other statistical modifiers affect pricing by causing the established
+        reasonable charge or fee to be modified in the same way every time. In both
+        cases, statistical modifiers are not established on the procedure or pricing
+        files as part of the procedure code key. On the other hand, pricing modifiers
+        are considered by the system as part of the seven-digit procedure code key
+        and are used for obtaining established reasonable charge or fee amounts. The
+        reasonable charge or fee amounts for procedure codes with pricing modifiers
+        are established independently of the same procedure without the modifier.
+
+        This field may contain multiple procedure code modifiers or spaces. A procedure
+        code modifier will further define the procedure code as a unique and different
+        service/supply.'
+    - name: idrModTwo
+      sqlType: varchar(2)
+      dbName: idr_mod_two
+      comment: 'Second Procedure Code Modifier: This is the second procedure modifier.
+        In addition to the normal pricing criteria, the system allows claims examiners
+        to use modifier codes to further qualify billed procedures. In some cases,
+        the modifier requires special handling for pricing the service; in other cases,
+        the modifier is used for further documentation of the performed service.
+
+        The two types of modifiers, as referred to in the MCS, are statistical and
+        pricing. There are two types of statistical modifiers. Some statistical modifiers
+        are documentation modifiers and do not affect pricing although they may affect
+        processing. Other statistical modifiers affect pricing by causing the established
+        reasonable charge or fee to be modified in the same way every time. In both
+        cases, statistical modifiers are not established on the procedure or pricing
+        files as part of the procedure code key. On the other hand, pricing modifiers
+        are considered by the system as part of the seven-digit procedure code key
+        and are used for obtaining established reasonable charge or fee amounts. The
+        reasonable charge or fee amounts for procedure codes with pricing modifiers
+        are established independently of the same procedure without the modifier.
+
+        This field may contain multiple procedure code modifiers or spaces. A procedure
+        code modifier will further define the procedure code as a unique and different
+        service/supply.'
+    - name: idrModThree
+      sqlType: varchar(2)
+      dbName: idr_mod_three
+      comment: 'Third Procedure Code Modifier: This is the second procedure modifier.
+        In addition to the normal pricing criteria, the system allows claims examiners
+        to use modifier codes to further qualify billed procedures. In some cases,
+        the modifier requires special handling for pricing the service; in other cases,
+        the modifier is used for further documentation of the performed service.
+
+        The two types of modifiers, as referred to in the MCS, are statistical and
+        pricing. There are two types of statistical modifiers. Some statistical modifiers
+        are documentation modifiers and do not affect pricing although they may affect
+        processing. Other statistical modifiers affect pricing by causing the established
+        reasonable charge or fee to be modified in the same way every time. In both
+        cases, statistical modifiers are not established on the procedure or pricing
+        files as part of the procedure code key. On the other hand, pricing modifiers
+        are considered by the system as part of the seven-digit procedure code key
+        and are used for obtaining established reasonable charge or fee amounts. The
+        reasonable charge or fee amounts for procedure codes with pricing modifiers
+        are established independently of the same procedure without the modifier.
+
+        This field may contain multiple procedure code modifiers or spaces. A procedure
+        code modifier will further define the procedure code as a unique and different
+        service/supply.'
+    - name: idrModFour
+      sqlType: varchar(2)
+      dbName: idr_mod_four
+      comment: 'Fourth Procedure Code Modifier: This is the fourth procedure modifier.
+        In addition to the normal pricing criteria, the system allows claims examiners
+        to use modifier codes to further qualify billed procedures. In some cases,
+        the modifier requires special handling for pricing the service; in other cases,
+        the modifier is used for further documentation of the performed service.
+
+        The two types of modifiers, as referred to in the MCS, are statistical and
+        pricing. There are two types of statistical modifiers. Some statistical modifiers
+        are documentation modifiers and do not affect pricing although they may affect
+        processing. Other statistical modifiers affect pricing by causing the established
+        reasonable charge or fee to be modified in the same way every time. In both
+        cases, statistical modifiers are not established on the procedure or pricing
+        files as part of the procedure code key. On the other hand, pricing modifiers
+        are considered by the system as part of the seven-digit procedure code key
+        and are used for obtaining established reasonable charge or fee amounts. The
+        reasonable charge or fee amounts for procedure codes with pricing modifiers
+        are established independently of the same procedure without the modifier.
+
+        This field may contain multiple procedure code modifiers or spaces. A procedure
+        code modifier will further define the procedure code as a unique and different
+        service/supply.'
+    - name: idrDtlDiagIcdType
+      sqlType: varchar(1)
+      dbName: idr_dtl_diag_icd_type
+      comment: 'Diagnosis ICD Type: This field identifies diagnosis code as ICD 10
+        or ICD 9.'
+    - name: idrDtlPrimaryDiagCode
+      sqlType: varchar(7)
+      dbName: idr_dtl_primary_diag_code
+      comment: 'Primary Detail Diagnosis Code: This field carries the primary detail
+        diagnosis code.'
+    - name: idrKPosLnameOrg
+      sqlType: varchar(60)
+      dbName: idr_k_pos_lname_org
+      comment: 'POS Last Name or Facility Name: This field carries the POS last name.'
+    - name: idrKPosFname
+      sqlType: varchar(35)
+      dbName: idr_k_pos_fname
+      comment: 'POS First Name: This field carries the POS first name.'
+    - name: idrKPosMname
+      sqlType: varchar(25)
+      dbName: idr_k_pos_mname
+      comment: 'POS Middle Name: This field carries the POS middle name.'
+    - name: idrKPosAddr1
+      sqlType: varchar(55)
+      dbName: idr_k_pos_addr1
+      comment: 'POS First Address Line: This field carries the POS first address line.'
+    - name: idrKPosAddr2_1st
+      sqlType: varchar(30)
+      dbName: idr_k_pos_addr2_1st
+      comment: 'POS Second Address Line - First Part: This field carries the
+        first half of the POS second address line.'
+    - name: idrKPosAddr2_2nd
+      sqlType: varchar(25)
+      dbName: idr_k_pos_addr2_2nd
+    - name: idrKPosCity
+      sqlType: varchar(30)
+      dbName: idr_k_pos_city
+      comment: 'POS City: This field carries the city portion of the POS address.'
+    - name: idrKPosState
+      sqlType: varchar(2)
+      dbName: idr_k_pos_state
+      comment: 'POS State: This field carries the state portion of the POS address.'
+    - name: idrKPosZip
+      sqlType: varchar(15)
+      dbName: idr_k_pos_zip
+      comment: 'POS Zip Code: This field carries the zip code portion of the POS address.'
+    - name: idrTos
+      sqlType: varchar(1)
+      dbName: idr_tos
+      comment: 'Procedure Code - Type of Service: TOS: This is a one-character code
+        that identifies the type of service designated to a particular procedure code
+        and modifier. This value may further define the procedure code/modifier combination
+        allowing it to carry multiple definitions and allowed charge values.
+
+        Refer to Spec S0102010 and MCSBBV manual for general input criteria information
+        and a listing of the acceptable entries.'
+    - name: idrTwoDigitPos
+      sqlType: varchar(2)
+      dbName: idr_two_digit_pos
+      comment: 'Place of Service - Second Position: TWO-DIGIT-POS: This is a CMS-defined,
+        two-byte code that identifies where the service was rendered. On claims, the
+        system uses the two-digit HCFA 1500 value. For SCC/procedure file maintenance,
+        the system uses the one-digit value.'
+    - name: idrDtlRendType
+      sqlType: varchar(2)
+      dbName: idr_dtl_rend_type
+      comment: 'Detail Rendering Provider Type Code: This field displays a two-number
+        code that is associated with identifying the rendering provider''s type code.'
+    - name: idrDtlRendSpec
+      sqlType: varchar(2)
+      dbName: idr_dtl_rend_spec
+      comment: 'Detail Rendering Provider Specialty: The rendering provider specialty
+        code is a two-character code that identifies the rendering provider''s specialty.'
+    - name: idrDtlRendNpi
+      sqlType: varchar(10)
+      dbName: idr_dtl_rend_npi
+      comment: 'Rendering Provider''s National Provider Identifier (NPI): This
+        field carries the rendering or ordering provider''s National Provider
+        Identifier (NPI) number.'
+    - name: idrDtlRendProv
+      sqlType: varchar(10)
+      dbName: idr_dtl_rend_prov
+      comment: 'Detail Rendering Provider Number: This field is used to record a unique
+        identification number assigned to each provider who renders or refers services
+        to, or orders services for, a Medicare beneficiary.'
+    - name: idrKDtlFacProvNpi
+      sqlType: varchar(10)
+      dbName: idr_k_dtl_fac_prov_npi
+      comment: 'Facility Provider National Provider Identifier (NPI): This field carries
+        the National Provider Identifier (NPI) number of the facility or laboratory
+        where services were performed, if applicable.'
+    - name: idrDtlAmbPickupAddres1
+      sqlType: varchar(25)
+      dbName: idr_dtl_amb_pickup_addres1
+    - name: idrDtlAmbPickupAddres2
+      sqlType: varchar(20)
+      dbName: idr_dtl_amb_pickup_addres2
+    - name: idrDtlAmbPickupCity
+      sqlType: varchar(20)
+      dbName: idr_dtl_amb_pickup_city
+      comment: 'Ambulance Pick Up City: This field contains the ambulance pickup location''s
+        city.'
+    - name: idrDtlAmbPickupState
+      sqlType: varchar(2)
+      dbName: idr_dtl_amb_pickup_state
+      comment: 'Ambulance Pick Up State: This field contains the ambulance pickup
+        location''s State code.'
+    - name: idrDtlAmbPickupZipcode
+      sqlType: varchar(9)
+      dbName: idr_dtl_amb_pickup_zipcode
+      comment: 'Ambulance Pick Up ZIP Code: This field contains the ambulance pickup
+        location''s zip code.'
+    - name: idrDtlAmbDropoffName
+      sqlType: varchar(24)
+      dbName: idr_dtl_amb_dropoff_name
+      comment: 'Ambulance Drop-off Location Name: This field contains the name of
+        the ambulance drop-off location.'
+    - name: idrDtlAmbDropoffAddrL1
+      sqlType: varchar(25)
+      dbName: idr_dtl_amb_dropoff_addr_l1
+    - name: idrDtlAmbDropoffAddrL2
+      sqlType: varchar(20)
+      dbName: idr_dtl_amb_dropoff_addr_l2
+    - name: idrDtlAmbDropoffCity
+      sqlType: varchar(20)
+      dbName: idr_dtl_amb_dropoff_city
+      comment: 'Ambulance Drop-off City: This field contains the ambulance drop-off
+        location''s city.'
+    - name: idrDtlAmbDropoffState
+      sqlType: varchar(2)
+      dbName: idr_dtl_amb_dropoff_state
+      comment: 'Ambulance Drop-off State: This field contains the ambulance drop-off
+        location''s State code.'
+    - name: idrDtlAmbDropoffZipcode
+      sqlType: varchar(9)
+      dbName: idr_dtl_amb_dropoff_zipcode
+      comment: 'Ambulance Drop-off Location ZIP Code: This field contains the ambulance
+        drop-off location''s zip code.'
+  transformations:
+  - from: PARENT
+    to: idrClmHdIcn
+  - from: idrDtlNumber
+    transformer: UintToShort
+    optionalComponents: None
+  - from: idrDtlStatus
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsDetailStatus
+  - from: idrDtlFromDate
+  - from: idrDtlToDate
+  - from: idrProcCode
+    transformerOptions:
+      ignoreEmptyString: true
+  - from: idrModOne
+  - from: idrModTwo
+  - from: idrModThree
+  - from: idrModFour
+  - from: idrDtlDiagIcdType
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType
+  - from: idrDtlPrimaryDiagCode
+  - from: idrKPosLnameOrg
+  - from: idrKPosFname
+  - from: idrKPosMname
+  - from: idrKPosAddr1
+  - from: idrKPosAddr21St
+    to: idrKPosAddr2_1st
+  - from: idrKPosAddr22Nd
+    to: idrKPosAddr2_2nd
+  - from: idrKPosCity
+  - from: idrKPosState
+  - from: idrKPosZip
+  - from: idrTos
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsTypeOfService
+  - from: idrTwoDigitPos
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService
+  - from: idrDtlRendType
+  - from: idrDtlRendSpec
+  - from: idrDtlRendNpi
+  - from: idrDtlRendProv
+  - from: idrKDtlFacProvNpi
+  - from: idrDtlAmbPickupAddres1
+  - from: idrDtlAmbPickupAddres2
+  - from: idrDtlAmbPickupCity
+  - from: idrDtlAmbPickupState
+  - from: idrDtlAmbPickupZipcode
+  - from: idrDtlAmbDropoffName
+  - from: idrDtlAmbDropoffAddrL1
+  - from: idrDtlAmbDropoffAddrL2
+  - from: idrDtlAmbDropoffCity
+  - from: idrDtlAmbDropoffState
+  - from: idrDtlAmbDropoffZipcode

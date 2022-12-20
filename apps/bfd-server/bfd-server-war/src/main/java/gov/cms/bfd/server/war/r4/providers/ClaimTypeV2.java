@@ -100,8 +100,8 @@ public enum ClaimTypeV2 {
       HHAClaim_.lines);
 
   private final Class<?> entityClass;
-  private final SingularAttribute<?, ?> entityIdAttribute;
-  private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
+  private final SingularAttribute<?, Long> entityIdAttribute;
+  private final SingularAttribute<?, Long> entityBeneficiaryIdAttribute;
   private final Function<Object, LocalDate> serviceEndAttributeFunction;
   private final ClaimTypeTransformerV2 transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
@@ -110,16 +110,17 @@ public enum ClaimTypeV2 {
    * Enum constant constructor.
    *
    * @param entityClass the value to use for {@link #getEntityClass()}
-   * @param entityIdAtt ibute the value to u e for {@link #getEntityIdAttribute()}
-   * @param entityBeneficiaryIdA tribute the value to use for {@link
+   * @param entityIdAttribute the value to u e for {@link #getEntityIdAttribute()}
+   * @param entityBeneficiaryIdAttribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
+   * @param serviceEndAttributeFunction the service end attribute function
    * @param transformer the value to use for {@link #getTransformer()}
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
   private ClaimTypeV2(
       Class<?> entityClass,
-      SingularAttribute<?, ?> entityIdAttribute,
-      SingularAttribute<?, String> entityBeneficiaryIdAttribute,
+      SingularAttribute<?, Long> entityIdAttribute,
+      SingularAttribute<?, Long> entityBeneficiaryIdAttribute,
       Function<Object, LocalDate> serviceEndAttributeFunction,
       ClaimTypeTransformerV2 transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
@@ -143,7 +144,7 @@ public enum ClaimTypeV2 {
   }
 
   /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
-  public SingularAttribute<?, ?> getEntityIdAttribute() {
+  public SingularAttribute<?, Long> getEntityIdAttribute() {
     return entityIdAttribute;
   }
 
@@ -151,12 +152,11 @@ public enum ClaimTypeV2 {
    * @return the JPA {@link Entity} field that is a (foreign keyed) reference to {@link
    *     Beneficiary#getBeneficiaryId()}
    */
-  public SingularAttribute<?, String> getEntityBeneficiaryIdAttribute() {
+  public SingularAttribute<?, Long> getEntityBeneficiaryIdAttribute() {
     return entityBeneficiaryIdAttribute;
   }
 
   /**
-   * @return the {@link Function} to use to transform the JPA {@link Entity} instances into FHIR
    * @return the {@link Function} to use to retrieve the {@link LocalDate} to use for service date
    *     filter
    */
@@ -165,7 +165,7 @@ public enum ClaimTypeV2 {
   }
 
   /**
-   * @return the {@link ClaimTypeTransformer} to use to transform the JPA {@link Entity} instances
+   * @return the {@link ClaimTypeTransformerV2} to use to transform the JPA {@link Entity} instances
    *     into FHIR {@link ExplanationOfBenefit} instances
    */
   public ClaimTypeTransformerV2 getTransformer() {
@@ -185,8 +185,11 @@ public enum ClaimTypeV2 {
    * @return the {@link ClaimTypeV2} represented by the specified {@link String}
    */
   public static Optional<ClaimTypeV2> parse(String claimTypeText) {
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values())
-      if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
+    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+      if (claimType.name().toLowerCase().equals(claimTypeText)) {
+        return Optional.of(claimType);
+      }
+    }
     return Optional.empty();
   }
 }

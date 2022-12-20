@@ -15,8 +15,9 @@ resource "aws_s3_bucket" "main" {
     rule {
       apply_server_side_encryption_by_default {
         sse_algorithm     = "aws:kms"
-        kms_master_key_id = aws_kms_key.main.key_id
+        kms_master_key_id = aws_kms_key.main.arn
       }
+      bucket_key_enabled = var.bucket_key_enabled
     }
   }
 
@@ -57,5 +58,3 @@ resource "aws_kms_alias" "main" {
   name          = "alias/${local.key_name}"
   target_key_id = aws_kms_key.main.key_id
 }
-
-    

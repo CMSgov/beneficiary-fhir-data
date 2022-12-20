@@ -1,13 +1,15 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * Unit tests for {@link CCWProcedure}.
@@ -46,8 +48,8 @@ public class CCWProcedureTest {
 
     Optional<CCWProcedure> diagnosis = CCWProcedure.from(code, Optional.of(version), procDate);
 
-    Assert.assertEquals(procDate.get(), diagnosis.get().getProcedureDate().get());
-    Assert.assertEquals(system, diagnosis.get().getFhirSystem());
+    assertEquals(procDate.get(), diagnosis.get().getProcedureDate().get());
+    assertEquals(system, diagnosis.get().getFhirSystem());
 
     TransformerTestUtils.assertHasCoding(
         system, code.get(), diagnosis.get().toCodeableConcept().getCoding());
@@ -56,7 +58,7 @@ public class CCWProcedureTest {
     Coding coding = codeableConcept.addCoding();
     coding.setSystem(system).setCode(code.get());
 
-    Assert.assertTrue(diagnosis.get().isContainedIn(codeableConcept));
+    assertTrue(diagnosis.get().isContainedIn(codeableConcept));
   }
 
   /** Verifies that a procedure date isn't present even though there is a procedure code present */
@@ -67,9 +69,9 @@ public class CCWProcedureTest {
 
     Optional<CCWProcedure> diagnosis = CCWProcedure.from(code, Optional.of(version), procDate);
 
-    Assert.assertEquals(Optional.empty(), diagnosis.get().getProcedureDate());
+    assertEquals(Optional.empty(), diagnosis.get().getProcedureDate());
 
-    Assert.assertEquals(system, diagnosis.get().getFhirSystem());
+    assertEquals(system, diagnosis.get().getFhirSystem());
 
     TransformerTestUtils.assertHasCoding(
         system, code.get(), diagnosis.get().toCodeableConcept().getCoding());
@@ -78,6 +80,6 @@ public class CCWProcedureTest {
     Coding coding = codeableConcept.addCoding();
     coding.setSystem(system).setCode(code.get());
 
-    Assert.assertTrue(diagnosis.get().isContainedIn(codeableConcept));
+    assertTrue(diagnosis.get().isContainedIn(codeableConcept));
   }
 }

@@ -1,0 +1,264 @@
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.MessageError;
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.RdaFissProcCode;
+import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+
+public class FissClaimRdaSinkIT {
+
+  private static final ObjectMapper mapper =
+      JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
+
+  /**
+   * Checks if writing valid FISS claim messages results in the entities being persisted to the
+   * database with the expected field values.
+   *
+   * @throws Exception If any unexpected exceptions are thrown.
+   */
+  @Test
+  public void fissClaim() throws Exception {
+    RdaPipelineTestUtils.runTestWithTemporaryDb(
+        FissClaimRdaSinkIT.class,
+        Clock.systemUTC(),
+        (appState, entityManager) -> {
+          final LocalDate today = LocalDate.of(2022, 1, 3);
+          final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
+          final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
+          final RdaFissClaim claim = new RdaFissClaim();
+          claim.setSequenceNumber(3L);
+          claim.setDcn("1");
+          claim.setHicNo("h1");
+          claim.setCurrStatus('T');
+          claim.setCurrLoc1('A');
+          claim.setCurrLoc2("1A");
+          claim.setPracLocCity("city name can be very long indeed");
+          claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
+
+          final RdaFissProcCode procCode0 = new RdaFissProcCode();
+          procCode0.setDcn(claim.getDcn());
+          procCode0.setRdaPosition((short) 1);
+          procCode0.setProcCode("P");
+          procCode0.setProcFlag("F");
+          procCode0.setProcDate(today);
+          claim.getProcCodes().add(procCode0);
+
+          final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
+          diagCode0.setDcn(claim.getDcn());
+          diagCode0.setRdaPosition((short) 1);
+          diagCode0.setDiagCd2("cd2");
+          diagCode0.setDiagPoaInd("Q");
+          claim.getDiagCodes().add(diagCode0);
+
+          final FissProcedureCode procCodeMessage =
+              FissProcedureCode.newBuilder()
+                  .setProcCd("P")
+                  .setRdaPosition(1)
+                  .setProcFlag("F")
+                  .setProcDt("2022-01-03")
+                  .build();
+
+          final FissDiagnosisCode diagCodeMessage =
+              FissDiagnosisCode.newBuilder()
+                  .setDiagCd2("cd2")
+                  .setRdaPosition(1)
+                  .setDiagPoaIndUnrecognized("Q")
+                  .build();
+
+          final FissClaim claimMessage =
+              FissClaim.newBuilder()
+                  .setDcn(claim.getDcn())
+                  .setHicNo(claim.getHicNo())
+                  .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
+                  .setCurrLoc1Unrecognized(String.valueOf(claim.getCurrLoc1()))
+                  .setCurrLoc2Unrecognized(claim.getCurrLoc2())
+                  .setPracLocCity("city name can be very long indeed")
+                  .addFissProcCodes(0, procCodeMessage)
+                  .addFissDiagCodes(0, diagCodeMessage)
+                  .setMbi(claim.getMbi())
+                  .build();
+
+          final FissClaimChange message =
+              FissClaimChange.newBuilder()
+                  .setSeq(claim.getSequenceNumber())
+                  .setDcn(claim.getDcn())
+                  .setClaim(claimMessage)
+                  .build();
+
+          final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
+          final FissClaimTransformer transformer =
+              new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
+          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
+          final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
+
+          assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
+
+          int count = sink.writeMessage("version", message);
+          assertEquals(1, count);
+
+          List<RdaFissClaim> claims =
+              entityManager
+                  .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+                  .getResultList();
+          assertEquals(1, claims.size());
+          RdaFissClaim resultClaim = claims.get(0);
+          assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
+          assertEquals(claim.getHicNo(), resultClaim.getHicNo());
+          assertEquals(claim.getPracLocCity(), resultClaim.getPracLocCity());
+          assertEquals(claim.getMbi(), resultClaim.getMbi());
+          assertEquals(expectedMbiHash, resultClaim.getMbiHash());
+          assertEquals(claim.getProcCodes().size(), resultClaim.getProcCodes().size());
+          assertEquals(claim.getDiagCodes().size(), resultClaim.getDiagCodes().size());
+
+          assertEquals(
+              Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());
+
+          Mbi databaseMbiEntity =
+              RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getMbi());
+          assertNotNull(databaseMbiEntity);
+          assertEquals(claim.getMbi(), databaseMbiEntity.getMbi());
+          assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
+        });
+  }
+
+  /**
+   * Checks if writing invalid FISS claim messages results in a {@link
+   * DataTransformer.TransformationException} being thrown and if {@link MessageError} entities were
+   * written out to the database.
+   *
+   * @throws Exception If any unexpected exceptions were thrown.
+   */
+  @Test
+  public void invalidFissClaim() throws Exception {
+    final String invalidLoc2 = "1A11111111";
+    final String invalidDateFormat = "invalid_date";
+
+    RdaPipelineTestUtils.runTestWithTemporaryDb(
+        FissClaimRdaSinkIT.class,
+        Clock.systemUTC(),
+        (appState, entityManager) -> {
+          final LocalDate today = LocalDate.of(2022, 1, 3);
+          final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
+          final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
+          final RdaFissClaim claim = new RdaFissClaim();
+          claim.setSequenceNumber(3L);
+          claim.setDcn("1");
+          claim.setHicNo("h1");
+          claim.setCurrStatus('T');
+          claim.setCurrLoc1('A');
+          claim.setCurrLoc2(invalidLoc2);
+          claim.setPracLocCity("city name can be very long indeed");
+          claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
+
+          final RdaFissProcCode procCode0 = new RdaFissProcCode();
+          procCode0.setDcn(claim.getDcn());
+          procCode0.setRdaPosition((short) 1);
+          procCode0.setProcCode("P");
+          procCode0.setProcFlag("F");
+          procCode0.setProcDate(today);
+          claim.getProcCodes().add(procCode0);
+
+          final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
+          diagCode0.setDcn(claim.getDcn());
+          diagCode0.setRdaPosition((short) 1);
+          diagCode0.setDiagCd2("cd2");
+          diagCode0.setDiagPoaInd("Q");
+          claim.getDiagCodes().add(diagCode0);
+
+          final FissProcedureCode procCodeMessage =
+              FissProcedureCode.newBuilder()
+                  .setProcCd("P")
+                  .setRdaPosition(1)
+                  .setProcFlag("F")
+                  .setProcDt(invalidDateFormat)
+                  .build();
+
+          final FissDiagnosisCode diagCodeMessage =
+              FissDiagnosisCode.newBuilder()
+                  .setDiagCd2("cd2")
+                  .setRdaPosition(1)
+                  .setDiagPoaIndUnrecognized("Q")
+                  .build();
+
+          final FissClaim claimMessage =
+              FissClaim.newBuilder()
+                  .setDcn(claim.getDcn())
+                  .setHicNo(claim.getHicNo())
+                  .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
+                  .setCurrLoc1Unrecognized(String.valueOf(claim.getCurrLoc1()))
+                  .setCurrLoc2Unrecognized(claim.getCurrLoc2())
+                  .setPracLocCity("city name can be very long indeed")
+                  .addFissProcCodes(0, procCodeMessage)
+                  .addFissDiagCodes(0, diagCodeMessage)
+                  .setMbi(claim.getMbi())
+                  .build();
+
+          final FissClaimChange message =
+              FissClaimChange.newBuilder()
+                  .setSeq(claim.getSequenceNumber())
+                  .setDcn(claim.getDcn())
+                  .setClaim(claimMessage)
+                  .build();
+
+          final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
+          final FissClaimTransformer transformer =
+              new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
+          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
+          final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
+
+          assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
+
+          assertThrows(ProcessingException.class, () -> sink.writeMessage("version", message));
+
+          List<RdaFissClaim> claims =
+              entityManager
+                  .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+                  .getResultList();
+          assertEquals(0, claims.size());
+
+          List<MessageError> errors =
+              entityManager
+                  .createQuery("select e from MessageError e", MessageError.class)
+                  .getResultList();
+          assertEquals(1, errors.size());
+
+          for (MessageError error : errors) {
+            List<DataTransformer.ErrorMessage> expectedTransformErrors =
+                List.of(
+                    new DataTransformer.ErrorMessage(
+                        "currLoc2", "invalid length: expected=[0,5] actual=10"),
+                    new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date"));
+
+            assertEquals(Long.valueOf(3), error.getSequenceNumber());
+            assertEquals(MessageError.ClaimType.FISS, error.getClaimType());
+            assertEquals(claim.getDcn(), error.getClaimId());
+            assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());
+          }
+        });
+  }
+}

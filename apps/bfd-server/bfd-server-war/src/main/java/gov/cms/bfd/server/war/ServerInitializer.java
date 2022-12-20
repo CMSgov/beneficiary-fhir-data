@@ -38,9 +38,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
     return false;
   }
 
-  /**
-   * @see org.springframework.web.WebApplicationInitializer#onStartup(javax.servlet.ServletContext)
-   */
+  /** {@inheritDoc} */
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
     LOGGER.info("Initializing Blue Button API backend server...");

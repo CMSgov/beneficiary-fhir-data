@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Beneficiary Sex
+enum FissBeneficiarySex {
+  BENEFICIARY_SEX_FEMALE = 0  [(string_value) = "F"];
+
+  BENEFICIARY_SEX_MALE = 1    [(string_value) = "M"];
+
+  BENEFICIARY_SEX_UNKNOWN = 2 [(string_value) = "U"];
+}

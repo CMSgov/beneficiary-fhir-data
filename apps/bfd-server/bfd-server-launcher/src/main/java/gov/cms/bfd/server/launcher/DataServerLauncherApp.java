@@ -1,11 +1,11 @@
 package gov.cms.bfd.server.launcher;
 
-import ch.qos.logback.access.jetty.RequestLogImpl;
 import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -15,15 +15,16 @@ import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
-import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -31,6 +32,7 @@ import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
 import org.eclipse.jetty.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.webapp.WebAppConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
@@ -58,6 +60,12 @@ public final class DataServerLauncherApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataServerLauncherApp.class);
 
   /**
+   * Logger for the structured access log ('access.json') that has one line for every request that
+   * the server receives.
+   */
+  private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
+
+  /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
    * incomplete and/or invalid.
    */
@@ -69,6 +77,7 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
+  /** The Jetty Server instance that will do most of our work. * */
   private static Server server;
 
   /**
@@ -116,7 +125,31 @@ public final class DataServerLauncherApp {
 
     // Create the HTTPS config.
     HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
-    httpsConfig.addCustomizer(new SecureRequestCustomizer());
+    SecureRequestCustomizer customizer = new SecureRequestCustomizer();
+    /*
+     * SNI (server name indication) is a TLS extension that allows a client to indicate
+     * the server name (domain) it is issuing a request for which is helpful when multiple
+     * domains are hosted at the same IP address. This indication is available before TLS
+     * handshaking occurs which gives the server an opportunity to present a different
+     * certificate for each server name (domain) that is being hosted. BFD only hosts one
+     * domain (per environment) and only has one certificate. Therefore, SNI is unnecessary
+     * for its intended purpose for BFD. Note as well that SNI is not a security mechanism --
+     * it merely allows clients to indicate which domain they are trying to reach so that the
+     * correct certificate will be returned from the server to prove its legitimacy to the
+     * client. SNI does not influence the way that the server validates client certificates
+     * or any other aspects of TLS.
+     *
+     * By default, SNI is not required by Jetty and BFD does not override that. However,
+     * if SNI is provided by the client, Jetty 10 will, by default, check that the host
+     * passed matches a certificate that is available to the server. This is a change from
+     * Jetty 9 which did not perform this SNI validation. The server startup sanity checking
+     * scripts and test tools make use of the ability to issue requests to localhost even
+     * though no certificate exists for that host within BFD so in order to allow those
+     * scripts to continue to work with Jetty 10, we turn off the Jetty SNI host name
+     * checking here.
+     */
+    customizer.setSniHostCheck(false);
+    httpsConfig.addCustomizer(customizer);
 
     // Create the SslContextFactory to be used, along with the cert.
     SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
@@ -158,6 +191,7 @@ public final class DataServerLauncherApp {
         new Configuration[] {
           new WebInfConfiguration(),
           new WebXmlConfiguration(),
+          new WebAppConfiguration(),
           new MetaInfConfiguration(),
           new FragmentConfiguration(),
           new JettyWebXmlConfiguration(),
@@ -165,7 +199,7 @@ public final class DataServerLauncherApp {
         });
 
     // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
-    webapp.getSystemClasspathPattern().add("org.slf4j.");
+    webapp.getSystemClassMatcher().add("org.slf4j.");
 
     /*
      * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
@@ -173,18 +207,32 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    /*
-     * Configure the NCSA-style flat access/request log. This picks up its configuration from this
-     * project's logback-access.xml resource. Please note that the logback-access library it uses is
-     * only half-supported anymore and will miss a number of things, e.g. async requests. See
-     * https://github.com/qos-ch/logback/pull/269 for details.
+    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog. Available format strings are
+     * documented here: https://www.eclipse.org/jetty/javadoc/jetty-10/org/eclipse/jetty/server/CustomRequestLog.html.
+     *
+     * Response time units have varied during BFD's history as follows:
+     * Prior to Oct 28 2021 - milliseconds
+     * Oct 28 2021 - Mar 24 2022 - microseconds
+     * Since Mar 24 2022 - milliseconds
      */
-    RequestLogHandler requestLogHandler = new RequestLogHandler();
-    JettyLogbackRequestLogImpl requestLog = new JettyLogbackRequestLogImpl();
-    requestLog.setName("access.log");
-    requestLog.setResource("/logback-access.xml");
-    requestLog.setQuiet(true);
-    requestLogHandler.setRequestLog(requestLog);
+    final String accessLogFileName =
+        System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
+    final String requestLogFormat =
+        "%{remote}a - \"%u\" %t \"%r\" \"%q\" %s %{CLF}S %{ms}T"
+            + " %{BlueButton-OriginalQueryId}i"
+            + " %{BlueButton-OriginalQueryCounter}i"
+            + " [%{BlueButton-OriginalQueryTimestamp}i]"
+            + " %{BlueButton-DeveloperId}i"
+            + " \"%{BlueButton-Developer}i\""
+            + " %{BlueButton-ApplicationId}i"
+            + " \"%{BlueButton-Application}i\""
+            + " %{BlueButton-UserId}i"
+            + " \"%{BlueButton-User}i\""
+            + " %{BlueButton-BeneficiaryId}i"
+            + " %{X-Request-ID}o";
+    final BfdRequestLog requestLog = new BfdRequestLog(accessLogFileName, requestLogFormat);
+
+    server.setRequestLog(requestLog);
 
     /*
      * Configure authentication for webapps. Note that this is a distinct operation from configuring
@@ -206,7 +254,7 @@ public final class DataServerLauncherApp {
     webapp.setSecurityHandler(securityHandler);
 
     // Wire up the WebAppContext to Jetty.
-    HandlerCollection handlers = new HandlerCollection(webapp, requestLogHandler);
+    HandlerCollection handlers = new HandlerCollection(webapp);
     server.setHandler(handlers);
 
     // Configure shutdown handlers before starting everything up.
@@ -246,6 +294,93 @@ public final class DataServerLauncherApp {
      * Anything past this point is not guaranteed to run, as the thread may get stopped before it
      * has a chance to execute.
      */
+  }
+
+  /**
+   * BFD implementation of the Jetty {@link org.eclipse.jetty.server.RequestLog} which provides
+   * callback functionality appropriate for writing access logs which contain information for each
+   * request received by the server.
+   *
+   * <p>This implementation is responsible for writing to two different log files upon completion of
+   * each request:
+   *
+   * <ul>
+   *   <li>access.json - a structured log built from the {@link BfdMDC}
+   *   <li>access.log - an unstructured NCSA style log that should be considered deprecated and
+   *       slated for removal
+   * </ul>
+   *
+   * TODO: BFD-1844 Remove access.log.
+   */
+  private static class BfdRequestLog extends CustomRequestLog {
+    /**
+     * Construct a BFD Request Log.
+     *
+     * @param accessLogFileName filename for the unstructured log 'access.log'
+     * @param accessLogFormat format for the unstructured log 'access.log'
+     */
+    public BfdRequestLog(String accessLogFileName, String accessLogFormat) {
+      super(accessLogFileName, accessLogFormat);
+    }
+
+    /**
+     * Log a message for a request/response pair to both the access.log (via the Jetty
+     * CustomRequestLog) and the access.json (via Logback).
+     *
+     * @param request the request
+     * @param response the response
+     */
+    @Override
+    public void log(Request request, Response response) {
+      try {
+        /*
+         * Call the implementation from CustomRequestLog to write the access.log entry.
+         */
+        super.log(request, response);
+
+        /*
+         * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
+         * CustomRequestLog to write the payload size to the access.log:
+         * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
+         *
+         * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
+         * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
+         * accessible to the filter.
+         */
+        Long outputSizeInBytes = response.getHttpOutput().getWritten();
+        BfdMDC.put(
+            BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
+
+        // Record the response duration.
+        Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
+        if (requestStartMilliseconds != null) {
+          Long responseDurationInMilliseconds =
+              System.currentTimeMillis() - requestStartMilliseconds;
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
+              Long.toString(responseDurationInMilliseconds));
+
+          if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
+            Long responseDurationPerKB =
+                ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
+            BfdMDC.put(
+                BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
+          } else {
+            BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+          }
+        } else {
+          BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+        }
+
+        /*
+         * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
+         * automatically included with it is!
+         */
+        LOGGER_HTTP_ACCESS.info("response complete");
+      } finally {
+        BfdMDC.clear();
+      }
+    }
   }
 
   /**
@@ -329,8 +464,4 @@ public final class DataServerLauncherApp {
           }
         });
   }
-
-  /** Needed to workaround the issue detailed in https://github.com/qos-ch/logback/pull/269. */
-  private static final class JettyLogbackRequestLogImpl extends RequestLogImpl
-      implements LifeCycle {}
 }

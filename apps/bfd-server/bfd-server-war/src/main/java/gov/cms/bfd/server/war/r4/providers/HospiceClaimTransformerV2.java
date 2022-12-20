@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.HospiceClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -24,16 +25,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  */
 public class HospiceClaimTransformerV2 {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link HospiceClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(HospiceClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
@@ -41,7 +42,7 @@ public class HospiceClaimTransformerV2 {
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -52,7 +53,8 @@ public class HospiceClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
-  private static ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      HospiceClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -73,7 +75,7 @@ public class HospiceClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.HOSPICE,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -135,9 +137,12 @@ public class HospiceClaimTransformerV2 {
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
+    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -147,7 +152,9 @@ public class HospiceClaimTransformerV2 {
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiscalIntermediaryClaimProcessDate());
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept
@@ -177,12 +184,19 @@ public class HospiceClaimTransformerV2 {
         Optional.empty(),
         Optional.empty());
 
+    // BENE_HOSPC_PRD_CNT => ExplanationOfBenefit.extension
+    if (claimGroup.getHospicePeriodCount().isPresent()) {
+      eob.addExtension(
+          TransformerUtilsV2.createExtensionQuantity(
+              CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
+    }
+
     for (HospiceClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
@@ -193,6 +207,7 @@ public class HospiceClaimTransformerV2 {
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,
@@ -201,7 +216,8 @@ public class HospiceClaimTransformerV2 {
           line.getTotalChargeAmount(),
           line.getNonCoveredChargeAmount(),
           line.getNationalDrugCodeQuantity(),
-          line.getNationalDrugCodeQualifierCode());
+          line.getNationalDrugCodeQualifierCode(),
+          line.getUnitCount());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
       TransformerUtilsV2.addItemRevenue(

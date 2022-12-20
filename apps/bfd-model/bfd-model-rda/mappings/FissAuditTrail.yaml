@@ -1,0 +1,74 @@
+mappings:
+- id: FissAuditTrail
+  messageClassName: gov.cms.mpsm.rda.v1.fiss.FissAuditTrail
+  entityClassName: gov.cms.bfd.model.rda.RdaFissAuditTrail
+  table:
+    name: fiss_audit_trails
+    schema: rda
+    primaryKeyColumns:
+    - dcn
+    - rdaPosition
+    columns:
+    - name: dcn
+      sqlType: varchar(23)
+      nullable: false
+      comment: 'Document Control Number: This field is the identification number for
+        a claim. It provides a reference number for the control and monitoring of
+        specific claims, and to differentiate between claims for the beneficiary;
+        it may be used to access data for the record depending on the copybook it
+        used for. This is a unique field created by the system.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: badtStatus
+      sqlType: varchar(1)
+      dbName: badt_status
+      comment: 'Batch Audit Status: This field identifies the condition of the claim
+        (paid, reject, deny, etc.) on the claim audit trail.
+
+        Note: The claim status is combined with the claim location to route claims
+        through the system.'
+    - name: badtLoc
+      sqlType: varchar(5)
+      dbName: badt_loc
+      comment: 'Batch Audit Location: This field identifies where the claim is currently
+        located in the system. The first position identifies the type of processing
+        occurring on the claim. The second and third position represents the driver
+        name. The fourth and fifth position allow for further category definition
+        with the driver.
+
+        Note: The claim status is combined with the claim location to route claims
+        through the system.'
+    - name: badtOperId
+      sqlType: varchar(9)
+      dbName: badt_oper_id
+      comment: 'Batch Audit Operator ID: This field identifies the authorized operator
+        that created, or revised data that processed to the claim audit trail. This
+        field is also utilized in a variety of mainframe programs to identify a program
+        name, or function that processes a request in the system, as an operator.Note:
+        Security authorization is handled through the Operator Control file.'
+    - name: badtReas
+      sqlType: varchar(5)
+      dbName: badt_reas
+      comment: 'Batch Audit Reason Code: This field identifies the system edit code
+        on the claim audit trail.'
+    - name: badtCurrDate
+      sqlType: date
+      dbName: badt_curr_date
+  transformations:
+  - from: PARENT
+    to: dcn
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: badtStatus
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissClaimStatus
+  - from: badtLoc
+  - from: badtOperId
+  - from: badtReas
+  - from: badtCurrDateCymd
+    to: badtCurrDate

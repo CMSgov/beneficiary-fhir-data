@@ -8,4 +8,3 @@ terraform {
     kms_key_id     = "alias/bfd-tf-state"
   }
 }
-

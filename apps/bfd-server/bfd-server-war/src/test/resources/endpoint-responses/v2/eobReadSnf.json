@@ -27,9 +27,10 @@
         } ]
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "1111111111"
+      "value" : "0000000000"
     } ],
-    "active" : true
+    "active" : true,
+    "name" : "Fake ORG Name"
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -38,6 +39,22 @@
       "code" : "V",
       "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd",
+      "code" : "1",
+      "display" : "Original debit action (always a 1 for all regular bills)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "23443453453"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+    "valueDate" : "2014-02-07"
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
@@ -50,6 +67,12 @@
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
       "code" : "1"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "code" : "11111"
     }
   } ],
   "identifier" : [ {
@@ -478,7 +501,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R4444"
+        "code" : "6202",
+        "display" : "OVARIAN CYST NEC/NOS"
       } ]
     },
     "type" : [ {
@@ -493,7 +517,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R5555"
+        "code" : "3736",
+        "display" : "PARASITIC INFEST EYELID"
       } ]
     },
     "type" : [ {
@@ -508,7 +533,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R6666"
+        "code" : "V0182",
+        "display" : "EXPOSURE TO SARS"
       } ]
     },
     "type" : [ {
@@ -523,7 +549,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R2222"
+        "code" : "E9281",
+        "display" : "EXPOSURE TO NOISE"
       } ]
     },
     "type" : [ {
@@ -538,7 +565,8 @@
     "diagnosisCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "R3333"
+        "code" : "3310",
+        "display" : "ALZHEIMER'S DISEASE"
       } ]
     },
     "type" : [ {
@@ -551,20 +579,28 @@
   } ],
   "procedure" : [ {
     "sequence" : 1,
-    "date" : "2016-01-16T00:00:00-05:00",
+    "date" : "2016-01-16T00:00:00+00:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",
-        "code" : "0TCCCCC"
+        "code" : "9214",
+        "display" : "BONE SCAN"
       } ]
     }
   } ],
   "insurance" : [ {
+    "focal" : true,
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
   } ],
   "item" : [ {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt",
+      "valueQuantity" : {
+        "value" : 477
+      }
+    } ],
     "sequence" : 1,
     "careTeamSequence" : [ 4 ],
     "revenue" : {
@@ -585,11 +621,18 @@
         "code" : "MMM"
       } ]
     },
+    "modifier" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "code" : "ML",
+        "display" : "Milliliter"
+      } ]
+    } ],
     "locationAddress" : {
       "state" : "FL"
     },
     "quantity" : {
-      "value" : 0
+      "value" : 234.567
     },
     "adjudication" : [ {
       "category" : {

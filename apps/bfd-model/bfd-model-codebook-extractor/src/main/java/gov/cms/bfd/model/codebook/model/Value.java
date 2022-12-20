@@ -14,7 +14,13 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public final class Value {
+
+  /**
+   * The coded value for this {@link Value}, representing one of the allowed values for its
+   * great-grandparent {@link Variable}.
+   */
   private String code;
+  /** A brief English human-readable description of this {@link Value}. */
   private String description;
 
   /** Constructs a new {@link Value} instance. */
@@ -26,6 +32,9 @@ public final class Value {
   /**
    * Constructs a new {@link Value} instance for the CCWCodebookMissingVariable. Had to add new
    * constructor for instantiation of the CCWCodebookInterface
+   *
+   * @param code the code
+   * @param description the description
    */
   public Value(String code, String description) {
     this.code = code;
@@ -33,6 +42,8 @@ public final class Value {
   }
 
   /**
+   * Gets the code.
+   *
    * @return the coded value for this {@link Value}, representing one of the allowed values for its
    *     great-grandparent {@link Variable}
    */
@@ -41,23 +52,35 @@ public final class Value {
     return code;
   }
 
-  /** @param code the new value for {@link #getCode()} */
+  /**
+   * Sets the code.
+   *
+   * @param code the new value for {@link #getCode()}
+   */
   public void setCode(String code) {
     this.code = code;
   }
 
-  /** @return a brief English human-readable description of this {@link Value} */
+  /**
+   * Gets the description.
+   *
+   * @return a brief English human-readable description of this {@link Value}
+   */
   @XmlValue
   public String getDescription() {
     return description;
   }
 
-  /** @param description the new value for {@link #getDescription()} */
+  /**
+   * Sets the description.
+   *
+   * @param description the new value for {@link #getDescription()}
+   */
   public void setDescription(String description) {
     this.description = description;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum McsClaimAssignmentCode {
+  CLAIM_ASSIGNMENT_CODE = 0                         [(string_value) = "A"];
+
+  // Non-assigned claim submitted with both clinical lab and non-clinical lab services (the system will auto split
+  // these during the batch process and revise the assignment indicator to ‘A’ and ‘N’).  This value applies only
+  // to pending claim records.
+  CLAIM_ASSIGNMENT_NON_ASSIGNED_LAB_SERVICES = 1    [(string_value) = "B"];
+
+  CLAIM_ASSIGNMENT_GROUP_ASSIGNED = 2               [(string_value) = "G"];
+
+  CLAIM_ASSIGNMENT_NON_ASSIGNED = 3                 [(string_value) = "N"];
+}

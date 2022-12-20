@@ -1,5 +1,7 @@
 {
   "resourceType" : "CapabilityStatement",
+  "id" : "IGNORED_FIELD",
+  "name" : "RestServer",
   "status" : "active",
   "date" : "IGNORED_FIELD",
   "publisher" : "Centers for Medicare & Medicaid Services",
@@ -12,26 +14,106 @@
     "description" : "gov.cms.bfd:bfd-server-war",
     "url" : "https://localhost:IGNORED_FIELD/v2/fhir"
   },
-  "fhirVersion" : "4.0.0",
-  "format" : [ "application/fhir+xml", "application/fhir+json" ],
+  "fhirVersion" : "4.0.1",
+  "format" : [ "application/fhir+xml", "xml", "application/fhir+json", "json" ],
   "rest" : [ {
     "mode" : "server",
     "resource" : [ {
-      "type" : "Coverage",
-      "profile" : "http://hl7.org/fhir/StructureDefinition/Coverage",
+      "type" : "Claim",
+      "profile" : "http://hl7.org/fhir/StructureDefinition/Claim",
       "interaction" : [ {
         "code" : "read"
       }, {
         "code" : "search-type"
       } ],
+      "searchInclude" : [ "*", "Claim:mbi" ],
+      "searchRevInclude" : [ "Claim:mbi", "ClaimResponse:mbi", "Coverage:beneficiary", "ExplanationOfBenefit:patient" ],
       "searchParam" : [ {
-        "name" : "beneficiary",
-        "type" : "reference",
-        "documentation" : "The patient identifier to search for"
-      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "excludeSAMHSA",
+        "type" : "string",
+        "documentation" : "If true, exclude all SAMHSA-related resources"
+      }, {
+        "name" : "isHashed",
+        "type" : "string",
+        "documentation" : "A boolean indicating whether or not the MBI is hashed"
+      }, {
+        "name" : "mbi",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "service-date",
+        "type" : "date",
+        "documentation" : "Include resources that completed in the given range"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      }, {
+        "name" : "type",
+        "type" : "token",
+        "documentation" : "A list of claim types to include"
+      } ]
+    }, {
+      "type" : "ClaimResponse",
+      "profile" : "http://hl7.org/fhir/StructureDefinition/ClaimResponse",
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchInclude" : [ "*", "ClaimResponse:mbi" ],
+      "searchRevInclude" : [ "Claim:mbi", "ClaimResponse:mbi", "Coverage:beneficiary", "ExplanationOfBenefit:patient" ],
+      "searchParam" : [ {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "excludeSAMHSA",
+        "type" : "string",
+        "documentation" : "If true, exclude all SAMHSA-related resources"
+      }, {
+        "name" : "isHashed",
+        "type" : "string",
+        "documentation" : "A boolean indicating whether or not the MBI is hashed"
+      }, {
+        "name" : "mbi",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "service-date",
+        "type" : "date",
+        "documentation" : "Include resources that completed in the given range"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      }, {
+        "name" : "type",
+        "type" : "token",
+        "documentation" : "A list of claim types to include"
+      } ]
+    }, {
+      "type" : "Coverage",
+      "profile" : "http://hl7.org/fhir/StructureDefinition/Coverage",
+      "interaction" : [ {
+        "code" : "search-type"
+      }, {
+        "code" : "read"
+      } ],
+      "searchInclude" : [ "*", "Coverage:beneficiary" ],
+      "searchRevInclude" : [ "Claim:mbi", "ClaimResponse:mbi", "Coverage:beneficiary", "ExplanationOfBenefit:patient" ],
+      "searchParam" : [ {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "beneficiary",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -45,11 +127,9 @@
       }, {
         "code" : "search-type"
       } ],
+      "searchInclude" : [ "*", "ExplanationOfBenefit:patient" ],
+      "searchRevInclude" : [ "Claim:mbi", "ClaimResponse:mbi", "Coverage:beneficiary", "ExplanationOfBenefit:patient" ],
       "searchParam" : [ {
-        "name" : "patient",
-        "type" : "reference",
-        "documentation" : "The patient identifier to search for"
-      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
@@ -57,6 +137,10 @@
         "name" : "excludeSAMHSA",
         "type" : "string",
         "documentation" : "If true, exclude all SAMHSA-related resources"
+      }, {
+        "name" : "patient",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
       }, {
         "name" : "service-date",
         "type" : "date",
@@ -75,31 +159,31 @@
       "profile" : "http://hl7.org/fhir/StructureDefinition/OperationDefinition",
       "interaction" : [ {
         "code" : "read"
-      } ]
+      } ],
+      "searchInclude" : [ "*" ],
+      "searchRevInclude" : [ "Claim:mbi", "ClaimResponse:mbi", "Coverage:beneficiary", "ExplanationOfBenefit:patient" ]
     }, {
       "type" : "Patient",
       "profile" : "http://hl7.org/fhir/StructureDefinition/Patient",
       "interaction" : [ {
-        "code" : "read"
-      }, {
         "code" : "search-type"
+      }, {
+        "code" : "read"
       } ],
+      "searchInclude" : [ "*" ],
+      "searchRevInclude" : [ "Claim:mbi", "ClaimResponse:mbi", "Coverage:beneficiary", "ExplanationOfBenefit:patient" ],
       "searchParam" : [ {
-        "name" : "_has:Coverage",
+        "name" : "_has:Coverage.extension",
         "type" : "token",
         "documentation" : "Part D coverage type"
       }, {
-        "name" : "_has:Coverage",
+        "name" : "_has:Coverage.rfrncyr",
         "type" : "token",
         "documentation" : "Part D reference year"
       }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
-      }, {
-        "name" : "_lastUpdated",
-        "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
@@ -116,18 +200,6 @@
         "name" : "startIndex",
         "type" : "string",
         "documentation" : "The offset used for result pagination"
-      }, {
-        "name" : "startIndex",
-        "type" : "string",
-        "documentation" : "The offset used for result pagination"
-      } ]
-    }, {
-      "type" : "StructureDefinition",
-      "profile" : "http://hl7.org/fhir/StructureDefinition/StructureDefinition",
-      "interaction" : [ {
-        "code" : "read"
-      }, {
-        "code" : "search-type"
       } ]
     } ]
   } ]

@@ -8,34 +8,12 @@
  * </p>
  */
 
-
-/**
- * Runs Maven with the specified arguments.
- *
- * @param args the arguments to pass to <code>mvn</code>
- * @throws RuntimeException An exception will be bubbled up if the Maven build returns a non-zero exit code.
- */
-def mvn(args) {
-	// This tool must be setup and named correctly in the Jenkins config.
-
-	def mvnHome = tool 'maven-3'
-
-	// Run the build, using Maven, with the appropriate config.
-	configFileProvider(
-			[
-				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
-				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
-			]
-	) {
-		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
-	}
-}
-
 /**
  * Models the results of a call to {@link #build}: contains the paths to the artifacts that were built.
  */
 class AppBuildResults implements Serializable {
-	String dataPipelineUberJar
+	String dbMigratorZip
+	String dataPipelineZip
 	String dataServerLauncher
 	String dataServerWar
 }
@@ -43,29 +21,77 @@ class AppBuildResults implements Serializable {
 /**
  * Builds the Java applications and utilities in this directory: Data Pipeline, Data Server, etc.
  *
+ * @param verboseMaven when `false`, maven runs with `--quiet` and `--batch-mode` flags
  * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
- 
-def build(String build_env) {
+def build(boolean verboseMaven) {
+	withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
+		// Set the auth token for aws code artifact
+		env.CODEARTIFACT_AUTH_TOKEN = sh(
+			returnStdout: true,
+			script: '''
+aws codeartifact get-authorization-token --domain bfd-mgmt \
+ --domain-owner "$ACCOUNT_ID" \
+ --output text --query authorizationToken
+'''
+		).trim()
+
+		// Get our endpoint url for our aws code artifact
+		env.CODEARTIFACT_ENDPOINT = sh(
+			returnStdout: true,
+			script: '''
+aws codeartifact get-repository-endpoint \
+--domain bfd-mgmt --repository bfd-mgmt \
+--format maven --output text
+'''
+		).trim()
+	}
+
+	// Add the authorization token and username for our aws code artifact repository
+	// Added the repositories section in order to not pull from the aws code artifact first instead
+	// of the regular maven repository.  Decreases build times assoiated with this change.
+	sh '''
+cat <<EOF > ~/.m2/settings.xml
+<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd\">
+    <profiles>
+        <profile>
+            <id>bfd-mgmt-bfd-mgmt</id>
+            <activation>
+            <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+               <repository>
+                   <id>bfd-mgmt-bfd-mgmt</id>
+                   <url>${CODEARTIFACT_ENDPOINT}</url>
+                   <releases>
+                   <enabled>false</enabled>
+                   </releases>
+               </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <servers>
+        <server>
+          <username>aws</username>
+          <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+          <id>bfd-mgmt-bfd-mgmt</id>
+        </server>
+    </servers>
+</settings>
+EOF
+'''
+
 	dir ('apps') {
-
-		mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
-
-	
-		/*
-		 * Fingerprint the output artifacts and archive the test results.
-		 *
-		 * Archiving the artifacts here would waste space, as the build deploys them to the local Maven repository.
-		 */
-		fingerprint '**/target/*.jar,**/target/*.war,**/target/*.zip'
-		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
-		archiveArtifacts artifacts: '**/target/*.jar,**/target/*.war,**/target/*.zip,**/target/*-reports/*.txt', allowEmptyArchive: true
+		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
+		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
 	}
 
 	return new AppBuildResults(
-		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar',
-		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar',
+		dbMigratorZip: 'apps/bfd-db-migrator/target/bfd-db-migrator-1.0.0-SNAPSHOT.zip',
+		dataPipelineZip: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip',
+		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT.zip',
 		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war'
 	)
 }

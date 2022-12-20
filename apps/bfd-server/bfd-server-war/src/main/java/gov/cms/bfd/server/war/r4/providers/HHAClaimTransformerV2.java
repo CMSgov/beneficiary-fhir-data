@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -21,23 +22,23 @@ import org.hl7.fhir.r4.model.Quantity;
 
 public class HHAClaimTransformerV2 {
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link HHAClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
@@ -48,7 +49,8 @@ public class HHAClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private static ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      HHAClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -69,7 +71,7 @@ public class HHAClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.HHA,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -104,6 +106,7 @@ public class HHAClaimTransformerV2 {
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
+    // ORG NPI NUM Display      => ExplanationOfBenefit.organization.display
     // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
     // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
     // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension
@@ -112,9 +115,12 @@ public class HHAClaimTransformerV2 {
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -124,7 +130,9 @@ public class HHAClaimTransformerV2 {
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiscalIntermediaryClaimProcessDate());
 
     // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
     TransformerUtilsV2.addInformationWithCode(
@@ -195,7 +203,7 @@ public class HHAClaimTransformerV2 {
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
@@ -222,6 +230,7 @@ public class HHAClaimTransformerV2 {
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,
@@ -230,7 +239,8 @@ public class HHAClaimTransformerV2 {
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
           line.getNationalDrugCodeQuantity(),
-          line.getNationalDrugCodeQualifierCode());
+          line.getNationalDrugCodeQualifierCode(),
+          line.getUnitCount());
 
       // Common item level fields between Outpatient, HHA and Hospice
       // REV_CNTR_DT              => ExplanationOfBenefit.item.servicedDate
@@ -260,6 +270,9 @@ public class HHAClaimTransformerV2 {
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
+
+      // REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
+      TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, eob, line.getStatusCode());
     }
 
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());

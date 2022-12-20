@@ -1,15 +1,27 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -38,10 +50,9 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public final class InpatientClaimTransformerV2Test {
   InpatientClaim claim;
@@ -63,15 +74,25 @@ public final class InpatientClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
 
     return claim;
   }
 
-  @Before
-  public void before() {
+  @BeforeEach
+  public void before() throws IOException {
     claim = generateClaim();
-    eob = InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    ExplanationOfBenefit genEob =
+        InpatientClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -79,18 +100,18 @@ public final class InpatientClaimTransformerV2Test {
   /** Common top level EOB values */
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("inpatient-" + claim.getClaimId(), eob.getId());
+    assertEquals("inpatient-" + claim.getClaimId(), eob.getIdElement().getIdPart());
   }
 
   @Test
   public void shouldSetLastUpdated() {
-    Assert.assertNotNull(eob.getMeta().getLastUpdated());
+    assertNotNull(eob.getMeta().getLastUpdated());
   }
 
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
-    Assert.assertTrue(
+    assertTrue(
         eob.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL)));
@@ -98,40 +119,40 @@ public final class InpatientClaimTransformerV2Test {
 
   @Test
   public void shouldSetUse() {
-    Assert.assertEquals(Use.CLAIM, eob.getUse());
+    assertEquals(Use.CLAIM, eob.getUse());
   }
 
   @Test
   public void shouldSetFinalAction() {
-    Assert.assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
+    assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
-    Assert.assertNotNull(eob.getBillablePeriod());
-    Assert.assertEquals(
+    assertNotNull(eob.getBillablePeriod());
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2016-01-15"),
         eob.getBillablePeriod().getStart());
-    Assert.assertEquals(
+    assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2016-01-27"), eob.getBillablePeriod().getEnd());
   }
 
   @Test
   public void shouldReferencePatient() {
-    Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    assertNotNull(eob.getPatient());
+    assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
   @Test
   public void shouldHaveCreatedDate() {
-    Assert.assertNotNull(eob.getCreated());
+    assertNotNull(eob.getCreated());
   }
 
   @Test
   public void shouldHaveFacilityTypeExtension() {
-    Assert.assertNotNull(eob.getFacility());
-    Assert.assertEquals(1, eob.getFacility().getExtension().size());
+    assertNotNull(eob.getFacility());
+    assertEquals(1, eob.getFacility().getExtension().size());
 
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -144,7 +165,7 @@ public final class InpatientClaimTransformerV2Test {
             new Coding(
                 "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd", "1", "Hospital"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**
@@ -155,7 +176,7 @@ public final class InpatientClaimTransformerV2Test {
    */
   @Test
   public void shouldHaveCareTeamList() {
-    Assert.assertEquals(4, eob.getCareTeam().size());
+    assertEquals(4, eob.getCareTeam().size());
   }
 
   /**
@@ -174,7 +195,7 @@ public final class InpatientClaimTransformerV2Test {
             "attending",
             "Attending");
 
-    Assert.assertTrue(compare1.equalsDeep(member1));
+    assertTrue(compare1.equalsDeep(member1));
 
     // Second member
     CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
@@ -186,7 +207,7 @@ public final class InpatientClaimTransformerV2Test {
             "operating",
             "Operating");
 
-    Assert.assertTrue(compare2.equalsDeep(member2));
+    assertTrue(compare2.equalsDeep(member2));
 
     // Third member
     CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
@@ -198,7 +219,7 @@ public final class InpatientClaimTransformerV2Test {
             "otheroperating",
             "Other Operating");
 
-    Assert.assertTrue(compare3.equalsDeep(member3));
+    assertTrue(compare3.equalsDeep(member3));
 
     // Fourth member
     CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, eob.getCareTeam());
@@ -210,13 +231,13 @@ public final class InpatientClaimTransformerV2Test {
             "performing",
             "Performing provider");
 
-    Assert.assertTrue(compare4.equalsDeep(member4));
+    assertTrue(compare4.equalsDeep(member4));
   }
 
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
-    Assert.assertEquals(11, eob.getSupportingInfo().size());
+    assertEquals(11, eob.getSupportingInfo().size());
   }
 
   @Test
@@ -246,7 +267,7 @@ public final class InpatientClaimTransformerV2Test {
                 "A",
                 "Discharged"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -270,7 +291,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setStartElement(new DateTimeType("2016-01-15"))
                     .setEndElement(new DateTimeType("2016-01-27")));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -302,7 +323,7 @@ public final class InpatientClaimTransformerV2Test {
                     + " severe, life threatening, or potentially disabling conditions. Generally,"
                     + " the patient was admitted through the emergency room."));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -329,7 +350,7 @@ public final class InpatientClaimTransformerV2Test {
             // Code
             new Coding(
                 "https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd", "4", null));
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -354,7 +375,7 @@ public final class InpatientClaimTransformerV2Test {
                     "Claim Diagnosis Related Group Code (or MS-DRG Code)")),
             // Code
             new Coding("https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "695", null));
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -384,7 +405,7 @@ public final class InpatientClaimTransformerV2Test {
                 "0",
                 "No managed care organization (MCO) payment"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -416,7 +437,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setCode(TransformerConstants.CODING_SYSTEM_UCUM_PINT_CODE)
                     .setUnit(TransformerConstants.CODING_SYSTEM_UCUM_PINT_DISPLAY));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -440,7 +461,7 @@ public final class InpatientClaimTransformerV2Test {
                 "1",
                 "Admit thru discharge claim"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -461,9 +482,11 @@ public final class InpatientClaimTransformerV2Test {
                     "Discharge Status")),
             // Code
             new Coding(
-                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd", "1", null));
+                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+                "51",
+                "Discharged/transferred to a Hospice – medical facility."));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -493,7 +516,7 @@ public final class InpatientClaimTransformerV2Test {
                 "A",
                 "Employer group health plan (EGHP) insurance for an aged beneficiary"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -518,20 +541,20 @@ public final class InpatientClaimTransformerV2Test {
             // timingDate
             .setTiming(new DateType("2016-02-26"));
 
-    Assert.assertTrue(compare.equalsDeep(sic));
+    assertTrue(compare.equalsDeep(sic));
   }
 
   /** Provider Local Reference */
   @Test
   public void shouldHaveLocalOrganizationReference() {
-    Assert.assertNotNull(eob.getProvider());
-    Assert.assertEquals("#provider-org", eob.getProvider().getReference());
+    assertNotNull(eob.getProvider());
+    assertEquals("#provider-org", eob.getProvider().getReference());
   }
 
   /** Top level Extensions */
   @Test
   public void shouldHaveKnownExtensions() {
-    Assert.assertEquals(5, eob.getExtension().size());
+    assertEquals(9, eob.getExtension().size());
   }
 
   @Test
@@ -550,7 +573,7 @@ public final class InpatientClaimTransformerV2Test {
                 "Part A institutional claim record (inpatient [IP], skilled nursing facility"
                     + " [SNF], hospice [HOS], or home health agency [HHA])"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -565,7 +588,7 @@ public final class InpatientClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
             new Money().setValue(66125.51).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -580,7 +603,7 @@ public final class InpatientClaimTransformerV2Test {
             "https://bluebutton.cms.gov/resources/variables/dsh_op_clm_val_amt",
             new Money().setValue(25).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -598,7 +621,7 @@ public final class InpatientClaimTransformerV2Test {
                 "A",
                 "Covered worker's compensation (Obsolete)"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   @Test
@@ -616,13 +639,13 @@ public final class InpatientClaimTransformerV2Test {
                 "1",
                 null));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /** Top level Identifiers */
   @Test
   public void shouldHaveKnownIdentifiers() {
-    Assert.assertEquals(2, eob.getIdentifier().size());
+    assertEquals(2, eob.getIdentifier().size());
   }
 
   @Test
@@ -639,7 +662,7 @@ public final class InpatientClaimTransformerV2Test {
             "uc",
             "Unique Claim ID");
 
-    Assert.assertTrue(compare.equalsDeep(clmId));
+    assertTrue(compare.equalsDeep(clmId));
   }
 
   @Test
@@ -656,25 +679,27 @@ public final class InpatientClaimTransformerV2Test {
             "uc",
             "Unique Claim ID");
 
-    Assert.assertTrue(compare.equalsDeep(clmGrp));
+    assertTrue(compare.equalsDeep(clmGrp));
   }
 
   /** Diagnosis elements */
   @Test
   public void shouldHaveDiagnosesList() {
-    Assert.assertEquals(8, eob.getDiagnosis().size());
+    assertEquals(8, eob.getDiagnosis().size());
   }
 
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R4444", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A37", eob.getDiagnosis());
 
     DiagnosisComponent cmp1 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R4444", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A37", "WHOOPING COUGH"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A37", "WHOOPING COUGH")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "admitting",
@@ -682,16 +707,18 @@ public final class InpatientClaimTransformerV2Test {
             null,
             null);
 
-    Assert.assertTrue(cmp1.equalsDeep(diag1));
+    assertTrue(cmp1.equalsDeep(diag1));
 
     DiagnosisComponent diag2 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A40", eob.getDiagnosis());
 
     DiagnosisComponent cmp2 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R5555", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A40", "STREPTOCOCCAL SEPSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A40", "STREPTOCOCCAL SEPSIS")),
             new Coding(
                 "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
                 "principal",
@@ -699,16 +726,18 @@ public final class InpatientClaimTransformerV2Test {
             1,
             "Y");
 
-    Assert.assertTrue(cmp2.equalsDeep(diag2));
+    assertTrue(cmp2.equalsDeep(diag2));
 
     DiagnosisComponent diag3 =
-        TransformerTestUtilsV2.findDiagnosisByCode("A7777", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A52", eob.getDiagnosis());
 
     DiagnosisComponent cmp3 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "A7777", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A52", "LATE SYPHILIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A52", "LATE SYPHILIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -716,16 +745,18 @@ public final class InpatientClaimTransformerV2Test {
             2,
             "N");
 
-    Assert.assertTrue(cmp3.equalsDeep(diag3));
+    assertTrue(cmp3.equalsDeep(diag3));
 
     DiagnosisComponent diag4 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R8888", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A06", eob.getDiagnosis());
 
     DiagnosisComponent cmp4 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R8888", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A06", "AMEBIASIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A06", "AMEBIASIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -733,16 +764,18 @@ public final class InpatientClaimTransformerV2Test {
             3,
             "N");
 
-    Assert.assertTrue(cmp4.equalsDeep(diag4));
+    assertTrue(cmp4.equalsDeep(diag4));
 
     DiagnosisComponent diag5 =
-        TransformerTestUtilsV2.findDiagnosisByCode("K71234", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A15", eob.getDiagnosis());
 
     DiagnosisComponent cmp5 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "K71234", null),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "A15", "RESPIRATORY TUBERCULOSIS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A15", "RESPIRATORY TUBERCULOSIS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -750,16 +783,18 @@ public final class InpatientClaimTransformerV2Test {
             4,
             "N");
 
-    Assert.assertTrue(cmp5.equalsDeep(diag5));
+    assertTrue(cmp5.equalsDeep(diag5));
 
     DiagnosisComponent diag6 =
-        TransformerTestUtilsV2.findDiagnosisByCode("7840", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("B01", eob.getDiagnosis());
 
     DiagnosisComponent cmp6 =
         TransformerTestUtilsV2.createDiagnosis(
             // Order doesn't matter
             diag6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "7840", "HEADACHE"),
+            List.of(
+                new Coding("http://hl7.org/fhir/sid/icd-10-cm", "B01", "VARICELLA [CHICKENPOX]"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "B01", "VARICELLA [CHICKENPOX]")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "other",
@@ -767,16 +802,20 @@ public final class InpatientClaimTransformerV2Test {
             5,
             "N");
 
-    Assert.assertTrue(cmp6.equalsDeep(diag6));
+    assertTrue(cmp6.equalsDeep(diag6));
 
     DiagnosisComponent diag7 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A01", eob.getDiagnosis());
 
     DiagnosisComponent cmp7 =
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag7.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R2222", null),
+            List.of(
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A01", "TYPHOID AND PARATYPHOID FEVERS"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "A01", "TYPHOID AND PARATYPHOID FEVERS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -784,16 +823,19 @@ public final class InpatientClaimTransformerV2Test {
             1,
             "N");
 
-    Assert.assertTrue(cmp7.equalsDeep(diag7));
+    assertTrue(cmp7.equalsDeep(diag7));
 
     DiagnosisComponent diag8 =
-        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+        TransformerTestUtilsV2.findDiagnosisByCode("A02", eob.getDiagnosis());
 
     DiagnosisComponent cmp8 =
         TransformerTestUtilsV2.createExDiagnosis(
             // Order doesn't matter
             diag8.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "R3333", null),
+            List.of(
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10-cm", "A02", "OTHER SALMONELLA INFECTIONS"),
+                new Coding("http://hl7.org/fhir/sid/icd-10", "A02", "OTHER SALMONELLA INFECTIONS")),
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "externalcauseofinjury",
@@ -801,103 +843,150 @@ public final class InpatientClaimTransformerV2Test {
             2,
             "Y");
 
-    Assert.assertTrue(cmp8.equalsDeep(diag8));
+    assertTrue(cmp8.equalsDeep(diag8));
   }
 
   /** Procedures */
   @Test
   public void shouldHaveProcedureList() {
-    Assert.assertEquals(6, eob.getProcedure().size());
+    assertEquals(6, eob.getProcedure().size());
   }
 
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
-        TransformerTestUtilsV2.findProcedureByCode("0TCDDEE", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BQ0HZZZ", eob.getProcedure());
 
     ProcedureComponent cmp1 =
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "0TCDDEE", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "BQ0HZZZ",
+                    "PLAIN RADIOGRAPHY OF LEFT ANKLE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "BQ0HZZZ",
+                    "PLAIN RADIOGRAPHY OF LEFT ANKLE")),
             "2016-01-16T00:00:00-06:00");
 
-    Assert.assertTrue("Comparing Procedure code 0TCDDEE", cmp1.equalsDeep(proc1));
+    assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code BQ0HZZZ");
 
     ProcedureComponent proc2 =
-        TransformerTestUtilsV2.findProcedureByCode("302DDAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("CD1YYZZ", eob.getProcedure());
 
     ProcedureComponent cmp2 =
         TransformerTestUtilsV2.createProcedure(
             proc2.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302DDAA", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "CD1YYZZ",
+                    "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
             "2016-01-16T00:00:00-06:00");
 
-    Assert.assertTrue("Comparing Procedure code 302DDAA", cmp2.equalsDeep(proc2));
+    assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
 
     ProcedureComponent proc3 =
-        TransformerTestUtilsV2.findProcedureByCode("302ZZXX", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("2W52X6Z", eob.getProcedure());
 
     ProcedureComponent cmp3 =
         TransformerTestUtilsV2.createProcedure(
             proc3.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "302ZZXX", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "2W52X6Z",
+                    "REMOVAL OF PRESSURE DRESSING ON NECK"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "2W52X6Z",
+                    "REMOVAL OF PRESSURE DRESSING ON NECK")),
             "2016-01-15T00:00:00-06:00");
 
-    Assert.assertTrue("Comparing Procedure code 302ZZXX", cmp3.equalsDeep(proc3));
+    assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 2W52X6Z");
 
     ProcedureComponent proc4 =
-        TransformerTestUtilsV2.findProcedureByCode("5566AAA", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("BP17ZZZ", eob.getProcedure());
 
     ProcedureComponent cmp4 =
         TransformerTestUtilsV2.createProcedure(
             proc4.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "5566AAA", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "BP17ZZZ",
+                    "FLUOROSCOPY OF LEFT SCAPULA"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA")),
             "2016-01-17T00:00:00-06:00");
 
-    Assert.assertTrue("Comparing Procedure code 5566AAA", cmp4.equalsDeep(proc4));
+    assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code BP17ZZZ");
 
     ProcedureComponent proc5 =
-        TransformerTestUtilsV2.findProcedureByCode("6677BBB", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("D9YD8ZZ", eob.getProcedure());
 
     ProcedureComponent cmp5 =
         TransformerTestUtilsV2.createProcedure(
             proc5.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "6677BBB", null),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "D9YD8ZZ",
+                    "HYPERTHERMIA OF NASOPHARYNX"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX")),
             "2016-01-24T00:00:00-06:00");
 
-    Assert.assertTrue("Comparing Procedure code 6677BBB", cmp5.equalsDeep(proc5));
+    assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code D9YD8ZZ");
 
     ProcedureComponent proc6 =
-        TransformerTestUtilsV2.findProcedureByCode("8109", eob.getProcedure());
+        TransformerTestUtilsV2.findProcedureByCode("F00ZCKZ", eob.getProcedure());
 
     ProcedureComponent cmp6 =
         TransformerTestUtilsV2.createProcedure(
             proc6.getSequence(),
-            new Coding("http://hl7.org/fhir/sid/icd-10", "8109", "REFUSION OF SPINE"),
+            List.of(
+                new Coding(
+                    "http://www.cms.gov/Medicare/Coding/ICD10",
+                    "F00ZCKZ",
+                    "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT"),
+                new Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    "F00ZCKZ",
+                    "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT")),
             "2016-01-24T00:00:00-06:00");
 
-    Assert.assertTrue("Comparing Procedure code 8109", cmp6.equalsDeep(proc6));
+    assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
   }
 
   /** Insurance */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object
-    Assert.assertEquals(1, eob.getInsurance().size());
+    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // to the correct insurance
+    assertEquals(false, eob.getInsurance().size() > 1);
+    assertEquals(1, eob.getInsurance().size());
 
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
 
     InsuranceComponent compare =
         new InsuranceComponent()
+            .setFocal(true)
             .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
 
-    Assert.assertTrue(compare.equalsDeep(insurance));
+    assertTrue(compare.equalsDeep(insurance));
   }
 
   /** Top level Type */
   @Test
   public void shouldHaveExpectedTypeCoding() {
-    Assert.assertEquals(3, eob.getType().getCoding().size());
+    assertEquals(3, eob.getType().getCoding().size());
   }
 
   @Test
@@ -919,25 +1008,25 @@ public final class InpatientClaimTransformerV2Test {
                         "institutional",
                         "Institutional")));
 
-    Assert.assertTrue(compare.equalsDeep(eob.getType()));
+    assertTrue(compare.equalsDeep(eob.getType()));
   }
 
   /** Line Items */
   @Test
   public void shouldHaveLineItems() {
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(1, eob.getItem().size());
   }
 
   @Test
   public void shouldHaveLineItemSequence() {
-    Assert.assertEquals(1, eob.getItemFirstRep().getSequence());
+    assertEquals(1, eob.getItemFirstRep().getSequence());
   }
 
   @Test
   public void shouldHaveLineItemCareTeamRef() {
     // The order isn't important but this should reference a care team member
-    Assert.assertNotNull(eob.getItemFirstRep().getCareTeamSequence());
-    Assert.assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
+    assertNotNull(eob.getItemFirstRep().getCareTeamSequence());
+    assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
   }
 
   @Test
@@ -956,7 +1045,7 @@ public final class InpatientClaimTransformerV2Test {
                         "A",
                         null)));
 
-    Assert.assertTrue(compare.equalsDeep(revenue));
+    assertTrue(compare.equalsDeep(revenue));
   }
 
   @Test
@@ -968,14 +1057,16 @@ public final class InpatientClaimTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/hcpcs_cd", "M55", null)));
+                        "https://bluebutton.cms.gov/resources/variables/hcpcs_cd", "M55", null),
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "M55", null)));
 
-    Assert.assertTrue(compare.equalsDeep(pos));
+    assertTrue(compare.equalsDeep(pos));
   }
 
   @Test
   public void shouldHaveLineItemModifier() {
-    Assert.assertEquals(1, eob.getItemFirstRep().getModifier().size());
+    assertEquals(1, eob.getItemFirstRep().getModifier().size());
 
     CodeableConcept modifier = eob.getItemFirstRep().getModifierFirstRep();
 
@@ -988,7 +1079,7 @@ public final class InpatientClaimTransformerV2Test {
                         "GG",
                         null)));
 
-    Assert.assertTrue(compare.equalsDeep(modifier));
+    assertTrue(compare.equalsDeep(modifier));
   }
 
   @Test
@@ -997,12 +1088,12 @@ public final class InpatientClaimTransformerV2Test {
 
     Address compare = new Address().setState("IA");
 
-    Assert.assertTrue(compare.equalsDeep(address));
+    assertTrue(compare.equalsDeep(address));
   }
 
   @Test
   public void shouldHaveLineItemAdjudications() {
-    Assert.assertEquals(3, eob.getItemFirstRep().getAdjudication().size());
+    assertEquals(3, eob.getItemFirstRep().getAdjudication().size());
   }
 
   @Test
@@ -1028,7 +1119,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Revenue Center Rate Amount"))))
             .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -1055,7 +1146,7 @@ public final class InpatientClaimTransformerV2Test {
             .setAmount(
                 new Money().setValue(84888.88).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   @Test
@@ -1086,13 +1177,13 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("3699.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(adjudication));
+    assertTrue(compare.equalsDeep(adjudication));
   }
 
   /** Total */
   @Test
   public void shouldHaveTotal() {
-    Assert.assertEquals(1, eob.getTotal().size());
+    assertEquals(1, eob.getTotal().size());
   }
 
   @Test
@@ -1117,7 +1208,7 @@ public final class InpatientClaimTransformerV2Test {
             .setAmount(
                 new Money().setValue(84999.37).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(total));
+    assertTrue(compare.equalsDeep(total));
   }
 
   /** Payment */
@@ -1128,13 +1219,13 @@ public final class InpatientClaimTransformerV2Test {
             .setAmount(
                 new Money().setValue(7699.48).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(eob.getPayment()));
+    assertTrue(compare.equalsDeep(eob.getPayment()));
   }
 
   /** Benefit Balance */
   @Test
   public void shouldHaveBenefitBalance() {
-    Assert.assertEquals(1, eob.getBenefitBalance().size());
+    assertEquals(1, eob.getBenefitBalance().size());
 
     // Test Category here
     CodeableConcept compare =
@@ -1146,12 +1237,12 @@ public final class InpatientClaimTransformerV2Test {
                         "1",
                         "Medical Care")));
 
-    Assert.assertTrue(compare.equalsDeep(eob.getBenefitBalanceFirstRep().getCategory()));
+    assertTrue(compare.equalsDeep(eob.getBenefitBalanceFirstRep().getCategory()));
   }
 
   @Test
   public void shouldHaveBenefitBalanceFinancial() {
-    Assert.assertEquals(21, eob.getBenefitBalanceFirstRep().getFinancial().size());
+    assertEquals(21, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
   @Test
@@ -1176,7 +1267,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("10.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1201,7 +1292,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("4.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1224,7 +1315,7 @@ public final class InpatientClaimTransformerV2Test {
             .setUsed(
                 new Money().setValue(646.23).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1246,7 +1337,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Beneficiary Total Coinsurance Days Count"))))
             .setUsed(new UnsignedIntType(0));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1268,7 +1359,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim Medicare Non Utilization Days Count"))))
             .setUsed(new UnsignedIntType(0));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1293,7 +1384,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("112.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1318,7 +1409,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("5.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1343,7 +1434,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("33.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1369,7 +1460,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("14.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1391,7 +1482,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim PPS Capital Disproportionate Share Amount"))))
             .setUsed(new Money().setValue(25.09).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1413,7 +1504,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim PPS Capital Exception Amount"))))
             .setUsed(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1436,7 +1527,7 @@ public final class InpatientClaimTransformerV2Test {
             .setUsed(
                 new Money().setValue(552.56).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1458,7 +1549,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim PPS Capital Indirect Medical Education (IME) Amount"))))
             .setUsed(new Money().setValue(68.58).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1480,7 +1571,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim PPS Capital Outlier Amount"))))
             .setUsed(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1502,7 +1593,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim PPS Old Capital Hold Harmless Amount"))))
             .setUsed(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1524,7 +1615,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "NCH DRG Outlier Approved Payment Amount"))))
             .setUsed(new Money().setValue(23.99).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1549,7 +1640,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("6.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1574,7 +1665,7 @@ public final class InpatientClaimTransformerV2Test {
                     .setValueElement(new DecimalType("11.00"))
                     .setCurrency(TransformerConstants.CODED_MONEY_USD));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1596,7 +1687,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim Medicare Utilization Day Count"))))
             .setUsed(new UnsignedIntType(12));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1618,7 +1709,7 @@ public final class InpatientClaimTransformerV2Test {
                                 "Claim PPS Capital DRG Weight Number"))))
             .setUsed(new UnsignedIntType(1));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
   }
 
   @Test
@@ -1640,7 +1731,78 @@ public final class InpatientClaimTransformerV2Test {
                                 "Beneficiary Medicare Lifetime Reserve Days (LRD) Used Count"))))
             .setUsed(new UnsignedIntType(0));
 
-    Assert.assertTrue(compare.equalsDeep(benefit));
+    assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /**
+   * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
+   * quantity is not zero
+   */
+  @Test
+  public void shouldHaveRevenueCenterUnit() {
+    TransformerTestUtilsV2.assertExtensionQuantityEquals(
+        CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(0), eob.getItem());
+  }
+
+  /**
+   * Ensures the fi_num is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryNumber is present.
+   */
+  @Test
+  public void shouldHaveFiNumberExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_num";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiNumExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiNumExtension);
+    assertEquals("8299", ((Coding) fiNumExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the fiClmActnCd is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimActionCode is present.
+   */
+  @Test
+  public void shouldHaveFiClaimActionCdExtension() {
+
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd";
+
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+    Extension fiClmActCdExtension =
+        eob.getExtension().stream()
+            .filter(e -> expectedDiscriminator.equals(e.getUrl()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(fiClmActCdExtension);
+    assertEquals("1", ((Coding) fiClmActCdExtension.getValue()).getCode());
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is correctly mapped to an eob as an extension when the
+   * fiscalIntermediaryClaimProcessDate is present.
+   */
+  @Test
+  public void shouldHaveFiClaimProcessDateExtension() {
+    assertNotNull(eob.getExtension());
+    assertFalse(eob.getExtension().isEmpty());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt", eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt",
+            new DateType("2016-02-19"));
+
+    assertTrue(compare.equalsDeep(ex));
   }
 
   /**
@@ -1648,12 +1810,17 @@ public final class InpatientClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  @Ignore
+  @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException {
+  public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
         InpatientClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(false),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

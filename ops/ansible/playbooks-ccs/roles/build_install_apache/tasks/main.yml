@@ -1,6 +1,0 @@
----
-##
-# Ensures that Apache is installed and running.
-##
-- name: Install and Configure Apache
-  import_tasks: install_and_configure.yml

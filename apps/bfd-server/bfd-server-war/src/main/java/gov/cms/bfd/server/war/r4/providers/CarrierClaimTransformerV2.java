@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -25,17 +26,18 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 public class CarrierClaimTransformerV2 {
+
   /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link CarrierClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to use
+   * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(
-      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
+  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        metricRegistry
+        transformerContext
+            .getMetricRegistry()
             .timer(
                 MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
@@ -44,7 +46,7 @@ public class CarrierClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob = transformClaim(transformerContext, (CarrierClaim) claim);
 
     timer.stop();
     return eob;
@@ -52,11 +54,12 @@ public class CarrierClaimTransformerV2 {
 
   /**
    * @param claimGroup the CCW {@link CarrierClaim} to transform
+   * @param transformerContext the {@link TransformerContext} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      TransformerContext transformerContext, CarrierClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -81,7 +84,7 @@ public class CarrierClaimTransformerV2 {
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.CARRIER,
-        claimGroup.getClaimGroupId().toPlainString(),
+        String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
@@ -135,7 +138,6 @@ public class CarrierClaimTransformerV2 {
     // CARR_CLM_CNTL_NUM              => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupCarrierDME(
         eob,
-        claimGroup.getBeneficiaryId(),
         claimGroup.getCarrierNumber(),
         claimGroup.getClinicalTrialNumber(),
         claimGroup.getBeneficiaryPartBDeductAmount(),
@@ -173,7 +175,7 @@ public class CarrierClaimTransformerV2 {
     for (CarrierClaimLine line : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       // LINE_NUM => ExplanationOfBenefit.item.sequence
-      item.setSequence(line.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber());
 
       // PRF_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       Optional<CareTeamComponent> performing =
@@ -195,36 +197,63 @@ public class CarrierClaimTransformerV2 {
                 line.getPerformingPhysicianUpin());
       }
 
-      // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
-
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
+      if (performing.isPresent()) {
+        // Update the responsible flag
+        performing.get().setResponsible(true);
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing
+            .get()
+            .setQualification(
                 TransformerUtilsV2.createCodeableConcept(
                     eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
+        boolean performingHasMatchingExtension =
+            TransformerUtilsV2.careTeamHasMatchingExtension(
+                performing.get(),
+                TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
+                String.valueOf(line.getProviderTypeCode()));
 
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+        if (!performingHasMatchingExtension) {
+          // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
+                      line.getProviderTypeCode()));
+        }
 
-      // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
-      TransformerUtilsV2.addCareTeamMember(
-          eob,
-          item,
-          C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
-          line.getOrganizationNpi());
+        performingHasMatchingExtension =
+            (line.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+                    performing.get(),
+                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(line.getProviderParticipatingIndCode().get()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.PRTCPTNG_IND_CD,
+                      line.getProviderParticipatingIndCode()));
+        }
+      }
+
+      if (line.getOrganizationNpi().isPresent()) {
+        // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
+        TransformerUtilsV2.addCareTeamMemberWithNpiOrg(
+            eob,
+            item,
+            C4BBPractitionerIdentifierType.NPI,
+            C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
+            line.getOrganizationNpi().get(),
+            transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(line.getOrganizationNpi()));
+      }
 
       // CARR_LINE_RDCD_PMT_PHYS_ASTN_C => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
@@ -246,7 +275,7 @@ public class CarrierClaimTransformerV2 {
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
       // tax num should be as a extension
-      if (includeTaxNumbers.orElse(false)) {
+      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
@@ -273,6 +302,14 @@ public class CarrierClaimTransformerV2 {
                   item.addExtension(
                       TransformerUtilsV2.createExtensionCoding(
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
+
+      // CARR_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
+      line.getMtusCode()
+          .ifPresent(
+              code ->
+                  item.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, code)));
 
       // Common item level fields between Carrier and DME
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
@@ -321,7 +358,10 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode());
+          line.getNationalDrugCode(),
+          transformerContext
+              .getDrugCodeDisplayLookup()
+              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

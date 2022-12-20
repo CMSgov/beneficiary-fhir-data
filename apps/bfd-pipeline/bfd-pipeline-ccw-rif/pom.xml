@@ -18,24 +18,22 @@
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-shared-utils</artifactId>
+			<artifactId>bfd-pipeline-shared-test-utils</artifactId>
 			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<!-- Just useful. -->
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>29.0-jre</version>
-		</dependency>
-
-		<dependency>
-			<!-- Used to poll interact with AWS' S3 service, which is where RIF files 
-				from the CCW will arrive, when this ETL pipeline is running in production. -->
+			<!-- Used to interact with AWS' S3 service -->
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<exclusions>
@@ -45,11 +43,18 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+			<!-- Just useful. -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
 		<dependency>
 			<!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.7.7</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -57,7 +62,7 @@
 				used in DataSetMonitorWorker. -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>4.1</version>
+			<version>${commons.collections4.version}</version>
 		</dependency>
 
 		<dependency>
@@ -67,20 +72,7 @@
 			<artifactId>jaxb-java-time-adapters</artifactId>
 			<version>1.1.3</version>
 		</dependency>
-
-		<dependency>
-			<!-- Hibernate's JPA implementation is used to load data into the Blue 
-				Button API's database. -->
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
-				for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
-
+		
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 				frameworks in Java. -->
@@ -94,7 +86,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). 
+			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). 
 				Brought into the compile classpath here, because RifLoader directly uses 
 				its CopyManager API. -->
 			<groupId>org.postgresql</groupId>
@@ -104,16 +96,16 @@
 
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>2.0.0</version>
+			<version>${awaitility.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -150,20 +142,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<!-- Will run the `*IT.java` integration tests in this project, as part 
-					of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 

@@ -10,10 +10,18 @@
 The Beneficiary FHIR Server systems should move from being split across 11 Git repositories to a single, combined repository: a "monorepo".
 This has a number of benefits: simpler onboarding, better testing of changes, and more efficient day-to-day operations.
 
+## Status
+[Status]: #status
+
+* Status: Implemented
+* Implementation JIRA Ticket(s):
+    * [BLUEBUTTON-1086](https://jira.cms.gov/browse/BLUEBUTTON-1086)
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
