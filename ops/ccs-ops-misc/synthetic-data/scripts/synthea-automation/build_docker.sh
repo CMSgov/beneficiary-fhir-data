@@ -61,6 +61,14 @@ ensure_paths() {
   fi
 }
 
+setup_python_venv() {
+  echo "Setting up local Python3 virtualenv for s3_utilities.py..."
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip3 install boto3
+  deactivate
+}
+
 download_synthea_properties() {
   echo "Downloading latest synthea.properties file directly from GitHub to $SYNTHEA_PROPERTIES_FILE_DIR"
   mkdir -p "$SYNTHEA_PROPERTIES_FILE_DIR"
@@ -75,12 +83,16 @@ download_synthea_latest_jar() {
 download_mapping_files_from_s3() {
   echo "Downloading Synthea mapping files from S3 to $SYNTHEA_MAPPING_FILES_DIR"
   mkdir -p "$SYNTHEA_MAPPING_FILES_DIR"
+  source .venv/bin/activate
   python3 "$BUILD_CONTEXT_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
+  deactivate
 }
 
 download_scripts_files_from_s3() {
   echo "Downloading Synthea script files from S3 to $BUILD_CONTEXT_ROOT_DIR"
+  source .venv/bin/activate
   python3 "$BUILD_CONTEXT_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
+  deactivate
 }
 
 build_docker_image() {
@@ -112,6 +124,7 @@ clean_up() {
 clean_up
 
 ensure_paths
+setup_python_venv
 
 download_synthea_properties
 download_synthea_latest_jar
