@@ -2070,14 +2070,6 @@
           } ]
         } ]
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "Y",
-            "display" : "Diagnosis was present at the time of admission (POA)"
-          }
-        } ],
         "sequence" : 3,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
@@ -2094,14 +2086,6 @@
           } ]
         } ]
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "N",
-            "display" : "Diagnosis was not present at the time of admission"
-          }
-        } ],
         "sequence" : 4,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
@@ -2111,14 +2095,6 @@
           } ]
         }
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "N",
-            "display" : "Diagnosis was not present at the time of admission"
-          }
-        } ],
         "sequence" : 5,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
@@ -2128,14 +2104,6 @@
           } ]
         }
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "N",
-            "display" : "Diagnosis was not present at the time of admission"
-          }
-        } ],
         "sequence" : 6,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
@@ -2145,14 +2113,6 @@
           } ]
         }
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "N",
-            "display" : "Diagnosis was not present at the time of admission"
-          }
-        } ],
         "sequence" : 7,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
@@ -2162,14 +2122,6 @@
           } ]
         }
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "N",
-            "display" : "Diagnosis was not present at the time of admission"
-          }
-        } ],
         "sequence" : 8,
         "diagnosisCodeableConcept" : {
           "coding" : [ {
@@ -2192,14 +2144,6 @@
           } ]
         } ]
       }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
-            "code" : "Y",
-            "display" : "Diagnosis was present at the time of admission (POA)"
-          }
-        } ],
         "sequence" : 9,
         "diagnosisCodeableConcept" : {
           "coding" : [ {

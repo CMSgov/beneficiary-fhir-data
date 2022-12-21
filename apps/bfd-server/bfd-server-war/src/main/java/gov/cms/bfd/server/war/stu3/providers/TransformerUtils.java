@@ -379,10 +379,11 @@ public final class TransformerUtils {
       diagnosisTypeConcept.getCodingFirstRep().setDisplay(diagnosisLabel.getDisplay());
       diagnosisComponent.addType(diagnosisTypeConcept);
     }
-    if (diagnosis.getPresentOnAdmission().isPresent()) {
+    if (diagnosis.getPresentOnAdmission().isPresent()
+        && diagnosis.getPresentOnAdmissionCode().isPresent()) {
       diagnosisComponent.addExtension(
           createExtensionCoding(
-              eob, CcwCodebookVariable.CLM_POA_IND_SW1, diagnosis.getPresentOnAdmission()));
+              eob, diagnosis.getPresentOnAdmissionCode().get(), diagnosis.getPresentOnAdmission()));
     }
 
     eob.getDiagnosis().add(diagnosisComponent);
