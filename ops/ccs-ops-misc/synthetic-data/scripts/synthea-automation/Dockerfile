@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
 FROM base as dist
 WORKDIR /usr/local/synthea
 COPY . .
-RUN chmod +x ./docker_entrypoint.sh ./run_synthea ./national_bfd.sh ./national_bfd_v2.sh
+RUN chmod +x ./run_synthea_docker.sh ./run_synthea ./national_bfd.sh ./national_bfd_v2.sh
 RUN mkdir output logs
-ENTRYPOINT [ "./docker_entrypoint.sh" ]
+ENTRYPOINT [ "./run_synthea_docker.sh" ]
 CMD ["-h"]
