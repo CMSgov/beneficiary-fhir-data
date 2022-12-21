@@ -67,16 +67,20 @@ echo "Checking if the output bind-mount directory is empty before generation..."
 )
 
 echo "Preparing to run Synthea generation..."
+current_datetime=$(date '+%F_%H:%M:%S')
 
 echo "Running Synthea generation with $num_generated_benes benes and $num_future_months future months..."
+echo "View the log in real-time by tailing the synthea.latest.log in the bind-mounted logs directory"
 {
   python3 prepare-and-run-synthea.py \
     "${BFD_END_STATE_PROPERTIES}" \
     "${TARGET_SYNTHEA_DIR}" \
     "${num_generated_benes}" \
-    "${num_future_months}" &> "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$(date '+%F_%H:%M:%S').log" && \
+    "${num_future_months}" &> "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$current_datetime.log" && \
   echo "Synthea generation finished, synthetic data should be available in the bind mounted output directory"
 } || {
   echo "Synthea generation failed to complete. View the logs in the bind-mounted logs directory for more information"
 }
-mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/national_script-$(date '+%F_%H:%M:%S').log"
+echo "Renaming synthea.latest.log to synthea-$current_datetime.log..."
+mv "$TARGET_SYNTHEA_DIR/logs/synthea.latest.log" "$TARGET_SYNTHEA_DIR/logs/synthea-$current_datetime.log"
+mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/national_script-$current_datetime.log"
