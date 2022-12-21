@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-TARGET_SYNTHEA_DIR="/usr/local/synthea"
+TARGET_SYNTHEA_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
 readonly TARGET_SYNTHEA_DIR
-
-BFD_STARTING_END_STATE_PROPS="/data/end_state.properties"
-readonly BFD_STARTING_END_STATE_PROPS
 
 BFD_END_STATE_PROPERTIES="$TARGET_SYNTHEA_DIR/end_state.properties"
 readonly BFD_END_STATE_PROPERTIES
