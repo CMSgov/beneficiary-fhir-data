@@ -15,9 +15,6 @@ readonly SYNTHEA_PROPERTIES_FILE_DIR
 SYNTHEA_MAPPING_FILES_DIR="$BUILD_CONTEXT_ROOT_DIR/src/main/resources/export"
 readonly SYNTHEA_MAPPING_FILES_DIR
 
-BFD_SYNTHEA_SCRIPTS_DIR="$(dirname "$BUILD_CONTEXT_ROOT_DIR")"
-readonly BFD_SYNTHEA_SCRIPTS_DIR
-
 DOCKERFILE_PATH="$BUILD_CONTEXT_ROOT_DIR/Dockerfile"
 readonly DOCKERFILE_PATH
 
@@ -57,12 +54,12 @@ download_synthea_latest_jar() {
 download_mapping_files_from_s3() {
   echo "Downloading Synthea mapping files from S3 to $SYNTHEA_MAPPING_FILES_DIR"
   mkdir -p "$SYNTHEA_MAPPING_FILES_DIR"
-  python3 "$BFD_SYNTHEA_SCRIPTS_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
+  python3 "$BUILD_CONTEXT_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
 }
 
 download_scripts_files_from_s3() {
   echo "Downloading Synthea script files from S3 to $BUILD_CONTEXT_ROOT_DIR"
-  python3 "$BFD_SYNTHEA_SCRIPTS_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
+  python3 "$BUILD_CONTEXT_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
 }
 
 build_docker_image() {
