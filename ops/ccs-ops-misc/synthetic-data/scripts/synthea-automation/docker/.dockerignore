@@ -1,0 +1,8 @@
+*
+!synthea-with-dependencies.jar
+!entrypoint.sh
+!national_bfd_v2.sh
+!national_bfd.sh
+!prepare-and-run-synthea.py
+!run_synthea
+!src/

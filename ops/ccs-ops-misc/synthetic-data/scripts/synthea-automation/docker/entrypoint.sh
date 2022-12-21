@@ -24,8 +24,6 @@ help() {
 
 args=$(getopt -l "num:num_future_months:help" -o "n:f:h" -- "$@")
 
-# parse the args
-# parse the args
 while [ $# -ge 1 ]; do
   case "$1" in
     --)
@@ -59,5 +57,29 @@ while [ $# -ge 1 ]; do
   shift
 done
 
-cp "$BFD_STARTING_END_STATE_PROPS" "$TARGET_SYNTHEA_DIR/"
-python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${num_generated_benes}" "${num_future_months}"
+echo "Checking if the output bind-mount directory is empty before generation..."
+(
+  cd "$TARGET_SYNTHEA_DIR/output"
+  shopt -s nullglob 
+  files=( * .* )
+  if (( ${#files[@]} != 2 )); then
+      # contents of files array is (. ..)
+      echo "The output bind-mount directory is not empty; ensure the directory is empty before running"
+      exit 1
+  fi
+)
+
+echo "Preparing to run Synthea generation..."
+
+echo "Running Synthea generation with $num_generated_benes benes and $num_future_months future months..."
+{
+  python3 prepare-and-run-synthea.py \
+    "${BFD_END_STATE_PROPERTIES}" \
+    "${TARGET_SYNTHEA_DIR}" \
+    "${num_generated_benes}" \
+    "${num_future_months}" &> "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$(date '+%F_%H:%M:%S').log" && \
+  echo "Synthea generation finished, synthetic data should be available in the bind mounted output directory"
+} || {
+  echo "Synthea generation failed to complete. View the logs in the bind-mounted logs directory for more information"
+}
+mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/national_script-$(date '+%F_%H:%M:%S').log"

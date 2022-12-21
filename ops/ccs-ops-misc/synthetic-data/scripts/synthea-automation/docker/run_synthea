@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-TARGET_SYNTHEA_DIR="/usr/local/synthea"
+TARGET_SYNTHEA_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
 readonly TARGET_SYNTHEA_DIR
 
-java -jar "$TARGET_SYNTHEA_DIR/synthea-with-dependencies.jar" "$@" > "$TARGET_SYNTHEA_DIR/synthea.log"
+LOG_PATH="$TARGET_SYNTHEA_DIR/logs/synthea-$(date '+%F_%H:%M:%S').log"
+readonly LOG_PATH
+
+java -cp "$TARGET_SYNTHEA_DIR/synthea-with-dependencies.jar:$TARGET_SYNTHEA_DIR/src/main/resources" \
+  "App" "-c" "$TARGET_SYNTHEA_DIR/src/main/resources/synthea.properties" "$@" >>"$LOG_PATH" 2>&1
