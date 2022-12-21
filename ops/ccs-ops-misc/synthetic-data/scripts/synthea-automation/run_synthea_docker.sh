@@ -77,7 +77,7 @@ echo "View logs in real-time by tailing *.latest.log logs in the logs directory"
     "${TARGET_SYNTHEA_DIR}" \
     "${num_generated_benes}" \
     "${num_future_months}" &>"$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea.latest.log" &&
-  echo "Synthea generation finished, synthetic data should be available in the mounted output directory"
+  echo "Synthea generation finished, generated synthetic data can be found in the output directory"
 } || {
   echo "Synthea generation failed to complete. View the logs in the logs directory for more information"
 }
