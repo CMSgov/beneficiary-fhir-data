@@ -70,7 +70,7 @@ echo "Preparing to run Synthea generation..."
 current_datetime=$(date '+%F_%H:%M:%S')
 
 echo "Running Synthea generation with $num_generated_benes benes and $num_future_months future months..."
-echo "View the log in real-time by tailing the synthea.latest.log in the bind-mounted logs directory"
+echo "View the Synthea generation log in real-time by tailing the synthea.latest.log in the bind-mounted logs directory"
 {
   python3 prepare-and-run-synthea.py \
     "${BFD_END_STATE_PROPERTIES}" \
