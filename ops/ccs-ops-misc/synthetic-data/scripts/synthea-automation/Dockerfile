@@ -1,6 +1,6 @@
 FROM python:3-slim-bullseye as base
 RUN apt-get update && apt-get install -y \
-    libpq-dev openjdk-11-jdk bc
+    openjdk-11-jdk bc
 
 FROM base as dist
 WORKDIR /usr/local/synthea
