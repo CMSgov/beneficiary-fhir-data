@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+# The national_bfd*.sh scripts assume that a "run_synthea" gradle script is avaiable to use that
+# runs Synthea (by running gradlew run ...). Since the .jar is being used in this Docker image
+# instead of builing the repository, this "fake" run_synthea script is included to allow the
+# national_bfd*.sh scripts to run as expected
+
 TARGET_SYNTHEA_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
 readonly TARGET_SYNTHEA_DIR
 
 LOG_PATH="$TARGET_SYNTHEA_DIR/logs/synthea.latest.log"
 readonly LOG_PATH
 
+# As mentioned above, the way in which Synthea is invoked (via the national_bfd*.sh scripts) assumes
+# that external, proprietary mapping files are available in the classpath when this script is
+# executed. As this image uses the pre-built Synthea .jar, these proprietary mapping files are _not_
+# available in the classpath by default and therefore we must tell the JVM where to find these
+# external resources by setting the classpath ourselves. Additionally, the synthea.properties file,
+# modified by prepare_and_run_synthea.py, must also be manually specified as otherwise the .jar's
+# internal synthea.properties will be used
 java -cp "$TARGET_SYNTHEA_DIR/synthea-with-dependencies.jar:$TARGET_SYNTHEA_DIR/src/main/resources" \
   "App" "-c" "$TARGET_SYNTHEA_DIR/src/main/resources/synthea.properties" "$@" >>"$LOG_PATH" 2>&1
