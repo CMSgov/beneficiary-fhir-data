@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+TARGET_SYNTHEA_DIR="/usr/local/synthea"
+readonly TARGET_SYNTHEA_DIR
+
+java -jar "$TARGET_SYNTHEA_DIR/synthea-with-dependencies.jar" "$@" > "$TARGET_SYNTHEA_DIR/synthea.log"
