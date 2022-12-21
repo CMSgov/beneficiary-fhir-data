@@ -33,6 +33,27 @@ readonly SYNTHEA_JAR_FILE
 SYNTHEA_LATEST_JAR_URL="https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/${SYNTHEA_JAR_FILE}"
 readonly SYNTHEA_LATEST_JAR_URL
 
+GIT_SHORT_HASH="$(git rev-parse --short HEAD)"
+readonly GIT_SHORT_HASH
+
+AWS_REGION="us-east-1"
+readonly AWS_REGION
+
+PRIVATE_REGISTRY_URI="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+readonly PRIVATE_REGISTRY_URI
+
+IMAGE_NAME="${PRIVATE_REGISTRY_URI}/bfd-mgmt-synthea-generation"
+readonly IMAGE_NAME
+
+SSM_IMAGE_TAG="/bfd/mgmt/common/nonsensitive/synthea_generation_latest_image_tag"
+readonly SSM_IMAGE_TAG
+
+DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$GIT_SHORT_HASH"}"
+readonly DOCKER_TAG
+
+DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
+readonly DOCKER_TAG_LATEST
+
 ensure_paths() {
   if [ ! -f "$DOCKERFILE_PATH" ]; then
     echo "$DOCKERFILE_PATH not found; is this script running from the correct path?"
@@ -65,11 +86,20 @@ download_scripts_files_from_s3() {
 build_docker_image() {
   # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
   DOCKER_BUILDKIT=1 
-  docker build -t "bfd_2234_t5" \
+  docker build -t "$IMAGE_NAME:$DOCKER_TAG" \
+    -t "$IMAGE_NAME:$DOCKER_TAG_LATEST" \
     -f "$DOCKERFILE_PATH" \
     --target "dist" \
+    --platform "linux/amd64" \
     "$BUILD_CONTEXT_ROOT_DIR"
-    # --platform "linux/amd64" \
+}
+
+push_image_to_ecr() {
+  # Get registry password and tell docker to login
+  aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
+
+  # Push image to ECR
+  docker push "$IMAGE_NAME" --all-tags
 }
 
 clean_up() {
@@ -89,5 +119,6 @@ download_mapping_files_from_s3
 download_scripts_files_from_s3
 
 build_docker_image
+push_image_to_ecr
 
 clean_up
