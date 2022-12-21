@@ -24,12 +24,6 @@ readonly DOCKERFILE_PATH
 BFD_S3_UTILITIES_SCRIPT="s3_utilities.py"
 readonly BFD_S3_UTILITIES_SCRIPT
 
-BFD_PREPARE_RUN_SYNTHEA_SCRIPT="prepare-and-run-synthea.py"
-readonly BFD_PREPARE_RUN_SYNTHEA_SCRIPT
-
-BFD_SPLIT_FUTURE_CLAIMS_SCRIPT="split-future-claims.py"
-readonly BFD_SPLIT_FUTURE_CLAIMS_SCRIPT
-
 SYNTHEA_NATIONAL_V1_SCRIPT="national_bfd.sh"
 readonly SYNTHEA_NATIONAL_V1_SCRIPT
 
@@ -43,11 +37,6 @@ SYNTHEA_LATEST_JAR_URL="https://github.com/synthetichealth/synthea/releases/down
 readonly SYNTHEA_LATEST_JAR_URL
 
 ensure_paths() {
-  if [ ! -f "$BFD_SYNTHEA_SCRIPTS_DIR/$BFD_S3_UTILITIES_SCRIPT" ]; then
-    echo "$BFD_S3_UTILITIES_SCRIPT not found; is this script running from the correct path?"
-    exit 1
-  fi
-
   if [ ! -f "$DOCKERFILE_PATH" ]; then
     echo "$DOCKERFILE_PATH not found; is this script running from the correct path?"
     exit 1
@@ -76,11 +65,6 @@ download_scripts_files_from_s3() {
   python3 "$BFD_SYNTHEA_SCRIPTS_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
 }
 
-copy_python_scripts_to_context() {
-  cp "$BFD_SYNTHEA_SCRIPTS_DIR/$BFD_PREPARE_RUN_SYNTHEA_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR"
-  cp "$BFD_SYNTHEA_SCRIPTS_DIR/$BFD_SPLIT_FUTURE_CLAIMS_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR"
-}
-
 build_docker_image() {
   # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
   DOCKER_BUILDKIT=1 
@@ -93,8 +77,6 @@ build_docker_image() {
 
 clean_up() {
   rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/src"
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$BFD_PREPARE_RUN_SYNTHEA_SCRIPT"
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$BFD_SPLIT_FUTURE_CLAIMS_SCRIPT"
   rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_JAR_FILE"
   rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_NATIONAL_V1_SCRIPT"
   rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_NATIONAL_V2_SCRIPT"
@@ -108,8 +90,6 @@ download_synthea_properties
 download_synthea_latest_jar
 download_mapping_files_from_s3
 download_scripts_files_from_s3
-
-copy_python_scripts_to_context
 
 build_docker_image
 
