@@ -132,6 +132,7 @@ download_mapping_files_from_s3
 download_scripts_files_from_s3
 
 build_docker_image
-push_image_to_ecr
 
 clean_up
+
+push_image_to_ecr
