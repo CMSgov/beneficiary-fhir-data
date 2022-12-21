@@ -57,12 +57,12 @@ done
 echo "Checking if the output bind-mount directory is empty before generation..."
 (
   cd "$TARGET_SYNTHEA_DIR/output"
-  shopt -s nullglob 
-  files=( * .* )
-  if (( ${#files[@]} != 2 )); then
-      # contents of files array is (. ..)
-      echo "The output bind-mount directory is not empty; ensure the directory is empty before running"
-      exit 1
+  shopt -s nullglob
+  files=(* .*)
+  if ((${#files[@]} != 2)); then
+    # contents of files array is (. ..)
+    echo "The output bind-mount directory is not empty; ensure the directory is empty before running"
+    exit 1
   fi
 )
 
@@ -76,8 +76,8 @@ echo "View the log in real-time by tailing the synthea.latest.log in the bind-mo
     "${BFD_END_STATE_PROPERTIES}" \
     "${TARGET_SYNTHEA_DIR}" \
     "${num_generated_benes}" \
-    "${num_future_months}" &> "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$current_datetime.log" && \
-  echo "Synthea generation finished, synthetic data should be available in the bind mounted output directory"
+    "${num_future_months}" &>"$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$current_datetime.log" &&
+    echo "Synthea generation finished, synthetic data should be available in the bind mounted output directory"
 } || {
   echo "Synthea generation failed to complete. View the logs in the bind-mounted logs directory for more information"
 }
