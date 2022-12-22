@@ -103,5 +103,5 @@ echo "Moving output to $generated_output_dir sub-directory..."
 mkdir -p "$TARGET_SYNTHEA_DIR/output/$generated_output_dir"
 (
   cd "$TARGET_SYNTHEA_DIR/output" && \
-  mv ./* "$generated_output_dir" 2>/dev/null # mv will complain about moving the sub-dir, but will move all other files/dirs
+  mv ./* "$generated_output_dir" 2>/dev/null || true # mv will complain about moving the sub-dir, but will move all other files/dirs
 )
