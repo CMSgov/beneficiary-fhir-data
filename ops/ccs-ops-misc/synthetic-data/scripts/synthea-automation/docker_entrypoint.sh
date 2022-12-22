@@ -70,13 +70,12 @@ echo "Preparing to run Synthea generation..."
 starting_datetime=$(date '+%F_%H:%M:%S')
 
 echo "Running Synthea generation with $num_generated_benes benes and $num_future_months future months..."
-echo "View logs in real-time by tailing *.latest.log logs in the logs directory"
 {
   python3 prepare-and-run-synthea.py \
     "${BFD_END_STATE_PROPERTIES}" \
     "${TARGET_SYNTHEA_DIR}" \
     "${num_generated_benes}" \
-    "${num_future_months}" &>"$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea.latest.log" &&
+    "${num_future_months}" 2>&1 | tee -a "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea.latest.log" &&
   echo "Synthea generation finished, generated synthetic data can be found in the output directory"
 } || {
   echo "Synthea generation failed to complete. View the logs in the logs directory for more information"
@@ -86,7 +85,7 @@ if [ "$generate_future" == 'true' ]; then
   echo "Generating future months was specified, splitting future claims to allow for proper loading..."
   {
     python3 split-future-claims.py "$TARGET_SYNTHEA_DIR" \
-      &>"$TARGET_SYNTHEA_DIR/logs/split_future_claims.latest.log" &&
+      2>&1 | tee -a "$TARGET_SYNTHEA_DIR/logs/split_future_claims.latest.log" &&
     echo "Future claims splitting succeeded, view the split_future_claims-$starting_datetime.log for more information"
   } || {
     echo "Future claims splitting failed, view the split_future_claims-$starting_datetime.log for more information"
@@ -94,9 +93,8 @@ if [ "$generate_future" == 'true' ]; then
 fi
 
 echo "Renaming *.latest.log logs to *$starting_datetime.log..."
-mv "$TARGET_SYNTHEA_DIR/logs/synthea.latest.log" "$TARGET_SYNTHEA_DIR/logs/synthea-$starting_datetime.log"
 mv "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea.latest.log" "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$starting_datetime.log"
 if [ "$generate_future" == 'true' ]; then
   mv "$TARGET_SYNTHEA_DIR/logs/split_future_claims.latest.log" "$TARGET_SYNTHEA_DIR/logs/split_future_claims-$starting_datetime.log"
 fi
-mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/national_script-$starting_datetime.log"
+mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/synthea-$starting_datetime.log"
