@@ -33,9 +33,6 @@ readonly SYNTHEA_JAR_FILE
 SYNTHEA_LATEST_JAR_URL="https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/${SYNTHEA_JAR_FILE}"
 readonly SYNTHEA_LATEST_JAR_URL
 
-GIT_SHORT_HASH="$(git rev-parse --short HEAD)"
-readonly GIT_SHORT_HASH
-
 AWS_REGION="us-east-1"
 readonly AWS_REGION
 
@@ -45,14 +42,11 @@ readonly PRIVATE_REGISTRY_URI
 IMAGE_NAME="${PRIVATE_REGISTRY_URI}/bfd-mgmt-synthea-generation"
 readonly IMAGE_NAME
 
-SSM_IMAGE_TAG="/bfd/mgmt/common/nonsensitive/synthea_generation_latest_image_tag"
-readonly SSM_IMAGE_TAG
+DOCKER_JENKINS_VARIANT_TAG="${DOCKER_JENKINS_VARIANT_TAG_OVERRIDE:-"jenkins-latest"}"
+readonly DOCKER_JENKINS_VARIANT_TAG
 
-DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$GIT_SHORT_HASH"}"
-readonly DOCKER_TAG
-
-DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
-readonly DOCKER_TAG_LATEST
+DOCKER_LOCAL_VARIANT_TAG="${DOCKER_LOCAL_VARIANT_TAG_OVERRIDE:-"latest"}"
+readonly DOCKER_LOCAL_VARIANT_TAG
 
 ensure_paths() {
   if [ ! -f "$DOCKERFILE_PATH" ]; then
@@ -97,11 +91,19 @@ download_scripts_files_from_s3() {
 
 build_docker_image() {
   # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
-  DOCKER_BUILDKIT=1 
-  docker build -t "$IMAGE_NAME:$DOCKER_TAG" \
-    -t "$IMAGE_NAME:$DOCKER_TAG_LATEST" \
+  DOCKER_BUILDKIT=1
+
+  echo "Building local variant of bfd-mgmt-synthea-generation..."
+  docker build -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
     -f "$DOCKERFILE_PATH" \
-    --target "dist" \
+    --target "local" \
+    --platform "linux/amd64" \
+    "$BUILD_CONTEXT_ROOT_DIR"
+    
+  echo "Building jenkins variant of bfd-mgmt-synthea-generation..."
+  docker build -t "$IMAGE_NAME:$DOCKER_JENKINS_VARIANT_TAG" \
+    -f "$DOCKERFILE_PATH" \
+    --target "jenkins" \
     --platform "linux/amd64" \
     "$BUILD_CONTEXT_ROOT_DIR"
 }
