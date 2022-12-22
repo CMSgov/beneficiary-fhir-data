@@ -96,5 +96,7 @@ fi
 echo "Renaming *.latest.log logs to *$starting_datetime.log..."
 mv "$TARGET_SYNTHEA_DIR/logs/synthea.latest.log" "$TARGET_SYNTHEA_DIR/logs/synthea-$starting_datetime.log"
 mv "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea.latest.log" "$TARGET_SYNTHEA_DIR/logs/prepare_and_run_synthea-$starting_datetime.log"
-mv "$TARGET_SYNTHEA_DIR/logs/split_future_claims.latest.log" "$TARGET_SYNTHEA_DIR/logs/split_future_claims-$starting_datetime.log"
+if [ "$generate_future" == 'true' ]; then
+  mv "$TARGET_SYNTHEA_DIR/logs/split_future_claims.latest.log" "$TARGET_SYNTHEA_DIR/logs/split_future_claims-$starting_datetime.log"
+fi
 mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/national_script-$starting_datetime.log"
