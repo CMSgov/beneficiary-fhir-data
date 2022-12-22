@@ -98,6 +98,9 @@ if [ "$generate_future" == 'true' ]; then
 fi
 mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/synthea-$starting_datetime.log"
 
+echo "Copying original end_state.properties into output/bfd..."
+cp "$TARGET_SYNTHEA_DIR/end_state.properties" "$TARGET_SYNTHEA_DIR/output/bfd/end_state.properties.orig"
+
 generated_output_dir="generated-$starting_datetime"
 echo "Moving output to $generated_output_dir sub-directory..."
 mkdir -p "$TARGET_SYNTHEA_DIR/output/$generated_output_dir"
