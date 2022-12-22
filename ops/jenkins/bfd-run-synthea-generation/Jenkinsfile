@@ -52,7 +52,7 @@ spec:
                         + 'generated. If specified, future claims will be split in the '
                         + 'generated output to allow for proper loading')
 
-    string(name: 'UPDATE_END_STATE_S3',
+    booleanParam(name: 'UPDATE_END_STATE_S3',
            defaultValue: false,
            description: 'Specifies whether the main end_state.properties stored in the synthea S3 '
                         + 'bucket should be updated with the end_state.properties '
