@@ -97,3 +97,11 @@ if [ "$generate_future" == 'true' ]; then
   mv "$TARGET_SYNTHEA_DIR/logs/split_future_claims.latest.log" "$TARGET_SYNTHEA_DIR/logs/split_future_claims-$starting_datetime.log"
 fi
 mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/synthea-$starting_datetime.log"
+
+generated_output_dir="generated-$starting_datetime"
+echo "Moving output to $generated_output_dir sub-directory..."
+mkdir -p "$TARGET_SYNTHEA_DIR/output/$generated_output_dir"
+(
+  cd "$TARGET_SYNTHEA_DIR/output" && \
+  mv ./* "$generated_output_dir" 2>/dev/null # mv will complain about moving the sub-dir, but will move all other files/dirs
+)
