@@ -42,9 +42,6 @@ readonly PRIVATE_REGISTRY_URI
 IMAGE_NAME="${PRIVATE_REGISTRY_URI}/bfd-mgmt-synthea-generation"
 readonly IMAGE_NAME
 
-DOCKER_JENKINS_VARIANT_TAG="${DOCKER_JENKINS_VARIANT_TAG_OVERRIDE:-"jenkins-latest"}"
-readonly DOCKER_JENKINS_VARIANT_TAG
-
 DOCKER_LOCAL_VARIANT_TAG="${DOCKER_LOCAL_VARIANT_TAG_OVERRIDE:-"latest"}"
 readonly DOCKER_LOCAL_VARIANT_TAG
 
@@ -92,18 +89,9 @@ download_scripts_files_from_s3() {
 build_docker_image() {
   # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
   DOCKER_BUILDKIT=1
-
-  echo "Building local variant of bfd-mgmt-synthea-generation..."
   docker build -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
     -f "$DOCKERFILE_PATH" \
-    --target "local" \
-    --platform "linux/amd64" \
-    "$BUILD_CONTEXT_ROOT_DIR"
-    
-  echo "Building jenkins variant of bfd-mgmt-synthea-generation..."
-  docker build -t "$IMAGE_NAME:$DOCKER_JENKINS_VARIANT_TAG" \
-    -f "$DOCKERFILE_PATH" \
-    --target "jenkins" \
+    --target "dist" \
     --platform "linux/amd64" \
     "$BUILD_CONTEXT_ROOT_DIR"
 }
