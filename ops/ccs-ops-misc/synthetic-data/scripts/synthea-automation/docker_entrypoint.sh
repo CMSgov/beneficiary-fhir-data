@@ -67,7 +67,7 @@ echo "Checking if the output directory is empty before generation..."
 )
 
 echo "Preparing to run Synthea generation..."
-starting_datetime=$(date '+%F_%H:%M:%S')
+starting_datetime=$(date '+%F_%H-%M-%S')
 
 echo "Running Synthea generation with $num_generated_benes benes and $num_future_months future months..."
 {
