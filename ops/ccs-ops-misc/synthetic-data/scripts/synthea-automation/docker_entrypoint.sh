@@ -16,39 +16,36 @@ num_future_months=0
 
 help() {
   echo "Help text"
-  exit 1
+  exit 0
 }
 
-args=$(getopt -l "num:num_future_months:help" -o "n:f:h" -- "$@")
-
-while [ $# -ge 1 ]; do
-  case "$1" in
-    --)
-      # No more options left.
-      shift
-      break
-      ;;
-    -n | --num)
-      if ! [[ $2 =~ $NUM_REGEX ]]; then
-        echo "ERROR, non-numeric specified ($2)...exiting" >&2
+while getopts ":n:f:vh" opt; do
+  case $opt in
+    n)
+      if ! [[ "$OPTARG" =~ $NUM_REGEX ]]; then
+        echo "ERROR, non-numeric specified ($OPTARG)...exiting" >&2
         exit 1
       fi
-      num_generated_benes="$2"
-      shift
+      num_generated_benes="$OPTARG"
       ;;
-    -f | --num_future_months)
-      if ! [[ $2 =~ $NUM_REGEX ]]; then
-        echo "ERROR, non-numeric future month value specified ($2)...exiting" >&2
+    f)
+      if ! [[ "$OPTARG" =~ $NUM_REGEX ]]; then
+        echo "ERROR, non-numeric future month value specified ($OPTARG)...exiting" >&2
         exit 1
       fi
-      num_future_months="$2"
-      if [[ $2 -gt 0 ]]; then
+      num_future_months="$OPTARG"
+      if [[ "$OPTARG" -gt 0 ]]; then
         generate_future="true"
       fi
-      shift
       ;;
-    -h | --help)
+    v)
+      export VERBOSE_SYNTHEA_LOGS="true"
+      ;;
+    h)
       help
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
       ;;
   esac
   shift
