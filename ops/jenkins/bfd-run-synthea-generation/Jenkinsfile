@@ -69,12 +69,12 @@ spec:
   }
 
   stages {
-    // Obviously, this is not ideal and bordering on awful. It would be more appropriate to use the
+    // The way this pipeline is configured is not ideal. It would be more appropriate to use the
     // bfd-mgmt-synthea-generation container as the agent for the subsequent stages, but due to
     // lacking options for authenticating to a private ECR (no access to kubectl, no Amazon ECR
     // plugin, etc.) prior to defining an agent stage using docker-in-docker is the next-best
     // option
-    // TODO: Refactor this to _not_ use DinD but instead use the synthea image as the agent
+    // TODO: Refactor this to _not_ use DinD but instead use the synthea image as the agent, when possible
 
     stage('Install prerequisites') {
       steps {
