@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.8 as base
+FROM public.ecr.aws/lambda/python:3.9 as base
 RUN  yum install git gcc python3-devel -y
 
 FROM base as python

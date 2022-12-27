@@ -23,6 +23,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.user=bfd >> /flyway/conf/flyway.conf
 
 FROM amazonlinux:2 as al2
+ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz"
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
 # Getting systemd to run correctly inside Docker is very tricky. Need to
@@ -37,7 +38,8 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 RUN yum update -y --security && \
     amazon-linux-extras enable java-openjdk11 && \
     yum clean metadata && \
-    yum install -y sudo unzip selinux-policy systemd java-11-openjdk-devel python3 && \
+    yum -y groupinstall "Development Tools" && \
+    yum install -y tar sudo unzip selinux-policy systemd java-11-openjdk-devel gcc devel libffi-devel openssl11 && \
     find /etc/systemd/system \
          /lib/systemd/system \
          -path '*.wants/*' \
@@ -45,6 +47,16 @@ RUN yum update -y --security && \
          -not -name '*systemd-tmpfiles*' \
          -not -name '*systemd-user-sessions*' \
          -exec rm \{} \;
+
+SHELL ["/bin/bash", "-c"]
+RUN curl -o python3.tgz $PYTHON3_TAR_SOURCE && \
+    tar zxvf python3.tgz && \
+    cd $(basename $PYTHON3_TAR_SOURCE .tgz) && \
+    ./configure && make && make altinstall
+
+RUN ln -s /usr/local/bin/python3.9 /usr/bin/python3 && \
+    ln -s /usr/local/bin/pip3.9 /usr/bin/pip3
+
 RUN systemctl set-default multi-user.target
 STOPSIGNAL SIGRTMIN+3
 
