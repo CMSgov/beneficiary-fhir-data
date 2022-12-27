@@ -32,6 +32,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Objects of this class create populated {@link McsClaim} objects using random data. The purpose is
+ * simply to rapidly produce objects for pipeline testing to try out different scenarios for
+ * transformation. The purpose is NOT to produce realistic/valid data. The random number seed is
+ * settable in the constructor to allow for predictable unit tests. Every optional field has a 50%
+ * chance of being present in each claim. Arrays have randomly assigned variable length (including
+ * zero).
+ */
 public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsClaim> {
   private static final int MAX_ADJUSTMENTS = 10;
   private static final int MAX_AUDITS = 20;
@@ -99,6 +107,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     super(seed, optionalOverride, clock);
   }
 
+  /** {@inheritDoc} */
   @Override
   public McsClaim createRandomClaim() {
     final int detailCount = 1 + randomInt(MAX_DETAILS);
@@ -122,6 +131,11 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     return claim.build();
   }
 
+  /**
+   * Adds random values to the basic fields of the given claim object
+   *
+   * @param claim The claim object to add random base field values to
+   */
   private void addRandomFieldValues(McsClaim.Builder claim, int detailCount) {
     always("idrContrId", () -> claim.setIdrContrId(randomDigit(1, 5)));
     optional("idrHic", () -> claim.setIdrHic(randomDigit(1, 12)));
@@ -205,6 +219,11 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     optional("idrAmbDropoffZipcode", () -> claim.setIdrAmbDropoffZipcode(randomAlphaNumeric(1, 9)));
   }
 
+  /**
+   * Adds randomly generated adjustment objects to the claim
+   *
+   * @param claim The claim object instance to add random adjustment objects to
+   */
   private void addAdjustments(McsClaim.Builder claim) {
     always(
         "adjustment",
@@ -233,6 +252,11 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
         });
   }
 
+  /**
+   * Adds randomly generated audit objects to the claim
+   *
+   * @param claim The claim object instance to add random audit objects to
+   */
   private void addAudits(McsClaim.Builder claim) {
     always(
         "audit",
@@ -262,6 +286,12 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
         });
   }
 
+  /**
+   * Adds a random diagnosis code to the given claim object
+   *
+   * @param claim The claim object to add the random diagnosis code to
+   * @param idrClmHdIcn The ICN of the current claim being created
+   */
   private void addDiagnosisCodes(McsClaim.Builder claim, String idrClmHdIcn) {
     always(
         "diagnosisCode",
@@ -288,6 +318,12 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
         });
   }
 
+  /**
+   * Adds a random details to the given claim object
+   *
+   * @param claim The claim object to add the random details to
+   * @param detailCount The number of details to add
+   */
   private void addDetails(McsClaim.Builder claim, int detailCount) {
     always(
         "detail",
@@ -398,6 +434,11 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
         });
   }
 
+  /**
+   * Adds randomly generated location objects to the claim
+   *
+   * @param claim The claim object instance to add random location objects to
+   */
   private void addLocations(McsClaim.Builder claim) {
     always(
         "location",
@@ -428,7 +469,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Ensures the from date and to date are set using the min/max dates in all of the details (if
+   * Ensures the "from" date and "to" date are set using the min/max dates in all the details (if
    * any). If either is missing from the details neither of the dates are set in the claim.
    */
   private void adjustServiceDatesFromDetails(McsClaim.Builder claim) {

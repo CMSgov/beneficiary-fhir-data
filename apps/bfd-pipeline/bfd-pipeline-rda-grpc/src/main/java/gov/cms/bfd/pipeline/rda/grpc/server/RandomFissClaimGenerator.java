@@ -34,12 +34,12 @@ import java.time.Clock;
 import java.util.List;
 
 /**
- * Objects of this class create populated FissClaim objects using random data. The purpose is simply
- * to rapidly produce objects for pipeline testing to try out different scenarios for
+ * Objects of this class create populated {@link FissClaim} objects using random data. The purpose
+ * is simply to rapidly produce objects for pipeline testing to try out different scenarios for
  * transformation. The purpose is NOT to produce realistic/valid data. The random number seed is
- * settable in the constructor to allow for for predictable unit tests. Every optional field has a
- * 50% chance of being present in each claim. Arrays have randomly assigned variable length
- * (including zero).
+ * settable in the constructor to allow for predictable unit tests. Every optional field has a 50%
+ * chance of being present in each claim. Arrays have randomly assigned variable length (including
+ * zero).
  */
 public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissClaim> {
   private static final int MAX_PROC_CODES = 7;
@@ -118,6 +118,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     super(seed, optionalOverride, clock);
   }
 
+  /** {@inheritDoc} */
   @Override
   public FissClaim createRandomClaim() {
     FissClaim.Builder claim = FissClaim.newBuilder();
@@ -133,6 +134,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     return claim.build();
   }
 
+  /**
+   * Adds random values to the basic fields of the given claim object
+   *
+   * @param claim The claim object to add random base field values to
+   */
   private void addRandomFieldValues(FissClaim.Builder claim) {
     always("dcn", () -> claim.setDcn(randomDigit(5, 8)));
     always("hicNo", () -> claim.setHicNo(randomDigit(12, 12)));
@@ -284,6 +290,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     optional("medicalRecordNo", () -> claim.setMedicalRecordNo(randomAlphaNumeric(1, 17)));
   }
 
+  /**
+   * Adds a random procedure code to the given claim object
+   *
+   * @param claim The claim object to add the random procedure code to
+   */
   private void addRandomProcCodes(FissClaim.Builder claim) {
     always(
         "procCode",
@@ -315,6 +326,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
         });
   }
 
+  /**
+   * Adds a random diagnosis code to the given claim object
+   *
+   * @param claim The claim object to add the random diagnosis code to
+   */
   private void addRandomDiagnosisCodes(FissClaim.Builder claim) {
     always(
         "diagnosisCode",
@@ -343,6 +359,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
         });
   }
 
+  /**
+   * Add a random payer to the given claim object
+   *
+   * @param claim The claim object to add a random payer to
+   */
   private void addRandomPayers(FissClaim.Builder claim) {
     always(
         "payer",
@@ -363,6 +384,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
         });
   }
 
+  /**
+   * Add a random BeneZ payer to the given payer builder
+   *
+   * @param parent The payer builder object to add to
+   * @param position The "position" of the payer instance to insert, used for rdaPosition
+   */
   private void addBeneZPayer(FissPayer.Builder parent, int position) {
     final FissBeneZPayer.Builder payer = FissBeneZPayer.newBuilder();
 
@@ -411,6 +438,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     parent.setBeneZPayer(payer.build());
   }
 
+  /**
+   * Add random insured payer object to the given payer builder object
+   *
+   * @param parent The payer builder object to add to
+   * @param position The "position" of the payer instance to insert, used for rdaPosition
+   */
   private void addInsuredPayer(FissPayer.Builder parent, int position) {
     final FissInsuredPayer.Builder payer = FissInsuredPayer.newBuilder();
 
@@ -460,6 +493,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     parent.setInsuredPayer(payer.build());
   }
 
+  /**
+   * Adds randomly generated audit objects to the claim
+   *
+   * @param claim The claim object instance to add random audit objects to
+   */
   private void addRandomAudits(FissClaim.Builder claim) {
     always(
         "audit",

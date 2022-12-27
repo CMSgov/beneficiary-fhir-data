@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
+/** Tests the functionality of the {@link AbstractRandomClaimGenerator} class */
 class AbstractRandomClaimGeneratorTest {
 
   /** The fully developed set of random data that could potentially be produced. */

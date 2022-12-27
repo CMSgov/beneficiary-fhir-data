@@ -103,6 +103,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     return randomClaim;
   }
 
+  /** Implementation defined logic for creating a random claim */
   public abstract T createRandomClaim();
 
   /**
@@ -423,6 +424,11 @@ abstract class AbstractRandomClaimGenerator<T> {
       return maxValue == 0 ? 0 : random.nextInt(maxValue);
     }
 
+    /**
+     * Returns a random boolean value
+     *
+     * @return A random boolean value
+     */
     public boolean randomBoolean() {
       return random.nextBoolean();
     }
