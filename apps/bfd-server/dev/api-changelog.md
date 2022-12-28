@@ -5,10 +5,24 @@ Add the display name for NPI Organizations to the contained resource for organiz
 
 New EOB Subtype Mapping for Inpatient, SNF, Hospice and HHA Claims in V2:
 ```json
+ "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
+      }
 ```
 
 New EOB Subtype Mapping for Outpatient Claims in V2:
 ```json
+ "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "outpatient"
+        } ],
+        "text" : "Outpatient"
+      },
 ```
 
 ## BFD-1923: Add Org Name Display to Organizations in V2
