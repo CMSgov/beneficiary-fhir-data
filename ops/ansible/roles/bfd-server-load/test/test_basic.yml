@@ -10,9 +10,9 @@
       package:
         name:
           - procps
-          - awscli
           - jq
-        state: present
+      vars:
+        ansible_python_interpreter: /usr/bin/python
       become: true
 
     - name: Archive server-load Application

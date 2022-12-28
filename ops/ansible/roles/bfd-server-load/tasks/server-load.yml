@@ -3,8 +3,8 @@
   yum:
     pkg:
       - gcc
-      - python3-devel
-      - python3-setuptools
+  vars:
+    ansible_python_interpreter: /usr/bin/python
   become: true
   tags:
     - pre-ami
@@ -42,7 +42,7 @@
 - name: Install server-load Application Requirements
   pip:
     requirements: "{{ server_load_dir }}/requirements.txt"
-    executable: pip3
+    executable: /usr/bin/pip3
     umask: "0022"
   become: true
   tags:
