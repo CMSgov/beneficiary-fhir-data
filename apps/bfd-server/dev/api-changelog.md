@@ -1,7 +1,7 @@
 # API Changelog
 
 ## BFD-2310: Add Eob.SubType for Institutional Claims in V2
-Add the display name for NPI Organizations to the contained resource for organizations.
+Added the subtype to the different claims types.  For  Inpatient, SNF, Hospice and HHA Claims it will be set to "Inpatient" and for Outpatient claims it will be set to "Outpatient".
 
 New EOB Subtype Mapping for Inpatient, SNF, Hospice and HHA Claims in V2:
 ```json
