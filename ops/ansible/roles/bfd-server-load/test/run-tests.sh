@@ -19,8 +19,6 @@ export ROLE=bfd-server-load
 export CONTAINER_NAME="$ROLE"
 export TEST_PLAY=test_basic.yml
 export ANSIBLE_SPEC="ansible"
-export ARTIFACT_DIRECTORY=".m2/repository/gov/cms/bfd/bfd-server-load/1.0.0-SNAPSHOT"
-export ARTIFACT="bfd-server-load-1.0.0-SNAPSHOT.zip"
 
 # iterate getopts
 while getopts "e:hk" option; do
@@ -48,9 +46,9 @@ shift "$((OPTIND-1))"
 
 # TODO: complete the getopts implementation. See BFD-1628.
 # use the input from option '-i' or default to current commit's short sha
-# export BFD_APPS_IMAGE_ID="${input_bfd_apps_image_id:-$(git rev-parse --short HEAD)}"
+# export BFD_ANSIBLE_IMAGE_ID="${input_bfd_ansible_image_id:-$(git rev-parse --short HEAD)}"
 # use input "$1" or default to current commit's short sha
-export BFD_APPS_IMAGE_ID="${1:-$(git rev-parse --short HEAD)}"
+export BFD_ANSIBLE_IMAGE_ID="${1:-$(git rev-parse --short HEAD)}"
 export REMOVE_CONTAINER EXTRA_VARS
 
 # Determine the directory that this script is in.
