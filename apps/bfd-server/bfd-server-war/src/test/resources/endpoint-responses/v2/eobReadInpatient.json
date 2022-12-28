@@ -123,6 +123,13 @@
       "display" : "Institutional"
     } ]
   },
+  "subType" : {
+    "coding" : [ {
+      "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+      "code" : "inpatient"
+    } ],
+    "text" : "Inpatient"
+  },
   "use" : "claim",
   "patient" : {
     "reference" : "Patient/567834"
