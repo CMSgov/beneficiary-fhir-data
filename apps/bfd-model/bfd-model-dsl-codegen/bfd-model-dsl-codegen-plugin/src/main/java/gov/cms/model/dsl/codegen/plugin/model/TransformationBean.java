@@ -146,7 +146,7 @@ public class TransformationBean implements ModelBean {
   }
 
   /**
-   * Looks up a transformer option by name. The value is expetced to be a comma separated list of
+   * Looks up a transformer option by name. The value is expected to be a comma separated list of
    * values. Creates a list containing each of the individual values.
    *
    * @param optionName name of the option

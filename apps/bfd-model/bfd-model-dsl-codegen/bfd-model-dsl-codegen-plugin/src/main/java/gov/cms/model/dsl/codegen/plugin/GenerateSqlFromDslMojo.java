@@ -78,7 +78,7 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
         out.println();
         out.println();
         for (MappingBean mapping : rootMappings) {
-          printAddColumnSqlForMapping(root, mapping, out);
+          printAddColumnSqlForMapping(mapping, out);
           out.println();
         }
       }
@@ -109,8 +109,8 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    */
   private void printCreateTableSqlForMapping(RootBean root, MappingBean mapping, PrintWriter out) {
     final var table = mapping.getTable();
-    final var primaryKeyColumns = getPrimaryKeyColumns(root, mapping);
-    final var columns = getAllColumns(root, mapping);
+    final var primaryKeyColumns = getPrimaryKeyColumns(mapping);
+    final var columns = getAllColumns(mapping);
     final var quoteNames = table.isQuoteNames();
     out.println("/*");
     out.print(" * ");
@@ -136,7 +136,7 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
     out.print(")");
     final var parent = findParent(root, mapping);
     if (parent != null) {
-      final var parentPrimaryKeyColumns = getPrimaryKeyColumns(root, parent);
+      final var parentPrimaryKeyColumns = getPrimaryKeyColumns(parent);
       out.println(",");
       out.print("    CONSTRAINT ");
       out.print(name(quoteNames, table.getName() + "_parent"));
@@ -156,13 +156,12 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    * Writes template {@code ALTER TABLE ... ADD} SQL to the provided {@link PrintWriter} for the
    * specified {@link MappingBean#table}.
    *
-   * @param root {@link RootBean} containing all known mappings
    * @param mapping {@link MappingBean} to create SQL for
    * @param out {@link PrintWriter} to write SQL to
    */
-  private void printAddColumnSqlForMapping(RootBean root, MappingBean mapping, PrintWriter out) {
+  private void printAddColumnSqlForMapping(MappingBean mapping, PrintWriter out) {
     final var table = mapping.getTable();
-    final var columns = getAllColumns(root, mapping);
+    final var columns = getAllColumns(mapping);
     final var quoteNames = table.isQuoteNames();
     out.println("/*");
     out.print(" * ");
@@ -187,14 +186,12 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    * of a specific {@link MappingBean}. The list will contain columns from any primary key joins
    * followed by regular columns.
    *
-   * @param root {@link RootBean} containing all known mappings
    * @param mapping {@link MappingBean} to create SQL for
    * @return list containing {@link ColumnBean} for all primary key columns of the table
    */
-  private List<ColumnBean> getPrimaryKeyColumns(RootBean root, MappingBean mapping) {
+  private List<ColumnBean> getPrimaryKeyColumns(MappingBean mapping) {
     // this map ensures no column is included twice
     final var columns = new LinkedHashMap<String, ColumnBean>();
-    final var table = mapping.getTable();
     for (ColumnBean column : mapping.getTable().getPrimaryKeyColumnBeans()) {
       columns.put(column.getColumnName(), column);
     }
@@ -206,11 +203,10 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    * specific {@link MappingBean}. The list will contain columns from any non-array joins followed
    * by regular columns.
    *
-   * @param root {@link RootBean} containing all known mappings
    * @param mapping {@link MappingBean} to create SQL for
    * @return list containing {@link ColumnBean} for all columns in the table
    */
-  private List<ColumnBean> getAllColumns(RootBean root, MappingBean mapping) {
+  private List<ColumnBean> getAllColumns(MappingBean mapping) {
     // this map ensures no column is included twice
     final var columns = new LinkedHashMap<String, ColumnBean>();
     for (ColumnBean column : mapping.getTable().getColumns()) {

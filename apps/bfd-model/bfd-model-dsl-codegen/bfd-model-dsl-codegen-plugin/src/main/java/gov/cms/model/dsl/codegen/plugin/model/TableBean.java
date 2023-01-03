@@ -89,18 +89,6 @@ public class TableBean implements ModelBean {
   }
 
   /**
-   * Finds the column with the specified {@link ColumnBean#getColumnName()}.
-   *
-   * @param columnName name value to search for
-   * @return a (possibly empty) {@link Optional} containing the the {@link ColumnBean} with the
-   *     given name
-   */
-  @Nonnull
-  public Optional<ColumnBean> getColumnByColumnName(String columnName) {
-    return columns.stream().filter(c -> columnName.equals(c.getColumnName())).findAny();
-  }
-
-  /**
    * Determines if this object has a non-empty comment string.
    *
    * @return true if this object has a non-empty comment string
@@ -154,15 +142,6 @@ public class TableBean implements ModelBean {
    */
   public List<ColumnBean> getPrimaryKeyColumnBeans() {
     return columns.stream().filter(c -> isPrimaryKey(c.getName())).collect(Collectors.toList());
-  }
-
-  /**
-   * Returns a list of all {@link JoinBean} objects that are part of the primary key.
-   *
-   * @return a {@link List} of {@link JoinBean}
-   */
-  public List<JoinBean> getPrimaryKeyJoinBeans() {
-    return joins.stream().filter(this::isPrimaryKey).collect(Collectors.toList());
   }
 
   /**
