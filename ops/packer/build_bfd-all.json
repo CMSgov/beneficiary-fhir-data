@@ -176,25 +176,6 @@
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
         "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
       ]
-    },
-    {
-      "only": ["bfd-server-load"],
-      "type": "ansible",
-      "user": "ec2-user",
-      "playbook_file": "./build_bfd-server-load.yml",
-      "extra_arguments": [
-        "-e ansible_python_interpreter=/usr/bin/python",
-        "-e git_commit={{ user `git_commit` }}",
-        "-e git_branch={{ user `git_branch` }}",
-        "--extra-vars",
-        "@extra_vars.json",
-        "--tags",
-        "pre-ami"
-      ],
-      "ansible_env_vars": [
-        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
-        "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
-      ]
     }
   ],
   "post-processors": [
@@ -214,12 +195,6 @@
       "only": ["bfd-db-migrator"],
       "type": "manifest",
       "output": "manifest_db-migrator.json",
-      "strip_path": true
-    },
-    {
-      "only": ["bfd-server-load"],
-      "type": "manifest",
-      "output": "manifest_server-load.json",
       "strip_path": true
     }
   ]
