@@ -53,7 +53,7 @@ spec:
                         + 'generated output to allow for proper loading')
 
     booleanParam(name: 'UPDATE_END_STATE_S3',
-           defaultValue: false,
+           defaultValue: true,
            description: 'Specifies whether the main end_state.properties stored in the synthea S3 '
                         + 'bucket should be updated with the end_state.properties '
                         + 'of this run. If false, the main end_state.properties is left as-is. '
