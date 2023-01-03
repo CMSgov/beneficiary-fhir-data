@@ -18,43 +18,59 @@ help() {
   echo
   echo "Docker container for running Synthea generation:"
   echo
-  echo "-n : Specifies the number of beneficiaries to generate. Defaults to 100"
-  echo "-f : Specifies the number of months in the future to generate claim lines. Defaults to 0"
-  echo "-v : Specifies whether the Synthea executable should log to STDOUT or if its logs should be discarded. Defaults to unset (non-verbose)"
-  echo "-h : Shows this help text"
-  exit 0
+  echo "-n,--num_benes : Specifies the number of beneficiaries to generate. Defaults to 100"
+  echo "-f,--future_months : Specifies the number of months in the future to generate claim lines. Defaults to 0"
+  echo "-v,--verbose : Specifies whether the Synthea executable should log to STDOUT or if its logs should be discarded. Defaults to unset (non-verbose)"
+  echo "-h,--help : Shows this help text"
+
+  exit "$1"
 }
 
-while getopts ":n:f:vh" opt; do
-  case $opt in
-    n)
-      if ! [[ "$OPTARG" =~ $NUM_REGEX ]]; then
-        echo "ERROR, non-numeric specified ($OPTARG)...exiting" >&2
-        exit 1
-      fi
-      num_generated_benes="$OPTARG"
-      ;;
-    f)
-      if ! [[ "$OPTARG" =~ $NUM_REGEX ]]; then
-        echo "ERROR, non-numeric future month value specified ($OPTARG)...exiting" >&2
-        exit 1
-      fi
-      num_future_months="$OPTARG"
-      if [[ "$OPTARG" -gt 0 ]]; then
-        generate_future="true"
-      fi
-      ;;
-    v)
+[ $# -lt 1 ] && help
+
+options=$(getopt -a -n "bfd-mgmt-synthea-generation" -o v,h,n:,f: -l verbose,help,num_benes:,future_months: -- "$@")
+[ $? -ne 0 ] && help 1
+
+eval set -- "$options"
+while :; do
+  case "$1" in
+    -v | --verbose)
       export VERBOSE_SYNTHEA_LOGS="true"
+      shift
       ;;
-    h)
+    -h | --help)
       help
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
+    -n | --num_benes)
+      if ! [[ "$2" =~ $NUM_REGEX ]]; then
+        echo "ERROR, non-numeric specified ($2)...exiting" >&2
+        exit 1
+      fi
+      num_generated_benes="$2"
+
+      shift 2
+      ;;
+    -f | --future_months)
+      if ! [[ "$2" =~ $NUM_REGEX ]]; then
+        echo "ERROR, non-numeric future month value specified ($2)...exiting" >&2
+        exit 1
+      fi
+      num_future_months="$2"
+      if [[ "$2" -gt 0 ]]; then
+        generate_future="true"
+      fi
+
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      echo "Unexpected option: $1"
+      help 1
       ;;
   esac
-  shift
 done
 
 echo "Preparing to run Synthea generation..."
@@ -67,7 +83,7 @@ echo "Running Synthea generation with $num_generated_benes benes and $num_future
     "${TARGET_SYNTHEA_DIR}" \
     "${num_generated_benes}" \
     "${num_future_months}" 2>&1 &&
-  echo "Synthea generation finished, generated synthetic data can be found in the output directory"
+    echo "Synthea generation finished, generated synthetic data can be found in the output directory"
 } || {
   echo "Synthea generation failed to complete. View the logs in the logs directory for more information"
 }
@@ -78,7 +94,7 @@ if [ "$generate_future" == 'true' ]; then
   {
     python3 split-future-claims.py "$TARGET_SYNTHEA_DIR" \
       2>&1 | tee -a "$TARGET_SYNTHEA_DIR/logs/$split_future_claims_logname" &&
-    echo "Future claims splitting succeeded, view the full log or the $split_future_claims_logname for more information"
+      echo "Future claims splitting succeeded, view the full log or the $split_future_claims_logname for more information"
   } || {
     echo "Future claims splitting failed, view the full log or the $split_future_claims_logname for more information"
   }
@@ -94,4 +110,4 @@ cp "$TARGET_SYNTHEA_DIR/end_state.properties" "$TARGET_SYNTHEA_DIR/output/bfd/en
 generated_output_dirname="generated-$starting_datetime"
 echo "Moving generated output to out/$generated_output_dirname..."
 mkdir -p "$TARGET_SYNTHEA_DIR/out/$generated_output_dirname"
-mv "$TARGET_SYNTHEA_DIR/output/" "$TARGET_SYNTHEA_DIR/out/$generated_output_dirname" 
+mv "$TARGET_SYNTHEA_DIR/output/" "$TARGET_SYNTHEA_DIR/out/$generated_output_dirname"
