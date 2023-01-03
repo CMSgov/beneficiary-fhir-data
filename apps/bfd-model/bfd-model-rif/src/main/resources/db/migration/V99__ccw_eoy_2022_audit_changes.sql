@@ -7,7 +7,8 @@ ${logic.psql-only} DROP TABLE IF EXISTS public.beneficiary_monthly_audit;
 ${logic.psql-only} DROP TRIGGER IF EXISTS audit_ccw_update ON beneficiary_monthly;
 
 -- The sequence used for the `skipped_rif_records.record_id` column.
-CREATE SEQUENCE bene_monthly_audit_seq
+CREATE SEQUENCE ${logic.psql-only} IF NOT EXISTS
+  bene_monthly_audit_seq
   AS bigint ${logic.sequence-start} 1 ${logic.sequence-increment} 1
   NO CYCLE;
 
