@@ -6,7 +6,7 @@ CLEANUP="True" # defaults to removing generated files on error, interupt, etc.
 
 help() {
   echo
-  echo "build_run_synthea.sh:"
+  echo "run_synthea_locally.sh:"
   echo "----------------------  ------------------------------------------------------------------------"
   echo "--num, -n               : number of beneficiaries to generate (default 100)"
   echo "--build_root, -b        : root directory for Synthea build (default /tmp)"
