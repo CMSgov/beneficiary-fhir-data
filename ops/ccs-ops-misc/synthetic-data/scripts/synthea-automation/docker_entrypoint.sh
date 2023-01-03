@@ -57,18 +57,6 @@ while getopts ":n:f:vh" opt; do
   shift
 done
 
-echo "Checking if the output directory is empty before generation..."
-(
-  cd "$TARGET_SYNTHEA_DIR/output"
-  shopt -s nullglob
-  files=(* .*)
-  if ((${#files[@]} != 2)); then
-    # contents of files array is (. ..)
-    echo "The output directory is not empty; ensure the directory is empty before running"
-    exit 1
-  fi
-)
-
 echo "Preparing to run Synthea generation..."
 starting_datetime=$(date '+%F_%H-%M-%S')
 
@@ -104,10 +92,7 @@ mv "$TARGET_SYNTHEA_DIR"/synthea-*.log "$TARGET_SYNTHEA_DIR/logs/synthea-$starti
 echo "Copying original end_state.properties into output/bfd..."
 cp "$TARGET_SYNTHEA_DIR/end_state.properties" "$TARGET_SYNTHEA_DIR/output/bfd/end_state.properties.orig"
 
-generated_output_dir="generated-$starting_datetime"
-echo "Moving output to $generated_output_dir sub-directory..."
-mkdir -p "$TARGET_SYNTHEA_DIR/output/$generated_output_dir"
-(
-  cd "$TARGET_SYNTHEA_DIR/output" && \
-  mv ./* "$generated_output_dir" 2>/dev/null || true # mv will complain about moving the sub-dir, but will move all other files/dirs
-)
+generated_output_dirname="generated-$starting_datetime"
+echo "Moving output to $generated_output_dirname sub-directory..."
+mkdir -p "$TARGET_SYNTHEA_DIR/out/$generated_output_dirname"
+mv "$TARGET_SYNTHEA_DIR/output/" "$TARGET_SYNTHEA_DIR/out/$generated_output_dirname" 

@@ -6,6 +6,6 @@ FROM base as dist
 WORKDIR /usr/local/synthea
 COPY . .
 RUN chmod +x ./docker_entrypoint.sh ./run_synthea ./national_bfd.sh ./national_bfd_v2.sh
-RUN mkdir output logs
+RUN mkdir out output logs
 ENTRYPOINT [ "./docker_entrypoint.sh" ]
 CMD ["-h"]

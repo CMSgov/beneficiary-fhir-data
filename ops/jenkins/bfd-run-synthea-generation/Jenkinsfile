@@ -115,7 +115,7 @@ spec:
       steps {
           sh ("docker run -v /var/run/docker.sock:/var/run/docker.sock "
               + "-v \"\$(pwd)\"/end_state.properties:/usr/local/synthea/end_state.properties:ro "
-              + "-v \"\$(pwd)\"/output:/usr/local/synthea/output "
+              + "-v \"\$(pwd)\"/out:/usr/local/synthea/out "
               + "\"${imageName}\" "
               + "-n \"${params.NUM_BENES}\" "
               + "-f \"${params.NUM_FUTURE_MONTHS}\"")
@@ -126,7 +126,7 @@ spec:
       steps {
         echo 'Uploading generated output to bfd-mgmt-synthea bucket...'
 
-        sh "aws s3 cp \"\$(pwd)/output/\" \"s3://bfd-mgmt-synthea/generated\" --recursive"
+        sh "aws s3 cp \"\$(pwd)/out/\" \"s3://bfd-mgmt-synthea/generated\" --recursive"
       }
     }
 

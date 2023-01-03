@@ -56,7 +56,7 @@ Usage is simple:
    docker pull "$IMAGE_NAME"
    ```
 
-4. Run the image as a container, _bind-mounting_ the various directories (`output/`, `logs/`) as
+4. Run the image as a container, _bind-mounting_ the various directories (`out/`, `logs/`) as
    well as the `end_state.properties` file downloaded in step (2):
 
    ```bash
@@ -64,8 +64,8 @@ Usage is simple:
    NUMBER_OF_FUTURE_MONTHS=0
    docker run -v "$(pwd)"/end_state.properties:/usr/local/synthea/end_state.properties:ro \
     -v "$(pwd)"/logs:/usr/local/synthea/logs \
-    -v "$(pwd)"/output:/usr/local/synthea/output "$IMAGE_NAME:latest" -n "$NUMBER_OF_BENES" -f "$NUMBER_OF_FUTURE_MONTHS"
+    -v "$(pwd)"/out:/usr/local/synthea/out "$IMAGE_NAME:latest" -n "$NUMBER_OF_BENES" -f "$NUMBER_OF_FUTURE_MONTHS"
    ```
 
 5. When finished, the generated output should be available in your current working directory in the
-   `output` sub-directory
+   `out` sub-directory
