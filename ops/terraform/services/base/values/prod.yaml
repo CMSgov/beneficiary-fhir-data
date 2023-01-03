@@ -37,7 +37,7 @@
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_interval: PT1M
 ## PIPELINE CCW
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2022_benes: true
 /bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
 ## PIPELINE+RDA
