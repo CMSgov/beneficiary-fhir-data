@@ -40,7 +40,7 @@ Usage is simple:
    ```bash
    NUMBER_OF_BENES=100
    NUMBER_OF_FUTURE_MONTHS=0
-   docker run -v "$(pwd)"end_state.properties:/usr/local/synthea/end_state.properties:ro \n
+   docker run -v "$(pwd)"/end_state.properties:/usr/local/synthea/end_state.properties:ro \
     -v "$(pwd)"/logs:/usr/local/synthea/logs \ 
     -v "$(pwd)"/output:/usr/local/synthea/output "$IMAGE_NAME:latest" -n "$NUMBER_OF_BENES" -f "$NUMBER_OF_FUTURE_MONTHS"
    ```
