@@ -16,8 +16,9 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
 
   public RandomFissClaimSource(long seed, int maxToSend) {
     generator = new RandomFissClaimGenerator(seed);
-    this.maxToSend = maxToSend;
     sent = 0;
+    generator.setSequence(sent);
+    this.maxToSend = maxToSend;
   }
 
   @Override
