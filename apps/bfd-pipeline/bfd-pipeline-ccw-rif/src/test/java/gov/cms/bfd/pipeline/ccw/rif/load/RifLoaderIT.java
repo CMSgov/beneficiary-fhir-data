@@ -714,7 +714,7 @@ public final class RifLoaderIT {
   public void loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
         "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -729,7 +729,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -744,7 +744,7 @@ public final class RifLoaderIT {
       loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
         "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -760,7 +760,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY));
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -777,7 +777,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY),
         false);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -795,7 +795,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -815,7 +815,7 @@ public final class RifLoaderIT {
 
     /* Re-load that bene again as an UPDATE with filtering turned on, and verify that it was skipped. */
     loadDefaultSampleABeneData(
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 1);
@@ -836,7 +836,7 @@ public final class RifLoaderIT {
     /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
     loadSampleABeneWithEnrollmentRefYear(
         null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -874,7 +874,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -894,7 +894,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -940,7 +940,7 @@ public final class RifLoaderIT {
         editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
     loadSample(
         "non-Bene sample update",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2023BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);

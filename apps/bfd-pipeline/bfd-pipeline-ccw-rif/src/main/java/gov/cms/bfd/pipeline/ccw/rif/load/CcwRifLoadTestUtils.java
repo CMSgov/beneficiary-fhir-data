@@ -44,7 +44,7 @@ public final class CcwRifLoadTestUtils {
    *     LoadAppOptions#isFilteringNonNullAndNon2023Benes()} set to <code>true</code>. Should only
    *     be used in those test cases looking to test that filtering capability.
    */
-  public static LoadAppOptions getLoadOptionsWithFilteringofNon2023BenesEnabled(
+  public static LoadAppOptions getLoadOptionsWithFilteringOfNon2023BenesEnabled(
       boolean idempotencyRequired) {
     return getLoadOptions(idempotencyRequired, true);
   }

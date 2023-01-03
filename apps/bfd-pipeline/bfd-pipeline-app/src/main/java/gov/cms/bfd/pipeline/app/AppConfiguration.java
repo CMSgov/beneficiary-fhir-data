@@ -114,7 +114,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
    * removed as soon as is reasonable.
    */
-  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES = false;
+  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES = true;
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
