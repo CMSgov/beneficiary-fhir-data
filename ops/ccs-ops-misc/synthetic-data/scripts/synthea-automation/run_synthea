@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# The national_bfd*.sh scripts assume that a "run_synthea" gradle script is avaiable to use that
+# The national_bfd*.sh scripts assume that a "run_synthea" gradle script is available to use that
 # runs Synthea (by running gradlew run ...). Since the .jar is being used in this Docker image
-# instead of builing the repository, this "fake" run_synthea script is included to allow the
+# instead of building the repository, this "fake" run_synthea script is included to allow the
 # national_bfd*.sh scripts to run as expected
 
 TARGET_SYNTHEA_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
