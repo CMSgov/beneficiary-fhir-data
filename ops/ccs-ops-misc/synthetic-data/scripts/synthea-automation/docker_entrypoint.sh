@@ -20,7 +20,7 @@ help() {
   echo
   echo "-n : Specifies the number of beneficiaries to generate. Defaults to 100"
   echo "-f : Specifies the number of months in the future to generate claim lines. Defaults to 0"
-  echo "-v : Specifies whether the Synthea executable should log to STDOUT or if its logs should be discared. Defaults to unset (non-verbose)"
+  echo "-v : Specifies whether the Synthea executable should log to STDOUT or if its logs should be discarded. Defaults to unset (non-verbose)"
   echo "-h : Shows this help text"
   exit 0
 }
