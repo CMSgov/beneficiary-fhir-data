@@ -70,8 +70,8 @@ ${logic.psql-only} CREATE TRIGGER audit_ccw_update
 ${logic.psql-only} AFTER UPDATE ON public.beneficiary_monthly
 ${logic.psql-only} FOR EACH ROW
 ${logic.psql-only}     WHEN ((
-${logic.psql-only           OLD.partd_contract_number_id <> '0' OR
-${logic.psql-only           OLD.partc_contract_number_id <> '0')
+${logic.psql-only}         OLD.partd_contract_number_id <> '0' OR
+${logic.psql-only}         OLD.partc_contract_number_id <> '0')
 ${logic.psql-only}     AND ((
 ${logic.psql-only}         OLD.partd_contract_number_id,
 ${logic.psql-only}         OLD.partc_contract_number_id,
