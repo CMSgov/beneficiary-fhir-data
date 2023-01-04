@@ -16,8 +16,9 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
 
   public RandomMcsClaimSource(long seed, int maxToSend) {
     generator = new RandomMcsClaimGenerator(seed);
-    this.maxToSend = maxToSend;
     sent = 0;
+    generator.setSequence(sent);
+    this.maxToSend = maxToSend;
   }
 
   @Override
