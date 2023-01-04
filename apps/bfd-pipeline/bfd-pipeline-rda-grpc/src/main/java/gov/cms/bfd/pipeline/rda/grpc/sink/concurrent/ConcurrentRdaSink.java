@@ -65,7 +65,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     if (maxThreads == 1) {
       return sinkFactory.apply(true);
     } else {
-      return new ConcurrentRdaSink<>(maxThreads, batchSize, () -> sinkFactory.apply(false));
+      return new ReactiveRdaSink<>(maxThreads, batchSize, () -> sinkFactory.apply(false));
     }
   }
 
