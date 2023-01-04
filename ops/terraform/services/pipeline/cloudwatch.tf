@@ -1,10 +1,12 @@
 resource "aws_cloudwatch_dashboard" "bfd-pipeline-dashboard" {
+  count          = local.is_ephemeral_env ? 0 : 1
   dashboard_name = "bfd-pipeline-${local.env}"
   dashboard_body = templatefile("${path.module}/dashboard.json.tftpl",
   { dashboard_namespace = "bfd-${local.env}/bfd-pipeline" })
 }
 
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
+  count          = local.is_ephemeral_env ? 0 : 1
   name           = "bfd-${local.env}/bfd-pipeline/messages/count/error"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message]"
   log_group_name = local.log_groups.messages
@@ -18,6 +20,7 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
 }
 
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-count" {
+  count          = local.is_ephemeral_env ? 0 : 1
   name           = "bfd-${local.env}/bfd-pipeline/messages/count/datasetfailed"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message = \"*Data set failed with an unhandled error*\"]"
   log_group_name = local.log_groups.messages
@@ -32,6 +35,7 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-cou
 
 # CloudWatch metric alarms
 resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
+  count               = local.is_ephemeral_env ? 0 : 1
   alarm_name          = "bfd-${local.env}-pipeline-messages-error"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = local.pipeline_messages_error.eval_periods
@@ -50,6 +54,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
+  count               = local.is_ephemeral_env ? 0 : 1
   alarm_name          = "bfd-${local.env}-pipeline-messages-datasetfailed"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = local.pipeline_messages_datasetfailed.eval_periods
