@@ -59,10 +59,20 @@ ${logic.psql-only} $beneficiary_monthly_audit$ LANGUAGE plpgsql;
 --
 ${logic.psql-only} DROP TRIGGER IF EXISTS audit_ccw_update ON beneficiary_monthly;
 
+-- We'll track any changes to the beneficiary_monthly table; however,
+-- since we create 12 'empty' buckets at the beginning of a new REF_YR,
+-- we'd pretty much always see UPDATEs where the 'OLD' is zero'd out
+-- and the 'NEW' has value(s); those sort of updates are expected and
+-- frankly not interesting (nor problematic). So we'll check the original
+-- Part C/D contract ID(s) to verify that any changes were meaningful.
+--
 ${logic.psql-only} CREATE TRIGGER audit_ccw_update
 ${logic.psql-only} AFTER UPDATE ON public.beneficiary_monthly
 ${logic.psql-only} FOR EACH ROW
 ${logic.psql-only}     WHEN ((
+${logic.psql-only           OLD.partd_contract_number_id <> '0' OR
+${logic.psql-only           OLD.partc_contract_number_id <> '0')
+${logic.psql-only}     AND ((
 ${logic.psql-only}         OLD.partd_contract_number_id,
 ${logic.psql-only}         OLD.partc_contract_number_id,
 ${logic.psql-only}         OLD.medicare_status_code,
@@ -89,5 +99,5 @@ ${logic.psql-only}         NEW.partd_retiree_drug_subsidy_ind,
 ${logic.psql-only}         NEW.partd_segment_number_id,
 ${logic.psql-only}         NEW.partd_low_income_cost_share_group_code,
 ${logic.psql-only}         NEW.partc_pbp_number_id,
-${logic.psql-only}         NEW.partc_plan_type_code))     
+${logic.psql-only}         NEW.partc_plan_type_code)) )   
 ${logic.psql-only}     EXECUTE FUNCTION track_bene_monthly_change();
