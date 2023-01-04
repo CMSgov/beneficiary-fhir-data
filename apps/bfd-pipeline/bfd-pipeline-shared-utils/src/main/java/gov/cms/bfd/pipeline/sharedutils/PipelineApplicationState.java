@@ -53,33 +53,6 @@ public final class PipelineApplicationState implements AutoCloseable {
   }
 
   /**
-   * Constructs a new {@link PipelineApplicationState} instance using a pre-existing non-pooled
-   * DataSource. Intended for use by PipelineTestUtils.
-   *
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param dataSource the {@link DatabaseOptions} for the application's DB (which this will use to
-   *     create {@link #getPooledDataSource()})
-   * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
-   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
-   * @param clock the clock
-   */
-  @VisibleForTesting
-  public PipelineApplicationState(
-      MeterRegistry meters,
-      MetricRegistry metrics,
-      DataSource dataSource,
-      int maxPoolSize,
-      String persistenceUnitName,
-      Clock clock) {
-    this(
-        meters,
-        metrics,
-        createPooledDataSource(dataSource, maxPoolSize, metrics),
-        persistenceUnitName,
-        clock);
-  }
-
-  /**
    * Constructs a new {@link PipelineApplicationState} instance using pre-existing DataSource and
    * EntityManagerFactory. This constructor is intended for use by other constructors and specific
    * unit tests.
@@ -126,25 +99,6 @@ public final class PipelineApplicationState implements AutoCloseable {
     Properties dataSourceProperties = new Properties();
     dataSourceProperties.setProperty("stringtype", "unspecified");
     pooledDataSource.setDataSourceProperties(dataSourceProperties);
-
-    return pooledDataSource;
-  }
-
-  /**
-   * @param unpooledDataSource a non-pooled {@link DataSource} for the application's DB (which this
-   *     will use to create {@link #getPooledDataSource()})
-   * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
-   * @param metrics the {@link MetricRegistry} to use
-   * @return a {@link HikariDataSource} for the BFD database
-   */
-  private static HikariDataSource createPooledDataSource(
-      DataSource unpooledDataSource, int maxPoolSize, MetricRegistry metrics) {
-    HikariDataSource pooledDataSource = new HikariDataSource();
-
-    pooledDataSource.setDataSource(unpooledDataSource);
-    pooledDataSource.setMaximumPoolSize(maxPoolSize);
-    pooledDataSource.setRegisterMbeans(true);
-    pooledDataSource.setMetricRegistry(metrics);
 
     return pooledDataSource;
   }

@@ -33,6 +33,11 @@ locals {
   logging_bucket  = "bfd-${local.env}-logs-${local.account_id}"
   pipeline_bucket = "bfd-${local.env}-etl-${local.account_id}"
 
+  # SSM-derived network, security group values
+  enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
+  vpn_security_group              = local.nonsensitive_common_config["vpn_security_group"]
+  vpc_name                        = local.nonsensitive_common_config["vpc_name"]
+
   # Cloudwatch Settings
   pipeline_messages_error = {
     period       = "300"
@@ -62,7 +67,7 @@ locals {
     eval_periods = "1"
     threshold    = "28800000"
     datapoints   = "1"
-    metrics = [
+    metrics = local.is_ephemeral_env ? [] : [
       { sink_name = "FissClaimRdaSink", claim_type = "fiss" },
       { sink_name = "McsClaimRdaSink", claim_type = "mcs" },
     ]
@@ -78,10 +83,10 @@ locals {
   # The log availability alarm will post an incident in prod; in other envs it will get posted
   # to #bfd-test 
   # TODO: Replace testing SNS topic in BFD-2244
-  log_availability_alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm.arn]
+  log_availability_alarm_actions = local.is_ephemeral_env ? [] : local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm[0].arn]
 
   # The max claim latency alarm sends notifications to #bfd-notices upon entering the ALARM state
-  max_claim_latency_alarm_actions = [data.aws_sns_topic.bfd_notices_slack_alarm.arn]
+  max_claim_latency_alarm_actions = local.is_ephemeral_env ? [] : [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn]
 
   # data-source resolution
   ami_id                = data.aws_ami.main.image_id
