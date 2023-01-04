@@ -86,12 +86,24 @@ public final class PipelineTestUtils {
   private PipelineTestUtils() {
     MetricRegistry testMetrics = new MetricRegistry();
     DatabaseSchemaManager.createOrUpdateSchema(DatabaseTestUtils.initUnpooledDataSource());
+
+    // Create a testing specific pooled data source from the existing unpooled data source
+    HikariDataSource pooledDataSource = new HikariDataSource();
+
+    pooledDataSource.setDataSource(DatabaseTestUtils.get().getUnpooledDataSource());
+    pooledDataSource.setMaximumPoolSize(DEFAULT_MAX_POOL_SIZE);
+    pooledDataSource.setRegisterMbeans(true);
+    pooledDataSource.setMetricRegistry(testMetrics);
+    // By default, the pool would immediately open all allowed connections. This is excessive for
+    // unit/IT testing, so we lower it to avoid exceeding max connections in postgresql.
+    pooledDataSource.setMinimumIdle(3);
+    pooledDataSource.setIdleTimeout(30_000);
+
     this.pipelineApplicationState =
         new PipelineApplicationState(
             new SimpleMeterRegistry(),
             testMetrics,
-            DatabaseTestUtils.get().getUnpooledDataSource(),
-            DEFAULT_MAX_POOL_SIZE,
+            pooledDataSource,
             PipelineApplicationState.PERSISTENCE_UNIT_NAME,
             Clock.systemUTC());
   }
