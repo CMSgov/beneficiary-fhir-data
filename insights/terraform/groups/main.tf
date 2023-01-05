@@ -46,4 +46,3 @@ resource "aws_s3_bucket_object" "user_output_folder" {
 
 
 
-
