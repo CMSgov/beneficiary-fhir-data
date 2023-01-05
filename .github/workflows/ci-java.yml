@@ -33,7 +33,11 @@ jobs:
       - id: workflow_files
         name: Set output
         run: |
-          echo "name=files=$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+        # echo "name=files::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
 
   mvn-fmt-maven-plugin:
     runs-on: ubuntu-20.04
