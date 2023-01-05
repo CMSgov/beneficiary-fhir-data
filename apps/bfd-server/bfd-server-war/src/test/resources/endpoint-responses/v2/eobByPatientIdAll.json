@@ -117,6 +117,13 @@
           "display" : "Institutional"
         } ]
       },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "outpatient"
+        } ],
+        "text" : "Outpatient"
+      },
       "use" : "claim",
       "patient" : {
         "reference" : "Patient/567834"
@@ -1683,6 +1690,13 @@
           "display" : "Professional"
         } ]
       },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
+      },
       "use" : "claim",
       "patient" : {
         "reference" : "Patient/567834"
@@ -2298,6 +2312,13 @@
           "code" : "institutional",
           "display" : "Institutional"
         } ]
+      },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
       },
       "use" : "claim",
       "patient" : {
@@ -3395,6 +3416,13 @@
           "code" : "institutional",
           "display" : "Institutional"
         } ]
+      },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
       },
       "use" : "claim",
       "patient" : {
@@ -5607,6 +5635,13 @@
           "code" : "institutional",
           "display" : "Institutional"
         } ]
+      },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
       },
       "use" : "claim",
       "patient" : {
