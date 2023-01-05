@@ -220,20 +220,24 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               }
             }
           } catch (GrpcResponseStream.StreamInterruptedException ex) {
+            log.info("shutting down due to interrupted stream");
             // If our thread is interrupted we cancel the stream so the server knows we're done
             // and then shut down normally.
             flushBatch = false;
             responseStream.cancelStream("shutting down due to InterruptedException");
             processResult.setInterrupted(true);
           } catch (GrpcResponseStream.DroppedConnectionException ex) {
+            log.info("shutting down due to dropped stream");
             if (isUnexpectedDroppedConnectionException(lastProcessedTime, ex)) {
               processResult.setException(ex);
             }
           } catch (ProcessingException ex) {
+            log.info("shutting down due to ProcessingException: {}", ex.getMessage());
             flushBatch = false;
             processResult.addCount(ex.getProcessedCount());
             processResult.setException(ex);
           } catch (Exception ex) {
+            log.info("shutting down due to Exception: {}", ex.getMessage());
             flushBatch = false;
             processResult.setException(ex);
           }

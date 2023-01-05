@@ -156,6 +156,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
 
       if (!channel.isTerminated()) {
         try {
+          log.info("wait for channel to terminate");
           channel.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException ex) {
           log.info("caught InterruptedException while closing ManagedChannel - retrying once");
@@ -168,6 +169,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
             channel.shutdownNow();
           }
         }
+        log.info("finished waiting for channel to terminate");
       }
 
       channel = null;

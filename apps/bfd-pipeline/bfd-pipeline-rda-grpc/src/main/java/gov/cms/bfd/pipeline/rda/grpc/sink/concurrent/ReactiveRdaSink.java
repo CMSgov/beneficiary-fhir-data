@@ -7,21 +7,16 @@ import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
@@ -52,16 +47,14 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private Throwable error;
   private final CountDownLatch latch;
 
-  private final Sinks.Many<Message> reactiveSink;
+  private final Publisher publisher;
   private final Disposable disposable;
 
-  private final int batchSize;
   private final List<ClaimWriter> claimWriters;
   private final SequenceNumberWriter sequenceNumberWriter;
 
   public ReactiveRdaSink(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
-    this.batchSize = batchSize;
     claimWriters =
         IntStream.rangeClosed(1, maxThreads)
             .boxed()
@@ -75,16 +68,10 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     currentProcessedCount = 0;
     error = null;
     latch = new CountDownLatch(2);
-    reactiveSink =
-        Sinks.many()
-            .unicast()
-            .onBackpressureBuffer(new BoundedQueue(maxThreads + maxThreads * batchSize));
-    log.info("created instance: threads={} batchSize={}", maxThreads, batchSize);
-    log.info("creating claim process");
-    var reactiveFlux = reactiveSink.asFlux();
+    publisher = new Publisher(batchSize * maxThreads * 2);
     var claimProcessing =
-        reactiveFlux
-            //            .doOnNext(m -> log.info(getClaimIdForMessage(m.message)))
+        publisher
+            .flux
             .groupBy(this::workerForMessage)
             .flatMap(
                 group ->
@@ -92,35 +79,36 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
                         .publishOn(Schedulers.boundedElastic())
                         .bufferTimeout(batchSize, Duration.ofSeconds(1))
                         .flatMap(message -> group.key().process(message), claimWriters.size()))
-            .subscribe(this::processResult, this::addError, latch::countDown);
-    log.info("creating sequenceNumber process");
+            .doFinally(o -> latch.countDown())
+            .subscribe(this::processResult, this::addError);
     var sequenceNumberProcessing =
         Flux.interval(Duration.ofMillis(250))
             .takeWhile(o -> isRunning())
             .flatMap(sequenceNumberWriter::updateDb)
             .subscribeOn(Schedulers.boundedElastic())
-            .subscribe(seq -> {}, this::addError, latch::countDown);
-    log.info("combining disposables");
+            .doFinally(o -> latch.countDown())
+            .subscribe(seq -> {}, this::addError);
     disposable = Disposables.composite(claimProcessing, sequenceNumberProcessing);
-    log.info("constructor complete");
+    log.info("created instance: threads={} batchSize={}", maxThreads, batchSize);
   }
 
   private ClaimWriter workerForMessage(Message message) {
-    final var claimId = getClaimIdForMessage(message.message);
-    final var hash = Hasher.hashString(claimId, StandardCharsets.UTF_8);
+    final var hash = Hasher.hashString(message.claimId, StandardCharsets.UTF_8);
     final var index = Math.abs(hash.asInt()) % claimWriters.size();
-    log.info("hash {} to claimWriter {}", claimId, claimWriters.get(index).id);
+    //    log.info("hash {} to claimWriter {}", claimId, claimWriters.get(index).id);
     return claimWriters.get(index);
   }
 
   @Override
   public int writeMessages(String dataVersion, List<TMessage> messages) throws ProcessingException {
     for (TMessage message : messages) {
-      sequenceNumbers.addActiveSequenceNumber(getSequenceNumberForObject(message));
-      final var emitResult = reactiveSink.tryEmitNext(new Message(dataVersion, message));
-      //      log.info("writeMessages: id={} res={}", getClaimIdForMessage(message), emitResult);
-      if (emitResult != Sinks.EmitResult.OK) {
-        throw new ProcessingException(new IOException("publish failed: " + emitResult), 0);
+      String claimId = getClaimIdForMessage(message);
+      long sequenceNumber = getSequenceNumberForObject(message);
+      sequenceNumbers.addActiveSequenceNumber(sequenceNumber);
+      try {
+        publisher.emit(new Message(claimId, sequenceNumber, dataVersion, message));
+      } catch (InterruptedException ex) {
+        throw new ProcessingException(ex, 0);
       }
     }
     log.info("writeMessages: complete count={}", messages.size());
@@ -128,8 +116,8 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   private void processResult(Result result) {
-    for (TMessage message : result.messages) {
-      sequenceNumbers.removeWrittenSequenceNumber(getSequenceNumberForObject(message));
+    for (Message message : result.messages) {
+      sequenceNumbers.removeWrittenSequenceNumber(message.sequenceNumber);
     }
     addToProcessedCount(result.processed);
   }
@@ -199,10 +187,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
+    new RuntimeException("SHUTDOWN CALLED").printStackTrace();
     log.info("shutdown called");
     synchronized (lock) {
       if (running) {
-        reactiveSink.tryEmitComplete();
+        publisher.complete();
         running = false;
         log.info("shutdown emit complete");
       }
@@ -212,11 +201,16 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       log.info("shutdown wait for latch");
       closer.close(
           () -> {
-            try {
-              latch.await(waitTime.toMillis(), TimeUnit.MILLISECONDS);
-            } catch (Exception ex) {
-              Thread.interrupted();
-              latch.await(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+            for (int i = 1; i <= 10; ++i) {
+              try {
+                log.info("interrupted? {}", Thread.interrupted());
+                latch.await(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+                break;
+              } catch (Exception ex) {
+                if (i >= 10) {
+                  throw ex;
+                }
+              }
             }
           });
       log.info("shutdown call dispose");
@@ -236,6 +230,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public void close() throws Exception {
+    new RuntimeException("CLOSE CALLED").printStackTrace();
     log.info("close called");
     shutdown(Duration.ofMinutes(2));
     log.info("close complete");
@@ -243,6 +238,8 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Data
   private class Message {
+    private final String claimId;
+    private final long sequenceNumber;
     private final String apiVersion;
     private final TMessage message;
   }
@@ -250,7 +247,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   @AllArgsConstructor
   private class Result {
     private final int processed;
-    private final List<TMessage> messages;
+    private final List<Message> messages;
   }
 
   private class SequenceNumberWriter {
@@ -298,15 +295,15 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     }
 
     private Flux<Result> process(List<Message> allMessages) {
-      log.info("ClaimWriter {} received {} messages", id, allMessages.size());
       final var uniqueMessages = new LinkedHashMap<String, Message>();
       for (Message message : allMessages) {
-        uniqueMessages.put(sink.getClaimIdForMessage(message.message), message);
+        uniqueMessages.put(message.claimId, message);
       }
       final var batch = new ArrayList<TClaim>();
       try {
-        for (Message messageForBatch : uniqueMessages.values()) {
-          batch.add(transform(messageForBatch));
+        for (Message message : uniqueMessages.values()) {
+          final var claim = sink.transformMessage(message.apiVersion, message.message);
+          batch.add(claim);
         }
         int processed = 0;
         if (batch.size() > 0) {
@@ -318,7 +315,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             uniqueMessages.size(),
             allMessages.size(),
             processed);
-        return Flux.just(new Result(processed, messageList(allMessages)));
+        return Flux.just(new Result(processed, allMessages));
       } catch (Exception ex) {
         log.error("ClaimWriter {} error: {}", id, ex.getMessage(), ex);
         return Flux.error(ex);
@@ -326,56 +323,34 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     }
 
     private void close() throws Exception {
-      log.info("ClaimWriter closing");
+      log.info("ClaimWriter {} closing", id);
       sink.close();
-      log.info("ClaimWriter closed");
-    }
-
-    private TClaim transform(Message message) {
-      return sink.transformMessage(message.apiVersion, message.message);
-    }
-
-    private List<TMessage> messageList(List<Message> allMessages) {
-      return allMessages.stream().map(Message::getMessage).collect(Collectors.toList());
+      log.info("ClaimWriter {} closed", id);
     }
   }
 
-  private class BoundedQueue extends AbstractQueue<Message> {
-    private final BlockingQueue<Message> queue;
+  private class Publisher {
+    private final Semaphore available;
+    private final Sinks.Many<Message> reactiveSink;
+    private final Flux<Message> flux;
 
-    public BoundedQueue(int maxSize) {
-      queue = new ArrayBlockingQueue<>(maxSize);
+    private Publisher(int maxAvailable) {
+      available = new Semaphore(maxAvailable, true);
+      reactiveSink = Sinks.many().unicast().onBackpressureBuffer();
+      flux = reactiveSink.asFlux().publishOn(Schedulers.boundedElastic()).doOnNext(o -> consumed());
     }
 
-    @Override
-    public Iterator<Message> iterator() {
-      return queue.iterator();
+    private void emit(Message message) throws InterruptedException {
+      available.acquire();
+      reactiveSink.emitNext(message, Sinks.EmitFailureHandler.FAIL_FAST);
     }
 
-    @Override
-    public int size() {
-      return queue.size();
+    private void complete() {
+      reactiveSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
     }
 
-    @Override
-    public boolean offer(Message message) {
-      try {
-        queue.put(message);
-        return true;
-      } catch (InterruptedException ex) {
-        log.info("queue.offer was interrupted");
-        return false;
-      }
-    }
-
-    @Override
-    public Message poll() {
-      return queue.poll();
-    }
-
-    @Override
-    public Message peek() {
-      return queue.peek();
+    private void consumed() {
+      available.release();
     }
   }
 }
