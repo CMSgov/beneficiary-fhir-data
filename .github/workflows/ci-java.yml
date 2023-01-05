@@ -82,9 +82,10 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@v3
       - name: 'Setup JDK'
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
+          distribution: 'corretto'
       - name: 'Generate Maven Config'
         run: |
           cat << EOF > ~/.m2/toolchains.xml
