@@ -102,7 +102,7 @@ final class BeneficiaryTransformerV2 {
     /*
      * Notify end users when they receive Patient records impacted by
      * https://jira.cms.gov/browse/BFD-1566. See the documentation on
-     * LoadAppOptions.isFilteringNonNullAndNon2022Benes() for details.
+     * LoadAppOptions.isFilteringNonNullAndNon2023Benes() for details.
      */
     if (!beneficiary.getSkippedRifRecords().isEmpty()) {
       patient

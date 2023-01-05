@@ -438,10 +438,10 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          // Log if we have a non-2022 enrollment year INSERT
+          // Log if we have a non-2023 enrollment year INSERT
           if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
             LOGGER.info(
-                "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
                 ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
           }
 
@@ -457,17 +457,17 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            // Log if we have a non-2022 enrollment year INSERT
+            // Log if we have a non-2023 enrollment year INSERT
             if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               LOGGER.info(
-                  "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                  "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
                   ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
-            // Skip this record if the year is not 2022 and its an update.
+            // Skip this record if the year is not 2023 and its an update.
             if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               /*
                * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
@@ -551,13 +551,13 @@ public final class RifLoader {
   }
 
   /**
-   * Checks if the record is a beneficiary with a non-2022 year, the flag to filter items is on, and
+   * Checks if the record is a beneficiary with a non-2023 year, the flag to filter items is on, and
    * has a non-{@code null} enrollment reference year. This is to handle special filtering while CCW
    * fixes an issue and should be temporary.
    *
    * @param rifRecordEvent the {@link RifRecordEvent} to check
    * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-
-   *     <code>null</code> and not 2022, and the flag to filter such beneficiaries is set to {@code
+   *     <code>null</code> and not 2023, and the flag to filter such beneficiaries is set to {@code
    *     true}
    */
   private boolean isBackdatedBene(RifRecordEvent<?> rifRecordEvent) {
@@ -578,7 +578,7 @@ public final class RifLoader {
    */
   private boolean isBackdatedBene(Beneficiary bene) {
     // No filtering should take place unless filtering is turned on in the configuration
-    if (!options.isFilteringNonNullAndNon2022Benes()) {
+    if (!options.isFilteringNonNullAndNon2023Benes()) {
       return false;
     }
 
@@ -587,8 +587,8 @@ public final class RifLoader {
       return false;
     }
 
-    // If the reference year is 2022 we do not want to filter it
-    if (BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get())) {
+    // If the reference year is 2023 we do not want to filter it
+    if (BigDecimal.valueOf(2023).equals(bene.getBeneEnrollmentReferenceYear().get())) {
       return false;
     }
     return true;

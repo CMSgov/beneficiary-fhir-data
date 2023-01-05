@@ -708,59 +708,59 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   * 2023 enrollment date and filter on expect the data is loaded to the regular database tables.
    */
   @Test
-  public void loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2022",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        "2023",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * non-2022 enrollment date and filter on expect the record is successfully loaded. A log message
+   * non-2023 enrollment date and filter on expect the record is successfully loaded. A log message
    * will be printed in this case.
    */
   @Test
-  public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used and 2022 enrollment date and filter on expect the data
+   * LoadStrategy.INSERT_IDEMPOTENT is used and 2023 enrollment date and filter on expect the data
    * is loaded to the regular database tables.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+      loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2022",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        "2023",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2022 enrollment date and filter on expect the
+   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2023 enrollment date and filter on expect the
    * data is loaded to the regular database tables. A log message will be printed.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+      loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY));
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -777,7 +777,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY),
         false);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -785,17 +785,17 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
-   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   * 2023 enrollment date and filter on expect the data is loaded to the regular database tables.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenUpdateAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
 
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
     loadSampleABeneWithEnrollmentRefYear(
-        "2022",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        "2023",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -803,11 +803,11 @@ public final class RifLoaderIT {
 
   /**
    * Verifies that {@link RifLoader} skips {@link Beneficiary} records, as expected, for <code>
-   * UPDATE</code>s of a non-2022 {@link Beneficiary}, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is enabled.
+   * UPDATE</code>s of a non-2023 {@link Beneficiary}, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is enabled.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAndNon2022EnrollmentDateAndFilterOnExpectRecordSkipped() {
+  public void loadBeneficiaryWhenUpdateAndNon2023EnrollmentDateAndFilterOnExpectRecordSkipped() {
 
     /* First, load a bene that SHOULD be filtered out (when filtering is turned on) normally. */
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
@@ -815,7 +815,7 @@ public final class RifLoaderIT {
 
     /* Re-load that bene again as an UPDATE with filtering turned on, and verify that it was skipped. */
     loadDefaultSampleABeneData(
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 1);
@@ -824,7 +824,7 @@ public final class RifLoaderIT {
   /**
    * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
    * UPDATE</code>s of a {@code null} {@link Beneficiary} enrollment year, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is enabled.
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is enabled.
    */
   @Test
   public void loadBeneficiaryWhenUpdateAndNullEnrollmentDateAndFilterOnExpectRecordLoaded() {
@@ -836,7 +836,7 @@ public final class RifLoaderIT {
     /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
     loadSampleABeneWithEnrollmentRefYear(
         null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -844,17 +844,17 @@ public final class RifLoaderIT {
 
   /**
    * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
-   * UPDATE</code>s of a 2022 {@link Beneficiary}, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is disabled.
+   * UPDATE</code>s of a 2023 {@link Beneficiary}, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is disabled.
    *
    * <p>If the filter is off, we take no special action to filter records.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOffExpectRecordLoaded() {
+  public void loadBeneficiaryWhenUpdateAnd2023EnrollmentDateAndFilterOffExpectRecordLoaded() {
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
-    loadSampleABeneWithEnrollmentRefYear("2022", CcwRifLoadTestUtils.getLoadOptions(), true);
+    loadSampleABeneWithEnrollmentRefYear("2023", CcwRifLoadTestUtils.getLoadOptions(), true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -874,7 +874,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -894,7 +894,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -940,7 +940,7 @@ public final class RifLoaderIT {
         editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
     loadSample(
         "non-Bene sample update",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -1146,7 +1146,7 @@ public final class RifLoaderIT {
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
     Stream<RifFile> updatedSampleAStream = editSamples(samplesStream, fileEditor);
 
-    loadSample("SAMPLE_A, updates to 2022 ref year", loadAppOptions, updatedSampleAStream);
+    loadSample("SAMPLE_A, updates to 2023 ref year", loadAppOptions, updatedSampleAStream);
   }
 
   /**
