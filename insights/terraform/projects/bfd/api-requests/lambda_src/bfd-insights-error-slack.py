@@ -39,12 +39,12 @@ def handler(event, context):
 
     try:
         wehbook_url = ssm_client.get_parameter(
-            Name=f"/bfd/mgmt/common/sensitive/slack_webhook_bfd_test",
+            Name=f"/bfd/mgmt/common/sensitive/slack_webhook_bfd_alerts",
             WithDecryption=True,
         )["Parameter"]["Value"]
     except KeyError as exc:
         print(
-            f'SSM parameter "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test" not found: {exc.reason}'
+            f'SSM parameter "/bfd/mgmt/common/sensitive/slack_webhook_bfd_alerts" not found: {exc.reason}'
         )
         return
 
