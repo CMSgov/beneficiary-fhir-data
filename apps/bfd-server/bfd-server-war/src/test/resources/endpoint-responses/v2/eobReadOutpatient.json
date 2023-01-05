@@ -104,6 +104,13 @@
       "display" : "Institutional"
     } ]
   },
+  "subType" : {
+    "coding" : [ {
+      "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+      "code" : "outpatient"
+    } ],
+    "text" : "Outpatient"
+  },
   "use" : "claim",
   "patient" : {
     "reference" : "Patient/567834"
