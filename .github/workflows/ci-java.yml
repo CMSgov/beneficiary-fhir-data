@@ -37,8 +37,6 @@ jobs:
           echo "$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-        # echo "name=files::$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
-
   mvn-fmt-maven-plugin:
     runs-on: ubuntu-20.04
     needs: workflow
@@ -46,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: 'Setup JDK'
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
           java-version: '11'
       - name: 'Generate maven toolchain config'
