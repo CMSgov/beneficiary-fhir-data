@@ -14,6 +14,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -3157,7 +3158,8 @@ public final class TransformerUtilsV2 {
    * @param fiscalIntermediaryNumber FI_NUM,
    * @param lastUpdated the last updated,
    * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM,
-   * @param fiClmProcDt FI_CLM_PROC_DT
+   * @param fiClmProcDt FI_CLM_PROC_DT,
+   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in.
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3174,7 +3176,8 @@ public final class TransformerUtilsV2 {
       Optional<String> fiscalIntermediaryNumber,
       Optional<Instant> lastUpdated,
       Optional<String> fiDocClmControlNum,
-      Optional<LocalDate> fiClmProcDt) {
+      Optional<LocalDate> fiClmProcDt,
+      C4BBInstutionalClaimSubtypes c4bbInstutionalClaimSubtype) {
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->
@@ -3254,6 +3257,14 @@ public final class TransformerUtilsV2 {
 
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(eob, CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount);
+
+    eob.setSubType(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(TransformerConstants.C4BB_Institutional_Claim_SubType)
+                    .setCode(c4bbInstutionalClaimSubtype.label))
+            .setText(c4bbInstutionalClaimSubtype.name()));
   }
 
   /**

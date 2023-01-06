@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
+import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -117,6 +118,8 @@ public class HHAClaimTransformerV2 {
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
+    // C4BBInstutionalClaimSubtypes.Inpatient for HHA Claims
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -132,7 +135,8 @@ public class HHAClaimTransformerV2 {
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
-        claimGroup.getFiscalIntermediaryClaimProcessDate());
+        claimGroup.getFiscalIntermediaryClaimProcessDate(),
+        C4BBInstutionalClaimSubtypes.Inpatient);
 
     // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
     TransformerUtilsV2.addInformationWithCode(
