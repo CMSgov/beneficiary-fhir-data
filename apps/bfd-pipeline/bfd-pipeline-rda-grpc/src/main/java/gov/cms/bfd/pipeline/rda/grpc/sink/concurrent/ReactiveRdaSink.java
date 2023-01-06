@@ -69,6 +69,16 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     error = null;
     latch = new CountDownLatch(2);
     publisher = new Publisher(batchSize * maxThreads * 2);
+    var claimWriterScheduler =
+        Schedulers.newBoundedElastic(
+            claimWriters.size(),
+            10 * claimWriters.size(),
+            "claims-" + sink.getClass().getSimpleName());
+    var sequenceNumberWriterScheduler =
+        Schedulers.newBoundedElastic(
+            claimWriters.size(),
+            10 * claimWriters.size(),
+            "seqs-" + sink.getClass().getSimpleName());
     var claimProcessing =
         publisher
             .flux
@@ -76,7 +86,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             .flatMap(
                 group ->
                     group
-                        .publishOn(Schedulers.boundedElastic())
+                        .publishOn(claimWriterScheduler)
                         .bufferTimeout(batchSize, Duration.ofSeconds(1))
                         .flatMap(message -> group.key().process(message), claimWriters.size()))
             .doFinally(o -> latch.countDown())
@@ -85,17 +95,17 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         Flux.interval(Duration.ofMillis(250))
             .takeWhile(o -> isRunning())
             .flatMap(sequenceNumberWriter::updateDb)
-            .subscribeOn(Schedulers.boundedElastic())
+            .subscribeOn(sequenceNumberWriterScheduler)
             .doFinally(o -> latch.countDown())
             .subscribe(seq -> {}, this::addError);
     disposable = Disposables.composite(claimProcessing, sequenceNumberProcessing);
-    log.info("created instance: threads={} batchSize={}", maxThreads, batchSize);
+    log.debug("created instance: threads={} batchSize={}", maxThreads, batchSize);
   }
 
   private ClaimWriter workerForMessage(Message message) {
     final var hash = Hasher.hashString(message.claimId, StandardCharsets.UTF_8);
     final var index = Math.abs(hash.asInt()) % claimWriters.size();
-    //    log.info("hash {} to claimWriter {}", claimId, claimWriters.get(index).id);
+    //    log.debug("hash {} to claimWriter {}", claimId, claimWriters.get(index).id);
     return claimWriters.get(index);
   }
 
@@ -111,7 +121,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         throw new ProcessingException(ex, 0);
       }
     }
-    log.info("writeMessages: complete count={}", messages.size());
+    log.debug("writeMessages: complete count={}", messages.size());
     return getProcessedCount();
   }
 
@@ -187,7 +197,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
-    new RuntimeException("SHUTDOWN CALLED").printStackTrace();
+    //    new RuntimeException("SHUTDOWN CALLED").printStackTrace();
     log.info("shutdown called");
     synchronized (lock) {
       if (running) {
@@ -230,10 +240,10 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public void close() throws Exception {
-    new RuntimeException("CLOSE CALLED").printStackTrace();
-    log.info("close called");
+    //    new RuntimeException("CLOSE CALLED").printStackTrace();
+    log.debug("close called");
     shutdown(Duration.ofMinutes(2));
-    log.info("close complete");
+    log.debug("close complete");
   }
 
   @Data
@@ -263,7 +273,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       if (newSequenceNumber != lastSequenceNumber) {
         try {
           sink.updateLastSequenceNumber(newSequenceNumber);
-          log.info(
+          log.debug(
               "SequenceNumberWriter updated last={} new={}", lastSequenceNumber, newSequenceNumber);
           lastSequenceNumber = newSequenceNumber;
           return Flux.just(newSequenceNumber);
@@ -277,10 +287,10 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     }
 
     private void close() throws Exception {
-      log.info("SequenceNumberWriter closing");
+      log.debug("SequenceNumberWriter closing");
       updateDb(0L).singleOrEmpty().block();
       sink.close();
-      log.info("SequenceNumberWriter closed");
+      log.debug("SequenceNumberWriter closed");
     }
   }
 
@@ -309,7 +319,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         if (batch.size() > 0) {
           processed = sink.writeClaims(batch);
         }
-        log.info(
+        log.debug(
             "ClaimWriter {} wrote unique={} all={} processed={}",
             id,
             uniqueMessages.size(),
@@ -323,9 +333,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     }
 
     private void close() throws Exception {
-      log.info("ClaimWriter {} closing", id);
+      log.debug("ClaimWriter {} closing", id);
       sink.close();
-      log.info("ClaimWriter {} closed", id);
+      log.debug("ClaimWriter {} closed", id);
     }
   }
 
