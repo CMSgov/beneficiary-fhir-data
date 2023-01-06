@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif2.Beneficiary
+- entityClassName: gov.cms.bfd.model.rif.Beneficiary
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: Beneficiary
@@ -895,7 +895,7 @@ mappings:
     - cascadeTypes:
       - ALL
       collectionType: List
-      entityClass: gov.cms.bfd.model.rif2.BeneficiaryMonthly
+      entityClass: gov.cms.bfd.model.rif.BeneficiaryMonthly
       fetchType: LAZY
       fieldName: beneficiaryMonthlys
       joinType: OneToMany
@@ -915,7 +915,7 @@ mappings:
     - cascadeTypes:
       - ALL
       collectionType: Set
-      entityClass: gov.cms.bfd.model.rif2.BeneficiaryHistory
+      entityClass: gov.cms.bfd.model.rif.BeneficiaryHistory
       fetchType: LAZY
       fieldName: beneficiaryHistories
       joinType: OneToMany
@@ -925,7 +925,7 @@ mappings:
     - cascadeTypes:
       - ALL
       collectionType: Set
-      entityClass: gov.cms.bfd.model.rif2.MedicareBeneficiaryIdHistory
+      entityClass: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
       fetchType: LAZY
       fieldName: medicareBeneficiaryIdHistories
       joinType: OneToMany
@@ -938,7 +938,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: BeneficiaryColumn
-    packageName: gov.cms.bfd.model.rif2
+    packageName: gov.cms.bfd.model.rif
     values:
     - BENE_ID
     - STATE_CODE
@@ -1569,4 +1569,4 @@ mappings:
   - defaultValue: '0'
     from: BENE_LINK_KEY
     to: beneLinkKey
-  transformerClassName: gov.cms.bfd.model.rif2.BeneficiaryParser
+  transformerClassName: gov.cms.bfd.model.rif.BeneficiaryParser

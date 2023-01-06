@@ -422,9 +422,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
 
     TypeSpec columnEnumFinal = columnEnum.build();
-    JavaFile columnsEnumFile =
-        JavaFile.builder(mappingSpec.getPackageName(), columnEnumFinal).build();
-    columnsEnumFile.writeTo(processingEnv.getFiler());
+    // Generation of entity classes disabled as part of PACA-656.
+    //    JavaFile columnsEnumFile =
+    //        JavaFile.builder(mappingSpec.getPackageName(), columnEnumFinal).build();
+    //    columnsEnumFile.writeTo(processingEnv.getFiler());
 
     return columnEnumFinal;
   }
@@ -626,9 +627,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
 
     TypeSpec lineEntityFinal = lineEntity.build();
-    JavaFile lineEntityClassFile =
-        JavaFile.builder(mappingSpec.getPackageName(), lineEntityFinal).build();
-    lineEntityClassFile.writeTo(processingEnv.getFiler());
+    // Generation of entity classes disabled as part of PACA-656.
+    //    JavaFile lineEntityClassFile =
+    //        JavaFile.builder(mappingSpec.getPackageName(), lineEntityFinal).build();
+    //    lineEntityClassFile.writeTo(processingEnv.getFiler());
 
     return lineEntityFinal;
   }
@@ -918,9 +920,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     createBeneficiaryMonthlyFields(beneficiaryMonthlyEntity, false, rifField);
 
     TypeSpec beneficiaryMonthlyEntityFinal = beneficiaryMonthlyEntity.build();
-    JavaFile beneficiaryMonthlyClassFile =
-        JavaFile.builder("gov.cms.bfd.model.rif", beneficiaryMonthlyEntityFinal).build();
-    beneficiaryMonthlyClassFile.writeTo(processingEnv.getFiler());
+    // Generation of entity classes disabled as part of PACA-656.
+    //    JavaFile beneficiaryMonthlyClassFile =
+    //        JavaFile.builder("gov.cms.bfd.model.rif", beneficiaryMonthlyEntityFinal).build();
+    //    beneficiaryMonthlyClassFile.writeTo(processingEnv.getFiler());
 
     return beneficiaryMonthlyEntityFinal;
   }
@@ -1241,9 +1244,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       }
     }
     TypeSpec headerEntityFinal = headerEntityClass.build();
-    JavaFile headerEntityFile =
-        JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
-    headerEntityFile.writeTo(processingEnv.getFiler());
+    // Generation of entity classes disabled as part of PACA-656.
+    //    JavaFile headerEntityFile =
+    //        JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
+    //    headerEntityFile.writeTo(processingEnv.getFiler());
 
     return headerEntityFinal;
   }

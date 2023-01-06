@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif2.OutpatientClaim
+- entityClassName: gov.cms.bfd.model.rif.OutpatientClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: OutpatientClaim
@@ -966,7 +966,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: OutpatientClaimColumn
-    packageName: gov.cms.bfd.model.rif2
+    packageName: gov.cms.bfd.model.rif
     values:
     - BENE_ID
     - CLM_ID
@@ -1635,4 +1635,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif2.OutpatientClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.OutpatientClaimParser

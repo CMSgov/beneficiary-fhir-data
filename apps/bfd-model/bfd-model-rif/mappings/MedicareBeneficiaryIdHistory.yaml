@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif2.MedicareBeneficiaryIdHistory
+- entityClassName: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: MedicareBeneficiaryIdHistory
@@ -100,7 +100,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: MedicareBeneficiaryIdHistoryColumn
-    packageName: gov.cms.bfd.model.rif2
+    packageName: gov.cms.bfd.model.rif
     values:
     - BENE_MBI_ID
     - BENE_ID
@@ -157,4 +157,4 @@ mappings:
   - defaultValue: '0'
     from: BENE_CRNT_REC_IND_ID
     to: mbiCrntRecIndId
-  transformerClassName: gov.cms.bfd.model.rif2.MedicareBeneficiaryIdHistoryParser
+  transformerClassName: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistoryParser

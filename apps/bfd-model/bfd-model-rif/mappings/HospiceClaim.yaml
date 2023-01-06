@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif2.HospiceClaim
+- entityClassName: gov.cms.bfd.model.rif.HospiceClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: HospiceClaim
@@ -552,7 +552,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: HospiceClaimColumn
-    packageName: gov.cms.bfd.model.rif2
+    packageName: gov.cms.bfd.model.rif
     values:
     - BENE_ID
     - CLM_ID
@@ -931,4 +931,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif2.HospiceClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.HospiceClaimParser
