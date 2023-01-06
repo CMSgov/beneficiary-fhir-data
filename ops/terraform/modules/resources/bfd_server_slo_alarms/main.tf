@@ -1,4 +1,6 @@
 locals {
+  region = data.aws_region.current.name
+
   app = "bfd-server"
 
   alert_arn   = var.alert_notification_arn == null ? [] : [var.alert_notification_arn]
@@ -83,6 +85,17 @@ locals {
       threshold = "0.001"
     }
   }
+
+  slo_dashboard_url          = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=bfd-${var.env}-server-slos"
+  default_dashboard_url      = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=bfd-${var.env}-server"
+  dashboard_message_fragment = <<-EOF
+View the relevant CloudWatch dashboards below for more information:
+
+* <${local.slo_dashboard_url}|bfd-${var.env}-server-slos>
+    * This dashboard visualizes SLOs along with ASG instance count and CPU utilization 
+* <${local.default_dashboard_url}|bfd-${var.env}-server>
+    * This dashboard visualizes data such as request count and latency per-endpoint and per-partner, and more
+  EOF 
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
@@ -95,7 +108,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
 
   alarm_description = join("", [
     "/v*/fhir/Coverage response mean 15 minute latency exceeded ALERT SLO threshold of 260ms for ",
-    "${local.app} in ${var.env} environment"
+    "${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.coverage_latency
@@ -118,7 +132,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
 
   alarm_description = join("", [
     "/v*/fhir/Coverage response mean 15 minute latency exceeded WARNING SLO threshold of 180ms ",
-    "for ${local.app} in ${var.env} environment"
+    "for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.coverage_latency
@@ -149,7 +164,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert"
   alarm_description = join("", [
     "/v*/fhir/Coverage response 99% 15 minute BULK latency exceeded ALERT SLO threshold of ",
     "${local.partners.bulk[each.key].timeout_ms} ms for partner ${each.key} for ${local.app} in ",
-    "${var.env} environment"
+    "${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.coverage_latency
@@ -180,7 +196,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_warnin
 
   alarm_description = join("", [
     "/v*/fhir/Coverage response 99% 15 minute BULK latency exceeded WARNING SLO threshold of 1440 ",
-    "ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "ms for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.coverage_latency
@@ -211,7 +228,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_ale
 
   alarm_description = join("", [
     "/v*/fhir/Coverage response 99% 15 minute NON-BULK latency exceeded ALERT SLO threshold of ",
-    "2050 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "2050 ms for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.coverage_latency
@@ -242,7 +260,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_war
 
   alarm_description = join("", [
     "/v*/fhir/Coverage response 99% 15 minute NON-BULK latency exceeded WARNING SLO threshold of ",
-    "1440 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "1440 ms for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.coverage_latency
@@ -268,7 +287,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_al
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with no resources returned mean 15 minute latency ",
-    "exceeded ALERT SLO threshold of 440 ms for ${local.app} in ${var.env} environment"
+    "exceeded ALERT SLO threshold of 440 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_no_resources_latency
@@ -291,7 +311,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_wa
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with no resources returned mean 15 minute latency ",
-    "exceeded WARNING SLO threshold of 310 ms for ${local.app} in ${var.env} environment"
+    "exceeded WARNING SLO threshold of 310 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_no_resources_latency
@@ -314,7 +335,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_me
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT SLO threshold of 450 ms/KB for ${local.app} in ${var.env} environment"
+    "exceeded ALERT SLO threshold of 450 ms/KB for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_resources_latency_by_kb
@@ -337,7 +359,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_me
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING SLO threshold of 320 ms/KB for ${local.app} in ${var.env} environment"
+    "exceeded WARNING SLO threshold of 320 ms/KB for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_resources_latency_by_kb
@@ -366,7 +389,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_bulk_latency_99p_
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit responses with resources returned 99% 15 minute BULK latency ",
     "exceeded ALERT SLO threshold of ${local.partners.bulk[each.key].timeout_ms} ms for partner ",
-    "${each.key} for ${local.app} in ${var.env} environment"
+    "${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_resources_latency
@@ -398,7 +422,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_bulk_latency_per_
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit responses with resources returned 99% 15 minute BULK latency ",
     "per KB exceeded WARNING SLO threshold of 480 ms/KB for partner ${each.key} for ${local.app} ",
-    "in ${var.env} environment"
+    "in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_resources_latency_by_kb
@@ -430,7 +455,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_nonbulk_latency_p
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit responses with resources returned 99% 15 minute NON-BULK ",
     "latency per KB exceeded ALERT SLO threshold of 690 ms for partner ${each.key} for ",
-    "${local.app} in ${var.env} environment"
+    "${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_resources_latency_by_kb
@@ -462,7 +488,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_nonbulk_latency_p
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit responses with resources returned 99% 15 minute NON-BULK ",
     "latency per KB exceeded WARNING SLO threshold of 480 ms for partner ${each.key} for ",
-    "${local.app} in ${var.env} environment"
+    "${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.eob_resources_latency_by_kb
@@ -488,7 +515,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response mean 15 minute latency exceeded ALERT SLO ",
-    "threshold of 80 ms for ${local.app} in ${var.env} environment"
+    "threshold of 80 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -511,7 +539,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response mean 15 minute latency exceeded WARNING SLO ",
-    "threshold of 60 ms for ${local.app} in ${var.env} environment"
+    "threshold of 60 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -540,7 +569,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute BULK latency exceeded ALERT SLO ",
     "threshold of ${local.partners.bulk[each.key].timeout_ms} ms for partner ${each.key} for ",
-    "${local.app} in ${var.env} environment"
+    "${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -571,7 +601,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute BULK latency exceeded WARNING SLO ",
-    "threshold of 585 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "threshold of 585 ms for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -602,7 +633,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute NON-BULK latency exceeded ALERT ",
-    "SLO threshold of 740 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 740 ms for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -633,7 +665,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
 
   alarm_description = join("", [
     "/v*/fhir/Patient (not by contract) response 99% 15 minute NON-BULK latency exceeded WARNING ",
-    "SLO threshold of 520 ms for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 520 ms for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_no_contract_latency
@@ -659,7 +692,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 
   alarm_description = join("", [
     "/v*/fhir/Patient (by contract, count 4000) response mean 15 minute latency exceeded ALERT ",
-    "SLO threshold of 40 seconds for ${local.app} in ${var.env} environment"
+    "SLO threshold of 40 seconds for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_contract_count_4000_latency
@@ -682,7 +716,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 
   alarm_description = join("", [
     "/v*/fhir/Patient (by contract, count 4000) response mean 15 minute latency exceeded WARNING ",
-    "SLO threshold of 40 seconds for ${local.app} in ${var.env} environment"
+    "SLO threshold of 40 seconds for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_contract_count_4000_latency
@@ -711,7 +746,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
   alarm_description = join("", [
     "/v*/fhir/Patient (by contract, count 4000) response 99% 15 minute latency exceeded ALERT ",
     "SLO threshold of ${local.all_partners[each.key].timeout_ms} ms for partner ${each.key} for ",
-    "${local.app} in ${var.env} environment"
+    "${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_contract_count_4000_latency
@@ -742,7 +778,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
 
   alarm_description = join("", [
     "/v*/fhir/Patient (by contract, count 4000) response 99% 15 minute latency exceeded WARNING ",
-    "SLO threshold of 44 seconds for partner ${each.key} for ${local.app} in ${var.env} environment"
+    "SLO threshold of 44 seconds for partner ${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.patient_contract_count_4000_latency
@@ -768,7 +805,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
 
   alarm_description = join("", [
     "/v*/fhir/Claim response with no resources returned mean 15 minute latency ",
-    "exceeded ALERT SLO threshold of 700 ms for ${local.app} in ${var.env} environment"
+    "exceeded ALERT SLO threshold of 700 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claim_no_resources_latency
@@ -791,7 +829,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
 
   alarm_description = join("", [
     "/v*/fhir/Claim response with no resources returned mean 15 minute latency ",
-    "exceeded WARNING SLO threshold of 600 ms for ${local.app} in ${var.env} environment"
+    "exceeded WARNING SLO threshold of 600 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claim_no_resources_latency
@@ -814,7 +853,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_latency_per_kb_
 
   alarm_description = join("", [
     "/v*/fhir/Claim response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT SLO threshold of 700 ms/KB for ${local.app} in ${var.env} environment"
+    "exceeded ALERT SLO threshold of 700 ms/KB for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claim_resources_latency_by_kb
@@ -837,7 +877,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_latency_per_kb_
 
   alarm_description = join("", [
     "/v*/fhir/Claim response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING SLO threshold of 600 ms/KB for ${local.app} in ${var.env} environment"
+    "exceeded WARNING SLO threshold of 600 ms/KB for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claim_resources_latency_by_kb
@@ -866,7 +907,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_bulk_latency_99
   alarm_description = join("", [
     "/v*/fhir/Claim responses with resources returned 99% 15 minute BULK latency ",
     "exceeded ALERT SLO threshold of ${local.partners.bulk[each.key].timeout_ms} ms for partner ",
-    "${each.key} for ${local.app} in ${var.env} environment"
+    "${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claim_resources_latency
@@ -898,7 +940,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_bulk_latency_pe
   alarm_description = join("", [
     "/v*/fhir/Claim responses with resources returned 99% 15 minute BULK latency ",
     "per KB exceeded WARNING SLO threshold of 480 ms/KB for partner ${each.key} for ${local.app} ",
-    "in ${var.env} environment"
+    "in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claim_resources_latency_by_kb
@@ -924,7 +967,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
 
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse response with no resources returned mean 15 minute latency ",
-    "exceeded ALERT SLO threshold of 1100 ms for ${local.app} in ${var.env} environment"
+    "exceeded ALERT SLO threshold of 1100 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claimresponse_no_resources_latency
@@ -947,7 +991,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
 
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse response with no resources returned mean 15 minute latency ",
-    "exceeded WARNING SLO threshold of 1000 ms for ${local.app} in ${var.env} environment"
+    "exceeded WARNING SLO threshold of 1000 ms for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claimresponse_no_resources_latency
@@ -970,7 +1015,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_latency
 
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT SLO threshold of 1100 ms/KB for ${local.app} in ${var.env} environment"
+    "exceeded ALERT SLO threshold of 1100 ms/KB for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claimresponse_resources_latency_by_kb
@@ -993,7 +1039,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_latency
 
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING SLO threshold of 1000 ms/KB for ${local.app} in ${var.env} environment"
+    "exceeded WARNING SLO threshold of 1000 ms/KB for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claimresponse_resources_latency_by_kb
@@ -1022,7 +1069,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_la
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse responses with resources returned 99% 15 minute BULK latency ",
     "exceeded ALERT SLO threshold of ${local.partners.bulk[each.key].timeout_ms} ms for partner ",
-    "${each.key} for ${local.app} in ${var.env} environment"
+    "${each.key} for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claimresponse_resources_latency
@@ -1054,7 +1102,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_la
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse responses with resources returned 99% 15 minute BULK latency ",
     "per KB exceeded WARNING SLO threshold of 480 ms/KB for partner ${each.key} for ${local.app} ",
-    "in ${var.env} environment"
+    "in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_name = local.metrics.claimresponse_resources_latency_by_kb
@@ -1081,7 +1130,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
   alarm_description = join("", [
     "Percent HTTP 500 (error) responses over ${each.value.period / (60 * 60)} hour(s) exceeded ",
     "${upper(each.value.type)} SLO threshold of ${each.value.threshold}% for ${local.app} in ",
-    "${var.env} environment"
+    "${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_query {
