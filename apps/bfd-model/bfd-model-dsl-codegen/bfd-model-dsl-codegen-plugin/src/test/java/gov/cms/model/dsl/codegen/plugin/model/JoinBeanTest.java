@@ -1,10 +1,8 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.squareup.javapoet.ClassName;
 import javax.persistence.FetchType;
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +12,6 @@ public class JoinBeanTest {
   @Test
   public void testAccessors() {
     JoinBean bean = new JoinBean();
-    assertFalse(bean.isValidEntityClass());
-    bean.setEntityClass("a");
-    assertFalse(bean.isValidEntityClass());
-    bean.setEntityClass(String.class.getName());
-    assertTrue(bean.isValidEntityClass());
-    assertEquals(ClassName.get(String.class), bean.getEntityClassType());
 
     assertFalse(bean.hasColumnName());
     bean.setJoinColumnName("x");

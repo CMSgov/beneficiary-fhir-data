@@ -1559,7 +1559,7 @@ public class McsClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "adjustment-0-" + basicLabel;
+      return "adjustments-0-" + basicLabel;
     }
   }
 
@@ -1583,7 +1583,7 @@ public class McsClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "audit-0-" + basicLabel;
+      return "audits-0-" + basicLabel;
     }
   }
 
@@ -1607,7 +1607,7 @@ public class McsClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "detail-0-" + basicLabel;
+      return "details-0-" + basicLabel;
     }
   }
 
@@ -1633,7 +1633,7 @@ public class McsClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "diagCode-0-" + basicLabel;
+      return "diagCodes-0-" + basicLabel;
     }
   }
 
@@ -1657,7 +1657,7 @@ public class McsClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "location-0-" + basicLabel;
+      return "locations-0-" + basicLabel;
     }
   }
 

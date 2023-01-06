@@ -232,7 +232,7 @@ public class McsClaimRdaSinkIT {
                     new DataTransformer.ErrorMessage(
                         "idrContrId", "invalid length: expected=[1,5] actual=18"),
                     new DataTransformer.ErrorMessage(
-                        "diagCode-0-idrDiagIcdType", "invalid length: expected=[0,1] actual=16"));
+                        "diagCodes-0-idrDiagIcdType", "invalid length: expected=[0,1] actual=16"));
 
             assertEquals(Long.valueOf(7), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.MCS, error.getClaimType());
