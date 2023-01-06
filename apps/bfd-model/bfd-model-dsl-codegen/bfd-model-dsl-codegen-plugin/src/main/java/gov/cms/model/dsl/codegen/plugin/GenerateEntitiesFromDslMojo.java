@@ -415,7 +415,9 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
         FieldSpec.builder(fieldType, join.getFieldName()).addModifiers(Modifier.PRIVATE);
     if (mapping.getTable().isPrimaryKey(join)) {
       fieldSpec.addAnnotation(Id.class);
-      fieldSpec.addAnnotation(EqualsAndHashCode.Include.class);
+      if (mapping.getTable().isEqualsNeeded()) {
+        fieldSpec.addAnnotation(EqualsAndHashCode.Include.class);
+      }
     }
     if (join.hasComment()) {
       fieldSpec.addJavadoc(join.getComment());
