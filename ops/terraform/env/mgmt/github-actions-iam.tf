@@ -99,3 +99,44 @@ resource "aws_iam_group_membership" "github_actions" {
 
   group = aws_iam_group.github_actions.name
 }
+
+data "tls_certificate" "github_actions" {
+  url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
+}
+
+resource "aws_iam_openid_connect_provider" "github_actions" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.github_actions.certificates[0].sha1_fingerprint]
+  url             = "https://token.actions.githubusercontent.com"
+}
+
+resource "aws_iam_role" "github_actions" {
+  name        = "bfd-${local.env}-github-actions"
+  path        = "/"
+  description = "OIDC Assumable GitHub Actions Role"
+
+  managed_policy_arns = [
+    aws_iam_policy.code_artifact_ro.arn,
+    aws_iam_policy.github_actions_s3its.arn
+  ]
+
+  assume_role_policy = jsonencode(
+    {
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRoleWithWebIdentity",
+          "Condition" : {
+            "ForAllValues:StringLike" : {
+              "token.actions.githubusercontent.com:sub" : "repo:CMSgov/beneficiary-fhir-data:*",
+              "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
+            }
+          },
+          "Effect" : "Allow",
+          "Principal" : {
+            "Federated" : aws_iam_openid_connect_provider.github_actions.arn
+          }
+        }
+      ],
+      "Version" : "2012-10-17"
+  })
+}
