@@ -28,7 +28,7 @@ NOTE: Before detaching an instance, ensure you have already [scaled out the Auto
 1. Navigate to the **Auto Scaling Groups** page, it is located under the **EC2** service.
 1. Click on the listed group corresponding to the desired environment.
       1. i.e. if `TEST` is the desired environment, click on `bfd-test-fhir...`
-1. On the **Instance management** tab, in **Instances**, select an instance and choose **Actions, Detach**.
+1. On the **Instance management** tab, in **Instances**, select the checkbox for the instance and choose **Actions, Detach**.
 1. In the **Detach instance** dialog box, leave the checkbox to launch a replacement instance unchecked. Choose **Detach instance**.
 
 Once you've verified that your instance has successfully detached, you are ready to rename the instance.
