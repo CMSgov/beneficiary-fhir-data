@@ -13,9 +13,9 @@ Follow this runbook to safely detach a BFD server instance for development or de
 
   1. Navigate to the **Auto Scaling Groups** page, it is located under the **EC2** service.
   1. Click on the listed group corresponding to the desired environment.
-      1. i.e. if `TEST` is the desired environment, click on `bfd-test-fhir...`
+    1. i.e. if `TEST` is the desired environment, click on `bfd-test-fhir...`
   1. On the **Details** tab, choose **Group details, Edit**.
-  1. Increment the desired capacity by one. For example, if the current value is 6, enter 7.
+  1. Increment the desired capacity by one. For example, if the current value is 6, enter 7.  
     1. The desired capacity must be less than or equal to the maximum size of the group. If your new value for **Desired capacity** is greater than **Maximum capacity**, you must update **Maximum capacity**.
   1. When you are finished, choose **Update**.
 
