@@ -1,9 +1,5 @@
 name: 'CI - Runbook'
-on:
-  push:
-    branches: ['bfd-2285-runbook-readme-index']
-    paths: ['runbooks']
-
+on: [workflow_dispatch]
 jobs:
   build-runbook-readme:
     runs-on: ubuntu-latest
