@@ -101,20 +101,20 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} value, which is a bit complex; please see
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} value, which is a bit complex; please see
    * its description for details.
    */
-  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES =
-      "FILTERING_NON_NULL_AND_NON_2022_BENES";
+  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES =
+      "FILTERING_NON_NULL_AND_NON_2023_BENES";
 
   /**
-   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES}
+   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES}
    * configuration environment variable when it is not set.
    *
    * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
    * removed as soon as is reasonable.
    */
-  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES = false;
+  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES = true;
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
@@ -414,9 +414,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
     int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
     boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
-    boolean filteringNonNullAndNon2022Benes =
-        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES)
-            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES);
+    boolean filteringNonNullAndNon2023Benes =
+        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES)
+            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
 
     MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
     DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(loaderThreads);
@@ -430,7 +430,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
                 .build(),
             loaderThreads,
             idempotencyRequired,
-            filteringNonNullAndNon2022Benes,
+            filteringNonNullAndNon2023Benes,
             RECORD_BATCH_SIZE);
 
     CcwRifLoadOptions ccwRifLoadOptions =

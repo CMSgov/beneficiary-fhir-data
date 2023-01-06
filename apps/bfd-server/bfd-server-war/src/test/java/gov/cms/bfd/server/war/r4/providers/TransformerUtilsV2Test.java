@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -173,7 +174,8 @@ public class TransformerUtilsV2Test {
         Optional.of(fiNum),
         Optional.empty(),
         Optional.empty(),
-        Optional.empty());
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -210,7 +212,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        Optional.empty());
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient);
 
     Optional<Resource> organization =
         eob.getContained().stream()
@@ -252,7 +255,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        Optional.empty());
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -473,7 +477,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        Optional.of(fiClmProcDt));
+        Optional.of(fiClmProcDt),
+        C4BBInstutionalClaimSubtypes.Inpatient);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -516,7 +521,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        Optional.empty());
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
