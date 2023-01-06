@@ -105,7 +105,7 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
       events = [
         "s3:ObjectCreated:*",
       ]
-      filter_prefix       = "databases/bfd-insights-bfd-${lambda_function.key}/bfd_insights_bfd_prod_api_requests_errors/"
+      filter_prefix       = "databases/bfd-insights-bfd-${lambda_function.key}/bfd_insights_bfd_${replace(lambda_function.key, "-", "_")}_api_requests_errors/"
       id                  = "bfd-${lambda_function.key}-bfd-insights-error-slack"
       lambda_function_arn = lambda_function.value.arn
     }
