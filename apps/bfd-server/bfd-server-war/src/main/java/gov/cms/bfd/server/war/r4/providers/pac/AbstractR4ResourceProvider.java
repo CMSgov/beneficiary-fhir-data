@@ -68,34 +68,53 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Digit}+)");
 
+  /** The entity manager. */
   private EntityManager entityManager;
+  /** The metric registry. */
   private MetricRegistry metricRegistry;
+  /** The samhsa matcher. */
   private R4ClaimSamhsaMatcher samhsaMatcher;
 
+  /** The claim dao for this provider. */
   private ClaimDao claimDao;
 
+  /** The resource type. */
   private Class<T> resourceType;
 
+  /** The enabled source types for this provider. */
   private Set<String> enabledSourceTypes = new HashSet<>();
 
-  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
+  /**
+   * Sets the {@link #entityManager}.
+   *
+   * @param entityManager a JPA {@link EntityManager} connected to the application's database
+   */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /** @param metricRegistry the {@link MetricRegistry} to use */
+  /**
+   * Sets the {@link #metricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link R4ClaimSamhsaMatcher} to use */
+  /**
+   * Sets the {@link #samhsaMatcher}.
+   *
+   * @param samhsaMatcher the {@link R4ClaimSamhsaMatcher} to use
+   */
   @Inject
   public void setSamhsaFilterer(R4ClaimSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
+  /** Initiates the provider's dependencies. */
   @PostConstruct
   public void init() {
     claimDao =
@@ -113,11 +132,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     this.enabledSourceTypes = enabledSourceTypes;
   }
 
-  /** @see IResourceProvider#getResourceType() */
+  /** {@inheritDoc} */
   public Class<T> getResourceType() {
     return resourceType;
   }
 
+  /** Sets the resource type. */
   @VisibleForTesting
   void setResourceType() {
     Type superClass = this.getClass().getGenericSuperclass();
@@ -185,7 +205,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
-   * Implementation specific claim type parsing
+   * Implementation specific claim type parsing.
    *
    * @param typeText String to parse representing the claim type.
    * @return The parsed {@link ClaimResponseTypeV2} type.
@@ -238,6 +258,19 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @VisibleForTesting
   abstract Map<String, ResourceTypeV2<T, ?>> getResourceTypeMap();
 
+  /**
+   * Find by patient bundle.
+   *
+   * @param mbi the patient identifier to search for
+   * @param types a list of claim types to include
+   * @param startIndex the offset used for result pagination
+   * @param hashed a boolean indicating whether the MBI is hashed
+   * @param samhsa if {@code true}, exclude all SAMHSA-related resources
+   * @param lastUpdated range which to include resources last updated within
+   * @param serviceDate range which to include resources completed within
+   * @param requestDetails the request details
+   * @return the bundle
+   */
   @Search
   @Trace
   public Bundle findByPatient(
@@ -357,6 +390,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     return bundle;
   }
 
+  /**
+   * Determines if there are no samhsa entries in the claim.
+   *
+   * @param metricRegistry the metric registry
+   * @param entity the claim to check
+   * @return {@code true} if there are no samhsa entries in the claim
+   */
   @VisibleForTesting
   boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
     Claim claim;

@@ -25,10 +25,13 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
 final class CoverageTransformerV2 {
   /**
+   * Transforms a beneficiary and medicare segment into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param medicareSegment the {@link MedicareSegment} to generate a {@link Coverage} resource for
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
@@ -55,6 +58,8 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Transforms a beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
@@ -69,6 +74,8 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Transforms a medicare part A beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_A} {@link
    *     Coverage} resource for
@@ -132,6 +139,8 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Transforms a medicare part B beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_B} {@link
    *     Coverage} resource for
@@ -187,6 +196,8 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Transforms a medicare part C beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
    *     Coverage} resource for
@@ -240,6 +251,8 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Transforms a medicare part D beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
    *     Coverage} resource for
@@ -345,8 +358,11 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Monthly Medicare Advantage (MA) enrollment indicator (HMO) extensions to the provided
+   * {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformHMOIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
@@ -377,8 +393,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Medicare plan type extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
@@ -409,8 +427,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Medicare pbp number extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void tranformsPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
@@ -441,8 +461,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Medicare part C contract id extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     addCoverageExtension(
@@ -472,6 +494,9 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Medicare entitlement buy in indicator extensions to the provided {@link Coverage}
+   * resource.
+   *
    * @param coverage the {@link Coverage} to generate
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    */
@@ -506,6 +531,9 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds monthly Medicare-Medicaid dual eligibility code extensions to the provided {@link
+   * Coverage} resource.
+   *
    * @param coverage the {@link Coverage} to generate
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    */
@@ -540,6 +568,9 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds monthly part D retiree drug subsidy indicators extensions to the provided {@link Coverage}
+   * resource.
+   *
    * @param coverage the {@link Coverage} to generate
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    */
@@ -572,8 +603,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds monthly cost sharing group extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformPartDLowIncomeCostShareGroup(
       Coverage coverage, Beneficiary beneficiary) {
@@ -629,8 +662,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds segment number extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
@@ -661,8 +696,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Medicare part D PBP extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
@@ -693,8 +730,10 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds Medicare part D contract number extensions to the provided {@link Coverage} resource.
+   *
    * @param coverage the FHIR {@link Coverage} resource to add to
-   * @param beneficiary the value for {@link Beneficiary)}
+   * @param beneficiary the value for {@link Beneficiary}
    */
   private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
@@ -865,10 +904,11 @@ final class CoverageTransformerV2 {
   }
 
   /**
-   * Constructs a Timer context {@link Timer.Context} suitable for measuring compute duration
+   * Constructs a Timer context {@link Timer.Context} suitable for measuring compute duration.
    *
    * @param metricRegistry The EtricRegistry passed into the transformer {@link MetricRegistry}
    * @param partId The context string {@link String}
+   * @return the timer context
    */
   static Timer.Context getTimerContext(MetricRegistry metricRegistry, String partId) {
     return metricRegistry

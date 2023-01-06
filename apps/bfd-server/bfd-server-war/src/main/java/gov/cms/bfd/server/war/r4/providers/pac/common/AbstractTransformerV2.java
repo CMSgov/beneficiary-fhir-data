@@ -32,14 +32,14 @@ import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
-/** Base logic for RDA transformations containing common logic */
+/** Base logic for RDA transformations containing common logic. */
 // S1118 - Can't make constructor private because children won't be able to have one due to no
 // public constructor being defined.
 @SuppressWarnings("squid:S1118")
 public class AbstractTransformerV2 {
 
   /**
-   * Converts a {@link LocalDate} (used by RDA messages) to a {@link Date} (used by FHIR)
+   * Converts a {@link LocalDate} (used by RDA messages) to a {@link Date} (used by FHIR).
    *
    * @param localDate The {@link LocalDate} to convert.
    * @return The converted {@link Date} object.
@@ -441,16 +441,38 @@ public class AbstractTransformerV2 {
    */
   protected static class PatientInfo {
 
+    /** The first name. */
     private final String firstName;
+    /** The last name. */
     private final String lastName;
+    /** The middle name. */
     private final String middleName;
+    /** The date of birth. */
     private final LocalDate dob;
+    /** The gender. */
     private final String gender;
+    /** The map of gender strings to the enum values. */
     private final Map<String, Enumerations.AdministrativeGender> genderMap;
+    /** The first name format. */
     private final String firstNameFormat;
+    /** The middle name format. */
     private final String middleNameFormat;
+    /** The last name format. */
     private final String lastNameFormat;
 
+    /**
+     * Instantiates a new Patient info.
+     *
+     * @param firstName the first name
+     * @param lastName the last name
+     * @param middleName the middle name
+     * @param dob the dob
+     * @param gender the gender
+     * @param genderMap the gender map
+     * @param firstNameFormat the first name format
+     * @param middleNameFormat the middle name format
+     * @param lastNameFormat the last name format
+     */
     public PatientInfo(
         String firstName,
         String lastName,
@@ -472,38 +494,83 @@ public class AbstractTransformerV2 {
       this.lastNameFormat = lastNameFormat;
     }
 
+    /**
+     * Gets the {@link #firstName}.
+     *
+     * @return the first name
+     */
     public String getFirstName() {
       return firstName;
     }
 
+    /**
+     * Gets the {@link #lastName}.
+     *
+     * @return the last name
+     */
     public String getLastName() {
       return lastName;
     }
 
+    /**
+     * Gets the {@link #middleName}.
+     *
+     * @return the middle name
+     */
     public String getMiddleName() {
       return middleName;
     }
 
+    /**
+     * Gets the {@link #dob}.
+     *
+     * @return the dob
+     */
     public LocalDate getDob() {
       return dob;
     }
 
+    /**
+     * Gets the {@link #gender}.
+     *
+     * @return the gender
+     */
     public String getGender() {
       return gender;
     }
 
+    /**
+     * Gets the {@link #genderMap}.
+     *
+     * @return the gender map
+     */
     public Map<String, Enumerations.AdministrativeGender> getGenderMap() {
       return genderMap;
     }
 
+    /**
+     * Gets the {@link #firstNameFormat}.
+     *
+     * @return the first name format
+     */
     public String getFirstNameFormat() {
       return firstNameFormat;
     }
 
+    /**
+     * Gets the {@link #middleNameFormat}.
+     *
+     * @return the middle name format
+     */
     public String getMiddleNameFormat() {
       return middleNameFormat;
     }
 
+    /**
+     * Gets the {@link #lastNameFormat}.
+     *
+     * @return the last name format
+     */
     public String getLastNameFormat() {
       return lastNameFormat;
     }

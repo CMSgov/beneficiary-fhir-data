@@ -37,17 +37,22 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
-  /** Date used to determine if an ICD code is ICD9 (before date) or ICD10 (on or after date) */
+  /** Date used to determine if an ICD code is ICD9 (before date) or ICD10 (on or after date). */
   private static final LocalDate ICD_9_CUTOFF_DATE = LocalDate.of(2015, 10, 1);
 
+  /** The MEDICARE constant. */
   private static final String MEDICARE = "MEDICARE";
 
+  /** The METRIC_NAME constant. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
 
+  /** Instantiates a new Fiss claim transformer v2. */
   private FissClaimTransformerV2() {}
 
   /**
+   * Transforms a claim entity into a FHIR {@link Claim}.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
@@ -66,6 +71,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
+   * Transforms a {@link RdaFissClaim} into a FHIR {@link Claim}.
+   *
    * @param claimGroup the {@link RdaFissClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaFissClaim}
@@ -180,6 +187,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * Parses data from the {@link RdaFissClaim} to create a {@link Claim.DiagnosisComponent} list.
    *
    * @param claimGroup The {@link RdaFissClaim} object to parse data from.
+   * @param isIcd9 if {@code true} sets the icd system to {@link IcdCode#CODING_SYSTEM_ICD_9}
    * @return The {@link Claim.DiagnosisComponent} object list created from the parsed data.
    */
   private static List<Claim.DiagnosisComponent> getDiagnosis(
@@ -223,6 +231,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * Parses data from the {@link RdaFissClaim} to create a {@link Claim.ProcedureComponent} list.
    *
    * @param claimGroup The {@link RdaFissClaim} object to parse data from.
+   * @param isIcd9 if {@code true} sets the icd system to {@link IcdCode#CODING_SYSTEM_ICD_9}
    * @return The {@link Claim.ProcedureComponent} object list created from the parsed data.
    */
   private static List<Claim.ProcedureComponent> getProcedure(

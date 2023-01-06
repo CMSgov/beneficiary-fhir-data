@@ -74,6 +74,7 @@ public class LoggingUtils {
    * set is returned.
    *
    * @param bundle that is searched through for valid bene_ids
+   * @return the set
    */
   static Set<Long> findBeneIds(org.hl7.fhir.dstu3.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();

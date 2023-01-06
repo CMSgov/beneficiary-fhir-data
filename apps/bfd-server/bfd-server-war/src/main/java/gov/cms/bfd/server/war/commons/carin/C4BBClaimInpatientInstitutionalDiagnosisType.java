@@ -8,7 +8,7 @@ package gov.cms.bfd.server.war.commons.carin;
 public enum C4BBClaimInpatientInstitutionalDiagnosisType {
   /**
    * The single medical diagnosis that is most relevant to the patient's chief complaint or need for
-   * treatment. *
+   * treatment.
    */
   PRINCIPAL,
   /** The diagnosis given as the reason why the patient was admitted to the hospital.* */

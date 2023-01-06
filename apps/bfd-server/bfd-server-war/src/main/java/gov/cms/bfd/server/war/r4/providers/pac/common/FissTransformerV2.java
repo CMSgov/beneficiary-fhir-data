@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 
-/** Class for performing common FISS based transformation logic */
+/** Class for performing common FISS based transformation logic. */
 public class FissTransformerV2 {
 
   /** The FISS specific gender mapping to use to map from RDA to FHIR. */
@@ -18,6 +18,7 @@ public class FissTransformerV2 {
           "f", Enumerations.AdministrativeGender.FEMALE,
           "u", Enumerations.AdministrativeGender.UNKNOWN);
 
+  /** Instantiates a new Fiss transformer v2. */
   private FissTransformerV2() {}
 
   /**

@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 
-/** Class for performing common MCS based transformation logic */
+/** Class for performing common MCS based transformation logic. */
 public class McsTransformerV2 {
 
   /** The MCS specific gender mapping to use to map from RDA to FHIR. */
@@ -16,6 +16,7 @@ public class McsTransformerV2 {
           "f", Enumerations.AdministrativeGender.FEMALE,
           "o", Enumerations.AdministrativeGender.UNKNOWN);
 
+  /** Instantiates a new Mcs transformer v2. */
   private McsTransformerV2() {}
 
   /**
