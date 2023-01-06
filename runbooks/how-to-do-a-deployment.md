@@ -30,7 +30,7 @@ To do so, one can attempt to notify other developers that you will be initiating
     - post message: `/dibs on test` to stake your claim on the test enviornemnt.
 
 ![Dibs-On](resources/deploy-dibs-on.png)    
-If you are not able to stake your claim to the `Test` environment, it would mean that another developer has it reserved for their build and/or testing. In that scenario one would probably not proceed unless `Test` is available; the prudent move here is to reach out to the developer to see if they are able to relinquish their need `Test` .
+If you are not able to stake your claim to the `Test` environment, it would mean that another developer has it reserved for their build and/or testing. In that scenario one would probably not proceed unless `Test` is available; the prudent move here is to reach out to the developer to see if they are able to relinquish their reservation of the `Test` environment.
 
 2. From browser navigate to CloudBees Managed Controller: https://jenkins-east.cloud.cms.gov/bfd/
 
@@ -93,17 +93,17 @@ Compare that with the git hash found in the git repository for `master` (whateve
     - `Pipeline Steps` provides a dynamic hierarchial view of the pipeline stages.
     - `Pause/resume` allows you to stop (and restart) the pipeline processing.
 
-10. When the build pipeline completes the deploy to `Test` stage, the pipeline processing pauses at the `Manual Approval` step and a small dialog appears:
+10. When the build pipeline completes the deployment to `Test` stage, the pipeline processing may pause at the `Manual Approval` step and a small dialog appears:
 
     ![Lockable Resources](resources/deploy-proceed-to-prod.png)
-This gives you the opportunity to do things like perform testing vs the `test` deployment, or you can just continnue pipeline processing by hitting the `Proceed` button; the pipeline processing resumes continuing on to deploy `prod-sbx` and then to deploy `prod`. A successfully completed pipeline deployment looks like:
+This gives you the opportunity to do things like perform testing vs the `test` deployment, or you can just continue pipeline processing by hitting the `Proceed` button; the pipeline processing resumes continuing on to deploy `prod-sbx` and then to deploy `prod`. A successfully completed pipeline deployment looks like:
     ![Lockable Resources](resources/deploy-done.png)
 12. When finished with build, there's a couple of _cleanup_ tasks that will need to be done:
 - if you created a hold on `test` (Step 1), you'll need to release your reservation:
     - notify #bfd-builds channel that you are releasing your hold on the `Test` enviornment.
     - post message: `/dibs off test` to unreserve the test enviornemnt.
 ![Dibs-Off](resources/deploy-dibs-off.png)    
-- Next you need to notify folks of the fact that a deployment has been completed; this is done by posting a message to the `#bfd-users` _Slack_ channel. While there is no prescribed content of the message, a best practice is to list the PR URLs that were merged into `master` for this deploy; for example:
+- Next you need to notify folks of the fact that a deployment has been completed; this is done by posting a message to the `#bfd-users` _Slack_ channel. While there is no prescribed content of the message, a best practice is to list each title and URL link for the PRs that were merged into `master` for this deploy; for example:
 ![Dibs-Off](resources/deploy-completed-slack.png)
 
 ## FAQ
