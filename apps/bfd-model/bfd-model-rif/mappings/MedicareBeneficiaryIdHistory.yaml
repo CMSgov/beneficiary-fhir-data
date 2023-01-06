@@ -98,6 +98,26 @@ mappings:
     primaryKeyColumns:
     - medicareBeneficiaryIdKey
     quoteNames: false
+  enumTypes:
+  - name: MedicareBeneficiaryIdHistoryColumn
+    packageName: gov.cms.bfd.model.rif2
+    values:
+    - BENE_MBI_ID
+    - BENE_ID
+    - BENE_CLM_ACNT_NUM
+    - BENE_IDENT_CD
+    - MBI_SQNC_NUM
+    - MBI_NUM
+    - MBI_EFCTV_BGN_DT
+    - MBI_EFCTV_END_DT
+    - MBI_BGN_RSN_CD
+    - MBI_END_RSN_CD
+    - MBI_CARD_RQST_DT
+    - CREAT_USER_ID
+    - CREAT_TS
+    - UPDT_USER_ID
+    - UPDT_TS
+    - BENE_CRNT_REC_IND_ID
   transformations:
   - defaultValue: '0'
     from: BENE_MBI_ID

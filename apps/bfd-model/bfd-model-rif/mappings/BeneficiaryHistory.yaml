@@ -141,6 +141,30 @@ mappings:
     primaryKeyColumns:
     - beneHistoryId
     quoteNames: false
+  enumTypes:
+  - name: BeneficiaryHistoryColumn
+    packageName: gov.cms.bfd.model.rif2
+    values:
+    - BENE_ID
+    - STATE_CODE
+    - BENE_COUNTY_CD
+    - BENE_ZIP_CD
+    - BENE_BIRTH_DT
+    - BENE_SEX_IDENT_CD
+    - BENE_RACE_CD
+    - BENE_ENTLMT_RSN_ORIG
+    - BENE_ENTLMT_RSN_CURR
+    - BENE_ESRD_IND
+    - BENE_MDCR_STATUS_CD
+    - BENE_PTA_TRMNTN_CD
+    - BENE_PTB_TRMNTN_CD
+    - BENE_CRNT_HIC_NUM
+    - BENE_SRNM_NAME
+    - BENE_GVN_NAME
+    - BENE_MDL_NAME
+    - MBI_NUM
+    - EFCTV_BGN_DT
+    - EFCTV_END_DT
   transformations:
   - from: BENE_ID
     optionalComponents: None
