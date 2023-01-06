@@ -205,11 +205,11 @@ The `join` objects contain the following properties:
 
 The `class` property of a `join` can be used to set default values and special validity constraints depending on the type of relationship the join represents.
 
-| class  | Relationship                                    | Defaults                                                                                                                  | Required Properties               |
-|--------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
-| array  | RDA API style array of unordered child objects. | `joinType=OneToMany`, `collectionType=Set`, `fetchType=EAGER`, `orphanRemoval=true`, `cascadeTypes=ALL`                   | `entityMapping`                   |
-| child  | Child side of parent-child relationship.        | `joinType=ManyToOne`                                                                                                      | `entityMapping`, `joinColumnName` |
-| parent | Parent side of parent-child relationship.       | `joinType=OneToMany`, `collectionType=List`, `fetchType=EAGER`, `readOnly=true`, `orphanRemoval=true`, `cascadeTypes=ALL` | `entityMapping`, `mappedBy`       | 
+| class  | Relationship                                    | Defaults                                                                                                                 | Required Properties               |
+|--------|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| array  | RDA API style array of unordered child objects. | `joinType=OneToMany`, `collectionType=Set`, `fetchType=EAGER`, `orphanRemoval=true`, `cascadeTypes=ALL`                  | `entityMapping`                   |
+| child  | Child side of parent-child relationship.        | `joinType=ManyToOne`                                                                                                     | `entityMapping`, `joinColumnName` |
+| parent | Parent side of parent-child relationship.       | `joinType=OneToMany`, `collectionType=List`, `fetchType=LAZY`, `readOnly=true`, `orphanRemoval=true`, `cascadeTypes=ALL` | `entityMapping`, `mappedBy`       | 
 
 The valid `transformer` names for use in a `transformation` are:
 
