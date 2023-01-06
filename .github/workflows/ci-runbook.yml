@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [main]
+    branches: [bfd-2285-runbook-readme-index]
     paths: ['runbooks']
 
 jobs:
