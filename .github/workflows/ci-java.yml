@@ -4,6 +4,7 @@ on: pull_request
 permissions:
   id-token: write   # This is required for requesting the AWS IAM OIDC JWT
   contents: read    # This is required for actions/checkout
+  packages: write
 
 env:
   # workflow file matchers - workflow jobs will only run if matching files are found
