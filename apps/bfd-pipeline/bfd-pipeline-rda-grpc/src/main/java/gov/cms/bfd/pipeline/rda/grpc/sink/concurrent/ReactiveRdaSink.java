@@ -34,7 +34,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private final Object lock = new Object();
 
   /** Used to assign claims to workers based on their claimId values. */
-  private static final HashFunction Hasher = Hashing.goodFastHash(32);
+  private static final HashFunction Hasher = Hashing.goodFastHash(64);
 
   /** Used to track sequence numbers to update progress table in database. */
   private final SequenceNumberTracker sequenceNumbers;
@@ -50,11 +50,15 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private final Publisher<TMessage> publisher;
   private final Disposable disposable;
 
+  /** Used to assign claims to workers based on their claimId values. */
+  private final HashPartitioner hashPartitioner;
+
   private final List<ClaimWriter<TMessage, TClaim>> claimWriters;
   private final SequenceNumberWriter<TMessage, TClaim> sequenceNumberWriter;
 
   public ReactiveRdaSink(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
+    hashPartitioner = new HashPartitioner(maxThreads);
     sequenceNumbers = new SequenceNumberTracker(0);
     sink = sinkFactory.get();
     claimWriters =
@@ -68,14 +72,14 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     currentProcessedCount = 0;
     error = null;
     latch = new CountDownLatch(2);
-    publisher = new Publisher<>(batchSize * maxThreads * 2);
+    publisher = new Publisher<>(batchSize * maxThreads * 3);
     var claimWriterScheduler =
         Schedulers.newBoundedElastic(
             claimWriters.size(),
             25 * claimWriters.size(),
             "claims-" + sink.getClass().getSimpleName());
     var sequenceNumberWriterScheduler =
-        Schedulers.newBoundedElastic(1, 100, "seqs-" + sink.getClass().getSimpleName());
+        Schedulers.newBoundedElastic(1, 25, "seqs-" + sink.getClass().getSimpleName());
     var claimProcessing =
         publisher
             .flux
@@ -100,8 +104,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   private ClaimWriter<TMessage, TClaim> workerForMessage(Message<TMessage> message) {
-    final var hash = Hasher.hashString(message.claimId, StandardCharsets.UTF_8);
-    final var index = Math.abs(hash.asInt()) % claimWriters.size();
+    final var index = hashPartitioner.bucketIndexForString(message.claimId);
     return claimWriters.get(index);
   }
 
@@ -141,6 +144,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       } else {
         error.addSuppressed(ex);
       }
+      running = false;
     }
   }
 
@@ -194,53 +198,24 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
     //    new RuntimeException("SHUTDOWN CALLED").printStackTrace();
-    boolean shutdownNeeded;
     log.info("shutdown called");
     synchronized (lock) {
       if (running) {
         publisher.complete();
         log.info("shutdown emit complete");
         running = false;
-        shutdownNeeded = true;
-      } else {
-        shutdownNeeded = false;
       }
-    }
-    if (!shutdownNeeded) {
-      log.info("shutdown not needed");
-      return;
     }
     try {
       var closer = new MultiCloser();
       log.info("shutdown wait for latch");
-      closer.close(
-          () -> {
-            InterruptedException error = null;
-            for (int i = 1; i <= 10; ++i) {
-              try {
-                log.info("interrupted? {}", Thread.interrupted());
-                latch.await(waitTime.toMillis(), TimeUnit.MILLISECONDS);
-                break;
-              } catch (InterruptedException ex) {
-                if (error == null) {
-                  error = ex;
-                }
-              }
-            }
-            if (error != null) {
-              throw error;
-            }
-          });
-      log.info("shutdown call dispose");
-      closer.close(disposable::dispose);
+      closer.close(() -> waitForLatch(waitTime));
       for (ClaimWriter<TMessage, TClaim> claimWriter : claimWriters) {
         log.info("shutdown close claimWriter {}", claimWriter.id);
         closer.close(claimWriter::close);
       }
       log.info("shutdown close sequenceWriter");
       closer.close(sequenceNumberWriter::close);
-      log.info("shutdown shutdown sink");
-      closer.close(() -> sink.shutdown(waitTime));
       log.info("shutdown close sink");
       closer.close(sink::close);
       log.info("shutdown finish");
@@ -251,9 +226,36 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     }
   }
 
+  /**
+   * Waits for countdown latch to reach zero so that rest of shutdown can proceed. The claim and
+   * sequence number writers decrement the latch as they complete so once it reach zero we know they
+   * are finished. We retry a few times in case of interrupts to resolve problems with spurious
+   * interrupts during cancellation.
+   *
+   * @param waitTime how long to wait for the latch
+   * @throws Exception if any exception caused the wait to fail
+   */
+  private void waitForLatch(Duration waitTime) throws Exception {
+    InterruptedException error = null;
+    for (int i = 1; i <= 10; ++i) {
+      try {
+        log.info("interrupted? {}", Thread.interrupted());
+        latch.await(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+        error = null;
+        break;
+      } catch (InterruptedException ex) {
+        if (error == null) {
+          error = ex;
+        }
+      }
+    }
+    if (error != null) {
+      throw error;
+    }
+  }
+
   @Override
   public void close() throws Exception {
-    //    new RuntimeException("CLOSE CALLED").printStackTrace();
     log.info("close called");
     shutdown(Duration.ofMinutes(2));
     log.info("close complete");
@@ -376,6 +378,47 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
     private void consumed() {
       available.release();
+    }
+  }
+
+  /**
+   * Divides strings into buckets using a hash function. Determines which bucket to assign to by
+   * assigning a range of hash values to each bucket. This provides a more even distribution than
+   * simple modulo by number of buckets.
+   */
+  private static class HashPartitioner {
+    private static final HashFunction Hasher = Hashing.goodFastHash(32);
+
+    private final int maxBuckets;
+    private final int maxHash;
+    private final int hashToIndexDivisor;
+
+    private HashPartitioner(int maxBuckets) {
+      this.maxBuckets = maxBuckets;
+      hashToIndexDivisor = Integer.MAX_VALUE / maxBuckets;
+      maxHash = hashToIndexDivisor * maxBuckets;
+    }
+
+    /**
+     * Select the bucket index for the given string.
+     *
+     * @param stringToHash value to hash
+     * @return index of bucket (zero to maxBuckets-1)
+     */
+    private int bucketIndexForString(String stringToHash) {
+      final var rawHash = Hasher.hashString(stringToHash, StandardCharsets.UTF_8).asInt();
+      final var inBoundsHash = Math.abs(rawHash) % maxHash;
+      final var index = inBoundsHash / hashToIndexDivisor;
+      if (index >= maxBuckets) {
+        log.error(
+            "division produced large index: divisor={} max={} hash={} inRange={} index={}",
+            hashToIndexDivisor,
+            maxHash,
+            rawHash,
+            inBoundsHash,
+            index);
+      }
+      return index;
     }
   }
 }
