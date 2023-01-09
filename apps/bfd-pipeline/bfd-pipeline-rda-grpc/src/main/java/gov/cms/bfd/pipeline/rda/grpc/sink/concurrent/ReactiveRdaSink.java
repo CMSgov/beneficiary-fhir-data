@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -47,8 +48,17 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private Throwable error;
   private final CountDownLatch latch;
 
+  /**
+   * Used to push messages to the claim and sequence number writers as well as to signal when there
+   * are no more messages.
+   */
   private final Publisher<TMessage> publisher;
-  private final Disposable disposable;
+  /**
+   * Holding a reference to the claim and sequence number writers to ensure they are not garbage
+   * collected.
+   */
+  @SuppressWarnings("FieldCanBeLocal")
+  private final Disposable referenceToProcessors;
 
   /** Used to assign claims to workers based on their claimId values. */
   private final HashPartitioner hashPartitioner;
@@ -83,7 +93,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     var claimProcessing =
         publisher
             .flux
-            .groupBy(this::workerForMessage)
+            .groupBy(this::selectWorkerForMessage)
             .flatMap(
                 group ->
                     group
@@ -99,11 +109,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             .subscribeOn(sequenceNumberWriterScheduler)
             .doFinally(o -> latch.countDown())
             .subscribe(seq -> {}, this::addError);
-    disposable = Disposables.composite(claimProcessing, sequenceNumberProcessing);
+    referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
     log.debug("created instance: threads={} batchSize={}", maxThreads, batchSize);
   }
 
-  private ClaimWriter<TMessage, TClaim> workerForMessage(Message<TMessage> message) {
+  private ClaimWriter<TMessage, TClaim> selectWorkerForMessage(Message<TMessage> message) {
     final var index = hashPartitioner.bucketIndexForString(message.claimId);
     return claimWriters.get(index);
   }
@@ -172,6 +182,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   @Override
   public long getSequenceNumberForObject(TMessage object) {
     return sink.getSequenceNumberForObject(object);
+  }
+
+  @Override
+  public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
+    return sink.readMaxExistingSequenceNumber();
   }
 
   @Nonnull
