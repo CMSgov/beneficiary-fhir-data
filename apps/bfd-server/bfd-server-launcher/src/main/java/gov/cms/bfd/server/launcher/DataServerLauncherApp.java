@@ -292,11 +292,6 @@ public final class DataServerLauncherApp {
     public void log(Request request, Response response) {
       try {
         /*
-         * Call the implementation from CustomRequestLog to write the access.log entry.
-         */
-        super.log(request, response);
-
-        /*
          * Capture the payload size in MDC:
          * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
          *
