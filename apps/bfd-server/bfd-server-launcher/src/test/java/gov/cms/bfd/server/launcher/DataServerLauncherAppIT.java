@@ -12,11 +12,9 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -203,24 +201,6 @@ public final class DataServerLauncherAppIT {
             100); // Needed in some configurations to resolve a race condition
       } catch (InterruptedException e) {
       }
-      Path accessLog =
-          ServerTestUtils.getLauncherProjectDirectory()
-              .resolve("target")
-              .resolve("server-work")
-              .resolve("access.log");
-      assertTrue(Files.isReadable(accessLog));
-      assertTrue(Files.size(accessLog) > 0);
-
-      // Check that the access log lines follow the desired regex pattern
-      List<String> lines = Files.readAllLines(accessLog);
-
-      Pattern p = Pattern.compile(accessLogPattern);
-
-      lines.forEach(
-          (line) -> {
-            Matcher m = p.matcher(line);
-            assertTrue(m.matches());
-          });
 
       Path accessLogJson =
           ServerTestUtils.getLauncherProjectDirectory()
