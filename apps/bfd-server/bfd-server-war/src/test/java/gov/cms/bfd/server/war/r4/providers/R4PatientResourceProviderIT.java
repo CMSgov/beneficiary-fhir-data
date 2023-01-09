@@ -40,6 +40,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public final class R4PatientResourceProviderIT {
+
+  /** Constant used for setting up tests with include identifiers = true. */
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
+  /** Constant for setting up tests with include identifiers without mbi. */
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
+
   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
    * that any existing data is deleted from the tables before running the test suite.
@@ -91,7 +97,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "true",
@@ -107,7 +113,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersMbi() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "mbi",
@@ -123,7 +129,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "false",
@@ -139,7 +145,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "",
@@ -159,7 +165,7 @@ public final class R4PatientResourceProviderIT {
         InvalidRequestException.class,
         () -> {
           assertExistingPatientIncludeIdentifiersExpected(
-              R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+              CNST_INCL_IDENTIFIERS_EXPECT_MBI,
               RequestHeaders.getHeaderWrapper(
                   R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
                   "invalid-identifier-value",
@@ -180,7 +186,7 @@ public final class R4PatientResourceProviderIT {
         InvalidRequestException.class,
         () -> {
           assertExistingPatientIncludeIdentifiersExpected(
-              R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+              CNST_INCL_IDENTIFIERS_EXPECT_MBI,
               RequestHeaders.getHeaderWrapper(
                   R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
                   "mbi,invalid-identifier-value",
