@@ -1,6 +1,11 @@
 name: 'CI - Java'
 on: pull_request
 
+permissions:
+  id-token: write   # This is required for requesting the AWS IAM OIDC JWT
+  contents: read    # This is required for actions/checkout
+  packages: write
+
 env:
   # workflow file matchers - workflow jobs will only run if matching files are found
   # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
@@ -76,8 +81,8 @@ jobs:
       - name: 'Configure AWS credentials'
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          aws-access-key-id: ${{ secrets.GA_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.GA_AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: ci-java
           aws-region: us-east-1
       - name: 'Checkout repo'
         uses: actions/checkout@v3
