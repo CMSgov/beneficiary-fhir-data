@@ -232,6 +232,7 @@ public final class DataServerLauncherApp {
             + " %{BlueButton-BeneficiaryId}i"
             + " %{X-Request-ID}o";
     final BfdRequestLog requestLog = new BfdRequestLog(slfjRequestLogWriter, requestLogFormat);
+
     server.setRequestLog(requestLog);
 
     /*
