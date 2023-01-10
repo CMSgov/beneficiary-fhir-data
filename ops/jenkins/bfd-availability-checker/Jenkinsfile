@@ -1,0 +1,77 @@
+#!/usr/bin/env groovy
+
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer 'availability-checker'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  restartPolicy: Never
+  containers:
+  - name: availability-checker
+    image: alpine:latest
+    command: ['cat']
+    tty: true
+"""
+    }
+  }
+
+  options {
+    // Nothing within this repository is required for running this pipeline, so skipping the default
+    // checkout saves us some time
+    skipDefaultCheckout()
+  }
+
+  stages {
+    stage('Install prerequisites') {
+      steps {
+        sh 'apk add --no-cache aws-cli curl jq'
+
+        awsAuth.assumeRole()
+        sh ('aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_key"'
+            + ' --region "us-east-1" --with-decryption | jq -r \'.Parameter.Value\''
+            + ' > bfd-test-cert.pem')
+        sh ('aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_cert"'
+            + ' --region "us-east-1" --with-decryption | jq -r \'.Parameter.Value\''
+            + ' >> bfd-test-cert.pem')
+      }
+    }
+    
+    stage('Check all environments') {
+      matrix {
+        agent {
+          kubernetes(k8sagent(name: 'availability-checker'))
+        }
+
+        axes {
+          axis {
+            name 'ENV'
+            values 'test', 'prod-sbx', 'prod'
+          }
+        }
+
+        stages {
+          stage("Availability check") {
+            steps {
+              script {
+                curlStatus = sh(
+                  returnStatus: true, 
+                  script: "curl --insecure --cert bfd-server-test.pem https://${ENV}.bfd.cms.gov/metrics/ping"
+                ).trim()
+
+                if (curlStatus == 0) {
+                  echo "Curl succeeded"
+                } else {
+                  echo "Curl failed"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
