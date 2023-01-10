@@ -72,12 +72,14 @@ pipeline {
                   if (httpReturnCode == 200) {
                     echo "Check succeeded with an HTTP response of 200"
                   } else {
-                    echo "Check failed with an HTTP response of ${httpReturnCode}"
+                    unstable "Check failed with an HTTP response of ${httpReturnCode}"
                     metricName = "availability/failure"
                   }
                 } catch(err) {
-                  echo "cURL failed with non-zero exit code"
                   metricName = "availability/failure"
+                  // Mark the stage as unstable to indicate that the check failed, but that the
+                  // pipeline itself did not
+                  unstable "cURL failed with non-zero exit code"
                 }
               }
             }
