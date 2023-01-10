@@ -336,7 +336,8 @@ public final class DataServerLauncherApp {
         super.log(request, response);
 
         /*
-         * Capture the payload size in MDC:
+         * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
+         * CustomRequestLog to write the payload size to the access.log:
          * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
          *
          * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
