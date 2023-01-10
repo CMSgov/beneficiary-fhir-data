@@ -43,7 +43,7 @@ spec:
         }
 
         stages {
-          stage("Check ${ENV}") {
+          stage('Run availability check') {
             options {
               lock('synchronous-matrix')
             }
