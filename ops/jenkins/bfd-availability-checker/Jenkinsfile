@@ -43,54 +43,67 @@ spec:
         }
 
         stages {
-          stage('Run availability check') {
+          stage('Sequential matrix') {
             options {
-              lock('synchronous-matrix')
+              lock('sequential-matrix')
             }
 
-            steps {
-              script {
-                script {
-                  awsAuth.assumeRole()
+            stages {
+              step ('Download certificate') {
+                steps {
+                  script {
+                    awsAuth.assumeRole()
+
+                    def pemKey = sh(
+                      returnStdout: true,
+                      script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
+                              + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+                    ).trim()
+                    def pemCert = sh(
+                      returnStdout: true,
+                      script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
+                              + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+                    ).trim()
+
+                    writeFile(
+                      file: "${ENV}-cert.pem",
+                      text: pemKey + "\n" + pemCert
+                    )
+                  }
                 }
+              }
+            }
 
-                def pemKey = sh(
-                  returnStdout: true,
-                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
-                           + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                ).trim()
-                def pemCert = sh(
-                  returnStdout: true,
-                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
-                           + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                ).trim()
+            stage('Run availability check') {
+              steps {
+                script {
+                  metricName = "availability/success"
+                  try {
+                    def httpReturnCode = sh(
+                      returnStdout: true,
+                      script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure" 
+                              + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
+                    ).trim() as Integer
 
-                writeFile(
-                  file: "${ENV}-cert.pem",
-                  text: pemKey + "\n" + pemCert
-                )
-                
-                def metricName = "availability/success"
-                try {
-                  def httpReturnCode = sh(
-                    returnStdout: true,
-                    script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure" 
-                            + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
-                  ).trim() as Integer
-
-                  if (httpReturnCode == 200) {
-                    echo "Check succeeded with an HTTP response of 200"
-                  } else {
-                    echo "Check failed with an HTTP response of ${httpReturnCode}"
+                    if (httpReturnCode == 200) {
+                      echo "Check succeeded with an HTTP response of 200"
+                    } else {
+                      echo "Check failed with an HTTP response of ${httpReturnCode}"
+                      metricName = "availability/failure"
+                    }
+                  } catch(err) { 
+                    echo "cURL failed with non-zero exit code"
                     metricName = "availability/failure"
                   }
-                } catch(err) { 
-                  echo "cURL failed with non-zero exit code"
-                  metricName = "availability/failure"
                 }
+              }
+            }
 
-                sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
-                    + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
+            stage('Update availability metric') {
+              steps {
+                  echo "Updating \"${metricName}\" in namespace \"bfd-${ENV}/bfd-server\""
+                  sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
+                      + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
               }
             }
           }
