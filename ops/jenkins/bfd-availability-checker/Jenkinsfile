@@ -53,22 +53,22 @@ spec:
                   returnStdout: true,
                   script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
                            + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                )
+                ).trim()
                 pemCert = sh(
                   returnStdout: true,
                   script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
                            + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                )
+                ).trim()
 
                 writeFile(
-                  file: "bfd-server-test.pem",
+                  file: "${ENV}-cert.pem",
                   text: pemKey + "\n" + pemCert
                 )
-
+                
                 curlStatus = sh(
                   returnStatus: true,
-                  script: "curl --insecure --cert bfd-server-test.pem https://${ENV}.bfd.cms.gov/metrics/ping"
-                ).trim()
+                  script: "curl --insecure --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping"
+                )
 
                 if (curlStatus == 0) {
                   echo "Curl succeeded"
