@@ -54,12 +54,12 @@ spec:
                   awsAuth.assumeRole()
                 }
 
-                pemKey = sh(
+                def pemKey = sh(
                   returnStdout: true,
                   script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
                            + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
                 ).trim()
-                pemCert = sh(
+                def pemCert = sh(
                   returnStdout: true,
                   script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
                            + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
@@ -71,7 +71,7 @@ spec:
                 )
                 
                 try {
-                  httpReturnCode = sh(
+                  def httpReturnCode = sh(
                     returnStdout: true,
                     script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure" 
                             + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
