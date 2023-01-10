@@ -49,12 +49,21 @@ spec:
                   awsAuth.assumeRole()
                 }
 
-                sh ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
-                    + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'"
-                    + " > bfd-test-cert.pem")
-                sh ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
-                    + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'"
-                    + " >> bfd-test-cert.pem")
+                pemKey = sh(
+                  returnStdout: true,
+                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
+                           + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+                )
+                pemCert = sh(
+                  returnStdout: true,
+                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
+                           + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+                )
+
+                writeFile(
+                  file: "bfd-server-test.pem",
+                  text: pemKey + "\n" + pemCert
+                )
 
                 curlStatus = sh(
                   returnStatus: true,
