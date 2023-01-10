@@ -2,13 +2,18 @@
 
 pipeline {
   agent none
+
   options {
     // Nothing within this repository is required for running this pipeline, so skipping the default
     // checkout saves us some time
     skipDefaultCheckout()
-    // Only keep the last 10 runs as this pipeline will be running every minute, so we don't need
+    // Only keep the last 10 runs as this pipeline will be running very frequently, so we don't need
     // that much history
     buildDiscarder(logRotator(numToKeepStr: '10'))
+  }
+
+  triggers {
+    cron "H/5 * * * *"
   }
 
   stages {
