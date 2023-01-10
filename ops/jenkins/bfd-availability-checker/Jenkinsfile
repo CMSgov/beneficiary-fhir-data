@@ -12,7 +12,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: availability-checker
-    image: alpine:3.17.1
+    image: public.ecr.aws/c2o1d8s9/bfd-availability-checker:base-3.17.1
     imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
@@ -27,12 +27,6 @@ spec:
   }
 
   stages {
-    stage('Install prerequisites') {
-      steps {
-        sh 'apk add --no-cache aws-cli curl'
-      }
-    }
-
     stage('Check all environments') {
       matrix {
         axes {
