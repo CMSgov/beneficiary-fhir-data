@@ -43,6 +43,10 @@ spec:
 
         stages {
           stage("Availability check") {
+            options {
+              lock('synchronous-matrix')
+            }
+
             steps {
               script {
                 script {
