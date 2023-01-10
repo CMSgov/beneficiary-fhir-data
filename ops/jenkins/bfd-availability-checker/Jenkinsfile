@@ -28,7 +28,7 @@ spec:
   stages {
     stage('Install prerequisites') {
       steps {
-        sh 'apk add --no-cache aws-cli curl jq'
+        sh 'apk add --no-cache aws-cli curl'
       }
     }
 
