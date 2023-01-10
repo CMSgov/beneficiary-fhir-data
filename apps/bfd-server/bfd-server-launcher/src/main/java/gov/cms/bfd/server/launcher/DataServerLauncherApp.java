@@ -208,7 +208,14 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    // Write logs to suppressed Slf4j output as opposed to an access.log file to preserve disk space
+    /* Configure the log output generation via a Jetty CustomRequestLog. Available format strings are
+     * documented here: https://www.eclipse.org/jetty/javadoc/jetty-10/org/eclipse/jetty/server/CustomRequestLog.html.
+     *
+     * Response time units have varied during BFD's history as follows:
+     * Prior to Oct 28 2021 - milliseconds
+     * Oct 28 2021 - Mar 24 2022 - microseconds
+     * Since Mar 24 2022 - milliseconds
+     */
     Slf4jRequestLogWriter slfjRequestLogWriter = new Slf4jRequestLogWriter();
     slfjRequestLogWriter.setLoggerName("com.company.request.log");
 
