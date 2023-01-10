@@ -67,7 +67,7 @@ spec:
                 
                 curlStatus = sh(
                   returnStatus: true,
-                  script: "curl --insecure --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping"
+                  script: "curl -s --insecure --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping"
                 )
 
                 if (curlStatus == 0) {
