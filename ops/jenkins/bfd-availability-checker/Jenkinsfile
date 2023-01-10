@@ -33,22 +33,18 @@ spec:
         script {
           awsAuth.assumeRole()
         }
-
-        sh ('aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_key"'
-            + ' --region "us-east-1" --with-decryption | jq -r \'.Parameter.Value\''
-            + ' > bfd-test-cert.pem')
-        sh ('aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_cert"'
-            + ' --region "us-east-1" --with-decryption | jq -r \'.Parameter.Value\''
-            + ' >> bfd-test-cert.pem')
+        
+        sh ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
+            + " --region us-east-1 --with-decryption --output text --query '.Parameter.Value'"
+            + " > bfd-test-cert.pem")
+        sh ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
+            + " --region us-east-1 --with-decryption --output text --query '.Parameter.Value'"
+            + " >> bfd-test-cert.pem")
       }
     }
     
     stage('Check all environments') {
       matrix {
-        agent {
-          kubernetes(k8sagent(name: 'availability-checker'))
-        }
-
         axes {
           axis {
             name 'ENV'
