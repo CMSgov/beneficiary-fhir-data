@@ -50,10 +50,10 @@ spec:
                 }
 
                 sh ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
-                    + " --region us-east-1 --with-decryption --output text --query '.Parameter.Value'"
+                    + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'"
                     + " > bfd-test-cert.pem")
                 sh ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
-                    + " --region us-east-1 --with-decryption --output text --query '.Parameter.Value'"
+                    + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'"
                     + " >> bfd-test-cert.pem")
 
                 curlStatus = sh(
