@@ -49,7 +49,7 @@ spec:
             }
 
             stages {
-              step ('Download certificate') {
+              stage('Download certificate') {
                 steps {
                   script {
                     awsAuth.assumeRole()
@@ -72,38 +72,38 @@ spec:
                   }
                 }
               }
-            }
 
-            stage('Run availability check') {
-              steps {
-                script {
-                  metricName = "availability/success"
-                  try {
-                    def httpReturnCode = sh(
-                      returnStdout: true,
-                      script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure" 
-                              + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
-                    ).trim() as Integer
+              stage('Run availability check') {
+                steps {
+                  script {
+                    metricName = "availability/success"
+                    try {
+                      def httpReturnCode = sh(
+                        returnStdout: true,
+                        script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure" 
+                                + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
+                      ).trim() as Integer
 
-                    if (httpReturnCode == 200) {
-                      echo "Check succeeded with an HTTP response of 200"
-                    } else {
-                      echo "Check failed with an HTTP response of ${httpReturnCode}"
+                      if (httpReturnCode == 200) {
+                        echo "Check succeeded with an HTTP response of 200"
+                      } else {
+                        echo "Check failed with an HTTP response of ${httpReturnCode}"
+                        metricName = "availability/failure"
+                      }
+                    } catch(err) { 
+                      echo "cURL failed with non-zero exit code"
                       metricName = "availability/failure"
                     }
-                  } catch(err) { 
-                    echo "cURL failed with non-zero exit code"
-                    metricName = "availability/failure"
                   }
                 }
               }
-            }
 
-            stage('Update availability metric') {
-              steps {
+              stage('Update availability metric') {
+                steps {
                   echo "Updating \"${metricName}\" in namespace \"bfd-${ENV}/bfd-server\""
                   sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
                       + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
+                }
               }
             }
           }
