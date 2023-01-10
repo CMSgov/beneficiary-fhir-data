@@ -30,7 +30,10 @@ spec:
       steps {
         sh 'apk add --no-cache aws-cli curl jq'
 
-        awsAuth.assumeRole()
+        script {
+          awsAuth.assumeRole()
+        }
+
         sh ('aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/test_client_key"'
             + ' --region "us-east-1" --with-decryption | jq -r \'.Parameter.Value\''
             + ' > bfd-test-cert.pem')
