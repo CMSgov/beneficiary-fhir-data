@@ -218,7 +218,6 @@ public final class DataServerLauncherApp {
      */
     Slf4jRequestLogWriter slfjRequestLogWriter = new Slf4jRequestLogWriter();
     slfjRequestLogWriter.setLoggerName("com.company.request.log");
-
     final String requestLogFormat =
         "%{remote}a - \"%u\" %t \"%r\" \"%q\" %s %{CLF}S %{ms}T"
             + " %{BlueButton-OriginalQueryId}i"
@@ -232,7 +231,6 @@ public final class DataServerLauncherApp {
             + " \"%{BlueButton-User}i\""
             + " %{BlueButton-BeneficiaryId}i"
             + " %{X-Request-ID}o";
-
     final BfdRequestLog requestLog = new BfdRequestLog(slfjRequestLogWriter, requestLogFormat);
     server.setRequestLog(requestLog);
 
