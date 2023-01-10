@@ -23,6 +23,7 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.resource.Resource;
@@ -207,6 +208,27 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
+    // Write logs to suppressed Slf4j output as opposed to an access.log file to preserve disk space
+    Slf4jRequestLogWriter slfjRequestLogWriter = new Slf4jRequestLogWriter();
+    slfjRequestLogWriter.setLoggerName("com.company.request.log");
+
+    final String requestLogFormat =
+        "%{remote}a - \"%u\" %t \"%r\" \"%q\" %s %{CLF}S %{ms}T"
+            + " %{BlueButton-OriginalQueryId}i"
+            + " %{BlueButton-OriginalQueryCounter}i"
+            + " [%{BlueButton-OriginalQueryTimestamp}i]"
+            + " %{BlueButton-DeveloperId}i"
+            + " \"%{BlueButton-Developer}i\""
+            + " %{BlueButton-ApplicationId}i"
+            + " \"%{BlueButton-Application}i\""
+            + " %{BlueButton-UserId}i"
+            + " \"%{BlueButton-User}i\""
+            + " %{BlueButton-BeneficiaryId}i"
+            + " %{X-Request-ID}o";
+
+    final BfdRequestLog requestLog = new BfdRequestLog(slfjRequestLogWriter, requestLogFormat);
+    server.setRequestLog(requestLog);
+
     /*
      * Configure authentication for webapps. Note that this is a distinct operation from configuring
      * mutual TLS above via the SslContextFactory, as that mostly only impacts the connections. In
@@ -283,6 +305,16 @@ public final class DataServerLauncherApp {
    */
   private static class BfdRequestLog extends CustomRequestLog {
     /**
+     * Construct a BFD Request Log.
+     *
+     * @param writer source for the unstructured log
+     * @param accessLogFormat format for the unstructured log
+     */
+    public BfdRequestLog(Slf4jRequestLogWriter writer, String accessLogFormat) {
+      super(writer, accessLogFormat);
+    }
+
+    /**
      * Log a message for a request/response pair to the access.json (via Logback).
      *
      * @param request the request
@@ -291,6 +323,11 @@ public final class DataServerLauncherApp {
     @Override
     public void log(Request request, Response response) {
       try {
+        /*
+         * Call the implementation from CustomRequestLog to write the log entry.
+         */
+        super.log(request, response);
+
         /*
          * Capture the payload size in MDC:
          * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().

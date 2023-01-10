@@ -210,6 +210,9 @@ public final class DataServerLauncherAppIT {
       assertTrue(Files.isReadable(accessLogJson));
       assertTrue(Files.size(accessLogJson) > 0);
       assertTrue(
+          Files.readString(accessLogJson)
+              .contains(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
+      assertTrue(
           Files.readString(accessLogJson).contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB));
       // Stop the application.
       serverProcess.close();
