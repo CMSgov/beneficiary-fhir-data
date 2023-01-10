@@ -13,6 +13,7 @@ spec:
   containers:
   - name: availability-checker
     image: alpine:3.17.1
+    imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
 """
