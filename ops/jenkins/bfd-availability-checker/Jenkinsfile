@@ -1,24 +1,6 @@
 #!/usr/bin/env groovy
 
 pipeline {
-  agent {
-    kubernetes {
-      defaultContainer 'availability-checker'
-      yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  serviceAccount: bfd
-  restartPolicy: Never
-  containers:
-  - name: availability-checker
-    image: public.ecr.aws/c2o1d8s9/bfd-availability-checker:base-3.17.1
-    imagePullPolicy: IfNotPresent
-    command: ['cat']
-    tty: true
-"""
-    }
-  }
 
   options {
     // Nothing within this repository is required for running this pipeline, so skipping the default
@@ -36,69 +18,68 @@ spec:
           }
         }
 
+        agent {
+          kubernetes {
+            yamlFile 'bfd-availability-checker.pod.yaml'
+            defaultContainer 'availability-checker'
+          }
+        }
+
         stages {
-          stage('Sequential matrix') {
-            options {
-              lock('sequential-matrix')
+          stage('Download certificate') {
+            steps {
+              script {
+                awsAuth.assumeRole()
+
+                def pemKey = sh(
+                  returnStdout: true,
+                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
+                          + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+                ).trim()
+                def pemCert = sh(
+                  returnStdout: true,
+                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
+                          + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+                ).trim()
+
+                writeFile(
+                  file: "${ENV}-cert.pem",
+                  text: pemKey + "\n" + pemCert
+                )
+              }
             }
+          }
 
-            stages {
-              stage('Download certificate') {
-                steps {
-                  script {
-                    awsAuth.assumeRole()
+          stage('Run availability check') {
+            steps {
+              script {
+                metricName = "availability/success"
+                try {
+                  def httpReturnCode = sh(
+                    returnStdout: true,
+                    script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure"
+                            + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
+                  ).trim() as Integer
 
-                    def pemKey = sh(
-                      returnStdout: true,
-                      script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
-                              + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                    ).trim()
-                    def pemCert = sh(
-                      returnStdout: true,
-                      script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
-                              + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                    ).trim()
-
-                    writeFile(
-                      file: "${ENV}-cert.pem",
-                      text: pemKey + "\n" + pemCert
-                    )
+                  if (httpReturnCode == 200) {
+                    echo "Check succeeded with an HTTP response of 200"
+                  } else {
+                    echo "Check failed with an HTTP response of ${httpReturnCode}"
+                    metricName = "availability/failure"
                   }
+                } catch(err) {
+                  echo "cURL failed with non-zero exit code"
+                  metricName = "availability/failure"
                 }
               }
+            }
+          }
 
-              stage('Run availability check') {
-                steps {
-                  script {
-                    metricName = "availability/success"
-                    try {
-                      def httpReturnCode = sh(
-                        returnStdout: true,
-                        script: ("curl -s -o /dev/null -w \"%{http_code}\\n\" --max-time 3 --insecure" 
-                                + " --cert ${ENV}-cert.pem https://${ENV}.bfd.cms.gov/metrics/ping")
-                      ).trim() as Integer
-
-                      if (httpReturnCode == 200) {
-                        echo "Check succeeded with an HTTP response of 200"
-                      } else {
-                        echo "Check failed with an HTTP response of ${httpReturnCode}"
-                        metricName = "availability/failure"
-                      }
-                    } catch(err) { 
-                      echo "cURL failed with non-zero exit code"
-                      metricName = "availability/failure"
-                    }
-                  }
-                }
-              }
-
-              stage('Update availability metric') {
-                steps {
-                  echo "Updating \"${metricName}\" in namespace \"bfd-${ENV}/bfd-server\""
-                  sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
-                      + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
-                }
-              }
+          stage('Update availability metric') {
+            steps {
+              echo "Updating \"${metricName}\" in namespace \"bfd-${ENV}/bfd-server\""
+              sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
+                  + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
             }
           }
         }
