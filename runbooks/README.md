@@ -2,6 +2,13 @@
 Table of Contents
 =================
 
+* [How to Detach BFD Server Instances for Development or Debugging](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#how-to-detach-bfd-server-instances-for-development-or-debugging)
+   * [Scale Out to Avoid Potential Performance Degradation](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#scale-out-to-avoid-potential-performance-degradation)
+   * [Detach the Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#detach-the-instance)
+   * [Scale In After Detaching an Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#scale-in-after-detaching-an-instance)
+   * [Patching Regularly When Instances Endure Beyond ~1 Day](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#patching-regularly-when-instances-endure-beyond-1-day)
+   * [Terminating the Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#terminating-the-instance)
+
 * [How to Run the Regression and Load Test Suites](./how-to-run-load-and-regression-locust-tests.md#how-to-run-the-regression-and-load-test-suites)
    * [Glossary](./how-to-run-load-and-regression-locust-tests.md#glossary)
    * [FAQ](./how-to-run-load-and-regression-locust-tests.md#faq)
