@@ -12,7 +12,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: availability-checker
-    image: alpine:latest
+    image: alpine:3.17.1
     command: ['cat']
     tty: true
 """
