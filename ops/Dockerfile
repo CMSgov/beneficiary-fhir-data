@@ -57,6 +57,8 @@ RUN curl -o python3.tgz $PYTHON3_TAR_SOURCE && \
 RUN ln -s /usr/local/bin/python3.9 /usr/bin/python3 && \
     ln -s /usr/local/bin/pip3.9 /usr/bin/pip3
 
+RUN /usr/bin/python3 -m pip install --upgrade pip
+
 RUN systemctl set-default multi-user.target
 STOPSIGNAL SIGRTMIN+3
 
