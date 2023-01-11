@@ -375,7 +375,7 @@ public final class DataServerLauncherApp {
         LOGGER_HTTP_ACCESS.info("response complete");
       } finally {
         BfdMDC.clear();
-        // clear request log object to avoid heavy memory usage
+        // Clear request log object to avoid heavy memory usage
         server.setRequestLog(null);
       }
     }
