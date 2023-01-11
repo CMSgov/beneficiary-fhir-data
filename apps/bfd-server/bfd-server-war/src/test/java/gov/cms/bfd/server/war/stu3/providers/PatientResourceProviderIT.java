@@ -50,6 +50,16 @@ import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
 public final class PatientResourceProviderIT {
+
+  /** Constant used for setting up tests with include identifiers = true. */
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
+  /** Constant used for setting up tests with include identifiers = true. */
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
+  /** Constant for setting up tests with include identifiers without hicn. */
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
+  /** Constant for setting up tests with include identifiers without mbi. */
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
+
   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
    * that any existing data is deleted from the tables before running the test suite.
@@ -118,8 +128,8 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
     assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_HICN,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "true",
@@ -135,8 +145,8 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersHicnMbi() {
     assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_HICN,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "hicn,mbi",
@@ -152,8 +162,8 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersHicn() {
     assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_HICN,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "hicn",
@@ -169,8 +179,8 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersMbi() {
     assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "mbi",
@@ -186,8 +196,8 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
     assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "false",
@@ -203,8 +213,8 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
     assertExistingPatientIncludeIdentifiersExpected(
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "",
@@ -224,8 +234,8 @@ public final class PatientResourceProviderIT {
         InvalidRequestException.class,
         () -> {
           assertExistingPatientIncludeIdentifiersExpected(
-              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+              CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+              CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
               RequestHeaders.getHeaderWrapper(
                   PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
                   "invalid-identifier-value",
@@ -246,8 +256,8 @@ public final class PatientResourceProviderIT {
         InvalidRequestException.class,
         () -> {
           assertExistingPatientIncludeIdentifiersExpected(
-              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
-              PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+              CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+              CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
               RequestHeaders.getHeaderWrapper(
                   PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
                   "mbi,invalid-identifier-value",

@@ -39,6 +39,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/** Integration tests for {@link R4PatientResourceProvider}. */
 public final class R4PatientResourceProviderIT {
 
   /** Constant used for setting up tests with include identifiers = true. */

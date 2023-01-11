@@ -412,7 +412,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Creates an extension identifier.
+   * Creates a new identifier.
    *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
@@ -433,7 +433,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Create an extension identifier.
+   * Creates a new identifier.
    *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
@@ -447,7 +447,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Creates an identifier.
+   * Creates a new identifier.
    *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting

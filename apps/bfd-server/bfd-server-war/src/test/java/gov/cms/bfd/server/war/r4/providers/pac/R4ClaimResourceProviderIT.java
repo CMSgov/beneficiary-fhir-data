@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/** R4ClaimResourceProviderIT. */
 public class R4ClaimResourceProviderIT {
 
   private static final RDATestUtils testUtils = new RDATestUtils();

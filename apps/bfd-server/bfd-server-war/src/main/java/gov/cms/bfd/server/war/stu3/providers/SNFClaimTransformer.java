@@ -24,6 +24,8 @@ import org.hl7.fhir.dstu3.model.Period;
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class SNFClaimTransformer {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -44,7 +46,10 @@ final class SNFClaimTransformer {
   }
 
   /**
+   * Transforms a specified {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link SNFClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */

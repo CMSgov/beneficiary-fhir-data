@@ -77,45 +77,84 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
+  /**
+   * The header key used to determine whether or not tax numbers should be included in responses.
+   *
+   * <p>Should be set to <code>"true"</code> if {@link
+   * gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} or {@link
+   * gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the results,
+   * <code>"false"</code> if not. Defaults to <code>"false"</code>.
+   */
+  public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
+  /** The entity manager. */
   private EntityManager entityManager;
+  /** The metric registry. */
   private MetricRegistry metricRegistry;
+  /** The samhsa matcher. */
   private Stu3EobSamhsaMatcher samhsaMatcher;
+  /** The loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
+  /** The drug code display lookup entity. */
   private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  /** The npi org lookup entity. */
   private NPIOrgLookup npiOrgLookup;
 
-  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
+  /**
+   * Sets the {@link #entityManager}.
+   *
+   * @param entityManager a JPA {@link EntityManager} connected to the application's database
+   */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /** @param metricRegistry the {@link MetricRegistry} to use */
+  /**
+   * Sets the {@link #metricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link Stu3EobSamhsaMatcher} to use */
+  /**
+   * Sets the {@link #samhsaMatcher}.
+   *
+   * @param samhsaMatcher the {@link Stu3EobSamhsaMatcher} to use
+   */
   @Inject
   public void setSamhsaFilterer(Stu3EobSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
+  /**
+   * Sets the {@link #loadedFilterManager}.
+   *
+   * @param loadedFilterManager the {@link LoadedFilterManager} to use
+   */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /** @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use */
+  /**
+   * Sets the {@link #drugCodeDisplayLookup}.
+   *
+   * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use
+   */
   @Inject
   public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     this.drugCodeDisplayLookup = drugCodeDisplayLookup;
   }
 
-  /** @param npiOrgLookup the {@link NPIOrgLookup} to use */
+  /**
+   * Sets the {@link #npiOrgLookup}.
+   *
+   * @param npiOrgLookup the {@link NPIOrgLookup} to use
+   */
   @Inject
   public void setNpiOrgLookup(NPIOrgLookup npiOrgLookup) {
     this.npiOrgLookup = npiOrgLookup;
@@ -392,10 +431,12 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
 
-  /*
-   * @param eob1 an {@link ExplanationOfBenefit} to be compared
+  /**
+   * Compare two EOB resources by claim id and claim type.
    *
-   * @param eob2 an {@link ExplanationOfBenefit} to be compared
+   * @param res1 an {@link ExplanationOfBenefit} to be compared
+   * @param res2 an {@link ExplanationOfBenefit} to be compared
+   * @return the comparison result
    */
   private static int compareByClaimIdThenClaimType(IBaseResource res1, IBaseResource res2) {
     /*
@@ -418,9 +459,13 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   }
 
   /**
+   * Find claim type by patient list.
+   *
+   * @param <T> the type parameter
    * @param claimType the {@link ClaimType} to find
    * @param patientId the {@link Beneficiary#getBeneficiaryId()} to filter by
    * @param lastUpdated the update time to filter by
+   * @param serviceDate the service date
    * @return the matching claim/event entities
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -501,8 +546,17 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   }
 
   /**
+   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
+   * objects.
+   *
+   * <p>TODO: This should likely not exist in the provider class and be moved somewhere else like a
+   * transformer class
+   *
    * @param claimType the {@link ClaimType} being transformed
    * @param claims the claims/events to transform
+   * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
    * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
    *     claim/event
    */
@@ -541,15 +595,15 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
   /**
    * Compares {@link LocalDate} a against {@link LocalDate} using the supplied {@link
-   * ParamPrefixEnum}
+   * ParamPrefixEnum}.
    *
-   * @param a
-   * @param b
+   * @param a the first item to compare
+   * @param b the second item to compare
    * @param prefix prefix to use. Supported: {@link ParamPrefixEnum#GREATERTHAN_OR_EQUALS}, {@link
    *     ParamPrefixEnum#GREATERTHAN}, {@link ParamPrefixEnum#LESSTHAN_OR_EQUALS}, {@link
    *     ParamPrefixEnum#LESSTHAN}
-   * @return true if the comparison between a and b returned true.
-   * @throws {@link IllegalArgumentException} if caller supplied an unsupported prefix
+   * @return true if the comparison between a and b returned true
+   * @throws IllegalArgumentException if caller supplied an unsupported prefix
    */
   private boolean compareLocalDate(
       @Nullable LocalDate a, @Nullable LocalDate b, ParamPrefixEnum prefix) {
@@ -571,6 +625,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   }
 
   /**
+   * Parses the claim types to return in the search by parsing out the type tokens parameters.
+   *
    * @param type a {@link TokenAndListParam} for the "type" field in a search
    * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param

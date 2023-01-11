@@ -22,6 +22,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
 final class CoverageTransformer {
   /**
+   * Transforms a beneficiary and medicare segment into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param medicareSegment the {@link MedicareSegment} to generate a {@link Coverage} resource for
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
@@ -44,6 +46,8 @@ final class CoverageTransformer {
   }
 
   /**
+   * Transforms a beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link

@@ -30,7 +30,11 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
 
-  /** Checks for BFD v2 Flag */
+  /**
+   * Checks for BFD v2 Flag.
+   *
+   * @return {@code true} if V2 is enabled
+   */
   private static boolean isV2Enabled() {
     if (!Strings.isNullOrEmpty(System.getProperty("bfdServer.v2.enabled"))) {
       return Boolean.parseBoolean(System.getProperty("bfdServer.v2.enabled"));

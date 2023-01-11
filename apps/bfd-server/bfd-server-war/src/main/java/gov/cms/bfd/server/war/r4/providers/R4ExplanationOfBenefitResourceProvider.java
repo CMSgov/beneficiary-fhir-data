@@ -559,7 +559,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    *
    * @param claimType the {@link ClaimTypeV2} being transformed
    * @param claims the claims/events to transform
-   * @param includeTaxNumbers the include tax numbers
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
    * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified

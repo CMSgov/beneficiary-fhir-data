@@ -30,7 +30,9 @@ public class V2Server extends RestfulServer {
 
   private static final long serialVersionUID = 1L;
 
+  /** Represents the capabilities publisher value. */
   static final String CAPABILITIES_PUBLISHER = "Centers for Medicare & Medicaid Services";
+  /** Represents the capabilities server name. */
   static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
   /** Constructs a new {@link V2Server} instance. */
