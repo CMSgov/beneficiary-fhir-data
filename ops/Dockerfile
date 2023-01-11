@@ -39,7 +39,7 @@ RUN yum update -y --security && \
     amazon-linux-extras enable java-openjdk11 && \
     yum clean metadata && \
     yum -y groupinstall "Development Tools" && \
-    yum install -y tar sudo unzip selinux-policy systemd java-11-openjdk-devel gcc devel libffi-devel openssl11 && \
+    yum install -y tar sudo unzip selinux-policy systemd java-11-openjdk-devel gcc devel libffi-devel openssl11 openssl-devel && \
     find /etc/systemd/system \
          /lib/systemd/system \
          -path '*.wants/*' \
