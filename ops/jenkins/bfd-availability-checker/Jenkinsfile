@@ -29,7 +29,7 @@ pipeline {
         agent {
           kubernetes {
             yamlFile 'ops/jenkins/bfd-availability-checker/bfd-availability-checker.pod.yaml'
-            defaulkContainer 'bfd-availability-checker'
+            defaultContainer 'bfd-availability-checker'
           }
         }
 
