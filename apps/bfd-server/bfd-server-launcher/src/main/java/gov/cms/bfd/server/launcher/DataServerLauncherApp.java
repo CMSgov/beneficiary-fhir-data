@@ -313,8 +313,8 @@ public final class DataServerLauncherApp {
     /**
      * Construct a BFD Request Log.
      *
-     * @param writer source for the unstructured log
-     * @param accessLogFormat format for the unstructured log
+     * @param writer source for the structured log
+     * @param accessLogFormat format for the structured log
      */
     public BfdRequestLog(Slf4jRequestLogWriter writer, String accessLogFormat) {
       super(writer, accessLogFormat);
