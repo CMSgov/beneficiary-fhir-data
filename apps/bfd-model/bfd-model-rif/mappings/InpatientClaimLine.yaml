@@ -36,22 +36,22 @@ mappings:
       dbName: rev_cntr_rate_amt
       name: rateAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Revenue Center Total Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_chrg.txt)
       dbName: rev_cntr_tot_chrg_amt
       name: totalChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Revenue Center Non-Covered Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_ncvr.txt)
       dbName: rev_cntr_ncvrd_chrg_amt
       name: nonCoveredChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Revenue Center Deductible Coinsurance Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt)
       dbName: rev_cntr_ddctbl_coinsrnc_cd
       javaType: Character
       name: deductibleCoinsuranceCd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Revenue Center NDC Quantity (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt)
       dbName: rev_cntr_ndc_qty
       name: nationalDrugCodeQuantity

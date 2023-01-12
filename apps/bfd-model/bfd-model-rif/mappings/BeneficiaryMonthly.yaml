@@ -29,12 +29,12 @@ mappings:
       dbName: entitlement_buy_in_ind
       javaType: Character
       name: entitlementBuyInInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: null
       dbName: hmo_indicator_ind
       javaType: Character
       name: hmoIndicatorInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: null
       dbName: partc_contract_number_id
       name: partCContractNumberId
@@ -63,7 +63,7 @@ mappings:
       dbName: partd_retiree_drug_subsidy_ind
       javaType: Character
       name: partDRetireeDrugSubsidyInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: null
       dbName: medicaid_dual_eligibility_code
       name: medicaidDualEligibilityCode

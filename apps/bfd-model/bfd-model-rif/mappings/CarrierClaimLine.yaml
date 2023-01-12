@@ -40,7 +40,7 @@ mappings:
       javaType: char
       name: providerTypeCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Line Provider Tax Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tax_num.txt)
       dbName: tax_num
       name: providerTaxNumber
@@ -62,13 +62,13 @@ mappings:
       dbName: prtcptng_ind_cd
       javaType: Character
       name: providerParticipatingIndCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Carrier Line Reduced Payment Physician Assistant Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt)
       dbName: carr_line_rdcd_pmt_phys_astn_c
       javaType: char
       name: reducedPaymentPhysicianAsstCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Line Service Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_cnt.txt)
       dbName: line_srvc_cnt
       name: serviceCount
@@ -79,7 +79,7 @@ mappings:
       javaType: char
       name: cmsServiceTypeCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Line Place Of Service Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt)
       dbName: line_place_of_srvc_cd
       name: placeOfServiceCode
@@ -118,47 +118,47 @@ mappings:
       dbName: line_nch_pmt_amt
       name: paymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lbenpmt.txt)
       dbName: line_bene_pmt_amt
       name: beneficiaryPaymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprvpmt.txt)
       dbName: line_prvdr_pmt_amt
       name: providerPaymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Beneficiary Part B Deductible Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ldedamt.txt)
       dbName: line_bene_ptb_ddctbl_amt
       name: beneficiaryPartBDeductAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Beneficiary Primary Payer Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt)
       dbName: line_bene_prmry_pyr_cd
       javaType: Character
       name: primaryPayerCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Line Beneficiary Primary Payer Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpdamt.txt)
       dbName: line_bene_prmry_pyr_pd_amt
       name: primaryPayerPaidAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Coinsurance Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coinamt.txt)
       dbName: line_coinsrnc_amt
       name: coinsuranceAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Submitted Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lsbmtchg.txt)
       dbName: line_sbmtd_chrg_amt
       name: submittedChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Allowed Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lalowchg.txt)
       dbName: line_alowd_chrg_amt
       name: allowedChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Line Processing Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt)
       dbName: line_prcsg_ind_cd
       name: processingIndicatorCode
@@ -167,12 +167,12 @@ mappings:
       dbName: line_pmt_80_100_cd
       javaType: Character
       name: paymentCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Line Service Deductible Indicator Switch (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt)
       dbName: line_service_deductible
       javaType: Character
       name: serviceDeductibleCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Carrier Line Miles/Time/Units/Services Count (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_cnt.txt)
       dbName: carr_line_mtus_cnt
       name: mtusCount
@@ -182,7 +182,7 @@ mappings:
       dbName: carr_line_mtus_cd
       javaType: Character
       name: mtusCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Line Diagnosis Code Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_icd_dgns_cd.txt)
       dbName: line_icd_dgns_cd
       name: diagnosisCode
@@ -191,12 +191,12 @@ mappings:
       dbName: line_icd_dgns_vrsn_cd
       javaType: Character
       name: diagnosisCodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Carrier Line HPSA/Scarcity Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hpsasccd.txt)
       dbName: hpsa_scrcty_ind_cd
       javaType: Character
       name: hpsaScarcityCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Carrier Line RX Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carrxnum.txt)
       dbName: carr_line_rx_num
       name: rxNumber
@@ -205,7 +205,7 @@ mappings:
       dbName: line_hct_hgb_rslt_num
       name: hctHgbTestResult
       nullable: false
-      sqlType: decimal(4,1)
+      sqlType: numeric(4,1)
     - comment: Hematocrit/Hemoglobin Test Type code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt)
       dbName: line_hct_hgb_type_cd
       name: hctHgbTestTypeCode

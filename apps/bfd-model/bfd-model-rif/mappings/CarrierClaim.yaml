@@ -32,13 +32,13 @@ mappings:
       javaType: char
       name: finalAction
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Near Line Record Identification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
       dbName: nch_near_line_rec_ident_cd
       javaType: char
       name: nearLineRecordIdCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Claim Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt)
       dbName: nch_clm_type_cd
       name: claimTypeCode
@@ -64,7 +64,7 @@ mappings:
       javaType: char
       name: claimEntryCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Disposition Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/disp_cd.txt)
       dbName: clm_disp_cd
       name: claimDispositionCode
@@ -84,12 +84,12 @@ mappings:
       dbName: clm_pmt_amt
       name: paymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Carrier Claim Primary Payer Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt)
       dbName: carr_clm_prmry_pyr_pd_amt
       name: primaryPayerPaidAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Carrier Claim Refering Physician UPIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_upin.txt)
       dbName: rfr_physn_upin
       name: referringPhysicianUpin
@@ -102,37 +102,37 @@ mappings:
       dbName: carr_clm_prvdr_asgnmt_ind_sw
       javaType: Character
       name: providerAssignmentIndicator
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Claim Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prov_pmt.txt)
       dbName: nch_clm_prvdr_pmt_amt
       name: providerPaymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Claim Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_pmt.txt)
       dbName: nch_clm_bene_pmt_amt
       name: beneficiaryPaymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Carrier Claim Submitted Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sbmtchrg.txt)
       dbName: nch_carr_clm_sbmtd_chrg_amt
       name: submittedChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Carrier Claim Allowed Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/alowchrg.txt)
       dbName: nch_carr_clm_alowd_amt
       name: allowedChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Carrier Claim Cash Deductible Applied Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dedapply.txt)
       dbName: carr_clm_cash_ddctbl_apld_amt
       name: beneficiaryPartBDeductAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Carrier Claim HCPCS Year Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt)
       dbName: carr_clm_hcpcs_yr_cd
       javaType: Character
       name: hcpcsYearCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Carrier Claim Referring PIN Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_prfl.txt)
       dbName: carr_clm_rfrng_pin_num
       name: referringProviderIdNumber
@@ -147,7 +147,7 @@ mappings:
       dbName: prncpal_dgns_vrsn_cd
       javaType: Character
       name: diagnosisPrincipalCodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd1.txt)
       dbName: icd_dgns_cd1
       name: diagnosis1Code
@@ -156,7 +156,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd1
       javaType: Character
       name: diagnosis1CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
       dbName: icd_dgns_cd2
       name: diagnosis2Code
@@ -165,7 +165,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd2
       javaType: Character
       name: diagnosis2CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
       dbName: icd_dgns_cd3
       name: diagnosis3Code
@@ -174,7 +174,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd3
       javaType: Character
       name: diagnosis3CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
       dbName: icd_dgns_cd4
       name: diagnosis4Code
@@ -183,7 +183,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd4
       javaType: Character
       name: diagnosis4CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
       dbName: icd_dgns_cd5
       name: diagnosis5Code
@@ -192,7 +192,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd5
       javaType: Character
       name: diagnosis5CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
       dbName: icd_dgns_cd6
       name: diagnosis6Code
@@ -201,7 +201,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd6
       javaType: Character
       name: diagnosis6CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
       dbName: icd_dgns_cd7
       name: diagnosis7Code
@@ -210,7 +210,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd7
       javaType: Character
       name: diagnosis7CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
       dbName: icd_dgns_cd8
       name: diagnosis8Code
@@ -220,7 +220,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd8
       javaType: Character
       name: diagnosis8CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
       dbName: icd_dgns_cd9
       name: diagnosis9Code
@@ -229,7 +229,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd9
       javaType: Character
       name: diagnosis9CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
       dbName: icd_dgns_cd10
       name: diagnosis10Code
@@ -238,7 +238,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd10
       javaType: Character
       name: diagnosis10CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
       dbName: icd_dgns_cd11
       name: diagnosis11Code
@@ -247,7 +247,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd11
       javaType: Character
       name: diagnosis11CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
       dbName: icd_dgns_cd12
       name: diagnosis12Code
@@ -256,7 +256,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd12
       javaType: Character
       name: diagnosis12CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Clinical Trial Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt)
       dbName: clm_clncl_tril_num
       name: clinicalTrialNumber

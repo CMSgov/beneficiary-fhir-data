@@ -26,7 +26,7 @@ mappings:
       javaType: char
       name: finalAction
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
       dbName: bene_id
       name: beneficiaryId
@@ -87,18 +87,18 @@ mappings:
       javaType: int
       name: compoundCode
       nullable: false
-      sqlType: numeric(2)
+      sqlType: integer
     - comment: Dispense as Written (DAW) Product Selection Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt)
       dbName: daw_prod_slctn_cd
       javaType: char
       name: dispenseAsWrittenProductSelectionCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Quantity Dispensed (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qty_dspnsd_num.txt)
       dbName: qty_dspnsd_num
       name: quantityDispensed
       nullable: false
-      sqlType: decimal(10,3)
+      sqlType: numeric(10,3)
     - comment: Days Supply (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt)
       dbName: days_suply_num
       name: daysSupply
@@ -113,93 +113,93 @@ mappings:
       dbName: dspnsng_stus_cd
       javaType: Character
       name: dispensingStatusCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Drug Coverage Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt)
       dbName: drug_cvrg_stus_cd
       javaType: char
       name: drugCoverageStatusCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Adjustment Deletion Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt)
       dbName: adjstmt_dltn_cd
       javaType: Character
       name: adjustmentDeletionCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Non-Standard Format Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt)
       dbName: nstd_frmt_cd
       javaType: Character
       name: nonstandardFormatCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Pricing Exception Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt)
       dbName: prcng_excptn_cd
       javaType: Character
       name: pricingExceptionCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Catastrophic Coverage Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt)
       dbName: ctstrphc_cvrg_cd
       javaType: Character
       name: catastrophicCoverageCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Gross Drug Cost Below Out-of-Pocket Threshold (GDCB) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_blw_oopt_amt.txt)
       dbName: gdc_blw_oopt_amt
       name: grossCostBelowOutOfPocketThreshold
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Gross Drug Cost Above Out-of-Pocket Threshold (GDCA) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_abv_oopt_amt.txt)
       dbName: gdc_abv_oopt_amt
       name: grossCostAboveOutOfPocketThreshold
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Patient Pay Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt)
       dbName: ptnt_pay_amt
       name: patientPaidAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Other TrOOP Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt)
       dbName: othr_troop_amt
       name: otherTrueOutOfPocketPaidAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Low Income Cost Sharing Subsidy Amount (LICS) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt)
       dbName: lics_amt
       name: lowIncomeSubsidyPaidAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Patient Liability Reduction Due to Other Payer Amount (PLRO) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt)
       dbName: plro_amt
       name: patientLiabilityReductionOtherPaidAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Covered D Plan Paid Amount (CPP) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cvrd_d_plan_pd_amt.txt)
       dbName: cvrd_d_plan_pd_amt
       name: partDPlanCoveredPaidAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Non-Covered Plan Paid Amount (NPP) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncvrd_plan_pd_amt.txt)
       dbName: ncvrd_plan_pd_amt
       name: partDPlanNonCoveredPaidAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Gross Drug Cost (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt)
       dbName: tot_rx_cst_amt
       name: totalPrescriptionCost
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: Prescription Origin Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt)
       dbName: rx_orgn_cd
       javaType: Character
       name: prescriptionOriginationCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Gap Discount Amount reported by the Submitting Plan (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt)
       dbName: rptd_gap_dscnt_num
       name: gapDiscountAmount
       nullable: false
-      sqlType: decimal(8,2)
+      sqlType: numeric(8,2)
     - comment: The Brand-Generic Code reported by the submitting plan (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt)
       dbName: brnd_gnrc_cd
       javaType: Character
       name: brandGenericCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Pharmacy Service Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt)
       dbName: phrmcy_srvc_type_cd
       name: pharmacyTypeCode

@@ -49,7 +49,7 @@ mappings:
       javaType: char
       name: sex
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Beneficiary Race Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt)
       dbName: bene_race_cd
       fieldType: Transient
@@ -127,7 +127,7 @@ mappings:
     - comment: HICN_UNHASHED (https://bluebutton.cms.gov/resources/variables/hicnUnhashed)
       dbName: hicn_unhashed
       name: hicnUnhashed
-      sqlType: varchar(64)
+      sqlType: varchar(11)
     - comment: MBI_HASH (https://bluebutton.cms.gov/resources/variables/mbiHash)
       dbName: mbi_hash
       name: mbiHash

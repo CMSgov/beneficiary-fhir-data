@@ -175,7 +175,7 @@ public class ModelUtil {
     if (sqlType.equals("bigint")) {
       return Optional.of(ClassName.get(Long.class));
     }
-    if (sqlType.equals("int")) {
+    if (sqlType.equals("int") || sqlType.equals("integer")) {
       return Optional.of(ClassName.get(Integer.class));
     }
     if (sqlType.contains("decimal") || sqlType.contains("numeric")) {

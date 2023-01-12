@@ -75,7 +75,7 @@ mappings:
     - comment: Timestamp when the row was added to the table.
       dbName: creat_ts
       name: mbiAddDate
-      sqlType: timestamp with time zone
+      sqlType: timestamp
     - comment: User who updated the record
       dbName: updt_user_id
       name: mbiUpdateUser
@@ -83,7 +83,7 @@ mappings:
     - comment: Timestamp when the row was updated.
       dbName: updt_ts
       name: mbiUpdateDate
-      sqlType: timestamp with time zone
+      sqlType: timestamp
     - comment: A system generated number used internally to spread data across all
         partitions within the Entitlement Database.
       dbName: bene_crnt_rec_ind_id

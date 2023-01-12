@@ -25,6 +25,8 @@ public class ColumnBeanTest {
   /** Test computation of column length. */
   @Test
   public void testComputeLength() {
+    assertEquals(1, ColumnBean.builder().sqlType("char").build().computeLength());
+    assertEquals(1, ColumnBean.builder().sqlType("VARCHAR").build().computeLength());
     assertEquals(10, ColumnBean.builder().sqlType("char(10)").build().computeLength());
     assertEquals(20, ColumnBean.builder().sqlType("varchar(20)").build().computeLength());
     assertEquals(
@@ -114,8 +116,12 @@ public class ColumnBeanTest {
     assertTrue(ColumnBean.builder().comment("informative!").build().hasComment());
 
     assertFalse(ColumnBean.builder().sqlType("int").build().isNumeric());
+    assertTrue(ColumnBean.builder().sqlType("decimal").build().isNumeric());
+    assertTrue(ColumnBean.builder().sqlType("decimal(10)").build().isNumeric());
     assertTrue(ColumnBean.builder().sqlType("decimal(10,2)").build().isNumeric());
+    assertTrue(ColumnBean.builder().sqlType("numeric").build().isNumeric());
     assertTrue(ColumnBean.builder().sqlType("numeric(11)").build().isNumeric());
+    assertTrue(ColumnBean.builder().sqlType("numeric(11,3)").build().isNumeric());
 
     assertFalse(ColumnBean.builder().build().isEnum());
     assertTrue(ColumnBean.builder().enumType("something").build().isEnum());
@@ -133,6 +139,7 @@ public class ColumnBeanTest {
 
     assertTrue(ColumnBean.builder().javaType("int").sqlType("date").build().isInt());
     assertTrue(ColumnBean.builder().javaType("String").sqlType("int").build().isInt());
+    assertTrue(ColumnBean.builder().javaType("String").sqlType("integer").build().isInt());
     assertFalse(ColumnBean.builder().javaType("char").sqlType("char(10)").build().isInt());
 
     assertFalse(ColumnBean.builder().sqlType("int").build().isDate());
@@ -147,15 +154,22 @@ public class ColumnBeanTest {
   @Test
   public void testComputePrecision() {
     assertEquals(0, ColumnBean.builder().sqlType("date").build().computePrecision());
+    assertEquals(0, ColumnBean.builder().sqlType("decimal").build().computePrecision());
+    assertEquals(10, ColumnBean.builder().sqlType("decimal(10)").build().computePrecision());
     assertEquals(10, ColumnBean.builder().sqlType("decimal(10,2)").build().computePrecision());
+    assertEquals(0, ColumnBean.builder().sqlType("numeric").build().computePrecision());
     assertEquals(12, ColumnBean.builder().sqlType("numeric(12)").build().computePrecision());
+    assertEquals(12, ColumnBean.builder().sqlType("numeric(12, 2)").build().computePrecision());
   }
 
   /** Test extraction of scale for decimal/numeric columns. */
   @Test
   public void testComputeScale() {
     assertEquals(0, ColumnBean.builder().sqlType("date").build().computeScale());
-    assertEquals(2, ColumnBean.builder().sqlType("decimal(10,2)").build().computeScale());
+    assertEquals(0, ColumnBean.builder().sqlType("decimal").build().computeScale());
+    assertEquals(0, ColumnBean.builder().sqlType("decimal(10)").build().computeScale());
+    assertEquals(2, ColumnBean.builder().sqlType("decimal(10, 2)").build().computeScale());
     assertEquals(0, ColumnBean.builder().sqlType("numeric(12)").build().computeScale());
+    assertEquals(2, ColumnBean.builder().sqlType("numeric(12,2)").build().computeScale());
   }
 }

@@ -40,27 +40,27 @@ mappings:
       javaType: char
       name: sex
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Beneficiary Race Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt)
       dbName: bene_race_cd
       javaType: Character
       name: race
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Original Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt)
       dbName: bene_entlmt_rsn_orig
       javaType: Character
       name: entitlementCodeOriginal
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Current Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt)
       dbName: bene_entlmt_rsn_curr
       javaType: Character
       name: entitlementCodeCurrent
-      sqlType: varchar(1)
+      sqlType: char
     - comment: ESRD Indicator (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt)
       dbName: bene_esrd_ind
       javaType: Character
       name: endStageRenalDiseaseCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt)
       dbName: bene_mdcr_status_cd
       name: medicareEnrollmentStatusCode
@@ -69,12 +69,12 @@ mappings:
       dbName: bene_pta_trmntn_cd
       javaType: Character
       name: partATerminationCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part B Termination Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt)
       dbName: bene_ptb_trmntn_cd
       javaType: Character
       name: partBTerminationCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Beneficiary Current HIC Number
       dbName: bene_crnt_hic_num
       name: hicn
@@ -94,7 +94,7 @@ mappings:
       dbName: bene_mdl_name
       javaType: Character
       name: nameMiddleInitial
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare Beneficiary ID
       dbName: mbi_num
       name: medicareBeneficiaryId
@@ -139,7 +139,7 @@ mappings:
       dbName: efivepct
       javaType: Character
       name: enhancedMedicareSampleIndicator
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Current Beneficiary Identification Code
       dbName: crnt_bic
       name: currentBeneficiaryIdCode
@@ -208,12 +208,12 @@ mappings:
       dbName: v_dod_sw
       javaType: Character
       name: validDateOfDeathSw
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Research Triangle Institute (RTI) Race Code
       dbName: rti_race_cd
       javaType: Character
       name: rtiRaceCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare Status Code - January
       dbName: mdcr_stus_jan_cd
       name: medicareStatusJanCode
@@ -270,122 +270,122 @@ mappings:
       dbName: mdcr_entlmt_buyin_1_ind
       javaType: Character
       name: entitlementBuyInJanInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - February
       dbName: mdcr_entlmt_buyin_2_ind
       javaType: Character
       name: entitlementBuyInFebInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - March
       dbName: mdcr_entlmt_buyin_3_ind
       javaType: Character
       name: entitlementBuyInMarInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - April
       dbName: mdcr_entlmt_buyin_4_ind
       javaType: Character
       name: entitlementBuyInAprInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - May
       dbName: mdcr_entlmt_buyin_5_ind
       javaType: Character
       name: entitlementBuyInMayInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - June
       dbName: mdcr_entlmt_buyin_6_ind
       javaType: Character
       name: entitlementBuyInJunInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - July
       dbName: mdcr_entlmt_buyin_7_ind
       javaType: Character
       name: entitlementBuyInJulInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - August
       dbName: mdcr_entlmt_buyin_8_ind
       javaType: Character
       name: entitlementBuyInAugInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - September
       dbName: mdcr_entlmt_buyin_9_ind
       javaType: Character
       name: entitlementBuyInSeptInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - October
       dbName: mdcr_entlmt_buyin_10_ind
       javaType: Character
       name: entitlementBuyInOctInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - November
       dbName: mdcr_entlmt_buyin_11_ind
       javaType: Character
       name: entitlementBuyInNovInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare  Entitlement/Buy-In Indicator - December
       dbName: mdcr_entlmt_buyin_12_ind
       javaType: Character
       name: entitlementBuyInDecInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: 'HMO Indicator - January '
       dbName: hmo_1_ind
       javaType: Character
       name: hmoIndicatorJanInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - February
       dbName: hmo_2_ind
       javaType: Character
       name: hmoIndicatorFebInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - March
       dbName: hmo_3_ind
       javaType: Character
       name: hmoIndicatorMarInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - April
       dbName: hmo_4_ind
       javaType: Character
       name: hmoIndicatorAprInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - May
       dbName: hmo_5_ind
       javaType: Character
       name: hmoIndicatorMayInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - June
       dbName: hmo_6_ind
       javaType: Character
       name: hmoIndicatorJunInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - July
       dbName: hmo_7_ind
       javaType: Character
       name: hmoIndicatorJulInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - August
       dbName: hmo_8_ind
       javaType: Character
       name: hmoIndicatorAugInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - September
       dbName: hmo_9_ind
       javaType: Character
       name: hmoIndicatorSeptInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - October
       dbName: hmo_10_ind
       javaType: Character
       name: hmoIndicatorOctInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - November
       dbName: hmo_11_ind
       javaType: Character
       name: hmoIndicatorNovInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: HMO Indicator - December
       dbName: hmo_12_ind
       javaType: Character
       name: hmoIndicatorDecInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part C Contract Number - January
       dbName: ptc_cntrct_jan_id
       name: partCContractNumberJanId
@@ -678,62 +678,62 @@ mappings:
       dbName: rds_jan_ind
       javaType: Character
       name: partDRetireeDrugSubsidyJanInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - February
       dbName: rds_feb_ind
       javaType: Character
       name: partDRetireeDrugSubsidyFebInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - March
       dbName: rds_mar_ind
       javaType: Character
       name: partDRetireeDrugSubsidyMarInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - April
       dbName: rds_apr_ind
       javaType: Character
       name: partDRetireeDrugSubsidyAprInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - May
       dbName: rds_may_ind
       javaType: Character
       name: partDRetireeDrugSubsidyMayInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - June
       dbName: rds_jun_ind
       javaType: Character
       name: partDRetireeDrugSubsidyJunInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - July
       dbName: rds_jul_ind
       javaType: Character
       name: partDRetireeDrugSubsidyJulInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - August
       dbName: rds_aug_ind
       javaType: Character
       name: partDRetireeDrugSubsidyAugInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - September
       dbName: rds_sept_ind
       javaType: Character
       name: partDRetireeDrugSubsidySeptInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - October
       dbName: rds_oct_ind
       javaType: Character
       name: partDRetireeDrugSubsidyOctInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - November
       dbName: rds_nov_ind
       javaType: Character
       name: partDRetireeDrugSubsidyNovInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Part D Retiree Drug Subsidy Indicator - December
       dbName: rds_dec_ind
       javaType: Character
       name: partDRetireeDrugSubsidyDecInd
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Medicare-Medicaid dual eligibility code - January
       dbName: meta_dual_elgbl_stus_jan_cd
       name: medicaidDualEligibilityJanCode
@@ -881,7 +881,7 @@ mappings:
     - comment: HICN_UNHASHED (https://bluebutton.cms.gov/resources/variables/hicnUnhashed)
       dbName: hicn_unhashed
       name: hicnUnhashed
-      sqlType: varchar(64)
+      sqlType: varchar(11)
     - comment: MBI_HASH (https://bluebutton.cms.gov/resources/variables/mbiHash)
       dbName: mbi_hash
       name: mbiHash

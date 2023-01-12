@@ -32,13 +32,13 @@ mappings:
       javaType: char
       name: finalAction
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Near Line Record Identification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
       dbName: nch_near_line_rec_ident_cd
       javaType: char
       name: nearLineRecordIdCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Claim Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt)
       dbName: nch_clm_type_cd
       name: claimTypeCode
@@ -68,7 +68,7 @@ mappings:
       javaType: char
       name: claimQueryCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Provider Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt)
       dbName: prvdr_num
       name: providerNumber
@@ -79,19 +79,19 @@ mappings:
       javaType: char
       name: claimFacilityTypeCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Service classification Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrvc.txt)
       dbName: clm_srvc_clsfctn_type_cd
       javaType: char
       name: claimServiceClassificationTypeCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Frequency Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt)
       dbName: clm_freq_cd
       javaType: char
       name: claimFrequencyCode
       nullable: false
-      sqlType: varchar(1)
+      sqlType: char
     - comment: FI Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_num.txt)
       dbName: fi_num
       name: fiscalIntermediaryNumber
@@ -104,17 +104,17 @@ mappings:
       dbName: clm_pmt_amt
       name: paymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Primary Payer Claim Paid Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt)
       dbName: nch_prmry_pyr_clm_pd_amt
       name: primaryPayerPaidAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Primary Payer Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt)
       dbName: nch_prmry_pyr_cd
       javaType: Character
       name: claimPrimaryPayerCode
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Provider State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prstate.txt)
       dbName: prvdr_state_cd
       name: providerStateCode
@@ -152,7 +152,7 @@ mappings:
       dbName: clm_mco_pd_sw
       javaType: Character
       name: mcoPaidSw
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Patient Discharge Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt)
       dbName: ptnt_dschrg_stus_cd
       name: patientDischargeStatusCode
@@ -161,17 +161,17 @@ mappings:
       dbName: clm_tot_chrg_amt
       name: totalChargeAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Beneficiary Blood Deductible Liability Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/blddedam.txt)
       dbName: nch_bene_blood_ddctbl_lblty_am
       name: bloodDeductibleLiabilityAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Professional Component Charge (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pcchgamt.txt)
       dbName: nch_profnl_cmpnt_chrg_amt
       name: professionalComponentCharge
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Primary Claim Diagnosis Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_cd.txt)
       dbName: prncpal_dgns_cd
       name: diagnosisPrincipalCode
@@ -181,7 +181,7 @@ mappings:
       dbName: prncpal_dgns_vrsn_cd
       javaType: Character
       name: diagnosisPrincipalCodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd1.txt)
       dbName: icd_dgns_cd1
       name: diagnosis1Code
@@ -190,7 +190,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd1
       javaType: Character
       name: diagnosis1CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
       dbName: icd_dgns_cd2
       name: diagnosis2Code
@@ -199,7 +199,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd2
       javaType: Character
       name: diagnosis2CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
       dbName: icd_dgns_cd3
       name: diagnosis3Code
@@ -208,7 +208,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd3
       javaType: Character
       name: diagnosis3CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
       dbName: icd_dgns_cd4
       name: diagnosis4Code
@@ -217,7 +217,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd4
       javaType: Character
       name: diagnosis4CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
       dbName: icd_dgns_cd5
       name: diagnosis5Code
@@ -226,7 +226,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd5
       javaType: Character
       name: diagnosis5CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
       dbName: icd_dgns_cd6
       name: diagnosis6Code
@@ -235,7 +235,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd6
       javaType: Character
       name: diagnosis6CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
       dbName: icd_dgns_cd7
       name: diagnosis7Code
@@ -244,7 +244,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd7
       javaType: Character
       name: diagnosis7CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
       dbName: icd_dgns_cd8
       name: diagnosis8Code
@@ -254,7 +254,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd8
       javaType: Character
       name: diagnosis8CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
       dbName: icd_dgns_cd9
       name: diagnosis9Code
@@ -263,7 +263,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd9
       javaType: Character
       name: diagnosis9CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
       dbName: icd_dgns_cd10
       name: diagnosis10Code
@@ -272,7 +272,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd10
       javaType: Character
       name: diagnosis10CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
       dbName: icd_dgns_cd11
       name: diagnosis11Code
@@ -281,7 +281,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd11
       javaType: Character
       name: diagnosis11CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
       dbName: icd_dgns_cd12
       name: diagnosis12Code
@@ -290,7 +290,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd12
       javaType: Character
       name: diagnosis12CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd13.txt)
       dbName: icd_dgns_cd13
       name: diagnosis13Code
@@ -300,7 +300,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd13
       javaType: Character
       name: diagnosis13CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd14.txt)
       dbName: icd_dgns_cd14
       name: diagnosis14Code
@@ -309,7 +309,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd14
       javaType: Character
       name: diagnosis14CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd15.txt)
       dbName: icd_dgns_cd15
       name: diagnosis15Code
@@ -318,7 +318,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd15
       javaType: Character
       name: diagnosis15CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XVI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd16.txt)
       dbName: icd_dgns_cd16
       name: diagnosis16Code
@@ -327,7 +327,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd16
       javaType: Character
       name: diagnosis16CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XVII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd17.txt)
       dbName: icd_dgns_cd17
       name: diagnosis17Code
@@ -337,7 +337,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd17
       javaType: Character
       name: diagnosis17CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XVIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd18.txt)
       dbName: icd_dgns_cd18
       name: diagnosis18Code
@@ -347,7 +347,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd18
       javaType: Character
       name: diagnosis18CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XIX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd19.txt)
       dbName: icd_dgns_cd19
       name: diagnosis19Code
@@ -356,7 +356,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd19
       javaType: Character
       name: diagnosis19CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd20.txt)
       dbName: icd_dgns_cd20
       name: diagnosis20Code
@@ -365,7 +365,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd20
       javaType: Character
       name: diagnosis20CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XXI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd21.txt)
       dbName: icd_dgns_cd21
       name: diagnosis21Code
@@ -374,7 +374,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd21
       javaType: Character
       name: diagnosis21CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XXII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd22.txt)
       dbName: icd_dgns_cd22
       name: diagnosis22Code
@@ -384,7 +384,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd22
       javaType: Character
       name: diagnosis22CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XXIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd23.txt)
       dbName: icd_dgns_cd23
       name: diagnosis23Code
@@ -394,7 +394,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd23
       javaType: Character
       name: diagnosis23CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XXIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd24.txt)
       dbName: icd_dgns_cd24
       name: diagnosis24Code
@@ -404,7 +404,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd24
       javaType: Character
       name: diagnosis24CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis Code XXV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd25.txt)
       dbName: icd_dgns_cd25
       name: diagnosis25Code
@@ -413,7 +413,7 @@ mappings:
       dbName: icd_dgns_vrsn_cd25
       javaType: Character
       name: diagnosis25CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: First Claim Diagnosis E Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_cd.txt)
       dbName: fst_dgns_e_cd
       name: diagnosisExternalFirstCode
@@ -423,7 +423,7 @@ mappings:
       dbName: fst_dgns_e_vrsn_cd
       javaType: Character
       name: diagnosisExternalFirstCodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd1.txt)
       dbName: icd_dgns_e_cd1
       name: diagnosisExternal1Code
@@ -432,7 +432,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd1
       javaType: Character
       name: diagnosisExternal1CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd2.txt)
       dbName: icd_dgns_e_cd2
       name: diagnosisExternal2Code
@@ -442,7 +442,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd2
       javaType: Character
       name: diagnosisExternal2CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd3.txt)
       dbName: icd_dgns_e_cd3
       name: diagnosisExternal3Code
@@ -452,7 +452,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd3
       javaType: Character
       name: diagnosisExternal3CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd4.txt)
       dbName: icd_dgns_e_cd4
       name: diagnosisExternal4Code
@@ -462,7 +462,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd4
       javaType: Character
       name: diagnosisExternal4CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd5.txt)
       dbName: icd_dgns_e_cd5
       name: diagnosisExternal5Code
@@ -471,7 +471,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd5
       javaType: Character
       name: diagnosisExternal5CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd6.txt)
       dbName: icd_dgns_e_cd6
       name: diagnosisExternal6Code
@@ -481,7 +481,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd6
       javaType: Character
       name: diagnosisExternal6CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd7.txt)
       dbName: icd_dgns_e_cd7
       name: diagnosisExternal7Code
@@ -491,7 +491,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd7
       javaType: Character
       name: diagnosisExternal7CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd8.txt)
       dbName: icd_dgns_e_cd8
       name: diagnosisExternal8Code
@@ -501,7 +501,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd8
       javaType: Character
       name: diagnosisExternal8CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd9.txt)
       dbName: icd_dgns_e_cd9
       name: diagnosisExternal9Code
@@ -511,7 +511,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd9
       javaType: Character
       name: diagnosisExternal9CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd10.txt)
       dbName: icd_dgns_e_cd10
       name: diagnosisExternal10Code
@@ -520,7 +520,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd10
       javaType: Character
       name: diagnosisExternal10CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd11.txt)
       dbName: icd_dgns_e_cd11
       name: diagnosisExternal11Code
@@ -530,7 +530,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd11
       javaType: Character
       name: diagnosisExternal11CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Diagnosis E Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd12.txt)
       dbName: icd_dgns_e_cd12
       name: diagnosisExternal12Code
@@ -540,7 +540,7 @@ mappings:
       dbName: icd_dgns_e_vrsn_cd12
       javaType: Character
       name: diagnosisExternal12CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code I (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd1.txt)
       dbName: icd_prcdr_cd1
       name: procedure1Code
@@ -550,7 +550,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd1
       javaType: Character
       name: procedure1CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code I Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt1.txt)
       dbName: prcdr_dt1
       name: procedure1Date
@@ -564,7 +564,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd2
       javaType: Character
       name: procedure2CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code II Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt2.txt)
       dbName: prcdr_dt2
       name: procedure2Date
@@ -578,7 +578,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd3
       javaType: Character
       name: procedure3CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code III Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt3.txt)
       dbName: prcdr_dt3
       name: procedure3Date
@@ -592,7 +592,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd4
       javaType: Character
       name: procedure4CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code IV Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt4.txt)
       dbName: prcdr_dt4
       name: procedure4Date
@@ -606,7 +606,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd5
       javaType: Character
       name: procedure5CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code V Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt5.txt)
       dbName: prcdr_dt5
       name: procedure5Date
@@ -620,7 +620,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd6
       javaType: Character
       name: procedure6CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code VI Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt6.txt)
       dbName: prcdr_dt6
       name: procedure6Date
@@ -634,7 +634,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd7
       javaType: Character
       name: procedure7CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code VII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt7.txt)
       dbName: prcdr_dt7
       name: procedure7Date
@@ -648,7 +648,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd8
       javaType: Character
       name: procedure8CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code VIII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt8.txt)
       dbName: prcdr_dt8
       name: procedure8Date
@@ -662,7 +662,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd9
       javaType: Character
       name: procedure9CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code IX Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt9.txt)
       dbName: prcdr_dt9
       name: procedure9Date
@@ -676,7 +676,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd10
       javaType: Character
       name: procedure10CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code X Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt10.txt)
       dbName: prcdr_dt10
       name: procedure10Date
@@ -690,7 +690,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd11
       javaType: Character
       name: procedure11CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XI Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt11.txt)
       dbName: prcdr_dt11
       name: procedure11Date
@@ -704,7 +704,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd12
       javaType: Character
       name: procedure12CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt12.txt)
       dbName: prcdr_dt12
       name: procedure12Date
@@ -718,7 +718,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd13
       javaType: Character
       name: procedure13CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XIII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt13.txt)
       dbName: prcdr_dt13
       name: procedure13Date
@@ -732,7 +732,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd14
       javaType: Character
       name: procedure14CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XIV Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt14.txt)
       dbName: prcdr_dt14
       name: procedure14Date
@@ -746,7 +746,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd15
       javaType: Character
       name: procedure15CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XV Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt15.txt)
       dbName: prcdr_dt15
       name: procedure15Date
@@ -760,7 +760,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd16
       javaType: Character
       name: procedure16CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XVI Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt16.txt)
       dbName: prcdr_dt16
       name: procedure16Date
@@ -774,7 +774,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd17
       javaType: Character
       name: procedure17CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XVII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt17.txt)
       dbName: prcdr_dt17
       name: procedure17Date
@@ -788,7 +788,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd18
       javaType: Character
       name: procedure18CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XVIII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt18.txt)
       dbName: prcdr_dt18
       name: procedure18Date
@@ -802,7 +802,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd19
       javaType: Character
       name: procedure19CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XIX Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt19.txt)
       dbName: prcdr_dt19
       name: procedure19Date
@@ -816,7 +816,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd20
       javaType: Character
       name: procedure20CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XX Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt20.txt)
       dbName: prcdr_dt20
       name: procedure20Date
@@ -830,7 +830,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd21
       javaType: Character
       name: procedure21CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XXI Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt21.txt)
       dbName: prcdr_dt21
       name: procedure21Date
@@ -844,7 +844,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd22
       javaType: Character
       name: procedure22CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XXII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt22.txt)
       dbName: prcdr_dt22
       name: procedure22Date
@@ -858,7 +858,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd23
       javaType: Character
       name: procedure23CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XXIII Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt23.txt)
       dbName: prcdr_dt23
       name: procedure23Date
@@ -872,7 +872,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd24
       javaType: Character
       name: procedure24CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XXIV Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt24.txt)
       dbName: prcdr_dt24
       name: procedure24Date
@@ -886,7 +886,7 @@ mappings:
       dbName: icd_prcdr_vrsn_cd25
       javaType: Character
       name: procedure25CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Claim Procedure Code XXV Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt25.txt)
       dbName: prcdr_dt25
       name: procedure25Date
@@ -900,7 +900,7 @@ mappings:
       dbName: rsn_visit_vrsn_cd1
       javaType: Character
       name: diagnosisAdmission1CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Reason for Visit Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rsn_visit_cd2.txt)
       dbName: rsn_visit_cd2
       name: diagnosisAdmission2Code
@@ -910,7 +910,7 @@ mappings:
       dbName: rsn_visit_vrsn_cd2
       javaType: Character
       name: diagnosisAdmission2CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: Reason for Visit Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rsn_visit_cd3.txt)
       dbName: rsn_visit_cd3
       name: diagnosisAdmission3Code
@@ -920,27 +920,27 @@ mappings:
       dbName: rsn_visit_vrsn_cd3
       javaType: Character
       name: diagnosisAdmission3CodeVersion
-      sqlType: varchar(1)
+      sqlType: char
     - comment: NCH Beneficiary Part B Deductible Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptb_ded.txt)
       dbName: nch_bene_ptb_ddctbl_amt
       name: deductibleAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: NCH Beneficiary Part B Coinsurance Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptb_coin.txt)
       dbName: nch_bene_ptb_coinsrnc_amt
       name: coinsuranceAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Claim Outpatient Provider Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvdrpmt.txt)
       dbName: clm_op_prvdr_pmt_amt
       name: providerPaymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: Claim Outpatient Beneficiary Payment Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/benepmt.txt)
       dbName: clm_op_bene_pmt_amt
       name: beneficiaryPaymentAmount
       nullable: false
-      sqlType: decimal(12,2)
+      sqlType: numeric(12,2)
     - comment: "FI Document Claim Control Number\_"
       dbName: fi_doc_clm_cntl_num
       name: fiDocumentClaimControlNumber
