@@ -13,11 +13,10 @@ public class AccessJsonIT {
   /**
    * Integration tests for Access JSON.
    *
-   * <p>These tests require the application launcher assembly and WAR to be built and available in
-   * the local projects' <code>target/</code> directories. Accordingly, they may not run correctly
-   * in Eclipse: if the binaries aren't built yet, they'll just fail, but if older binaries exist
-   * (because you haven't rebuilt them), it'll run using the old code, which probably isn't what you
-   * want.
+   * <p>These tests require the application WAR to be built and available in the local projects'
+   * <code>target/</code> directories. Accordingly, they may not run correctly in Eclipse: if the
+   * binaries aren't built yet, they'll just fail, but if older binaries exist (because you haven't
+   * rebuilt them), it'll run using the old code, which probably isn't what you want.
    */
   /**
    * Verifies that access JSON is properly configured.
