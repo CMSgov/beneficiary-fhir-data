@@ -7,7 +7,6 @@ import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -27,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 @Slf4j
@@ -52,23 +49,30 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    * Used to push messages to the claim and sequence number writers as well as to signal when there
    * are no more messages.
    */
-  private final Publisher<TMessage> publisher;
+  private final BlockingPublisher<Message<TMessage>> publisher;
   /**
-   * Holding a reference to the claim and sequence number writers to ensure they are not garbage
-   * collected.
+   * Used to hold a reference to the claim and sequence number writers to ensure they are not
+   * garbage collected. We never call dispose on this since our shutdown closes the flux using our
+   * publisher rather than cancelling the flux from the subscriber end.
    */
   @SuppressWarnings("FieldCanBeLocal")
   private final Disposable referenceToProcessors;
 
-  /** Used to assign claims to workers based on their claimId values. */
-  private final HashPartitioner hashPartitioner;
-
+  /**
+   * Each of these handles a subset of the incoming claims. All claims with a given claim id are
+   * processed by the same writer.
+   */
   private final List<ClaimWriter<TMessage, TClaim>> claimWriters;
+
+  /**
+   * Used to periodically update the progress table with the our highest known to be complete
+   * sequence number. Refer to {@link SequenceNumberTracker} for details on sequence number
+   * tracking.
+   */
   private final SequenceNumberWriter<TMessage, TClaim> sequenceNumberWriter;
 
   public ReactiveRdaSink(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
-    hashPartitioner = new HashPartitioner(maxThreads);
     sequenceNumbers = new SequenceNumberTracker(0);
     sink = sinkFactory.get();
     claimWriters =
@@ -82,7 +86,8 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     currentProcessedCount = 0;
     error = null;
     latch = new CountDownLatch(2);
-    publisher = new Publisher<>(batchSize * maxThreads * 3);
+    publisher = new BlockingPublisher<>(batchSize * maxThreads * 3);
+    var claimPartitioner = new StringPartitioner<>(claimWriters);
     var claimWriterScheduler =
         Schedulers.newBoundedElastic(
             claimWriters.size(),
@@ -92,30 +97,24 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         Schedulers.newBoundedElastic(1, 25, "seqs-" + sink.getClass().getSimpleName());
     var claimProcessing =
         publisher
-            .flux
-            .groupBy(this::selectWorkerForMessage)
+            .flux()
+            .groupBy(message -> claimPartitioner.partitionFor(message.claimId))
             .flatMap(
                 group ->
                     group
                         .publishOn(claimWriterScheduler)
-                        .buffer(batchSize)
+                        .bufferTimeout(batchSize, Duration.ofSeconds(30), claimWriterScheduler)
                         .flatMap(message -> group.key().writeBuffer(message), claimWriters.size()))
             .doFinally(o -> latch.countDown())
             .subscribe(this::processResult, this::addError);
     var sequenceNumberProcessing =
-        Flux.interval(Duration.ofMillis(250))
+        Flux.interval(Duration.ofMillis(250), sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
             .flatMap(sequenceNumberWriter::updateDb)
-            .subscribeOn(sequenceNumberWriterScheduler)
             .doFinally(o -> latch.countDown())
             .subscribe(seq -> {}, this::addError);
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
     log.debug("created instance: threads={} batchSize={}", maxThreads, batchSize);
-  }
-
-  private ClaimWriter<TMessage, TClaim> selectWorkerForMessage(Message<TMessage> message) {
-    final var index = hashPartitioner.bucketIndexForString(message.claimId);
-    return claimWriters.get(index);
   }
 
   @Override
@@ -368,72 +367,6 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       log.debug("ClaimWriter {} closing", id);
       sink.close();
       log.info("ClaimWriter {} closed", id);
-    }
-  }
-
-  private static class Publisher<TMessage> {
-    private final Semaphore available;
-    private final Sinks.Many<Message<TMessage>> reactiveSink;
-    private final Flux<Message<TMessage>> flux;
-
-    private Publisher(int maxAvailable) {
-      available = new Semaphore(maxAvailable, true);
-      reactiveSink = Sinks.many().unicast().onBackpressureBuffer();
-      flux = reactiveSink.asFlux().publishOn(Schedulers.boundedElastic()).doOnNext(o -> consumed());
-    }
-
-    private void emit(Message<TMessage> message) throws InterruptedException {
-      available.acquire();
-      reactiveSink.emitNext(message, Sinks.EmitFailureHandler.FAIL_FAST);
-    }
-
-    private void complete() {
-      reactiveSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
-    }
-
-    private void consumed() {
-      available.release();
-    }
-  }
-
-  /**
-   * Divides strings into buckets using a hash function. Determines which bucket to assign to by
-   * assigning a range of hash values to each bucket. This provides a more even distribution than
-   * simple modulo by number of buckets.
-   */
-  private static class HashPartitioner {
-    private static final HashFunction Hasher = Hashing.goodFastHash(32);
-
-    private final int maxBuckets;
-    private final int maxHash;
-    private final int hashToIndexDivisor;
-
-    private HashPartitioner(int maxBuckets) {
-      this.maxBuckets = maxBuckets;
-      hashToIndexDivisor = Integer.MAX_VALUE / maxBuckets;
-      maxHash = hashToIndexDivisor * maxBuckets;
-    }
-
-    /**
-     * Select the bucket index for the given string.
-     *
-     * @param stringToHash value to hash
-     * @return index of bucket (zero to maxBuckets-1)
-     */
-    private int bucketIndexForString(String stringToHash) {
-      final var rawHash = Hasher.hashString(stringToHash, StandardCharsets.UTF_8).asInt();
-      final var inBoundsHash = Math.abs(rawHash) % maxHash;
-      final var index = inBoundsHash / hashToIndexDivisor;
-      if (index >= maxBuckets) {
-        log.error(
-            "division produced large index: divisor={} max={} hash={} inRange={} index={}",
-            hashToIndexDivisor,
-            maxHash,
-            rawHash,
-            inBoundsHash,
-            index);
-      }
-      return index;
     }
   }
 }
