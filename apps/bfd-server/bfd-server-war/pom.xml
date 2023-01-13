@@ -338,7 +338,7 @@
 			<artifactId>bfd-data-fda</artifactId> 
 			<version>1.0-SNAPSHOT</version> 
 		</dependency>
-	</dependencies>
+</dependencies>
 
 	<build>
 		<pluginManagement>
