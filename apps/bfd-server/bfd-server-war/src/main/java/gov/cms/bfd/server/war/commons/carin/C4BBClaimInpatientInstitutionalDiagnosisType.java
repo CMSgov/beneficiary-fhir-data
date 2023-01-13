@@ -11,11 +11,11 @@ public enum C4BBClaimInpatientInstitutionalDiagnosisType {
    * treatment.
    */
   PRINCIPAL,
-  /** The diagnosis given as the reason why the patient was admitted to the hospital.* */
+  /** The diagnosis given as the reason why the patient was admitted to the hospital. */
   ADMITTING,
-  /** Required when other conditions coexist or develop subsequently during the treatment. * */
+  /** Required when other conditions coexist or develop subsequently during the treatment. */
   OTHER,
-  /** Required when an external cause of injury is needed to describe the injury. * */
+  /** Required when an external cause of injury is needed to describe the injury. */
   EXTERNAL_CAUSE;
 
   /**

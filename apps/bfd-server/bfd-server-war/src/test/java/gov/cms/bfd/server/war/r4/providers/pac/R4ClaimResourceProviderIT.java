@@ -22,17 +22,21 @@ import org.junit.jupiter.api.Test;
 /** R4ClaimResourceProviderIT. */
 public class R4ClaimResourceProviderIT {
 
+  /** Test utils for the test. */
   private static final RDATestUtils testUtils = new RDATestUtils();
 
+  /** An ignore pattern for testing. */
   private static final Set<String> IGNORE_PATTERNS =
       Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
 
+  /** Sets the test up. */
   @BeforeAll
   public static void init() {
     testUtils.init();
     testUtils.seedData(false);
   }
 
+  /** Cleans up the tests. */
   @AfterAll
   public static void tearDown() {
     testUtils.truncateTables();
@@ -41,7 +45,7 @@ public class R4ClaimResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
-   * specific ID
+   * specific ID.
    */
   @Test
   public void shouldGetCorrectFissClaimResourceById() {
@@ -79,7 +83,7 @@ public class R4ClaimResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
-   * specific ID
+   * specific ID.
    */
   @Test
   public void shouldGetCorrectMcsClaimResourceById() {

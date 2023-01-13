@@ -62,6 +62,8 @@ final class CoverageTransformer {
   }
 
   /**
+   * Transforms a Medicare part A beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_A} {@link
    *     Coverage} resource for
@@ -142,6 +144,8 @@ final class CoverageTransformer {
   }
 
   /**
+   * Transforms a Medicare part B beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_B} {@link
    *     Coverage} resource for
@@ -206,6 +210,8 @@ final class CoverageTransformer {
   }
 
   /**
+   * Transforms a Medicare part C beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
    *     Coverage} resource for
@@ -258,6 +264,8 @@ final class CoverageTransformer {
   }
 
   /**
+   * Transforms a Medicare part D beneficiary into a {@link Coverage} resource.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
    *     Coverage} resource for
@@ -359,8 +367,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link HMOIndicator} {@link Coverage}
+   * Adds Monthly Medicare Advantage (MA) enrollment indicator (HMO) extensions to the provided
+   * {@link org.hl7.fhir.r4.model.Coverage} resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
@@ -427,9 +438,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
-   *     Coverage}
+   * Adds part C PBP number extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
@@ -496,9 +509,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
-   *     Coverage}
+   * Adds part C plan type extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
@@ -589,9 +604,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
-   *     Coverage}
+   * Adds part C contract number extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
@@ -682,9 +699,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to generate
-   * @param beneficiary the {@link Beneficiary} to generate Coverage for
-   * @return {@link Coverage} resource for the
+   * Adds entitlement buy-in extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformEntitlementBuyInIndicators(
       Coverage coverage, Beneficiary beneficiary) {
@@ -753,9 +772,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment} {@link
-   *     Coverage}
+   * Adds Medicaid dual eligibility extensions to the provided {@link
+   * org.hl7.fhir.r4.model.Coverage} resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformMedicaidDualEligibility(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
@@ -846,9 +867,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
-   *     Coverage}
+   * Adds part D contract number extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     if (beneficiary.getPartDContractNumberJanId().isPresent()) {
@@ -938,9 +961,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
-   *     Coverage}
+   * Adds part D PBP number extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
@@ -1007,9 +1032,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
-   *     Coverage}
+   * Adds part D segment number extensions to the provided {@link org.hl7.fhir.r4.model.Coverage}
+   * resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
@@ -1076,9 +1103,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
-   *     Coverage}
+   * Adds part D low income cost share group extensions to the provided {@link
+   * org.hl7.fhir.r4.model.Coverage} resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartDLowIncomeCostShareGroup(
       Coverage coverage, Beneficiary beneficiary) {
@@ -1170,9 +1199,11 @@ final class CoverageTransformer {
   }
 
   /**
-   * @param coverage the {@link Coverage} to use
-   * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
-   *     Coverage}
+   * Adds part D retiree drug subsidy extensions to the provided {@link
+   * org.hl7.fhir.r4.model.Coverage} resource.
+   *
+   * @param coverage the {@link Coverage} to generate extensions for
+   * @param beneficiary the {@link Beneficiary} to get information from
    */
   private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Part D Retiree Drug Subsidy Indicators
