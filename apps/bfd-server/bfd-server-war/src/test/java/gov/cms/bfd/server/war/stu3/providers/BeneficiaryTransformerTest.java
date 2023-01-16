@@ -31,9 +31,9 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer}. */
 public final class BeneficiaryTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
+   * Verifies that {@link BeneficiaryTransformer#transform(MetricRegistry, Beneficiary,
+   * RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
   @Test
   public void transformSampleARecord() {
@@ -55,9 +55,10 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * when there is a matching {@link SkippedRifRecord} for the {@link Beneficiary}.
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, when there is a matching {@link
+   * SkippedRifRecord} for the {@link Beneficiary}.
    */
   @Test
   public void transformSampleARecordWithSkippedRecord() {
@@ -76,9 +77,10 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * with {@link IncludeIdentifiersValues} = ["hicn","mbi"].
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, with IncludeIdentifiers =
+   * ["hicn","mbi"].
    */
   @Test
   public void transformSampleARecordWithIdentifiers() {
@@ -109,9 +111,9 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * with {@link IncludeIdentifiersValues} = ["true"].
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, with IncludeIdentifiers = ["true"].
    */
   @Test
   public void transformSampleARecordWithIdentifiersTrue() {
@@ -142,9 +144,9 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * with {@link IncludeIdentifiersValues} = ["hicn"].
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, with IncludeIdentifiers = ["hicn"].
    */
   @Test
   public void transformSampleARecordWithIdentifiersHicn() {
@@ -172,19 +174,19 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * assertValuesInPatientIdentifiers( patient,
-   * TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, assertValuesInPatientIdentifiers(
+   * patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
    * assertValuesInPatientIdentifiers( patient,
    * TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
    * assertValuesInPatientIdentifiers( patient,
    * TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z"); }
    *
    * <p>/** Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * with {@link IncludeIdentifiersValues} = ["mbi"].
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, with IncludeIdentifiers = ["mbi"].
    */
   @Test
   public void transformSampleARecordWithIdentifiersMbi() {
@@ -209,7 +211,7 @@ public final class BeneficiaryTransformerTest {
   /**
    * Verifies that the {@link Patient} identifiers contain expected values.
    *
-   * @param Patient {@link Patient} containing identifiers
+   * @param patient {@link Patient} containing identifiers
    * @param identifierSystem value to be matched
    * @param identifierValue value to be matched
    */
@@ -235,9 +237,9 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
-   * a lastUpdated field set.
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with a lastUpdated field set.
    */
   @Test
   public void transformSampleARecordWithLastUpdated() {
@@ -257,9 +259,9 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
-   * a lastUpdated field not set.
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with a lastUpdated field not set.
    */
   @Test
   public void transformSampleARecordWithoutLastUpdated() {
@@ -273,9 +275,9 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
-   * a reference year field not found.
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with a reference year field not found.
    */
   @Test
   public void transformSampleARecordWithoutReferenceYear() {
@@ -292,6 +294,8 @@ public final class BeneficiaryTransformerTest {
   }
 
   /**
+   * Loads and returns the sample a beneficiary.
+   *
    * @return the {@link StaticRifResourceGroup#SAMPLE_A} {@link Beneficiary} record, with the {@link
    *     Beneficiary#getBeneficiaryHistories()} and {@link
    *     Beneficiary#getMedicareBeneficiaryIdHistories()} fields populated.
@@ -362,13 +366,6 @@ public final class BeneficiaryTransformerTest {
   }
 
   /**
-   * Notes for reviewer: for header related coverage, do not test on the combination of headers
-   * values if there is no correlation between the headers, hence removed includeAddressFields
-   * header tests out of includeIdentifiers header tests to speed up tests and keep the same level
-   * of coverage at the same time.
-   */
-
-  /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer} works
    * correctly when passed a {@link Beneficiary} where all {@link Optional} fields are set to {@link
    * Optional#empty()} and includeAddressFields header take all possible values.
@@ -427,6 +424,7 @@ public final class BeneficiaryTransformerTest {
    *
    * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
    * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
+   * @param requestHeader the request header
    */
   static void assertMatches(
       Beneficiary beneficiary, Patient patient, RequestHeaders requestHeader) {
@@ -502,6 +500,12 @@ public final class BeneficiaryTransformerTest {
     }
   }
 
+  /**
+   * Adds medicaid dual eligibility codes to the specified patient.
+   *
+   * @param patient the patient to add the codes to
+   * @param beneficiary the beneficiary to read information from
+   */
   private static void addMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
@@ -591,7 +595,8 @@ public final class BeneficiaryTransformerTest {
   }
 
   /**
-   * test helper
+   * Gets a header with {@link PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} set to the
+   * specified value.
    *
    * @param value of all include identifier values
    * @return RequestHeaders instance derived from value
@@ -602,7 +607,8 @@ public final class BeneficiaryTransformerTest {
   }
 
   /**
-   * test helper
+   * Gets a header with {@link PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} set to
+   * the specified value.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value

@@ -344,6 +344,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH verified non-covered stay from date supporting
+   * info.
+   */
   @Test
   public void shouldHaveNchVrfdNcvrdStayFromDtSupInfo() throws Exception {
     SupportingInformationComponent sic =
@@ -376,6 +380,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary medicare benefits exhausted date
+   * supporting info.
+   */
   @Test
   public void shouldHaveNchBeneMdcrBnftsExhtdDtISupInfo() {
     SupportingInformationComponent sic =
@@ -488,6 +496,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected NCH qualified stay from date supporting info. */
   @Test
   public void shouldHaveNchQlfydStayFromDtSupInfo() throws Exception {
     SupportingInformationComponent sic =
@@ -520,6 +529,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim PPS indicator code supporting info. */
   @Test
   public void shouldHaveClmPpsIndCdSupInfo() {
     SupportingInformationComponent sic =
@@ -790,12 +800,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
   }
 
-  /** Procedures */
+  /** Tests that the transformer sets the expected number of procedure entries. */
   @Test
   public void shouldHaveProcedureList() {
     assertEquals(1, eob.getProcedure().size());
   }
 
+  /** Tests that the transformer sets the expected procedure entries. */
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
@@ -1475,7 +1486,7 @@ public class SNFClaimTransformerV2Test {
 
   /**
    * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
-   * quantity is not zero
+   * quantity is not zero.
    */
   @Test
   public void shouldHaveRevenueCenterUnit() {

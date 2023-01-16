@@ -206,6 +206,7 @@ public final class PartDEventTransformerV2Test {
     assertEquals(14, eob.getSupportingInfo().size());
   }
 
+  /** Tests that the transformer sets the expected compound code supporting info. */
   @Test
   public void shouldHaveCompoundCodeSupInfo() {
     SupportingInformationComponent sic =
@@ -230,6 +231,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected refill number supporting info. */
   @Test
   public void shouldHaveRefillNumberSupInfo() {
     SupportingInformationComponent sic =
@@ -251,6 +253,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected days supply supporting info. */
   @Test
   public void shouldHaveDaysSupplySupInfo() {
     SupportingInformationComponent sic =
@@ -272,6 +275,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected drug coverage status code supporting info. */
   @Test
   public void shouldHaveDrugCvrgStusCdSupInfo() {
     SupportingInformationComponent sic =
@@ -302,6 +306,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected DAW product selection supporting info. */
   @Test
   public void shouldHaveDAWProdSlctnCdCodeSupInfo() {
     SupportingInformationComponent sic =
@@ -332,6 +337,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected dispensing status code supporting info. */
   @Test
   public void shouldHaveDspnsngStusCdSupInfo() {
     SupportingInformationComponent sic =
@@ -362,6 +368,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected adjustment deletion code supporting info. */
   @Test
   public void shouldHaveAdjstmtDltnCdSupInfo() {
     SupportingInformationComponent sic =
@@ -392,6 +399,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected non-standard format code supporting info. */
   @Test
   public void shouldHaveNstdFrmtCdSupInfo() {
     SupportingInformationComponent sic =
@@ -419,6 +427,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected pricing exception code supporting info. */
   @Test
   public void shouldHavePrcngExcptnCdSupInfo() {
     SupportingInformationComponent sic =
@@ -449,6 +458,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected catastrophic coverage code supporting info. */
   @Test
   public void shouldHaveCtstrphcCvrgCdSupInfo() {
     SupportingInformationComponent sic =
@@ -479,6 +489,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected rx origin code supporting info. */
   @Test
   public void shouldHaveRxOrgnCdSupInfo() {
     SupportingInformationComponent sic =
@@ -501,6 +512,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected brand generic code supporting info. */
   @Test
   public void shouldHaveBrndGnrcCdSupInfo() {
     SupportingInformationComponent sic =
@@ -526,6 +538,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected patient residence code supporting info. */
   @Test
   public void shouldHavePtntRsdncCdSupInfo() {
     SupportingInformationComponent sic =
@@ -556,6 +569,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected submission clarification code supporting info. */
   @Test
   public void shouldHaveSubmsnClrCdSupInfo() {
     SupportingInformationComponent sic =
@@ -661,6 +675,7 @@ public final class PartDEventTransformerV2Test {
     assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
   }
 
+  /** Tests that the transformer sets the expected part D amount paid for PDE. */
   @Test
   public void shouldHaveLineItemAdjudicationCvrdDPlanPdAmt() {
     AdjudicationComponent adjudication =
@@ -688,6 +703,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected GDBC threshold amount. */
   @Test
   public void shouldHaveLineItemAdjudicationGdcBlwOoptAmt() {
     AdjudicationComponent adjudication =
@@ -715,6 +731,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected GDBA threshold amount. */
   @Test
   public void shouldHaveLineItemAdjudicationGdcAbvOoptAmt() {
     AdjudicationComponent adjudication =
@@ -742,6 +759,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected adjudication amount paid by patient. */
   @Test
   public void shouldHaveLineItemAdjudicationPtntPayAmt() {
     AdjudicationComponent adjudication =
@@ -769,6 +787,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the 'expected other true out-of-pocket' (TrOOP) amount. */
   @Test
   public void shouldHaveLineItemAdjudicationOthrTroopAmt() {
     AdjudicationComponent adjudication =
@@ -799,6 +818,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the line item low income subsidy amount. */
   @Test
   public void shouldHaveLineItemAdjudicationLicsAmt() {
     AdjudicationComponent adjudication =
@@ -826,6 +846,10 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the line item patient liability due to payments by other payers
+   * (PLRO).
+   */
   @Test
   public void shouldHaveLineItemAdjudicationPlroAmt() {
     AdjudicationComponent adjudication =
@@ -853,6 +877,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the line item part D total drug cost amount. */
   @Test
   public void shouldHaveLineItemAdjudicationTotRxCstAmt() {
     AdjudicationComponent adjudication =
@@ -883,6 +908,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the line item adjudication gap discount amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRptdGapDscntNum() {
     AdjudicationComponent adjudication =
@@ -924,8 +950,7 @@ public final class PartDEventTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * PartDEventTransformer has a provider set otherwise it throws an exception
+   * Verifies that the transformer sets the expected provider value.
    *
    * @throws Exception (indicates test failure)
    */

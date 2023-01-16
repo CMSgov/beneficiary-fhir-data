@@ -498,12 +498,13 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
   }
 
-  /** Procedures */
+  /** Tests that the transformer sets the expected number of procedure entries. */
   @Test
   public void shouldHaveProcedureList() {
     assertEquals(1, eob.getProcedure().size());
   }
 
+  /** Tests that the transformer sets the expected procedure entries. */
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
@@ -712,6 +713,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center denial reason. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntr2ndAnsiCd() {
     AdjudicationComponent adjudication =
@@ -828,6 +830,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center blood deductible amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrBloddDdctblAmt() {
     AdjudicationComponent adjudication =
@@ -855,6 +858,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center cash deductible amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrCashDdctblAmt() {
     AdjudicationComponent adjudication =
@@ -882,6 +886,10 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected revenue center coinsurance/wage adjusted
+   * coinsurance amount.
+   */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrCoinsrncWgeAdjstdC() {
     AdjudicationComponent adjudication =
@@ -909,6 +917,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center reduced coinsurance amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrRdcdCoinsrncAmt() {
     AdjudicationComponent adjudication =
@@ -940,6 +949,10 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected revenue center first medicare secondary payer
+   * (MSP) paid amount.
+   */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntr1stMspPdAmt() {
     AdjudicationComponent adjudication =
@@ -966,6 +979,10 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected revenue center second medicare secondary payer
+   * (MSP) paid amount.
+   */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntr2ndMspPdAmt() {
     AdjudicationComponent adjudication =
@@ -1046,6 +1063,10 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected revenue center patient responsibility payment
+   * amount.
+   */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrPtntRspnbltyPmt() {
     AdjudicationComponent adjudication =
@@ -1195,6 +1216,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH beneficiary part B deductible amount. */
   @Test
   public void shouldHaveNchBenePtbDdctblAmtFinancial() {
     BenefitComponent benefit =
@@ -1220,6 +1242,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH beneficiary part B coinsurance amount. */
   @Test
   public void shouldHaveNchBenePtbCoinsrncAmtFinancial() {
     BenefitComponent benefit =
@@ -1243,6 +1266,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected outpatient provider payment amount. */
   @Test
   public void shouldHaveClmOpPrvdrPmtAmtFinancial() {
     BenefitComponent benefit =
@@ -1266,6 +1290,7 @@ public final class OutpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected outpatient payment amount to beneficiary. */
   @Test
   public void shouldHaveClmOpBenePmtAmtFinancial() {
     BenefitComponent benefit =
@@ -1375,7 +1400,7 @@ public final class OutpatientClaimTransformerV2Test {
 
   /**
    * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
-   * quantity is not zero
+   * quantity is not zero.
    */
   @Test
   public void shouldHaveRevenueCenterUnit() {
