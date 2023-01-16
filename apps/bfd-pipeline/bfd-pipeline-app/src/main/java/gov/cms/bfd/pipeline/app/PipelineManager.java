@@ -272,10 +272,7 @@ public final class PipelineManager implements AutoCloseable {
         jobsEnqueuedHandles.remove(jobRecordId);
       }
       LOGGER.error(
-          "Handle job failure in Pipeline: "
-              + exception.getMessage()
-              + " and stack trace: "
-              + exception.getStackTrace());
+          "Handle job failure in Pipeline: " + exception.getMessage() + " and " + exception);
     }
   }
 
