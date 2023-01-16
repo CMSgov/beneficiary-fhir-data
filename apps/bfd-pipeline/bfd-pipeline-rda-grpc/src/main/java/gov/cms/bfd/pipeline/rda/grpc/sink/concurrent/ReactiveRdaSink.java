@@ -92,9 +92,10 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         Schedulers.newBoundedElastic(
             claimWriters.size(),
             25 * claimWriters.size(),
-            "claims-" + sink.getClass().getSimpleName());
+            "ClaimWriter-" + sink.getClass().getSimpleName());
     var sequenceNumberWriterScheduler =
-        Schedulers.newBoundedElastic(1, 25, "seqs-" + sink.getClass().getSimpleName());
+        Schedulers.newBoundedElastic(
+            1, 25, "SequenceNumberWriter-" + sink.getClass().getSimpleName());
     var claimProcessing =
         publisher
             .flux()
@@ -106,13 +107,13 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
                         .bufferTimeout(batchSize, Duration.ofSeconds(30), claimWriterScheduler)
                         .flatMap(message -> group.key().writeBuffer(message), claimWriters.size()))
             .doFinally(o -> latch.countDown())
-            .subscribe(this::processResult, this::addError);
+            .subscribe(this::processResult, this::processError);
     var sequenceNumberProcessing =
         Flux.interval(Duration.ofMillis(250), sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
             .flatMap(sequenceNumberWriter::updateDb)
             .doFinally(o -> latch.countDown())
-            .subscribe(seq -> {}, this::addError);
+            .subscribe(seq -> {}, this::processError);
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
     log.debug("created instance: threads={} batchSize={}", maxThreads, batchSize);
   }
@@ -137,16 +138,12 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     for (Message<TMessage> message : result.messages) {
       sequenceNumbers.removeWrittenSequenceNumber(message.sequenceNumber);
     }
-    addToProcessedCount(result.processed);
-  }
-
-  private void addToProcessedCount(int count) {
     synchronized (lock) {
-      currentProcessedCount += count;
+      currentProcessedCount += result.processed;
     }
   }
 
-  private void addError(Throwable ex) {
+  private void processError(Throwable ex) {
     synchronized (lock) {
       if (error == null) {
         error = ex;
