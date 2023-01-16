@@ -493,6 +493,7 @@ public final class PipelineManager implements AutoCloseable {
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         handleJobFailure(jobRecord.getId(), e);
+
         // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
       }
