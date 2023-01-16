@@ -21,6 +21,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.SpringConfiguration;
+import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
@@ -59,7 +60,7 @@ import org.hl7.fhir.r4.model.Resource;
  * @param <T> The specific fhir resource the concrete provider will serve.
  */
 public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
-    implements IResourceProvider {
+    extends AbstractResourceProvider implements IResourceProvider {
 
   /**
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
@@ -152,6 +153,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Read
   @Trace
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
+    final boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
+
     if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
     if (claimId.getVersionIdPartAsLong() != null)
       throw new IllegalArgumentException("Resource ID must not define a version.");
@@ -178,7 +181,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    return claimIdType.getTransformer().transform(metricRegistry, claimEntity);
+    return claimIdType.getTransformer().transform(metricRegistry, claimEntity, includeTaxNumbers);
   }
 
   /**
@@ -267,6 +270,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
       boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
+      boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
       OffsetLinkBuilder paging =
           new OffsetLinkBuilder(
@@ -285,7 +289,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                 excludeSamhsa,
                 lastUpdated,
                 serviceDate,
-                paging);
+                paging,
+                includeTaxNumbers);
       } else {
         bundleResource =
             createBundleFor(
@@ -295,7 +300,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                 excludeSamhsa,
                 lastUpdated,
                 serviceDate,
-                paging);
+                paging,
+                includeTaxNumbers);
       }
 
       return bundleResource;
@@ -310,9 +316,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param resourceTypes The {@link ResourceTypeV2} data to retrieve.
    * @param mbi The mbi to look up associated data for.
    * @param isHashed Denotes if the given mbi is hashed.
+   * @param excludeSamhsa Indicates if SAMHSA data should be excluded from the results.
    * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
    * @param serviceDate Date range of the desired service date to retrieve data for.
    * @param paging Pagination details for the bundle
+   * @param includeTaxNumbers Indicates if the tax number should be included in the results.
    * @return A Bundle with data found using the provided parameters.
    */
   @VisibleForTesting
@@ -323,7 +331,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       boolean excludeSamhsa,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
-      OffsetLinkBuilder paging) {
+      OffsetLinkBuilder paging,
+      boolean includeTaxNumbers) {
     List<T> resources = new ArrayList<>();
 
     for (ResourceTypeV2<T, ?> type : resourceTypes) {
@@ -334,7 +343,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       resources.addAll(
           entities.stream()
               .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
-              .map(e -> type.getTransformer().transform(metricRegistry, e))
+              .map(e -> type.getTransformer().transform(metricRegistry, e, includeTaxNumbers))
               .collect(Collectors.toList()));
     }
 
@@ -364,9 +373,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     Claim claim;
 
     if (entity instanceof RdaFissClaim) {
-      claim = FissClaimTransformerV2.transform(metricRegistry, entity);
+      claim = FissClaimTransformerV2.transform(metricRegistry, entity, false);
     } else if (entity instanceof RdaMcsClaim) {
-      claim = McsClaimTransformerV2.transform(metricRegistry, entity);
+      claim = McsClaimTransformerV2.transform(metricRegistry, entity, false);
     } else {
       throw new IllegalArgumentException(
           "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");

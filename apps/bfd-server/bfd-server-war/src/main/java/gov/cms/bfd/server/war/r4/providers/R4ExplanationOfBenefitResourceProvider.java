@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -25,6 +24,7 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -67,7 +67,8 @@ import org.springframework.stereotype.Component;
  * derived from the CCW claims.
  */
 @Component
-public final class R4ExplanationOfBenefitResourceProvider implements IResourceProvider {
+public final class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
+    implements IResourceProvider {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(R4ExplanationOfBenefitResourceProvider.class);
 
@@ -76,15 +77,6 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
-  /**
-   * The header key used to determine whether or not tax numbers should be included in responses.
-   *
-   * <p>Should be set to <code>"true"</code> if {@link
-   * gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} or {@link
-   * gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the results,
-   * <code>"false"</code> if not. Defaults to <code>"false"</code>.
-   */
-  public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -655,34 +647,5 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     }
 
     return claimTypes;
-  }
-
-  /**
-   * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
-   *     to parse out the HTTP header that controls this setting
-   * @return <code>true</code> if {@link gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} and
-   *     {@link gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the
-   *     results, <code>false</code> if not (defaults to <code>false</code>)
-   */
-  public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
-    /*
-     * Note: headers can be multi-valued and so calling the enticing-looking `getHeader(...)` method
-     * is often a bad idea, as it will often do the wrong thing.
-     */
-    List<String> headerValues = requestDetails.getHeaders(HEADER_NAME_INCLUDE_TAX_NUMBERS);
-
-    if (headerValues == null || headerValues.isEmpty()) {
-      return false;
-    } else if (headerValues.size() == 1) {
-      String headerValue = headerValues.get(0);
-      if ("true".equalsIgnoreCase(headerValue)) {
-        return true;
-      } else if ("false".equalsIgnoreCase(headerValue)) {
-        return false;
-      }
-    }
-
-    throw new InvalidRequestException(
-        "Unsupported " + HEADER_NAME_INCLUDE_TAX_NUMBERS + " header value: " + headerValues);
   }
 }

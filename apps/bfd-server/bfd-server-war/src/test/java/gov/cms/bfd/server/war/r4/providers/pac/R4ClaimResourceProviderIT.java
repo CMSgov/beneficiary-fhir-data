@@ -55,6 +55,28 @@ public class R4ClaimResourceProviderIT {
   }
 
   /**
+   * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
+   * specific ID with tax numbers included
+   */
+  @Test
+  public void shouldGetCorrectFissClaimResourceByIdWithTaxNumbers() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Claim claimResult =
+        fhirClient
+            .read()
+            .resource(Claim.class)
+            .withId("f-123456")
+            .withAdditionalHeader("IncludeTaxNumbers", "true")
+            .execute();
+
+    String expected = testUtils.expectedResponseFor("claimFissReadWithTaxNumbers");
+    String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
+
+    AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
+  }
+
+  /**
    * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
    * specific ID
    */
@@ -65,6 +87,28 @@ public class R4ClaimResourceProviderIT {
     Claim claimResult = fhirClient.read().resource(Claim.class).withId("m-654321").execute();
 
     String expected = testUtils.expectedResponseFor("claimMcsRead");
+    String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
+
+    AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
+   * specific ID with tax numbers included
+   */
+  @Test
+  public void shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Claim claimResult =
+        fhirClient
+            .read()
+            .resource(Claim.class)
+            .withId("m-654321")
+            .withAdditionalHeader("IncludeTaxNumbers", "true")
+            .execute();
+
+    String expected = testUtils.expectedResponseFor("claimMcsReadWithTaxNumbers");
     String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
 
     AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
@@ -96,6 +140,43 @@ public class R4ClaimResourceProviderIT {
     claimResult.getEntry().sort(Comparator.comparing(a -> a.getResource().getId()));
 
     String expected = testUtils.expectedResponseFor("claimSearch");
+    String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
+
+    Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
+    ignorePatterns.add("\"/id\"");
+    ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
+
+    AssertUtils.assertJsonEquals(expected, actual, ignorePatterns);
+  }
+
+  /**
+   * Tests to see if the correct response is given when a search is done for {@link Claim}s using
+   * given mbi and service-date range with tax numbers included. In this test case the query finds
+   * the matched claims because their to dates are within the date range even though their from
+   * dates are not.
+   */
+  @Test
+  public void shouldGetCorrectClaimResourcesByMbiHashWithTaxNumbers() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Bundle claimResult =
+        fhirClient
+            .search()
+            .forResource(Claim.class)
+            .where(
+                Map.of(
+                    "mbi",
+                    List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
+                    "service-date",
+                    List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-25"))))
+            .returnBundle(Bundle.class)
+            .withAdditionalHeader("IncludeTaxNumbers", "true")
+            .execute();
+
+    // Sort entries for consistent testing results
+    claimResult.getEntry().sort(Comparator.comparing(a -> a.getResource().getId()));
+
+    String expected = testUtils.expectedResponseFor("claimSearchWithTaxNumbers");
     String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
 
     Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
