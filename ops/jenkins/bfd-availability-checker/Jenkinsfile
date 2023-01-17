@@ -43,24 +43,24 @@ pipeline {
 
         stages {
           stage('Download certificate') {
-            steps {
-              script {
-                def pemKey = sh(
-                  returnStdout: true,
-                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
-                          + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                ).trim()
-                def pemCert = sh(
-                  returnStdout: true,
-                  script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
-                          + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
-                ).trim()
+            environment {
+              PEM_KEY = sh(
+                returnStdout: true,
+                script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
+                         + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+              ).trim()
+              PEM_CERT = sh(
+                returnStdout: true,
+                script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_cert\""
+                        + " --region us-east-1 --with-decryption --output text --query 'Parameter.Value'")
+              ).trim()
+            }
 
-                writeFile(
-                  file: "${ENV}-cert.pem",
-                  text: pemKey + "\n" + pemCert
-                )
-              }
+            steps {
+              writeFile(
+                file: "${ENV}-cert.pem",
+                text: PEM_KEY + "\n" + PEM_CERT
+              )
             }
           }
 
