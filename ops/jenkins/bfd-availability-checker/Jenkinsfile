@@ -22,6 +22,16 @@ pipeline {
   }
 
   stages {
+    stage('Authenticate with AWS') {
+      steps {
+        script {
+          // We authenticate only once as we are running on the same pod for each matrix axis.
+          // The pipeline is so short that we should never have to reauthenticate
+          awsAuth.assumeRole()
+        }
+      }
+    }
+
     stage('Check all environments') {
       matrix {
         axes {
@@ -35,8 +45,6 @@ pipeline {
           stage('Download certificate') {
             steps {
               script {
-                awsAuth.assumeRole()
-
                 def pemKey = sh(
                   returnStdout: true,
                   script: ("aws ssm get-parameter --name \"/bfd/${ENV}/server/sensitive/test_client_key\""
