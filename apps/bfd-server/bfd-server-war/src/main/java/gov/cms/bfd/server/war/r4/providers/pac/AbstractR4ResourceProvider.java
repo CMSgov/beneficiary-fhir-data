@@ -280,28 +280,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         TransformerUtilsV2.logMbiHashToMdc(mbiString);
       }
 
+      BundleOptions bundleOptions = new BundleOptions(isHashed, excludeSamhsa, includeTaxNumbers);
+
       if (types != null) {
         bundleResource =
             createBundleFor(
-                parseClaimTypes(types),
-                mbiString,
-                isHashed,
-                excludeSamhsa,
-                lastUpdated,
-                serviceDate,
-                paging,
-                includeTaxNumbers);
+                parseClaimTypes(types), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       } else {
         bundleResource =
             createBundleFor(
-                getResourceTypes(),
-                mbiString,
-                isHashed,
-                excludeSamhsa,
-                lastUpdated,
-                serviceDate,
-                paging,
-                includeTaxNumbers);
+                getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
 
       return bundleResource;
@@ -315,35 +303,36 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *
    * @param resourceTypes The {@link ResourceTypeV2} data to retrieve.
    * @param mbi The mbi to look up associated data for.
-   * @param isHashed Denotes if the given mbi is hashed.
-   * @param excludeSamhsa Indicates if SAMHSA data should be excluded from the results.
    * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
    * @param serviceDate Date range of the desired service date to retrieve data for.
    * @param paging Pagination details for the bundle
-   * @param includeTaxNumbers Indicates if the tax number should be included in the results.
+   * @param bundleOptions Bundle related options that affect the results.
    * @return A Bundle with data found using the provided parameters.
    */
   @VisibleForTesting
   Bundle createBundleFor(
       Set<ResourceTypeV2<T, ?>> resourceTypes,
       String mbi,
-      boolean isHashed,
-      boolean excludeSamhsa,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
       OffsetLinkBuilder paging,
-      boolean includeTaxNumbers) {
+      BundleOptions bundleOptions) {
     List<T> resources = new ArrayList<>();
 
     for (ResourceTypeV2<T, ?> type : resourceTypes) {
       List<?> entities;
 
-      entities = claimDao.findAllByMbiAttribute(type, mbi, isHashed, lastUpdated, serviceDate);
+      entities =
+          claimDao.findAllByMbiAttribute(
+              type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate);
 
       resources.addAll(
           entities.stream()
-              .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
-              .map(e -> type.getTransformer().transform(metricRegistry, e, includeTaxNumbers))
+              .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
+              .map(
+                  e ->
+                      type.getTransformer()
+                          .transform(metricRegistry, e, bundleOptions.includeTaxNumbers))
               .collect(Collectors.toList()));
     }
 
@@ -382,5 +371,22 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     }
 
     return !samhsaMatcher.test(claim);
+  }
+
+  /** Helper class for passing bundle result options */
+  private static class BundleOptions {
+
+    /** Indicates if the given MBI of the search request was hashed */
+    private final boolean isHashed;
+    /** Indicates if SAMHSA data should be excluded from the bundle results */
+    private final boolean excludeSamhsa;
+    /** Indicates if the tax numbers should be included in the bundle results */
+    private final boolean includeTaxNumbers;
+
+    private BundleOptions(boolean isHashed, boolean excludeSamhsa, boolean includeTaxNumbers) {
+      this.isHashed = isHashed;
+      this.excludeSamhsa = excludeSamhsa;
+      this.includeTaxNumbers = includeTaxNumbers;
+    }
   }
 }
