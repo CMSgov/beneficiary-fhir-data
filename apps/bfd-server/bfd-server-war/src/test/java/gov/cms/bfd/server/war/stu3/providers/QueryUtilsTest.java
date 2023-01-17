@@ -9,7 +9,13 @@ import java.time.Instant;
 import java.util.Date;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for the {@link QueryUtils}. */
 public class QueryUtilsTest {
+
+  /**
+   * Verifies that {@link QueryUtils#isInRange} correctly determines if a value is within a time
+   * range for various cases.
+   */
   @Test
   public void testInRange() {
     /*
@@ -41,6 +47,10 @@ public class QueryUtilsTest {
     assertFalse(QueryUtils.isInRange(upperInstant, new DateRangeParam(lowerDate, middleDate)));
   }
 
+  /**
+   * Verifies that {@link QueryUtils#isInRange} correctly determines if a value is within a time
+   * range for various cases with {@code null} lastUpdated values.
+   */
   @Test
   public void testInRangeWithNullLastUpdate() {
     Date lowerDate = new Date();

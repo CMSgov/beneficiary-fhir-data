@@ -200,7 +200,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Asserts the expected extension codings are equal.
+   * Asserts the expected extension coding exists.
    *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedCode the expected {@link Coding#getCode()}
@@ -338,7 +338,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Asserts the expected identifiers are equal.
+   * Asserts the expected identifiers match the expected value.
    *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()} value
@@ -700,7 +700,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Verifies a @link Coding} exists within the specified {@link CodeableConcept}.
+   * Verifies a {@link Coding} exists within the specified {@link CodeableConcept}.
    *
    * @param concept the {@link CodeableConcept} to check
    * @param codingSystem the {@link Coding#getSystem()} to match
@@ -961,7 +961,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Assert that two extension quantities are equal.
+   * Asserts that an extension quantity matches the expected value.
    *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for

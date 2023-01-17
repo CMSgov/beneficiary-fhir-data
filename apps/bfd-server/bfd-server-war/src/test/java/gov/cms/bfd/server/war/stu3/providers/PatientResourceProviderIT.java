@@ -79,9 +79,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} that
+   * does exist in the DB.
    */
   @Test
   public void readExistingPatient() {
@@ -105,9 +104,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.stu3.model.IdType)}
-   * throws an exception for a non-numeric {@link Patient} identifer.
+   * Verifies that {@link PatientResourceProvider#read} throws an exception for a non-numeric {@link
+   * Patient} identifer.
    */
   @Test
   public void readPatientForNonNumericPatientId() {
@@ -121,9 +119,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "true".
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "true".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
@@ -138,9 +135,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "hicn,mbi".
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "hicn,mbi".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersHicnMbi() {
@@ -155,9 +151,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "hicn".
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "hicn".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersHicn() {
@@ -172,9 +167,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "mbi".
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "mbi".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersMbi() {
@@ -189,9 +183,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "false".
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "false".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
@@ -206,9 +199,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "".
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
@@ -223,10 +215,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value =
-   * "invalid-identifier-value" and that an exception is thrown.
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = "invalid-identifier-value" and that an exception is thrown.
    */
   @Test
   public void readExistingPatientIncludeIdentifiersInvalid1() {
@@ -245,10 +235,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value =
-   * ["mbi,invalid-identifier-value"] and that an exception is thrown.
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} when
+   * include identifiers value = ["mbi,invalid-identifier-value"] and that an exception is thrown.
    */
   @Test
   public void readExistingPatientIncludeIdentifiersInvalid2() {
@@ -267,9 +255,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Asserts that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * contains expected/present identifiers for a {@link Patient}.
+   * Asserts that {@link PatientResourceProvider#read} contains expected/present identifiers for a
+   * {@link Patient}.
    *
    * @param expectingHicn true if expecting a HICN
    * @param expectingMbi true if expecting a MBI
@@ -319,11 +306,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} that does exist in the DB but has no {@link
-   * BeneficiaryHistory} or {@link MedicareBeneficiaryIdHistory} records when include identifiers
-   * value = ["true"].
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} that
+   * does exist in the DB but has no {@link BeneficiaryHistory} or {@link
+   * MedicareBeneficiaryIdHistory} records when include identifiers value = ["true"].
    */
   @Test
   public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
@@ -370,9 +355,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} that
+   * does not exist in the DB.
    */
   @Test
   public void readMissingPatient() {
@@ -386,9 +370,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link PatientResourceProvider#searchByLogicalId} works as expected for a {@link
+   * Patient} that does exist in the DB.
    */
   @Test
   public void searchForExistingPatientByLogicalId() {
@@ -431,10 +414,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link PatientResourceProvider#searchByLogicalId} works as expected for a {@link
+   * Patient} that does exist in the DB, including identifiers to return the unhashed HICN and MBI.
    */
   @Test
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersTrue() {
@@ -484,10 +465,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link PatientResourceProvider#searchByLogicalId} works as expected for a {@link
+   * Patient} that does exist in the DB, including identifiers to return the unhashed HICN and MBI.
    */
   @Test
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersFalse() {
@@ -537,9 +516,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with paging.
+   * Verifies that {@link PatientResourceProvider#searchByLogicalId} works as expected for a {@link
+   * Patient} that does exist in the DB, with paging.
    */
   @Test
   public void searchForPatientByLogicalIdWithPaging() {
@@ -580,9 +558,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link PatientResourceProvider#searchByLogicalId} works as expected for a {@link
+   * Patient} that does not exist in the DB.
    */
   @Test
   public void searchForMissingPatientByLogicalId() {
@@ -602,9 +579,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB.
    */
   @Test
   public void searchForExistingPatientByHicnHash() {
@@ -648,10 +624,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB, including identifiers to return the unhashed HICN and MBI.
    */
   @Test
   public void searchForExistingPatientByHicnHashIncludeIdentifiersTrue() {
@@ -837,10 +811,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB, including identifiers to return the unhashed HICN and MBI.
    */
   @Test
   public void searchForExistingPatientByHicnHashIncludeIdentifiersFalse() {
@@ -891,9 +863,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with paging.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB, with paging.
    */
   @Test
   public void searchForExistingPatientByHicnHashWithPaging() {
@@ -938,9 +909,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for HICNs that should be present as a {@link BeneficiaryHistory} record.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for HICNs
+   * that should be present as a {@link BeneficiaryHistory} record.
    */
   @Test
   public void searchForExistingPatientByHistoricalHicnHash() {
@@ -977,10 +947,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for HICNs associated with {@link Beneficiary}s that have <strong>no</strong>
-   * {@link BeneficiaryHistory} records.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for HICNs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
    */
   @Test
   public void searchForExistingPatientWithNoHistory() {
@@ -1016,10 +985,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for HICNs associated with {@link Beneficiary}s that have <strong>no</strong>
-   * {@link BeneficiaryHistory} records.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for HICNs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
    */
   @Test
   public void searchForExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
@@ -1055,9 +1023,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does not exist in the DB.
    */
   @Test
   public void searchForMissingPatientByHicnHash() {
@@ -1080,8 +1047,7 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier}
    *
    * <p>works as expected for a {@link Patient} that does exist in the DB.
    */
@@ -1138,10 +1104,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB, including identifiers to return the unhashed HICN and MBI.
    */
   @Test
   public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() {
@@ -1338,14 +1302,14 @@ public final class PatientResourceProviderIT {
    *
    * <p>The hashType param chooses which type of values/hash to use. This is either "hicn" or "mbi".
    *
-   * @param fhirClient
-   * @param beneficiariesList
-   * @param beneficiariesHistoryList
-   * @param beneficiaryId
-   * @param unhashedValue
-   * @param useFromBeneficiaryTable
-   * @param hashType
-   * @param expectsSingleBeneMatch
+   * @param fhirClient the fhir client
+   * @param beneficiariesList the beneficiaries list
+   * @param beneficiariesHistoryList the beneficiaries history list
+   * @param beneficiaryId the beneficiary id
+   * @param unhashedValue the unhashed value
+   * @param useFromBeneficiaryTable the use from beneficiary table
+   * @param hashType the hash type
+   * @param expectsSingleBeneMatch the expects single bene match
    */
   private void assertPatientByHashTypeMatch(
       IGenericClient fhirClient,
@@ -1452,10 +1416,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB, including identifiers to return the unhashed HICN and MBI.
    */
   @Test
   public void searchForExistingPatientByMbiHashIncludeIdentifiersFalse() {
@@ -1507,9 +1469,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with paging.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does exist in the DB, with paging.
    */
   @Test
   public void searchForExistingPatientByMbiHashWithPaging() {
@@ -1555,9 +1516,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for MBIs that should be present as a {@link BeneficiaryHistory} record.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * that should be present as a {@link BeneficiaryHistory} record.
    */
   @Test
   public void searchForExistingPatientByHistoricalMbiHash() {
@@ -1595,10 +1555,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for MBIs associated with {@link Beneficiary}s that have <strong>no</strong>
-   * {@link BeneficiaryHistory} records.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
    */
   @Test
   public void searchForExistingPatientByMbiWithNoHistory() {
@@ -1635,10 +1594,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for MBIs associated with {@link Beneficiary}s that have <strong>no</strong>
-   * {@link BeneficiaryHistory} records.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
    */
   @Test
   public void searchForExistingPatientByMbiWithNoHistoryIncludeIdentifiersTrue() {
@@ -1675,9 +1633,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected for a {@link
+   * Patient} that does not exist in the DB.
    */
   @Test
   public void searchForMissingPatientByMbiHash() {
@@ -1699,12 +1656,7 @@ public final class PatientResourceProviderIT {
     assertEquals(0, searchResults.getTotal());
   }
 
-  /**
-   * Verifies that {@link
-   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
-   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
-   * as expected.
-   */
+  /** Verifies that {@link PatientResourceProvider#searchByCoverageContract} works as expected. */
   @Test
   public void searchByPartDContract() {
     List<Object> loadedRecords =
@@ -1761,10 +1713,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
-   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
-   * as expected, when no year is specified (hopefully causing it to substitute the current year).
+   * Verifies that {@link PatientResourceProvider#searchByCoverageContract} works as expected, when
+   * no year is specified (hopefully causing it to substitute the current year).
    */
   @Test
   public void searchByPartDContractWithoutYear() {
@@ -1835,10 +1785,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
-   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
-   * as expected, when paging is requested.
+   * Verifies that {@link PatientResourceProvider#searchByCoverageContract} works as expected, when
+   * paging is requested.
    */
   @Test
   public void searchByPartDContractWithPaging() {
@@ -1873,10 +1821,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
-   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
-   * as expected, when searching for a contract-year-month with no benes.
+   * Verifies that {@link PatientResourceProvider#searchByCoverageContract} works as expected, when
+   * searching for a contract-year-month with no benes.
    */
   @Test
   public void searchByPartDContractForEmptyContract() {
@@ -1908,10 +1854,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
-   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
-   * as expected, when an invalid year is specified.
+   * Verifies that {@link PatientResourceProvider#searchByCoverageContract} works as expected, when
+   * an invalid year is specified.
    */
   @Test
   public void searchByPartDContractWithInvalidYear() {
@@ -1941,6 +1885,10 @@ public final class PatientResourceProviderIT {
         });
   }
 
+  /**
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} works as expected, when a
+   * valid lastUpdated query is included.
+   */
   @Test
   public void searchWithLastUpdated() {
     List<Object> loadedRecords =
@@ -1974,7 +1922,7 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Test the set of lastUpdated values
+   * Test the set of lastUpdated values.
    *
    * @param fhirClient to use
    * @param id the beneficiary id to use
@@ -1999,7 +1947,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * test helper
+   * Gets a header with {@link PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} set to the
+   * specified value.
    *
    * @param value of all include identifier values
    * @return RequestHeaders instance derived from value
@@ -2010,7 +1959,8 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * test helper
+   * Gets a header with {@link PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} set to
+   * the specified value.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value
@@ -2021,7 +1971,7 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * helper create a client w/o extra params
+   * Creates a basic FHIR client.
    *
    * @return the client
    */
@@ -2030,6 +1980,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
+   * Creates a basic FHIR client with {@link
+   * PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} included in the request header.
+   *
    * @return a FHIR {@link IGenericClient} where the {@link
    *     CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} is set to <code>"true"</code>
    */
@@ -2041,7 +1994,10 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * helper
+   * Creates a basic FHIR client with {@link
+   * PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} and {@link
+   * PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} included in the request header with
+   * the specified values.
    *
    * @param idHdrVal - includeIdentifiers header value
    * @param addrHdrVal - includeAddressFields header value
@@ -2056,9 +2012,11 @@ public final class PatientResourceProviderIT {
             addrHdrVal);
     return createFhirClient(requestHeader);
   }
+
   /**
-   * helper
+   * Creates a FHIR client with the specified header.
    *
+   * @param requestHeader the request header
    * @return the client with extra params registered
    */
   public static IGenericClient createFhirClient(RequestHeaders requestHeader) {
