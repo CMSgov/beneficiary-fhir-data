@@ -275,6 +275,26 @@ public final class ServerTestUtils {
     return serverBaseUrl;
   }
 
+  /**
+   * Gets the local {@link Path} that the project can be found in.
+   *
+   * @return the local {@link Path}
+   */
+  public static Path getWarProjectDirectory() {
+    try {
+      /*
+       * The working directory for tests will either be the module directory or their parent
+       * directory. With that knowledge, we're searching for the project directory.
+       */
+      Path projectDir = Paths.get(".");
+      if (!Files.isDirectory(projectDir) && projectDir.toRealPath().endsWith("bfd-server-war"))
+        throw new IllegalStateException();
+      return projectDir;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
   /** @return the local {@link Path} that development/test key and trust stores can be found in */
   static Path getSslStoresDirectory() {
     /*
