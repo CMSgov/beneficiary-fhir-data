@@ -67,7 +67,7 @@ pipeline {
           stage('Run availability check') {
             steps {
               script {
-                metricName = "availability/success"
+                def metricName = "availability/success"
                 try {
                   def httpReturnCode = sh(
                     returnStdout: true,
@@ -91,15 +91,11 @@ pipeline {
                   // pipeline itself did not
                   unstable "cURL failed with non-zero exit code"
                 }
-              }
-            }
-          }
 
-          stage('Update availability metric') {
-            steps {
-              echo "Updating \"${metricName}\" in namespace \"bfd-${ENV}/bfd-server\""
-              sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
-                  + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
+                echo "Updating \"${metricName}\" in namespace \"bfd-${ENV}/bfd-server\""
+                sh ("aws cloudwatch put-metric-data --namespace \"bfd-${ENV}/bfd-server\""
+                    + " --metric-name \"${metricName}\" --unit \"Count\" --value 1")
+              }
             }
           }
         }
