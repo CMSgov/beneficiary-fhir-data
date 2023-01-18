@@ -193,14 +193,12 @@ public final class PipelineApplication {
             ((PgConnection) pSqlConnection).getLogServerErrorDetail());
       }
     } finally {
-      /*
       if (dbConn != null) {
         try {
           dbConn.close();
         } catch (Exception ex) {
         }
       }
-      */
     }
 
     /*
