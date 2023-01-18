@@ -127,7 +127,7 @@ resource "aws_instance" "this" {
     account_id      = local.account_id
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
-    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
+    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
   })
 
   volume_tags = merge(
