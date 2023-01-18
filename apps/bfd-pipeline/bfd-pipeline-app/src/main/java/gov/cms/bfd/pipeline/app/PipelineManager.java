@@ -271,8 +271,7 @@ public final class PipelineManager implements AutoCloseable {
         jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
         jobsEnqueuedHandles.remove(jobRecordId);
       }
-      LOGGER.error(
-          "Handle job failure in Pipeline: " + exception.getMessage() + " and " + exception);
+      LOGGER.error("Handle job failure in Pipeline: " + exception.getMessage(), exception);
     }
   }
 
@@ -486,10 +485,7 @@ public final class PipelineManager implements AutoCloseable {
         // Restore the interrupt so things can get back to shutting down.
         Thread.currentThread().interrupt();
         LOGGER.error(
-            "PipeLineJobOutcome interrupt failed with the the following: "
-                + e.getMessage()
-                + "and "
-                + e);
+            "PipeLineJobOutcome interrupt failed with the the following: " + e.getMessage(), e);
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         handleJobFailure(jobRecord.getId(), e);
@@ -536,10 +532,7 @@ public final class PipelineManager implements AutoCloseable {
         handleJobCancellation(jobRecord.getId());
       }
       LOGGER.error(
-          "OnFailure Job Pipeline failed with: "
-              + jobThrowable.getMessage()
-              + "and "
-              + jobThrowable);
+          "OnFailure Job Pipeline failed with: " + jobThrowable.getMessage(), jobThrowable);
     }
   }
 }
