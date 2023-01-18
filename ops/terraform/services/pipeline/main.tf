@@ -4,6 +4,7 @@ locals {
   layer            = "data"
   established_envs = ["test", "prod-sbx", "prod"]
   create_etl_user  = local.is_prod || var.force_etl_user_creation
+  jdbc_suffix      = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
