@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 /** Integration tests for NPIOrgLookup. */
 public class NPIOrgLookupIT {
-  /** Verifies that it returns a valid npi org */
+  /** Verifies that it returns a valid npi org. */
   @Test
   public void VerifyAValidNPIOrg() throws IOException {
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
@@ -18,7 +18,7 @@ public class NPIOrgLookupIT {
     assertEquals("CUMBERLAND COUNTY HOSPITAL SYSTEM", orgDisplay.get());
   }
 
-  /** Verifies that it returns a empty string for a non valid npiOrg Number */
+  /** Verifies that it returns a empty string for a non valid npiOrg Number. */
   @Test
   public void VerifyANonValidNPIOrgReturnsEmpty() throws IOException {
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForProduction();
