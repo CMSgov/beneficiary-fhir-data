@@ -457,7 +457,7 @@ public final class TransformerConstants {
   /**
    * C4BB Institutional Claim SubType Code System <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBInstitutionalClaimSubType.html">CodeSystem:
-   * C4BB Institutional Claim SubType Code System</a>
+   * C4BB Institutional Claim SubType Code System</a>.
    */
   public static final String C4BB_Institutional_Claim_SubType =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
