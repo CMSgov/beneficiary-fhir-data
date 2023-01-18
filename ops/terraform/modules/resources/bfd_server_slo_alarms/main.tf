@@ -1229,7 +1229,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_availability_failures_sum" {
   threshold           = each.value.threshold
 
   alarm_description = join("", [
-    "The sum of failed availability checks exceeded or was equal to ${upper(each.value.type)}",
+    "The sum of failed availability checks exceeded or was equal to ${upper(each.value.type)} ",
     "SLO threshold of ${each.value.threshold} failures in ${each.value.period / 60} minute(s) ",
     "for ${local.app} in ${var.env} environment.",
     "\n\n${local.dashboard_message_fragment}"
