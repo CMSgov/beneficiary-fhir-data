@@ -56,8 +56,11 @@ def handler(event, context):
         return
 
     try:
+        # We do not escape "<" or ">" to allow for links to be embedded in the Alarm message
+        unescaped_alarm_message: str = alarm_info["AlarmDescription"]
+        alarm_message = unescaped_alarm_message.replace("&", "&amp;")
+
         alarm_name = slack_escape_str(alarm_info["AlarmName"])
-        alarm_message = slack_escape_str(alarm_info["AlarmDescription"])
         alarm_reason = slack_escape_str(alarm_info["NewStateReason"])
         alarm_metric = slack_escape_str(alarm_info["Trigger"]["MetricName"])
     except KeyError as exc:

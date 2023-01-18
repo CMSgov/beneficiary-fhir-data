@@ -1,5 +1,30 @@
 # API Changelog
 
+## BFD-2310: Add Eob.SubType for Institutional Claims in V2
+Added the subtype to the different claims types.  For  Inpatient, SNF, Hospice and HHA Claims it will be set to "Inpatient" and for Outpatient claims it will be set to "Outpatient".
+
+New EOB Subtype Mapping for Inpatient, SNF, Hospice and HHA Claims in V2:
+```json
+ "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
+      }
+```
+
+New EOB Subtype Mapping for Outpatient Claims in V2:
+```json
+ "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "outpatient"
+        } ],
+        "text" : "Outpatient"
+      },
+```
+
 ## BFD-1923: Add Org Name Display to Organizations in V2
 Add the display name for NPI Organizations to the contained resource for organizations.
 

@@ -11,6 +11,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import jakarta.validation.constraints.AssertTrue;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,6 +92,22 @@ public class ValidationUtil {
   public static Optional<MappingBean> getMappingBeanFromContext(
       ConstraintValidatorContext context) {
     return getValidationPayload(context).map(ValidationPayload::getMapping);
+  }
+
+  /**
+   * Used in {@link AssertTrue} methods to validate that exactly one object reference is not null.
+   *
+   * @param objects One or more object references to check for nullness
+   * @return true if exactly one reference is not null
+   */
+  public static boolean isExactlyOneNotNull(Object... objects) {
+    int notNullCount = 0;
+    for (Object object : objects) {
+      if (object != null) {
+        notNullCount += 1;
+      }
+    }
+    return notNullCount == 1;
   }
 
   /**

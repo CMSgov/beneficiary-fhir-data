@@ -11,6 +11,10 @@ mappings:
         - parentClaim
         - priority
       columns:
+        - name: dcn
+          sqlType: varchar(23)
+          nullable: false
+          dbOnly: true
         - name: priority
           sqlType: smallint
           javaType: short
@@ -39,10 +43,10 @@ mappings:
         - name: lastUpdated
           sqlType: timestamp with time zone
       joins:
-        - fieldName: parentClaim
-          entityClass: gov.cms.test.FissClaim
+        - class: child
+          fieldName: parentClaim
+          entityMapping: FissClaim
           joinColumnName: dcn
-          joinType: ManyToOne
           foreignKey: fiss_payer_dcn_to_fiss_claims
     enumTypes:
       - name: PayerType

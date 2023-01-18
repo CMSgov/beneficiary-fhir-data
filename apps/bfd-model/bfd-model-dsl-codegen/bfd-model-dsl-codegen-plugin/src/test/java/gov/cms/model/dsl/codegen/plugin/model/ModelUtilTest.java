@@ -2,7 +2,9 @@ package gov.cms.model.dsl.codegen.plugin.model;
 
 import static gov.cms.model.dsl.codegen.plugin.model.ModelUtil.mapJavaTypeToTypeName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.io.Files;
 import com.squareup.javapoet.ClassName;
@@ -19,6 +21,10 @@ public class ModelUtilTest {
   /** Test methods that parse class and package names from strings. */
   @Test
   public void testClassNameParsing() {
+    assertFalse(ModelUtil.isValidFullClassName(null));
+    assertFalse(ModelUtil.isValidFullClassName(""));
+    assertFalse(ModelUtil.isValidFullClassName("String"));
+    assertTrue(ModelUtil.isValidFullClassName("java.lang.String"));
     assertEquals("java.lang", ModelUtil.packageName("java.lang.String"));
     assertEquals("String", ModelUtil.className("java.lang.String"));
     assertEquals(ClassName.get(String.class), ModelUtil.classType("java.lang.String"));

@@ -26,6 +26,6 @@ module "stateless" {
 
   ## Cloudwatch Dashboard ##
   ## This is where the dashboard params are passed ##
-  dashboard_name      = "bfd-server-${local.env}"
+  dashboard_name      = "bfd-${local.env}-server"
   dashboard_namespace = "bfd-${local.env}/bfd-server"
 }

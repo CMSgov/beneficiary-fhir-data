@@ -2075,7 +2075,7 @@ public class FissClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "payer-0-" + basicLabel;
+      return "payers-0-" + basicLabel;
     }
   }
 
@@ -2104,7 +2104,7 @@ public class FissClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "payer-0-" + basicLabel;
+      return "payers-0-" + basicLabel;
     }
   }
 
@@ -2135,7 +2135,7 @@ public class FissClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "procCode-0-" + basicLabel;
+      return "procCodes-0-" + basicLabel;
     }
   }
 
@@ -2182,7 +2182,7 @@ public class FissClaimTransformerTest {
 
     @Override
     String getLabel(String basicLabel) {
-      return "diagCode-0-" + basicLabel;
+      return "diagCodes-0-" + basicLabel;
     }
   }
 

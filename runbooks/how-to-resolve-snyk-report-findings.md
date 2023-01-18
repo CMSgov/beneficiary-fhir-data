@@ -1,5 +1,6 @@
-Follow this runbook for each SNYK finding that appears in the
-[SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda) that does not have an associated SNYK bot PR automatically
+# How to Resolve SNYK Report Findings
+
+Follow this runbook for each SNYK finding that appears in the [SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda) that does not have an associated SNYK bot PR automatically
 created in github, for those findings that *do* have a SNYK-bot PR follow the
 [Resolving SNKY-bot PRs](how-to-resolve-snyk-bot-prs.md).
 

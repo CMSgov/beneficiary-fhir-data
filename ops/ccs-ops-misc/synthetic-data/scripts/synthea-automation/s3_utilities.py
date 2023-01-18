@@ -57,7 +57,8 @@ def download_synthea_files(target_dir):
         'snf_pdpm_code_map.json',
         'snf_pps_code_map.json',
         'snf_rev_cntr_code_map.json',
-        'external_codes.csv'
+        'hospice_rev_cntr_code_map.json',
+        'external_codes.csv',
         ]
 
     for fn in code_map_files:

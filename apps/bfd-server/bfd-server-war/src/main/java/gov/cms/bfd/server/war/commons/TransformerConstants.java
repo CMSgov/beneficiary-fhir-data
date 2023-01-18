@@ -100,8 +100,9 @@ public final class TransformerConstants {
 
   /**
    * Used to notify end users when they receive {@link Patient} records impacted by <a
-   * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>. See the documentation on <code>
-   * LoadAppOptions.isFilteringNonNullAndNon2022Benes()</code> for details
+   * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
+   * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>. See the documentation on <code>
+   * LoadAppOptions.isFilteringNonNullAndNon2023Benes()</code> for details
    */
   public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT =
       "delayed-backdated-enrollment";
@@ -440,4 +441,12 @@ public final class TransformerConstants {
    */
   public static final String NUBC_REVENUE_CODE_SYSTEM =
       "https://www.nubc.org/CodeSystem/RevenueCodes";
+
+  /**
+   * C4BB Institutional Claim SubType Code System <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBInstitutionalClaimSubType.html">CodeSystem:
+   * C4BB Institutional Claim SubType Code System</a>
+   */
+  public static final String C4BB_Institutional_Claim_SubType =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
 }

@@ -84,6 +84,16 @@ public class ModelUtil {
   }
 
   /**
+   * Determine if the given class name is a valid full name including package as well as class.
+   *
+   * @param fullClassName class name to test
+   * @return true if the class name is a valid full name including package as well as class
+   */
+  public static boolean isValidFullClassName(String fullClassName) {
+    return fullClassName != null && fullClassName.indexOf('.') > 0;
+  }
+
+  /**
    * Load mappings from the given path.
    *
    * @param mappingPath path to a file or directory
