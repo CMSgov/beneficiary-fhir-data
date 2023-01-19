@@ -26,12 +26,11 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer}. */
+/** Unit tests for {@link SNFClaimTransformer}. */
 public final class SNFClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
+   * Verifies that {@link SNFClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

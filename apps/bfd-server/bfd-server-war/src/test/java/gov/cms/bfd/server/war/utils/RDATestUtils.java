@@ -46,15 +46,23 @@ public class RDATestUtils {
           RdaMcsClaim.class,
           Mbi.class);
 
+  /** Path to use for persistence units. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+  /** Test mbi. */
   public static final String MBI = "123456MBI";
+  /** Test mbi hash. */
   public static final String MBI_HASH = "a7f8e93f09";
+  /** Test mbi has (old). */
   public static final String MBI_OLD_HASH = "3816a4c752";
+  /** Test fiss claim (DCN). */
   public static final String FISS_CLAIM_A_DCN = "123456";
+  /** Test fiss claim (DCN). */
   public static final String FISS_CLAIM_B_DCN = "123457";
 
+  /** The entity manager. */
   private EntityManager entityManager;
 
+  /** Initializes the test utility. */
   public void init() {
     final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
 
@@ -66,17 +74,27 @@ public class RDATestUtils {
             .createEntityManager();
   }
 
+  /** Closes all resources. */
   public void destroy() {
     if (entityManager != null) {
       entityManager.close();
     }
   }
 
+  /**
+   * Gets the {@link #entityManager}.
+   *
+   * @return the entity manager
+   */
   public EntityManager getEntityManager() {
     return entityManager;
   }
 
-  /** Seed data into the database for testing. */
+  /**
+   * Seed data into the database for testing.
+   *
+   * @param includeOldHash whether to include the old hash
+   */
   public void seedData(boolean includeOldHash) {
     doTransaction(
         em -> {
@@ -145,8 +163,9 @@ public class RDATestUtils {
   }
 
   /**
-   * One FISS claim for testing
+   * One FISS claim for testing.
    *
+   * @param mbi the mbi
    * @return The FISS test claim A
    */
   private RdaFissClaim fissTestDataA(Mbi mbi) {
@@ -244,8 +263,9 @@ public class RDATestUtils {
   }
 
   /**
-   * One FISS claim for testing
+   * One FISS claim for testing.
    *
+   * @param mbi the mbi
    * @return The FISS test claim B
    */
   private RdaFissClaim fissTestDataB(Mbi mbi) {
@@ -336,8 +356,9 @@ public class RDATestUtils {
   }
 
   /**
-   * One MCS claim for testing
+   * One MCS claim for testing.
    *
+   * @param mbi the mbi
    * @return The MCS test claim A
    */
   private RdaMcsClaim mcsTestDataA(Mbi mbi) {
@@ -403,8 +424,9 @@ public class RDATestUtils {
   }
 
   /**
-   * One MCS claim for testing
+   * One MCS claim for testing.
    *
+   * @param mbi the mbi
    * @return The MCS test claim B
    */
   private RdaMcsClaim mcsTestDataB(Mbi mbi) {
@@ -473,11 +495,11 @@ public class RDATestUtils {
   /**
    * Writes a single {@link RdaMcsClaim} record and associated details based on the given criteria.
    *
-   * @param claimId value for {@link RdaMcsClaim#idrClmHdIcn}
-   * @param lastUpdated value for {@link RdaMcsClaim#lastUpdated} as a date
-   * @param claimServiceDate value for {@link RdaMcsClaim#idrHdrToDateOfSvc}
+   * @param claimId value for {@link RdaMcsClaim#getIdrClmHdIcn}
+   * @param lastUpdated value for {@link RdaMcsClaim#getLastUpdated} as a date
+   * @param claimServiceDate value for {@link RdaMcsClaim#getIdrHdrToDateOfSvc}
    * @param detailServiceDates values for {@link RdaMcsDetail} record {@link
-   *     RdaMcsDetail#idrDtlToDate}
+   *     RdaMcsDetail#getIdrDtlToDate}
    */
   public void seedMcsClaimForServiceIdTest(
       String claimId,

@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 
+/** Abstract resource provider for common functionality. */
 public class AbstractResourceProvider {
 
   /**
@@ -17,6 +18,8 @@ public class AbstractResourceProvider {
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   /**
+   * Returns if tax numbers should be included after examining the request details.
+   *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out the HTTP header that controls this setting
    * @return <code>true</code> if {@link gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} and

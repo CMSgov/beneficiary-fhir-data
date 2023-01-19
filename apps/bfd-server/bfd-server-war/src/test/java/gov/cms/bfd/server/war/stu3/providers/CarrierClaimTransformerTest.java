@@ -32,9 +32,9 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
 public final class CarrierClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
+   * CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -73,10 +73,10 @@ public final class CarrierClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
-   * has two care members under the care team component and doesnt duplicate its results
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
+   * CarrierClaim}. has two care members under the care team component and doesnt duplicate its
+   * results
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -106,9 +106,9 @@ public final class CarrierClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link
+   * CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

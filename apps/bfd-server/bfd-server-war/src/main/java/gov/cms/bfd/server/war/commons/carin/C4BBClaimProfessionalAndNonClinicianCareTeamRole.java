@@ -6,20 +6,20 @@ package gov.cms.bfd.server.war.commons.carin;
  * C4BB Claim Professional And Non Clinician Care Team Role</a>.
  */
 public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
-  /** The primary care provider. * */
+  /** The primary care provider. */
   PRIMARY,
-  /** Supervising care provider. * */
+  /** Supervising care provider. */
   SUPERVISOR,
-  /** The performing or rendering provider. * */
+  /** The performing or rendering provider. */
   PERFORMING,
   /**
    * A purchased service occurs when one provider purchases a service from another provider and then
-   * provides it to the patient, e.g. a diagnostic exam. *
+   * provides it to the patient, e.g. a diagnostic exam.
    */
   PURCHASED_SERVICE,
-  /** The referring physician. * */
+  /** The referring physician. */
   REFERRING,
-  /** Other role on the care team. * */
+  /** Other role on the care team. */
   OTHER;
 
   /**

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Integration tests for the {@link R4CoverageResourceProvider}. */
 public final class R4CoverageResourceProviderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(R4CoverageResourceProviderIT.class);
 
@@ -147,10 +148,8 @@ public final class R4CoverageResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that has an invalid {@link
-   * gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider#IdParam} parameter.
+   * Verifies that {@link R4CoverageResourceProvider#read} works as expected for {@link
+   * Beneficiary}-derived {@link Coverage}s that has an invalid coverage id parameter.
    */
   @Test
   public void readCoveragesForInvalidIdParam() {
@@ -173,9 +172,8 @@ public final class R4CoverageResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Beneficiary} that does exist in the DB.
+   * Verifies that {@link R4CoverageResourceProvider#searchByBeneficiary} works as expected for a
+   * {@link Beneficiary} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -263,9 +261,8 @@ public final class R4CoverageResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Beneficiary} that does exist in the DB, with paging.
+   * Verifies that {@link R4CoverageResourceProvider#searchByBeneficiary} works as expected for a
+   * {@link Beneficiary} that does exist in the DB, with paging.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -356,9 +353,8 @@ public final class R4CoverageResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Beneficiary} that does not exist in the DB.
+   * Verifies that {@link R4CoverageResourceProvider#searchByBeneficiary} works as expected for a
+   * {@link Beneficiary} that does not exist in the DB.
    */
   @Test
   public void searchByMissingBeneficiary() {

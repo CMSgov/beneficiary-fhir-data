@@ -57,15 +57,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link HHAClaimTransformerV2Test}. */
 public class HHAClaimTransformerV2Test {
+  /** The claim under test. */
   HHAClaim claim;
+  /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
+  /** The fhir context for parsing the file data. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
 
   /**
-   * Generates the Claim object to be used in multiple tests
+   * Generates the sample A claim object to be used in multiple tests.
    *
-   * @return
-   * @throws FHIRException
+   * @return the claim object
+   * @throws FHIRException if there is an issue parsing the claim
    */
   public HHAClaim generateClaim() throws FHIRException {
     List<Object> parsedRecords =
@@ -83,6 +88,11 @@ public class HHAClaimTransformerV2Test {
     return claim;
   }
 
+  /**
+   * Loads the test data needed for each test.
+   *
+   * @throws IOException if there is an issue loading the file
+   */
   @BeforeEach
   public void before() throws IOException {
     claim = generateClaim();
@@ -99,18 +109,19 @@ public class HHAClaimTransformerV2Test {
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
-  private static final FhirContext fhirContext = FhirContext.forR4();
-
+  /** Tests that the transformer sets the expected id. */
   @Test
   public void shouldSetID() {
     assertEquals("ExplanationOfBenefit/hha-" + claim.getClaimId(), eob.getId());
   }
 
+  /** Tests that the transformer sets the expected last updated date in the metadata. */
   @Test
   public void shouldSetLastUpdated() {
     assertNotNull(eob.getMeta().getLastUpdated());
   }
 
+  /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it
@@ -121,16 +132,23 @@ public class HHAClaimTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_NONCLINICIAN_PROFILE_URL)));
   }
 
+  /** Tests that the transformer sets the expected 'nature of request' value. */
   @Test
   public void shouldSetUse() {
     assertEquals(Use.CLAIM, eob.getUse());
   }
 
+  /** Tests that the transformer sets the expected final action status. */
   @Test
   public void shouldSetFinalAction() {
     assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
+  /**
+   * Tests that the transformer sets the billable period.
+   *
+   * @throws Exception should not be thrown
+   */
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
@@ -142,17 +160,23 @@ public class HHAClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2015-06-23"), eob.getBillablePeriod().getEnd());
   }
 
+  /** Tests that the transformer sets the expected patient reference. */
   @Test
   public void shouldReferencePatient() {
     assertNotNull(eob.getPatient());
     assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
+  /** Tests that the transformer sets the expected creation date. */
   @Test
   public void shouldHaveCreatedDate() {
     assertNotNull(eob.getCreated());
   }
 
+  /**
+   * Tests that the transformer sets the expected number of facility type extensions and the correct
+   * values.
+   */
   @Test
   public void shouldHaveFacilityTypeExtension() {
     assertNotNull(eob.getFacility());
@@ -174,21 +198,13 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /**
-   * CareTeam list
-   *
-   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
-   * are added in the same order. This means we can look them up by sequence number.
-   */
+  /** Tests that the transformer sets the expected number of care team entries. */
   @Test
   public void shouldHaveCareTeamList() {
     assertEquals(2, eob.getCareTeam().size());
   }
 
-  /**
-   * Testing all of these in one test, just because there isn't a distinct identifier really for
-   * each
-   */
+  /** Tests that the transformer sets the expected values for the care team member entries. */
   @Test
   public void shouldHaveCareTeamMembers() {
     // First member
@@ -216,12 +232,15 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare2.equalsDeep(member2));
   }
 
-  /** SupportingInfo items */
+  /** Tests that the transformer sets the expected number of supporting info entries. */
   @Test
   public void shouldHaveSupportingInfoList() {
     assertEquals(9, eob.getSupportingInfo().size());
   }
 
+  /**
+   * Tests that the transformer sets the expected Supporting Information for claim received date.
+   */
   @Test
   public void shouldHaveClaimReceivedDateSupInfo() {
     SupportingInformationComponent sic =
@@ -247,6 +266,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected type of bill supporting info. */
   @Test
   public void shouldHaveTypeOfBillSupInfo() {
     SupportingInformationComponent sic =
@@ -271,6 +291,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected discharge status supporting info. */
   @Test
   public void shouldHaveDischargeStatusSupInfo() {
     SupportingInformationComponent sic =
@@ -296,6 +317,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer code supporting info. */
   @Test
   public void shouldHaveNchPrmryPyrCdSupInfo() {
     SupportingInformationComponent sic =
@@ -326,6 +348,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim PPS indicator code supporting info. */
   @Test
   public void shouldHaveClmMcoPdSwSupInfo() {
     SupportingInformationComponent sic =
@@ -356,6 +379,10 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected low utilization payment adjustment supporting
+   * info.
+   */
   @Test
   public void shouldHaveClmHhaLupaIndCdSupInfo() {
     SupportingInformationComponent sic =
@@ -386,6 +413,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim HHA referral code supporting info. */
   @Test
   public void shouldHaveClmHhaRfrlCdSupInfo() {
     SupportingInformationComponent sic =
@@ -416,6 +444,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim HHA total visit count supporting info. */
   @Test
   public void shouldHaveClmHhaTotVisitCntSupInfo() {
     SupportingInformationComponent sic =
@@ -443,6 +472,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim HHA total visit count supporting info. */
   @Test
   public void shouldHaveAdmissionPeriodSupInfo() throws Exception {
     SupportingInformationComponent sic =
@@ -468,12 +498,13 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
-  /** Diagnosis elements */
+  /** Tests that the transformer sets the expected number of diagnosis. */
   @Test
   public void shouldHaveDiagnosesList() {
     assertEquals(4, eob.getDiagnosis().size());
   }
 
+  /** Tests that the transformer sets the expected diagnosis entries. */
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
@@ -549,7 +580,10 @@ public class HHAClaimTransformerV2Test {
     assertTrue(cmp4.equalsDeep(diag4));
   }
 
-  /** Insurance */
+  /**
+   * Tests that the transformer sets the expected number of insurance entries with the expected
+   * values.
+   */
   @Test
   public void shouldReferenceCoverageInInsurance() {
     //     // Only one insurance object if there is more than we need to fix the focal set to point
@@ -567,17 +601,19 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(insurance));
   }
 
-  /** Line Items */
+  /** Tests that the transformer sets the expected number of line items. */
   @Test
   public void shouldHaveLineItems() {
     assertEquals(1, eob.getItem().size());
   }
 
+  /** Tests that the transformer sets the expected number of line item sequences. */
   @Test
   public void shouldHaveLineItemSequence() {
     assertEquals(1, eob.getItemFirstRep().getSequence());
   }
 
+  /** Tests that the transformer sets the expected line item care team reference. */
   @Test
   public void shouldHaveLineItemCareTeamRef() {
     // The order isn't important but this should reference a care team member
@@ -585,6 +621,7 @@ public class HHAClaimTransformerV2Test {
     assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
   }
 
+  /** Tests that the transformer sets the expected line item revenue codes. */
   @Test
   public void shouldHaveLineItemRevenue() {
     CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
@@ -632,6 +669,7 @@ public class HHAClaimTransformerV2Test {
         code3.getDisplay());
   }
 
+  /** Tests that the transformer sets the expected Coding for line item produce/service. */
   @Test
   public void shouldHaveLineItemProductOrServiceCoding() {
     CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
@@ -646,6 +684,10 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(pos));
   }
 
+  /**
+   * Tests that the transformer sets the expected number of line item modifiers and the entries are
+   * correct.
+   */
   @Test
   public void shouldHaveLineItemModifier() {
     assertEquals(2, eob.getItemFirstRep().getModifier().size());
@@ -662,6 +704,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(modifier));
   }
 
+  /** Tests that the transformer sets the expected line item serviced date. */
   @Test
   public void shouldHaveLineItemServicedDate() {
     DateType servicedDate = eob.getItemFirstRep().getServicedDateType();
@@ -671,6 +714,7 @@ public class HHAClaimTransformerV2Test {
     assertEquals(servicedDate.toString(), compare.toString());
   }
 
+  /** Tests that the transformer sets the expected line location (address). */
   @Test
   public void shouldHaveLineItemLocation() {
     Address address = eob.getItemFirstRep().getLocationAddress();
@@ -680,6 +724,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(address));
   }
 
+  /** Tests that the transformer sets the expected line item quantity. */
   @Test
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
@@ -689,11 +734,13 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(quantity));
   }
 
+  /** Tests that the transformer sets the expected number of line item adjudications. */
   @Test
   public void shouldHaveLineItemAdjudications() {
     assertEquals(5, eob.getItemFirstRep().getAdjudication().size());
   }
 
+  /** Tests that the transformer sets the expected adjudication denial code. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntr1stAnsiCd() {
     AdjudicationComponent adjudication =
@@ -722,6 +769,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected adjudication center rate amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrRateAmt() {
     AdjudicationComponent adjudication =
@@ -748,6 +796,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected adjudication revenue center to charge amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrTotChrgAmt() {
     AdjudicationComponent adjudication =
@@ -778,6 +827,10 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected adjudication revenue center non-covered charge
+   * amount.
+   */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrNcrvdChrgAmt() {
     AdjudicationComponent adjudication =
@@ -808,6 +861,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected adjudication revenue center payment amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrPmtAmtAmt() {
     AdjudicationComponent adjudication =
@@ -838,6 +892,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected claim total charge amount entries. */
   @Test
   public void shouldHaveClmTotChrgAmtTotal() {
     // Only one so just pull it directly and compare
@@ -862,7 +917,8 @@ public class HHAClaimTransformerV2Test {
 
     assertTrue(compare.equalsDeep(total));
   }
-  /** Payment */
+
+  /** Tests that the transformer sets the expected payment value. */
   @Test
   public void shouldHavePayment() {
     // Need to maintain trailing 0s in USD amount
@@ -876,7 +932,7 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getPayment()));
   }
 
-  /** Total */
+  /** Tests that the transformer sets the expected number of total entries. */
   @Test
   public void shouldHaveTotal() {
     assertEquals(1, eob.getTotal().size());
@@ -884,7 +940,7 @@ public class HHAClaimTransformerV2Test {
 
   /**
    * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
-   * quantity is not zero
+   * quantity is not zero.
    */
   @Test
   public void shouldHaveRevenueCenterUnit() {
@@ -892,7 +948,10 @@ public class HHAClaimTransformerV2Test {
         CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(1), eob.getItem());
   }
 
-  /** Benefit Balance */
+  /**
+   * Tests that the transformer sets the expected number of benefit balance entries and the correct
+   * values.
+   */
   @Test
   public void shouldHaveBenefitBalance() {
     assertEquals(1, eob.getBenefitBalance().size());
@@ -910,11 +969,13 @@ public class HHAClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getBenefitBalanceFirstRep().getCategory()));
   }
 
+  /** Tests that the transformer sets the expected number of benefit balance financial entries. */
   @Test
   public void shouldHaveBenefitBalanceFinancial() {
     assertEquals(1, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer claim paid amount. */
   @Test
   public void shouldHavePrpayAmtFinancial() {
     BenefitComponent benefit =
@@ -1026,9 +1087,10 @@ public class HHAClaimTransformerV2Test {
   }
 
   /**
-   * Serializes the EOB and prints to the command line
+   * Serializes the EOB and prints to the command line.
    *
-   * @throws FHIRException
+   * @throws FHIRException if there is an issue with transforming the claim
+   * @throws IOException if there is an issue with reading the test file
    */
   @Disabled
   @Test

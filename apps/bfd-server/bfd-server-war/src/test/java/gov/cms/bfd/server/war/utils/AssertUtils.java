@@ -17,13 +17,24 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+/** Utility class for helping with assertions. */
 public class AssertUtils {
 
+  /** Interface for executing. TODO: What is this? */
   @FunctionalInterface
   public interface Executor {
+    /** Executes something. */
     void execute();
   }
 
+  /**
+   * Catch exceptions using an {@link Executor}.
+   *
+   * <p>TODO: Unused code, delete this and the above. exceptions can be thrown by tests without this
+   *
+   * @param executor the executor
+   * @return the exception
+   */
   public static Exception catchExceptions(Executor executor) {
     Exception ex = null;
 
@@ -36,6 +47,14 @@ public class AssertUtils {
     return ex;
   }
 
+  /**
+   * Checks if two exception messages are equal, and fails the test if not.
+   *
+   * <p>TODO: Unused, remove
+   *
+   * @param expected the expected exception
+   * @param actual the actual exception
+   */
   public static void assertThrowEquals(Exception expected, Exception actual) {
     if (expected.getClass() == actual.getClass()) {
       if (!Objects.equals(expected.getMessage(), actual.getMessage())) {
@@ -121,6 +140,12 @@ public class AssertUtils {
    * JsonNode}, and returns true if the JsonNode satisfies the filter.
    */
   private interface NodeFilter {
+    /**
+     * Applies the filter to the specified node.
+     *
+     * @param node the node
+     * @return {@code true} if the node matches the filter
+     */
     boolean apply(JsonNode node);
   }
 
@@ -130,8 +155,14 @@ public class AssertUtils {
    */
   private static class NodeFilteringConsumer implements Consumer<JsonNode> {
 
+    /** The node filter. */
     private final NodeFilter f;
 
+    /**
+     * The filter consumer.
+     *
+     * @param f the filter
+     */
     public NodeFilteringConsumer(NodeFilter f) {
       this.f = f;
     }

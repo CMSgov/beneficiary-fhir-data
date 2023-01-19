@@ -54,10 +54,17 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}. */
 public final class BeneficiaryTransformerV2Test {
 
+  /** Fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** Beneficiary under test. */
   private static Beneficiary beneficiary = null;
+  /** Patient under test. */
   private static Patient patient = null;
 
+  /**
+   * Sets up the test, including parsing the beneficiary from a file and adjusting some of its
+   * values for use in each test.
+   */
   @BeforeEach
   public void setup() {
     List<Object> parsedRecords =
@@ -102,6 +109,11 @@ public final class BeneficiaryTransformerV2Test {
     createPatient(RequestHeaders.getHeaderWrapper());
   }
 
+  /**
+   * Creates a patient to use in the tests.
+   *
+   * @param reqHeaders the request headers
+   */
   private void createPatient(RequestHeaders reqHeaders) {
     Patient genPatient =
         BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
@@ -110,7 +122,7 @@ public final class BeneficiaryTransformerV2Test {
     patient = parser.parseResource(Patient.class, json);
   }
 
-  /** Common top level Patient ouput to console */
+  /** 'Test' to output the json value of the test patient to the console for debugging. */
   @Disabled
   @Test
   public void shouldOutputJSON() {
@@ -118,6 +130,10 @@ public final class BeneficiaryTransformerV2Test {
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
   }
 
+  /**
+   * 'Test' to output the json value of the test patient (with mbi data) to the console for
+   * debugging.
+   */
   @Disabled
   @Test
   public void shouldOutputMbiHistory() {
@@ -139,17 +155,19 @@ public final class BeneficiaryTransformerV2Test {
         patient.getMeta().getTag().get(0));
   }
 
-  /** Common top level Patient values */
+  /** Tests that the transformer sets the expected id. */
   @Test
   public void shouldSetID() {
     assertEquals(patient.getId(), "Patient/" + beneficiary.getBeneficiaryId());
   }
 
+  /** Tests that the transformer sets the expected last updated date in the metadata. */
   @Test
   public void shouldSetLastUpdated() {
     assertNotNull(patient.getMeta().getLastUpdated());
   }
 
+  /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
@@ -159,19 +177,27 @@ public final class BeneficiaryTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
   }
 
-  /** Top level Identifiers */
+  /**
+   * Tests that the transformer sets the expected number of identifiers when mbi is not returned.
+   */
   @Test
   public void shouldHaveKnownIdentifiersNoMbiHistory() {
     assertEquals(2, patient.getIdentifier().size());
   }
 
-  /** Sample_A data */
+  /**
+   * Tests that the transformer sets the expected number of identifiers when mbi is returned.
+   *
+   * <p>TODO: This doesnt seem like a great test since the number is the same as the test above
+   * without mbi?
+   */
   @Test
   public void shouldHaveKnownIdentifiersWithMbiHistory() {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
     assertEquals(2, patient.getIdentifier().size());
   }
 
+  /** Tests that the transformer sets the expected member identifier values. */
   @Test
   public void shouldIncludeMemberIdentifier() {
     Identifier mbId =
@@ -189,6 +215,7 @@ public final class BeneficiaryTransformerV2Test {
     assertTrue(compare.equalsDeep(mbId));
   }
 
+  /** Tests that the transformer sets the expected medicare extensions with ids. */
   @Test
   public void shouldIncludeMedicareExtensionIdentifierCurrent() {
     Identifier mcId =
@@ -225,6 +252,10 @@ public final class BeneficiaryTransformerV2Test {
     assertTrue(compare.equalsDeep(mcId));
   }
 
+  /**
+   * Tests that the transformer sets the expected medicare extensions and values when include mbi is
+   * set.
+   */
   @Test
   public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
@@ -273,7 +304,7 @@ public final class BeneficiaryTransformerV2Test {
 
     compareIdentList.add(ident);
 
-    /**
+    /*
      * We have implemented a rule that for a valid MBI history record it has to have an end date; if
      * no end date then the MBI has probably been provided by the CURRENT MBI extension. the
      * following code is therefore commented out until the current Sample_A rif data provides a
@@ -308,7 +339,7 @@ public final class BeneficiaryTransformerV2Test {
     }
   }
 
-  /** Top level Extension(s) */
+  /** Tests that the transformer sets the expected race extension entries. */
   @Test
   public void shouldHaveRaceExtension() {
     assertNotNull(beneficiary.getRace());
@@ -326,8 +357,8 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}
-   * hanldes patient race Extension.
+   * Test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}
+   * handles patient race Extension.
    */
   @Test
   public void shouldHaveOmbCategoryExtension() {
@@ -361,8 +392,8 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}
-   * hanldes patient reference year extension.
+   * Test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}
+   * handles patient reference year extension.
    */
   @Test
   public void shouldHaveReferenceYearExtension() {
@@ -387,9 +418,9 @@ public final class BeneficiaryTransformerV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
-   * a reference year field not found.
+   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with a reference year field not found.
    */
   @Test
   public void shouldNotHaveReferenceYearExtension() {
@@ -464,8 +495,10 @@ public final class BeneficiaryTransformerV2Test {
 
   /**
    * helper function to verify that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} correctly handles patient Part D
+   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}* correctly handles patient Part D
    * attributee.
+   *
+   * @param dualId the dual id to verify
    */
   private void verifyDualResourceExtension(String dualId) {
     String uri = "https://bluebutton.cms.gov/resources/variables/" + dualId;
@@ -484,7 +517,7 @@ public final class BeneficiaryTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /** Top level beneficiary info */
+  /** Tests that the transformer sets the expected patient name. */
   @Test
   public void shouldMatchBeneficiaryName() {
     List<HumanName> name = patient.getName();
@@ -587,7 +620,7 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * test helper
+   * Parses a date from a string.
    *
    * @param value of date string
    * @return Date instance derived from value
@@ -601,7 +634,8 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * test helper
+   * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS}
+   * set to the given value.
    *
    * @param value of all include identifier values
    * @return RequestHeaders instance derived from value
@@ -612,7 +646,8 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * test helper
+   * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS}
+   * set to the given value.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value

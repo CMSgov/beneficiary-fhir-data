@@ -36,10 +36,11 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
+  /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
 
-  /** Valid ICD Types */
+  /** Valid ICD Types. */
   private static final List<String> VALID_ICD_TYPES = List.of("0", "9");
 
   /**
@@ -49,6 +50,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static final List<String> CANCELED_STATUS_CODES = List.of("r", "z", "9");
 
+  /** Instantiates a new Mcs claim transformer v2. */
   private McsClaimTransformerV2() {}
 
   /**

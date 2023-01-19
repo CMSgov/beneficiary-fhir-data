@@ -24,20 +24,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+/** Integration tests for the {@link gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao}. */
 public class ClaimDaoIT {
+  /** Test utils. */
   private static final RDATestUtils testUtils = new RDATestUtils();
+  /** The test metric registry. */
   private final MetricRegistry metricRegistry = new MetricRegistry();
 
+  /** Initializes test resources. */
   @BeforeAll
   public static void init() {
     testUtils.init();
   }
 
+  /** Cleans up testing resources after all tests have run. */
   @AfterAll
   public static void tearDown() {
     testUtils.destroy();
   }
 
+  /** Cleans up the database resources after each test. */
   @AfterEach
   public void cleanupDatabase() {
     testUtils.getEntityManager().clear();
@@ -123,7 +129,7 @@ public class ClaimDaoIT {
 
   /**
    * Verifies that doing a claims search with an unknown MBI hash returns no results even with old
-   * hash enabled
+   * hash enabled.
    */
   @Test
   public void verifyQueryWithOldHashEnabledAndUnknownHashFindsNothing() {

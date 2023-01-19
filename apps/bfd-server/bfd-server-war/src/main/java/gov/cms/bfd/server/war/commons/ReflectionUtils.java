@@ -3,9 +3,15 @@ package gov.cms.bfd.server.war.commons;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+/**
+ * Utilities for working with reflection.
+ *
+ * <p>Note that to avoid illegal access issues, reflection should not be used to modify classes
+ * outside this package.
+ */
 public class ReflectionUtils {
   /**
-   * Helper function to look up method names and optionally attempt to execute
+   * Helper function to look up method names and optionally attempt to execute.
    *
    * @param <T> the type parameter
    * @param obj the object with the specified method

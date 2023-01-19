@@ -13,9 +13,13 @@ import java.util.Date;
 import org.apache.spark.util.sketch.BloomFilter;
 import org.junit.jupiter.api.Test;
 
-/** Tests for {@link gov.cms.bfd.server.war.stu3.providers.LoadedFileFilter}. */
+/** Tests for {@link LoadedFileFilter}. */
 public final class LoadedFilterTest {
 
+  /**
+   * Test that {@link LoadedFileFilter#matchesDateRange} correctly works for various date range
+   * cases.
+   */
   @Test
   public void testMatchesDateRange() {
     final BloomFilter emptyFilter = LoadedFileFilter.createFilter(10);
@@ -75,6 +79,7 @@ public final class LoadedFilterTest {
     assertTrue(filter1.matchesDateRange(sevenSeconds), "Expected partial match to match");
   }
 
+  /** Test {@link LoadedFileFilter#mightContain} works for a few values. */
   @Test
   public void testMightContain() {
     // Very small test on the Guava implementation of BloomFilters. Assume this package works.

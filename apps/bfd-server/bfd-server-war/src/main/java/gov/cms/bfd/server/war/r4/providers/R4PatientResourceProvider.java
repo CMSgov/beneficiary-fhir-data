@@ -84,23 +84,51 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
+  /**
+   * The header key used to determine which header should be used. See {@link
+   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
+   */
+  public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
+
+  /**
+   * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
+   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
+   */
+  public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
+      Arrays.asList("true", "false", "mbi");
+
+  /** The Entity manager. */
   private EntityManager entityManager;
+  /** The Metric registry. */
   private MetricRegistry metricRegistry;
+  /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
-  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
+  /**
+   * Sets the {@link #entityManager}.
+   *
+   * @param entityManager a JPA {@link EntityManager} connected to the application's database
+   */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /** @param metricRegistry the {@link MetricRegistry} to use */
+  /**
+   * Sets the {@link #metricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
+  /**
+   * Sets the {@link #loadedFilterManager}.
+   *
+   * @param loadedFilterManager the {@link LoadedFilterManager} to use
+   */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
@@ -271,6 +299,15 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     return bundle;
   }
 
+  /**
+   * Search by coverage contract.
+   *
+   * @param coverageId the coverage id
+   * @param referenceYear the reference year
+   * @param cursor the cursor for paging
+   * @param requestDetails the request details
+   * @return the bundle representing the results
+   */
   @Search
   @Trace
   public Bundle searchByCoverageContract(
@@ -310,6 +347,14 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     return searchByCoverageContractAndYearMonth(coverageId, ym.atDay(1), requestDetails);
   }
 
+  /**
+   * Search by coverage contract by field name.
+   *
+   * @param coverageId the coverage id
+   * @param cursor the cursor
+   * @param requestDetails the request details
+   * @return the bundle representing the results
+   */
   public Bundle searchByCoverageContractByFieldName(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -350,6 +395,16 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     return bundle;
   }
 
+  /**
+   * Get the {@link CcwCodebookVariable} value for the specified system string.
+   *
+   * <p>TODO: Move this out of here into a shared/generic location and rename method
+   *
+   * @param system the system to find the {@link CcwCodebookVariable} for
+   * @return the ccw codebook variable
+   * @throws InvalidRequestException (http 400 error) if the system did not match a known {@link
+   *     CcwCodebookVariable}
+   */
   private CcwCodebookVariable partDCwVariableFor(String system) {
     try {
       return CcwCodebookVariable.valueOf(system.toUpperCase());
@@ -358,6 +413,17 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
   }
 
+  /**
+   * Gets the part D contract id field from the given {@link CcwCodebookVariable}.
+   *
+   * <p>TODO: This could be moved somewhere else; also should this hardcoded map exist in a more
+   * central location?
+   *
+   * @param month the part d contract variable to look for as a {@link CcwCodebookVariable}
+   * @return the string representing the part d contract
+   * @throws InvalidRequestException if the {@link CcwCodebookVariable} is not one of the supported
+   *     part d contract months
+   */
   private String partDFieldFor(CcwCodebookVariable month) {
     Map<CcwCodebookVariable, String> mapOfMonth =
         new HashMap<CcwCodebookVariable, String>() {
@@ -386,7 +452,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
   /**
    * Fetch beneficiaries for the PartD coverage parameter. If includeIdentiers are present then the
-   * entity mappings are fetched as well
+   * entity mappings are fetched as well.
    *
    * @param coverageId coverage type
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
@@ -426,13 +492,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Build a criteria for a general Beneficiary query
+   * Build a criteria for a general Beneficiary query.
    *
    * @param field to match on
    * @param value to match on
    * @param paging to use for the result set
-   * @param identifiers to add for many-to-one relations
-   * @return the criteria
+   * @param requestHeader the request header
+   * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
@@ -485,12 +551,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Build a criteria for a general beneficiaryId query
+   * Build a criteria for a general beneficiaryId query.
    *
    * @param field to match on
    * @param value to match on
    * @param paging to use for the result set
-   * @return the criteria
+   * @return the query object
    */
   private TypedQuery<String> queryBeneficiaryIds(
       String field, String value, PatientLinkBuilder paging) {
@@ -519,11 +585,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Build a criteria for a beneficiary query using the passed in list of ids
+   * Build a criteria for a beneficiary query using the passed in list of ids.
    *
    * @param ids to use
-   * @param identifiers to add for many-to-one relations
-   * @return the criteria
+   * @param requestHeader the request header
+   * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(
       List<String> ids, RequestHeaders requestHeader) {
@@ -633,9 +699,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
+   * Queries the database by hicn hash.
+   *
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -648,9 +715,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
+   * Queries the database by mbi hash.
+   *
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -663,12 +731,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
+   * Queries the database by the specified hash type.
+   *
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -819,8 +888,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Following method will bring back the Beneficiary that has the most recent rfrnc_yr since there
-   * may be more than bene id in the Beneficiaries table
+   * Returns the Beneficiary that has the most recent rfrnc_yr, since there may be more than bene id
+   * in the Beneficiaries table.
    *
    * @param duplicateBenes of matching Beneficiary records the {@link
    *     Beneficiary#getBeneficiaryId()} value to match
@@ -849,20 +918,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * The header key used to determine which header should be used. See {@link
-   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
-   */
-  public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
-
-  /**
-   * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
-   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
-   */
-  public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-      Arrays.asList("true", "false", "mbi");
-
-  /**
-   * Return a valid List of values for the IncludeIdenfifiers header
+   * Returns a valid List of values for the IncludeIdenfifiers header.
    *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out include identifiers values
@@ -909,11 +965,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         || includeIdentifiersValues.contains("true");
   }
 
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
-
   /**
-   * Check that coverageId value is valid
+   * Check that coverageId value is valid.
    *
    * @param coverageId the coverage id
    * @throws InvalidRequestException if invalid coverageId
@@ -928,7 +981,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Query the DB for and return the matching {@link Beneficiary}s
+   * Query the DB for and return the matching {@link Beneficiary}s.
    *
    * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
    * @return the matching {@link Beneficiary}s
@@ -969,6 +1022,17 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
   }
 
+  /**
+   * Gets the part D contract month field from the given {@link CcwCodebookVariable}.
+   *
+   * <p>TODO: This could be moved somewhere else; also should this hardcoded map exist in a more
+   * central location?
+   *
+   * @param month the part d contract variable to look for as a {@link CcwCodebookVariable}
+   * @return the string representing the part d contract month
+   * @throws InvalidRequestException if the {@link CcwCodebookVariable} is not one of the supported
+   *     part d contract values
+   */
   private String partDFieldByMonth(CcwCodebookVariable month) {
 
     Map<CcwCodebookVariable, String> mapOfMonth =
@@ -997,6 +1061,14 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
 
+  /**
+   * Search by coverage contract and year month.
+   *
+   * @param coverageId the coverage id
+   * @param yearMonth the year month
+   * @param requestDetails the request details
+   * @return the search results
+   */
   @Trace
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
@@ -1046,6 +1118,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
+   * Fetch beneficiaries by contract and year-month.
+   *
    * @param coverageId a {@link TokenParam} specifying the Part D contract ID and the month to match
    *     against (yeah, the combo is weird)
    * @param yearMonth the enrollment month and year to match against
@@ -1094,6 +1168,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
+   * Query bene count by part d contract code and year-month.
+   *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
@@ -1136,6 +1212,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
+   * Query beneficiary ids by part d contract code and year-month.
+   *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
