@@ -74,10 +74,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the MCS {@link RdaMcsClaim} to transform
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
+  static ClaimResponse transform(
+      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }

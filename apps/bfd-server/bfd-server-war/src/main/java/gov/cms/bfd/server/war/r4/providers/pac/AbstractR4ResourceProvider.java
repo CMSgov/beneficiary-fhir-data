@@ -21,6 +21,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.SpringConfiguration;
+import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
@@ -59,7 +60,7 @@ import org.hl7.fhir.r4.model.Resource;
  * @param <T> The specific fhir resource the concrete provider will serve.
  */
 public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
-    implements IResourceProvider {
+    extends AbstractResourceProvider implements IResourceProvider {
 
   /**
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
@@ -152,6 +153,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Read
   @Trace
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
+    final boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
+
     if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
     if (claimId.getVersionIdPartAsLong() != null)
       throw new IllegalArgumentException("Resource ID must not define a version.");
@@ -178,7 +181,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    return claimIdType.getTransformer().transform(metricRegistry, claimEntity);
+    return claimIdType.getTransformer().transform(metricRegistry, claimEntity, includeTaxNumbers);
   }
 
   /**
@@ -267,6 +270,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
       boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
+      boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
       OffsetLinkBuilder paging =
           new OffsetLinkBuilder(
@@ -276,26 +280,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         TransformerUtilsV2.logMbiHashToMdc(mbiString);
       }
 
+      BundleOptions bundleOptions = new BundleOptions(isHashed, excludeSamhsa, includeTaxNumbers);
+
       if (types != null) {
         bundleResource =
             createBundleFor(
-                parseClaimTypes(types),
-                mbiString,
-                isHashed,
-                excludeSamhsa,
-                lastUpdated,
-                serviceDate,
-                paging);
+                parseClaimTypes(types), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       } else {
         bundleResource =
             createBundleFor(
-                getResourceTypes(),
-                mbiString,
-                isHashed,
-                excludeSamhsa,
-                lastUpdated,
-                serviceDate,
-                paging);
+                getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
 
       return bundleResource;
@@ -309,32 +303,36 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *
    * @param resourceTypes The {@link ResourceTypeV2} data to retrieve.
    * @param mbi The mbi to look up associated data for.
-   * @param isHashed Denotes if the given mbi is hashed.
    * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
    * @param serviceDate Date range of the desired service date to retrieve data for.
    * @param paging Pagination details for the bundle
+   * @param bundleOptions Bundle related options that affect the results.
    * @return A Bundle with data found using the provided parameters.
    */
   @VisibleForTesting
   Bundle createBundleFor(
       Set<ResourceTypeV2<T, ?>> resourceTypes,
       String mbi,
-      boolean isHashed,
-      boolean excludeSamhsa,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
-      OffsetLinkBuilder paging) {
+      OffsetLinkBuilder paging,
+      BundleOptions bundleOptions) {
     List<T> resources = new ArrayList<>();
 
     for (ResourceTypeV2<T, ?> type : resourceTypes) {
       List<?> entities;
 
-      entities = claimDao.findAllByMbiAttribute(type, mbi, isHashed, lastUpdated, serviceDate);
+      entities =
+          claimDao.findAllByMbiAttribute(
+              type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate);
 
       resources.addAll(
           entities.stream()
-              .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
-              .map(e -> type.getTransformer().transform(metricRegistry, e))
+              .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
+              .map(
+                  e ->
+                      type.getTransformer()
+                          .transform(metricRegistry, e, bundleOptions.includeTaxNumbers))
               .collect(Collectors.toList()));
     }
 
@@ -364,14 +362,31 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     Claim claim;
 
     if (entity instanceof RdaFissClaim) {
-      claim = FissClaimTransformerV2.transform(metricRegistry, entity);
+      claim = FissClaimTransformerV2.transform(metricRegistry, entity, false);
     } else if (entity instanceof RdaMcsClaim) {
-      claim = McsClaimTransformerV2.transform(metricRegistry, entity);
+      claim = McsClaimTransformerV2.transform(metricRegistry, entity, false);
     } else {
       throw new IllegalArgumentException(
           "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");
     }
 
     return !samhsaMatcher.test(claim);
+  }
+
+  /** Helper class for passing bundle result options */
+  private static class BundleOptions {
+
+    /** Indicates if the given MBI of the search request was hashed */
+    private final boolean isHashed;
+    /** Indicates if SAMHSA data should be excluded from the bundle results */
+    private final boolean excludeSamhsa;
+    /** Indicates if the tax numbers should be included in the bundle results */
+    private final boolean includeTaxNumbers;
+
+    private BundleOptions(boolean isHashed, boolean excludeSamhsa, boolean includeTaxNumbers) {
+      this.isHashed = isHashed;
+      this.excludeSamhsa = excludeSamhsa;
+      this.includeTaxNumbers = includeTaxNumbers;
+    }
   }
 }
