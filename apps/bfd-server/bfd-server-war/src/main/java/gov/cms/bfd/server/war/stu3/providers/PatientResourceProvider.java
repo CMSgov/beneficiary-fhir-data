@@ -88,6 +88,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   private MetricRegistry metricRegistry;
   /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
+
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
   /**

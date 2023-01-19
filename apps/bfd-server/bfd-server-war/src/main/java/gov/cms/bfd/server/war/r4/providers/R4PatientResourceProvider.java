@@ -103,6 +103,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private MetricRegistry metricRegistry;
   /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
+
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
   /**
