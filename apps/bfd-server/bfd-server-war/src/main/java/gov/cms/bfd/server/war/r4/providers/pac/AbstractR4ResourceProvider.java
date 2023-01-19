@@ -413,16 +413,23 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     return !samhsaMatcher.test(claim);
   }
 
-  /** Helper class for passing bundle result options */
+  /** Helper class for passing bundle result options. */
   private static class BundleOptions {
 
-    /** Indicates if the given MBI of the search request was hashed */
+    /** Indicates if the given MBI of the search request was hashed. */
     private final boolean isHashed;
-    /** Indicates if SAMHSA data should be excluded from the bundle results */
+    /** Indicates if SAMHSA data should be excluded from the bundle results. */
     private final boolean excludeSamhsa;
-    /** Indicates if the tax numbers should be included in the bundle results */
+    /** Indicates if the tax numbers should be included in the bundle results. */
     private final boolean includeTaxNumbers;
 
+    /**
+     * Instantiates a new Bundle options.
+     *
+     * @param isHashed whether to hash the mbi
+     * @param excludeSamhsa whether to exclude samhsa
+     * @param includeTaxNumbers whether to include tax numbers
+     */
     private BundleOptions(boolean isHashed, boolean excludeSamhsa, boolean includeTaxNumbers) {
       this.isHashed = isHashed;
       this.excludeSamhsa = excludeSamhsa;

@@ -61,7 +61,7 @@ public class R4ClaimResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
-   * specific ID with tax numbers included
+   * specific ID with tax numbers included.
    */
   @Test
   public void shouldGetCorrectFissClaimResourceByIdWithTaxNumbers() {
@@ -99,7 +99,7 @@ public class R4ClaimResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
-   * specific ID with tax numbers included
+   * specific ID with tax numbers included.
    */
   @Test
   public void shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers() {
