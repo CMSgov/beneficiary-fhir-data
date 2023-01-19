@@ -3289,7 +3289,6 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param bloodDeductibleLiabilityAmount NCH_BENE_BLOOD_DDCTBL_LBLTY_AM
-   * @param claimQueryCode CLAIM_QUERY_CODE
    * @param mcoPaidSw CLM_MCO_PD_SW
    */
   static void mapEobCommonGroupInpOutSNF(

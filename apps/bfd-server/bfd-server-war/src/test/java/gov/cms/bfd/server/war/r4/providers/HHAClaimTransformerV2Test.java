@@ -168,11 +168,7 @@ public class HHAClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2015-06-23"), eob.getBillablePeriod().getEnd());
   }
 
-  /**
-   * This test is to make sure the billable period is not set if claim query code is null.
-   *
-   * @throws Exception
-   */
+  /** Tests that the billable period is not set if claim query code is null. */
   public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
