@@ -610,13 +610,13 @@
         },
         {
             "height": 6,
-            "width": 12,
+            "width": 8,
             "y": 36,
-            "x": 0,
+            "x": 8,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1", "period": 86400 } ],
                     [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
                     [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
                 ],
@@ -624,17 +624,17 @@
                 "view": "timeSeries",
                 "region": "us-east-1",
                 "stat": "Sum",
-                "period": 2592000,
+                "period": 86400,
                 "setPeriodToTimeRange": false,
                 "trend": true,
                 "singleValueFullPrecision": true,
-                "title": "% Uptime over 30-day Period",
+                "title": "% Uptime over 24-Hour Period",
                 "stacked": false,
                 "annotations": {
                     "horizontal": [
                         {
                             "label": "Alert threshold",
-                            "value": 99.8
+                            "value": 99
                         },
                         {
                             "label": "Warning threshold",
@@ -656,9 +656,9 @@
         },
         {
             "height": 6,
-            "width": 12,
+            "width": 8,
             "y": 36,
-            "x": 12,
+            "x": 16,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -691,6 +691,41 @@
                     "left": {
                         "label": "Count",
                         "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "gauge",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 2592000,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "% Uptime over 30-day Period",
+                "stacked": false,
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "label": "% Uptime",
+                        "showUnits": false,
+                        "min": 99.8
                     },
                     "right": {
                         "showUnits": false
