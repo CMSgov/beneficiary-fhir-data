@@ -102,15 +102,22 @@ locals {
   }
 
   availability_slo_uptime_percent_configs = {
-    slo_availability_uptime_percent_30days_warning = {
+    # CloudWatch Alarms have an upper limit of 1 day periods. Unfortunately, our SLO for
+    # availability is on a monthly-basis rather than daily, so this alarm does not exactly model
+    # that SLO. However, these alarms do give us more immediate and actionable feedback when the BFD
+    # Server is falling over, so there is some upside. The thresholds for warning and alert have
+    # been modified slightly with the significantly smaller period in-mind, and any failing checks
+    # at all (between 100% and 99.8% uptime per-day) will be caught by the other availability alarm
+    # TODO: Determine some method of alarming on the agreed-upon monthly availability SLO
+    slo_availability_uptime_percent_24hr_warning = {
       type      = "warning"
-      period    = 30 * 24 * 60 * 60
-      threshold = "100"
-    }
-    slo_availability_uptime_percent_30days_alert = {
-      type      = "alert"
-      period    = 30 * 24 * 60 * 60
+      period    = 24 * 60 * 60
       threshold = "99.8"
+    }
+    slo_availability_uptime_percent_24hr_alert = {
+      type      = "alert"
+      period    = 24 * 60 * 60
+      threshold = "99"
     }
   }
 
