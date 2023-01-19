@@ -9,3 +9,9 @@ variable "force_etl_user_creation" {
   description = "Force an etl service account creation; only `prod` typically creates an etl service account."
   type        = string
 }
+
+variable "jdbc_suffix" {
+  default     = "?logServerErrorDetail=false"
+  description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
+  type        = string
+}

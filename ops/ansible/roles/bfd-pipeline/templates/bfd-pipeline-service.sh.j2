@@ -66,5 +66,5 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
-	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
+	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
