@@ -9,3 +9,15 @@ variable "force_etl_user_creation" {
   description = "Force an etl service account creation; only `prod` typically creates an etl service account."
   type        = string
 }
+
+variable "create_ccw_pipeline" {
+  default     = true
+  description = "Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default."
+  type        = bool
+}
+
+variable "create_rda_pipeline" {
+  default     = true
+  description = "Creates a BFD Pipeline to run RDA jobs; CCW Rif jobs on the pipeline are disabled by default."
+  type        = bool
+}

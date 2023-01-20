@@ -17,8 +17,8 @@ locals {
 
   # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
   pipeline_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/pipeline/sensitive/data_pipeline_db_username" = "/bfd/${local.seed_env}/pipeline/sensitive/data_pipeline_db_username",
-    "/bfd/${local.env}/pipeline/sensitive/data_pipeline_db_password" = "/bfd/${local.seed_env}/pipeline/sensitive/data_pipeline_db_password"
+    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_username" = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_username",
+    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_password" = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_password"
   } : {}
 }
 

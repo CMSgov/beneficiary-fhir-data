@@ -28,21 +28,23 @@
 # NOTE: At the time of this writing, there is less emphasis on pipeline instances in ephemeral environments
 # PIPELINE CONFIGURATION
 ## PIPELINE GENERAL
-/bfd/${env}/pipeline/nonsensitive/bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_dir: *bfdPipelineDir
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_host: *newRelicMetricHost
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_user: bb-etl
-/bfd/${env}/pipeline/nonsensitive/instance_type: m5a.large
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_enabled: false
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_micrometer_cw_interval: PT1M
+/bfd/${env}/pipeline/shared/nonsensitive/bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_dir: *bfdPipelineDir
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_user: bb-etl
+/bfd/${env}/pipeline/shared/nonsensitive/instance_type: m5a.large
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_micrometer_cw_enabled: false
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
+/bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_micrometer_cw_interval: PT1M
 ## PIPELINE CCW
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_idempotency_required: false
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
 ## PIPELINE RDA
-/bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_enabled: false
+/bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
+/bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_enabled: false
 
 
 # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.

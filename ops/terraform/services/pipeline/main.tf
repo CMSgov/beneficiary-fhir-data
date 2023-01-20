@@ -4,8 +4,6 @@ locals {
   layer               = "data"
   established_envs    = ["test", "prod-sbx", "prod"]
   create_etl_user     = local.is_prod || var.force_etl_user_creation
-  create_ccw_pipeline = true
-  create_rda_pipeline = true
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
@@ -107,7 +105,7 @@ locals {
 }
 
 resource "aws_instance" "ccw" {
-  count = local.create_ccw_pipeline ? 1 : 0
+  count = var.create_ccw_pipeline ? 1 : 0
 
   ami                                  = local.ami_id
   associate_public_ip_address          = false
@@ -131,7 +129,7 @@ resource "aws_instance" "ccw" {
 
   tenancy = "default"
 
-  user_data = templatefile("${path.module}/user-data-shared.sh.tftpl", {
+  user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     account_id      = local.account_id
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
@@ -180,7 +178,7 @@ resource "aws_instance" "ccw" {
 }
 
 resource "aws_instance" "rda" {
-  count                                = local.create_rda_pipeline ? 1 : 0
+  count                                = var.create_rda_pipeline ? 1 : 0
 
   ami                                  = local.ami_id
   associate_public_ip_address          = false
@@ -204,7 +202,7 @@ resource "aws_instance" "rda" {
 
   tenancy = "default"
 
-  user_data = templatefile("${path.module}/user-data-shared.sh.tftpl", {
+  user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     account_id      = local.account_id
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
