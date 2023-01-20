@@ -89,6 +89,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
+  /** The expected coverage id length. */
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
   /**

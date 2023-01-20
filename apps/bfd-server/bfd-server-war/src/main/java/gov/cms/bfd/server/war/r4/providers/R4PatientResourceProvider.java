@@ -104,6 +104,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
+  /** The expected coverage id length. */
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
   /**
