@@ -21,12 +21,12 @@ locals {
   }
 
   # NOTE: nonsensitive service-oriented and common config
-  nonsensitive_common_map     = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
-  nonsensitive_common_config  = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
+  nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
+  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
 
   nonsensitive_ccw_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_ccw.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_ccw.values))
   nonsensitive_ccw_service_config = { for key, value in local.nonsensitive_ccw_service_map : split("/", key)[6] => value }
-  
+
   nonsensitive_rda_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_rda.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_rda.values))
   nonsensitive_rda_service_config = { for key, value in local.nonsensitive_rda_service_map : split("/", key)[6] => value }
 
@@ -131,11 +131,11 @@ resource "aws_instance" "ccw" {
   tenancy = "default"
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    account_id      = local.account_id
-    env             = local.env
-    pipeline_bucket = aws_s3_bucket.this.bucket
+    account_id        = local.account_id
+    env               = local.env
+    pipeline_bucket   = aws_s3_bucket.this.bucket
     pipeline_job_type = "ccw"
-    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
+    writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
   })
 
   volume_tags = merge(
@@ -179,7 +179,7 @@ resource "aws_instance" "ccw" {
 }
 
 resource "aws_instance" "rda" {
-  count                                = var.create_rda_pipeline ? 1 : 0
+  count = var.create_rda_pipeline ? 1 : 0
 
   ami                                  = local.ami_id
   associate_public_ip_address          = false
@@ -204,11 +204,11 @@ resource "aws_instance" "rda" {
   tenancy = "default"
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    account_id      = local.account_id
-    env             = local.env
-    pipeline_bucket = aws_s3_bucket.this.bucket
+    account_id        = local.account_id
+    env               = local.env
+    pipeline_bucket   = aws_s3_bucket.this.bucket
     pipeline_job_type = "rda"
-    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
+    writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
   })
 
   volume_tags = merge(
