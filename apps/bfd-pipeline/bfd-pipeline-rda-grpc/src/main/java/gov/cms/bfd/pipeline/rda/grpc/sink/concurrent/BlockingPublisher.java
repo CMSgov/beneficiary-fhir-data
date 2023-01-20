@@ -1,9 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import java.util.concurrent.Semaphore;
+import javax.annotation.Nonnull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.scheduler.Scheduler;
 
 /**
  * Publishes messages to a {@link Flux}. Uses a semaphore to limit the number of unconsumed messages
@@ -19,24 +20,16 @@ public class BlockingPublisher<T> {
   private final Sinks.Many<T> reactiveSink;
   /** {@link Flux} that subscribers use to receive messages. */
   private final Flux<T> flux;
-  /** Used to synchronize calls to {@link #emit} and {@link #complete} */
-  private final Object lock = new Object();
-  /** Used to prevent emitting any messages once {@link #complete} has been caleld. */
-  private boolean completed;
 
   /**
    * Creates an instance with the specified limit on number of unconsumed messages.
    *
    * @param maxAvailable number of unconsumed messages allowed at any given time
    */
-  public BlockingPublisher(int maxAvailable) {
+  public BlockingPublisher(int maxAvailable, Scheduler scheduler) {
     available = new Semaphore(maxAvailable, true);
     reactiveSink = Sinks.many().unicast().onBackpressureBuffer();
-    flux =
-        reactiveSink
-            .asFlux()
-            .publishOn(Schedulers.boundedElastic())
-            .doOnNext(o -> available.release());
+    flux = reactiveSink.asFlux().publishOn(scheduler).doOnNext(o -> available.release());
   }
 
   /**
@@ -48,19 +41,12 @@ public class BlockingPublisher<T> {
    */
   public void emit(T message) throws InterruptedException {
     available.acquire();
-    synchronized (lock) {
-      if (!completed) {
-        reactiveSink.emitNext(message, Sinks.EmitFailureHandler.FAIL_FAST);
-      }
-    }
+    reactiveSink.emitNext(message, Sinks.EmitFailureHandler.FAIL_FAST);
   }
 
   /** Sends a completed signal to subscribers. */
   public void complete() {
-    synchronized (lock) {
-      completed = true;
-      reactiveSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
-    }
+    reactiveSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
   }
 
   /**
@@ -68,6 +54,7 @@ public class BlockingPublisher<T> {
    *
    * @return
    */
+  @Nonnull
   public Flux<T> flux() {
     return flux;
   }

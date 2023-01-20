@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
@@ -12,10 +11,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
@@ -25,11 +26,13 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TClaim> {
   private final Object lock = new Object();
+  private final Message<TMessage> FlushMessage = new Message<>(null, 0, null, null);
 
   /** Used to assign claims to workers based on their claimId values. */
   private static final HashFunction Hasher = Hashing.goodFastHash(64);
@@ -78,24 +81,23 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     claimWriters =
         IntStream.rangeClosed(1, maxThreads)
             .boxed()
-            .map(i -> new ClaimWriter<>(i, sinkFactory.get()))
-            .collect(ImmutableList.toImmutableList());
+            .map(writerId -> new ClaimWriter<>(writerId, sinkFactory.get(), batchSize))
+            .collect(Collectors.toUnmodifiableList());
     sequenceNumberWriter = new SequenceNumberWriter<>(sinkFactory.get(), sequenceNumbers);
     running = true;
     prevProcessedCount = 0;
     currentProcessedCount = 0;
     error = null;
-    latch = new CountDownLatch(2);
-    publisher = new BlockingPublisher<>(batchSize * maxThreads * 3);
-    var claimPartitioner = new StringPartitioner<>(claimWriters);
-    var claimWriterScheduler =
+    latch = new CountDownLatch(2); // one each for claim and sequence number fluxes
+    final var claimWriterScheduler =
         Schedulers.newBoundedElastic(
-            claimWriters.size(),
-            25 * claimWriters.size(),
-            "ClaimWriter-" + sink.getClass().getSimpleName());
-    var sequenceNumberWriterScheduler =
+            maxThreads, maxThreads, "ClaimWriter-" + sink.getClass().getSimpleName());
+    final var sequenceNumberWriterScheduler =
         Schedulers.newBoundedElastic(
-            1, 25, "SequenceNumberWriter-" + sink.getClass().getSimpleName());
+            1, 1, "SequenceNumberWriter-" + sink.getClass().getSimpleName());
+    final var otherScheduler = Schedulers.boundedElastic();
+    final var claimPartitioner = new StringPartitioner<>(claimWriters);
+    publisher = new BlockingPublisher<>(batchSize, otherScheduler);
     var claimProcessing =
         publisher
             .flux()
@@ -103,9 +105,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             .flatMap(
                 group ->
                     group
+                        .concatWithValues(FlushMessage)
                         .publishOn(claimWriterScheduler)
-                        .bufferTimeout(batchSize, Duration.ofSeconds(30), claimWriterScheduler)
-                        .flatMap(message -> group.key().writeBuffer(message), claimWriters.size()))
+                        .concatMap(message -> group.key().processMessage(message)),
+                maxThreads)
+            .publishOn(otherScheduler)
             .doFinally(o -> latch.countDown())
             .subscribe(this::processResult, this::processError);
     var sequenceNumberProcessing =
@@ -273,11 +277,16 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   @Data
+  @AllArgsConstructor
   private static class Message<TMessage> {
     private final String claimId;
     private final long sequenceNumber;
     private final String apiVersion;
     private final TMessage message;
+
+    private boolean isFlush() {
+      return claimId == null;
+    }
   }
 
   @AllArgsConstructor
@@ -304,7 +313,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       if (newSequenceNumber != lastSequenceNumber) {
         try {
           sink.updateLastSequenceNumber(newSequenceNumber);
-          log.info(
+          log.debug(
               "SequenceNumberWriter updated last={} new={}", lastSequenceNumber, newSequenceNumber);
           lastSequenceNumber = newSequenceNumber;
           return Flux.just(newSequenceNumber);
@@ -329,35 +338,51 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private static class ClaimWriter<TMessage, TClaim> {
     @EqualsAndHashCode.Include private final int id;
     private final RdaSink<TMessage, TClaim> sink;
+    private final int batchSize;
+    private final List<Message<TMessage>> messageBuffer;
+    private final Map<String, TClaim> claimBuffer;
 
-    private ClaimWriter(int id, RdaSink<TMessage, TClaim> sink) {
+    private ClaimWriter(int id, RdaSink<TMessage, TClaim> sink, int batchSize) {
       this.id = id;
       this.sink = sink;
+      this.batchSize = batchSize;
+      messageBuffer = new ArrayList<>();
+      claimBuffer = new LinkedHashMap<>();
     }
 
-    private Flux<Result<TMessage>> writeBuffer(List<Message<TMessage>> allMessages) {
-      final var uniqueMessages = new LinkedHashMap<String, Message<TMessage>>();
-      for (Message<TMessage> message : allMessages) {
-        uniqueMessages.put(message.claimId, message);
-      }
-      final var batch = new ArrayList<TClaim>();
+    private Mono<Result<TMessage>> processMessage(Message<TMessage> message) {
+      Mono<Result<TMessage>> result = Mono.empty();
       try {
-        for (Message<TMessage> message : uniqueMessages.values()) {
+        var writeNeeded = false;
+        if (message.isFlush()) {
+          writeNeeded = claimBuffer.size() > 0;
+        } else {
           final var claim = sink.transformMessage(message.apiVersion, message.message);
-          batch.add(claim);
+          messageBuffer.add(message);
+          claimBuffer.put(message.claimId, claim);
+          writeNeeded = claimBuffer.size() >= batchSize;
         }
-        final int processed = sink.writeClaims(batch);
-        log.info(
-            "ClaimWriter {} wrote unique={} all={} processed={}",
-            id,
-            uniqueMessages.size(),
-            allMessages.size(),
-            processed);
-        return Flux.just(new Result<>(processed, allMessages));
+        if (writeNeeded) {
+          var messages = List.copyOf(messageBuffer);
+          var claims = List.copyOf(claimBuffer.values());
+          messageBuffer.clear();
+          claimBuffer.clear();
+          final int processed = sink.writeClaims(claims);
+          if (log.isDebugEnabled()) {
+            log.debug(
+                "ClaimWriter {} wrote unique={} all={} processed={}",
+                id,
+                claims.size(),
+                messages.size(),
+                processed);
+          }
+          result = Mono.just(new Result<>(processed, messages));
+        }
       } catch (Exception ex) {
         log.error("ClaimWriter {} error: {}", id, ex.getMessage(), ex);
-        return Flux.error(ex);
+        result = Mono.error(ex);
       }
+      return result;
     }
 
     private void close() throws Exception {
