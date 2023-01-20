@@ -40,7 +40,7 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
-/bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m5.xlarge
+/bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
 ## PIPELINE+RDA
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_enabled: true 
@@ -53,7 +53,7 @@
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_write_threads: 5
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_process_dlq: false
-/bfd/${env}/pipeline/rda/nonsensitive/instance_type: m6i.large
+/bfd/${env}/pipeline/rda/nonsensitive/instance_type: m5.xlarge
 
 # SERVER CONFIGURATION
 /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
