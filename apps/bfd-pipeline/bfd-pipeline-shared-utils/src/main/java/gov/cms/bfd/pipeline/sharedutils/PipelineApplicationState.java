@@ -20,19 +20,27 @@ import org.hibernate.tool.schema.Action;
  * #getPooledDataSource()}.
  */
 public final class PipelineApplicationState implements AutoCloseable {
+  /** The persistence unit name for the adjudicated pipeline. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+  /** The persistence unit name for the RDA (pre-adjudicated) pipeline. */
   public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
+  /** Registry for metering. */
   private final MeterRegistry meters;
+  /** Registry for metrics. */
   private final MetricRegistry metrics;
+  /** The pooled data source for communicating with the database. */
   private final HikariDataSource pooledDataSource;
+  /** Factory for the entity manager, used in persistence. */
   private final EntityManagerFactory entityManagerFactory;
+  /** Clock instance for timekeeping. */
   private final Clock clock;
 
   /**
    * Constructs a new {@link PipelineApplicationState} instance using a pre-existing pooled data
    * DataSource. This is the standard constructor used by PipelineApplication.
    *
+   * @param meters the meters
    * @param metrics the value to use for {@link #getMetrics()}
    * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
    * @param persistenceUnitName the persistence unit name
@@ -57,6 +65,7 @@ public final class PipelineApplicationState implements AutoCloseable {
    * EntityManagerFactory. This constructor is intended for use by other constructors and specific
    * unit tests.
    *
+   * @param meters the meters
    * @param metrics the value to use for {@link #getMetrics()}
    * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
    * @param entityManagerFactory the value to use for {@link #getEntityManagerFactory()}
@@ -77,6 +86,8 @@ public final class PipelineApplicationState implements AutoCloseable {
   }
 
   /**
+   * Create pooled data source used to communicate with the database.
+   *
    * @param dbOptions the {@link DatabaseOptions} to use for the application's DB (which this will
    *     use to create {@link #getPooledDataSource()})
    * @param metrics the {@link MetricRegistry} to use
@@ -104,7 +115,10 @@ public final class PipelineApplicationState implements AutoCloseable {
   }
 
   /**
+   * Creates an entity manager factory.
+   *
    * @param pooledDataSource the JDBC {@link DataSource} for the application's database
+   * @param persistenceUnitName the persistence unit name
    * @return a JPA {@link EntityManagerFactory} for the application's database
    */
   private static EntityManagerFactory createEntityManagerFactory(
@@ -132,32 +146,52 @@ public final class PipelineApplicationState implements AutoCloseable {
     return entityManagerFactory;
   }
 
-  /** @return the {@link MeterRegistry} for the application */
+  /**
+   * Gets the {@link #meters}.
+   *
+   * @return the {@link MeterRegistry} for the application
+   */
   public MeterRegistry getMeters() {
     return meters;
   }
 
-  /** @return the {@link MetricRegistry} for the application */
+  /**
+   * Gets the {@link #metrics}.
+   *
+   * @return the {@link MetricRegistry} for the application
+   */
   public MetricRegistry getMetrics() {
     return metrics;
   }
 
-  /** @return the {@link HikariDataSource} that holds the application's database connection pool */
+  /**
+   * Gets the {@link #pooledDataSource}.
+   *
+   * @return the {@link HikariDataSource} that holds the application's database connection pool
+   */
   public HikariDataSource getPooledDataSource() {
     return pooledDataSource;
   }
 
-  /** @return the {@link EntityManagerFactory} for the application */
+  /**
+   * Gets the {@link #entityManagerFactory}.
+   *
+   * @return the {@link EntityManagerFactory} for the application
+   */
   public EntityManagerFactory getEntityManagerFactory() {
     return entityManagerFactory;
   }
 
-  /** @return the Clock to use within the application */
+  /**
+   * Gets the {@link #clock}.
+   *
+   * @return the Clock to use within the application
+   */
   public Clock getClock() {
     return clock;
   }
 
-  /** @see java.lang.AutoCloseable#close() */
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     if (entityManagerFactory.isOpen()) {

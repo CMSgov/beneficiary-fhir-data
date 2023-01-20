@@ -36,9 +36,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class SharedS3Utilities {
   /** The default AWS {@link Region} to interact with. */
   public static final Regions REGION_DEFAULT = Regions.US_EAST_1;
-
+  /** The bucket prefix for AWS. */
   private static final String BUCKET_NAME_PREFIX = "bb-test";
-
+  /** The bucket policy for AWS. */
   private static final String BUCKET_POLICY_TLS =
       "{"
           + " \"Version\": \"2012-10-17\","
@@ -74,6 +74,8 @@ public final class SharedS3Utilities {
   }
 
   /**
+   * Creates and returns a new s3 client via minio.
+   *
    * @param awsS3Region the AWS {@link Regions} that should be used when interacting with S3
    * @param minioConfig passes the minioConfig to use
    * @return the {@link AmazonS3} minio client to use
@@ -162,7 +164,7 @@ public final class SharedS3Utilities {
   }
 
   /**
-   * Deletes a bucket created by {@link createTestBucket} along with all of its contents.
+   * Deletes a bucket created by {@link #createTestBucket} along with all of its contents.
    *
    * @param s3Client the {@link AmazonS3} client to use
    * @param bucket the {@link Bucket} client to delete along with all of its contents
