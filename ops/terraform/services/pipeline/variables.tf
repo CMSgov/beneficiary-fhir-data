@@ -21,3 +21,9 @@ variable "create_rda_pipeline" {
   description = "Creates a BFD Pipeline to run RDA jobs; CCW Rif jobs on the pipeline are disabled by default."
   type        = bool
 }
+
+variable "jdbc_suffix" {
+  default     = "?logServerErrorDetail=false"
+  description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
+  type        = string
+}

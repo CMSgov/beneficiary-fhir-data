@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
+/** Tests for the {@link LoggingUtils}. */
 public class LoggingUtilsTest {
 
   /**

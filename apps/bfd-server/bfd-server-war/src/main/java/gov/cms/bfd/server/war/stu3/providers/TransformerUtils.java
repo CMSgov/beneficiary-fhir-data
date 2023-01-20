@@ -25,6 +25,7 @@ import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimColumn;
 import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.HospiceClaimColumn;
 import gov.cms.bfd.model.rif.HospiceClaimLine;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimColumn;
@@ -101,7 +102,6 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -119,6 +119,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,28 +153,28 @@ public final class TransformerUtils {
   /** Tracks the icd codes that have already had code lookup failures. */
   private static final Set<String> icdCodeLookupMissingFailures = new HashSet<>();
 
-  /** Stores the diagnosis ICD codes and their display values */
+  /** Stores the diagnosis ICD codes and their display values. */
   private static Map<String, String> icdMap = null;
 
-  /** Stores the procedure codes and their display values */
+  /** Stores the procedure codes and their display values. */
   private static Map<String, String> procedureMap = null;
 
   /** Tracks the procedure codes that have already had code lookup failures. */
   private static final Set<String> procedureLookupMissingFailures = new HashSet<>();
 
-  /** Stores the NPI codes and their display values */
+  /** Stores the NPI codes and their display values. */
   private static Map<String, String> npiMap = null;
 
   /** Tracks the NPI codes that have already had code lookup failures. */
   private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
 
   /**
+   * Adds an adjudication total to the specified {@link ExplanationOfBenefit}.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
    * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
-   *     category</code>
+   *          category</code>
    * @param amountValue the {@link Money#getValue()} for the adjudication total
-   * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
-   *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static void addAdjudicationTotal(
       ExplanationOfBenefit eob,
@@ -194,12 +195,12 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds an adjudication total to the specified {@link ExplanationOfBenefit}.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
    * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
-   *     category</code>
+   *          category</code>
    * @param totalAmountValue the {@link Money#getValue()} for the adjudication total
-   * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
-   *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static void addAdjudicationTotal(
       ExplanationOfBenefit eob, CcwCodebookInterface categoryVariable, Number totalAmountValue) {
@@ -207,6 +208,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new {@link Money} from the specified amount value.
+   *
    * @param amountValue the value to use for {@link Money#getValue()}
    * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
    */
@@ -224,6 +227,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new {@link Money} from the specified amount value.
+   *
    * @param amountValue the value to use for {@link Money#getValue()}
    * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
    */
@@ -232,6 +237,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds a benefit balance financial component to the specified {@link ExplanationOfBenefit}.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
    * @param benefitCategory the {@link BenefitCategory} (see {@link
    *     BenefitBalanceComponent#getCategory()}) for the {@link BenefitBalanceComponent} that the
@@ -261,6 +268,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Finds or adds a benefit balance component to the specified {@link ExplanationOfBenefit}.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
    * @param benefitCategory the {@link BenefitCategory} to map to {@link
    *     BenefitBalanceComponent#getCategory()}
@@ -358,6 +367,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Add diagnosis code to the specified {@link ExplanationOfBenefit}.
+   *
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
    * @param diagnosis the {@link Diagnosis} to add, if it's not already present
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
@@ -515,7 +526,7 @@ public final class TransformerUtils {
    * {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookInterface to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
    * @return the newly-added {@link SupportingInformationComponent} entry
    */
@@ -535,9 +546,8 @@ public final class TransformerUtils {
 
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
-   * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
-   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
-   * based on the values provided.
+   * {@link ExplanationOfBenefit}. Unlike {@link #addInformation}, this also sets the {@link
+   * SupportingInformationComponent#getCode()} based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
@@ -564,9 +574,8 @@ public final class TransformerUtils {
 
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
-   * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
-   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
-   * based on the values provided.
+   * {@link ExplanationOfBenefit}. Unlike {@link #addInformationWithCode}, this also sets the {@link
+   * SupportingInformationComponent#getCode()} based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
@@ -587,8 +596,10 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds a procedure code to the specified {@link ExplanationOfBenefit} if it does not exist.
+   *
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
-   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @param procedure the procedure
    * @return the {@link ProcedureComponent#getSequence()} of the existing or newly-added entry
    */
   static int addProcedureCode(ExplanationOfBenefit eob, CCWProcedure procedure) {
@@ -623,8 +634,10 @@ public final class TransformerUtils {
   }
 
   /**
-   * Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier has a
-   * data type of StringType that does not constrain itself to numeric. So this convenience method
+   * Builds an id for an {@link ExplanationOfBenefit}.
+   *
+   * <p>Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier has
+   * a data type of StringType that does not constrain itself to numeric. So this convenience method
    * will continue to exist as a means to create a {@link ExplanationOfBenefit#getId()} whose claim
    * ID is not numeric. This non-numeric handling may be used in integration tests to trigger {@link
    * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
@@ -640,17 +653,21 @@ public final class TransformerUtils {
   }
 
   /**
+   * Builds an id for an {@link ExplanationOfBenefit}.
+   *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
-   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
-   *     </code> value
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>
+   *     claimId     </code> value
    */
   public static String buildEobId(ClaimType claimType, Long claimId) {
     return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
+   * Gets the unprefixed claim id.
+   *
    * @param eob the {@link ExplanationOfBenefit} to extract the id from
    * @return the <code>claimId</code> field value (e.g. from {@link CarrierClaim#getClaimId()})
    */
@@ -665,6 +682,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Gets the claim type from the specified {@link ExplanationOfBenefit}.
+   *
    * @param eob the {@link ExplanationOfBenefit} to extract the claim type from
    * @return the {@link ClaimType}
    */
@@ -679,6 +698,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Builds a patient id from a {@link Beneficiary}.
+   *
    * @param beneficiary the {@link Beneficiary} to calculate the {@link Patient#getId()} value for
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
    *     Beneficiary}
@@ -688,6 +709,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Builds a patient id from a beneficiary id.
+   *
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} to calculate the {@link
    *     Patient#getId()} value for
    * @return the {@link Patient#getId()} value that will be used for the specified {@link
@@ -698,6 +721,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Builds a patient id from a {@link Beneficiary} and a {@link MedicareSegment}.
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiary the {@link Beneficiary} to compute a {@link Coverage#getId()} for
    * @return the {@link Coverage#getId()} value to use for the specified values
@@ -707,6 +732,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Builds a patient id from a beneficiary id and a {@link MedicareSegment}.
+   *
    * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
    * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
    *     Coverage#getId()} for
@@ -737,19 +764,22 @@ public final class TransformerUtils {
   }
 
   /**
+   * Converts a {@link LocalDate} to a {@link Date} using the system timezone.
+   *
+   * <p>We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just
+   * use this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as
+   * this system).
+   *
    * @param localDate the {@link LocalDate} to convert
    * @return a {@link Date} version of the specified {@link LocalDate}
    */
   static Date convertToDate(LocalDate localDate) {
-    /*
-     * We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just use
-     * this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as this
-     * system).
-     */
     return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
 
   /**
+   * Creates a {@link CodeableConcept} from the specified system and code.
+   *
    * @param codingSystem the {@link Coding#getSystem()} to use
    * @param codingCode the {@link Coding#getCode()} to use
    * @return a {@link CodeableConcept} with the specified {@link Coding}
@@ -759,6 +789,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a {@link CodeableConcept} from the specified system, display, and code.
+   *
    * @param codingSystem the {@link Coding#getSystem()} to use
    * @param codingVersion the {@link Coding#getVersion()} to use
    * @param codingDisplay the {@link Coding#getDisplay()} to use
@@ -775,6 +807,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Used for creating Identifier references for Organizations and Facilities.
+   *
    * @param identifierSystem the {@link Identifier#getSystem()} to use in {@link
    *     Reference#getIdentifier()}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link
@@ -807,7 +841,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param identifierType the {@link gov.cms.bfd.server.war.stu3.providers.IdentifierType}
+   * Used for creating Identifier references for Organizations and Facilities.
+   *
+   * @param identifierType the {@link IdentifierType}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link
    *     Reference#getIdentifier()}
    * @return a {@link Reference} with the specified {@link Identifier}
@@ -835,14 +871,19 @@ public final class TransformerUtils {
   }
 
   /**
-   * @return a Reference to the {@link Organization} for CMS, which will only be valid if {@link
-   *     #upsertSharedData()} has been run
+   * Creates a reference to the cms organization.
+   *
+   * @return a Reference to the {@link Organization} for CMS, which will only be valid if
+   *     upsertSharedData has been run
    */
   static Reference createReferenceToCms() {
     return new Reference("Organization?name=" + urlEncode(TransformerConstants.COVERAGE_ISSUER));
   }
 
   /**
+   * Checks if the specified combination of system and code exists as a Coding within the supplied
+   * {@link CodeableConcept}.
+   *
    * @param concept the {@link CodeableConcept} to check
    * @param codingSystem the {@link Coding#getSystem()} to match
    * @param codingCode the {@link Coding#getCode()} to match
@@ -854,9 +895,12 @@ public final class TransformerUtils {
   }
 
   /**
+   * Checks if the specified combination of version, system, and code exists as a Coding within the
+   * supplied {@link CodeableConcept}.
+   *
    * @param concept the {@link CodeableConcept} to check
    * @param codingSystem the {@link Coding#getSystem()} to match
-   * @param codingSystem the {@link Coding#getVersion()} to match
+   * @param codingVersion the coding version
    * @param codingCode the {@link Coding#getCode()} to match
    * @return <code>true</code> if the specified {@link CodeableConcept} contains the specified
    *     {@link Coding}, <code>false</code> if it does not
@@ -875,7 +919,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookInterface being mapped
+   * Creates a new identifier.
+   *
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -894,6 +940,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new identifier.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -906,6 +954,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new identifier.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -922,6 +972,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new identifier.
+   *
    * @param systemUrl the url being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -935,6 +987,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Helper function to create the valueDate for the specified {@link Extension}.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -960,6 +1014,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an extension for a ccw variable with the specified quantity.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
@@ -982,6 +1038,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an extension for a ccw variable with the specified quantity.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
@@ -1023,6 +1081,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an extension coding for the specified ccw variable and code.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1043,9 +1103,12 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an extension coding for the specified ccw variable, year-month, and code.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookInterface being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
+   * @param yearMonth the year month
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
    *     Coding} to represent the specified input values
@@ -1067,6 +1130,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an extension coding for the specified ccw variable and code.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
    * @param ccwVariable the {@link CcwCodebookVariable} being coded
@@ -1082,6 +1147,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a {@link CodeableConcept} from the specified ccw variable and code.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1102,6 +1169,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a {@link CodeableConcept} from the specified ccw variable and code.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1117,10 +1186,10 @@ public final class TransformerUtils {
   }
 
   /**
-   * Unlike {@link #createCodeableConcept(IAnyResource, CcwCodebookVariable, Optional)}, this method
-   * creates a {@link CodeableConcept} that's intended for use as a field ID/discriminator: the
-   * {@link Variable#getId()} will be used for the {@link Coding#getCode()}, rather than the {@link
-   * Coding#getSystem()}.
+   * Unlike {@link #createCodeableConcept(IAnyResource, CcwCodebookInterface, Optional)}, this
+   * method creates a {@link CodeableConcept} that's intended for use as a field ID/discriminator:
+   * the {@link Variable#getId()} will be used for the {@link Coding#getCode()}, rather than the
+   * {@link Coding#getSystem()}.
    *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
@@ -1137,6 +1206,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a coding.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1165,6 +1236,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a coding.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
    * @param ccwVariable the {@link CcwCodebookVariable} being coded
@@ -1194,6 +1267,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a coding.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1206,6 +1281,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an adjudication category codeable concept.
+   *
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
    *     specified {@link CcwCodebookInterface}
@@ -1226,6 +1303,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates an adjudication component with a reason code.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     AdjudicationComponent} will be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1250,6 +1329,10 @@ public final class TransformerUtils {
   }
 
   /**
+   * Calculates the {@link Coding#getDisplay()} value to use for the specified {@link
+   * CcwCodebookInterface} and {@link Coding#getCode()}, or {@link Optional#empty()} if no matching
+   * display value could be determined.
+   *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
    * @param ccwVariable the {@link CcwCodebookInterface} being coded
@@ -1330,19 +1413,21 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
-   *     value for the {@link Coverage#getBeneficiary()} value to match
+   * Creates a {@link Reference} to a coverage resource.
+   *
+   * @param beneficiaryPatientId the bene ID value for the {@link Coverage#getBeneficiary()} value
+   *     to match
    * @param coverageType the {@link MedicareSegment} value to match
-   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
-   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
+   * @return a {@link Reference} to the {@link Coverage} resource
    */
   static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
     return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
   /**
-   * @param patientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID value for the
-   *     beneficiary to match
+   * Creates a new {@link Reference} from the specified patient id.
+   *
+   * @param patientId the bene id value for the beneficiary to match
    * @return a {@link Reference} to the {@link Patient} resource that matches the specified
    *     parameters
    */
@@ -1351,6 +1436,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new {@link Reference} from the specified {@link Beneficiary}.
+   *
    * @param beneficiary the {@link Beneficiary} to generate a {@link Patient} {@link Reference} for
    * @return a {@link Reference} to the {@link Patient} resource for the specified {@link
    *     Beneficiary}
@@ -1360,8 +1447,10 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a new {@link Reference} from the specified {@link Practitioner}.
+   *
    * @param practitionerNpi the {@link Practitioner#getIdentifier()} value to match (where {@link
-   *     Identifier#getSystem()} is {@value #TransformerConstants.CODING_SYSTEM_NPI_US})
+   *     Identifier#getSystem()} is {@value TransformerConstants#CODING_NPI_US})
    * @return a {@link Reference} to the {@link Practitioner} resource that matches the specified
    *     parameters
    */
@@ -1370,6 +1459,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Sets the period end.
+   *
    * @param period the {@link Period} to adjust
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
@@ -1378,6 +1469,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Sets the period start.
+   *
    * @param period the {@link Period} to adjust
    * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
    */
@@ -1386,6 +1479,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a url-encoded version of the specified text.
+   *
    * @param urlText the URL or URL portion to be encoded
    * @return a URL-encoded version of the specified text
    */
@@ -1398,7 +1493,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * validate the from/thru dates to ensure the from date is before or the same as the thru date
+   * Validate the from/thru dates to ensure the from date is before or the same as the thru date.
    *
    * @param dateFrom start date {@link LocalDate}
    * @param dateThrough through date {@link LocalDate} to verify
@@ -1417,11 +1512,10 @@ public final class TransformerUtils {
   }
 
   /**
-   * validate the <Optional>from/<Optional>thru dates to ensure the from date is before or the same
-   * as the thru date
+   * Validate the from/thru dates to ensure the from date is before or the same as the thru date.
    *
-   * @param <Optional>dateFrom start date {@link <Optional>LocalDate}
-   * @param <Optional>dateThrough through date {@link <Optional>LocalDate} to verify
+   * @param dateFrom the date from
+   * @param dateThrough the date through
    */
   static void validatePeriodDates(Optional<LocalDate> dateFrom, Optional<LocalDate> dateThrough) {
     if (!dateFrom.isPresent()) return;
@@ -1637,9 +1731,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * maps a blue button claim type to a FHIR claim type
+   * Maps a blue button claim type to a FHIR claim type.
    *
-   * @param eobType the {@link CodeableConcept} that will get remapped
+   * @param eob the {@link CodeableConcept} that will get remapped
    * @param blueButtonClaimType the blue button {@link ClaimType} we are mapping from
    * @param ccwNearLineRecordIdCode if present, the blue button near line id code {@link
    *     Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
@@ -1710,7 +1804,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Transforms the common group level header fields between all claim types
+   * Transforms the common group level header fields between all claim types.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimId CLM_ID
@@ -1770,7 +1864,12 @@ public final class TransformerUtils {
     }
   }
 
-  // Weekly Process Date
+  /**
+   * Maps the eob weekly process date.
+   *
+   * @param eob the eob to add the information to
+   * @param weeklyProcessLocalDate the weekly process local date
+   */
   static void mapEobWeeklyProcessDate(ExplanationOfBenefit eob, LocalDate weeklyProcessLocalDate) {
     TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_WKLY_PROC_DT)
         .setTiming(new DateType(TransformerUtils.convertToDate(weeklyProcessLocalDate)));
@@ -1778,12 +1877,12 @@ public final class TransformerUtils {
 
   /**
    * Transforms the common group level data elements between the {@link CarrierClaim} and {@link
-   * DMEClaim} claim types to FHIR. The method parameter fields from {@link CarrierClaim} and {@link
-   * DMEClaim} are listed below and their corresponding RIF CCW fields (denoted in all CAPS below
-   * from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
+   * DMEClaim}* claim types to FHIR. The method parameter fields from {@link CarrierClaim} and
+   * {@link DMEClaim}* are listed below and their corresponding RIF CCW fields (denoted in all CAPS
+   * below from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param benficiaryId BEME_ID, *
+   * @param beneficiaryId BEME_ID,
    * @param carrierNumber CARR_NUM,
    * @param clinicalTrialNumber CLM_CLNCL_TRIL_NUM,
    * @param beneficiaryPartBDeductAmount CARR_CLM_CASH_DDCTBL_APLD_AMT,
@@ -1794,6 +1893,8 @@ public final class TransformerUtils {
    * @param beneficiaryPaymentAmount NCH_CLM_BENE_PMT_AMT,
    * @param submittedChargeAmount NCH_CARR_CLM_SBMTD_CHRG_AMT,
    * @param allowedChargeAmount NCH_CARR_CLM_ALOWD_AMT,
+   * @param claimDispositionCode CLM_DISP_CD
+   * @param claimCarrierControlNumber CARR_CLM_CNTL_NUM
    */
   static void mapEobCommonGroupCarrierDME(
       ExplanationOfBenefit eob,
@@ -1863,12 +1964,12 @@ public final class TransformerUtils {
 
   /**
    * Transforms the common item level data elements between the {@link CarrierClaimLine} and {@link
-   * DMEClaimLine} claim types to FHIR. The method parameter fields from {@link CarrierClaimLine}
+   * DMEClaimLine}* claim types to FHIR. The method parameter fields from {@link CarrierClaimLine}
    * and {@link DMEClaimLine} are listed below and their corresponding RIF CCW fields (denoted in
    * all CAPS below from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
    *
-   * @param item the {@ ItemComponent} to modify
-   * @param eob the {@ ExplanationOfBenefit} to modify
+   * @param item the {@link ItemComponent} to modify
+   * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimId CLM_ID,
    * @param serviceCount LINE_SRVC_CNT,
    * @param placeOfServiceCode LINE_PLACE_OF_SRVC_CD,
@@ -1893,8 +1994,7 @@ public final class TransformerUtils {
    * @param hctHgbTestResult LINE_HCT_HGB_RSLT_NUM,
    * @param cmsServiceTypeCode LINE_CMS_TYPE_SRVC_CD,
    * @param nationalDrugCode LINE_NDC_CD,
-   * @param beneficiaryId BENE_ID,
-   * @param referringPhysicianNpi RFR_PHYSN_NPI
+   * @param drugCodeName the drug code name
    * @return the {@link ItemComponent}
    */
   static ItemComponent mapEobCommonItemCarrierDME(
@@ -2037,11 +2137,11 @@ public final class TransformerUtils {
    * claim types to FHIR. The method parameter fields from {@link InpatientClaimLine} {@link
    * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} are
    * listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HopsiceClaimColumn} {@link
+   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HospiceClaimColumn} {@link
    * HHAClaimColumn} and {@link SNFClaimColumn}).
    *
-   * @param item the {@ ItemComponent} to modify
-   * @param eob the {@ ExplanationOfBenefit} to modify
+   * @param item the {@link ItemComponent} to modify
+   * @param eob the {@link ExplanationOfBenefit} to modify
    * @param revenueCenterCode REV_CNTR,
    * @param rateAmount REV_CNTR_RATE_AMT,
    * @param totalChargeAmount REV_CNTR_TOT_CHRG_AMT,
@@ -2122,9 +2222,9 @@ public final class TransformerUtils {
    * HospiceClaimLine} and {@link HHAClaimLine} claim types to FHIR. The method parameter fields
    * from {@link OutpatientClaimLine} {@link HospiceClaimLine} and {@link HHAClaimLine} are listed
    * below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * OutpatientClaimColumn} {@link HopsiceClaimColumn} and {@link HHAClaimColumn}.
+   * OutpatientClaimColumn} {@link HospiceClaimColumn} and {@link HHAClaimColumn}.
    *
-   * @param item the {@ ItemComponent} to modify
+   * @param item the {@link ItemComponent} to modify
    * @param revenueCenterDate REV_CNTR_DT,
    * @param paymentAmount REV_CNTR_PMT_AMT_AMT
    */
@@ -2143,23 +2243,17 @@ public final class TransformerUtils {
 
   /**
    * Transforms the common group level data elements between the {@link InpatientClaim}, {@link
-   * OutpatientClaim} and {@link SNFClaim} claim types to FHIR. The method parameter fields from
+   * OutpatientClaim}* and {@link SNFClaim} claim types to FHIR. The method parameter fields from
    * {@link InpatientClaim}, {@link OutpatientClaim} and {@link SNFClaim} are listed below and their
    * corresponding RIF CCW fields (denoted in all CAPS below from {@link InpatientClaimColumn}
    * {@link OutpatientClaimColumn}and {@link SNFClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param beneficiaryId BENE_ID, *
-   * @param carrierNumber CARR_NUM,
-   * @param clinicalTrialNumber CLM_CLNCL_TRIL_NUM,
-   * @param beneficiaryPartBDeductAmount CARR_CLM_CASH_DDCTBL_APLD_AMT,
-   * @param paymentDenialCode CARR_CLM_PMT_DNL_CD,
-   * @param referringPhysicianNpi RFR_PHYSN_NPI
-   * @param providerAssignmentIndicator CARR_CLM_PRVDR_ASGNMT_IND_SW,
-   * @param providerPaymentAmount NCH_CLM_PRVDR_PMT_AMT,
-   * @param beneficiaryPaymentAmount NCH_CLM_BENE_PMT_AMT,
-   * @param submittedChargeAmount NCH_CARR_CLM_SBMTD_CHRG_AMT,
-   * @param allowedChargeAmount NCH_CARR_CLM_ALOWD_AMT,
+   * @param bloodDeductibleLiabilityAmount NCH_BENE_BLOOD_DDCTBL_LBLTY_AM
+   * @param operatingPhysicianNpi the operating physician npi
+   * @param otherPhysicianNpi the other physician npi
+   * @param claimQueryCode CLAIM_QUERY_CODE
+   * @param mcoPaidSw CLM_MCO_PD_SW
    */
   static void mapEobCommonGroupInpOutSNF(
       ExplanationOfBenefit eob,
@@ -2201,15 +2295,16 @@ public final class TransformerUtils {
 
   /**
    * Transforms the common group level data elements between the {@link InpatientClaimLine} {@link
-   * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine}
+   * OutpatientClaimLine}* {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine}
    * claim types to FHIR. The method parameter fields from {@link InpatientClaimLine} {@link
-   * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} are
+   * OutpatientClaimLine}* {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} are
    * listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HopsiceClaimColumn} {@link
-   * HHAClaimColumn} and {@link SNFClaimColumn}).
+   * InpatientClaimColumn}* {@link OutpatientClaimColumn} {@link HospiceClaimColumn} {@link
+   * HHAClaimColumn}* and {@link SNFClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param organizationNpi ORG_NPI_NUM,
+   * @param organizationNpiDisplay the organization npi display
    * @param claimFacilityTypeCode CLM_FAC_TYPE_CD,
    * @param claimFrequencyCode CLM_FREQ_CD,
    * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD,
@@ -2220,6 +2315,8 @@ public final class TransformerUtils {
    * @param totalChargeAmount CLM_TOT_CHRG_AMT,
    * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
    * @param fiscalIntermediaryNumber FI_NUM
+   * @param fiDocumentClaimControlNumber FI_DOC_CLM_CNTL_NUM
+   * @param fiOriginalClaimControlNumber the fi original claim control number
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -2316,14 +2413,15 @@ public final class TransformerUtils {
 
   /**
    * Transforms the common group level data elements between the {@link InpatientClaim} {@link
-   * HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
+   * HHAClaim}* {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
    * fields from {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim}
    * are listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
+   * InpatientClaimColumn}* {@link HHAClaimColumn} {@link HospiceClaimColumn} and {@link
+   * SNFClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimAdmissionDate CLM_ADMSN_DT,
-   * @param benficiaryDischargeDate,
+   * @param beneficiaryDischargeDate the beneficiary discharge date
    * @param utilizedDays CLM_UTLZTN_CNT,
    * @return the {@link ExplanationOfBenefit}
    */
@@ -2364,11 +2462,12 @@ public final class TransformerUtils {
    * HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
    * fields from {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim}
    * are listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
+   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceClaimColumn} and {@link
+   * SNFClaimColumn}).
    *
    * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
    * @param item the {@link ItemComponent} to modify
-   * @param deductibleCoinsruanceCd REV_CNTR_DDCTBL_COINSRNC_CD
+   * @param deductibleCoinsuranceCd REV_CNTR_DDCTBL_COINSRNC_CD
    */
   static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
       ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
@@ -2477,7 +2576,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Extract the Diagnosis values for codes 1-12
+   * Extract the Diagnosis values for codes 1-12.
    *
    * @param diagnosisPrincipalCode the diagnosis principal code
    * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
@@ -2563,7 +2662,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Extract the Diagnosis values for codes 1-12
+   * Extract the Diagnosis values for codes 1-12.
    *
    * @param diagnosisAdmittingCode the diagnosis admitting code
    * @param diagnosisAdmittingCodeVersion the diagnosis admitting code version
@@ -2655,7 +2754,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Extract the Diagnosis values for codes 13-25
+   * Extract the Diagnosis values for codes 13-25.
    *
    * @param diagnosis13Code through diagnosis25Code
    * @param diagnosis13CodeVersion through diagnosis25CodeVersion
@@ -2741,7 +2840,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Extract the External Diagnosis values for codes 1-12
+   * Extract the External Diagnosis values for codes 1-12.
    *
    * @param diagnosisExternalFirstCode the diagnosis external first code
    * @param diagnosisExternalFirstCodeVersion the diagnosis external first code version
@@ -2855,7 +2954,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Extract the Procedure values for codes 1-25
+   * Extract the Procedure values for codes 1-25.
    *
    * @param procedure1Code through procedure25Code,
    * @param procedure1CodeVersion through procedure25CodeVersion
@@ -3092,6 +3191,9 @@ public final class TransformerUtils {
   }
 
   /**
+   * Maps a hcpcs {@link CodeableConcept} and any applicable modifiders to the given {@link
+   * ItemComponent}.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the HCPCS code is being mapped into
    * @param item the {@link ItemComponent} that the HCPCS code is being mapped into
    * @param hcpcsYear the {@link CcwCodebookVariable#CARR_CLM_HCPCS_YR_CD} identifying the HCPCS
@@ -3135,9 +3237,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * Retrieves the Diagnosis display value from a Diagnosis code look up file
+   * Retrieves the Diagnosis display value from a Diagnosis code look up file.
    *
-   * @param icdCode - Diagnosis code
+   * @param icdCode Diagnosis code
    * @return the icd code display
    */
   public static String retrieveIcdCodeDisplay(String icdCode) {
@@ -3173,7 +3275,9 @@ public final class TransformerUtils {
 
   /**
    * Reads ALL the ICD codes and display values from the DGNS_CD.txt file. Refer to the README file
-   * in the src/main/resources directory
+   * in the src/main/resources directory.
+   *
+   * @return the map of idc codes
    */
   private static Map<String, String> readIcdCodeFile() {
     Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
@@ -3202,9 +3306,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * Retrieves the NPI display value from an NPI code look up file
+   * Retrieves the NPI display value from an NPI code look up file.
    *
-   * @param npiCode - NPI code
+   * @param npiCode NPI code
    * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
@@ -3235,9 +3339,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * Gets the reference variable
+   * Gets the reference variable.
    *
-   * @param ccwCodebookVariable the {@ CcwCodebookVariable} to get the url
+   * @param ccwCodebookVariable the {@link CcwCodebookVariable} to get the url
    * @return url as a string
    */
   static String getReferenceUrl(CcwCodebookVariable ccwCodebookVariable) {
@@ -3246,11 +3350,11 @@ public final class TransformerUtils {
 
   /**
    * Checks to see if there is a extension that already exists in the careteamcomponent so a
-   * duplicate entry for extension is not added
+   * duplicate entry for extension is not added.
    *
-   * @param careTeamComponent - Careteam component
+   * @param careTeamComponent care team component
    * @param referenceUrl the {@link String} is the reference url to compare
-   * @param codeValue - the {@link String} is the code value to compare
+   * @param codeValue the {@link String} is the code value to compare
    * @return {@link Boolean} whether it was found or not
    */
   public static boolean careTeamHasMatchingExtension(
@@ -3280,7 +3384,9 @@ public final class TransformerUtils {
 
   /**
    * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
-   * Refer to the README file in the src/main/resources directory
+   * Refer to the README file in the src/main/resources directory.
+   *
+   * @return the map of npi codes
    */
   private static Map<String, String> readNpiCodeFile() {
 
@@ -3328,9 +3434,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * Retrieves the Procedure code and display value from a Procedure code look up file
+   * Retrieves the Procedure code and display value from a Procedure code look up file.
    *
-   * @param procedureCode - Procedure code
+   * @param procedureCode procedure code
    * @return the procedure code display
    */
   public static String retrieveProcedureCodeDisplay(String procedureCode) {
@@ -3367,7 +3473,9 @@ public final class TransformerUtils {
 
   /**
    * Reads all the procedure codes and display values from the PRCDR_CD.txt file Refer to the README
-   * file in the src/main/resources directory
+   * file in the src/main/resources directory.
+   *
+   * @return the map of procedure codes
    */
   private static Map<String, String> readProcedureCodeFile() {
 
@@ -3396,11 +3504,16 @@ public final class TransformerUtils {
   }
 
   /**
+   * Transform rif record to eob explanation of benefit.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
-   *     includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   *          false</code>)
+   * @param includeTaxNumbers if tax numbers should be included in the response
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
@@ -3425,7 +3538,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Create a bundle from the entire search result
+   * Create a bundle from the entire search result.
    *
    * @param paging contains the {@link OffsetLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
@@ -3480,7 +3593,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * Create a bundle from the entire search result
+   * Create a bundle from the entire search result.
    *
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, all of which will be added to the bundle
@@ -3523,6 +3636,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds resources to the specified bundle.
+   *
    * @param bundle a {@link Bundle} to add the list of {@link ExplanationOfBenefit} resources to.
    * @param resources a list of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion will be added to the bundle based on the paging values
@@ -3538,6 +3653,8 @@ public final class TransformerUtils {
   }
 
   /**
+   * Creates a currency identifier extension.
+   *
    * @param currencyIdentifier the {@link CurrencyIdentifier} indicating the currency of an {@link
    *     Identifier}.
    * @return Returns an {@link Extension} describing the currency of an {@link Identifier}.
@@ -3624,6 +3741,12 @@ public final class TransformerUtils {
     }
   }
 
+  /**
+   * Adds the principal diagnosis labels.
+   *
+   * @param diagnoses the diagnoses to add to
+   * @return the list of updated diagnosis
+   */
   public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
     return diagnosisToAdd -> {
       if (diagnosisToAdd.isPresent()) {

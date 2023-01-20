@@ -23,6 +23,8 @@ locals {
     claimresponse_resources_latency_by_kb = "http-requests/latency-by-kb/claimresponse-all-with-resources"
     all_responses_count                   = "http-requests/count/all"
     all_http500s_count                    = "http-requests/count/500-responses"
+    availability_success_count            = "availability/success"
+    availability_failure_count            = "availability/failure"
   }
 
   partners = {
@@ -83,6 +85,39 @@ locals {
       type      = "warning"
       period    = 24 * 60 * 60
       threshold = "0.001"
+    }
+  }
+
+  availability_slo_failure_sum_configs = {
+    slo_availability_failures_sum_5m_alert = {
+      type      = "alert"
+      period    = 60 * 5
+      threshold = "3"
+    }
+    slo_availability_failures_sum_5m_warning = {
+      type      = "warning"
+      period    = 60 * 5
+      threshold = "1"
+    }
+  }
+
+  availability_slo_uptime_percent_configs = {
+    # CloudWatch Alarms have an upper limit of 1 day periods. Unfortunately, our SLO for
+    # availability is on a monthly-basis rather than daily, so this alarm does not exactly model
+    # that SLO. However, these alarms do give us more immediate and actionable feedback when the BFD
+    # Server is falling over, so there is some upside. The thresholds for warning and alert have
+    # been modified slightly with the significantly smaller period in-mind, and any failing checks
+    # at all (between 100% and 99.8% uptime per-day) will be caught by the other availability alarm
+    # TODO: Determine some method of alarming on the agreed-upon monthly availability SLO
+    slo_availability_uptime_percent_24hr_warning = {
+      type      = "warning"
+      period    = 24 * 60 * 60
+      threshold = "99.8"
+    }
+    slo_availability_uptime_percent_24hr_alert = {
+      type      = "alert"
+      period    = 24 * 60 * 60
+      threshold = "99"
     }
   }
 
@@ -1188,4 +1223,87 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "slo_availability_failures_sum" {
+  for_each = local.availability_slo_failure_sum_configs
+
+  alarm_name          = "${local.app}-${var.env}-${replace(each.key, "_", "-")}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  period              = each.value.period
+  statistic           = "Sum"
+  threshold           = each.value.threshold
+
+  alarm_description = join("", [
+    "The sum of failed availability checks exceeded or was equal to ${upper(each.value.type)} ",
+    "SLO threshold of ${each.value.threshold} failures in ${each.value.period / 60} minute(s) ",
+    "for ${local.app} in ${var.env} environment.",
+    "\n\n${local.dashboard_message_fragment}"
+  ])
+
+  metric_name = local.metrics.availability_failure_count
+  namespace   = local.namespace
+
+  alarm_actions = each.value.type == "alert" ? local.alert_arn : local.warning_arn
+  ok_actions    = local.ok_arn
+
+  datapoints_to_alarm = "1"
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "slo_availability_uptime_percent" {
+  for_each = local.availability_slo_uptime_percent_configs
+
+  alarm_name          = "${local.app}-${var.env}-${replace(each.key, "_", "-")}"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = "1"
+  threshold           = each.value.threshold
+
+  alarm_description = join("", [
+    "The alarm transitioned to the ALARM state due to one of the following occurring:\n",
+    "* Percent uptime over ${each.value.period / (24 * 60 * 60)} day(s) dropped below ",
+    "${upper(each.value.type)} SLO threshold of ${each.value.threshold}% for ${local.app} in ",
+    "${var.env} environment.\n",
+    "* No data was reported by the availability checker Jenkins pipeline; the pipeline may have ",
+    "stopped running",
+    "\n\n${local.dashboard_message_fragment}"
+  ])
+
+  metric_query {
+    id          = "e1"
+    expression  = "100*(m1/(m1+m2))"
+    label       = "% Uptime"
+    return_data = "true"
+  }
+
+  metric_query {
+    id = "m1"
+
+    metric {
+      metric_name = local.metrics.availability_success_count
+      namespace   = local.namespace
+      period      = each.value.period
+      stat        = "Sum"
+      unit        = "Count"
+    }
+  }
+
+  metric_query {
+    id = "m2"
+
+    metric {
+      metric_name = local.metrics.availability_failure_count
+      namespace   = local.namespace
+      period      = each.value.period
+      stat        = "Sum"
+      unit        = "Count"
+    }
+  }
+
+  alarm_actions = each.value.type == "alert" ? local.alert_arn : local.warning_arn
+  ok_actions    = local.ok_arn
+
+  datapoints_to_alarm = "1"
+  treat_missing_data  = "breaching"
 }

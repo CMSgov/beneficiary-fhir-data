@@ -8,6 +8,7 @@ import java.io.IOException;
 
 /** A HAPI {@link IClientInterceptor} that allows us to add HTTP headers to our requests. */
 public class ExtraParamsInterceptor implements IClientInterceptor {
+  /** The request header. */
   private RequestHeaders requestHeader;
 
   /** {@inheritDoc} */
@@ -28,6 +29,11 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
     // nothing needed here
   }
 
+  /**
+   * Sets the {@link #requestHeader}.
+   *
+   * @param requestHeader the request header
+   */
   public void setHeaders(RequestHeaders requestHeader) {
     this.requestHeader = requestHeader;
   }

@@ -11,14 +11,11 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/*
- * Unit tests for {@link CCWProcedure}.
- */
+/** Unit tests for {@link CCWProcedure}. */
 public class CCWProcedureTest {
 
   /**
-   * Verifies that {@link CCWProcedure(Object)} works as expected. {@link
-   * gov.cms.bfd.server.war.stu3.providers.CCWProcedure}.
+   * Verifies that {@link CCWProcedure} works as expected.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -41,6 +38,13 @@ public class CCWProcedureTest {
     assertDateNotPresent(versionIcdUnknown, systemIcdUnknown);
   }
 
+  /**
+   * Assert the version code matches the specified system value when the version is passed to a
+   * {@link CCWProcedure}.
+   *
+   * @param version the version code
+   * @param system the expected system value
+   */
   static void assertMatches(Character version, String system) {
 
     Optional<String> code = Optional.of("code");
@@ -61,7 +65,12 @@ public class CCWProcedureTest {
     assertTrue(diagnosis.get().isContainedIn(codeableConcept));
   }
 
-  /** Verifies that a procedure date isn't present even though there is a procedure code present */
+  /**
+   * Verifies that a procedure date isn't present even though there is a procedure code present.
+   *
+   * @param version the version
+   * @param system the system
+   */
   static void assertDateNotPresent(Character version, String system) {
 
     Optional<String> code = Optional.of("code");

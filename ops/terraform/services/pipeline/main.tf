@@ -1,9 +1,10 @@
 locals {
-  account_id          = data.aws_caller_identity.current.account_id
-  env                 = terraform.workspace
-  layer               = "data"
-  established_envs    = ["test", "prod-sbx", "prod"]
-  create_etl_user     = local.is_prod || var.force_etl_user_creation
+  account_id       = data.aws_caller_identity.current.account_id
+  env              = terraform.workspace
+  layer            = "data"
+  established_envs = ["test", "prod-sbx", "prod"]
+  create_etl_user  = local.is_prod || var.force_etl_user_creation
+  jdbc_suffix      = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
@@ -134,7 +135,7 @@ resource "aws_instance" "ccw" {
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
     pipeline_job_type = "ccw"
-    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
+    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
   })
 
   volume_tags = merge(
@@ -207,7 +208,7 @@ resource "aws_instance" "rda" {
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
     pipeline_job_type = "rda"
-    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
+    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
   })
 
   volume_tags = merge(

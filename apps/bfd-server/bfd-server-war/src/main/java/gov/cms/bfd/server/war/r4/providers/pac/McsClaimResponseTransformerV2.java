@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r4.model.codesystems.ClaimType;
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
 public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
+  /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
@@ -37,7 +39,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
           "z", ClaimResponse.ClaimResponseStatus.CANCELLED,
           "9", ClaimResponse.ClaimResponseStatus.CANCELLED);
 
-  /** The known MCS codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings */
+  /** The known MCS codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings. */
   private static final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
       Map.ofEntries(
           Map.entry("a", ClaimResponse.RemittanceOutcome.QUEUED),
@@ -69,15 +71,20 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
           Map.entry("5", ClaimResponse.RemittanceOutcome.COMPLETE),
           Map.entry("9", ClaimResponse.RemittanceOutcome.COMPLETE));
 
+  /** Instantiates a new Mcs claim response transformer v2. */
   private McsClaimResponseTransformerV2() {}
 
   /**
+   * Transforms a claim entity into a FHIR {@link ClaimResponse}.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the MCS {@link RdaMcsClaim} to transform
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
+  static ClaimResponse transform(
+      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -88,6 +95,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
+   * Transforms a {@link RdaMcsClaim} into a FHIR {@link Claim}.
+   *
    * @param claimGroup the {@link RdaMcsClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link RdaMcsClaim}
    */

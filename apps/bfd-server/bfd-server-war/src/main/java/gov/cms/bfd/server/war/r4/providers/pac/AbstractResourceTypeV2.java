@@ -18,7 +18,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     implements ResourceTypeV2<TResource, TEntity> {
   /** Name used when parsing parameter string to find appropriate instance. */
   protected final String nameForParsing;
-  /** Value returned by {@link ResourceTypeV2#getTypeLabel()} */
+  /** Value returned by {@link ResourceTypeV2#getTypeLabel()}. */
   protected final String typeLabel;
   /** The JPA entity class. */
   protected final Class<TEntity> entityClass;
@@ -34,6 +34,7 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   /**
    * Constructor intended for use by derived classes to set values in common fields.
    *
+   * @param nameForParsing the name for parsing
    * @param typeLabel value returned by {@link ResourceTypeV2#getTypeLabel()}
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
@@ -92,8 +93,10 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
 
   /**
    * Scans the provided instances to find the first one whose {@link
-   * AbstractResourceTypeV2#nameForParsing} is equal to the provided string.
+   * AbstractResourceTypeV2#nameForParsing}* is equal to the provided string.
    *
+   * @param <TResource> the type parameter for the resource
+   * @param <TSubclass> the type parameter for the resource subclass
    * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#nameForParsing} value to parse
    *     search for
    * @param values The specific instances to search

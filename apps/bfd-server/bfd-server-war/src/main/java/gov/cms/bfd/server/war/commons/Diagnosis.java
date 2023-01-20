@@ -10,8 +10,11 @@ import java.util.Set;
 /** Models a diagnosis code entry in a claim. */
 public final class Diagnosis extends IcdCode {
 
+  /** The ICD presentOnAdmission indicator. */
   private final Character presentOnAdmission;
+  /** The ICD presentOnAdmission indicator code. * */
   private final CcwCodebookInterface presentOnAdmissionCode;
+  /** The ICD labels. */
   private final Set<DiagnosisLabel> labels;
 
   /**
@@ -23,8 +26,6 @@ public final class Diagnosis extends IcdCode {
    *     CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
    *     version, if any
    * @param labels the value to use for {@link #getLabels()}
-   * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>icdCode</code> was
-   *     present
    */
   private Diagnosis(
       Optional<String> icdCode, Optional<Character> icdVersionCode, DiagnosisLabel... labels) {
@@ -48,8 +49,6 @@ public final class Diagnosis extends IcdCode {
    *     version, if any
    * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission()}
    * @param labels the value to use for {@link #getLabels()}
-   * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>icdCode</code> was
-   *     present
    */
   private Diagnosis(
       Optional<String> icdCode,
@@ -79,8 +78,6 @@ public final class Diagnosis extends IcdCode {
    * @param presentOnAdmissionCode the Present on Admissions indicator code {@link
    *     #getPresentOnAdmissionCode()}
    * @param labels the value to use for {@link #getLabels()}
-   * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>icdCode</code> was
-   *     present
    */
   private Diagnosis(
       Optional<String> icdCode,
@@ -100,21 +97,38 @@ public final class Diagnosis extends IcdCode {
     this.labels = new HashSet<>(Arrays.asList(labels));
   }
 
-  /** @return the ICD label */
+  /**
+   * Gets the {@link #labels}.
+   *
+   * @return the ICD label
+   */
   public Set<DiagnosisLabel> getLabels() {
     return labels;
   }
 
+  /**
+   * Adds a new item to the {@link #labels}.
+   *
+   * @param label the label to add
+   */
   public void setLabels(DiagnosisLabel label) {
     this.labels.add(label);
   }
 
-  /** @return the ICD presentOnAdmission indicator */
+  /**
+   * Gets the {@link #presentOnAdmission}.
+   *
+   * @return the ICD presentOnAdmission indicator
+   */
   public Optional<Character> getPresentOnAdmission() {
     return Optional.ofNullable(presentOnAdmission);
   }
 
-  /** @return the ICD presentOnAdmission indicator code */
+  /**
+   * Gets the {@link #presentOnAdmissionCode}.
+   *
+   * @return the ICD presentOnAdmission indicator code
+   */
   public Optional<CcwCodebookInterface> getPresentOnAdmissionCode() {
     return Optional.ofNullable(presentOnAdmissionCode);
   }
@@ -198,7 +212,7 @@ public final class Diagnosis extends IcdCode {
         "The single medical diagnosis that is most relevant to the patient's chief complaint"
             + " or need for treatment."),
 
-    /** NOTE: display text matches C4BBClaimDiagnosisType#OTHER */
+    /** NOTE: display text matches C4BBClaimDiagnosisType#OTHER. */
     OTHER(
         "other",
         "Required when other conditions coexist or develop subsequently during the treatment"),
@@ -232,7 +246,9 @@ public final class Diagnosis extends IcdCode {
         "reason-for-visit",
         "A diagnosis code used to identify the patient's reason for the visit.");
 
+    /** The fhir code. */
     private final String fhirCode;
+    /** The display string. */
     private final String fhirDisplay;
 
     /**
@@ -247,6 +263,8 @@ public final class Diagnosis extends IcdCode {
     }
 
     /**
+     * Gets the system.
+     *
      * @return the FHIR Coding#getSystem() to use for the DiagnosisComponent#getType() that this
      *     {@link DiagnosisLabel} should be mapped to
      */
@@ -255,6 +273,8 @@ public final class Diagnosis extends IcdCode {
     }
 
     /**
+     * Gets the {@link #fhirCode}.
+     *
      * @return the FHIR Coding#getCode() to use for the DiagnosisComponent#getType() that this
      *     {@link DiagnosisLabel} should be mapped to
      */
@@ -263,6 +283,8 @@ public final class Diagnosis extends IcdCode {
     }
 
     /**
+     * Gets the {@link #fhirDisplay}.
+     *
      * @return the FHIR Coding#getDisplay() to use for the DiagnosisComponent#getType() that this
      *     {@link DiagnosisLabel} should be mapped to
      */
