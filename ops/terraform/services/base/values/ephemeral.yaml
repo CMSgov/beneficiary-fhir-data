@@ -48,16 +48,16 @@
 /bfd/${env}/pipeline/rda/nonsensitive/instance_type: m5a.large
 
 # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_batch_size: 20
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_interval_seconds: 3600
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: 0
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_job_write_threads: 5
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_batch_size: 20
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_interval_seconds: 3600
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: 0
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: 0
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_write_threads: 5
 
 # ALWAYS excluded from parameter store. Only valid when data_pipeline_rda_grpc_server_type is InProcess
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: ''
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_directory: ''
-# /bfd/${env}/pipeline/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_region: ''
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: ''
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_directory: ''
+# /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_region: ''
