@@ -97,7 +97,8 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             1, 1, "SequenceNumberWriter-" + sink.getClass().getSimpleName());
     final var otherScheduler = Schedulers.boundedElastic();
     final var claimPartitioner = new StringPartitioner<>(claimWriters);
-    publisher = new BlockingPublisher<>(batchSize, otherScheduler);
+    int maxQueueSize = (int) (maxThreads * batchSize * 1.5);
+    publisher = new BlockingPublisher<>(maxQueueSize, otherScheduler);
     var claimProcessing =
         publisher
             .flux()
@@ -134,11 +135,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         throw new ProcessingException(ex, 0);
       }
     }
-    log.debug("writeMessages: complete count={}", messages.size());
     return getProcessedCount();
   }
 
   private void processResult(Result<TMessage> result) {
+    publisher.release(result.messages.size());
     for (Message<TMessage> message : result.messages) {
       sequenceNumbers.removeWrittenSequenceNumber(message.sequenceNumber);
     }
@@ -368,14 +369,12 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
           messageBuffer.clear();
           claimBuffer.clear();
           final int processed = sink.writeClaims(claims);
-          if (log.isDebugEnabled()) {
-            log.debug(
-                "ClaimWriter {} wrote unique={} all={} processed={}",
-                id,
-                claims.size(),
-                messages.size(),
-                processed);
-          }
+          log.debug(
+              "ClaimWriter {} wrote unique={} all={} processed={}",
+              id,
+              claims.size(),
+              messages.size(),
+              processed);
           result = Mono.just(new Result<>(processed, messages));
         }
       } catch (Exception ex) {

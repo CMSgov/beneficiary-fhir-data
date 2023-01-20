@@ -29,7 +29,7 @@ public class BlockingPublisher<T> {
   public BlockingPublisher(int maxAvailable, Scheduler scheduler) {
     available = new Semaphore(maxAvailable, true);
     reactiveSink = Sinks.many().unicast().onBackpressureBuffer();
-    flux = reactiveSink.asFlux().publishOn(scheduler).doOnNext(o -> available.release());
+    flux = reactiveSink.asFlux().publishOn(scheduler);
   }
 
   /**
@@ -47,6 +47,10 @@ public class BlockingPublisher<T> {
   /** Sends a completed signal to subscribers. */
   public void complete() {
     reactiveSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
+  }
+
+  public void release(int count) {
+    available.release(count);
   }
 
   /**
