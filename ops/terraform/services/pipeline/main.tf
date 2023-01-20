@@ -24,9 +24,7 @@ locals {
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map     = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config  = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
-  nonsensitive_shared_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_shared.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_shared.values))
-  nonsensitive_shared_service_config = { for key, value in local.nonsensitive_shared_service_map : split("/", key)[6] => value }
-  
+
   nonsensitive_ccw_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_ccw.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_ccw.values))
   nonsensitive_ccw_service_config = { for key, value in local.nonsensitive_ccw_service_map : split("/", key)[6] => value }
   
@@ -133,10 +131,11 @@ resource "aws_instance" "ccw" {
 
   tenancy = "default"
 
-  user_data = templatefile("${path.module}/user-data-ccw.sh.tftpl", {
+  user_data = templatefile("${path.module}/user-data-shared.sh.tftpl", {
     account_id      = local.account_id
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
+    pipeline_job_type = "ccw"
     writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
   })
 
@@ -205,10 +204,11 @@ resource "aws_instance" "rda" {
 
   tenancy = "default"
 
-  user_data = templatefile("${path.module}/user-data-rda.sh.tftpl", {
+  user_data = templatefile("${path.module}/user-data-shared.sh.tftpl", {
     account_id      = local.account_id
     env             = local.env
     pipeline_bucket = aws_s3_bucket.this.bucket
+    pipeline_job_type = "rda"
     writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
   })
 
