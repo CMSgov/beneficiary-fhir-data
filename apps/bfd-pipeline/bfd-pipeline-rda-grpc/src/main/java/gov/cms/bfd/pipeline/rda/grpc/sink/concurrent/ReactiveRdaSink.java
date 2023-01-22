@@ -31,21 +31,37 @@ import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TClaim> {
+  /** Used to synchronize access to {@link #running}. */
   private final Object lock = new Object();
-  private final Message<TMessage> FlushMessage = new Message<>(null, 0, null, null);
+
+  /** Message used to tell a claim writer to flush its buffer immediately. */
+  final Message<TMessage> FlushMessage = new Message<>(null, 0, null, null);
 
   /** Used to assign claims to workers based on their claimId values. */
   private static final HashFunction Hasher = Hashing.goodFastHash(64);
 
   /** Used to track sequence numbers to update progress table in database. */
   private final SequenceNumberTracker sequenceNumbers;
+
   /** Used to perform database i/o. */
   private final RdaSink<TMessage, TClaim> sink;
 
+  /** Used to signal when a shutdown is in progress. */
   private boolean running;
+
+  /** Holds the last reported processed count. */
   private int prevProcessedCount;
+
+  /** Holds the current processed count. */
   private int currentProcessedCount;
+
+  /** The {@link Exception} (if any) that terminated processing. */
   private Throwable error;
+
+  /**
+   * Used to synchronize shutdown by waiting for both claim and sequence number processing to
+   * complete.
+   */
   private final CountDownLatch latch;
 
   /**
@@ -53,6 +69,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    * are no more messages.
    */
   private final BlockingPublisher<Message<TMessage>> publisher;
+
   /**
    * Used to hold a reference to the claim and sequence number writers to ensure they are not
    * garbage collected. We never call dispose on this since our shutdown closes the flux using our
@@ -91,22 +108,23 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     latch = new CountDownLatch(2); // one each for claim and sequence number fluxes
     final var claimWriterScheduler =
         Schedulers.newBoundedElastic(
-            maxThreads, maxThreads, "ClaimWriter-" + sink.getClass().getSimpleName());
+            maxThreads, maxThreads, sink.getClass().getSimpleName() + "ClaimWriter");
     final var sequenceNumberWriterScheduler =
         Schedulers.newBoundedElastic(
-            1, 1, "SequenceNumberWriter-" + sink.getClass().getSimpleName());
+            1, 1, sink.getClass().getSimpleName() + "-SequenceNumberWriter");
     final var otherScheduler = Schedulers.boundedElastic();
     final var claimPartitioner = new StringPartitioner<>(claimWriters);
-    int maxQueueSize = (int) (maxThreads * batchSize * 1.5);
-    publisher = new BlockingPublisher<>(maxQueueSize, otherScheduler);
+    publisher = new BlockingPublisher<>(4 * maxThreads * batchSize);
     var claimProcessing =
         publisher
             .flux()
+            .publishOn(otherScheduler)
             .groupBy(message -> claimPartitioner.partitionFor(message.claimId))
             .flatMap(
                 group ->
                     group
                         .concatWithValues(FlushMessage)
+                        //                        .takeWhile(o -> !isImmediateShutdown())
                         .publishOn(claimWriterScheduler)
                         .concatMap(message -> group.key().processMessage(message)),
                 maxThreads)
@@ -139,7 +157,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   private void processResult(Result<TMessage> result) {
-    publisher.release(result.messages.size());
+    publisher.allow(result.messages.size());
     for (Message<TMessage> message : result.messages) {
       sequenceNumbers.removeWrittenSequenceNumber(message.sequenceNumber);
     }
@@ -369,7 +387,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
           messageBuffer.clear();
           claimBuffer.clear();
           final int processed = sink.writeClaims(claims);
-          log.debug(
+          log.info(
               "ClaimWriter {} wrote unique={} all={} processed={}",
               id,
               claims.size(),

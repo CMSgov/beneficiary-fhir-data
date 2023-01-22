@@ -4,7 +4,6 @@ import java.util.concurrent.Semaphore;
 import javax.annotation.Nonnull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-import reactor.core.scheduler.Scheduler;
 
 /**
  * Publishes messages to a {@link Flux}. Uses a semaphore to limit the number of unconsumed messages
@@ -24,17 +23,18 @@ public class BlockingPublisher<T> {
   /**
    * Creates an instance with the specified limit on number of unconsumed messages.
    *
-   * @param maxAvailable number of unconsumed messages allowed at any given time
+   * @param startingAllowance number of unconsumed messages initally allowed
    */
-  public BlockingPublisher(int maxAvailable, Scheduler scheduler) {
-    available = new Semaphore(maxAvailable, true);
+  public BlockingPublisher(int startingAllowance) {
+    available = new Semaphore(startingAllowance, true);
     reactiveSink = Sinks.many().unicast().onBackpressureBuffer();
-    flux = reactiveSink.asFlux().publishOn(scheduler);
+    flux = reactiveSink.asFlux();
   }
 
   /**
    * Emits a message to the {@link Flux}. If the maximum allowed number of unconsumed messages have
-   * already been emitted this call will block until one of them has been consumed.
+   * already been emitted this call will block until one of them has been consumed and allowance
+   * increased by a call to {@link #allow}.
    *
    * @param message the message to emit
    * @throws InterruptedException if waiting is interrupted
@@ -49,7 +49,13 @@ public class BlockingPublisher<T> {
     reactiveSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
   }
 
-  public void release(int count) {
+  /**
+   * Increases the allowance by the stated amount. Used to permit more calls to the {@link #emit}
+   * method.
+   *
+   * @param count number messages by which to increase the allowance
+   */
+  public void allow(int count) {
     available.release(count);
   }
 
