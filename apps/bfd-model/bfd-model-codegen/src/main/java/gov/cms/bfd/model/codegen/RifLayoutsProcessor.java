@@ -7,7 +7,6 @@ import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -1432,10 +1431,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     parsingClass.addMethod(parseMethod.build());
 
     TypeSpec parsingClassFinal = parsingClass.build();
-    logNote("parsingClass: %s", parsingClassFinal.name);
-    JavaFile parsingClassFile =
-        JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
-    parsingClassFile.writeTo(processingEnv.getFiler());
+    //    logNote("parsingClass: %s", parsingClassFinal.name);
+    //    JavaFile parsingClassFile =
+    //        JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
+    //    parsingClassFile.writeTo(processingEnv.getFiler());
 
     return parsingClassFinal;
   }
@@ -1573,9 +1572,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     csvWriterClass.addMethod(csvWriterMethod.build());
 
     TypeSpec parsingClassFinal = csvWriterClass.build();
-    JavaFile parsingClassFile =
-        JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
-    parsingClassFile.writeTo(processingEnv.getFiler());
+    //    JavaFile parsingClassFile =
+    //        JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
+    //    parsingClassFile.writeTo(processingEnv.getFiler());
     return parsingClassFinal;
   }
 

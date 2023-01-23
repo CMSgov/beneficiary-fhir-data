@@ -3,7 +3,7 @@ mappings:
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: MedicareBeneficiaryIdHistory
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
@@ -125,6 +125,7 @@ mappings:
     to: medicareBeneficiaryIdKey
   - from: BENE_ID
     to: beneficiaryId
+    transformer: LongString
   - from: BENE_CLM_ACNT_NUM
     to: claimAccountNumber
   - from: BENE_IDENT_CD

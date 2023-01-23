@@ -3,7 +3,7 @@ mappings:
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: BeneficiaryHistory
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
@@ -169,6 +169,7 @@ mappings:
   - from: BENE_ID
     optionalComponents: None
     to: beneficiaryId
+    transformer: LongString
   - from: STATE_CODE
     to: stateCode
   - from: BENE_COUNTY_CD

@@ -1,7 +1,7 @@
 mappings:
 - entityClassName: gov.cms.bfd.model.rif.HospiceClaimLine
   id: HospiceClaimLine
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
@@ -113,6 +113,7 @@ mappings:
     from: CLM_LINE_NUM
     optionalComponents: None
     to: lineNumber
+    transformer: ShortString
   - from: REV_CNTR
     optionalComponents: None
     to: revenueCenterCode

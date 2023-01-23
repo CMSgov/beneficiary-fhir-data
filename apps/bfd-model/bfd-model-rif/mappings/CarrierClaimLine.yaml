@@ -1,7 +1,7 @@
 mappings:
 - entityClassName: gov.cms.bfd.model.rif.CarrierClaimLine
   id: CarrierClaimLine
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
@@ -243,6 +243,7 @@ mappings:
     from: LINE_NUM
     optionalComponents: None
     to: lineNumber
+    transformer: ShortString
   - from: CARR_PRFRNG_PIN_NUM
     optionalComponents: None
     to: performingProviderIdNumber
