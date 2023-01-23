@@ -165,10 +165,10 @@ resource "aws_instance" "pipeline" {
     local.default_tags,
     {
       Layer    = local.layer
-      Name     = "bfd-${local.env}-${local.legacy_service}"
       role     = local.legacy_service
       snapshot = true
-    }
+    },
+    each.value.tags
   )
 
   vpc_security_group_ids = [
