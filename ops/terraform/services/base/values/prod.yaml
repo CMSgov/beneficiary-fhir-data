@@ -53,7 +53,7 @@
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_write_threads: 20
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_process_dlq: false
-/bfd/${env}/pipeline/rda/nonsensitive/instance_type: m5.4xlarge
+/bfd/${env}/pipeline/rda/nonsensitive/instance_type: m6i.large
 
 # SERVER CONFIGURATION
 /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
