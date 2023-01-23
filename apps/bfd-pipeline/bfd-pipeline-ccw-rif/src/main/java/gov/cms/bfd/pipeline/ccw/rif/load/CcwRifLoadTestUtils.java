@@ -23,6 +23,8 @@ public final class CcwRifLoadTestUtils {
   public static final int DEFAULT_LOAD_BATCH_SIZE = 100;
 
   /**
+   * Gets the load options.
+   *
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
    *     to the database server that tests should be run against
    */

@@ -8,7 +8,9 @@ import java.io.Serializable;
 public final class CcwRifLoadOptions implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  /** The data extraction options. */
   private final ExtractionOptions extractionOptions;
+  /** The application load options. */
   private final LoadAppOptions loadOptions;
 
   /**
@@ -22,17 +24,25 @@ public final class CcwRifLoadOptions implements Serializable {
     this.loadOptions = loadOptions;
   }
 
-  /** @return the options related to finding and extracting data sets from S3 */
+  /**
+   * Gets the {@link #extractionOptions}.
+   *
+   * @return the options related to finding and extracting data sets from S3
+   */
   public ExtractionOptions getExtractionOptions() {
     return extractionOptions;
   }
 
-  /** @return the options related to loading data into the BFD database */
+  /**
+   * Gets the {@link #loadOptions}.
+   *
+   * @return the options related to loading data into the BFD database
+   */
   public LoadAppOptions getLoadOptions() {
     return loadOptions;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
