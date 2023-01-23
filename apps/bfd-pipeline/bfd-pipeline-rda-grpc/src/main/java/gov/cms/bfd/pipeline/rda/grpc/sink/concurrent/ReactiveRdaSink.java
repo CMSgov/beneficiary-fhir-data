@@ -369,7 +369,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       claimBuffer = new LinkedHashMap<>();
     }
 
-    private Mono<Result<TMessage>> processMessage(Message<TMessage> message) {
+    private synchronized Mono<Result<TMessage>> processMessage(Message<TMessage> message) {
       Mono<Result<TMessage>> result = Mono.empty();
       try {
         var writeNeeded = false;
@@ -402,7 +402,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       return result;
     }
 
-    private void close() throws Exception {
+    private synchronized void close() throws Exception {
       log.debug("ClaimWriter {} closing", id);
       sink.close();
       log.info("ClaimWriter {} closed", id);
