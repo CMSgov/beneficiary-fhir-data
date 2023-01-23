@@ -66,7 +66,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
    */
   private void validate() {
     if (getPageSize() <= 0) {
-      throw new InvalidRequestException("Value for pageSize cannot be negative: %s");
+      throw new InvalidRequestException("Value for pageSize cannot be zero or negative: %s");
     }
     if (!(getPageSize() <= MAX_PAGE_SIZE)) {
       throw new InvalidRequestException("Page size must be less than " + MAX_PAGE_SIZE);

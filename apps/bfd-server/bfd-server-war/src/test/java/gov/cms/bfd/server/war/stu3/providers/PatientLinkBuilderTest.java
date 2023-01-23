@@ -253,7 +253,18 @@ public class PatientLinkBuilderTest {
         () -> {
           new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=-1");
         },
-        "Value for pageSize cannot be negative: -1");
+        "Value for pageSize cannot be zero or negative: -1");
+  }
+
+  /** Tests that when the page size is zero, an {@link InvalidRequestException} is thrown. */
+  @Test
+  public void testZeroPageSizeExpectException() {
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=0");
+        },
+        "Value for pageSize cannot be zero or negative: 0");
   }
 
   /** Tests that when the page size is too large, an {@link InvalidRequestException} is thrown. */
