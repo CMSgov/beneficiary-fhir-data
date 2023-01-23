@@ -86,6 +86,12 @@ public class TransformerUtil {
 
   /**
    * Fixed name for {@code transformer} field of {@link TransformationBean} to indicate {@link
+   * ShortStringFieldTransformer} should be used.
+   */
+  public static final String ShortStringTransformName = "ShortString";
+
+  /**
+   * Fixed name for {@code transformer} field of {@link TransformationBean} to indicate {@link
    * LongStringFieldTransformer} should be used.
    */
   public static final String LongStringTransformName = "LongString";
@@ -135,6 +141,10 @@ public class TransformerUtil {
   private static final IntStringFieldTransformer IntStringInstance =
       new IntStringFieldTransformer();
 
+  /** Shared instance of {@link ShortStringFieldTransformer}. */
+  private static final ShortStringFieldTransformer ShortStringInstance =
+      new ShortStringFieldTransformer();
+
   /** Shared instance of {@link LongStringFieldTransformer}. */
   private static final LongStringFieldTransformer LongStringInstance =
       new LongStringFieldTransformer();
@@ -169,6 +179,8 @@ public class TransformerUtil {
           RifTimestampInstance,
           IntStringTransformName,
           IntStringInstance,
+          ShortStringTransformName,
+          ShortStringInstance,
           LongStringTransformName,
           LongStringInstance,
           UintToShortTransformName,

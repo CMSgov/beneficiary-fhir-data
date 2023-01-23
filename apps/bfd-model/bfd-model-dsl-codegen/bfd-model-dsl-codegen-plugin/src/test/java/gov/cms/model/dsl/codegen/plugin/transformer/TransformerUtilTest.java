@@ -9,6 +9,7 @@ import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.Messa
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.NoMappingFromName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.ParentFromName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.RifTimestampTransformName;
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.ShortStringTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.TimestampTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.UintToShortTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.anyMappingRequiresIdHasher;
@@ -133,6 +134,9 @@ public class TransformerUtilTest {
 
     transformation.setTransformer(IntStringTransformName);
     assertTransformerInstanceOf(column, transformation, IntStringFieldTransformer.class);
+
+    transformation.setTransformer(ShortStringTransformName);
+    assertTransformerInstanceOf(column, transformation, ShortStringFieldTransformer.class);
 
     transformation.setTransformer(LongStringTransformName);
     assertTransformerInstanceOf(column, transformation, LongStringFieldTransformer.class);
