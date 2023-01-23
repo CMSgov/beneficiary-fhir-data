@@ -15,10 +15,6 @@
 		Provides sample data in the RIF format that BFD uses to extract data from the CCW.
 	</description>
 
-	<properties>
-		<checkstyle.skip>true</checkstyle.skip>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>

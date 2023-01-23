@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 /** This {@link RifFile} implementation operates on local files. */
 final class StaticRifFile implements RifFile {
+  /** Static Rif Resource. */
   private final StaticRifResource staticRifResource;
 
   /**
@@ -22,25 +23,41 @@ final class StaticRifFile implements RifFile {
     this.staticRifResource = staticRifResource;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getFileType() */
+  /**
+   * Get File Type.
+   *
+   * @see gov.cms.bfd.model.rif.RifFile#getFileType()
+   */
   @Override
   public RifFileType getFileType() {
     return staticRifResource.getRifFileType();
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getDisplayName() */
+  /**
+   * Get Display Name.
+   *
+   * @see gov.cms.bfd.model.rif.RifFile#getDisplayName()
+   */
   @Override
   public String getDisplayName() {
     return staticRifResource.name();
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getCharset() */
+  /**
+   * Get Charset.
+   *
+   * @see gov.cms.bfd.model.rif.RifFile#getCharset()
+   */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#open() */
+  /**
+   * Open Inputstream.
+   *
+   * @see gov.cms.bfd.model.rif.RifFile#open()
+   */
   @Override
   public InputStream open() {
     try {
@@ -50,7 +67,11 @@ final class StaticRifFile implements RifFile {
     }
   }
 
-  /** @see java.lang.Object#toString() */
+  /**
+   * toString.
+   *
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
