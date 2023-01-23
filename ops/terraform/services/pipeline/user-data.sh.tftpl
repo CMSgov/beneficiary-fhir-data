@@ -20,10 +20,10 @@ aws ssm get-parameters-by-path \
 
 aws ssm get-parameters-by-path \
     --with-decryption \
-    --path "/bfd/${env}/pipeline/${pipeline_job_type}/" \
+    --path "/bfd/${env}/pipeline/${pipeline_instance}/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > "pipeline_${pipeline_job_type}_vars.json"
+    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > "pipeline_${pipeline_instance}_vars.json"
 
 aws ssm get-parameters-by-path \
     --with-decryption \
@@ -46,7 +46,7 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars "@pipeline_${pipeline_job_type}_vars.json" --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
+ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars "@pipeline_${pipeline_instance}_vars.json" --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
