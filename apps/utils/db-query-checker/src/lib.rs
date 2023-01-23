@@ -17,6 +17,7 @@ use std::{
     time::Duration,
 };
 
+use chrono::prelude::*;
 use csv_async::AsyncSerializer;
 use dotenv::dotenv;
 use eyre::{Result, WrapErr};
@@ -29,7 +30,6 @@ use tokio::{fs::File, sync::Mutex};
 use tracing::{info, warn, Instrument};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
-use chrono::prelude::*;
 
 use crate::query::{fetch_all_monitored, DatabaseQuery, DATABASE_QUERY_SQL};
 
@@ -68,10 +68,13 @@ pub async fn run_db_query_checker() -> Result<()> {
         .parse()
         .expect("Unable to parse environment variable: DB_QUERIES_START_YEAR");
     if start_year < 0 {
-        start_year = end_year -1;
+        start_year = end_year - 1;
     }
     if start_year > end_year {
-        panic!("Invalid start year {} cannot be GT end_year {}", start_year, end_year);
+        panic!(
+            "Invalid start year {} cannot be GT end_year {}",
+            start_year, end_year
+        );
     }
     println!("using start_year: {}, end_year: {}", start_year, end_year);
     let fmt_layer = fmt::layer()
@@ -87,7 +90,6 @@ pub async fn run_db_query_checker() -> Result<()> {
         .with(tracing_error::ErrorLayer::default())
         .init();
     color_eyre::install()?;
-
 
     /*
      * Create the CSV serializer, which will automatically write out a header row the first time a row is
