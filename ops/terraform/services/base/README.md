@@ -38,10 +38,13 @@ However between writing a JSON string to yaml here and being fetched from AWS SS
 
 ### Formatting and Validation
 
-As of early September 2022, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
-- hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/${sensitivity}/${leaf}` format
+As of mid-January 2023, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
+- hierarchies or paths generally conform to a 4 or 5 tuple prefix and leaf format, e.g.
+  - `/bfd/${env}/${group}/${sensitivity}/${leaf}`
+  - `/bfd/${env}/${group}/${subgroup}/${sensitivity}/${leaf}`
 - `${env}` is typically one of `test`, `prod-sbx`, or `prod` but limited support for ephemeral environments exists. Guidance on ephemeral environment naming conventions is forthcoming.
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
+- `${subgroup}` is optional, as of January 2023, examples include `ccw`, `rda`, `shared`
 - `${sensitivity}` must be one of `sensitive` when encrypted or `nonsensitive` when in plain text
 - `${leaf}` _should_ be lower_snake_case formatted
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)
