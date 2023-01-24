@@ -607,6 +607,131 @@
                 },
                 "title": "/v*/fhir/* 24-hour Error rate (HTTP 5XX)"
             }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 8,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1", "period": 86400 } ],
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "timeSeries",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 86400,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "% Uptime over 24-Hour Period",
+                "stacked": false,
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "label": "Alert threshold",
+                            "value": 99
+                        },
+                        {
+                            "label": "Warning threshold",
+                            "value": 99.8
+                        }
+                    ]
+                },
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "label": "% Uptime",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 16,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "FILL(METRICS(), 0)", "label": "", "id": "e1" } ],
+                    [ "${namespace}", "availability/failure", { "id": "m2", "label": "Sum of Failed Checks over 5 Minutes", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "timeSeries",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 300,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "Failed Uptime Checks over 5 Minute Period",
+                "stacked": false,
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "label": "Alert Threshold",
+                            "value": 3
+                        },
+                        {
+                            "label": "Warning Threshold",
+                            "value": 1
+                        }
+                    ]
+                },
+                "yAxis": {
+                    "left": {
+                        "label": "Count",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "gauge",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 2592000,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "% Uptime over 30-day Period",
+                "stacked": false,
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "label": "% Uptime",
+                        "showUnits": false,
+                        "min": 99.8
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
         }
     ]
 }
