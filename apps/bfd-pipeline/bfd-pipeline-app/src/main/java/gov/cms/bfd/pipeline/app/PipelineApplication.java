@@ -321,6 +321,7 @@ public final class PipelineApplication {
    * Create all pipeline jobs and return them in a list.
    *
    * @param appConfig our {@link AppConfiguration} for configuring jobs
+   * @param appMeters the app meters
    * @param appMetrics our {@link MetricRegistry} for metrics reporting
    * @param pooledDataSource our {@link javax.sql.DataSource}
    * @return list of {@link PipelineJob}s to be registered
@@ -386,6 +387,8 @@ public final class PipelineApplication {
   }
 
   /**
+   * Creates the CCW RIF loader job and returns it.
+   *
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use
