@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
@@ -83,16 +84,24 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @param apiVersion The version of the api used to get the message.
    * @param message The message that was being transformed when the error occurred.
    * @param exception The exception that was thrown while transforming the message.
-   * @throws IOException If there was an issue writing out the error.
+   * @throws IOException If there was an issue writing the error out
+   * @throws ProcessingException If there was a problem processing the claim
    */
   default void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
-      throws IOException {
+      throws IOException, ProcessingException {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * Write all of the objects to the data store and return the number of objects actually written.
+   * Checks if the error limit has been exceeded.
+   *
+   * @throws ProcessingException If the error limit was reached.
+   */
+  void checkErrorCount() throws ProcessingException;
+
+  /**
+   * Write all the objects to the data store and return the number of objects actually written.
    * Objects must be processed in the same order as they appear within the Iterable. Some Sinks can
    * support transactional batch processing (all or none) but others might default to processing one
    * object at a time and can successfully process some portion of the batch before an exception is
@@ -150,12 +159,14 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    *
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param message an RDA API message object of the correct type for this sync
-   * @return an appropriate entity object containing the data from the message
-   * @throws DataTransformer.TransformationException if the message is invalid
+   * @return an optional containing the appropriate entity object containing the data from the
+   *     message if successfully converted, {@link Optional#empty()} otherwise
+   * @throws IOException if there was an issue writing out a {@link MessageError}
+   * @throws ProcessingException if there was an issue transforming the message
    */
   @Nonnull
-  TClaim transformMessage(String apiVersion, TMessage message)
-      throws DataTransformer.TransformationException;
+  Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException;
 
   /**
    * Write the specified collection of entity objects to the database. This write could happen in

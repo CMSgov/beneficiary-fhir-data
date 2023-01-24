@@ -24,8 +24,9 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
   public McsClaimRdaSink(
       PipelineApplicationState appState,
       McsClaimTransformer transformer,
-      boolean autoUpdateLastSeq) {
-    super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq);
+      boolean autoUpdateLastSeq,
+      int errorLimit) {
+    super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq, errorLimit);
     this.transformer =
         transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
   }

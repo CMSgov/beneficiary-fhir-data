@@ -216,19 +216,19 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
                   + startingSequenceNumber,
               e);
         }
-
-        try {
-          sink.shutdown(Duration.ofMinutes(5));
-        } catch (Exception ex) {
-          if (processResult.getException() != null) {
-            processResult.getException().addSuppressed(ex);
-          } else {
-            processResult.setException(ex);
-          }
-        }
-
-        processResult.addCount(sink.getProcessedCount());
       }
+
+      try {
+        sink.shutdown(Duration.ofMinutes(5));
+      } catch (Exception ex) {
+        if (processResult.getException() != null) {
+          processResult.getException().addSuppressed(ex);
+        } else {
+          processResult.setException(ex);
+        }
+      }
+
+      processResult.addCount(sink.getProcessedCount());
 
       return processResult;
     };

@@ -176,6 +176,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   @Override
   public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
+    sink.checkErrorCount();
+
     return tryRetrieveAndProcessObjects(
         () -> {
           boolean flushBatch = true;
