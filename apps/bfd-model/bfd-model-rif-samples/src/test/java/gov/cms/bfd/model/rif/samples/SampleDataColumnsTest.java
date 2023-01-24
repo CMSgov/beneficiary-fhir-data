@@ -129,7 +129,7 @@ public final class SampleDataColumnsTest {
   }
 
   /**
-   * To Header Format.
+   * Appeneds the columns together using a pipe delimiter and returns it as a String.
    *
    * @param columns the array of columns to format {@link T}
    * @param columnNameFunction the {@link Function} to convert each column entry to the column name

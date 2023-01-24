@@ -354,13 +354,13 @@ public enum StaticRifResource {
       RifFileType.BENEFICIARY_HISTORY,
       7);
 
-  /** Resource URL Supplier. */
+  /** {@link Supplier} the Resource URL Supplier. */
   private final Supplier<URL> resourceUrlSupplier;
-  /** Rif File Type. */
+  /** {@link RifFileTyoe} the Rif File Type. */
   private final RifFileType rifFileType;
-  /** Record Count. */
+  /** {@link int} the Record Count. */
   private final int recordCount;
-  /** Resource URL. */
+  /** {@link URL} the Resource URL. */
   private URL resourceUrl;
 
   /**
