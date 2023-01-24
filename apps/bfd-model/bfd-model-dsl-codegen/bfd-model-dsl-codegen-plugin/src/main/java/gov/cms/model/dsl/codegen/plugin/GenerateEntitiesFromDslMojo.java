@@ -82,9 +82,9 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
 
   /** Path to directory to contain generated code. */
   @Parameter(
-      property = "outputDirectory",
+      property = "entitiesDirectory",
       defaultValue = "${project.build.directory}/generated-sources/entities")
-  private String outputDirectory;
+  private String entitiesDirectory;
 
   /**
    * Instance of {@link MavenProject} used to call {@link MavenProject#addCompileSourceRoot(String)}
@@ -100,13 +100,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    * All fields constructor for use in unit tests.
    *
    * @param mappingPath path to file or directory containing mappings
-   * @param outputDirectory path to directory to contain generated code
+   * @param entitiesDirectory path to directory to contain generated code
    * @param project instance of {@link MavenProject}
    */
   @VisibleForTesting
-  GenerateEntitiesFromDslMojo(String mappingPath, String outputDirectory, MavenProject project) {
+  GenerateEntitiesFromDslMojo(String mappingPath, String entitiesDirectory, MavenProject project) {
     this.mappingPath = mappingPath;
-    this.outputDirectory = outputDirectory;
+    this.entitiesDirectory = entitiesDirectory;
     this.project = project;
   }
 
@@ -118,13 +118,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    */
   public void execute() throws MojoExecutionException {
     try {
-      final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
+      final File outputDir = MojoUtil.initializeOutputDirectory(entitiesDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
       MojoUtil.validateModel(root);
       generateEnumClasses(outputDir, root);
       generateEntityClasses(outputDir, root);
       if (project != null) {
-        project.addCompileSourceRoot(outputDirectory);
+        project.addCompileSourceRoot(entitiesDirectory);
       }
     } catch (IOException ex) {
       throw new MojoExecutionException("I/O error during code generation", ex);

@@ -3,6 +3,7 @@ package gov.cms.model.dsl.codegen.plugin.model.validation;
 import static java.lang.String.format;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelBean;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
@@ -55,7 +56,7 @@ public class ValidationUtil {
             .buildValidatorFactory()) {
       final Validator validator = factory.getValidator();
       final Set<ConstraintViolation<MappingBean>> violations = validator.validate(mapping);
-      final List<String> errors =
+      final Set<String> errors =
           violations.stream()
               .map(
                   violation ->
@@ -66,7 +67,7 @@ public class ValidationUtil {
                           violation.getInvalidValue(),
                           violation.getMessage()))
               .sorted()
-              .collect(ImmutableList.toImmutableList());
+              .collect(ImmutableSet.toImmutableSet());
       return new ValidationResult(mapping, errors);
     }
   }
@@ -148,8 +149,8 @@ public class ValidationUtil {
   public static class ValidationResult {
     /** The mapping that was validated. */
     private final MappingBean mapping;
-    /** List containing a message for every error that was found. Empty if none were found. */
-    private final List<String> errors;
+    /** Set containing a message for every error that was found. Empty if none were found. */
+    private final Set<String> errors;
 
     /**
      * Return true if there are any error messages.

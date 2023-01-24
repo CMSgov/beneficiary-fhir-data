@@ -1,0 +1,54 @@
+mappings:
+- entityClassName: gov.cms.test.DMEClaimLine
+  id: DMEClaimLine
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - dbName: clm_id
+      name: claimId
+      sqlType: bigint
+      nullable: false
+      dbOnly: true
+    - comment: Claim Line Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_num.txt)
+      dbName: line_num
+      name: lineNumber
+      nullable: false
+      sqlType: smallint
+      javaType: short
+    - comment: Line Provider Tax Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tax_num.txt)
+      dbName: tax_num
+      name: providerTaxNumber
+      nullable: false
+      sqlType: varchar(10)
+    - comment: Line HCFA Provider Specialty Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt)
+      dbName: prvdr_spclty
+      name: providerSpecialityCode
+      sqlType: varchar(3)
+    compositeKeyClassName: LineId
+    equalsNeeded: false
+    joins:
+    - entityClass: gov.cms.test.DMEClaim
+      fetchType: EAGER
+      fieldName: parentClaim
+      foreignKey: dme_claim_lines_clm_id_to_dme_claims
+      joinColumnName: claimId
+      joinType: ManyToOne
+    name: dme_claim_lines
+    primaryKeyColumns:
+    - parentClaim
+    - lineNumber
+    quoteNames: false
+  transformations:
+  - defaultValue: '0'
+    from: LINE_NUM
+    optionalComponents: None
+    to: lineNumber
+    transformer: ShortString
+  - from: TAX_NUM
+    optionalComponents: None
+    to: providerTaxNumber
+  - from: PRVDR_SPCLTY
+    to: providerSpecialityCode
