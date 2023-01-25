@@ -121,4 +121,3 @@ def handler(event, context):
         cw_client.delete_alarms(AlarmNames=[alarm_name])
 
 
-handler(None, None)
