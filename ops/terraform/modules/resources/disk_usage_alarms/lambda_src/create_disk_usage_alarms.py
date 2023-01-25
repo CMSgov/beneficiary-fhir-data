@@ -9,8 +9,8 @@ REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ENV = os.environ.get("ENV", "")
 ALARM_ACTION_ARN = os.environ.get("ALARM_ACTION_ARN", "")
 OK_ACTION_ARN = os.environ.get("OK_ACTION_ARN", "")
-METRIC_NAMESPACE = os.environ.get("METRIC_NAMESPACE", f"bfd-{ENV}/bfd-server/CWAgent")
-METRIC_NAME = os.environ.get("METRIC_NAME", "disk_used_percent")
+METRIC_NAMESPACE = os.environ.get("METRIC_NAMESPACE", "")
+METRIC_NAME = os.environ.get("METRIC_NAME", "")
 
 DEFAULT_DIMENSIONS = [
     {"Name": "path", "Value": "/"},
@@ -23,23 +23,17 @@ cw_client = boto3.client("cloudwatch", config=boto_config)
 
 
 class AutoScalingAction(str, Enum):
-    """"""
+    """Represents the possible AWS EventBridge AutoScaling actions that this Lambda will react to"""
 
-    INSTANCE_CREATE = "EC2 Instance Launch Successful"
+    INSTANCE_LAUNCH = "EC2 Instance Launch Successful"
+    """Represents when an EC2 instance is launched in an AutoScaling Group"""
     INSTANCE_TERMINATE = "EC2 Instance Terminate Successful"
+    """Represents when an EC2 instance is terminated in an AutoScaling Group"""
 
 
 def handler(event, context):
-    if not ENV:
-        print("ENV was not defined, exiting...")
-        return
-
-    if not ALARM_ACTION_ARN:
-        print("ALARM_ACTION_ARN was not defined, exiting...")
-        return
-
-    if not OK_ACTION_ARN:
-        print("OK_ACTION_ARN was not defined, exiting...")
+    if not all([REGION, ENV, ALARM_ACTION_ARN, OK_ACTION_ARN, METRIC_NAMESPACE, METRIC_NAME]):
+        print("Not all necessary environment variables were defined, exiting...")
         return
 
     # TODO: Remove sample event
@@ -102,7 +96,7 @@ def handler(event, context):
 
     alarm_name = f"bfd-server-{ENV}-alert-disk-usage-percent-{instance_id}"
 
-    if auto_scaling_action == AutoScalingAction.INSTANCE_CREATE:
+    if auto_scaling_action == AutoScalingAction.INSTANCE_LAUNCH:
         print(f"Instance {instance_id} is being created, creating associated disk usage alarm")
 
         metric_dimensions = DEFAULT_DIMENSIONS + [
@@ -125,9 +119,9 @@ def handler(event, context):
             Period=60,
             Threshold=95.0,
             Unit="Percent",
-            # ActionsEnabled=True,
-            # AlarmActions=[ALARM_ACTION_ARN],
-            # OKActions=[OK_ACTION_ARN],
+            ActionsEnabled=True,
+            AlarmActions=[ALARM_ACTION_ARN],
+            OKActions=[OK_ACTION_ARN],
         )
     elif auto_scaling_action == AutoScalingAction.INSTANCE_TERMINATE:
         print(f"Instance {instance_id} is being terminated, removing associated alarm")
