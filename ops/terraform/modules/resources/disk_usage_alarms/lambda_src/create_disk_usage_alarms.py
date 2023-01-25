@@ -18,7 +18,14 @@ DEFAULT_DIMENSIONS = [
     {"Name": "device", "Value": "nvme0n1p1"},
 ]
 
-boto_config = Config(region_name=REGION)
+boto_config = Config(
+    region_name=REGION,
+    # Instructs boto3 to retry upto 10 times using an exponential backoff
+    retries={
+        "total_max_attempts": 10,
+        "mode": "adaptive",
+    },
+)
 cw_client = boto3.client("cloudwatch", config=boto_config)
 
 
