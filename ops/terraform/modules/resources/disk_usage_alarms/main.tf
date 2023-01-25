@@ -5,6 +5,11 @@ locals {
   lambda_name            = "manage-disk-usage-alarms"
 
   alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
+
+  eventbridge_rules = { for rule in [
+    aws_cloudwatch_event_rule.autoscaling_instance_launch,
+    aws_cloudwatch_event_rule.autoscaling_instance_terminate
+  ] : rule.name => rule }
 }
 
 resource "aws_cloudwatch_event_rule" "autoscaling_instance_launch" {
@@ -51,26 +56,20 @@ EOF
 }
 
 resource "aws_cloudwatch_event_target" "invoke_lambda_from_autoscaling_events" {
-  for_each = [
-    aws_cloudwatch_event_rule.autoscaling_instance_launch.arn,
-    aws_cloudwatch_event_rule.autoscaling_instance_terminate.arn
-  ]
+  for_each = local.eventbridge_rules
 
   arn  = aws_lambda_function.this.arn
   rule = each.key
 }
 
 resource "aws_lambda_permission" "allow_eventbridge_to_invoke_lambda" {
-  for_each = [
-    aws_cloudwatch_event_rule.autoscaling_instance_launch.arn,
-    aws_cloudwatch_event_rule.autoscaling_instance_terminate.arn
-  ]
+  for_each = local.eventbridge_rules
 
-  statement_id  = "AllowExecutionFromCloudWatch"
+  statement_id  = "allow-execution-from-${each.key}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = each.key
+  source_arn    = each.value.arn
 }
 
 resource "aws_iam_policy" "logs" {
