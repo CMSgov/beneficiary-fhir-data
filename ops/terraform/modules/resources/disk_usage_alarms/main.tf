@@ -7,16 +7,38 @@ locals {
   alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
 }
 
-resource "aws_cloudwatch_event_rule" "autoscaling_instance_launch_terminate" {
-  name          = "bfd-${var.env}-autoscaling-instance-launch-terminate"
-  description   = "Filters for bfd-server EC2 instance launches and terminations in ${var.env} ASG"
+resource "aws_cloudwatch_event_rule" "autoscaling_instance_launch" {
+  name        = "bfd-${var.env}-autoscaling-instance-launch"
+  description = "Filters for bfd-server EC2 instance launches, excluding to the WarmPool, in ${var.env} ASG"
+  # The "anything-but" clause ensures that only launches to the InService ASG are filtered through
+  # the EventBridge
   event_pattern = <<-EOF
 {
   "source": ["aws.autoscaling"],
-  "detail-type": [
-    "EC2 Instance Launch Successful",
-    "EC2 Instance Terminate Successful"
-  ],
+  "detail-type": ["EC2 Instance-launch Lifecycle Action"],
+  "detail": {
+    "Destination": [
+      {
+        "anything-but": "WarmPool"
+      }
+    ],
+    "AutoScalingGroupName": [
+      {
+        "prefix": "bfd-${var.env}-fhir"
+      }
+    ]
+  }
+}
+EOF
+}
+
+resource "aws_cloudwatch_event_rule" "autoscaling_instance_terminate" {
+  name          = "bfd-${var.env}-autoscaling-instance-terminate"
+  description   = "Filters for bfd-server EC2 instance terminations in ${var.env} ASG"
+  event_pattern = <<-EOF
+{
+  "source": ["aws.autoscaling"],
+  "detail-type": ["EC2 Instance-terminate Lifecycle Action"],
   "detail": {
     "AutoScalingGroupName": [
       {
@@ -28,17 +50,27 @@ resource "aws_cloudwatch_event_rule" "autoscaling_instance_launch_terminate" {
 EOF
 }
 
-resource "aws_cloudwatch_event_target" "invoke_lambda_from_autoscaling_event" {
+resource "aws_cloudwatch_event_target" "invoke_lambda_from_autoscaling_events" {
+  for_each = [
+    aws_cloudwatch_event_rule.autoscaling_instance_launch.arn,
+    aws_cloudwatch_event_rule.autoscaling_instance_terminate.arn
+  ]
+
   arn  = aws_lambda_function.this.arn
-  rule = aws_cloudwatch_event_rule.autoscaling_instance_launch_terminate.name
+  rule = each.key
 }
 
 resource "aws_lambda_permission" "allow_eventbridge_to_invoke_lambda" {
+  for_each = [
+    aws_cloudwatch_event_rule.autoscaling_instance_launch.arn,
+    aws_cloudwatch_event_rule.autoscaling_instance_terminate.arn
+  ]
+
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.autoscaling_instance_launch_terminate.arn
+  source_arn    = each.key
 }
 
 resource "aws_iam_policy" "logs" {
@@ -112,7 +144,7 @@ EOF
 resource "aws_lambda_function" "this" {
   description = join("", [
     "Creates and destroys per-instance disk usage alarms when launch and terminate events from ",
-    "EventBridge are received"
+    "AutoScaling EventBridge Rules are received"
   ])
   function_name = "bfd-${var.env}-${local.lambda_name}"
   tags          = { Name = "bfd-${var.env}-${local.lambda_name}" }

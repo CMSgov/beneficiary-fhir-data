@@ -34,9 +34,9 @@ cw_client = boto3.client("cloudwatch", config=boto_config)
 class AutoScalingAction(str, Enum):
     """Represents the possible AWS EventBridge AutoScaling actions that this Lambda will react to"""
 
-    INSTANCE_LAUNCH = "EC2 Instance Launch Successful"
+    INSTANCE_LAUNCH = "EC2 Instance-launch Lifecycle Action"
     """Represents when an EC2 instance is launched in an AutoScaling Group"""
-    INSTANCE_TERMINATE = "EC2 Instance Terminate Successful"
+    INSTANCE_TERMINATE = "EC2 Instance-terminate Lifecycle Action"
     """Represents when an EC2 instance is terminated in an AutoScaling Group"""
 
 
