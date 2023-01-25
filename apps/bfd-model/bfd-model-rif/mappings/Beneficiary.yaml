@@ -890,30 +890,30 @@ mappings:
       dbName: last_updated
       name: lastUpdated
       sqlType: timestamp with time zone
-#      - comment: Part A Coverage Start Date
-#      dbName: pta_cvrg_strt_dt
-#      name: partACoverageStartDate
-#      sqlType: date
-#      - comment: Part A Coverage End Date
-#      dbName: pta_cvrg_end_dt
-#      name: partACoverageEndDate
-#      sqlType: date
-#      - comment: Part B Coverage Start Date
-#      dbName: ptb_cvrg_strt_dt
-#      name: partBCoverageStartDate
-#      sqlType: date
-#      - comment: Part B Coverage End Date
-#      dbName: ptb_cvrg_end_dt
-#      name: partBCoverageEndDate
-#      sqlType: date
-#      - comment: Part D Coverage Start Date
-#      dbName: ptd_cvrg_strt_dt
-#      name: partDCoverageStartDate
-#      sqlType: date
-#      - comment: Part D Coverage End Date
-#      dbName: ptd_cvrg_end_dt
-#      name: partDCoverageEndDate
-#      sqlType: date
+    - comment: Part A Coverage Start Date
+      dbName: pta_cvrg_strt_dt
+      name: partACoverageStartDate
+      sqlType: date
+    - comment: Part A Coverage End Date
+      dbName: pta_cvrg_end_dt
+      name: partACoverageEndDate
+      sqlType: date
+    - comment: Part B Coverage Start Date
+      dbName: ptb_cvrg_strt_dt
+      name: partBCoverageStartDate
+      sqlType: date
+    - comment: Part B Coverage End Date
+      dbName: ptb_cvrg_end_dt
+      name: partBCoverageEndDate
+      sqlType: date
+    - comment: Part D Coverage Start Date
+      dbName: ptd_cvrg_strt_dt
+      name: partDCoverageStartDate
+      sqlType: date
+    - comment: Part D Coverage End Date
+      dbName: ptd_cvrg_end_dt
+      name: partDCoverageEndDate
+      sqlType: date
     equalsNeeded: false
     joins:
     - cascadeTypes:
@@ -1167,12 +1167,12 @@ mappings:
     - EFCTV_BGN_DT
     - EFCTV_END_DT
     - BENE_LINK_KEY
-#   - PTA_CVRG_STRT_DT
-#   - PTA_CVRG_END_DT
-#   - PTB_CVRG_STRT_DT
-#   - PTB_CVRG_END_DT
-#   - PTD_CVRG_STRT_DT
-#   - PTD_CVRG_END_DT
+    - PTA_CVRG_STRT_DT
+    - PTA_CVRG_END_DT
+    - PTB_CVRG_STRT_DT
+    - PTB_CVRG_END_DT
+    - PTD_CVRG_STRT_DT
+    - PTD_CVRG_END_DT
   transformations:
   - from: BENE_ID
     optionalComponents: None
@@ -1599,16 +1599,16 @@ mappings:
   - defaultValue: '0'
     from: BENE_LINK_KEY
     to: beneLinkKey
-#   - from: PTA_CVRG_STRT_DT
-#     to: partACoverageStartDate
-#   - from: PTA_CVRG_END_DT
-#     to: partACoverageEndDate
-#   - from: PTB_CVRG_STRT_DT
-#     to: partBCoverageStartDate
-#   - from: PTB_CVRG_END_DT
-#     to: partBCoverageEndDate
-#   - from: PTD_CVRG_STRT_DT
-#     to: partDCoverageStartDate
-#   - from: PTD_CVRG_END_DT
-#     to: partDCoverageEndDate
+  - from: PTA_CVRG_STRT_DT
+    to: partACoverageStartDate
+  - from: PTA_CVRG_END_DT
+    to: partACoverageEndDate
+  - from: PTB_CVRG_STRT_DT
+    to: partBCoverageStartDate
+  - from: PTB_CVRG_END_DT
+    to: partBCoverageEndDate
+  - from: PTD_CVRG_STRT_DT
+    to: partDCoverageStartDate
+  - from: PTD_CVRG_END_DT
+    to: partDCoverageEndDate
   transformerClassName: gov.cms.bfd.model.rif.BeneficiaryParser
