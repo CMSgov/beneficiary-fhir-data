@@ -539,6 +539,10 @@ mappings:
       dbName: fi_orig_clm_cntl_num
       name: fiOriginalClaimControlNumber
       sqlType: varchar(23)
+    - comment: "Claim query code"
+      dbName: claim_query_code
+      name: claimQueryCode
+      sqlType: char(1)
     - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
       dbName: last_updated
       name: lastUpdated
@@ -668,6 +672,7 @@ mappings:
     - CLM_ADMSN_DT
     - FI_DOC_CLM_CNTL_NUM
     - FI_ORIG_CLM_CNTL_NUM
+    - CLAIM_QUERY_CODE
     - CLM_LINE_NUM
     - REV_CNTR
     - REV_CNTR_DT
@@ -934,6 +939,8 @@ mappings:
     to: fiDocumentClaimControlNumber
   - from: FI_ORIG_CLM_CNTL_NUM
     to: fiOriginalClaimControlNumber
+  - from: CLAIM_QUERY_CODE
+    to: claimQueryCode
   - from: lines
     to: lines
     transformer: Array
