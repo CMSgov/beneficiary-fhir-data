@@ -119,5 +119,3 @@ def handler(event, context):
         print(f"Instance {instance_id} is being terminated, removing associated alarm")
 
         cw_client.delete_alarms(AlarmNames=[alarm_name])
-
-
