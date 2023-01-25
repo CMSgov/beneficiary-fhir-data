@@ -11,8 +11,19 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+/** Abstract class for the transformer. */
 public abstract class AbstractTransformer {
 
+  /**
+   * Abstract function for the transform method.
+   *
+   * @param wrappedMessage the wrappedMessage.
+   * @param sequenceNumber the sequenceNumber.
+   * @param data the data.
+   * @param mbiSampler the samples of mbis.
+   * @param sampleId the samples of Ids.
+   * @return {@link MessageOrBuilder}
+   */
   public abstract Optional<MessageOrBuilder> transform(
       WrappedMessage wrappedMessage,
       WrappedCounter sequenceNumber,

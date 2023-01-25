@@ -47,7 +47,9 @@ public interface Parser<T> extends Closeable {
   @SuppressWarnings("squid:S1610")
   abstract class Data<T> {
 
+    /** enumeration for Type. */
     public enum Type {
+      /** Date value for enum. */
       DATE
     }
 

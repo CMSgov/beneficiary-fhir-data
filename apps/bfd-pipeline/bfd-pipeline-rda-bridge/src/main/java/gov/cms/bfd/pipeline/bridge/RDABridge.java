@@ -45,35 +45,57 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
 
+/** RDA Bridge Data Class. */
 @Slf4j
 public class RDABridge {
 
+  /** Sets the default output file. */
   private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
+  /** Sets the default input file. */
   private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
 
+  /** Enumeration for the source types. */
   enum SourceType {
+    /** FISS enum value. */
     FISS,
+    /** MCS enum value. */
     MCS
   }
 
+  /** Sets the output flag. */
   private static final String OUTPUT_FLAG = "o";
+  /** Sets the mbi flag. */
   private static final String MBI_FLAG = "b";
+  /** Sets the fiss flag. */
   private static final String FISS_FLAG = "f";
+  /** Sets the mcs flag. */
   private static final String MCS_FLAG = "m";
+  /** Sets the fiss output flag. */
   private static final String FISS_OUTPUT_FLAG = "g";
+  /** Sets the mcs output flag. */
   private static final String MCS_OUTPUT_FLAG = "n";
+  /** Sets the fiss sequence start. */
   private static final String FISS_SEQ_START = "s";
+  /** Sets the mcs sequence start. */
   private static final String MCS_SEQ_START = "z";
+  /** Sets the external config flag. */
   private static final String EXTERNAL_CONFIG_FLAG = "e";
+  /** Sets the build attribution file. */
   private static final String BUILD_ATTRIBUTION_FILE = "a";
+  /** Sets the attribution size. */
   private static final String ATTRIBUTION_SIZE = "x";
+  /** Sets the attribution script file. */
   private static final String ATTRIBUTION_SCRIPT_FILE = "q";
+  /** Sets the attribution template file. */
   private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
+  /** Sets the attribution fiss ratio. */
   private static final String ATTRIBUTION_FISS_RATIO = "u";
 
+  /** Sets the parser map. */
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
 
+  /** Sets the sink map. */
   private static final Map<
           String, ThrowingFunction<Sink<MessageOrBuilder>, SinkArguments, IOException>>
       sinkMap = Map.of("ndjson", NdJsonSink::new);
@@ -268,8 +290,11 @@ public class RDABridge {
    * @param sourceType The type of claim in the source file.
    * @param path The path to the root directory of the RIF files.
    * @param sourceName The name of the source file to read from.
+   * @param sequenceCounter The counter for the sequence.
    * @param mbiMap The generated MBI map to read MBIs values from.
    * @param sink The {@link Sink} used to write out the associated transformed RDA data.
+   * @param mbiSampler The samples for the mbi.
+   * @param sampleId the sample id associated with the execution.
    * @throws IOException If there was a problem accessing any of the files.
    */
   @VisibleForTesting
@@ -471,6 +496,13 @@ public class RDABridge {
     return new ConfigLoader(mapConfig::get);
   }
 
+  /**
+   * Helper method to put the key if its not null.
+   *
+   * @param builder the collection class.
+   * @param key the key to put in the collection.
+   * @param value the value to check if there is a null.
+   */
   @VisibleForTesting
   static void putIfNotNull(
       ImmutableMap.Builder<String, Collection<String>> builder, String key, String value) {
@@ -479,6 +511,13 @@ public class RDABridge {
     }
   }
 
+  /**
+   * Helper method to put the key if its not null.
+   *
+   * @param builder the collection class.
+   * @param key the key to put in the collection.
+   * @param values the value to check if there is a null.
+   */
   @VisibleForTesting
   static void putIfNotNull(
       ImmutableMap.Builder<String, Collection<String>> builder, String key, String[] values) {

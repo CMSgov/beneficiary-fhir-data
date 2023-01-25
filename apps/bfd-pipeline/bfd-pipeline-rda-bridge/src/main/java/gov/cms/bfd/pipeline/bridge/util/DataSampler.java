@@ -19,11 +19,20 @@ import java.util.Set;
  * @param <T> The type of data being stored.
  */
 public class DataSampler<T> implements Iterable<T> {
+  /** Private field to set hashmap that will be used for the dataSet. */
   private final Map<Integer, Set<T>> dataSet = new HashMap<>();
 
+  /** Private field to set a sample for the DataSampler. */
   private final Map<Integer, Float> sampleProportions;
+  /** Private field to the max values for the DataSet. */
   private final int maxValues;
 
+  /**
+   * Contructor to initialize all the properties of the DataSampler class.
+   *
+   * @param maxValues is for the maxvalues.
+   * @param sampleProportions is the sample proportion of the dataset.
+   */
   private DataSampler(int maxValues, Map<Integer, Float> sampleProportions) {
     this.maxValues = maxValues;
 
@@ -127,7 +136,9 @@ public class DataSampler<T> implements Iterable<T> {
    * @param <T> The type of data to store in the created {@link DataSampler} instance.
    */
   public static class Builder<T> {
+    /** Sets the max Values to the maximum integer value. */
     private int maxValues = Integer.MAX_VALUE;
+    /** Sets the sampleProportions to a hashmap. */
     private final Map<Integer, Float> sampleProportions = new HashMap<>();
 
     /**
@@ -180,9 +191,14 @@ public class DataSampler<T> implements Iterable<T> {
    */
   public class DataSamplerIterator implements Iterator<T> {
 
+    /** Sets the mapIterators. */
     private final Iterator<Set<T>> mapIterator;
+    /** Sets the curretSetIterator. */
     private Iterator<T> currentSetIterator;
 
+    /**
+     * Constructor for the DataSamplerIterator that sets the mapIterator and the currentSetIterator.
+     */
     private DataSamplerIterator() {
       mapIterator = dataSet.values().iterator();
       currentSetIterator = mapIterator.next().iterator();

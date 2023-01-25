@@ -13,12 +13,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NdJsonSink implements Sink<MessageOrBuilder> {
 
+  /** writer returns {@link BufferedWriter}. */
   private final BufferedWriter writer;
 
+  /** outputPath returns {@link Path}. */
   private final Path outputPath;
+  /** sequenceCounter returns {@link WrappedCounter}. */
   private final WrappedCounter sequenceCounter;
+  /** startSequenceNumber returns {@link long}. */
   private final long startSequenceNumber;
 
+  /**
+   * Constructor for NdJsonSink.
+   *
+   * @param args the sink arguments being passed in.
+   * @throws IOException throws IOException.
+   */
   public NdJsonSink(SinkArguments args) throws IOException {
     outputPath = args.getOutputPath();
     sequenceCounter = args.getSequenceCounter();
@@ -26,6 +36,11 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     writer = new BufferedWriter(new FileWriter(outputPath.toString()));
   }
 
+  /**
+   * This method writes to the messageOrBuilder.
+   *
+   * @param messageOrBuilder {@link MessageOrBuilder} is the messagebuilder being written to.
+   */
   @Override
   public void write(MessageOrBuilder messageOrBuilder) {
     try {
@@ -36,6 +51,11 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     }
   }
 
+  /**
+   * This method closes the buffered writer.
+   *
+   * @throws IOException throws IOException.
+   */
   @Override
   public void close() throws IOException {
     writer.close();

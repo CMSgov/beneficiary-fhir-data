@@ -29,6 +29,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
+  /** Sets the mbiMap. */
   private final Map<String, BeneficiaryData> mbiMap;
 
   /**
@@ -89,6 +90,7 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Adds additional line items to an existing claim.
    *
+   * @param lineNumber The lineNumber for the claim.
    * @param mcsClaimChange The claim to add line items to.
    * @param data The data to grab new line items from.
    * @return The newly constructed claim with additional line items added.
@@ -107,7 +109,10 @@ public class McsTransformer extends AbstractTransformer {
    * Creates a new claim from the given {@link Parser.Data}.
    *
    * @param sequenceNumber The sequence number of the current claim.
+   * @param lineNumber The line number of the current claim.
    * @param data The {@link Parser.Data} to pull claim data for building the claim.
+   * @param mbiSampler The samples for the mbis.
+   * @param sampleId The samples of IDs.
    * @return A new claim built from parsing the given {@link Parser.Data}.
    */
   McsClaimChange transformNewClaim(
@@ -202,6 +207,7 @@ public class McsTransformer extends AbstractTransformer {
    *
    * @param claimBuilder The claim to add diagnosis codes to.
    * @param data The {@link Parser.Data} to pull diagnosis codes from.
+   * @param icn The icn that is being set for the diagnosis codes.
    */
   @VisibleForTesting
   void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
@@ -251,6 +257,7 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Builds a list of details (line items), parsed from the given {@link Parser.Data}.
    *
+   * @param lineNumber The line number of the claim.
    * @param data The {@link Parser.Data} to pull procedure codes from.
    * @return The list of build {@link McsDetail}s.
    */

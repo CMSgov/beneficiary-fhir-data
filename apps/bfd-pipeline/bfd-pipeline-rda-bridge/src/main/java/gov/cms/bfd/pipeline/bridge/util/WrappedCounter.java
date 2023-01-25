@@ -2,8 +2,14 @@ package gov.cms.bfd.pipeline.bridge.util;
 
 /** Wrapped long value used for keeping a counter between method scopes. */
 public class WrappedCounter {
+  /** Keeps a counter between method scopes. */
   private long counter;
 
+  /**
+   * Constructor to set the start of the counter variable.
+   *
+   * @param start sets the start of the counter.
+   */
   public WrappedCounter(long start) {
     counter = start;
   }

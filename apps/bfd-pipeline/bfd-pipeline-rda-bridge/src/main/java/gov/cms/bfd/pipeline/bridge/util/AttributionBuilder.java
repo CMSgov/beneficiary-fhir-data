@@ -23,7 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AttributionBuilder {
 
+  /** Sets the attributionTemplate to a {@link String}. */
   private final String attributionTemplate;
+  /** Sets the attributionScript to a {@link String}. */
   private final String attributionScript;
 
   /**

@@ -11,26 +11,46 @@ import java.util.List;
  */
 public class Mcs {
 
+  /** Bene Id is set to Carrier Claim Bene Id Name. */
   public static final String BENE_ID = CarrierClaimColumn.BENE_ID.name();
+  /** Carrier Claim Control Number is set to Carrier Claim Control Number Name. */
   public static final String CARR_CLM_CNTL_NUM = CarrierClaimColumn.CARR_CLM_CNTL_NUM.name();
+  /** Carrier From Date is set to Claim From Date Name. */
   public static final String CLM_FROM_DT = CarrierClaimColumn.CLM_FROM_DT.name();
+  /** Claim Id is set to Carrier Claim Id Name. */
   public static final String CLM_ID = CarrierClaimColumn.CLM_ID.name();
+  /** Carrier Thru Date is set to Carrier Claim Thru Date Name. */
   public static final String CLM_THRU_DT = CarrierClaimColumn.CLM_THRU_DT.name();
+  /** HCPCS Code is set to HCPCS Name. */
   public static final String HCPCS_CD = CarrierClaimColumn.HCPCS_CD.name();
+  /** HCPCS first Code is set to Carrier Claim HCPCS first code Name. */
   public static final String HCPCS_1ST_MDFR_CD = CarrierClaimColumn.HCPCS_1ST_MDFR_CD.name();
+  /** HCPCS second Code is set to Carrier Claim HCPCS second code Name. */
   public static final String HCPCS_2ND_MDFR_CD = CarrierClaimColumn.HCPCS_2ND_MDFR_CD.name();
+  /** ICD Diagnosis Code is set to Carrier Claim ICD Diagnosis Code. */
   public static final List<String> ICD_DGNS_CD =
       listNumberedEnumNames(CarrierClaimColumn.values(), CarrierClaimColumn.ICD_DGNS_CD1);
+  /** ICD Diagnosis Version Code is set to Carrier Claim ICD Diagnosis Version Code. */
   public static final List<String> ICD_DGNS_VRSN_CD =
       listNumberedEnumNames(CarrierClaimColumn.values(), CarrierClaimColumn.ICD_DGNS_VRSN_CD1);
+  /** Line first date is set to Carrier Claim Line first date. */
   public static final String LINE_1ST_EXPNS_DT = CarrierClaimColumn.LINE_1ST_EXPNS_DT.name();
+  /** Line ICD Diagnosis Code is set to Carrier Claim Line ICD Diagnosis Code. */
   public static final String LINE_ICD_DGNS_CD = CarrierClaimColumn.LINE_ICD_DGNS_CD.name();
+  /** ICD Diagnosis Version Code is set to Carrier Claim ICD Diagnosis Version Code. */
   public static final String LINE_ICD_DGNS_VRSN_CD =
       CarrierClaimColumn.LINE_ICD_DGNS_VRSN_CD.name();
+  /** Line Date is set to Carrier Claim Line Date. */
   public static final String LINE_LAST_EXPNS_DT = CarrierClaimColumn.LINE_LAST_EXPNS_DT.name();
+  /** Line Number is set to Carrier Claim Line Number. */
   public static final String LINE_NUM = CarrierClaimColumn.LINE_NUM.name();
+  /**
+   * NCH Carrier Claim Submitted Charge Amount is set to Carrier Claim NCH Carrier Claim Submitted
+   * Charge Amount.
+   */
   public static final String NCH_CARR_CLM_SBMTD_CHRG_AMT =
       CarrierClaimColumn.NCH_CARR_CLM_SBMTD_CHRG_AMT.name();
+  /** Original NPI Number is set to Carrier Claim Original NPI Number. */
   public static final String ORG_NPI_NUM = CarrierClaimColumn.ORG_NPI_NUM.name();
 
   /**
@@ -40,5 +60,6 @@ public class Mcs {
   public static final int MAX_DIAGNOSIS_CODES =
       Math.min(ICD_DGNS_CD.size(), ICD_DGNS_VRSN_CD.size());
 
+  /** Private constructor method. */
   private Mcs() {}
 }

@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/** Testing utility for making more succinct tests */
+/** Testing utility for making more succinct tests. */
 public class TestUtils {
 
   /**
-   * Compares two lists of json objects (ndjson) for equality
+   * Compares two lists of json objects (ndjson) for equality.
    *
    * @param expectedJson The expected json values
    * @param actualJson The actual json values
@@ -60,7 +60,7 @@ public class TestUtils {
   }
 
   /**
-   * Creates a single diff string of the differences fond between the json strings
+   * Creates a single diff string of the differences fond between the json strings.
    *
    * @param expectedJson The expected json string
    * @param actualJson The actual json string

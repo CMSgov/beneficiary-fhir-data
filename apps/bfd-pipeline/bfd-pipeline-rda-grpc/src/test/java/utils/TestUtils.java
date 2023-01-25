@@ -13,7 +13,7 @@ public class TestUtils {
   }
 
   /**
-   * Sets the value of a class field, even if it's private, and potentially if it's final
+   * Sets the value of a class field, even if it's private, and potentially if it's final.
    *
    * @param object The object to change a field value for
    * @param fieldName The name of the field to change the value for

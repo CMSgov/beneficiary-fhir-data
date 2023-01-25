@@ -31,9 +31,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
-  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id */
+  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id. */
   private final Map<String, BeneficiaryData> mbiMap;
-  /** Constant value used within the code */
+  /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
 
   /**
@@ -112,6 +112,8 @@ public class FissTransformer extends AbstractTransformer {
    *
    * @param sequenceNumber The sequence number of the current claim.
    * @param data The {@link Parser.Data} to pull claim data for building the claim.
+   * @param mbiSampler The {@link DataSampler} of the mbis.
+   * @param sampleId The sample of ids.
    * @return A new claim built from parsing the given {@link Parser.Data}.
    */
   @VisibleForTesting
