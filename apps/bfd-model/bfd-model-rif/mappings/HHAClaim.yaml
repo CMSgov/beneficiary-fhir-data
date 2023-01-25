@@ -541,6 +541,7 @@ mappings:
       sqlType: varchar(23)
     - comment: "Claim query code"
       dbName: claim_query_code
+      javaType: Character
       name: claimQueryCode
       sqlType: char(1)
     - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
