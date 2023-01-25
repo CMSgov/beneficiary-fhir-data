@@ -6,10 +6,10 @@ import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.RecordSource;
 import java.util.Map;
 
-/** Base class for Claim transformation offering common logic shared between FISS and MCS */
+/** Base class for Claim transformation offering common logic shared between FISS and MCS. */
 public abstract class AbstractClaimTransformer {
 
-  /** Maps strings sent by RDA to simple numeric values for DB storage */
+  /** Maps strings sent by RDA to simple numeric values for DB storage. */
   private static final Map<String, Short> PHASE_TO_SHORT =
       Map.of(
           "P1", (short) 1,

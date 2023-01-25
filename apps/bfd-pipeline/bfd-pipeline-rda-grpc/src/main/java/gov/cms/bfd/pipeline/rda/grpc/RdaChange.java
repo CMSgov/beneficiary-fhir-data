@@ -18,28 +18,43 @@ import lombok.experimental.FieldNameConstants;
 @Getter
 @AllArgsConstructor
 public class RdaChange<T> {
+  /** The minimum sequence number. */
   public static final long MIN_SEQUENCE_NUM = 0;
 
+  /** Represents the change type. */
   public enum Type {
+    /** Represents a database insert. */
     INSERT,
+    /** Represents a database update. */
     UPDATE,
+    /** Represents a database delete. */
     DELETE
   }
 
+  /** The sequence number for the change. */
   private final long sequenceNumber;
+  /** The change type. */
   private final Type type;
+  /** The claim being changed. */
   private final T claim;
+  /** The timestamp of the change. */
   private final Instant timestamp;
+  /** The source of the change. */
   private final Source source;
 
+  /** Represents the source of a change. */
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
   @FieldNameConstants
   public static class Source {
+    /** The phase. */
     private Short phase;
+    /** The phase sequence number. */
     private Short phaseSeqNum;
+    /** The extract date. */
     private LocalDate extractDate;
+    /** The timestamp of transmission. */
     private Instant transmissionTimestamp;
   }
 }

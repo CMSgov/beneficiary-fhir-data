@@ -50,19 +50,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+/** Tests the {@link AbstractClaimRdaSink}. */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class AbstractClaimRdaSinkTest {
+  /** Test value for version. */
   private static final String VERSION = "version";
-
+  /** The clock used for creating fixed timestamps. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
 
+  /** The mock datasource. */
   @Mock private HikariDataSource dataSource;
+  /** The mock entity manager factory. */
   @Mock private EntityManagerFactory entityManagerFactory;
+  /** The mock entity manager. */
   @Mock private EntityManager entityManager;
+  /** The mock entity transaction. */
   @Mock private EntityTransaction transaction;
+  /** The sink under test. */
   private TestClaimRdaSink sink;
 
+  /** Sets the test dependencies up before each test. */
   @BeforeEach
   public void setUp() {
     MeterRegistry meters = new SimpleMeterRegistry();
@@ -343,6 +351,13 @@ public class AbstractClaimRdaSinkTest {
 
   /** Simple implementation of {@link AbstractClaimRdaSink} for testing purposes. */
   static class TestClaimRdaSink extends AbstractClaimRdaSink<String, String> {
+    /**
+     * Instantiates a new Test claim rda sink.
+     *
+     * @param appState the app state
+     * @param claimType the claim type
+     * @param autoUpdateLastSeq if the sequence number should be updated automatically
+     */
     protected TestClaimRdaSink(
         PipelineApplicationState appState,
         RdaApiProgress.ClaimType claimType,
@@ -351,16 +366,19 @@ public class AbstractClaimRdaSinkTest {
       super(appState, claimType, autoUpdateLastSeq, errorLimit);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getClaimIdForMessage(String object) {
       return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long getSequenceNumberForObject(String object) {
       return 0;
     }
 
+    /** {@inheritDoc} */
     @Nonnull
     @Override
     RdaChange<String> transformMessageImpl(String apiVersion, String s) {
@@ -369,16 +387,19 @@ public class AbstractClaimRdaSinkTest {
       return mock(RdaChange.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     RdaClaimMessageMetaData createMetaData(RdaChange<String> change) {
       return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     int getInsertCount(String s) {
       return 1;
     }
 
+    /** {@inheritDoc} */
     @Override
     MessageError createMessageError(
         String apiVersion, String change, List<DataTransformer.ErrorMessage> errors) {

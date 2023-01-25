@@ -193,6 +193,11 @@ public class RdaSourceConfigIT {
    * @param <E> The type of exception the runnable logic can throw.
    */
   private interface ThrowingRunnable<E extends Throwable> {
+    /**
+     * Runs the specified logic.
+     *
+     * @throws E the exception thrown from this runnable
+     */
     void run() throws E;
   }
 

@@ -9,7 +9,14 @@ import static org.mockito.Mockito.*;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
+/** Tests for the {@link FilteredMessageSource}. */
 public class FilteredMessageSourceTest {
+
+  /**
+   * Verifies that a message filter properly filters out a message based on a function.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void filtering() throws Exception {
     MessageSource<Integer> source = createSource();
@@ -21,6 +28,12 @@ public class FilteredMessageSourceTest {
     assertFalse(filtered.hasNext());
   }
 
+  /**
+   * Verifies that the filtered message source properly passes the close command to the primary
+   * message source.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void closePassesThrough() throws Exception {
     MessageSource<Integer> source = createSource();
@@ -29,6 +42,12 @@ public class FilteredMessageSourceTest {
     verify(source).close();
   }
 
+  /**
+   * Verifies that calling {@link FilteredMessageSource#hasNext()} multiple times does not increment
+   * the actual next entry pointer when {@link FilteredMessageSource#next()} is called.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void multipleHasNextOk() throws Exception {
     MessageSource<Integer> source = createSource();
@@ -44,6 +63,13 @@ public class FilteredMessageSourceTest {
     verify(source, times(2)).hasNext();
   }
 
+  /**
+   * Verifies that calling {@link FilteredMessageSource#next()} without first calling {@link
+   * FilteredMessageSource#hasNext()} throws a {@link NoSuchElementException}, even when there are
+   * next elements.
+   *
+   * @throws Exception indicates test failure (expected exception is caught)
+   */
   @Test
   public void nextWithoutHasNextFails() throws Exception {
     MessageSource<Integer> source = createSource();
@@ -55,6 +81,13 @@ public class FilteredMessageSourceTest {
         });
   }
 
+  /**
+   * Verifies that when there are no next elements, calling {@link FilteredMessageSource#hasNext()}
+   * returns {@code false} and calling {@link FilteredMessageSource#next()} throws a {@link
+   * NoSuchElementException}.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void nextPastTheEndFails() throws Exception {
     MessageSource<Integer> source = createSource();
@@ -68,6 +101,12 @@ public class FilteredMessageSourceTest {
         });
   }
 
+  /**
+   * Creates a mock message source for testing, and sets up the relevant mock returns.
+   *
+   * @return the configured mock message source
+   * @throws Exception if there is a mocking issue
+   */
   private MessageSource<Integer> createSource() throws Exception {
     MessageSource<Integer> answer = mock(MessageSource.class);
     doReturn(true).doReturn(true).doReturn(true).doReturn(false).when(answer).hasNext();

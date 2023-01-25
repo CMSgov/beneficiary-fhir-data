@@ -44,7 +44,6 @@ public abstract class ClaimTransformerFieldTester<
    *     entity object
    * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
    *     error messages}
-   * @param minLength minimum valid length for the string field
    * @param maxLength maximum valid length for the string field
    * @return this object so that calls can be chained
    */
@@ -70,7 +69,6 @@ public abstract class ClaimTransformerFieldTester<
    *     entity object
    * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
    *     error messages}
-   * @param minLength minimum valid length for the string field
    * @param maxLength maximum valid length for the string field
    * @return this object so that calls can be chained
    */
@@ -265,9 +263,8 @@ public abstract class ClaimTransformerFieldTester<
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
    *     entity object
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @return this object so that calls can be chained
    */
   @CanIgnoreReturnValue
@@ -321,6 +318,7 @@ public abstract class ClaimTransformerFieldTester<
    * value is properly copied from the message object to the entity object and that the copied value
    * matches the expected string value associated with the enum.
    *
+   * @param <TEnum> the type parameter
    * @param setter method reference or lambda to set a value of the field being tested on a message
    *     object
    * @param getter method reference of lambda to get a value of the field being tested from an
@@ -372,6 +370,7 @@ public abstract class ClaimTransformerFieldTester<
    * Verifies that an enum field transformation that has been configured to reject specific values
    * throws a proper error.
    *
+   * @param <TEnum> the type parameter
    * @param setter method reference or lambda to set a value of the field being tested on a message
    *     object
    * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
@@ -448,6 +447,13 @@ public abstract class ClaimTransformerFieldTester<
    */
   abstract RdaChange<TClaimEntity> transformClaim(TClaim claim);
 
+  /**
+   * Verifies the given string field can be transformed as expected.
+   *
+   * @param setter the field's setter
+   * @param getter the field's getter
+   * @param maxLength the max length of the value to create
+   */
   private void verifyStringFieldTransformationCorrect(
       BiConsumer<TClaimBuilder, String> setter,
       Function<TClaimEntity, String> getter,
@@ -457,6 +463,15 @@ public abstract class ClaimTransformerFieldTester<
         claimBuilder -> setter.accept(claimBuilder, value), getter, value);
   }
 
+  /**
+   * Verifies the string field's length limit is enforced.
+   *
+   * @param setter the field's setter
+   * @param fieldLabel the field's label
+   * @param minLength the field's min length
+   * @param maxLength the field's max length
+   * @param length the length of the string to create to test the field
+   */
   private void verifyStringFieldLengthLimitsEnforced(
       BiConsumer<TClaimBuilder, String> setter,
       String fieldLabel,
@@ -469,6 +484,14 @@ public abstract class ClaimTransformerFieldTester<
         String.format("invalid length: expected=[%d,%d] actual=%d", minLength, maxLength, length));
   }
 
+  /**
+   * Verifies a field transformation succeeds.
+   *
+   * @param <T> the type of the field
+   * @param setter the setter for the field
+   * @param getter the getter for the field
+   * @param expectedValue the expected value after transformation
+   */
   private <T> void verifyFieldTransformationSucceeds(
       Consumer<TClaimBuilder> setter, Function<TClaimEntity, T> getter, T expectedValue) {
     var claimBuilder = createClaimBuilder();
@@ -479,6 +502,13 @@ public abstract class ClaimTransformerFieldTester<
     assertEquals(expectedValue, getter.apply(change.getClaim()));
   }
 
+  /**
+   * Verifies a field transformation fails.
+   *
+   * @param setter the setter for the field
+   * @param fieldLabel the field's label
+   * @param errorMessages the error messages expected from the failure
+   */
   private void verifyFieldTransformationFails(
       Consumer<TClaimBuilder> setter, String fieldLabel, String... errorMessages) {
     try {
@@ -497,6 +527,12 @@ public abstract class ClaimTransformerFieldTester<
     }
   }
 
+  /**
+   * Creates a random string of the given length.
+   *
+   * @param length the length of the string
+   * @return the created string
+   */
   private String createString(int length) {
     StringBuilder sb = new StringBuilder();
     var digit = 1;

@@ -6,5 +6,11 @@ package gov.cms.bfd.pipeline.rda.grpc;
  */
 @FunctionalInterface
 public interface ThrowableConsumer<T> {
+  /**
+   * Takes an action on the provided argument.
+   *
+   * @param arg the argument
+   * @throws Exception any exception that arises from the function
+   */
   void accept(T arg) throws Exception;
 }

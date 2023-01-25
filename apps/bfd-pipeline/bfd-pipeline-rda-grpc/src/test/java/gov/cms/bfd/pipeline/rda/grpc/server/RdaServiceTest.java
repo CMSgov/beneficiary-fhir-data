@@ -21,40 +21,48 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+/** Tests the {@link RdaService}. */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class RdaServiceTest {
 
+  /** The mocked configuration. */
   @Mock private RdaService.Config mockConfig;
-
+  /** The mocked RDA version. */
   @Mock private RdaService.Version mockVersion;
-
+  /** The mocked api version data. */
   @Mock private ApiVersion mockApiVersion;
-
+  /** The mocked api observer. */
   @Mock private StreamObserver<ApiVersion> mockAPIObserver;
-
+  /** The mocked Fiss observer. */
   @Mock private StreamObserver<FissClaimChange> mockFissObserver;
-
+  /** The mocked Fiss responder. */
   @Mock private RdaService.Responder<FissClaimChange> mockFissResponder;
-
+  /** The mocked Fiss factory. */
   @Mock private MessageSource.Factory<FissClaimChange> mockFissFactory;
-
+  /** The mocked source. */
   @Mock private MessageSource<FissClaimChange> mockFissSource;
-
+  /** The mocked MCS observer. */
   @Mock private StreamObserver<McsClaimChange> mockMcsObserver;
-
+  /** The mocked MCS responder. */
   @Mock private RdaService.Responder<McsClaimChange> mockMcsResponder;
-
+  /** The mocked MCS factory. */
   @Mock private MessageSource.Factory<McsClaimChange> mockMcsFactory;
-
+  /** The mocked MCS source. */
   @Mock private MessageSource<McsClaimChange> mockMcsSource;
-
+  /** The mocked MCS request. */
   @Mock private ClaimRequest mockRequest;
 
+  /** The empty request to use when the request contents don't matter. */
   private static final Empty request = Empty.newBuilder().build();
-
+  /** Sequence number used in test setup. */
   private static final long SINCE_VALUE = 5L;
 
+  /**
+   * Initializes mock methods with the expected returns.
+   *
+   * @throws Exception issue with mock setup
+   */
   @BeforeEach
   void init() throws Exception {
     doReturn(mockApiVersion).when(mockVersion).toApiVersion();

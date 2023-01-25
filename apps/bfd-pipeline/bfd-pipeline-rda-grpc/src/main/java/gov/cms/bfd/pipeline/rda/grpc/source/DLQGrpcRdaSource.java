@@ -39,7 +39,9 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
   /** The maximum amount of time to wait for an {@link RdaSink} to shut down */
   private static final Duration MAX_SINK_SHUTDOWN_WAIT = Duration.ofMinutes(5);
 
+  /** Object for use in querying the database. */
   private final DLQDao dao;
+  /** Used to compare sequence values. */
   private final BiPredicate<Long, TMessage> sequencePredicate;
 
   /**
@@ -242,8 +244,16 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
   @RequiredArgsConstructor
   static class DLQDao {
 
+    /** The database entity manager. */
     private final EntityManager entityManager;
 
+    /**
+     * Finds all message errors with the matching claim type and status.
+     *
+     * @param claimType the claim type to match
+     * @param status the status to match
+     * @return the list of errors that match the conditions
+     */
     public List<MessageError> findAllMessageErrorsByClaimTypeAndStatus(
         MessageError.ClaimType claimType, MessageError.Status status) {
       return entityManager
@@ -255,6 +265,14 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
           .getResultList();
     }
 
+    /**
+     * Updates the message error status for the entry with the specified sequence number and type.
+     *
+     * @param sequenceNumber the sequence number to check for
+     * @param type the type to check for
+     * @param status the status to update with
+     * @return the number of entities affected by the update
+     */
     public long updateState(
         Long sequenceNumber, MessageError.ClaimType type, MessageError.Status status) {
       long entitiesAffected = 0L;

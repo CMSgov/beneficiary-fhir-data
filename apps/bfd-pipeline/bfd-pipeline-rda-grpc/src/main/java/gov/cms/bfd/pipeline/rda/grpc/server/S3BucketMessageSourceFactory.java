@@ -33,13 +33,30 @@ import lombok.ToString;
  * increasing order by sequence number.
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
+  /** The client for interacting with AWS S3 buckets and files. */
   private final AmazonS3 s3Client;
+  /** The bucket to use for S3 interactions. */
   private final String bucketName;
+  /** The directory path to save files to. */
   private final String directoryPath;
+  /** A function for getting the message factory to transform the response. */
   private final Function<String, MessageSource<T>> actualFactory;
+  /** A function for obtaining the sequence number. */
   private final Function<T, Long> sequenceNumberGetter;
+  /** The pattern to use to find files from S3. */
   private final Pattern matchPattern;
 
+  /**
+   * Instantiates a new S3 bucket message source factory.
+   *
+   * @param s3Client the s3 client to do operations with
+   * @param bucketName the bucket name to look for files in
+   * @param directoryPath the directory path to download files to
+   * @param filePrefix the file prefix
+   * @param fileSuffix the file suffix
+   * @param actualFactory the source factory creation function
+   * @param sequenceNumberGetter the function to get the sequence number
+   */
   public S3BucketMessageSourceFactory(
       AmazonS3 s3Client,
       String bucketName,
@@ -136,6 +153,11 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     return entries;
   }
 
+  /**
+   * Gets the object listing.
+   *
+   * @return the object listing
+   */
   private ObjectListing getObjectListing() {
     if (Strings.isNullOrEmpty(directoryPath)) {
       return s3Client.listObjects(bucketName);
@@ -150,7 +172,9 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * closed as they are completed.
    */
   private class MultiS3MessageSource implements MessageSource<T> {
+    /** The list of S3 files yet to be downloaded. */
     private final List<FileEntry> remaining;
+    /** The current message source stream. */
     private MessageSource<T> current;
 
     /**
@@ -184,11 +208,13 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
       return current.hasNext();
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized T next() throws Exception {
       return current.next();
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized void close() throws Exception {
       current.close();
@@ -206,10 +232,14 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   @ToString
   @EqualsAndHashCode
   static class FileEntry implements Comparable<FileEntry> {
+    /** The file's S3 key. */
     private final String objectKey;
+    /** The minimum sequence number. */
     private final long minSequenceNumber;
+    /** The maximum sequence number. */
     private final long maxSequenceNumber;
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(FileEntry o) {
       if (minSequenceNumber < o.minSequenceNumber) {

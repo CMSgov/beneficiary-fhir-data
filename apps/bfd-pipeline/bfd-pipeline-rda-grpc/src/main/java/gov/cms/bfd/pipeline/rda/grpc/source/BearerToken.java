@@ -13,12 +13,19 @@ import java.util.concurrent.Executor;
  * RDA API with a JWT token for authorization.
  */
 public class BearerToken extends CallCredentials {
+  /** Used as a prefix for the header value. */
   private static final String HEADER_PREFIX = "Bearer ";
+  /** Used as the header key. */
   private static final Metadata.Key<String> HEADER_KEY =
       Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
-
+  /** Used as the header value, prefixed by {@link #HEADER_PREFIX}. */
   private final String headerValue;
 
+  /**
+   * Instantiates a new bearer token.
+   *
+   * @param headerValue the header value
+   */
   public BearerToken(String headerValue) {
     if (Strings.isNullOrEmpty(headerValue)) {
       throw new IllegalArgumentException("Token value was null or empty.");
@@ -26,6 +33,7 @@ public class BearerToken extends CallCredentials {
     this.headerValue = HEADER_PREFIX + headerValue;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void applyRequestMetadata(
       RequestInfo requestInfo, Executor appExecutor, MetadataApplier applier) {
@@ -41,6 +49,7 @@ public class BearerToken extends CallCredentials {
         });
   }
 
+  /** {@inheritDoc} */
   @Override
   public void thisUsesUnstableApi() {
     // nothing to do here

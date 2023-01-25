@@ -20,11 +20,21 @@ import java.util.zip.GZIPInputStream;
  * @param <T> the type parameter
  */
 public class S3JsonMessageSource<T> implements MessageSource<T> {
+  /** The S3 object to read. */
   private final S3Object s3Object;
+  /** The raw stream of the {@link #s3Object}. */
   private final S3ObjectInputStream s3InputStream;
+  /** The source for outputting json messages. */
   private final JsonMessageSource<T> jsonMessageSource;
+  /** If the object has not been fully read yet. */
   private boolean unfinished;
 
+  /**
+   * Instantiates a new S3 json message source.
+   *
+   * @param s3Object the s3 object
+   * @param parser the parser to parse the object
+   */
   public S3JsonMessageSource(S3Object s3Object, JsonMessageSource.Parser<T> parser) {
     this.s3Object = s3Object;
     s3InputStream = s3Object.getObjectContent();
@@ -33,17 +43,20 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
     unfinished = true;
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() throws Exception {
     unfinished = jsonMessageSource.hasNext();
     return unfinished;
   }
 
+  /** {@inheritDoc} */
   @Override
   public T next() throws Exception {
     return jsonMessageSource.next();
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     // Note: When the JsonMessageSource closes it will also close the S3 stream.
@@ -92,6 +105,13 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
     }
   }
 
+  /**
+   * Creates a buffered reader from an input stream.
+   *
+   * @param resourceName the resource name, to unzip it if required
+   * @param stream the stream
+   * @return the buffered reader
+   */
   private static BufferedReader createReader(String resourceName, InputStream stream) {
     try {
       if (resourceName.endsWith(".gz")) {

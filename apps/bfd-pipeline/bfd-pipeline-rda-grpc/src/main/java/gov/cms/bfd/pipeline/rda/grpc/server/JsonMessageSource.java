@@ -21,8 +21,11 @@ import java.util.NoSuchElementException;
  * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
  */
 public class JsonMessageSource<T> implements MessageSource<T> {
+  /** The JSON parser. */
   private final Parser<T> parser;
+  /** Reads files from the file system. */
   private final BufferedReader reader;
+  /** The next line to read. */
   private String line;
 
   /**
@@ -75,7 +78,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * This method fits the signature of Parser&lt;FissClaim&gt;
+   * This method fits the signature of Parser&lt;FissClaim&gt;.
    *
    * @param jsonString JSON to be parsed
    * @return a FissClaim object
@@ -88,7 +91,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * This method fits the signature of Parser&lt;McsClaim&gt;
+   * This method fits the signature of Parser&lt;McsClaim&gt;.
    *
    * @param jsonString JSON to be parsed
    * @return a McsClaim object
@@ -101,7 +104,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * This method fits the signature of Parser&lt;FissClaimChange&gt;
+   * This method fits the signature of Parser&lt;FissClaimChange&gt;.
    *
    * @param jsonString JSON to be parsed
    * @return a ClaimChange object
@@ -114,7 +117,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * This method fits the signature of Parser&lt;McsClaimChange&gt;
+   * This method fits the signature of Parser&lt;McsClaimChange&gt;.
    *
    * @param jsonString JSON to be parsed
    * @return a ClaimChange object
@@ -144,11 +147,13 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     return builder.build();
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() throws Exception {
     return advance();
   }
 
+  /** {@inheritDoc} */
   @Override
   public T next() throws Exception {
     if (!advance()) {
@@ -159,11 +164,18 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     return claim;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     reader.close();
   }
 
+  /**
+   * Advance the reader and load the next line.
+   *
+   * @return if there is a next line from the reader
+   * @throws IOException there is an issue reading from the reader
+   */
   private boolean advance() throws IOException {
     if (line == null) {
       line = reader.readLine();
@@ -180,6 +192,13 @@ public class JsonMessageSource<T> implements MessageSource<T> {
    */
   @FunctionalInterface
   public interface Parser<T> {
+    /**
+     * Parses JSON from the specified string.
+     *
+     * @param jsonString the json string to parse
+     * @return the parsed JSON as an object of type T
+     * @throws Exception if there is a parse exception
+     */
     T parseJson(String jsonString) throws Exception;
   }
 }
