@@ -99,7 +99,7 @@ def handler(event, context):
             AlarmName=alarm_name,
             AlarmDescription=(
                 f"Disk usage percent for BFD Server instance {instance_id} in"
-                f" {ENV} environment exceeded 95% in the past minute"
+                f" {ENV} environment exceeded {ALARM_THRESHOLD}% in the past {ALARM_PERIOD} seconds"
             ),
             ComparisonOperator="GreaterThanThreshold",
             EvaluationPeriods=1,
