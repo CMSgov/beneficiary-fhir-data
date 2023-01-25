@@ -12,6 +12,6 @@ data "aws_sns_topic" "cloudwatch_alarms_ok" {
 
 data "archive_file" "this" {
   type        = "zip"
-  source_file = "${path.module}/lambda-src/manage_disk_usage_alarms.py"
-  output_path = "${path.module}/lambda-src/manage_disk_usage_alarms.zip"
+  source_file = "${path.module}/lambda_src/manage_disk_usage_alarms.py"
+  output_path = "${path.module}/lambda_src/manage_disk_usage_alarms.zip"
 }
