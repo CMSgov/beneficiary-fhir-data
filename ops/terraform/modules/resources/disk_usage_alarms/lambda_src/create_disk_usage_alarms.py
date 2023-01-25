@@ -30,12 +30,6 @@ class AutoScalingAction(str, Enum):
 
 
 def handler(event, context):
-    # TODO: Remove mocked-out data
-    ENV = "prod"
-    METRIC_NAMESPACE = f"bfd-{ENV}/bfd-server/CWAgent"
-    ALARM_ACTION_ARN = "EXAMPLE"
-    OK_ACTION_ARN = "EXAMPLE"
-
     if not ENV:
         print("ENV was not defined, exiting...")
         return
