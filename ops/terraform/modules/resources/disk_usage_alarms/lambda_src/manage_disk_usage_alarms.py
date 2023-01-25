@@ -1,4 +1,3 @@
-import json
 import os
 from enum import Enum
 
@@ -7,6 +6,7 @@ from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ENV = os.environ.get("ENV", "")
+ALARMS_PREFIX = os.environ.get("ALARMS_PREFIX", "")
 ALARM_THRESHOLD = float(os.environ.get("ALARM_THRESHOLD", "95.0"))
 ALARM_PERIOD = int(os.environ.get("ALARM_PERIOD", "60"))
 ALARM_ACTION_ARN = os.environ.get("ALARM_ACTION_ARN", "")
@@ -45,6 +45,7 @@ def handler(event, context):
         [
             REGION,
             ENV,
+            ALARMS_PREFIX,
             ALARM_THRESHOLD,
             ALARM_PERIOD,
             ALARM_ACTION_ARN,
@@ -85,7 +86,7 @@ def handler(event, context):
         )
         return
 
-    alarm_name = f"bfd-server-{ENV}-alert-disk-usage-percent-{instance_id}"
+    alarm_name = f"{ALARMS_PREFIX}-{instance_id}"
 
     if auto_scaling_action == AutoScalingAction.INSTANCE_LAUNCH:
         print(f"Instance {instance_id} is being created, creating associated disk usage alarm")

@@ -3,11 +3,13 @@ locals {
 
   lambda_timeout_seconds = 30
   lambda_name            = "manage-disk-usage-alarms"
+
+  alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
 }
 
 resource "aws_cloudwatch_event_rule" "autoscaling_instance_launch_terminate" {
-  name = "bfd-${var.env}-autoscaling-instance-launch-terminate"
-  description = "Filters for bfd-server EC2 instance launches and terminations in ${var.env} ASG"
+  name          = "bfd-${var.env}-autoscaling-instance-launch-terminate"
+  description   = "Filters for bfd-server EC2 instance launches and terminations in ${var.env} ASG"
   event_pattern = <<-EOF
 {
   "source": ["aws.autoscaling"],
@@ -27,16 +29,16 @@ EOF
 }
 
 resource "aws_cloudwatch_event_target" "invoke_lambda_from_autoscaling_event" {
-  arn = aws_lambda_function.this.arn
+  arn  = aws_lambda_function.this.arn
   rule = aws_cloudwatch_event_rule.autoscaling_instance_launch_terminate.name
 }
 
 resource "aws_lambda_permission" "allow_eventbridge_to_invoke_lambda" {
-  statement_id = "AllowExecutionFromCloudWatch"
-  action = "lambda:InvokeFunction"
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.autoscaling_instance_launch_terminate.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.autoscaling_instance_launch_terminate.arn
 }
 
 resource "aws_iam_policy" "logs" {
@@ -63,6 +65,24 @@ resource "aws_iam_policy" "logs" {
 EOF
 }
 
+resource "aws_iam_policy" "cloudwatch" {
+  name        = "bfd-${var.env}-${local.lambda_name}-cloudwatch"
+  description = "Permissions for bfd-${var.env}-${local.lambda_name} to create and destroy metric alarms"
+  policy      = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": ["cloudwatch:PutMetricAlarm", "cloudwatch:DeleteAlarms"],
+      "Resource": "arn:aws:cloudwatch:us-east-1:577373831711:alarm:${local.alarms_prefix}*"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role" "this" {
   name        = "bfd-${var.env}-${local.lambda_name}"
   path        = "/"
@@ -83,7 +103,10 @@ resource "aws_iam_role" "this" {
 }
 EOF
 
-  managed_policy_arns = [aws_iam_policy.logs.arn]
+  managed_policy_arns = [
+    aws_iam_policy.logs.arn,
+    aws_iam_policy.cloudwatch.arn
+  ]
 }
 
 resource "aws_lambda_function" "this" {
@@ -111,6 +134,7 @@ resource "aws_lambda_function" "this" {
       OK_ACTION_ARN    = data.aws_sns_topic.cloudwatch_alarms_ok.arn
       METRIC_NAMESPACE = "bfd-${var.env}/bfd-server/CWAgent"
       METRIC_NAME      = "disk_used_percent"
+      ALARMS_PREFIX    = local.alarms_prefix
     }
   }
 
