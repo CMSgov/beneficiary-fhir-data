@@ -126,6 +126,7 @@ def handler(event, context):
             Period=60,
             Threshold=95.0,
             Unit="Percent",
+            TreatMissingData="notBreaching",
             ActionsEnabled=True,
             AlarmActions=[ALARM_ACTION_ARN],
             OKActions=[OK_ACTION_ARN],
