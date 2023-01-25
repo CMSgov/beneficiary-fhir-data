@@ -261,11 +261,14 @@ mappings:
       dbName: clm_clncl_tril_num
       name: clinicalTrialNumber
       sqlType: varchar(8)
-    - comment: Unique control number assigned by a carrier to a non-institutional
-        claim.
+    - comment: Unique control number assigned by a carrier to a non-institutional claim.
       dbName: carr_clm_cntl_num
       name: claimCarrierControlNumber
       sqlType: varchar(23)
+    - comment: carrier claim NPI number
+      dbName: carr_clm_blg_npi_num
+      name: carrierClaimBlgNpiNumber
+      sqlType: varchar(10)
     - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
       dbName: last_updated
       name: lastUpdated
@@ -338,6 +341,7 @@ mappings:
     - ICD_DGNS_VRSN_CD12
     - CLM_CLNCL_TRIL_NUM
     - CARR_CLM_CNTL_NUM
+    - CARR_CLM_BLG_NPI_NUM
     - LINE_NUM
     - CARR_PRFRNG_PIN_NUM
     - PRF_PHYSN_UPIN
@@ -519,6 +523,8 @@ mappings:
     to: clinicalTrialNumber
   - from: CARR_CLM_CNTL_NUM
     to: claimCarrierControlNumber
+  - from: CARR_CLM_BLG_NPI_NUM
+    to: carrierClaimBlgNpiNumber
   - from: lines
     to: lines
     transformer: Array
