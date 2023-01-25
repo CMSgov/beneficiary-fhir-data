@@ -293,7 +293,7 @@ mappings:
     - comment: Claim Diagnosis Related Group Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drg_cd.txt)
       dbName: clm_drg_cd
       name: diagnosisRelatedGroupCd
-      sqlType: varchar(3)
+      sqlType: varchar(4)
     - comment: Claim Admitting Diagnosis Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/admtg_dgns_cd.txt)
       dbName: admtg_dgns_cd
       name: diagnosisAdmittingCode
