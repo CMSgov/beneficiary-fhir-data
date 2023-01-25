@@ -106,7 +106,11 @@ resource "aws_iam_policy" "cloudwatch" {
     {
       "Sid": "VisualEditor0",
       "Effect": "Allow",
-      "Action": ["cloudwatch:PutMetricAlarm", "cloudwatch:DeleteAlarms"],
+      "Action": [
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DescribeAlarms"
+      ],
       "Resource": "arn:aws:cloudwatch:us-east-1:577373831711:alarm:${local.alarms_prefix}*"
     }
   ]

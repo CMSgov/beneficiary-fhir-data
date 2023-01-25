@@ -87,9 +87,22 @@ def handler(event, context):
         return
 
     alarm_name = f"{ALARMS_PREFIX}-{instance_id}"
+    try:
+        metric_alarm_exists = (
+            len(cw_client.describe_alarms(AlarmNames=[alarm_name])["MetricAlarms"]) > 0
+        )
+    except KeyError as ex:
+        print(f"Unable to discover metric alarms: {str(ex)}")
+        return
 
     if auto_scaling_action == AutoScalingAction.INSTANCE_LAUNCH:
-        print(f"Instance {instance_id} is being created, creating associated disk usage alarm")
+        print(f"Instance {instance_id} is being launched...")
+
+        if metric_alarm_exists:
+            print(f"Alarm {alarm_name} already exists, skipping creation")
+            return
+
+        print(f"Alarm {alarm_name} does not exist already, creating it...")
 
         metric_dimensions = DEFAULT_DIMENSIONS + [
             {"Name": "InstanceId", "Value": instance_id},
@@ -116,10 +129,16 @@ def handler(event, context):
             AlarmActions=[ALARM_ACTION_ARN],
             OKActions=[OK_ACTION_ARN],
         )
-        
+
         print(f"Alarm {alarm_name} successfully created")
     elif auto_scaling_action == AutoScalingAction.INSTANCE_TERMINATE:
-        print(f"Instance {instance_id} is being terminated, removing associated alarm")
+        print(f"Instance {instance_id} is being terminated...")
+
+        if not metric_alarm_exists:
+            print(f"Alarm {alarm_name} does not exist, skipping deletion")
+            return 
+
+        print(f"Alarm {alarm_name} exists, deleting it...")
 
         cw_client.delete_alarms(AlarmNames=[alarm_name])
 
