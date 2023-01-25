@@ -54,7 +54,7 @@ struct CsvOutputRow {
 /// let query_result_fake = Ok(vec![]);
 /// output_csv_row(
 ///   csv_serializer,
-///   DatabaseQuery::SelectBeneRecordsByBeneIds,
+///   DatabaseQuery::BeneRecordsByBeneIds,
 ///   format!("k1 = v1, k2 = v2"),
 ///   query_result_fake.is_ok(),
 ///   query_before.elapsed(),
@@ -134,7 +134,7 @@ mod tests {
         // Write out a fake row and check the buffer.
         output_csv_row(
             csv_serializer,
-            DatabaseQuery::SelectBeneRecordsByBeneIds,
+            DatabaseQuery::BeneRecordsByBeneIds,
             "k1 = v1, k2 = v2".to_owned(),
             true,
             Duration::from_millis(42),
@@ -143,7 +143,7 @@ mod tests {
         .await?;
         assert_eq!(
             "query_id,query_params,query_succeeded,query_time_millis,query_result_count\n\
-             SelectBeneRecordsByBeneIds,\"k1 = v1, k2 = v2\",true,42,24\n",
+             BeneRecordsByBeneIds,\"k1 = v1, k2 = v2\",true,42,24\n",
             String::from_utf8(buffer.into_inner())?
         );
 
