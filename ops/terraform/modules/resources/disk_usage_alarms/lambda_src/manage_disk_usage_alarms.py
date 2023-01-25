@@ -116,7 +116,11 @@ def handler(event, context):
             AlarmActions=[ALARM_ACTION_ARN],
             OKActions=[OK_ACTION_ARN],
         )
+        
+        print(f"Alarm {alarm_name} successfully created")
     elif auto_scaling_action == AutoScalingAction.INSTANCE_TERMINATE:
         print(f"Instance {instance_id} is being terminated, removing associated alarm")
 
         cw_client.delete_alarms(AlarmNames=[alarm_name])
+
+        print(f"Alarm {alarm_name} successfully deleted")
