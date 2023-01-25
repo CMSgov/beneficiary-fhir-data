@@ -7,6 +7,8 @@ from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ENV = os.environ.get("ENV", "")
+ALARM_THRESHOLD = float(os.environ.get("ALARM_THRESHOLD", "95.0"))
+ALARM_PERIOD = int(os.environ.get("ALARM_PERIOD", "60"))
 ALARM_ACTION_ARN = os.environ.get("ALARM_ACTION_ARN", "")
 OK_ACTION_ARN = os.environ.get("OK_ACTION_ARN", "")
 METRIC_NAMESPACE = os.environ.get("METRIC_NAMESPACE", "")
@@ -39,7 +41,18 @@ class AutoScalingAction(str, Enum):
 
 
 def handler(event, context):
-    if not all([REGION, ENV, ALARM_ACTION_ARN, OK_ACTION_ARN, METRIC_NAMESPACE, METRIC_NAME]):
+    if not all(
+        [
+            REGION,
+            ENV,
+            ALARM_THRESHOLD,
+            ALARM_PERIOD,
+            ALARM_ACTION_ARN,
+            OK_ACTION_ARN,
+            METRIC_NAMESPACE,
+            METRIC_NAME,
+        ]
+    ):
         print("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -123,8 +136,8 @@ def handler(event, context):
             MetricName=METRIC_NAME,
             Dimensions=metric_dimensions,
             Statistic="Maximum",
-            Period=60,
-            Threshold=95.0,
+            Period=ALARM_PERIOD,
+            Threshold=ALARM_THRESHOLD,
             Unit="Percent",
             TreatMissingData="notBreaching",
             ActionsEnabled=True,
