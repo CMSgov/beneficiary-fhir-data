@@ -28,6 +28,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 public class CarrierClaimTransformerV2 {
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -53,6 +55,8 @@ public class CarrierClaimTransformerV2 {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param transformerContext the {@link TransformerContext} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link

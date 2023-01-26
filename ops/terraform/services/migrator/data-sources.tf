@@ -7,6 +7,32 @@ data "external" "rds" {
 
 data "aws_caller_identity" "current" {}
 
+# TODO: this is a temporary work-around until versioning becomes a reality
+# the following logic produces a map of ami filters to their filter values:
+# `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
+# `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided
+locals {
+  filters = { for k, v in {
+    "image-id" = var.ami_id_override,
+    "tag:Branch" = var.ami_id_override == null ? "master" : null } : k => v if v != null
+  }
+}
+
+data "aws_ami" "main" {
+  most_recent = true
+  owners      = ["self"]
+  name_regex  = ".+-${local.service}-.+"
+
+  dynamic "filter" {
+    for_each = local.filters
+    content {
+      name   = filter.key
+      values = [filter.value]
+    }
+  }
+}
+
+
 data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
@@ -39,7 +65,7 @@ data "aws_security_group" "enterprise_tools" {
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-enterprise-tools"]
+    values = [local.enterprise_tools_security_group]
   }
 }
 

@@ -40,14 +40,14 @@ import org.slf4j.LoggerFactory;
 public class DiagnosisUtilV2 {
   private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosisUtilV2.class);
 
-  /** Stores the diagnosis ICD codes and their display values */
+  /** Stores the diagnosis ICD codes and their display values. */
   private static Map<String, String> icdMap = null;
 
   /** Tracks the national drug codes that have already had code lookup failures. */
   private static final Set<String> icdLookupMissingFailures = new HashSet<>();
 
   /**
-   * Retrieves the Diagnosis display value from a Diagnosis code look up file
+   * Retrieves the Diagnosis display value from a Diagnosis code look up file.
    *
    * @param icdCode - Diagnosis code
    * @return the icd code display value
@@ -86,7 +86,9 @@ public class DiagnosisUtilV2 {
 
   /**
    * Reads ALL the ICD codes and display values from the DGNS_CD.txt file. Refer to the README file
-   * in the src/main/resources directory
+   * in the src/main/resources directory.
+   *
+   * @return the map of ICD codes
    */
   private static Map<String, String> readIcdCodeFile() {
     Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
@@ -114,7 +116,13 @@ public class DiagnosisUtilV2 {
     return icdDiagnosisMap;
   }
 
-  /** Checks to see if a diagnosis that matches already exists */
+  /**
+   * Checks to see if a diagnosis that matches already exists.
+   *
+   * @param diag the diagnosis to check for
+   * @param codeableConcept the codeable concept to check within
+   * @return {@code true} if the diagnosis exists within the codeableConcept
+   */
   static boolean containedIn(Diagnosis diag, CodeableConcept codeableConcept) {
     return codeableConcept.getCoding().stream()
             .filter(c -> diag.getCode().equals(c.getCode()))
@@ -124,10 +132,10 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Converts a {@link Diagnosis} to an R4 {@link CodeableConcept}
+   * Converts a {@link Diagnosis} to an R4 {@link CodeableConcept}.
    *
    * @param diag The diagnosis to convert
-   * @return
+   * @return the converted codeable concept
    */
   static CodeableConcept toCodeableConcept(Diagnosis diag) {
     CodeableConcept codeableConcept = new CodeableConcept();
@@ -148,12 +156,11 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Creates a {@link Coding} from an R4 {@link CodeableConcept}
+   * Creates a {@link Coding} from an R4 {@link CodeableConcept}.
    *
-   * @param codeableConcept The codeableConcept to add Codings for
-   * @param system The system
-   * @param system The code
-   * @return
+   * @param codeableConcept The CodeableConcept to add a Coding for
+   * @param system The system to use in the new coding
+   * @param code the code to use in the new coding
    */
   private static void addCodingToCodeableConcept(
       CodeableConcept codeableConcept, String system, String code) {
@@ -197,7 +204,8 @@ public class DiagnosisUtilV2 {
    * specific claim type doesn't have the given diagnosis it will just be skipped.
    *
    * @param claim the Claim to extract the {@link Diagnosis}es from
-   * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
+   * @return the {@link Diagnosis} that can be extracted from the specified {@link
+   *     gov.cms.bfd.model.rif.InpatientClaim}
    */
   static List<Diagnosis> extractDiagnoses(Object claim) {
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
@@ -260,7 +268,10 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Translates from {@link DiagnosisLabel} to {@link C4BBClaimInpatientInstitutionalDiagnosisType}
+   * Translates from {@link DiagnosisLabel} to {@link C4BBClaimInpatientInstitutionalDiagnosisType}.
+   *
+   * @param label the label to transform
+   * @return the label translated to the specified type
    */
   static Coding translateLabelCodeInpatient(DiagnosisLabel label) {
     switch (label) {
@@ -294,7 +305,11 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Translates from {@link DiagnosisLabel} to {@link C4BBClaimOutpatientInstitutionalDiagnosisType}
+   * Translates from {@link DiagnosisLabel} to {@link
+   * C4BBClaimOutpatientInstitutionalDiagnosisType}.
+   *
+   * @param label the label to transform
+   * @return the label translated to the specified type
    */
   static Coding translateLabelCodeOutpatient(DiagnosisLabel label) {
     switch (label) {
@@ -328,10 +343,13 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Translates from {@link DiagnosisLabel} to {@link ExDiagnosistype}
+   * Translates from {@link DiagnosisLabel} to {@link ExDiagnosistype}.
    *
    * <p>*Note* : Pharmacy EOBs do not get diagnosis mapped at this point in time. This is here for
    * completeness and consistency.
+   *
+   * @param label the label to transform
+   * @return the label translated to the specified type
    */
   static Coding translateLabelPharmacy(DiagnosisLabel label) {
     switch (label) {
@@ -358,7 +376,10 @@ public class DiagnosisUtilV2 {
 
   /**
    * Translates from {@link DiagnosisLabel} to {@link
-   * C4BBClaimProfessionalAndNonClinicianDiagnosisType}
+   * C4BBClaimProfessionalAndNonClinicianDiagnosisType}.
+   *
+   * @param label the label to transform
+   * @return the label translated to the specified type
    */
   static Coding translateLabelProfessional(DiagnosisLabel label) {
     switch (label) {
@@ -383,8 +404,12 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Translates from {@link DiagnosisLabel} to an EOB type specific Coding based on the (@link
+   * Translates from {@link DiagnosisLabel} to an EOB type specific Coding based on the {@link
    * ClaimTypeV2}.
+   *
+   * @param label the label to transform
+   * @param claimType the claim type to use for the translation
+   * @return the label translated to the specified type
    */
   static Coding translateLabelCode(DiagnosisLabel label, ClaimTypeV2 claimType) {
     switch (claimType) {
@@ -411,12 +436,16 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Translates a list of {@link DiagnosisLabel} to an EOB type specific Coding based on the (@link
+   * Translates a list of {@link DiagnosisLabel} to an EOB type specific Coding based on the {@link
    * ClaimTypeV2}.
    *
    * <p>In practice, the list will only ever be one {@link DiagnosisLabel}. The {@link Diagnosis}
    * class allows multiple labels to be present, so we cover that case here. In V2, only a single
    * label will ever be assigned.
+   *
+   * @param labels the labels to transform
+   * @param claimType the claim type to use for the label translation
+   * @return a new {@link CodeableConcept} with the coding set based on the labels
    */
   static CodeableConcept translateLabels(Set<DiagnosisLabel> labels, ClaimTypeV2 claimType) {
     CodeableConcept diagType = new CodeableConcept();
@@ -428,8 +457,13 @@ public class DiagnosisUtilV2 {
   }
 
   /**
+   * Adds a diagnosis code to the specified {@link ExplanationOfBenefit} and returns the sequence
+   * value added. If the specified code already exists, returns the existing sequence value and does
+   * not add anything.
+   *
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
    * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @param claimType the claim type to use when adding the diagnosis code
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
    */
   static int addDiagnosisCode(
@@ -467,10 +501,11 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Optionally adds a diagnosis
+   * Optionally adds a diagnosis.
    *
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
    * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @param claimType the claim type to use when adding the diagnosis
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
    */
   static Optional<Integer> addDiagnosisCode(
@@ -479,11 +514,13 @@ public class DiagnosisUtilV2 {
   }
 
   /**
+   * Add a diagnosis link.
+   *
    * @param eob the {@link ExplanationOfBenefit} that the specified {@link ItemComponent} is a child
    *     of
-   * @param item the {@link ItemComponent} to add an {@link ItemComponent#getDiagnosisLinkId()}
-   *     entry to
+   * @param item the {@link ItemComponent} to add a diagnosis code entry to
    * @param diagnosis the {@link Diagnosis} to add a link for
+   * @param claimType the claim type to use when adding the sequence
    */
   static void addDiagnosisLink(
       ExplanationOfBenefit eob,

@@ -21,14 +21,14 @@ import javax.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
-/** Provides common logic for performing DB interactions */
+/** Provides common logic for performing DB interactions. */
 @EqualsAndHashCode
 @AllArgsConstructor
 public class ClaimDao {
 
-  /** Query name for logging MDC */
+  /** Query name for logging MDC. */
   static final String CLAIM_BY_MBI_QUERY = "claim_by_mbi";
-  /** Query name for logging MDC */
+  /** Query name for logging MDC. */
   static final String CLAIM_BY_ID_QUERY = "claim_by_id";
 
   /** {@link EntityManager} used for database access. */
@@ -211,6 +211,8 @@ public class ClaimDao {
   /**
    * Helper method for easier mocking related to metrics.
    *
+   * @param resourceType the resource type
+   * @param queryName the query name
    * @param queryTime The amount of time passed executing the query.
    * @param querySize The number of entities returned by the query.
    */

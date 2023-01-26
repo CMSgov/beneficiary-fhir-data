@@ -17,6 +17,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link ClaimTypeV2} enum logic. */
 public final class ClaimTypeV2Test {
   /**
    * Verifies that our service end date function is working as expected. Since we are type casting

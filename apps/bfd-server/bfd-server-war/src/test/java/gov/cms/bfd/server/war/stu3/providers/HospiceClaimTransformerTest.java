@@ -23,12 +23,11 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.HospiceClaimTransformer}. */
+/** Unit tests for {@link HospiceClaimTransformer}. */
 public final class HospiceClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.HospiceClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
+   * Verifies that {@link HospiceClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

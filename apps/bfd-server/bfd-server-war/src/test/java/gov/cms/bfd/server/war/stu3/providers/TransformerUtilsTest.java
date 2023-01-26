@@ -48,15 +48,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils}. Not to be confused
- * with {@link TransformerTestUtils}, which are test utilities.
+ * Unit tests for {@link TransformerUtils}. Not to be confused with {@link TransformerTestUtils},
+ * which are test utilities.
  */
 public final class TransformerUtilsTest {
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createExtensionCoding(org.hl7.fhir.instance.model.api.IAnyResource,
-   * CcwCodebookVariable, String)} works as expected.
-   */
+  /** Verifies that {@link TransformerUtils#createExtensionCoding} works as expected. */
   @Test
   public void createExtensionCoding() {
     Patient patientA = new Patient();
@@ -74,11 +70,7 @@ public final class TransformerUtilsTest {
     assertEquals("4", coding.getCode());
   }
 
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createCodeableConcept(org.hl7.fhir.instance.model.api.IAnyResource,
-   * CcwCodebookVariable, String)} works as expected.
-   */
+  /** Verifies that {@link TransformerUtils#createCodeableConcept} works as expected. */
   @Test
   public void createCodeableConcept() {
     Patient patientA = new Patient();
@@ -96,9 +88,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createCodeableConcept(org.hl7.fhir.instance.model.api.IAnyResource,
-   * CcwCodebookVariable, String)} sets {@link Coding#getDisplay()} correctly.
+   * Verifies that {@link TransformerUtils#createCodeableConcept} sets {@link Coding#getDisplay()}
+   * correctly.
    */
   @Test
   public void createCodeableConcept_display() {
@@ -124,6 +115,7 @@ public final class TransformerUtilsTest {
     assertNull(paymentMethodConcept_1.getCodingFirstRep().getDisplay());
   }
 
+  /** Tests that {@link TransformerUtils#addCareTeamPractitioner} adds the care team as expected. */
   @Test
   public void addCareTeamPractitioner() {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
@@ -136,9 +128,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createIdentifierReference(String,
-   * String)} sets {@link Reference)} correctly.
+   * Verifies that {@link TransformerUtils#createIdentifierReference} sets {@link Reference}
+   * correctly.
    */
   @Test
   public void createReferenceTest() {
@@ -154,10 +145,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies if
-   * an extension is found
+   * Verifies that {@link TransformerUtils#careTeamHasMatchingExtension} verifies if an extension is
+   * found.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsTrueWhenFound() {
@@ -177,10 +166,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a reference url is empty.
+   * Verifies that {@link TransformerUtils#careTeamHasMatchingExtension} verifies it returns false
+   * when a reference url is empty.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithEmptyReferenceUrl() {
@@ -200,10 +187,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a reference url is null.
+   * Verifies that {@link TransformerUtils#careTeamHasMatchingExtension} verifies it returns false
+   * when a reference url is null.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithNullReferenceUrl() {
@@ -223,10 +208,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a code value is empty.
+   * Verifies that {@link TransformerUtils#careTeamHasMatchingExtension} verifies it returns false
+   * when a code value is empty.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithEmptyCodeValue() {
@@ -246,10 +229,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a code value is null.
+   * Verifies that {@link TransformerUtils#careTeamHasMatchingExtension} verifies it returns false
+   * when a code value is null.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithNullCodeValue() {
@@ -269,9 +250,7 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createIdentifierReference
-   * (gov.cms.bfd.server.war.stu3.providers.IdentifierType, String)} sets {@link Reference)}
+   * Verifies that {@link TransformerUtils#createIdentifierReference} sets {@link Reference}
    * correctly.
    */
   @Test
@@ -293,11 +272,7 @@ public final class TransformerUtilsTest {
         reference.getIdentifier().getType().getCoding().get(0).getSystem());
   }
 
-  /**
-   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
-   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * size correctly.
-   */
+  /** Verifies that {@link TransformerUtils#createBundle} sets bundle size correctly. */
   @Test
   public void createBundleWithoutPaging() throws IOException {
 
@@ -335,11 +310,7 @@ public final class TransformerUtilsTest {
     assertEquals(1, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
 
-  /**
-   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
-   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * size correctly.
-   */
+  /** Verifies that {@link TransformerUtils#createBundle} sets bundle size correctly. */
   @Test
   public void createBundleWithoutPagingWithZeroEobs() throws IOException {
 
@@ -354,9 +325,8 @@ public final class TransformerUtilsTest {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createBundle
-   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * with paging size of 2 correctly.
+   * Verifies that {@link TransformerUtils#createBundle} sets bundle with paging size of 2
+   * correctly.
    */
   @Test
   public void createBundleWithPagingWithASizeOf2() throws IOException {
@@ -470,6 +440,12 @@ public final class TransformerUtilsTest {
     assertEquals(2, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
 
+  /**
+   * Verifies coding list is null or empty.
+   *
+   * @param coding the coding
+   * @return {@code true} if the coding list is null or empty
+   */
   private boolean isCodingListNullOrEmpty(List<Coding> coding) {
     if (coding == null || coding.isEmpty() || coding.size() == 0) return true;
 

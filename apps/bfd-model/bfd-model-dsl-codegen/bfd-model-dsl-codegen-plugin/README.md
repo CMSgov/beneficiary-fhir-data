@@ -157,6 +157,7 @@ The `column` objects have the following properties:
 - minLength: Minimum allowed length for a non-null string value in this field. Default is to use the value in
   the `table`.
 - sequence: Object defining the database sequence to use to populate this column.
+- dbOnly: When true the column will be added to generated SQL but not added as a field in entities.  Default value is false.  Intended for use with joinColumnName.
 
 The `transformation` objects define how to copy data from a field in an RDA API message to a field in the JPA entity.
 Generally each field has one transformation applied to it, but the DSL allows multiple transformations to be applied.
@@ -185,8 +186,12 @@ The `array` objects contain the following properties:
 
 The `join` objects contain the following properties:
 
+- class: Optional.  One of `array`, `child`, or `parent`.  See below for details. 
 - fieldName: Name of the java field in the entity class.
-- entityClass: Name of the entity being joined.
+- entityClass: Full (package plus class) class name of the entity being joined. Used when the entity is not defined
+  within the model.
+- entityMapping: ID of the entity's mapping. Used when the entity is defined within the model. Either entityClass or
+  entityMapping must be defined but not both.
 - collectionType: Type of collection to use for field (List or Set).
 - readOnly: When true no setter is generated for the field.
 - joinType: Type of JPA join annotation to use (OneToMany, ManyToOne, OneToOne).
@@ -194,11 +199,23 @@ The `join` objects contain the following properties:
 - orphanRemoval: value for orphanRemoval parameter in JPA annotation.
 - fetchType: value for fetchType parameter in JPA annotation.
 - cascadeTypes: array of values for cascade parameter in JPA annotation.
+- joinColumnName: Which dbOnly column is used to map parent primary key.  For use with child joins.
+- orderBy: Optional SQL to use in ORDER BY clause during join.
+- foreignKey: Optional name of a foreign key constraint
+
+The `class` property of a `join` can be used to set default values and special validity constraints depending on the type of relationship the join represents.
+
+| class  | Relationship                                    | Defaults                                                                                                                  | Required Properties               |
+|--------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| array  | RDA API style array of unordered child objects. | `joinType=OneToMany`, `collectionType=Set`, `fetchType=EAGER`, `orphanRemoval=true`, `cascadeTypes=ALL`                   | `entityMapping`                   |
+| child  | Child side of parent-child relationship.        | `joinType=ManyToOne`                                                                                                      | `entityMapping`, `joinColumnName` |
+| parent | Parent side of parent-child relationship.       | `joinType=OneToMany`, `collectionType=List`, `fetchType=EAGER`, `readOnly=true`, `orphanRemoval=true`, `cascadeTypes=ALL` | `entityMapping`, `mappedBy`       | 
 
 The valid `transformer` names for use in a `transformation` are:
 
 | Name               | Description                                                                                       |
 |--------------------|---------------------------------------------------------------------------------------------------|
+| Array              | Transforms all child objects within a collection.  Used with array joins.                         |
 | IdHash             | Hashes a string before storing it into the `to` field.                                            |
 | Now                | Stores the current timestamp into the `to` field.                                                 |
 | MessageEnum        | Uses an `EnumStringExtractor` instance to extract a string value from an enum value.              |
@@ -227,7 +244,7 @@ The `EnumValueIfPresent` transformer accepts these options:
 - enumValue: Name of the specific enum value to assign to the `to` field (must be one of the ones listed in the `enumType`).
 
 The `MessageEnum` transformer uses an `EnumStringExtractor` instance to extract a string value from an RDA API
-`oneof` containing an enum field and a string field.  The latter is used for unrecognized values.
+`oneof` containing an enum field and a string field. The latter is used for unrecognized values.
 By convention these fields have names ending in `Enum` and `Unrecognized`, respectively.
 accepts these options:
 - enumClass: The java class for the RDA API enum.

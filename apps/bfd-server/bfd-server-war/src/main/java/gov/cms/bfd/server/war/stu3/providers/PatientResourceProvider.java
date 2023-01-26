@@ -82,23 +82,38 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
+  /** The Entity manager. */
   private EntityManager entityManager;
+  /** The Metric registry. */
   private MetricRegistry metricRegistry;
+  /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
-  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
+  /**
+   * Sets the {@link #entityManager}.
+   *
+   * @param entityManager a JPA {@link EntityManager} connected to the application's database
+   */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /** @param metricRegistry the {@link MetricRegistry} to use */
+  /**
+   * Sets the {@link #metricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
+  /**
+   * Sets the {@link #loadedFilterManager}.
+   *
+   * @param loadedFilterManager the {@link LoadedFilterManager} to use
+   */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
@@ -200,6 +215,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return patient;
   }
 
+  /**
+   * Search by coverage contract.
+   *
+   * @param coverageId the coverage id
+   * @param referenceYear the reference year
+   * @param cursor the cursor for paging
+   * @param requestDetails the request details
+   * @return the bundle representing the results
+   */
   @Search
   @Trace
   public Bundle searchByCoverageContract(
@@ -327,6 +351,14 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
+  /**
+   * Search by coverage contract and year month.
+   *
+   * @param coverageId the coverage id
+   * @param yearMonth the year month
+   * @param requestDetails the request details
+   * @return the search results
+   */
   @Trace
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
@@ -374,6 +406,16 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
+  /**
+   * Get the {@link CcwCodebookVariable} value for the specified system string.
+   *
+   * <p>TODO: Move this out of here into a shared/generic location and rename method
+   *
+   * @param system the system to find the {@link CcwCodebookVariable} for
+   * @return the ccw codebook variable
+   * @throws InvalidRequestException (http 400 error) if the system did not match a known {@link
+   *     CcwCodebookVariable}
+   */
   private CcwCodebookVariable partDCwVariableFor(String system) {
     try {
       return CcwCodebookVariable.valueOf(system.toUpperCase());
@@ -382,6 +424,17 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
   }
 
+  /**
+   * Gets the part D contract month field from the given {@link CcwCodebookVariable}.
+   *
+   * <p>TODO: This could be moved somewhere else; also should this hardcoded map exist in a more
+   * central location?
+   *
+   * @param month the part d contract variable to look for as a {@link CcwCodebookVariable}
+   * @return the string representing the part d contract month
+   * @throws InvalidRequestException if the {@link CcwCodebookVariable} is not one of the supported
+   *     part d contract values
+   */
   private String partDFieldByMonth(CcwCodebookVariable month) {
 
     Map<CcwCodebookVariable, String> mapOfMonth =
@@ -410,6 +463,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Fetch beneficiaries by contract and year-month.
+   *
    * @param coverageId a {@link TokenParam} specifying the Part D contract ID and the month to match
    *     against (yeah, the combo is weird)
    * @param yearMonth the enrollment month and year to match against
@@ -458,6 +513,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Query bene count by part d contract code and year-month.
+   *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
@@ -500,6 +557,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Query beneficiary ids by part d contract code and year-month.
+   *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
@@ -562,7 +621,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Query the DB for and return the matching {@link Beneficiary}s
+   * Query the DB for and return the matching {@link Beneficiary}s.
    *
    * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
    * @return the matching {@link Beneficiary}s
@@ -693,9 +752,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Queries the database by hicn hash.
+   *
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -708,9 +768,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Queries the database by mbi hash.
+   *
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -723,10 +784,11 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Queries the database by the specified hash type.
+   *
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
@@ -885,8 +947,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Following method will bring back the Beneficiary that has the most recent rfrnc_yr since the
-   * hicn points to more than one bene id in the Beneficiaries table
+   * Returns the Beneficiary that has the most recent rfrnc_yr since the hicn points to more than
+   * one bene id in the Beneficiaries table.
    *
    * @param duplicateBenes of matching Beneficiary records the {@link
    *     Beneficiary#getBeneficiaryId()} value to match
@@ -928,7 +990,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       Arrays.asList("true", "false", "hicn", "mbi");
 
   /**
-   * Return a valid List of values for the IncludeIdenfifiers header
+   * Return a valid List of values for the IncludeIdenfifiers header.
    *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out include identifiers values
@@ -973,13 +1035,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
   }
 
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
-
   /**
-   * Check that coverageId value is valid
+   * Check that coverageId value is valid.
    *
    * @param coverageId the coverage id
    * @throws InvalidRequestException if invalid coverageId

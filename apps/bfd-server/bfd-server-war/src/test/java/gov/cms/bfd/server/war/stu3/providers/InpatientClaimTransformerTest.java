@@ -25,13 +25,11 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.InpatientClaimTransformer}. */
+/** Unit tests for {@link InpatientClaimTransformer}. */
 public final class InpatientClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.InpatientClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
-   * InpatientClaim}.
+   * Verifies that {@link InpatientClaimTransformer#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

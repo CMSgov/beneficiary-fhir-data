@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
 
+  /** The map of claim types. */
   private static final Map<String, ResourceTypeV2<Claim, ?>> claimTypeMap =
       ImmutableMap.of("fiss", ClaimTypeV2.F, "mcs", ClaimTypeV2.M);
 

@@ -27,7 +27,13 @@ import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
  * via the {@link #publishOperationName()} method.
  */
 public final class Operation {
+  /** The operational endpoint. */
   private final Endpoint endpoint;
+  /**
+   * A mode, query parameter, HTTP header, etc. that meaningfully impacts the behavior of the
+   * operation such that {@link Operation}s with different values for it should be tracked
+   * separately in our monitoring tools.
+   */
   private final SortedMap<String, String> options;
 
   /**
@@ -41,7 +47,11 @@ public final class Operation {
     this.options = new TreeMap<String, String>();
   }
 
-  /** @return the canonical name for the HTTP request represented by this {@link Operation} */
+  /**
+   * Gets the canonical name for the HTTP request represented by this {@link Operation}.
+   *
+   * @return the canonical name
+   */
   private String getCanonicalName() {
     return String.format(
         "%s%s",
@@ -120,26 +130,35 @@ public final class Operation {
     /** Some other, unknown HTTP endpoint/operation. */
     OTHER(null);
 
+    /**
+     * A URI path that represents all invocations of this {@link Endpoint}, or {@code null} for
+     * unknown {@link Endpoint}s. *
+     */
     private final String requestHttpUri;
 
     /**
-     * Enum constant constructor.
+     * Constructs a new Endpoint.
      *
      * @param requestHttpUri a URI path that represents all invocations of this {@link Endpoint}, or
-     *     <code>null</code> for unknown {@link Endpoint}s
+     *     {@code null} for unknown {@link Endpoint}s
      */
     private Endpoint(String requestHttpUri) {
       this.requestHttpUri = requestHttpUri;
     }
 
     /**
-     * @return the canonical name for the HTTP endpoint/handler represented by this {@link Endpoint}
+     * Gets the canonical name for the HTTP endpoint/handler represented by this {@link Endpoint}.
+     *
+     * @return the canonical name
      */
     public String getCanonicalName() {
       return requestHttpUri;
     }
 
     /**
+     * Attempts to return a known {@link Endpoint} based on the {@link HttpServletRequest} request
+     * uri.
+     *
      * @param httpServletRequest the {@link HttpServletRequest} to find a match for
      * @return the {@link Endpoint} that matches the specified {@link HttpServletRequest}, or {@link
      *     Endpoint#OTHER} if no exact match could be found

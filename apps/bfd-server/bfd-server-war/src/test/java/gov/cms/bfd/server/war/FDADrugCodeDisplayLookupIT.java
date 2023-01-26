@@ -6,7 +6,7 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-/** Verifies it can get an actual fda drug code display */
+/** Verifies it can get an actual fda drug code display. */
 public class FDADrugCodeDisplayLookupIT {
   /** Verifies a real drug code display. */
   @Test

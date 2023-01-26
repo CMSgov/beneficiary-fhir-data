@@ -9,14 +9,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * A per request instance holds all resource (FHIR) request headers, such as: "includeIdentifiers"
- * {@link CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} "includeAddressFields" {@link
- * CommonHeaders#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} which serve as part of BFD API
+ * A per-request instance that holds all resource (FHIR) request headers, such as:
+ * "includeIdentifiers" {@link CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} "includeAddressFields"
+ * {@link CommonHeaders#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} which serve as part of BFD API.
  */
 public class RequestHeaders {
+  /** The request details. */
   RequestDetails requestDetails;
+  /** A map of all the header names and values. */
   Map<String, Object> headerNVs = new HashMap<String, Object>();
 
+  /**
+   * Instantiates a new Request header object.
+   *
+   * @param requestDetails the request details
+   */
   private RequestHeaders(RequestDetails requestDetails) {
     this.requestDetails = requestDetails;
     // parse headers
@@ -35,12 +42,12 @@ public class RequestHeaders {
         });
   }
 
-  /** instantiate an empty RH, used by tests */
+  /** instantiate an empty RH, used by tests. */
   private RequestHeaders() {}
 
   /**
-   * currently used by internal code to create a RH instance with ad hoc header/value pairs for
-   * testing code
+   * Currently used by internal code to create a RH instance with ad hoc header/value pairs for
+   * testing code.
    *
    * @param hdrValues the header/value pairs
    */
@@ -83,40 +90,40 @@ public class RequestHeaders {
   }
 
   /**
-   * get RH (RequestHeaders) instance extracting headers (API headers) from request details
+   * Get a {@link RequestHeaders} instance extracting headers (API headers) from request details.
    *
    * @param requestDetails source to extract API headers
-   * @return a RH instance
+   * @return the {@link RequestHeaders} instance
    */
   public static RequestHeaders getHeaderWrapper(RequestDetails requestDetails) {
     return new RequestHeaders(requestDetails);
   }
 
   /**
-   * get an empty RH
+   * Get an empty {@link RequestHeaders}.
    *
-   * @return RH instance with no headers at all
+   * @return a {@link RequestHeaders} instance with no headers set
    */
   public static RequestHeaders getHeaderWrapper() {
     return new RequestHeaders();
   }
 
   /**
-   * get RH (RequestHeaders) instance extracting headers (API headers) from hdrValues
+   * Gets a {@link RequestHeaders} instance extracting headers (API headers) from hdrValues.
    *
    * @param hdrValues a literal string in the form of h1, v1, h2, v2, ...
-   * @return a RH instance based on hdrValues
+   * @return a {@link RequestHeaders} instance based on hdrValues
    */
   public static RequestHeaders getHeaderWrapper(String... hdrValues) {
     return new RequestHeaders(hdrValues);
   }
 
   /**
-   * get header value by given header name.
+   * Get header value by using a given header name.
    *
    * @param <T> the header value type
    * @param hdrName the header name
-   * @return the header value casted to its type
+   * @return the header value cast to its type
    */
   public <T> T getValue(String hdrName) {
     Object v = this.headerNVs.get(hdrName);
@@ -127,7 +134,7 @@ public class RequestHeaders {
   }
 
   /**
-   * public helper for headers name value pairs iteration
+   * Public helper for iterating over a headers name and value pairs.
    *
    * @return a map of header name value pairs
    */
@@ -136,8 +143,8 @@ public class RequestHeaders {
   }
 
   /**
-   * public helper for headers name value pairs iteration with an excludion list (in the form of
-   * delimited string)
+   * Helper for iterating over a headers name and value pairs with an exclusion list (in the form of
+   * delimited string).
    *
    * @param excludeHeaders list of headers to exclude when getting header/value pairs map
    * @return the map of all header/value with headers in exclude list removed
@@ -156,10 +163,11 @@ public class RequestHeaders {
   }
 
   /**
-   * check if request contains header includeIdentifiers {@link
-   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
+   * Check if request contains header includeIdentifiers {@link
+   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'.
    *
-   * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
+   * @return {@code true} if the header is present and has value 'hicn' or 'true', {@code false}
+   *     otherwise
    */
   public boolean isHICNinIncludeIdentifiers() {
     List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS);
@@ -167,10 +175,10 @@ public class RequestHeaders {
   }
 
   /**
-   * check if request contains header includeIdentifiers {@link
-   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
+   * Check if request contains header includeIdentifiers {@link
+   * CommonHeaders#HEADER_NAME_INCLUDE_TAX_NUMBERS} and if the value is 'true'.
    *
-   * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
+   * @return {@code true} if the header is present and has value 'true', {@code false} otherwise
    */
   public boolean isTaxNumIncludeIdentifiers() {
     List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS);
@@ -178,10 +186,11 @@ public class RequestHeaders {
   }
 
   /**
-   * check if request contains header includeIdentifiers {@link
-   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'
+   * Check if request contains header includeIdentifiers {@link
+   * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'.
    *
-   * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
+   * @return {@code true} if the header is present and has value 'mbi' or 'true', {@code false}
+   *     otherwise
    */
   public boolean isMBIinIncludeIdentifiers() {
     List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS);
@@ -189,10 +198,11 @@ public class RequestHeaders {
   }
 
   /**
-   * Return a TRUE / FALSE from VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS header
+   * Return the value from the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS header translated into a
+   * {@link Boolean}.
    *
-   * @param headerValue a String containing Boolean value in string form
-   * @return True or False.
+   * @param headerValue the header string value
+   * @return the header value, returns false unless the value is "TRUE" (case-insensitive)
    */
   public static Boolean returnIncludeAddressFieldsValue(String headerValue) {
     return (headerValue == null
@@ -204,22 +214,23 @@ public class RequestHeaders {
   }
 
   /**
-   * Return a TRUE / FALSE from VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS header
+   * Return the value from the HEADER_NAME_INCLUDE_TAX_NUMBERS header translated into a {@link
+   * Boolean}.
    *
-   * @param headerValue a String containing Boolean value in string form
-   * @return True or False.
+   * @param headerValue the header string value
+   * @return the header value, returns false unless the value is "TRUE" (case-insensitive)
    */
   public static Boolean returnIncludeTaxValue(String headerValue) {
     return (headerValue != null && headerValue.equalsIgnoreCase("TRUE"));
   }
 
   /**
-   * Return a valid List of values for the IncludeIdenfifiers header
+   * Return a valid List of values for the IncludeIdentifiers header.
    *
    * @param headerValues a String value containing the value of header
    *     VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
    * @return List of validated header values against the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
-   *     list.
+   *     list
    */
   public static List<String> returnIncludeIdentifiersValues(String headerValues) {
     if (headerValues == null

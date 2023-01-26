@@ -14,31 +14,47 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
 
-  /** @return A label for the resource type that uniquely identifies it */
+  /**
+   * Gets a label for the resource type that uniquely identifies it.
+   *
+   * @return the label
+   */
   String getTypeLabel();
 
   /**
-   * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     ResourceTypeV2} in the database
+   * Gets the JPA {@link Entity} {@link Class} used to store instances of this {@link
+   * ResourceTypeV2} in the database.
+   *
+   * @return the entity class
    */
   Class<TEntity> getEntityClass();
 
-  /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
+  /**
+   * Gets the JPA {@link Entity} field used as the entity's {@link Id}.
+   *
+   * @return the entity id attribute
+   */
   String getEntityIdAttribute();
 
-  /** @return The attribute name for the entity's mbiRecord attribute. */
+  /**
+   * Gets the attribute name for the entity's mbiRecord attribute.
+   *
+   * @return the mbi record attribute
+   */
   String getEntityMbiRecordAttribute();
 
   /**
    * List of attribute names for the entity's service start and/or end dates.
    *
-   * @return List of attribute names for use in service date queries.
+   * @return the list of attribute names
    */
   List<String> getEntityServiceDateAttributes();
 
   /**
-   * @return the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances
-   *     into FHIR instances
+   * Gets the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances into
+   * FHIR instances.
+   *
+   * @return the transformer
    */
   ResourceTransformer<TResource> getTransformer();
 }

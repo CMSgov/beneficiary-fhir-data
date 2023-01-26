@@ -252,7 +252,7 @@ public class FissClaimRdaSinkIT {
                 List.of(
                     new DataTransformer.ErrorMessage(
                         "currLoc2", "invalid length: expected=[0,5] actual=10"),
-                    new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date"));
+                    new DataTransformer.ErrorMessage("procCodes-0-procDate", "invalid date"));
 
             assertEquals(Long.valueOf(3), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());

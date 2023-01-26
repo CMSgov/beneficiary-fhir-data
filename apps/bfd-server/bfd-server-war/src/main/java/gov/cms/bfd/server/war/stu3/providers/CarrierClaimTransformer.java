@@ -24,6 +24,8 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
  */
 final class CarrierClaimTransformer {
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -45,6 +47,8 @@ final class CarrierClaimTransformer {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param transformerContext the {@TransformerContext} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link

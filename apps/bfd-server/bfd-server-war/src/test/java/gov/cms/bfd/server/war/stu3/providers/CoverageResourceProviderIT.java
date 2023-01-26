@@ -151,8 +151,8 @@ public final class CoverageResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that has an invalid {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#IdParam} parameter.
+   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that has an invalid id
+   * parameter.
    */
   @Test
   public void readCoveragesForInvalidIdParam() {
@@ -176,8 +176,8 @@ public final class CoverageResourceProviderIT {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Beneficiary} that does exist in the DB.
+   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary} works as
+   * expected for a {@link Beneficiary} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -251,8 +251,8 @@ public final class CoverageResourceProviderIT {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Beneficiary} that does exist in the DB, with paging.
+   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary} works as
+   * expected for a {@link Beneficiary} that does exist in the DB, with paging.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -328,8 +328,8 @@ public final class CoverageResourceProviderIT {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Beneficiary} that does not exist in the DB.
+   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary} works as
+   * expected for a {@link Beneficiary} that does not exist in the DB.
    */
   @Test
   public void searchByMissingBeneficiary() {
