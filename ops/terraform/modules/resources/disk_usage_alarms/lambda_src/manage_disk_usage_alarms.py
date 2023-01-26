@@ -1,3 +1,4 @@
+import json
 import os
 from enum import Enum
 
@@ -31,12 +32,12 @@ boto_config = Config(
 cw_client = boto3.client("cloudwatch", config=boto_config)
 
 
-class AutoScalingAction(str, Enum):
-    """Represents the possible AWS EventBridge AutoScaling actions that this Lambda will react to"""
+class AutoScalingEvent(str, Enum):
+    """Represents the possible AWS AutoScaling Notifcations events that this Lambda will react to"""
 
-    INSTANCE_LAUNCH = "EC2 Instance-launch Lifecycle Action"
+    INSTANCE_LAUNCH = "autoscaling:EC2_INSTANCE_LAUNCH"
     """Represents when an EC2 instance is launched in an AutoScaling Group"""
-    INSTANCE_TERMINATE = "EC2 Instance-terminate Lifecycle Action"
+    INSTANCE_TERMINATE = "autoscaling:EC2_INSTANCE_TERMINATE"
     """Represents when an EC2 instance is terminated in an AutoScaling Group"""
 
 
@@ -58,18 +59,36 @@ def handler(event, context):
         return
 
     try:
-        auto_scaling_action = AutoScalingAction(event["detail-type"])
-    except KeyError:
-        print(
-            'Event does not contain property "detail-type", Lambda was invoked with incorrect event'
-        )
-        return
-    except ValueError:
-        print(f'Invalid "detail-type" was specified: {event["detail-type"]}')
+        record = event["Records"][0]
+    except IndexError:
+        print("Invalid SNS notification, no records found")
         return
 
     try:
-        instance_id: str = event["detail"]["EC2InstanceId"]
+        sns_message = record["Sns"]["Message"]
+    except KeyError as exc:
+        print(f"No message found in SNS notification: {exc}")
+        return
+
+    try:
+        asg_notification = json.loads(sns_message)
+    except json.JSONDecodeError:
+        print("SNS message body was not valid JSON")
+        return
+
+    try:
+        auto_scaling_action = AutoScalingEvent(asg_notification["Event"])
+    except KeyError:
+        print(
+            'Notification does not contain property "Event", Lambda was invoked with incorrect event'
+        )
+        return
+    except ValueError:
+        print(f'Invalid "Event" was specified: {asg_notification["Event"]}')
+        return
+
+    try:
+        instance_id: str = asg_notification["EC2InstanceId"]
     except KeyError as ex:
         print(
             "No EC2 instance ID was specified by auto-scaling event. Event is missing keys:"
@@ -78,7 +97,7 @@ def handler(event, context):
         return
 
     try:
-        asg_name: str = event["detail"]["AutoScalingGroupName"]
+        asg_name: str = asg_notification["AutoScalingGroupName"]
     except KeyError as ex:
         print(
             "No auto-scaling group name was specified by auto-scaling event. Event is missing"
@@ -95,7 +114,7 @@ def handler(event, context):
         print(f"Unable to discover metric alarms: {str(ex)}")
         return
 
-    if auto_scaling_action == AutoScalingAction.INSTANCE_LAUNCH:
+    if auto_scaling_action == AutoScalingEvent.INSTANCE_LAUNCH:
         print(f"Instance {instance_id} is being launched...")
 
         if metric_alarm_exists:
@@ -131,12 +150,12 @@ def handler(event, context):
         )
 
         print(f"Alarm {alarm_name} successfully created")
-    elif auto_scaling_action == AutoScalingAction.INSTANCE_TERMINATE:
+    elif auto_scaling_action == AutoScalingEvent.INSTANCE_TERMINATE:
         print(f"Instance {instance_id} is being terminated...")
 
         if not metric_alarm_exists:
             print(f"Alarm {alarm_name} does not exist, skipping deletion")
-            return 
+            return
 
         print(f"Alarm {alarm_name} exists, deleting it...")
 
