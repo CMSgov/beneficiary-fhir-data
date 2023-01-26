@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,8 +53,9 @@ public class WriterThreadPoolIT {
     }
     assertTrue(error instanceof ProcessingException, "caught the exception");
     assertTrue(
-        ((ProcessingException) error).getOriginalCause() instanceof IllegalStateException,
-        "exception is due to error limit");
+        ((ProcessingException) error).getOriginalCause()
+            instanceof DataTransformer.TransformationException,
+        "exception is a transformation error");
     assertTrue(database.allClosed(), "all sinks closed");
   }
 

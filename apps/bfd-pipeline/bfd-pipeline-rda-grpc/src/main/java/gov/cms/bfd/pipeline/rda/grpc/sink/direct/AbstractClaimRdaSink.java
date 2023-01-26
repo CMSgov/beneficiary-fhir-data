@@ -169,9 +169,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public void checkErrorCount() throws ProcessingException {
     var query =
         entityManager.createQuery(
-            "select error from MessageError error where status = :status", MessageError.class);
+            "select count(error) from MessageError error where status = :status", Long.class);
     query.setParameter("status", MessageError.Status.UNRESOLVED);
-    int errorCount = query.getResultList().size();
+    long errorCount = query.getSingleResult();
 
     if (errorCount > errorLimit) {
       throw new ProcessingException(new IllegalStateException("Error limit reached"), 0);
@@ -302,7 +302,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param messages collection of RDA API message objects of the correct type for this sync
    * @return the converted claims
-   * @throws ProcessingException if there was an issue transforming the message
+   * @throws ProcessingException if any message in the collection triggered an error
    */
   @VisibleForTesting
   List<RdaChange<TClaim>> transformMessages(String apiVersion, Collection<TMessage> messages)
@@ -336,16 +336,19 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public Optional<RdaChange<TClaim>> transformMessage(String apiVersion, TMessage message)
       throws IOException, ProcessingException {
+    Optional<RdaChange<TClaim>> result;
+
     try {
       var change = transformMessageImpl(apiVersion, message);
       metrics.transformSuccesses.increment();
-      return Optional.of(change);
+      result = Optional.of(change);
     } catch (DataTransformer.TransformationException transformationException) {
       metrics.transformFailures.increment();
       writeError(apiVersion, message, transformationException);
+      result = Optional.empty();
     }
 
-    return Optional.empty();
+    return result;
   }
 
   /**

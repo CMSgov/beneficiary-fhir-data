@@ -156,6 +156,15 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   }
 
   /**
+   * Checks if the error limit has been exceeded.
+   *
+   * @throws ProcessingException If the error limit was reached.
+   */
+  public void checkErrorCount() throws ProcessingException {
+    sink.checkErrorCount();
+  }
+
+  /**
    * Use the provided RDA API message object plus the API version string to produce an appropriate
    * entity object for writing to the database. This operation is provided by the sink because the
    * sink has to be aware of the specific types involved and also because that allows the message

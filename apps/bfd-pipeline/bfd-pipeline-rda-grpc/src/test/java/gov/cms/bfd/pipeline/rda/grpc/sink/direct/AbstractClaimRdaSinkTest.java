@@ -189,24 +189,21 @@ public class AbstractClaimRdaSinkTest {
    * Tests that the {@link AbstractClaimRdaSink#writeError(String, Object,
    * DataTransformer.TransformationException)} method does NOT throw a {@link ProcessingException}
    * if the {@link MessageError} limit has NOT been exceeded.
-   *
-   * @throws ProcessingException If the error count was exceeded
    */
   @Test
-  void shouldNotThrowProcessingExceptionIfMessageErrorLimitNotExceeded()
-      throws ProcessingException {
+  void shouldNotThrowProcessingExceptionIfMessageErrorLimitNotExceeded() {
     // unchecked - This is fine for a mock
     //noinspection unchecked
     TypedQuery<MessageError> mockQuery = mock(TypedQuery.class);
 
     doReturn(mockQuery).when(mockQuery).setParameter(anyString(), any());
 
-    doReturn(List.of(new MessageError())).when(mockQuery).getResultList();
+    doReturn(1L).when(mockQuery).getSingleResult();
 
     doReturn(mockQuery)
         .when(entityManager)
         .createQuery(
-            "select error from MessageError error where status = :status", MessageError.class);
+            "select count(error) from MessageError error where status = :status", Long.class);
 
     assertDoesNotThrow(() -> sink.checkErrorCount());
   }
@@ -215,23 +212,21 @@ public class AbstractClaimRdaSinkTest {
    * Tests that the {@link AbstractClaimRdaSink#writeError(String, Object,
    * DataTransformer.TransformationException)} method DOES throw a {@link ProcessingException} if
    * the {@link MessageError} limit HAS been exceeded.
-   *
-   * @throws ProcessingException If the error count was exceeded
    */
   @Test
-  void shouldThrowProcessingExceptionIfMessageErrorLimitExceeded() throws ProcessingException {
+  void shouldThrowProcessingExceptionIfMessageErrorLimitExceeded() {
     // unchecked - This is fine for a mock
     //noinspection unchecked
     TypedQuery<MessageError> mockQuery = mock(TypedQuery.class);
 
     doReturn(mockQuery).when(mockQuery).setParameter(anyString(), any());
 
-    doReturn(List.of(new MessageError(), new MessageError())).when(mockQuery).getResultList();
+    doReturn(2L).when(mockQuery).getSingleResult();
 
     doReturn(mockQuery)
         .when(entityManager)
         .createQuery(
-            "select error from MessageError error where status = :status", MessageError.class);
+            "select count(error) from MessageError error where status = :status", Long.class);
 
     assertThrows(ProcessingException.class, () -> sink.checkErrorCount());
   }

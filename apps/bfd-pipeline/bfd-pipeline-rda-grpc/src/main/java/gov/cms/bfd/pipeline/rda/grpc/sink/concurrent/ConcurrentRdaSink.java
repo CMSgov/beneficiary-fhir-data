@@ -130,8 +130,8 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   }
 
   @Override
-  public void checkErrorCount() {
-    throw new UnsupportedOperationException();
+  public void checkErrorCount() throws ProcessingException {
+    writerPool.checkErrorCount();
   }
 
   /**

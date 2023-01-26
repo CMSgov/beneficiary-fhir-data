@@ -6,7 +6,6 @@ import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ReportingCallback.ProcessedBatch;
-import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -274,17 +273,13 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
      */
     void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry)
         throws IOException, ProcessingException {
-      try {
-        final String claimKey = sink.getClaimIdForMessage(entry.getObject());
-        final Optional<TClaim> claim =
-            sink.transformMessage(entry.getApiVersion(), entry.getObject());
+      final String claimKey = sink.getClaimIdForMessage(entry.getObject());
+      final Optional<TClaim> claim =
+          sink.transformMessage(entry.getApiVersion(), entry.getObject());
 
-        if (claim.isPresent()) {
-          allMessages.add(entry.getObject());
-          uniqueClaims.put(claimKey, claim.get());
-        }
-      } catch (DataTransformer.TransformationException transformationException) {
-        sink.writeError(entry.getApiVersion(), entry.getObject(), transformationException);
+      if (claim.isPresent()) {
+        allMessages.add(entry.getObject());
+        uniqueClaims.put(claimKey, claim.get());
       }
     }
 

@@ -3,14 +3,9 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -78,21 +73,10 @@ public class ClaimWriterThread_BufferTest {
 
     doReturn(mockClaimKey).when(mockSink).getClaimIdForMessage(mockMessage);
 
-    doThrow(DataTransformer.TransformationException.class)
-        .when(mockSink)
-        .transformMessage(mockApiVersion, mockMessage);
-
-    doThrow(ProcessingException.class)
-        .when(mockSink)
-        .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
+    doThrow(ProcessingException.class).when(mockSink).transformMessage(mockApiVersion, mockMessage);
 
     ClaimWriterThread.Buffer<String, String> buffer = new ClaimWriterThread.Buffer<>();
 
     assertThrows(ProcessingException.class, () -> buffer.add(mockSink, mockEntry));
-    verify(mockSink, times(1))
-        .writeError(
-            eq(mockApiVersion),
-            eq(mockMessage),
-            any(DataTransformer.TransformationException.class));
   }
 }

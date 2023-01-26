@@ -235,9 +235,11 @@ public class FissClaimRdaSinkTest {
         .when(transformer)
         .transformClaim(messages.get(2));
 
+    // unchecked - This is fine for a mock
+    //noinspection unchecked
     TypedQuery<MessageError> mockTypedQuery = mock(TypedQuery.class);
 
-    doReturn(List.of(new MessageError())).when(mockTypedQuery).getResultList();
+    doReturn(1L).when(mockTypedQuery).getSingleResult();
 
     doReturn(mockTypedQuery)
         .when(mockTypedQuery)
@@ -246,7 +248,7 @@ public class FissClaimRdaSinkTest {
     doReturn(mockTypedQuery)
         .when(entityManager)
         .createQuery(
-            "select error from MessageError error where status = :status", MessageError.class);
+            "select count(error) from MessageError error where status = :status", Long.class);
 
     try {
       sink.writeMessages(VERSION, messages);
