@@ -180,7 +180,11 @@ public class LoadedFilterManager {
    */
   public synchronized boolean isResultSetEmpty(
       Long beneficiaryId, DateRangeParam lastUpdatedRange) {
-    if (beneficiaryId == null) throw new IllegalArgumentException();
+    if (beneficiaryId == null) {
+      // This case should not happen and be caught/validated before this, therefore if we get here
+      // it is a code error
+      throw new IllegalArgumentException("Beneficiary id cannot be null/empty");
+    }
 
     if (!isInBounds(lastUpdatedRange)) {
       // Out of bounds has to be treated as unknown result
