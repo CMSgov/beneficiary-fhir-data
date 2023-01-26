@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -175,16 +176,25 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   @Read(version = false)
   @Trace
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
-    if (eobId == null) throw new IllegalArgumentException();
-    if (eobId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (eobId == null) {
+      throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
+    }
+    if (eobId.getVersionIdPartAsLong() != null) {
+      throw new InvalidRequestException("ExplanationOfBenefit ID must not define a version");
+    }
 
     String eobIdText = eobId.getIdPart();
-    if (eobIdText == null || eobIdText.trim().isEmpty()) throw new IllegalArgumentException();
+    if (eobIdText == null || eobIdText.trim().isEmpty()) {
+      throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
+    }
 
     Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(eobIdText);
-    if (!eobIdMatcher.matches())
-      throw new IllegalArgumentException("Unsupported ID pattern: " + eobIdText);
-
+    if (!eobIdMatcher.matches()) {
+      throw new InvalidRequestException(
+          "ExplanationOfBenefit ID pattern: '"
+              + eobIdText
+              + "' does not match expected pattern: {alphaString}-{idNumber}");
+    }
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
 
@@ -611,7 +621,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       case LESSTHAN:
         return a.isBefore(b);
       default:
-        throw new IllegalArgumentException(String.format("Unsupported prefix supplied %s", prefix));
+        throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
     }
   }
 
@@ -643,7 +653,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
        */
       Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
       for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
-        if (codingToken.getModifier() != null) throw new IllegalArgumentException();
+        if (codingToken.getModifier() != null) {
+          throw new InvalidRequestException("Cannot set modifier on field 'type'");
+        }
 
         /*
          * Per the FHIR spec (https://www.hl7.org/fhir/search.html), there are lots of

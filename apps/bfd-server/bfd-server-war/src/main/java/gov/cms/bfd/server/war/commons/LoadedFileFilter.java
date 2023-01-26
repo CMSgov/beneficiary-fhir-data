@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.Instant;
 import org.apache.spark.util.sketch.BloomFilter;
 
@@ -73,7 +74,7 @@ public class LoadedFileFilter {
           }
           break;
         default:
-          throw new IllegalArgumentException("Invalid upper bound in _lastUpdated");
+          throw new InvalidRequestException("Invalid upper bound in _lastUpdated");
       }
     }
 
@@ -91,7 +92,7 @@ public class LoadedFileFilter {
           }
           break;
         default:
-          throw new IllegalArgumentException("Invalid lower bound in _lastUpdated");
+          throw new InvalidRequestException("Invalid lower bound in _lastUpdated");
       }
     }
 
