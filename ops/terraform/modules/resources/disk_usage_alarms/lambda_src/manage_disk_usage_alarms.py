@@ -30,6 +30,7 @@ boto_config = Config(
     },
 )
 cw_client = boto3.client("cloudwatch", config=boto_config)
+autoscaling_client = boto3.client("autoscaling", config=boto_config)
 
 
 class AutoScalingEvent(str, Enum):
@@ -80,85 +81,99 @@ def handler(event, context):
         auto_scaling_action = AutoScalingEvent(asg_notification["Event"])
     except KeyError:
         print(
-            'Notification does not contain property "Event", Lambda was invoked with incorrect event'
+            'Notification does not contain property "Event", Lambda was invoked with'
+            " incorrect event"
         )
         return
     except ValueError:
         print(f'Invalid "Event" was specified: {asg_notification["Event"]}')
         return
 
-    try:
-        instance_id: str = asg_notification["EC2InstanceId"]
-    except KeyError as ex:
-        print(
-            "No EC2 instance ID was specified by auto-scaling event. Event is missing keys:"
-            f" {str(ex)}"
-        )
-        return
+    print(f"Valid AutoScaling Event {auto_scaling_action} received")
 
     try:
         asg_name: str = asg_notification["AutoScalingGroupName"]
     except KeyError as ex:
         print(
-            "No auto-scaling group name was specified by auto-scaling event. Event is missing"
-            f" keys: {str(ex)}"
+            "No auto-scaling group name was specified by auto-scaling event. Event is"
+            f" missing keys: {str(ex)}"
         )
         return
 
-    alarm_name = f"{ALARMS_PREFIX}-{instance_id}"
+    asg_details = autoscaling_client.describe_auto_scaling_groups(AutoScalingGroupNames=[asg_name])
+
     try:
-        metric_alarm_exists = (
-            len(cw_client.describe_alarms(AlarmNames=[alarm_name])["MetricAlarms"]) > 0
-        )
+        asg_instances = [x["InstanceId"] for x in asg_details["AutoScalingGroups"][0]["Instances"]]
     except KeyError as ex:
-        print(f"Unable to discover metric alarms: {str(ex)}")
+        print(f"AutoScaling Group details are missing from ASG {asg_name}, see: {str(ex)}")
         return
 
-    if auto_scaling_action == AutoScalingEvent.INSTANCE_LAUNCH:
-        print(f"Instance {instance_id} is being launched...")
-
-        if metric_alarm_exists:
-            print(f"Alarm {alarm_name} already exists, skipping creation")
-            return
-
-        print(f"Alarm {alarm_name} does not exist already, creating it...")
-
-        metric_dimensions = DEFAULT_DIMENSIONS + [
-            {"Name": "InstanceId", "Value": instance_id},
-            {"Name": "AutoScalingGroupName", "Value": asg_name},
+    try:
+        existing_alarms = [
+            x["AlarmName"]
+            for x in cw_client.describe_alarms(AlarmNamePrefix=ALARMS_PREFIX)["MetricAlarms"]
         ]
+    except KeyError as ex:
+        print(f"Unable to discover existing metric alarms: {str(ex)}")
+        return
 
-        cw_client.put_metric_alarm(
-            AlarmName=alarm_name,
-            AlarmDescription=(
-                f"Disk usage percent for BFD Server instance {instance_id} in"
-                f" {ENV} environment exceeded {ALARM_THRESHOLD}% in the past {ALARM_PERIOD} seconds"
-            ),
-            ComparisonOperator="GreaterThanThreshold",
-            EvaluationPeriods=1,
-            Namespace=METRIC_NAMESPACE,
-            MetricName=METRIC_NAME,
-            Dimensions=metric_dimensions,
-            Statistic="Maximum",
-            Period=ALARM_PERIOD,
-            Threshold=ALARM_THRESHOLD,
-            Unit="Percent",
-            TreatMissingData="notBreaching",
-            ActionsEnabled=True,
-            AlarmActions=[ALARM_ACTION_ARN],
-            OKActions=[OK_ACTION_ARN],
+    alarms_to_ids = {f"{ALARMS_PREFIX}-{instance_id}": instance_id for instance_id in asg_instances}
+    alarms_to_create = list(set(alarms_to_ids.keys()) - set(existing_alarms))
+    # Remaining existing alarms, after subtracting those that _should_ exist, are alarms for
+    # instances that no longer exist in the current ASG
+    alarms_to_delete = list(set(existing_alarms) - set(alarms_to_ids.keys()))
+
+    if alarms_to_create:
+        # Take only instances that have no existing alarm -- this dictionary maps the instance's ID
+        # to its alarm name
+        ids_to_new_alarms = {
+            alarms_to_ids[alarm_name]: alarm_name for alarm_name in alarms_to_create
+        }
+
+        # Create new alarms for all instances in ASG
+        for instance_id, alarm_name in ids_to_new_alarms.items():
+            print(f"Alarm {alarm_name} does not exist already, creating it...")
+
+            metric_dimensions = DEFAULT_DIMENSIONS + [
+                {"Name": "InstanceId", "Value": instance_id},
+                {"Name": "AutoScalingGroupName", "Value": asg_name},
+            ]
+
+            cw_client.put_metric_alarm(
+                AlarmName=alarm_name,
+                AlarmDescription=(
+                    f"Disk usage percent for BFD Server instance {instance_id} in"
+                    f" {ENV} environment exceeded {ALARM_THRESHOLD}% in the past"
+                    f" {ALARM_PERIOD} seconds"
+                ),
+                ComparisonOperator="GreaterThanThreshold",
+                EvaluationPeriods=1,
+                Namespace=METRIC_NAMESPACE,
+                MetricName=METRIC_NAME,
+                Dimensions=metric_dimensions,
+                Statistic="Maximum",
+                Period=ALARM_PERIOD,
+                Threshold=ALARM_THRESHOLD,
+                Unit="Percent",
+                TreatMissingData="notBreaching",
+                ActionsEnabled=True,
+                AlarmActions=[ALARM_ACTION_ARN],
+                OKActions=[OK_ACTION_ARN],
+            )
+
+            print(f"Alarm {alarm_name} successfully created")
+    else:
+        print(f"Alarms for all instances in ASG {asg_name} already exist")
+
+    if alarms_to_delete:
+        print(
+            "The following alarms exist but their corresponding EC2 instances are no"
+            f" longer InService in the {asg_name} ASG {asg_name} so they will be"
+            f" deleted: {alarms_to_delete}"
         )
 
-        print(f"Alarm {alarm_name} successfully created")
-    elif auto_scaling_action == AutoScalingEvent.INSTANCE_TERMINATE:
-        print(f"Instance {instance_id} is being terminated...")
+        cw_client.delete_alarms(AlarmNames=alarms_to_delete)
 
-        if not metric_alarm_exists:
-            print(f"Alarm {alarm_name} does not exist, skipping deletion")
-            return
-
-        print(f"Alarm {alarm_name} exists, deleting it...")
-
-        cw_client.delete_alarms(AlarmNames=[alarm_name])
-
-        print(f"Alarm {alarm_name} successfully deleted")
+        print(f"The following alarms were successfully deleted: {alarms_to_delete}")
+    else:
+        print(f"No stale disk usage alarms found, skipping deletion")

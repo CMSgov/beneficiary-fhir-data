@@ -87,6 +87,28 @@ resource "aws_iam_policy" "kms" {
 EOF
 }
 
+resource "aws_iam_policy" "autoscaling" {
+  name        = "bfd-${var.env}-${local.lambda_name}-autoscaling"
+  description = "Permissions for bfd-${var.env}-${local.lambda_name} to describe ASGs"
+  # Unfortunately AWS does not support anything but wildcarding for the resource defition for the
+  # DescribeAutoScalingGroups action
+  policy = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_policy" "cloudwatch" {
   name        = "bfd-${var.env}-${local.lambda_name}-cloudwatch"
   description = "Permissions for bfd-${var.env}-${local.lambda_name} to create and destroy metric alarms"
@@ -102,7 +124,7 @@ resource "aws_iam_policy" "cloudwatch" {
         "cloudwatch:DeleteAlarms",
         "cloudwatch:DescribeAlarms"
       ],
-      "Resource": "arn:aws:cloudwatch:us-east-1:577373831711:alarm:${local.alarms_prefix}*"
+      "Resource": "arn:aws:cloudwatch:us-east-1:577373831711:alarm:*"
     }
   ]
 }
@@ -132,6 +154,7 @@ EOF
   managed_policy_arns = [
     aws_iam_policy.logs.arn,
     aws_iam_policy.kms.arn,
+    aws_iam_policy.autoscaling.arn,
     aws_iam_policy.cloudwatch.arn
   ]
 }
