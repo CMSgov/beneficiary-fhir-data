@@ -26,25 +26,25 @@ final class StaticRifFile implements RifFile {
     this.staticRifResource = staticRifResource;
   }
 
-  /** Gets the file type of the static rif resource as a {@link RifFileType}. */
+  /** Gets the file type of the static rif resource as a {@link RifFileType}. {@inheritdoc} */
   @Override
   public RifFileType getFileType() {
     return staticRifResource.getRifFileType();
   }
 
-  /** Gets Display Name of the static rif resource as a {@link String}. */
+  /** Gets Display Name of the static rif resource as a {@link String}. {@inheritdoc} */
   @Override
   public String getDisplayName() {
     return staticRifResource.name();
   }
 
-  /** Gets the {@link Charset} as a UTF 8. */
+  /** Gets the {@link Charset} as a UTF 8. {@inheritdoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** Opens the {@link InputStream} of the resourceURL of the static rif resource. */
+  /** Opens the {@link InputStream} of the resourceURL of the static rif resource. {@inheritdoc} */
   @Override
   public InputStream open() {
     try {
@@ -54,7 +54,7 @@ final class StaticRifFile implements RifFile {
     }
   }
 
-  /** Returns {@link String} of the static rif resource. */
+  /** Returns {@link String} of the static rif resource. {@inheritdoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
