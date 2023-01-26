@@ -1,75 +1,49 @@
 locals {
   account_id = data.aws_caller_identity.current.account_id
 
+  kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
+  kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
+
+  topic_name = "bfd-server-${var.env}-instance-launch-terminate"
+
   lambda_timeout_seconds = 30
   lambda_name            = "manage-disk-usage-alarms"
 
   alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
-
-  eventbridge_rules = { for rule in [
-    aws_cloudwatch_event_rule.autoscaling_instance_launch,
-    aws_cloudwatch_event_rule.autoscaling_instance_terminate
-  ] : rule.name => rule }
 }
 
-resource "aws_cloudwatch_event_rule" "autoscaling_instance_launch" {
-  name        = "bfd-${var.env}-autoscaling-instance-launch"
-  description = "Filters for bfd-server EC2 instance launches, excluding to the WarmPool, in ${var.env} ASG"
-  # The "anything-but" clause ensures that only launches to the InService ASG are filtered through
-  # the EventBridge
-  event_pattern = <<-EOF
-{
-  "source": ["aws.autoscaling"],
-  "detail-type": ["EC2 Instance-launch Lifecycle Action"],
-  "detail": {
-    "Destination": [
-      {
-        "anything-but": "WarmPool"
-      }
-    ],
-    "AutoScalingGroupName": [
-      {
-        "prefix": "bfd-${var.env}-fhir"
-      }
-    ]
-  }
-}
-EOF
+# TODO: This SNS topic (and related resources below) mostly duplicates a similar topic used for
+# server-load; consolidate these in the future
+resource "aws_sns_topic" "this" {
+  name              = local.topic_name
+  kms_master_key_id = local.kms_key_id
 }
 
-resource "aws_cloudwatch_event_rule" "autoscaling_instance_terminate" {
-  name          = "bfd-${var.env}-autoscaling-instance-terminate"
-  description   = "Filters for bfd-server EC2 instance terminations in ${var.env} ASG"
-  event_pattern = <<-EOF
-{
-  "source": ["aws.autoscaling"],
-  "detail-type": ["EC2 Instance-terminate Lifecycle Action"],
-  "detail": {
-    "AutoScalingGroupName": [
-      {
-        "prefix": "bfd-${var.env}-fhir"
-      }
-    ]
-  }
-}
-EOF
+resource "aws_autoscaling_notification" "this" {
+  topic_arn = aws_sns_topic.this.arn
+
+  group_names = [
+    data.aws_autoscaling_group.asg.name,
+  ]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+    "autoscaling:EC2_INSTANCE_TERMINATE"
+  ]
 }
 
-resource "aws_cloudwatch_event_target" "invoke_lambda_from_autoscaling_events" {
-  for_each = local.eventbridge_rules
-
-  arn  = aws_lambda_function.this.arn
-  rule = each.key
-}
-
-resource "aws_lambda_permission" "allow_eventbridge_to_invoke_lambda" {
-  for_each = local.eventbridge_rules
-
-  statement_id  = "allow-execution-from-${each.key}"
+resource "aws_lambda_permission" "this" {
+  statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = each.value.arn
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.this.arn
+}
+
+resource "aws_sns_topic_subscription" "this" {
+  topic_arn = aws_sns_topic.this.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.this.arn
 }
 
 resource "aws_iam_policy" "logs" {
@@ -90,6 +64,23 @@ resource "aws_iam_policy" "logs" {
       "Resource": [
         "arn:aws:logs:us-east-1:${local.account_id}:log-group:/aws/lambda/bfd-${var.env}-${local.lambda_name}:*"
       ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "kms" {
+  name        = "bfd-${var.env}-${local.lambda_name}-kms"
+  description = "Permissions to decrypt mgmt KMS key"
+  policy      = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt"],
+      "Resource": ["${local.kms_key_arn}"]
     }
   ]
 }
@@ -140,14 +131,15 @@ EOF
 
   managed_policy_arns = [
     aws_iam_policy.logs.arn,
+    aws_iam_policy.kms.arn,
     aws_iam_policy.cloudwatch.arn
   ]
 }
 
 resource "aws_lambda_function" "this" {
   description = join("", [
-    "Creates and destroys per-instance disk usage alarms when launch and terminate events from ",
-    "AutoScaling EventBridge Rules are received"
+    "Creates and destroys per-instance disk usage alarms when launch and terminate notifications ",
+    "from AutoScaling Notifications are received"
   ])
   function_name = "bfd-${var.env}-${local.lambda_name}"
   tags          = { Name = "bfd-${var.env}-${local.lambda_name}" }
