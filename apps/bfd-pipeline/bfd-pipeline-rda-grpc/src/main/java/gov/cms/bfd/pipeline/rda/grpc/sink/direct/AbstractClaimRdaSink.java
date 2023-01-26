@@ -344,6 +344,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       result = Optional.of(change);
     } catch (DataTransformer.TransformationException transformationException) {
       metrics.transformFailures.increment();
+      logger.error("Claim transformation error", transformationException);
       writeError(apiVersion, message, transformationException);
       result = Optional.empty();
     }
