@@ -131,7 +131,7 @@ public enum StaticRifResourceGroup {
   }
 
   /**
-   * Get Resources.
+   * Gets the {@link #resources}.
    *
    * @return the related {@link StaticRifResource}s grouped into this {@link StaticRifResourceGroup}
    */
@@ -140,9 +140,9 @@ public enum StaticRifResourceGroup {
   }
 
   /**
-   * To Rif Files.
+   * Generates a {@link Set} of {@link RifFile}s based on {@link #resources}.
    *
-   * @return a {@link Set} of {@link RifFile}s based on {@link #getResources()}
+   * @return the set of RIF files
    */
   public Set<RifFile> toRifFiles() {
     return Arrays.stream(resources)

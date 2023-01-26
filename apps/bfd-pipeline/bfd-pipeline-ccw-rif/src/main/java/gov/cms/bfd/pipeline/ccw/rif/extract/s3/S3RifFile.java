@@ -60,13 +60,13 @@ public final class S3RifFile implements RifFile {
     this.manifestEntryDownload = manifestEntryDownload;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getFileType() */
+  /** Gets the file type of the static rif resource as a {@link RifFileType}. */
   @Override
   public RifFileType getFileType() {
     return manifestEntry.getType();
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getDisplayName() */
+  /** Gets the display name of the static rif resource as a {@link RifFile#getDisplayName()} */
   @Override
   public String getDisplayName() {
     return String.format(
@@ -76,13 +76,13 @@ public final class S3RifFile implements RifFile {
         manifestEntry.getName());
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getCharset() */
+  /** Gets the charSet as a {@link RifFile#getCharset()} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#open() */
+  /** Opens the file and returns as a {@link InputStream} */
   @Override
   public InputStream open() {
     ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
@@ -162,7 +162,7 @@ public final class S3RifFile implements RifFile {
     LOGGER.debug("Cleaned up '{}'.", this);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** Gets the toString as a {@link Object#toString()} */
   @Override
   public String toString() {
     String localDownloadPath;

@@ -38,11 +38,7 @@ final class StaticRifFile implements RifFile {
     return staticRifResource.name();
   }
 
-  /**
-   * Gets the {@link Charset} as a UTF 8.
-   *
-   * @see gov.cms.bfd.model.rif.RifFile#getCharset()
-   */
+  /** Gets the {@link Charset} as a UTF 8. */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
