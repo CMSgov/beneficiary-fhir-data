@@ -46,6 +46,7 @@ The claim query code data is captured and presented in the HHA and Hospice V2 ap
       }
     } ]
  }
+ ```
 
 ## BFD-2310: Add Eob.SubType for Institutional Claims in V2
 Added the subtype to the different claims types.  For  Inpatient, SNF, Hospice and HHA Claims it will be set to "Inpatient" and for Outpatient claims it will be set to "Outpatient".
