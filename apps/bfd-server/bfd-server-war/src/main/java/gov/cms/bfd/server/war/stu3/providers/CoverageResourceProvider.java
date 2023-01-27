@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -118,20 +119,29 @@ public final class CoverageResourceProvider implements IResourceProvider {
   @Read(version = false)
   @Trace
   public Coverage read(@IdParam IdType coverageId) {
-    if (coverageId == null) throw new IllegalArgumentException();
-    if (coverageId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (coverageId == null) {
+      throw new InvalidRequestException("Missing required coverage ID");
+    }
+    if (coverageId.getVersionIdPartAsLong() != null) {
+      throw new InvalidRequestException("Coverage ID must not define a version");
+    }
 
     String coverageIdText = coverageId.getIdPart();
-    if (coverageIdText == null || coverageIdText.trim().isEmpty())
-      throw new IllegalArgumentException();
+    if (coverageIdText == null || coverageIdText.trim().isEmpty()) {
+      throw new InvalidRequestException("Missing required coverage ID");
+    }
 
     Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    if (!coverageIdMatcher.matches())
-      throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+    if (!coverageIdMatcher.matches()) {
+      throw new InvalidRequestException(
+          "Coverage ID pattern: '"
+              + coverageIdText
+              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}}");
+    }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =

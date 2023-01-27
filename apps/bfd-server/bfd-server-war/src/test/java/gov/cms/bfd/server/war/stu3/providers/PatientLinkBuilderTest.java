@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import java.util.Collections;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -228,5 +230,52 @@ public class PatientLinkBuilderTest {
         UriComponentsBuilder.fromUriString(bundle.getLink(Constants.LINK_NEXT).getUrl()).build();
     assertEquals("1", nextLink.getQueryParams().getFirst(Constants.PARAM_COUNT));
     assertEquals("1", nextLink.getQueryParams().getFirst(PatientLinkBuilder.PARAM_CURSOR));
+  }
+
+  /**
+   * Tests that when the page size is not a number, an {@link InvalidRequestException} is thrown.
+   */
+  @Test
+  public void testNonNumberPageSizeExpectException() {
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=abc");
+        },
+        "Invalid argument in request URL: _count must be a number.");
+  }
+
+  /** Tests that when the page size is negative, an {@link InvalidRequestException} is thrown. */
+  @Test
+  public void testNegativePageSizeExpectException() {
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=-1");
+        },
+        "Value for pageSize cannot be zero or negative: -1");
+  }
+
+  /** Tests that when the page size is zero, an {@link InvalidRequestException} is thrown. */
+  @Test
+  public void testZeroPageSizeExpectException() {
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=0");
+        },
+        "Value for pageSize cannot be zero or negative: 0");
+  }
+
+  /** Tests that when the page size is too large, an {@link InvalidRequestException} is thrown. */
+  @Test
+  public void testOverlyLargePageSizeException() {
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          new PatientLinkBuilder(
+              TEST_CONTRACT_URL + "&_count=" + (PatientLinkBuilder.MAX_PAGE_SIZE + 1));
+        },
+        "Page size must be less than " + PatientLinkBuilder.MAX_PAGE_SIZE);
   }
 }
