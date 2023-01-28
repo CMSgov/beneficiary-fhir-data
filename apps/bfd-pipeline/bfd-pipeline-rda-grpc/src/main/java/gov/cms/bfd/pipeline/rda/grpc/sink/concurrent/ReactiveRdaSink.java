@@ -31,11 +31,29 @@ import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TClaim> {
+  /** Used to identify {@link #IdleMessage}. */
+  private static final long IdleSequenceNumber = -1;
+
+  /** Used to identify {@link #FlushMessage}. */
+  private static final long FlushSequenceNumber = -2;
+
+  /**
+   * Interval used to check if a claim worker is idle. Two consecutive checks when a worker is idle
+   * will flush the worker's buffer to the database. Thus the period of time after which the flush
+   * will happen is actually twice the interval.
+   */
+  private static final Duration IdleCheckInterval = Duration.ofMillis(500);
+
   /** Used to synchronize access to {@link #running}. */
-  private final Object lock = new Object();
+  private final RWLock lock = new RWLock();
 
   /** Message used to tell a claim writer to flush its buffer immediately. */
-  final Message<TMessage> FlushMessage = new Message<>(null, 0, null, null);
+  final Message<TMessage> FlushMessage = new Message<>(null, FlushSequenceNumber, null, null);
+
+  /**
+   * Message used to allow a claim writer to flush its buffer when it has been idle for too long.
+   */
+  final Message<TMessage> IdleMessage = new Message<>(null, IdleSequenceNumber, null, null);
 
   /** Used to assign claims to workers based on their claimId values. */
   private static final HashFunction Hasher = Hashing.goodFastHash(64);
@@ -70,6 +88,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    */
   private final BlockingPublisher<Message<TMessage>> publisher;
 
+  /** Used to push */
+  private final Flux<Message<TMessage>> idleTimer;
+
   /**
    * Used to hold a reference to the claim and sequence number writers to ensure they are not
    * garbage collected. We never call dispose on this since our shutdown closes the flux using our
@@ -97,8 +118,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     sink = sinkFactory.get();
     claimWriters =
         IntStream.rangeClosed(1, maxThreads)
-            .boxed()
-            .map(writerId -> new ClaimWriter<>(writerId, sinkFactory.get(), batchSize))
+            .mapToObj(writerId -> new ClaimWriter<>(writerId, sinkFactory.get(), batchSize))
             .collect(Collectors.toUnmodifiableList());
     sequenceNumberWriter = new SequenceNumberWriter<>(sinkFactory.get(), sequenceNumbers);
     running = true;
@@ -115,6 +135,10 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     final var otherScheduler = Schedulers.boundedElastic();
     final var claimPartitioner = new StringPartitioner<>(claimWriters);
     publisher = new BlockingPublisher<>(4 * maxThreads * batchSize);
+    idleTimer =
+        Flux.interval(IdleCheckInterval, claimWriterScheduler)
+            .map(o -> FlushMessage)
+            .takeWhile(o -> isRunning());
     var claimProcessing =
         publisher
             .flux()
@@ -124,6 +148,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
                 group ->
                     group
                         .concatWithValues(FlushMessage)
+                        .mergeWith(idleTimer)
                         //                        .takeWhile(o -> !isImmediateShutdown())
                         .publishOn(claimWriterScheduler)
                         .concatMap(message -> group.key().processMessage(message)),
@@ -161,26 +186,23 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     for (Message<TMessage> message : result.messages) {
       sequenceNumbers.removeWrittenSequenceNumber(message.sequenceNumber);
     }
-    synchronized (lock) {
-      currentProcessedCount += result.processed;
-    }
+    lock.doWrite(() -> currentProcessedCount += result.processed);
   }
 
   private void processError(Throwable ex) {
-    synchronized (lock) {
-      if (error == null) {
-        error = ex;
-      } else {
-        error.addSuppressed(ex);
-      }
-      running = false;
-    }
+    lock.doWrite(
+        () -> {
+          if (error == null) {
+            error = ex;
+          } else {
+            error.addSuppressed(ex);
+          }
+          running = false;
+        });
   }
 
   private boolean isRunning() {
-    synchronized (lock) {
-      return running;
-    }
+    return lock.read(() -> running);
   }
 
   /**
@@ -233,15 +255,16 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   public void shutdown(Duration waitTime) throws ProcessingException {
     //    new RuntimeException("SHUTDOWN CALLED").printStackTrace();
     log.info("shutdown called");
-    synchronized (lock) {
-      if (running) {
-        publisher.complete();
-        log.info("shutdown emit complete");
-        running = false;
-      }
-    }
+    lock.doWrite(
+        () -> {
+          if (running) {
+            publisher.complete();
+            log.info("shutdown emit complete");
+            running = false;
+          }
+        });
     try {
-      var closer = new MultiCloser();
+      final var closer = new MultiCloser();
       log.info("shutdown wait for latch");
       closer.close(() -> waitForLatch(waitTime));
       for (ClaimWriter<TMessage, TClaim> claimWriter : claimWriters) {
@@ -302,10 +325,6 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     private final long sequenceNumber;
     private final String apiVersion;
     private final TMessage message;
-
-    private boolean isFlush() {
-      return claimId == null;
-    }
   }
 
   @AllArgsConstructor
@@ -360,6 +379,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     private final int batchSize;
     private final List<Message<TMessage>> messageBuffer;
     private final Map<String, TClaim> claimBuffer;
+    private boolean idle;
 
     private ClaimWriter(int id, RdaSink<TMessage, TClaim> sink, int batchSize) {
       this.id = id;
@@ -372,14 +392,19 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     private synchronized Mono<Result<TMessage>> processMessage(Message<TMessage> message) {
       Mono<Result<TMessage>> result = Mono.empty();
       try {
-        var writeNeeded = false;
-        if (message.isFlush()) {
+        final boolean writeNeeded;
+        if (message.sequenceNumber == IdleSequenceNumber) {
+          writeNeeded = idle && claimBuffer.size() > 0;
+          idle = true;
+        } else if (message.sequenceNumber == FlushSequenceNumber) {
           writeNeeded = claimBuffer.size() > 0;
+          idle = false;
         } else {
           final var claim = sink.transformMessage(message.apiVersion, message.message);
           messageBuffer.add(message);
           claimBuffer.put(message.claimId, claim);
           writeNeeded = claimBuffer.size() >= batchSize;
+          idle = false;
         }
         if (writeNeeded) {
           var messages = List.copyOf(messageBuffer);
@@ -388,11 +413,13 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
           claimBuffer.clear();
           final int processed = sink.writeClaims(claims);
           log.info(
-              "ClaimWriter {} wrote unique={} all={} processed={}",
+              "ClaimWriter {} wrote unique={} all={} processed={} idle={} seq={}",
               id,
               claims.size(),
               messages.size(),
-              processed);
+              processed,
+              idle,
+              message.sequenceNumber);
           result = Mono.just(new Result<>(processed, messages));
         }
       } catch (Exception ex) {

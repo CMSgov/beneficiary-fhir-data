@@ -397,37 +397,44 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
     final Instant startTime = Instant.now();
-    boolean commit = false;
-    int insertCount = 0;
-
     try {
-      entityManager.getTransaction().begin();
-      for (RdaChange<TClaim> change : changes) {
-        if (change.getType() != RdaChange.Type.DELETE) {
-          var metaData = createMetaData(change);
-          entityManager.merge(metaData);
-          entityManager.merge(change.getClaim());
-          insertCount += getInsertCount(change.getClaim());
-        } else {
-          // TODO: [DCGEO-131] accept DELETE changes from RDA API
-          throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
-        }
-      }
-      if (autoUpdateLastSeq) {
-        updateLastSequenceNumberImpl(maxSeq);
-      }
-      commit = true;
-    } finally {
-      if (commit) {
-        entityManager.getTransaction().commit();
-      } else {
-        entityManager.getTransaction().rollback();
-      }
-      entityManager.clear();
-      metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
-      metrics.dbBatchSize.record(changes.size());
-      metrics.insertCount.record(insertCount);
+      Thread.currentThread().sleep(10);
+    } catch (InterruptedException ex) {
+      // do nothing
     }
+    var insertCount = changes.size();
+    //    boolean commit = false;
+    //    int insertCount = 0;
+    //
+    //    try {
+    //      entityManager.getTransaction().begin();
+    //      for (RdaChange<TClaim> change : changes) {
+    //        if (change.getType() != RdaChange.Type.DELETE) {
+    //          var metaData = createMetaData(change);
+    //          entityManager.merge(metaData);
+    //          entityManager.merge(change.getClaim());
+    //          insertCount += getInsertCount(change.getClaim());
+    //        } else {
+    //          // TODO: [DCGEO-131] accept DELETE changes from RDA API
+    //          throw new IllegalArgumentException("RDA API DELETE changes are not currently
+    // supported");
+    //        }
+    //      }
+    //      if (autoUpdateLastSeq) {
+    //        updateLastSequenceNumberImpl(maxSeq);
+    //      }
+    //      commit = true;
+    //    } finally {
+    //      if (commit) {
+    //        entityManager.getTransaction().commit();
+    //      } else {
+    //        entityManager.getTransaction().rollback();
+    //      }
+    //      entityManager.clear();
+    metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
+    metrics.dbBatchSize.record(changes.size());
+    metrics.insertCount.record(insertCount);
+    //    }
   }
 
   /**
