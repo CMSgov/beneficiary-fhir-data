@@ -57,6 +57,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jpa.QueryHints;
@@ -486,9 +487,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * reason to even run the next query.
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
-      long matchingBeneCount =
-          queryBeneCountByPartDContractCodeAndYearMonth(yearMonth, contractCode);
-      if (matchingBeneCount <= 0) {
+      boolean matchingBeneCount =
+          queryExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+      if (!matchingBeneCount) {
         return Collections.emptyList();
       }
     }
@@ -521,38 +522,42 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * @return the count of matching {@link Beneficiary#getBeneficiaryId()} values
    */
   @Trace
-  private long queryBeneCountByPartDContractCodeAndYearMonth(
+  private boolean queryExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Long> beneCountCriteria = builder.createQuery(Long.class);
-    Root<BeneficiaryMonthly> beneMonthlyRoot = beneCountCriteria.from(BeneficiaryMonthly.class);
-    beneCountCriteria.select(builder.count(beneMonthlyRoot));
-    beneCountCriteria.where(
-        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
-        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+    CriteriaQuery beneExistsCriteria = builder.createQuery(BeneficiaryMonthly.class);
+    Subquery<Integer> beneSelectSubquery = beneExistsCriteria.subquery(Integer.class);
+    Root<BeneficiaryMonthly> beneMonthlyRoot = beneSelectSubquery.from(BeneficiaryMonthly.class);
+    beneSelectSubquery
+        .select(builder.literal(1))
+        .where(
+            builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
+            builder.equal(
+                beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+    beneExistsCriteria.where(builder.exists(beneSelectSubquery));
 
     // Run the query and return the results.
-    Optional<Long> matchingBeneCount = Optional.empty();
+    Optional<Boolean> matchingBeneExists = Optional.empty();
     Long beneHistoryMatchesTimerQueryNanoSeconds = null;
-    Timer.Context matchingBeneCountTimer =
+    Timer.Context matchingBeneExistsTimer =
         metricRegistry
             .timer(
                 MetricRegistry.name(
                     getClass().getSimpleName(),
                     "query",
-                    "bene_count_by_year_month_part_d_contract_id"))
+                    "bene_exists_by_year_month_part_d_contract_id"))
             .time();
     try {
-      matchingBeneCount =
-          Optional.of(entityManager.createQuery(beneCountCriteria).getSingleResult());
-      return matchingBeneCount.get();
+      matchingBeneExists =
+          Optional.of((Boolean) entityManager.createQuery(beneExistsCriteria).getSingleResult());
+      return matchingBeneExists.get();
     } finally {
-      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneCountTimer.stop();
+      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
       TransformerUtils.recordQueryInMdc(
-          "bene_count_by_year_month_part_d_contract_id",
+          "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
-          matchingBeneCount.isPresent() ? 1 : 0);
+          matchingBeneExists.get() ? 1 : 0);
     }
   }
 
