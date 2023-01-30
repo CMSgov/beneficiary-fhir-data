@@ -88,9 +88,6 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    */
   private final BlockingPublisher<Message<TMessage>> publisher;
 
-  /** Used to push */
-  private final Flux<Message<TMessage>> idleTimer;
-
   /**
    * Used to hold a reference to the claim and sequence number writers to ensure they are not
    * garbage collected. We never call dispose on this since our shutdown closes the flux using our
@@ -135,9 +132,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     final var otherScheduler = Schedulers.boundedElastic();
     final var claimPartitioner = new StringPartitioner<>(claimWriters);
     publisher = new BlockingPublisher<>(4 * maxThreads * batchSize);
-    idleTimer =
+    final var idleTimerFlux =
         Flux.interval(IdleCheckInterval, claimWriterScheduler)
-            .map(o -> FlushMessage)
+            .map(o -> IdleMessage)
             .takeWhile(o -> isRunning());
     var claimProcessing =
         publisher
@@ -148,8 +145,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
                 group ->
                     group
                         .concatWithValues(FlushMessage)
-                        .mergeWith(idleTimer)
-                        //                        .takeWhile(o -> !isImmediateShutdown())
+                        .mergeWith(idleTimerFlux)
                         .publishOn(claimWriterScheduler)
                         .concatMap(message -> group.key().processMessage(message)),
                 maxThreads)
@@ -412,14 +408,14 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
           messageBuffer.clear();
           claimBuffer.clear();
           final int processed = sink.writeClaims(claims);
-          log.info(
-              "ClaimWriter {} wrote unique={} all={} processed={} idle={} seq={}",
-              id,
-              claims.size(),
-              messages.size(),
-              processed,
-              idle,
-              message.sequenceNumber);
+          //          log.info(
+          //              "ClaimWriter {} wrote unique={} all={} processed={} idle={} seq={}",
+          //              id,
+          //              claims.size(),
+          //              messages.size(),
+          //              processed,
+          //              idle,
+          //              message.sequenceNumber);
           result = Mono.just(new Result<>(processed, messages));
         }
       } catch (Exception ex) {
