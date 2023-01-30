@@ -143,7 +143,7 @@ public class HHAClaimTransformerV2 {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.of(claimGroup.getClaimQueryCode()));
+        claimGroup.getClaimQueryCode());
 
     // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
     TransformerUtilsV2.addInformationWithCode(

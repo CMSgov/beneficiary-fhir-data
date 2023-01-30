@@ -164,7 +164,7 @@ public class HospiceClaimTransformerV2 {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.of(claimGroup.getClaimQueryCode()));
+        claimGroup.getClaimQueryCode());
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept
