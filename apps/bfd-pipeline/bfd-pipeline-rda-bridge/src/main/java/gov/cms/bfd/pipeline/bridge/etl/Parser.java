@@ -47,7 +47,7 @@ public interface Parser<T> extends Closeable {
   @SuppressWarnings("squid:S1610")
   abstract class Data<T> {
 
-    /** enumeration for Type. */
+    /** enumeration for Date type used for rif parser date. */
     public enum Type {
       /** Date value for enum. */
       DATE

@@ -16,9 +16,12 @@ public class RifParser implements Parser<String> {
   /** Sets the Delimiter for the rif. */
   private static final String DELIMITER = "\\|";
 
-  /** Source returns the {@link Source}. */
+  /** Source of the RifParser. */
   private final Source<String> source;
-  /** headerIndexMap returns the {@link Map}. */
+  /**
+   * headerIndexMap is a mapping of the index and their associated number in their respective
+   * orders.
+   */
   private final Map<String, Integer> headerIndexMap = new HashMap<>();
   /** rowCounter returns {@link long}. */
   private long rowCounter = 0;

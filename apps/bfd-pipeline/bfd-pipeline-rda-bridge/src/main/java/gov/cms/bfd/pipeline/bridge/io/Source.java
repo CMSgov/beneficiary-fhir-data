@@ -7,16 +7,17 @@ import java.io.IOException;
 public interface Source<T> extends Closeable {
 
   /**
-   * hasInput() method returns {@link boolean}.
+   * Checks to see if is the source has anymore input, if not it closes the stream.
    *
    * @return {@link boolean}.
    */
   boolean hasInput();
 
   /**
-   * Interface generic that returns {@link T}.
+   * Interface to read the source of the file.
    *
    * @return {@link T}.
+   * @throws IOException i End of source is reached.
    */
   T read() throws IOException;
 }
