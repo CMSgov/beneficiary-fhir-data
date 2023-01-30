@@ -701,7 +701,6 @@ public final class RifLoaderIT {
    * <p>Note: For (https://jira.cms.gov/browse/BFD-2222) this test will be temporarily disabled and
    * re-enabled them once Synthea is updated for the new fields
    */
-  @Disabled
   @Test
   public void loadSyntheaData() {
     List<StaticRifResource> samples =
