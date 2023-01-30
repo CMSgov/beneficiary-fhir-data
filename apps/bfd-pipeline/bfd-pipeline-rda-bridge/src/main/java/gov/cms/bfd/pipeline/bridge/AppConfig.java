@@ -9,32 +9,32 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants
 public class AppConfig {
-  /** Input Directory Path returns {@link String}. */
+  /** Input Directory Path. */
   private String inputDirPath;
-  /** Output Directory Path returns {@link String}. */
+  /** Output Directory Path. */
   private String outputDirPath;
-  /** Fiss Output File returns {@link String}. */
+  /** Fiss Output File. */
   private String fissOutputFile;
-  /** Mcs Output File returns {@link String}. */
+  /** Mcs Output File. */
   private String mcsOutputFile;
-  /** MBI Source returns {@link String}. */
+  /** MBI Source. */
   private String mbiSource;
-  /** Fiss Sequence Start returns {@link String}. */
+  /** Fiss Sequence Start. */
   private String fissSeqStart;
-  /** Mcs Sequence Start returns {@link String}. */
+  /** Mcs Sequence Start. */
   private String mcsSeqStart;
-  /** Build Attribution Set returns {@link String}. */
+  /** Build Attribution Set. */
   private String buildAttributionSet;
-  /** Attribution Set Size returns {@link String}. */
+  /** Attribution Set Size. */
   private String attributionSetSize;
-  /** Attribution Template File returns {@link String}. */
+  /** Attribution Template File. */
   private String attributionTemplateFile;
-  /** Attribution Script File returns {@link String}. */
+  /** Attribution Script File. */
   private String attributionScriptFile;
-  /** Attribution Fiss Ratio returns {@link String}. */
+  /** Attribution Fiss Ratio. */
   private String attributionFissRatio;
-  /** Fiss Sources returns {@link Set}. */
+  /** Fiss Sources. */
   private Set<String> fissSources = new HashSet<>();
-  /** Mcs Sources returns {@link Set}. */
+  /** Mcs Sources. */
   private Set<String> mcsSources = new HashSet<>();
 }

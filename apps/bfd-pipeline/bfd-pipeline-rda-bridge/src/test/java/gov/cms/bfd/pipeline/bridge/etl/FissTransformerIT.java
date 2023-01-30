@@ -535,19 +535,7 @@ public class FissTransformerIT {
         private final Map<String, String> dataMap = parserData;
 
         /**
-         * Gets the {@link long} of the entryNumber.
-         *
-         * @return {@link long}
-         */
-        @Override
-        public long getEntryNumber() {
-          return 1;
-        }
-        /**
-         * Gets the {@link fieldName} from the dataMap.
-         *
-         * @param fieldName of the data map.
-         * @return {@link Optional}
+         * {@inheritDoc} / @Override public long getEntryNumber() { return 1; } /** {@inheritDoc}
          */
         @Override
         public Optional<String> get(String fieldName) {

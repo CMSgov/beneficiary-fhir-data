@@ -21,7 +21,7 @@
         <checkstyle.skip>true</checkstyle.skip>
         <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
         <bfd-pipeline-rda-grpcs.version>1.0.0-SNAPSHOT</bfd-pipeline-rda-grpcs.version>
-		<checkstyle.skip>false</checkstyle.skip>
+        <checkstyle.skip>false</checkstyle.skip>
     </properties>
 
     <dependencies>

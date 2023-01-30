@@ -25,21 +25,13 @@ public class RifSource implements Source<String> {
     nextLine = reader.readLine();
   }
 
-  /**
-   * This method determines if the input is not null.
-   *
-   * @return {@link boolean}
-   */
+  /** {@inheritDoc} */
   @Override
   public boolean hasInput() {
     return nextLine != null;
   }
 
-  /**
-   * This method reads the buffered reader.
-   *
-   * @throws IOException throws IOException.
-   */
+  /** {@inheritDoc} */
   @Override
   public String read() throws IOException {
     if (nextLine == null) {
@@ -51,11 +43,7 @@ public class RifSource implements Source<String> {
     return line;
   }
 
-  /**
-   * This method closes the buffered reader.
-   *
-   * @throws IOException throws IOException.
-   */
+  /** {@inheritDoc} */
   @Override
   public void close() throws IOException {
     reader.close();

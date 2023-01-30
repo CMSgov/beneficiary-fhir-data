@@ -14,36 +14,36 @@ public class WrappedMessage {
   private long lineNumber = 0;
 
   /**
-   * This method gets the message out of the MessageOrBuilder.
+   * Gets the {@link #message}.
    *
-   * @return {@link MessageOrBuilder} returns the message.
+   * @return the message.
    */
   public MessageOrBuilder getMessage() {
     return message;
   }
 
   /**
-   * This method sets the message in the MessageOrBuilder.
+   * Sets the {@link #message}.
    *
-   * @param message sets the message from {@link MessageOrBuilder}.
+   * @param message sets the message.
    */
   public void setMessage(MessageOrBuilder message) {
     this.message = message;
   }
 
   /**
-   * * This method gets the lineNumber.
+   * Gets the {@link #lineNumber}.
    *
-   * @return lineNumber sets the line number from {@link long}.
+   * @return the line number.
    */
   public long getLineNumber() {
     return lineNumber;
   }
 
   /**
-   * This method sets the lineNumber.
+   * Sets the {@link #lineNumber}.
    *
-   * @param lineNumber sets the line number from {@link long}.
+   * @param lineNumber sets the line number.
    */
   public void setLineNumber(long lineNumber) {
     this.lineNumber = lineNumber;

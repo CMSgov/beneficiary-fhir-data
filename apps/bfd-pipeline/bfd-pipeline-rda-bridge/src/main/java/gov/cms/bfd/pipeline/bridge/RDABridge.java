@@ -104,7 +104,7 @@ public class RDABridge {
    * Handles translation of a CLI execution, validating and pulling arguments to then invoke the
    * underlying application code with.
    *
-   * @param args Array of the command line arguments.
+   * @param args Array of the command line arguments
    */
   public static void main(String[] args) {
     try {
@@ -161,8 +161,8 @@ public class RDABridge {
   /**
    * Reads all relevant source files, executing task logic for each claim found.
    *
-   * @param config The configurations to use when generating the RDA data.
-   * @throws IOException If there was an issue accessing any of the files.
+   * @param config The configurations to use when generating the RDA data
+   * @throws IOException If there was an issue accessing any of the files
    */
   public void run(ConfigLoader config) throws IOException {
     WrappedCounter fissSequence =
@@ -287,15 +287,15 @@ public class RDABridge {
   /**
    * Executes the transformation logic of one source file.
    *
-   * @param sourceType The type of claim in the source file.
-   * @param path The path to the root directory of the RIF files.
-   * @param sourceName The name of the source file to read from.
-   * @param sequenceCounter The counter for the sequence.
-   * @param mbiMap The generated MBI map to read MBIs values from.
-   * @param sink The {@link Sink} used to write out the associated transformed RDA data.
-   * @param mbiSampler The samples for the mbi.
-   * @param sampleId the sample id associated with the execution.
-   * @throws IOException If there was a problem accessing any of the files.
+   * @param sourceType The type of claim in the source file
+   * @param path The path to the root directory of the RIF files
+   * @param sourceName The name of the source file to read from
+   * @param sequenceCounter The counter for the sequence
+   * @param mbiMap The generated MBI map to read MBIs values from
+   * @param sink The {@link Sink} used to write out the associated transformed RDA data
+   * @param mbiSampler The samples for the mbi
+   * @param sampleId the sample id associated with the execution
+   * @throws IOException If there was a problem accessing any of the files
    */
   @VisibleForTesting
   void executeTransformation(
@@ -359,10 +359,10 @@ public class RDABridge {
    * Creates an {@link AbstractTransformer} for the specific {@link SourceType} of the data being
    * transformed.
    *
-   * @param sourceType The {@link SourceType} of the data being transformed. data.
-   * @param mbiMap A complete MBI map for looking up MBI values.
+   * @param sourceType The {@link SourceType} of the data being transformed. data
+   * @param mbiMap A complete MBI map for looking up MBI values
    * @return The appropraite {@link AbstractTransformer} implementation for the given {@link
-   *     SourceType} of the source file.
+   *     SourceType} of the source file
    */
   @VisibleForTesting
   AbstractTransformer createTransformer(
@@ -377,8 +377,8 @@ public class RDABridge {
   /**
    * Generates a map of MBI numbers from the given location.
    *
-   * @param filePath Path to the root directory containing the RIF files.
-   * @return The completed MBI map.
+   * @param filePath Path to the root directory containing the RIF files
+   * @return The completed MBI map
    */
   @VisibleForTesting
   Map<String, BeneficiaryData> parseMbiNumbers(Path filePath) throws IOException {
@@ -407,9 +407,9 @@ public class RDABridge {
   /**
    * Creates a {@link ConfigLoader} from a given yaml configuration file.
    *
-   * @param yamlFilePath Path to the yaml configuration file.
-   * @return The {@link ConfigLoader} generated from the yaml configuration file.
-   * @throws FileNotFoundException If the yaml configuration file was not found.
+   * @param yamlFilePath Path to the yaml configuration file
+   * @return The {@link ConfigLoader} generated from the yaml configuration file
+   * @throws FileNotFoundException If the yaml configuration file was not found
    */
   @VisibleForTesting
   static ConfigLoader createYamlConfig(String yamlFilePath) throws IOException {
@@ -460,8 +460,8 @@ public class RDABridge {
   /**
    * Creates a {@link ConfigLoader} from the given command line arguments.
    *
-   * @param cmd {@link CommandLine} containing the arguments/options used with the CLI.
-   * @return The {@link ConfigLoader} generated from the CLI arguments/options.
+   * @param cmd {@link CommandLine} containing the arguments/options used with the CLI
+   * @return The {@link ConfigLoader} generated from the CLI arguments/options
    */
   @VisibleForTesting
   static ConfigLoader createCliConfig(CommandLine cmd) {
@@ -499,9 +499,9 @@ public class RDABridge {
   /**
    * Helper method to put the key if its not null.
    *
-   * @param builder the collection class.
-   * @param key the key to put in the collection.
-   * @param value the value to check if there is a null.
+   * @param builder the collection class
+   * @param key the key to put in the collection
+   * @param value the value to check if there is a null
    */
   @VisibleForTesting
   static void putIfNotNull(
@@ -514,9 +514,9 @@ public class RDABridge {
   /**
    * Helper method to put the key if its not null.
    *
-   * @param builder the collection class.
-   * @param key the key to put in the collection.
-   * @param values the value to check if there is a null.
+   * @param builder the collection class
+   * @param key the key to put in the collection
+   * @param values the value to check if there is a null
    */
   @VisibleForTesting
   static void putIfNotNull(
@@ -529,7 +529,7 @@ public class RDABridge {
   /**
    * Helper method to print the usage message for the CLI tool.
    *
-   * @param options The {@link Options} to generate the usage message from.
+   * @param options The {@link Options} to generate the usage message from
    */
   @VisibleForTesting
   static void printUsage(Options options) {

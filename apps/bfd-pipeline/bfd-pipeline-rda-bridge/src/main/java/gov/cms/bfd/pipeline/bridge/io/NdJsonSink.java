@@ -27,7 +27,9 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
    * Constructor for NdJsonSink.
    *
    * @param args the sink arguments being passed in.
-   * @throws IOException throws IOException.
+   * @throws IOException throws an IOException if the outputPath file exists but its a directory
+   *     rather than a regular file, does not exist but cannot be created, or cannot be opened for
+   *     any other reason.
    */
   public NdJsonSink(SinkArguments args) throws IOException {
     outputPath = args.getOutputPath();
@@ -36,11 +38,7 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     writer = new BufferedWriter(new FileWriter(outputPath.toString()));
   }
 
-  /**
-   * This method writes to the messageOrBuilder.
-   *
-   * @param messageOrBuilder {@link MessageOrBuilder} is the messagebuilder being written to.
-   */
+  /** {@inheritDoc} */
   @Override
   public void write(MessageOrBuilder messageOrBuilder) {
     try {
@@ -51,11 +49,7 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     }
   }
 
-  /**
-   * This method closes the buffered writer.
-   *
-   * @throws IOException throws IOException.
-   */
+  /** {@inheritDoc} */
   @Override
   public void close() throws IOException {
     writer.close();
