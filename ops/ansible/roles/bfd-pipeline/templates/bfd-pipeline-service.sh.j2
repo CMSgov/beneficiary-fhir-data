@@ -65,6 +65,10 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
+# Set some additional variables.
+JVM_ARGS='{{ data_pipeline_jvm_args }}'
+
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
+	${JVM_ARGS} \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
