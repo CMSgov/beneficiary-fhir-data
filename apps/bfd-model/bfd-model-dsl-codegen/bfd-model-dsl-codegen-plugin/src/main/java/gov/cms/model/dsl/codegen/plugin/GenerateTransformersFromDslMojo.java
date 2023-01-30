@@ -355,7 +355,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
             .addModifiers(Modifier.PUBLIC)
             .addParameter(messageClassType, FieldTransformer.SOURCE_VAR);
     builder.addStatement(
-        "final $T $L = new $T();",
+        "final $T $L = new $T()",
         DataTransformer.class,
         FieldTransformer.TRANSFORMER_VAR,
         DataTransformer.class);
