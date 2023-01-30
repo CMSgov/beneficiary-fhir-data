@@ -48,6 +48,9 @@ The claim query code data is captured and presented in the HHA and Hospice V2 ap
  }
  ```
 
+## BFD-2220: Support 3 and 4 character `CLM_DRG_CD`
+The optional string field `CLM_DRG_CD` can now be up to 4 characters in length.
+
 ## BFD-2310: Add Eob.SubType for Institutional Claims in V2
 Added the subtype to the different claims types.  For  Inpatient, SNF, Hospice and HHA Claims it will be set to "Inpatient" and for Outpatient claims it will be set to "Outpatient".
 
