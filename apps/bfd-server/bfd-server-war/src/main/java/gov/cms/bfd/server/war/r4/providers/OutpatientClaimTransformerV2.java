@@ -169,7 +169,6 @@ public class OutpatientClaimTransformerV2 {
     // Common group level fields between Inpatient, Outpatient and SNF
     // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM =>
     // ExplanationOfBenefit.benefitBalance.financial
-    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     // CLM_MCO_PD_SW => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
         eob, claimGroup.getBloodDeductibleLiabilityAmount(), claimGroup.getMcoPaidSw());
