@@ -60,13 +60,13 @@ public final class S3RifFile implements RifFile {
     this.manifestEntryDownload = manifestEntryDownload;
   }
 
-  /** Gets the file type of the static rif resource as a {@link RifFileType}. */
+  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return manifestEntry.getType();
   }
 
-  /** Gets the display name of the static rif resource as a {@link RifFile#getDisplayName()} */
+  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return String.format(
@@ -76,13 +76,13 @@ public final class S3RifFile implements RifFile {
         manifestEntry.getName());
   }
 
-  /** Gets the charSet as a {@link RifFile#getCharset()} */
+  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** Opens the file and returns as a {@link InputStream} */
+  /** {@inheritDoc} */
   @Override
   public InputStream open() {
     ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
@@ -162,7 +162,7 @@ public final class S3RifFile implements RifFile {
     LOGGER.debug("Cleaned up '{}'.", this);
   }
 
-  /** Gets the toString as a {@link Object#toString()} */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     String localDownloadPath;
