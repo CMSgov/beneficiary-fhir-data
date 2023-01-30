@@ -152,6 +152,7 @@ public final class InpatientClaimTransformerV2Test {
     Extension extension =
         eob.getBillablePeriod()
             .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
     Coding valueCoding = (Coding) extension.getValue();
     assertEquals("Final bill", valueCoding.getDisplay());
     assertEquals("3", valueCoding.getCode());
