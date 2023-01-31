@@ -159,9 +159,9 @@ public class FissTransformerIT {
   }
 
   /**
-   * New first claim test cases.
+   * This tests is for a new first claim test cases.
    *
-   * @return {@link Arguments}
+   * @return {@link Arguments} the expected claim lines and their associated numbers
    */
   private static Arguments newFirstClaimTestCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
@@ -194,9 +194,9 @@ public class FissTransformerIT {
   }
 
   /**
-   * New first claim invalid line number test cases.
+   * This test is to test that the first claim has a invalid line number.
    *
-   * @return {@link Arguments}
+   * @return {@link Arguments} the expected claim lines and their associated numbers
    */
   private static Arguments newFirstClaimInvalidLineNumberCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
@@ -232,9 +232,10 @@ public class FissTransformerIT {
   }
 
   /**
-   * Recurring claim test case function.
+   * Recurring claim test case function tests that there is a claim 1 followed by a different claim
+   * 2.
    *
-   * @return {@link Arguments}
+   * @return {@link Arguments} the expected claim lines and their associated numbers
    */
   private static Arguments recurringClaimCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
@@ -276,7 +277,7 @@ public class FissTransformerIT {
   /**
    * Recurring Claim Invalid Line Number Case.
    *
-   * @return {@link Arguments}
+   * @return {@link Arguments} the expected claim lines and their associated numbers
    */
   private static Arguments recurringClaimInvalidLineNumberCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
@@ -320,7 +321,7 @@ public class FissTransformerIT {
   /**
    * Non first claim case.
    *
-   * @return {@link Arugments}
+   * @return {@link Arugments} the expected claim lines and their associated numbers
    */
   private static Arguments newNonFirstClaimCase() {
     final String NEW_CLAIM_DCN = "dcn87654321";
@@ -528,7 +529,7 @@ public class FissTransformerIT {
      * Creates a default data parser.
      *
      * @param parserData the data that needs to be parsed.
-     * @return {@link Parser}
+     * @return {@link Parser} data parser.
      */
     public static Parser.Data<String> createDataParser(Map<String, String> parserData) {
       return new Parser.Data<>() {
