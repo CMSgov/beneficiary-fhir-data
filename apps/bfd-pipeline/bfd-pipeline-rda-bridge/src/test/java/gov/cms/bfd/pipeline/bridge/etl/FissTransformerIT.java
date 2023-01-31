@@ -534,9 +534,7 @@ public class FissTransformerIT {
       return new Parser.Data<>() {
         private final Map<String, String> dataMap = parserData;
 
-        /**
-         * {@inheritDoc} / @Override public long getEntryNumber() { return 1; } /** {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         @Override
         public Optional<String> get(String fieldName) {
           Optional<String> result;
