@@ -537,6 +537,12 @@ public class FissTransformerIT {
 
         /** {@inheritDoc} */
         @Override
+        public long getEntryNumber() {
+          return 1;
+        }
+
+        /** {@inheritDoc} */
+        @Override
         public Optional<String> get(String fieldName) {
           Optional<String> result;
 
