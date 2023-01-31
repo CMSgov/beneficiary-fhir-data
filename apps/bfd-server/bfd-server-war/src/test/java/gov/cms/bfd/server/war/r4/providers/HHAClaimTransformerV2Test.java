@@ -183,7 +183,6 @@ public class HHAClaimTransformerV2Test {
 
     claim.setLastUpdated(Instant.now());
     claim.setClaimQueryCode(Optional.empty());
-
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
@@ -204,6 +203,41 @@ public class HHAClaimTransformerV2Test {
         eob.getBillablePeriod()
             .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
     assertNull(extension);
+  }
+
+  /** Tests that the billable period is set if optional claim query code is not empty. */
+  public void shouldSetBillablePeriodWithNonEmptyClaimQueryCode() throws Exception {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    HHAClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(r -> (HHAClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    claim.setClaimQueryCode(Optional.of('3'));
+    claim.setLastUpdated(Instant.now());
+
+    ExplanationOfBenefit genEob =
+        HHAClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    // We just want to make sure it is set
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
   }
 
   /** Tests that the transformer sets the expected patient reference. */
