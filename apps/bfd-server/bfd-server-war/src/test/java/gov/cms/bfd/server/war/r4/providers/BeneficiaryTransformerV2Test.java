@@ -287,6 +287,7 @@ public final class BeneficiaryTransformerV2Test {
     try {
       Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
       period.setStart(start, TemporalPrecisionEnum.DAY);
+
     } catch (Exception e) {
     }
 
