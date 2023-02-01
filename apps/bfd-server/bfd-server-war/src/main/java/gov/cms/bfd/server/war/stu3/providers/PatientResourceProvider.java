@@ -527,7 +527,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-
     CriteriaQuery<BeneficiaryMonthly> beneExistsCriteria =
         builder.createQuery(BeneficiaryMonthly.class);
     Root<BeneficiaryMonthly> root = beneExistsCriteria.from(BeneficiaryMonthly.class);
