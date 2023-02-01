@@ -77,8 +77,8 @@ public class RdaServerApp {
     /**
      * Configs the S3bucket for connectivity for Fiss and Mcs claims.
      *
-     * @param args that are sent in.
-     * @throws Exception if there is a connectivity issue to S3.
+     * @param args that are sent in
+     * @throws Exception if there is a connectivity issue to S3
      */
     private Config(String[] args) throws Exception {
       final ConfigLoader config =
@@ -108,8 +108,8 @@ public class RdaServerApp {
      * Checks the s3 connectivity for the specified claim factory.
      *
      * @param claimType specifies whether to use the fiss or mcs claims
-     * @param factory message factory to use.
-     * @throws Exception if the specied claim factory can't be opened.
+     * @param factory message factory to use
+     * @throws Exception if the specied claim factory can't be opened
      */
     private void checkS3Connectivity(String claimType, MessageSource.Factory<?> factory)
         throws Exception {
@@ -130,7 +130,7 @@ public class RdaServerApp {
     /**
      * Creates the fiss claims to process.
      *
-     * @param sequenceNumber the starting number,
+     * @param sequenceNumber the starting number
      * @return the Fiss claims
      * @throws Exception if source cannot be closed
      */
@@ -159,7 +159,7 @@ public class RdaServerApp {
      * Create Mcs Claims depending on the source of the claims. The source can be from a file, S3
      * bucket, or a random claim source.
      *
-     * @param sequenceNumber to start at.
+     * @param sequenceNumber to start at
      * @return the Mcs Claims
      * @throws Exception if the sources cannot be closed
      */

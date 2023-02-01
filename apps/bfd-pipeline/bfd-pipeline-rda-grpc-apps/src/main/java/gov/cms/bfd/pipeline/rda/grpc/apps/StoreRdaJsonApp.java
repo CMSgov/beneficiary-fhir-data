@@ -48,8 +48,8 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
    * Sets up the config parameters and converts the Fiss and Mcs claims results into json and puts
    * it into the output file.
    *
-   * @param args to be passed in.
-   * @throws Exception if the file writer can't be opened or closed.
+   * @param args to be passed in
+   * @throws Exception if the file writer can't be opened or closed
    */
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
@@ -88,8 +88,8 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   /**
    * Creates the appropriate channel to be used.
    *
-   * @param config to be pssed into to use.
-   * @return the correct grpc channel to use.
+   * @param config to be pssed into to use
+   * @return the correct grpc channel to use
    */
   private static ManagedChannel createChannel(Config config) {
     final ManagedChannelBuilder<?> channelBuilder =
@@ -124,7 +124,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
    * Converts the claim data to json.
    *
    * @param change the claims data coming in
-   * @return a string that omits insignificant whitespace in the JSON output.
+   * @return a string that omits insignificant whitespace in the JSON output
    * @throws InvalidProtocolBufferException for the json formatter
    */
   private static String convertToJson(MessageOrBuilder change)

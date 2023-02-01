@@ -38,8 +38,8 @@ public class DirectRdaLoadApp {
   /**
    * Sets up the database options to use, the pipeline to use, and creates the pipeline job for RDA.
    *
-   * @param args that are passed in.
-   * @throws Exception if the pipeline encounters a problem loading or reading.
+   * @param args that are passed in
+   * @throws Exception if the pipeline encounters a problem loading or reading
    */
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
@@ -90,7 +90,7 @@ public class DirectRdaLoadApp {
    * Create a job for the pipeline with the correct claim type of fiss or mcs.
    *
    * @param jobConfig the config to use
-   * @param appState sets the state for the pipeline.
+   * @param appState sets the state for the pipeline
    * @param claimType whether to use fiss or mcs claims
    * @return the pipeline job for mcs or fiss
    */
@@ -109,7 +109,7 @@ public class DirectRdaLoadApp {
   /**
    * This sets up the database options of db url, user, password, and max connections.
    *
-   * @param options the database options to se
+   * @param options the database options to set
    * @param threadCount the number of threads to use
    * @return the database options
    */
