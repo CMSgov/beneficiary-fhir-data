@@ -1300,14 +1300,6 @@ public final class EndpointJsonResponseComparatorV2IT {
 
     String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
-    System.out.println("***** " + endpointId);
-    System.out.println("approvedResponseDir: " + approvedResponseDir.toString());
-    System.out.println("targetResponseDir: " + targetResponseDir.toString());
-    System.out.println("\n\n");
-    System.out.println("approvedJson:\n" + approvedJson);
-    System.out.println("\n\n");
-    System.out.println("newJson:\n" + newJson);
-
     AssertUtils.assertJsonEquals(approvedJson, newJson, IGNORED_PATHS);
   }
 
