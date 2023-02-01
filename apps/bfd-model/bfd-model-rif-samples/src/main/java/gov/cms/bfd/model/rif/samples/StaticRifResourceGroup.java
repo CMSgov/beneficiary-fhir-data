@@ -46,7 +46,7 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SAMPLE_A_HOSPICE,
       StaticRifResource.SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE,
       StaticRifResource.SAMPLE_A_DME),
- /** Sample A Without Reference Year Resource Group. */
+  /** Sample A Without Reference Year Resource Group. */
   SAMPLE_A_WITHOUT_REFERENCE_YEAR(
       StaticRifResource.SAMPLE_A_BENES_WITHOUT_REFERENCE_YEAR,
       StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
