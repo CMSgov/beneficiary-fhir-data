@@ -13,14 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NdJsonSink implements Sink<MessageOrBuilder> {
 
-  /** writer returns {@link BufferedWriter}. */
+  /** Buffered writer for json printer. */
   private final BufferedWriter writer;
 
-  /** outputPath returns {@link Path}. */
+  /** Output path for file. */
   private final Path outputPath;
-  /** sequenceCounter returns {@link WrappedCounter}. */
+  /** Sequence Counter. */
   private final WrappedCounter sequenceCounter;
-  /** startSequenceNumber returns {@link long}. */
+  /** The Seqeunce Start Number. */
   private final long startSequenceNumber;
 
   /**

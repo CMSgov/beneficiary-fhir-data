@@ -405,29 +405,29 @@ public class FissTransformerIT {
 
   /** TestData return class. */
   private static class TestData {
-    /** Bene Id returns {@link String}. */
+    /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
-    /** Bene First Name returns {@link String}. */
+    /** Beneficiary First Name}. */
     private static final String BENE_FIRST_NAME = "Firstname";
-    /** Bene Last Name returns {@link String}. */
+    /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastname";
-    /** Bene Middle Initial returns {@link String}. */
+    /** Beneficiary Middle Initial. */
     private static final String BENE_MID_INIT = "M";
-    /** Bene Date of Birth returns {@link String}. */
+    /** Beneficiary Date of Birth. */
     private static final String BENE_DOB = "2020-01-01";
-    /** Bene Genderreturns {@link String}. */
+    /** Beneficiary Gender. */
     private static final String BENE_GENDER = "1";
-    /** Fi Document Claim Control Number returns {@link String}. */
+    /** Fi Document Claim Control Number. */
     private static final String FI_DOC_CLM_CNTL_NUM = "dcn12345678";
-    /** HICN Number returns {@link String}. */
+    /** HICN Number. */
     private static final String HIC_NO = "hicno123";
-    /** MBI returns {@link String}. */
+    /** MBI Number. */
     private static final String MBI = "mbimbimbimbi";
-    /** Admitting Diagnosis Code returns {@link String}. */
+    /** Admitting Diagnosis Code. */
     private static final String ADMTG_DGNS_CD = "admitcd";
-    /** Claim Frequency Code returns {@link String}. */
+    /** Claim Frequency Code. */
     private static final String CLM_FREQ_CD = "freqCode";
-    /** Claim From Date returns {@link String}. */
+    /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
 
     /** Claim Type Code returns {@link int}. */

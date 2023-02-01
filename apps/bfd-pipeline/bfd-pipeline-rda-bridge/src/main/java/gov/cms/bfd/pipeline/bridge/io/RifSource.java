@@ -9,9 +9,9 @@ import java.nio.file.Path;
 /** Creates a {@link Source} that reads data from a RIF file. */
 public class RifSource implements Source<String> {
 
-  /** reader returns {@link BufferedReader}. */
+  /** Buffered Reader for inputPath. */
   private final BufferedReader reader;
-  /** nextLine returns {@link String}. */
+  /** Next Line to keep track of reader. */
   private String nextLine;
 
   /**

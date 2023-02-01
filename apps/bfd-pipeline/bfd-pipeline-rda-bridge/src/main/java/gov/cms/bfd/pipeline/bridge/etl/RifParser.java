@@ -82,11 +82,11 @@ public class RifParser implements Parser<String> {
     /** Sets the standardFormat. */
     private final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    /** rowId returns {@link long}. */
+    /** Identifies the row id. */
     private final long rowId;
-    /** headerIndexMap returns {@link Map}. */
+    /** Header Index Map keeps track of header value and index. */
     private final Map<String, Integer> headerIndexMap;
-    /** rowData returns {@link String}. */
+    /** Keeps track of the data for the row. */
     private final String[] rowData;
 
     @Override
