@@ -247,10 +247,7 @@ public class SNFClaimTransformerV2 {
     // CLAIM_QUERY_CODE                 => ExplanationOfBenefit.billablePeriod.extension
     // CLM_MCO_PD_SW                    => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
-        eob,
-        claimGroup.getBloodDeductibleLiabilityAmount(),
-        claimGroup.getClaimQueryCode(),
-        claimGroup.getMcoPaidSw());
+        eob, claimGroup.getBloodDeductibleLiabilityAmount(), claimGroup.getMcoPaidSw());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
@@ -265,6 +262,7 @@ public class SNFClaimTransformerV2 {
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Inpatient for SNF Claims
+    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -281,7 +279,8 @@ public class SNFClaimTransformerV2 {
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
-        C4BBInstutionalClaimSubtypes.Inpatient);
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        Optional.of(claimGroup.getClaimQueryCode()));
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept

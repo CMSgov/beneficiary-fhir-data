@@ -13,6 +13,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -48,6 +50,13 @@ public final class CoverageTransformerV2Test {
    * to avoid cross-pollution between tests.
    */
   private static Coverage coverage = null;
+
+  /** Date formatter that complies with std RIF date string. */
+  private static final DateTimeFormatter RIF_DATE_FORMATTER =
+      new DateTimeFormatterBuilder()
+          .parseCaseInsensitive()
+          .appendPattern("dd-MMM-yyyy")
+          .toFormatter();
 
   /** Sets up the test dependencies shared across each test. */
   @BeforeEach
@@ -192,7 +201,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyPeriodPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-Mar-2020"), Optional.of("17-JUN-2020"));
   }
 
   /** Tests that the transformer sets the expected payor data. */
@@ -315,7 +324,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyPeriodPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-JUL-2021"), Optional.of("17-AUG-2022"));
   }
 
   /** Tests that the transformer sets the expected payor data. */
@@ -460,6 +469,13 @@ public final class CoverageTransformerV2Test {
   public void shouldSetCorrectProfileAndDatePartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyMeta();
+  }
+
+  /** Tests that the transformer sets the expected period date. */
+  @Test
+  public void verifyPeriodPartD() {
+    transformCoverage(MedicareSegment.PART_D, false);
+    verifyPeriod(Optional.of("17-FEB-2021"), Optional.of("17-NOV-2022"));
   }
 
   /** Tests that the transformer sets the expected extension entries. */
@@ -700,11 +716,17 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(typ));
   }
 
-  /** Verifies the period date is as expected. */
-  private static void verifyPeriod() {
+  /**
+   * Verifies the period date is as expected.
+   *
+   * @param startDate option {@link String} denoting FHIR {@link Period} start date
+   * @param endDate option {@link String} denoting FHIR {@link Period} end date
+   */
+  private static void verifyPeriod(Optional<String> startDate, Optional<String> endDate) {
     Period per = coverage.getPeriod();
     Period compare = new Period();
-    TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("1963-10-03"));
+    startDate.ifPresent(value -> TransformerUtilsV2.setPeriodStart(compare, parseDate(value)));
+    endDate.ifPresent(value -> TransformerUtilsV2.setPeriodEnd(compare, parseDate(value)));
     assertTrue(compare.equalsDeep(per));
   }
 
@@ -839,7 +861,7 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-Mar-2020"), Optional.of("17-JUN-2020"));
     verifyPayor();
   }
 
@@ -863,7 +885,7 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-JUL-2021"), Optional.of("17-AUG-2022"));
     verifyPayor();
   }
 
@@ -968,6 +990,24 @@ public final class CoverageTransformerV2Test {
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/rdsind%02d", i);
       verifyCodedExtensionDoesNotExist(inCoverage, url);
+    }
+  }
+
+  /**
+   * Parse an {@link Optional} {@link LocalDate} from a {@link String}.
+   *
+   * @param dateText the date string to parse
+   * @return an {@link Optional} populated with a {@link LocalDate} if the input has data, or an
+   *     empty Optional if not
+   */
+  public static Optional<LocalDate> parseDate(String dateText) {
+    if (dateText.isEmpty()) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(LocalDate.parse(dateText, RIF_DATE_FORMATTER));
+    } catch (Exception e) {
+      return Optional.empty();
     }
   }
 }
