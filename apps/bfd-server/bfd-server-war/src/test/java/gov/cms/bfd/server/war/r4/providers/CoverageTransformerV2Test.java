@@ -78,7 +78,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_A. */
-  // @Disabled
+  @Disabled
   @Test
   public void outputTransformCoveragePartA() throws FHIRException {
     transformCoverage(MedicareSegment.PART_A, true);
@@ -86,7 +86,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_B. */
-  // @Disabled
+  @Disabled
   @Test
   public void outputTransformCoveragePartB() throws FHIRException {
     transformCoverage(MedicareSegment.PART_B, true);
@@ -102,7 +102,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_D. */
-  // @Disabled
+  @Disabled
   @Test
   public void outputTransformCoveragePartD() throws FHIRException {
     transformCoverage(MedicareSegment.PART_D, true);
