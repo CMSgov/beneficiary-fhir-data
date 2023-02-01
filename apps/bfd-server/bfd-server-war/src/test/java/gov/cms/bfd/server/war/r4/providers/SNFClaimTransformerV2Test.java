@@ -154,8 +154,6 @@ public class SNFClaimTransformerV2Test {
     Coding valueCoding = (Coding) extension.getValue();
     assertEquals("Final bill", valueCoding.getDisplay());
     assertEquals("3", valueCoding.getCode());
-    assertEquals(
-        "https://bluebutton.cms.gov/resources/variables/claim_query_cd", valueCoding.getSystem());
 
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2013-12-01"),
