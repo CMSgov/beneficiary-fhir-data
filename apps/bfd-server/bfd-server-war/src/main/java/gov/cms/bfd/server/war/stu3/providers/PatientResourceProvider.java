@@ -66,8 +66,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -76,7 +74,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class PatientResourceProvider implements IResourceProvider, CommonHeaders {
-  private static final Logger LOGGER = LoggerFactory.getLogger(PatientResourceProvider.class);
 
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
@@ -491,9 +488,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * reason to even run the next query.
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
-      boolean matchingBeneCount =
-          queryBeneCountByPartDContractCodeAndYearMonth(yearMonth, contractCode);
-      if (!matchingBeneCount) {
+      boolean matchingBeneExists =
+          queryBeneExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+      if (!matchingBeneExists) {
         return Collections.emptyList();
       }
     }
@@ -518,15 +515,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Query bene count by part d contract code and year-month.
+   * Query bene exists by part d contract code and year-month.
    *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
-   * @return the count of matching {@link Beneficiary#getBeneficiaryId()} values
+   * @return true if the {@link BeneficiaryMonthly} exists
    */
   @Trace
-  private boolean queryBeneCountByPartDContractCodeAndYearMonth(
+  private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -566,7 +563,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       return matchingBeneExists;
     } finally {
       beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
-      LOGGER.warn("NANO " + beneHistoryMatchesTimerQueryNanoSeconds);
       TransformerUtils.recordQueryInMdc(
           "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
