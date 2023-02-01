@@ -92,10 +92,10 @@ public class FissTransformerIT {
   /**
    * Happy path test to produce expected claims and data samples.
    *
-   * @param testName for the test name.
-   * @param arguments for the arguments of the test.
-   * @param expectedValues for the expected values of the test.
-   * @param expectedException if there is a expected exception.
+   * @param testName for the test name
+   * @param arguments for the arguments of the test
+   * @param expectedValues for the expected values of the test
+   * @param expectedException if there is a expected exception
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -371,8 +371,8 @@ public class FissTransformerIT {
   /**
    * Helper method to generate {@link FissClaimChange} objects.
    *
-   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object.
-   * @return The created wrapping {@link FissClaimChange} object.
+   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object
+   * @return The created wrapping {@link FissClaimChange} object
    */
   private static FissClaimChange createFissClaimChange(FissClaim claim) {
     return createFissClaimChange(claim, TestData.FI_DOC_CLM_CNTL_NUM, 1);
@@ -381,10 +381,10 @@ public class FissTransformerIT {
   /**
    * Helper method to generate {@link FissClaimChange} objects.
    *
-   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object.
-   * @param dcn The dcn to use.
-   * @param sequenceNumber The sequence number to use.
-   * @return The created wrapping {@link FissClaimChange} object.
+   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object
+   * @param dcn The dcn to use
+   * @param sequenceNumber The sequence number to use
+   * @return The created wrapping {@link FissClaimChange} object
    */
   private static FissClaimChange createFissClaimChange(
       FissClaim claim, String dcn, int sequenceNumber) {
@@ -407,7 +407,7 @@ public class FissTransformerIT {
   private static class TestData {
     /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
-    /** Beneficiary First Name}. */
+    /** Beneficiary First Name. */
     private static final String BENE_FIRST_NAME = "Firstname";
     /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastname";
@@ -430,46 +430,46 @@ public class FissTransformerIT {
     /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
 
-    /** Claim Type Code returns {@link int}. */
+    /** Claim Type Code. */
     private static final int CLM_SRVC_CLSFCTN_TYPE_CD = 1;
-    /** Claim Thru Date returns {@link String}. */
+    /** Claim Thru Date. */
     private static final String CLM_THRU_DT = "03-Mar-2001";
-    /** Claim Tot Charge Amount returns {@link String}. */
+    /** Claim Tot Charge Amount. */
     private static final String CLM_TOT_CHRG_AMT = "3218.33";
-    /** Claim Fac Type Code returns {@link int}. */
+    /** Claim Fac Type Code. */
     private static final int CLM_FAC_TYPE_CD = 8;
-    /** Orginial NPI Number returns {@link String}. */
+    /** Orginial NPI Number. */
     private static final String ORG_NPI_NUM = "8888888888";
-    /** Principal Diagnosis Code returns {@link String}. */
+    /** Principal Diagnosis Code. */
     private static final String PRNCPAL_DGNS_CD = "princode";
-    /** Provider Number returns {@link String}. */
+    /** Provider Number. */
     private static final String PRVDR_NUM = "222222";
-    /** Claim ID returns {@link String}. */
+    /** Claim ID. */
     private static final String CLM_ID = "-999999999";
-    /** ICD Diagnosis Code returns {@link String}. */
+    /** ICD Diagnosis Code. */
     private static final String ICD_DGNS_CD1 = "JJJJ";
-    /** Claim POA returns {@link int}. */
+    /** Claim POA. */
     private static final int CLM_POA_IND_SW1 = 1;
-    /** Icd Procedure code returns {@link String}. */
+    /** Icd Procedure code. */
     private static final String ICD_PRCDR_CD1 = "pc1";
-    /** Procedure Date returns {@link String}. */
+    /** Procedure Date. */
     private static final String PRCDR_DT1 = "10-Jan-2011";
-    /** Claim Line Number returns {@link String}. */
+    /** Claim Line Number. */
     private static final String CLM_LINE_NUM = "1";
 
-    /** Hardcoded Location1 returns {@link String}. */
+    /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
-    /** Hardcoded Location2 returns {@link String}. */
+    /** Hardcoded Location2. */
     private static final String HARDCODED_LOC2 = "?";
-    /** Hardcoded Transaction Date returns {@link String}. */
+    /** Hardcoded Transaction Date. */
     private static final String HARDCODED_TRAN_DATE_CYMD = "1970-01-01";
-    /** Hardcoded Federal Tax Number returns {@link String}. */
+    /** Hardcoded Federal Tax Number. */
     private static final String HARDCODED_FED_TAX_NUMBER = "XX-XXXXXXX";
-    /** Hardcoded Received Date returns {@link String}. */
+    /** Hardcoded Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
-    /** Fiss Sample ID returns {@link int}. */
+    /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
-    /** Mcs Sample ID returns {@link int}. */
+    /** Mcs Sample ID. */
     private static final int MCS_SAMPLE_ID = 1;
 
     /**
@@ -528,8 +528,8 @@ public class FissTransformerIT {
     /**
      * Creates a default data parser.
      *
-     * @param parserData the data that needs to be parsed.
-     * @return {@link Parser} data parser.
+     * @param parserData the data that needs to be parsed
+     * @return {@link Parser} data parser
      */
     public static Parser.Data<String> createDataParser(Map<String, String> parserData) {
       return new Parser.Data<>() {
