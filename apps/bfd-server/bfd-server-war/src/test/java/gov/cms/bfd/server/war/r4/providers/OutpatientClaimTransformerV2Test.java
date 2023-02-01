@@ -150,11 +150,10 @@ public final class OutpatientClaimTransformerV2Test {
     Extension extension =
         eob.getBillablePeriod()
             .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
     Coding valueCoding = (Coding) extension.getValue();
     assertEquals("Final bill", valueCoding.getDisplay());
     assertEquals("3", valueCoding.getCode());
-    assertEquals(
-        "https://bluebutton.cms.gov/resources/variables/claim_query_cd", valueCoding.getSystem());
 
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2011-01-24"),

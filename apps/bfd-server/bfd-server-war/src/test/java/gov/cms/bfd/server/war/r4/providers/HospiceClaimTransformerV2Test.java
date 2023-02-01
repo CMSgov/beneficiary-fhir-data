@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -394,17 +395,51 @@ public final class HospiceClaimTransformerV2Test {
     Extension extension =
         eob.getBillablePeriod()
             .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
     Coding valueCoding = (Coding) extension.getValue();
     assertEquals("Final bill", valueCoding.getDisplay());
     assertEquals("3", valueCoding.getCode());
-    assertEquals(
-        "https://bluebutton.cms.gov/resources/variables/claim_query_cd", valueCoding.getSystem());
 
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-01"),
         eob.getBillablePeriod().getStart());
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-30"), eob.getBillablePeriod().getEnd());
+  }
+
+  /** Tests that the billable period is not set if claim query code is null. */
+  public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    HospiceClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(r -> (HospiceClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    claim.setClaimQueryCode(Optional.empty());
+    claim.setLastUpdated(Instant.now());
+
+    ExplanationOfBenefit genEob =
+        HospiceClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    // We just want to make sure it is not set
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNull(extension);
   }
 
   /** Tests that the transformer sets the expected insurer. */

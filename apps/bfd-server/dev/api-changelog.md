@@ -7,10 +7,25 @@ Added mapping for Coverage Period start and end dates
 "resource" : {
   "resourceType" : "Coverage",
   ...
+  "beneficiary" : {
+    "reference" : "Patient/567834"
+  },
+  "relationship" : {
+    "coding" : [ {
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+      "code" : "self",
+      "display" : "Self"
+    } ]
+  },
   "period" : {
     "start" : "2020-03-17",
     "end" : "2020-06-17"
-    },
+  },
+  "payor" : [ {
+    "identifier" : {
+      "value" : "Centers for Medicare and Medicaid Services"
+    }
+  } ]
   ...
 }
 ```

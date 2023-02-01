@@ -3317,21 +3317,21 @@ public final class TransformerUtilsV2 {
    * HHAClaimColumn}* and {@link SNFClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param organizationNpi ORG_NPI_NUM,
+   * @param organizationNpi ORG_NPI_NUM
    * @param npiOrgName the npi org name
-   * @param claimFacilityTypeCode CLM_FAC_TYPE_CD,
-   * @param claimFrequencyCode CLM_FREQ_CD,
-   * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD,
-   * @param patientDischargeStatusCode PTNT_DSCHRG_STUS_CD,
-   * @param claimServiceClassificationTypeCode CLM_SRVC_CLSFCTN_TYPE_CD,
-   * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
-   * @param totalChargeAmount CLM_TOT_CHRG_AMT,
-   * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
-   * @param fiscalIntermediaryNumber FI_NUM,
-   * @param lastUpdated the last updated,
-   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM,
-   * @param fiClmProcDt FI_CLM_PROC_DT,
-   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in,
+   * @param claimFacilityTypeCode CLM_FAC_TYPE_CD
+   * @param claimFrequencyCode CLM_FREQ_CD
+   * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD
+   * @param patientDischargeStatusCode PTNT_DSCHRG_STUS_CD
+   * @param claimServiceClassificationTypeCode CLM_SRVC_CLSFCTN_TYPE_CD
+   * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD
+   * @param totalChargeAmount CLM_TOT_CHRG_AMT
+   * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT
+   * @param fiscalIntermediaryNumber FI_NUM
+   * @param lastUpdated the last updated
+   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM
+   * @param fiClmProcDt FI_CLM_PROC_DT
+   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in
    * @param claimQueryCode the CLAIM_QUERY_CODE
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
