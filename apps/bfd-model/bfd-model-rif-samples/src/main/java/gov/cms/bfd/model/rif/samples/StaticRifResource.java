@@ -75,6 +75,12 @@ public enum StaticRifResource {
   SAMPLE_A_INPATIENT(
       resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
+  /** Sample A Inpatient four character drg code static rif. */
+  SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE(
+      resourceUrl("rif-static-samples/sample-a-inpatient-with-four-character-drg-code.txt"),
+      RifFileType.INPATIENT,
+      1),
+
   /** Sample A Outpatient static rif. */
   SAMPLE_A_OUTPATIENT(
       resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
