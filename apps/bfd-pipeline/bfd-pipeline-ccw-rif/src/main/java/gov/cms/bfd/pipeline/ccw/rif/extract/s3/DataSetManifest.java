@@ -372,7 +372,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      *
      * @return the name of the S3 object/file that is represented by this {@link
      *     DataSetManifestEntry}, which is effectively a relative S3 key (relative to this <code>
-     *          manifest.xml</code> object's key, that is)
+     *      manifest.xml</code> object's key, that is)
      */
     public String getName() {
       return name;
@@ -481,7 +481,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
-     * Computes a s3 key string.
+     * Computes an s3 key string.
      *
      * @param s3Prefix the S3 key prefix that should be prepended to the calculated S3 key, e.g. "
      *     <code>Incoming</code>"
