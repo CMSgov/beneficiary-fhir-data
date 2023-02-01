@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDownloadResult> {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
-  /** The task manager for s3. */
+  /** The task manager for S3. */
   private final S3TaskManager s3TaskManager;
   /** The metrics registry. */
   private final MetricRegistry appMetrics;
