@@ -84,8 +84,16 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
   path = "/bfd/${local.env}/common/nonsensitive"
 }
 
-data "aws_ssm_parameters_by_path" "nonsensitive" {
-  path = "/bfd/${local.env}/${local.service}/nonsensitive"
+data "aws_ssm_parameters_by_path" "nonsensitive_shared" {
+  path = "/bfd/${local.env}/${local.service}/shared/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive_ccw" {
+  path = "/bfd/${local.env}/${local.service}/ccw/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive_rda" {
+  path = "/bfd/${local.env}/${local.service}/rda/nonsensitive"
 }
 
 # TODO: this needs to be defined in common

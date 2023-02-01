@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -119,15 +120,15 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   @Trace
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
-      throw new IllegalArgumentException();
+      throw new InvalidRequestException("Missing required coverage ID");
     }
     if (coverageId.getVersionIdPartAsLong() != null) {
-      throw new IllegalArgumentException();
+      throw new InvalidRequestException("Coverage ID must not define a version");
     }
 
     String coverageIdText = coverageId.getIdPart();
     if (coverageIdText == null || coverageIdText.trim().isEmpty()) {
-      throw new IllegalArgumentException();
+      throw new InvalidRequestException("Missing required coverage ID");
     }
 
     Operation operation = new Operation(Operation.Endpoint.V2_COVERAGE);
@@ -136,7 +137,10 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
     if (!coverageIdMatcher.matches()) {
-      throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+      throw new InvalidRequestException(
+          "Coverage ID pattern: '"
+              + coverageIdText
+              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}");
     }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);

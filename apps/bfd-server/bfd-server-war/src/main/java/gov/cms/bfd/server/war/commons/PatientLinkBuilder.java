@@ -66,7 +66,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
    */
   private void validate() {
     if (getPageSize() <= 0) {
-      throw new InvalidRequestException("A zero or negative page size is unsupported");
+      throw new InvalidRequestException("Value for pageSize cannot be zero or negative: %s");
     }
     if (!(getPageSize() <= MAX_PAGE_SIZE)) {
       throw new InvalidRequestException("Page size must be less than " + MAX_PAGE_SIZE);
@@ -165,7 +165,9 @@ public final class PatientLinkBuilder implements LinkBuilder {
       try {
         return Integer.parseInt(countText);
       } catch (NumberFormatException ex) {
-        throw new InvalidRequestException("Invalid _count parameter: " + countText);
+        throw new InvalidRequestException(
+            String.format(
+                "Invalid argument in request URL: %s must be a number.", Constants.PARAM_COUNT));
       }
     }
     return null;

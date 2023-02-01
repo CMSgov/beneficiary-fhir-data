@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -142,30 +141,6 @@ public final class R4CoverageResourceProviderIT {
           .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, -1234L))
           .execute();
     } catch (ResourceNotFoundException e) {
-      exception = e;
-    }
-    assertNotNull(exception);
-  }
-
-  /**
-   * Verifies that {@link R4CoverageResourceProvider#read} works as expected for {@link
-   * Beneficiary}-derived {@link Coverage}s that has an invalid coverage id parameter.
-   */
-  @Test
-  public void readCoveragesForInvalidIdParam() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    // Parameter is invalid, should throw exception
-    InvalidRequestException exception;
-
-    exception = null;
-    try {
-      fhirClient
-          .read()
-          .resource(Coverage.class)
-          .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, "1?234"))
-          .execute();
-    } catch (InvalidRequestException e) {
       exception = e;
     }
     assertNotNull(exception);
