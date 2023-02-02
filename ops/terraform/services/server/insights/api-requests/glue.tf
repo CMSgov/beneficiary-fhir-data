@@ -1,5 +1,6 @@
 # Creates AWS Glue Database named "bfd-insights-bfd-<environment>"
 module "database" {
+  # TODO: Update the source of this module when common insights modules are re-homed
   source     = "../../../../../../insights/terraform/modules/database"
   database   = local.database
   bucket     = data.aws_s3_bucket.bfd-insights-bucket.bucket
@@ -9,6 +10,7 @@ module "database" {
 
 # Target Glue Table where ingested logs are eventually stored
 module "glue-table-api-requests" {
+  # TODO: Update the source of this module when common insights modules are re-homed
   source         = "../../../../../../insights/terraform/modules/table"
   table          = "${local.full_name_underscore}_api_requests"
   description    = "Target Glue Table where ingested logs are eventually stored"
