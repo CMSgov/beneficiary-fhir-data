@@ -32,8 +32,11 @@ import org.xml.sax.SAXException;
 public final class DataSetQueue {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataSetQueue.class);
 
+  /** The metric registry. */
   private final MetricRegistry appMetrics;
+  /** The extraction options. */
   private final ExtractionOptions options;
+  /** The S3 task manager. */
   private final S3TaskManager s3TaskManager;
 
   /**
@@ -57,6 +60,7 @@ public final class DataSetQueue {
    */
   private final Set<DataSetManifestId> knownInvalidManifests;
 
+  /** The number of completed manifests. */
   private Integer completedManifestsCount;
 
   /**
@@ -176,6 +180,8 @@ public final class DataSetQueue {
   }
 
   /**
+   * Lists the pending manifests.
+   *
    * @return the {@link DataSetManifestId}s for the manifests that are found in S3 under the {@value
    *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
    */
@@ -233,6 +239,8 @@ public final class DataSetQueue {
   }
 
   /**
+   * Reads the {@link DataSetManifest} that was contained in the specified S3 object.
+   *
    * @param s3Client the {@link AmazonS3} client to use
    * @param options the {@link ExtractionOptions} to use
    * @param manifestToProcessKey the {@link S3Object#getKey()} of the S3 object for the manifest to
@@ -289,7 +297,9 @@ public final class DataSetQueue {
   }
 
   /**
-   * @return the {@link Stream} that {@link QueuedDataSet}s should be pulled from, when requested
+   * Gets the manifests to process.
+   *
+   * @return the {@link Stream} that QueuedDataSets should be pulled from, when requested
    */
   private Stream<DataSetManifest> getManifestsToProcess() {
     return manifestsToProcess.stream()
@@ -297,6 +307,8 @@ public final class DataSetQueue {
   }
 
   /**
+   * Determines if there are no remaining manifests to process.
+   *
    * @return <code>false</code> if there is at least one pending {@link DataSetManifest} to process,
    *     <code>true</code> if not
    */
@@ -304,12 +316,18 @@ public final class DataSetQueue {
     return getManifestsToProcess().count() == 0;
   }
 
-  /** @return the {@link DataSetManifest} for the next data set that should be processed, if any */
+  /**
+   * Gets the next data set to process.
+   *
+   * @return the {@link DataSetManifest} for the next data set that should be processed, if any
+   */
   public Optional<DataSetManifest> getNextDataSetToProcess() {
     return getManifestsToProcess().findFirst();
   }
 
   /**
+   * Gets the second data set to process.
+   *
    * @return the {@link DataSetManifest} for the next-but-one data set that should be processed, if
    *     any
    */
@@ -318,6 +336,8 @@ public final class DataSetQueue {
   }
 
   /**
+   * Gets the pending manifests count.
+   *
    * @return the count of {@link DataSetManifest}s found for data sets that need to be processed
    *     (including those known to be invalid)
    */
@@ -328,6 +348,8 @@ public final class DataSetQueue {
   }
 
   /**
+   * Gets the completed manifests count.
+   *
    * @return the count of {@link DataSetManifest}s found for data sets that have already been
    *     processed
    */

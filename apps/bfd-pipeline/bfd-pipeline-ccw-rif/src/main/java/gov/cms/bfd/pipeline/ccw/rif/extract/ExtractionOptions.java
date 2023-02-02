@@ -13,8 +13,11 @@ import java.util.function.Predicate;
 public final class ExtractionOptions implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  /** The S3 bucket name. */
   private final String s3BucketName;
+  /** The allowed rif file type for this extraction. */
   private final RifFileType allowedRifFileType;
+  /** The max keys for S3. */
   private final Integer s3ListMaxKeys;
 
   /**
@@ -53,7 +56,11 @@ public final class ExtractionOptions implements Serializable {
     this(s3BucketName, Optional.empty());
   }
 
-  /** @return the AWS {@link Regions} that should be used when interacting with S3 */
+  /**
+   * Gets the S3 region.
+   *
+   * @return the AWS {@link Regions} that should be used when interacting with S3
+   */
   public Regions getS3Region() {
     /*
      * NOTE: This is hardcoded for now, unless/until we have a need to
@@ -64,12 +71,18 @@ public final class ExtractionOptions implements Serializable {
     return SharedS3Utilities.REGION_DEFAULT;
   }
 
-  /** @return the name of the AWS S3 bucket to monitor */
+  /**
+   * Gets the S3 bucket name.
+   *
+   * @return the name of the AWS S3 bucket to monitor
+   */
   public String getS3BucketName() {
     return s3BucketName;
   }
 
   /**
+   * Gets the allowed rif file type.
+   *
    * @return the single {@link RifFileType} that the application should process, or {@link
    *     Optional#empty()} if it should process all {@link RifFileType}s (when set, any data sets
    *     that do not <strong>only</strong> contain the specified {@link RifFileType} will be skipped
@@ -80,6 +93,8 @@ public final class ExtractionOptions implements Serializable {
   }
 
   /**
+   * Gets the data set filter.
+   *
    * @return a {@link Predicate} that returns <code>true</code> for {@link Predicate#test(Object)}
    *     if the specified {@link DataSetManifest} matches the {@link #getAllowedRifFileType()}
    *     value, and <code>false</code> if it does not (and thus should be skipped)
@@ -102,7 +117,7 @@ public final class ExtractionOptions implements Serializable {
     return Optional.ofNullable(s3ListMaxKeys);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

@@ -13,7 +13,9 @@ import java.nio.file.Path;
 
 /** This {@link RifFile} implementation represents a local file on disk. */
 public final class LocalRifFile implements RifFile {
+  /** The local file. */
   private final Path localFile;
+  /** The file type. */
   private final RifFileType rifFileType;
 
   /**
@@ -27,25 +29,25 @@ public final class LocalRifFile implements RifFile {
     this.rifFileType = rifFileType;
   }
 
-  /** @see RifFile#getDisplayName() */
+  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return localFile.toAbsolutePath().toString();
   }
 
-  /** @see RifFile#getFileType() */
+  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return rifFileType;
   }
 
-  /** @see RifFile#getCharset() */
+  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** @see RifFile#open() */
+  /** {@inheritDoc} */
   @Override
   public InputStream open() {
     try {

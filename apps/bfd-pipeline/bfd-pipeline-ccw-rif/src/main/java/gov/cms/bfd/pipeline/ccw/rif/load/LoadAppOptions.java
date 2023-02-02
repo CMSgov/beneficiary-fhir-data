@@ -22,9 +22,30 @@ public final class LoadAppOptions implements Serializable {
   public static final int DEFAULT_LOADER_THREADS =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
+  /** The config for the id hasher. */
   private final IdHasher.Config idHasherConfig;
+  /** The number of loader threads. */
   private final int loaderThreads;
+  /** If idempotency mode should be used. */
   private final boolean idempotencyRequired;
+  /**
+   * Special property used to filter non-2023 beneficiaries from loading, as sometimes our upstream
+   * partners have historically sent us previous years mixed with the current year, which causes
+   * issues with the database overwriting newer year data with older.
+   *
+   * <p>As part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
+   * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>, we want a filtering mechanism in our
+   * loads such some {@link Beneficiary}s are temporarily skipped: only those with a {@link
+   * Beneficiary#getBeneEnrollmentReferenceYear()} of "2023" or where the reference year is <code>
+   *  null</code> will be processed. As part of this filtering, we are implementing an assumption
+   * that no non-2023 <code>INSERT</code> {@link Beneficiary} records will be received, as skipping
+   * those would also require skipping their associated claims, which is additional complexity that
+   * we want to avoid. If any such records are encountered, the load will go boom. This filtering is
+   * an inelegant hack to workaround upstream data issues, and was ideally only in place very
+   * temporarily, although it's now been in place for at least a year. See the code that uses this
+   * field in {@link RifLoader} for details. This filtering is being made configurable so as not to
+   * invalidate all of our existing test coverage.
+   */
   private final boolean filteringNonNullAndNon2023Benes;
 
   /**
@@ -58,12 +79,18 @@ public final class LoadAppOptions implements Serializable {
     this.recordBatchSize = recordBatchSize;
   }
 
-  /** @return the configuration settings used when hashing beneficiary HICNs */
+  /**
+   * Gets the {@link #idHasherConfig}.
+   *
+   * @return the configuration settings used when hashing beneficiary HICNs
+   */
   public IdHasher.Config getIdHasherConfig() {
     return idHasherConfig;
   }
 
   /**
+   * Gets the {@link #loaderThreads}.
+   *
    * @return the number of threads that will be used to simultaneously process {@link RifLoader}
    *     operations
    */
@@ -81,6 +108,8 @@ public final class LoadAppOptions implements Serializable {
   }
 
   /**
+   * Gets {@link #idempotencyRequired}.
+   *
    * @return
    *     <p><code>true</code> if {@link RifLoader} should check to see if each record has already
    *     been processed, <code>false</code> if it should blindly assume that it hasn't
@@ -93,20 +122,7 @@ public final class LoadAppOptions implements Serializable {
   }
 
   /**
-   * Gets if the filtering for non-null and 2023 benes is active or not.
-   *
-   * <p>As part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
-   * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>, we want a filtering mechanism in our
-   * loads such some {@link Beneficiary}s are temporarily skipped: only those with a {@link
-   * Beneficiary#getBeneEnrollmentReferenceYear()} of "2023" or where the reference year is <code>
-   * null</code> will be processed (which, during the calendar year of 2023, is most of them). As
-   * part of this filtering, we are implementing an assumption that no non-2023 <code>INSERT
-   * </code> {@link Beneficiary} records will be received, as skipping those would also require
-   * skipping their associated claims, which is additional complexity that we want to avoid. If any
-   * such records are encountered, the load will go boom. This filtering is an inelegant hack to
-   * workaround upstream data issues, and will hopefully only be in place very temporarily. See the
-   * code that uses this field in {@link RifLoader} for details. This filtering is being made
-   * configurable so as to not invalidate all of our existing test coverage.
+   * Gets {@link #filteringNonNullAndNon2023Benes}.
    *
    * @return filtering is enabled when this field is <code>true</code>, and disabled when it's
    *     <code>false</code>

@@ -11,6 +11,8 @@ import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
  */
 public final class S3Utilities {
   /**
+   * Create an S3 client.
+   *
    * @param options the {@link ExtractionOptions} to use
    * @return the {@link AmazonS3} client to use
    */

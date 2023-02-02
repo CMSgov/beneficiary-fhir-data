@@ -44,7 +44,7 @@ public class MicrometerConfigHelper {
 
   /**
    * Creates a copy of this object that differs only in the value lookup function. Intended for use
-   * in unit tests to plug in a testable lookup function (like {@link Map::get}) instead of an
+   * in unit tests to plug in a testable lookup function (like {@link Map#get}) instead of an
    * untestable one like {@link System#getenv}.
    *
    * @param valueLookupFunction replacement lookup function

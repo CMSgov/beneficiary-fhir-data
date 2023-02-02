@@ -44,14 +44,22 @@ import org.slf4j.LoggerFactory;
 public final class SyntheaRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
-  /** Ensures that each test case here starts with a clean/empty database, with the right schema. */
+  /**
+   * Ensures that each test case here starts with a clean/empty database, with the right schema.
+   *
+   * @param testInfo the test info
+   */
   @BeforeEach
   public void prepareTestDatabase(TestInfo testInfo) {
     LOGGER.info("{}: starting.", testInfo.getDisplayName());
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
-  /** log a message after every test finishes. */
+  /**
+   * Log a message after every test finishes.
+   *
+   * @param testInfo the test info
+   */
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());

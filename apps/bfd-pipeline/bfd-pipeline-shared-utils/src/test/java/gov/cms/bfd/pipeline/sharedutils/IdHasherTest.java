@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link IdHasher}. */
 public class IdHasherTest {
+
+  /** Tests the {@link IdHasher} with a fake pepper and ensures it matches the expected value. */
   @Test
   public void testHashing() {
     IdHasher hasher =

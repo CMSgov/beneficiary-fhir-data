@@ -36,11 +36,21 @@ import org.slf4j.LoggerFactory;
 public final class PipelineManagerIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
 
+  /**
+   * Logs a message before each test.
+   *
+   * @param testInfo the test info
+   */
   @BeforeEach
   public void starting(TestInfo testInfo) {
     LOGGER.info("{}: starting.", testInfo.getDisplayName());
   }
 
+  /**
+   * Logs a message after each test.
+   *
+   * @param testInfo the test info
+   */
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
@@ -504,11 +514,15 @@ public final class PipelineManagerIT {
 
   /** This mock {@link PipelineJob} returns a specified result. */
   private static class MockJob implements PipelineJob<NullPipelineJobArguments> {
+    /** Represents the job type for this mock job. */
     public static final PipelineJobType<NullPipelineJobArguments> JOB_TYPE =
         new PipelineJobType<NullPipelineJobArguments>(MockJob.class);
 
+    /** The pipeline job schedule for the mock job. */
     private final Optional<PipelineJobSchedule> schedule;
+    /** Represents if this job can be interrupted. */
     private final boolean interruptible;
+    /** The {@link Callable} that will create the values to use for {@link #call()}. */
     private final Callable<Object> jobResultProducer;
 
     /**
@@ -539,19 +553,19 @@ public final class PipelineManagerIT {
       this(schedule, true, jobResultProducer);
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+    /** {@inheritDoc} */
     @Override
     public Optional<PipelineJobSchedule> getSchedule() {
       return schedule;
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+    /** {@inheritDoc} */
     @Override
     public boolean isInterruptible() {
       return interruptible;
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+    /** {@inheritDoc} */
     @Override
     public PipelineJobOutcome call() throws Exception {
       Object result = jobResultProducer.call();

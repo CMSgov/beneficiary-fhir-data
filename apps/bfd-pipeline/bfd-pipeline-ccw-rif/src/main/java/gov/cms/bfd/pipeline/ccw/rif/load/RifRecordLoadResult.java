@@ -7,7 +7,9 @@ import gov.cms.bfd.model.rif.RifRecordEvent;
  * RifRecordEvent}s.
  */
 public final class RifRecordLoadResult {
+  /** The list of successful load events. */
   private final RifRecordEvent<?> rifRecordEvent;
+  /** The load action. */
   private final LoadAction loadAction;
 
   /**
@@ -24,17 +26,25 @@ public final class RifRecordLoadResult {
     this.loadAction = loadAction;
   }
 
-  /** @return the {@link RifRecordEvent} that was loaded */
+  /**
+   * Gets the {@link #rifRecordEvent}.
+   *
+   * @return the {@link RifRecordEvent} that was loaded
+   */
   public RifRecordEvent<?> getRifRecordEvent() {
     return rifRecordEvent;
   }
 
-  /** @return the {@link LoadAction} that indicates the outcome of the load */
+  /**
+   * Gets the {@link #loadAction}.
+   *
+   * @return the {@link LoadAction} that indicates the outcome of the load
+   */
   public LoadAction getLoadAction() {
     return loadAction;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
