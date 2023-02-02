@@ -105,6 +105,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
+  /** The expected coverage id length. */
+  private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
+
   /**
    * Sets the {@link #entityManager}.
    *
@@ -158,10 +161,18 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Read(version = false)
   @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
-    if (patientId == null || patientId.getVersionIdPartAsLong() != null) {
-      throw new IllegalArgumentException();
+    if (patientId == null || patientId.getIdPart() == null) {
+      throw new InvalidRequestException("Missing required patient ID");
     }
-    Long beneId = patientId.getIdPartAsLong();
+    if (patientId.getVersionIdPartAsLong() != null) {
+      throw new InvalidRequestException("Patient ID must not define a version");
+    }
+    Long beneId;
+    try {
+      beneId = patientId.getIdPartAsLong();
+    } catch (NumberFormatException e) {
+      throw new InvalidRequestException("Patient ID must be a number");
+    }
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
@@ -250,10 +261,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
     if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty())
       throw new InvalidRequestException(
-          "Unsupported query parameter system: " + logicalId.getSystem());
+          "System is unsupported here and should not be set (" + logicalId.getSystem() + ")");
     if (logicalId.getValueNotNull().isEmpty())
-      throw new InvalidRequestException(
-          "Unsupported query parameter value: " + logicalId.getValue());
+      throw new InvalidRequestException("Missing required id value");
 
     List<IBaseResource> patients;
     if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
@@ -344,7 +354,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       try {
         year = Integer.parseInt(referenceYear.getValueNotNull());
       } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Invalid contract year specified", e);
+        throw new InvalidRequestException("Contract year must be a number.", e);
       }
     }
 
@@ -762,7 +772,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
       RequestHeaders requestHeader) {
     if (hash == null || hash.trim().isEmpty()) {
-      throw new IllegalArgumentException();
+      throw new InvalidRequestException("Hash value cannot be null/empty");
     }
 
     /*
@@ -999,9 +1009,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (coverageId.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
-    if (coverageId.getValueNotNull().length() != 5)
+    if (coverageId.getValueNotNull().length() != EXPECTED_COVERAGE_ID_LENGTH) {
       throw new InvalidRequestException(
-          "Unsupported query parameter value: " + coverageId.getValueNotNull());
+          String.format(
+              "Coverage id is not expected length; value %s is not expected length %s",
+              coverageId.getValueNotNull(), EXPECTED_COVERAGE_ID_LENGTH));
+    }
   }
 
   /**

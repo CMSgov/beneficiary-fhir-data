@@ -13,10 +13,17 @@ cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 # TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
-    --path "/bfd/${env}/pipeline/" \
+    --path "/bfd/${env}/pipeline/shared/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > pipeline_vars.json
+
+aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/pipeline/${pipeline_instance}/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > "pipeline_${pipeline_instance}_vars.json"
 
 aws ssm get-parameters-by-path \
     --with-decryption \
@@ -28,9 +35,9 @@ aws ssm get-parameters-by-path \
 cat <<EOF > extra_vars.json
 {
   "data_pipeline_db_url": "${writer_endpoint}",
-  "data_pipeline_jvm_args": "-Xmx{{ ansible_memtotal_mb * 0.80 | int }}m -XX:+PreserveFramePointer",
+  "data_pipeline_jvm_args": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) }}m -XX:+PreserveFramePointer",
   "data_pipeline_loader_threads": "{{ ansible_processor_vcpus * 25 }}",
-  "data_pipeline_new_relic_app_name": "BFD Pipeline ({{ env_name_std }})",
+  "data_pipeline_new_relic_app_name": "BFD Pipeline %{ if pipeline_instance == "rda" ~} %{ else ~} ${pipeline_instance} %{ endif ~} ({{ env_name_std }})",
   "data_pipeline_s3_bucket": "${pipeline_bucket}",
   "data_pipeline_tmp_dir": "{{ data_pipeline_dir }}/tmp",
   "env": "${env}"
@@ -39,7 +46,7 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
+ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars "@pipeline_${pipeline_instance}_vars.json" --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
@@ -57,3 +64,4 @@ if [[ \$- == *i* ]]; then
 fi
 EOF
 chmod 0644 /etc/profile.d/set-bfd-login-env.sh
+

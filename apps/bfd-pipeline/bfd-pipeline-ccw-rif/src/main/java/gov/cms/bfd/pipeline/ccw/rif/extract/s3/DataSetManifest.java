@@ -44,7 +44,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
 
-  /** A {@link PreValidationProperties} optional element that provides pre-validation meta-data */
+  /** A {@link PreValidationProperties} optional element that provides pre-validation meta-data. */
   @XmlElement(name = "preValidationProperties", required = false)
   protected PreValidationProperties preValidationProperties;
 
@@ -174,6 +174,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
+   * Gets the timestamp text.
+   *
    * @return the {@link String} representation of {@link #getTimestamp()} used to identify this
    *     {@link DataSetManifest} in S3 and elsewhere
    */
@@ -188,12 +190,18 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     return timestampText;
   }
 
-  /** @return the date and time that the represented data set was created/prepared at */
+  /**
+   * Gets the timestamp as an {@link Instant}.
+   *
+   * @return the date and time that the represented data set was created/prepared at
+   */
   public Instant getTimestamp() {
     return Instant.parse(timestampText.trim());
   }
 
   /**
+   * Gets the {@link #sequenceId}.
+   *
    * @return the {@link int} sequence number of the file represented by this {@link DataSetManifest}
    */
   public int getSequenceId() {
@@ -201,6 +209,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
+   * Determines if this is synthetic data.
+   *
    * @return the {@link boolean} denoting if the data is synthetic based on the {@link
    *     DataSetManifest}
    */
@@ -209,6 +219,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
+   * Gets the {@link DataSetManifestId}.
+   *
    * @return a {@link DataSetManifestId} that models this {@link DataSetManifest}'s identity and
    *     ordering
    */
@@ -216,7 +228,11 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     return new DataSetManifestId(this);
   }
 
-  /** @return the list of {@link DataSetManifestEntry} included in this {@link DataSetManifest} */
+  /**
+   * Gets the {@link #entries}.
+   *
+   * @return the list of {@link DataSetManifestEntry} included in this {@link DataSetManifest}
+   */
   public List<DataSetManifestEntry> getEntries() {
     return entries;
   }
@@ -277,7 +293,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     this.preValidationProperties = value;
   }
 
-  /** @see java.lang.Comparable#compareTo(java.lang.Object) */
+  /** {@inheritDoc} */
   @Override
   public int compareTo(DataSetManifest o) {
     if (o == null) return 1;
@@ -342,21 +358,29 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.exportType = null;
     }
 
-    /** @return the {@link DataSetManifest} that this {@link DataSetManifestEntry} is a part of */
+    /**
+     * Gets the {@link #parentManifest}.
+     *
+     * @return the {@link DataSetManifest} that this {@link DataSetManifestEntry} is a part of
+     */
     public DataSetManifest getParentManifest() {
       return parentManifest;
     }
 
     /**
+     * Gets the {@link #name}.
+     *
      * @return the name of the S3 object/file that is represented by this {@link
      *     DataSetManifestEntry}, which is effectively a relative S3 key (relative to this <code>
-     *     manifest.xml</code> object's key, that is)
+     *      manifest.xml</code> object's key, that is)
      */
     public String getName() {
       return name;
     }
 
     /**
+     * Gets the {@link #type}.
+     *
      * @return the {@link RifFileType} of the file represented by this {@link DataSetManifestEntry}
      */
     public RifFileType getType() {
@@ -398,7 +422,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * can be determined.
    */
   public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
-    /** a {@link String} derived {@linkDataSetManifest#getTimestamp()} value. */
+    /** a {@link String} derived {@link DataSetManifest#getTimestamp()} value. */
     private final String timestampText;
 
     /** an {@link Instant} object derived timestampText {@link String} value. */
@@ -413,7 +437,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * @param timestampText a {@link String} representation of the {@link
      *     DataSetManifest#getTimestamp()} value
      * @param sequenceId the {@link DataSetManifest#getSequenceId()} value
-     * @param syntheticData the {@link DataSetManifest#isSyntheticData()} value
      */
     private DataSetManifestId(String timestampText, int sequenceId) {
       this.timestampText = timestampText;
@@ -458,6 +481,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     }
 
     /**
+     * Computes an s3 key string.
+     *
      * @param s3Prefix the S3 key prefix that should be prepended to the calculated S3 key, e.g. "
      *     <code>Incoming</code>"
      * @return the S3 key for this {@link DataSetManifestId}, under the specified prefix
@@ -475,7 +500,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return Instant.now().compareTo(timestamp) <= 0;
     }
 
-    /** @see java.lang.Comparable#compareTo(java.lang.Object) */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(DataSetManifestId o) {
       if (o == null) throw new IllegalArgumentException();
@@ -491,7 +516,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return Integer.compare(sequenceId, o.sequenceId);
     }
 
-    /** @see java.lang.Object#hashCode() */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
       final int prime = 31;
@@ -501,7 +526,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return result;
     }
 
-    /** @see java.lang.Object#equals(java.lang.Object) */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
@@ -602,7 +627,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     @XmlElement(name = "generated", required = false)
     protected String generated;
 
-    /** Create an instance of {@link PreValidationProperties } */
+    /** Create an instance of {@link PreValidationProperties}. */
     public PreValidationProperties() {}
 
     /**

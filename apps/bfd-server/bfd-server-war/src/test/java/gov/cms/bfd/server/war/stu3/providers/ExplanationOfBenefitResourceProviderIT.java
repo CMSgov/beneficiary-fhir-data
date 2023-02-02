@@ -117,26 +117,25 @@ public final class ExplanationOfBenefitResourceProviderIT {
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception as expected
    * for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that provides an non-numeric
-   * claim identifer.
+   * claim identifier.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
   public void readEobForNonNumericClaimId() throws FHIRException {
-    ca.uhn.fhir.rest.server.exceptions.InternalErrorException thrown =
-        assertThrows(
-            ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
-            () -> {
-              IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
-              ExplanationOfBenefit eob =
-                  fhirClient
-                      .read()
-                      .resource(ExplanationOfBenefit.class)
-                      .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
-                      .execute();
-            },
-            "Unsupported ID pattern: junk");
+          ExplanationOfBenefit eob =
+              fhirClient
+                  .read()
+                  .resource(ExplanationOfBenefit.class)
+                  .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
+                  .execute();
+        },
+        "ExplanationOfBenefit ID pattern: 'junk' does not match expected pattern: characterString-idNumber");
   }
 
   /**

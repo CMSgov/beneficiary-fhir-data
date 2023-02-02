@@ -147,6 +147,14 @@ public class SNFClaimTransformerV2Test {
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
     assertNotNull(eob.getBillablePeriod());
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
+    Coding valueCoding = (Coding) extension.getValue();
+    assertEquals("Final bill", valueCoding.getDisplay());
+    assertEquals("3", valueCoding.getCode());
+
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2013-12-01"),
         eob.getBillablePeriod().getStart());
@@ -434,6 +442,54 @@ public class SNFClaimTransformerV2Test {
                     "Claim Diagnosis Related Group Code (or MS-DRG Code)")),
             // Code
             new Coding("https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "645", null));
+
+    assertTrue(compare.equalsDeep(sic));
+  }
+
+  /** Tests to make sure a four digit DiagnosisRelatedGroupCd exists for snf claims. */
+  @Test
+  public void shouldHaveFourCharacterDRGClmDrgCdSupInfo() throws IOException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_FOUR_CHARACTER_DRG_CODE.getResources()));
+
+    SNFClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(r -> (SNFClaim) r)
+            .findFirst()
+            .get();
+    ExplanationOfBenefit genEob =
+        SNFClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+    SupportingInformationComponent sic =
+        TransformerTestUtilsV2.findSupportingInfoByCode(
+            "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", eob.getSupportingInfo());
+
+    SupportingInformationComponent compare =
+        TransformerTestUtilsV2.createSupportingInfo(
+            // We don't care what the sequence number is here
+            sic.getSequence(),
+            // Category
+            Arrays.asList(
+                new Coding(
+                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+                    "info",
+                    "Information"),
+                new Coding(
+                    "https://bluebutton.cms.gov/resources/codesystem/information",
+                    "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
+                    "Claim Diagnosis Related Group Code (or MS-DRG Code)")),
+            // Code
+            new Coding("https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "6455", null));
 
     assertTrue(compare.equalsDeep(sic));
   }

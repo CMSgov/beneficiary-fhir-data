@@ -124,8 +124,8 @@ public class HHAClaimTransformerV2 {
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
-    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Inpatient for HHA Claims
+    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -142,7 +142,8 @@ public class HHAClaimTransformerV2 {
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
-        C4BBInstutionalClaimSubtypes.Inpatient);
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        claimGroup.getClaimQueryCode());
 
     // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
     TransformerUtilsV2.addInformationWithCode(

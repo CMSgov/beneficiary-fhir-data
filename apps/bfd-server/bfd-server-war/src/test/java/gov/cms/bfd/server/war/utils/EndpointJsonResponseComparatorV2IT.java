@@ -1300,7 +1300,6 @@ public final class EndpointJsonResponseComparatorV2IT {
 
     String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
-
     AssertUtils.assertJsonEquals(approvedJson, newJson, IGNORED_PATHS);
   }
 

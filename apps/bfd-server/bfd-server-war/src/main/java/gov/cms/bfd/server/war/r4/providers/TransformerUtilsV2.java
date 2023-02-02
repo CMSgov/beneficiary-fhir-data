@@ -3289,23 +3289,16 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param bloodDeductibleLiabilityAmount NCH_BENE_BLOOD_DDCTBL_LBLTY_AM
-   * @param claimQueryCode CLAIM_QUERY_CODE
    * @param mcoPaidSw CLM_MCO_PD_SW
    */
   static void mapEobCommonGroupInpOutSNF(
       ExplanationOfBenefit eob,
       BigDecimal bloodDeductibleLiabilityAmount,
-      char claimQueryCode,
       Optional<Character> mcoPaidSw) {
 
     // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(
         eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
-
-    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
-    eob.getBillablePeriod()
-        .addExtension(
-            createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode));
 
     // CLM_MCO_PD_SW => ExplanationOfBenefit.supportingInfo.code
     if (mcoPaidSw.isPresent()) {
@@ -3324,21 +3317,22 @@ public final class TransformerUtilsV2 {
    * HHAClaimColumn}* and {@link SNFClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param organizationNpi ORG_NPI_NUM,
+   * @param organizationNpi ORG_NPI_NUM
    * @param npiOrgName the npi org name
-   * @param claimFacilityTypeCode CLM_FAC_TYPE_CD,
-   * @param claimFrequencyCode CLM_FREQ_CD,
-   * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD,
-   * @param patientDischargeStatusCode PTNT_DSCHRG_STUS_CD,
-   * @param claimServiceClassificationTypeCode CLM_SRVC_CLSFCTN_TYPE_CD,
-   * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD,
-   * @param totalChargeAmount CLM_TOT_CHRG_AMT,
-   * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT,
-   * @param fiscalIntermediaryNumber FI_NUM,
-   * @param lastUpdated the last updated,
-   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM,
-   * @param fiClmProcDt FI_CLM_PROC_DT,
-   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in.
+   * @param claimFacilityTypeCode CLM_FAC_TYPE_CD
+   * @param claimFrequencyCode CLM_FREQ_CD
+   * @param claimNonPaymentReasonCode CLM_MDCR_NON_PMT_RSN_CD
+   * @param patientDischargeStatusCode PTNT_DSCHRG_STUS_CD
+   * @param claimServiceClassificationTypeCode CLM_SRVC_CLSFCTN_TYPE_CD
+   * @param claimPrimaryPayerCode NCH_PRMRY_PYR_CD
+   * @param totalChargeAmount CLM_TOT_CHRG_AMT
+   * @param primaryPayerPaidAmount NCH_PRMRY_PYR_CLM_PD_AMT
+   * @param fiscalIntermediaryNumber FI_NUM
+   * @param lastUpdated the last updated
+   * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM
+   * @param fiClmProcDt FI_CLM_PROC_DT
+   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in
+   * @param claimQueryCode the CLAIM_QUERY_CODE
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3356,7 +3350,16 @@ public final class TransformerUtilsV2 {
       Optional<Instant> lastUpdated,
       Optional<String> fiDocClmControlNum,
       Optional<LocalDate> fiClmProcDt,
-      C4BBInstutionalClaimSubtypes c4bbInstutionalClaimSubtype) {
+      C4BBInstutionalClaimSubtypes c4bbInstutionalClaimSubtype,
+      Optional<Character> claimQueryCode) {
+
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
+    claimQueryCode.ifPresent(
+        queryCode ->
+            eob.getBillablePeriod()
+                .addExtension(
+                    createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, queryCode)));
+
     // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     fiDocClmControlNum.ifPresent(
         cntlNum ->

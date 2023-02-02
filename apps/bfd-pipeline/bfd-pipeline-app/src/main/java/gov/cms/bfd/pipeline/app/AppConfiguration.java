@@ -180,7 +180,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
       "RDA_GRPC_INPROC_SERVER_NAME";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME} */
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME}. */
   public static final String DEFAULT_RDA_GRPC_INPROC_SERVER_NAME = "MockRdaServer";
 
   /**
@@ -194,7 +194,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop} value.
+   * #getRdaLoadOptions()} {@link StandardGrpcRdaSource}'s minIdleMillisBeforeConnectionDrop value.
    * This variable value should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
@@ -213,6 +213,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN}. */
   public static final String DEFAULT_RDA_GRPC_AUTH_TOKEN = null;
+
+  /**
+   * The name of the environment variable that should be used to indicate how many RDA messages can
+   * error without causing the job to stop processing prematurely.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "RDA_JOB_ERROR_LIMIT";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -346,9 +352,15 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   private static final int RECORD_BATCH_SIZE = 100;
 
-  // this can be null if the RDA job is not configured, Optional is not Serializable
+  /**
+   * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
+   * Serializable.
+   */
   @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
-  // this can be null if the RDA job is not configured, Optional is not Serializable
+  /**
+   * The RDA rif load options. This can be null if the RDA job is not configured, Optional is not
+   * Serializable.
+   */
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
@@ -369,12 +381,20 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     this.rdaLoadOptions = rdaLoadOptions;
   }
 
-  /** @return the {@link CcwRifLoadOptions} that the application will use */
+  /**
+   * Gets the {@link #ccwRifLoadOptions}.
+   *
+   * @return the {@link CcwRifLoadOptions} that the application will use
+   */
   public Optional<CcwRifLoadOptions> getCcwRifLoadOptions() {
     return Optional.ofNullable(ccwRifLoadOptions);
   }
 
-  /** @return the {@link RdaLoadOptions} that the application will use */
+  /**
+   * Gets the {@link #rdaLoadOptions}.
+   *
+   * @return the {@link RdaLoadOptions} that the application will use
+   */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
     return Optional.ofNullable(rdaLoadOptions);
   }
@@ -531,8 +551,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * Loads the configuration settings related to the RDA gRPC API data load jobs. Ths job and most
    * of its settings are optional. Because the API may exist in some environments but not others a
-   * separate environment variable indicates whether or not the settings should be loaded.
+   * separate environment variable indicates whether the settings should be loaded.
    *
+   * @param idHasherConfig the id hasher config
    * @return a valid RdaLoadOptions if job is configured, otherwise null
    */
   @Nullable
@@ -605,8 +626,10 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(mockServerConfig::s3Bucket);
     readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
         .ifPresent(mockServerConfig::s3Directory);
+    final int errorLimit = readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT).orElse(0);
+
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
+        jobConfig.build(), grpcConfig, mockServerConfig.build(), errorLimit, idHasherConfig);
   }
 
   /**

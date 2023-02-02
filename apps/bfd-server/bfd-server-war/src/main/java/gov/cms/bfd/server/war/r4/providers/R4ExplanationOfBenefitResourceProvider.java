@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -174,19 +175,29 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @Read(version = false)
   @Trace
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
-    if (eobId == null) throw new IllegalArgumentException();
-    if (eobId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (eobId == null) {
+      throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
+    }
+    if (eobId.getVersionIdPartAsLong() != null) {
+      throw new InvalidRequestException("ExplanationOfBenefit ID must not define a version");
+    }
 
     String eobIdText = eobId.getIdPart();
-    if (eobIdText == null || eobIdText.trim().isEmpty()) throw new IllegalArgumentException();
+    if (eobIdText == null || eobIdText.trim().isEmpty()) {
+      throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
+    }
 
     Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(eobIdText);
-    if (!eobIdMatcher.matches())
-      throw new IllegalArgumentException("Unsupported ID pattern: " + eobIdText);
+    if (!eobIdMatcher.matches()) {
+      throw new InvalidRequestException(
+          "ExplanationOfBenefit ID pattern: '"
+              + eobIdText
+              + "' does not match expected pattern: {alphaString}-{idNumber}");
+    }
 
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimTypeV2> eobIdType = ClaimTypeV2.parse(eobIdTypeText);
-    if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
+    if (eobIdType.isEmpty()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V2_EOB);
@@ -625,7 +636,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       case LESSTHAN:
         return a.isBefore(b);
       default:
-        throw new IllegalArgumentException(String.format("Unsupported prefix supplied %s", prefix));
+        throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
     }
   }
 

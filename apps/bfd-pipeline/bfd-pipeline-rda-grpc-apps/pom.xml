@@ -17,6 +17,7 @@
 
     <properties>
         <jpa.version>1.0.2.Final</jpa.version>
+        <checkstyle.skip>true</checkstyle.skip>
     </properties>
 
     <dependencies>

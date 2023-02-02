@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -173,6 +174,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Read
   @Trace
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
+    if (claimId == null) {
+      throw new InvalidRequestException("Resource ID can not be null");
+    }
+    if (claimId.getVersionIdPartAsLong() != null) {
+      throw new InvalidRequestException("Resource ID must not define a version");
+    }
     final boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
     if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
@@ -181,11 +188,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     String claimIdText = claimId.getIdPart();
     if (claimIdText == null || claimIdText.trim().isEmpty())
-      throw new IllegalArgumentException("Resource ID can not be null/blank");
+      throw new InvalidRequestException("Resource ID can not be null/blank");
 
     Matcher claimIdMatcher = CLAIM_ID_PATTERN.matcher(claimIdText);
     if (!claimIdMatcher.matches())
-      throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
+      throw new InvalidRequestException(
+          "ID pattern: '"
+              + claimIdText
+              + "' does not match expected pattern: {singleCharacter}-{claimIdNumber}");
 
     String claimIdTypeText = claimIdMatcher.group(1);
     Optional<ResourceTypeV2<T, ?>> optional = parseClaimType(claimIdTypeText);
@@ -327,7 +337,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       return bundleResource;
     } else {
-      throw new IllegalArgumentException("mbi can't be null/blank");
+      throw new InvalidRequestException("Missing required field mbi");
     }
   }
 

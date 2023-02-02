@@ -75,7 +75,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
             "Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.",
             e);
         throw new InvalidRequestException(
-            "Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.");
+            "Invalid argument in request URL: " + parameterToParse + " must be a number.");
       }
     }
     return Optional.empty();
@@ -94,9 +94,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     if (!pageSize.isPresent()) return 10;
     if (pageSize.get() < 0) {
       throw new InvalidRequestException(
-          String.format(
-              "HTTP 400 Bad Request: Value for startIndex cannot be negative: pageSize %s",
-              pageSize.get()));
+          String.format("Value for pageSize cannot be negative: %s", pageSize.get()));
     }
     return pageSize.get();
   }
@@ -118,9 +116,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     if (startIndex.isPresent()) {
       if (startIndex.get() < 0) {
         throw new InvalidRequestException(
-            String.format(
-                "HTTP 400 Bad Request: Value for startIndex cannot be negative: startIndex %s",
-                startIndex.get()));
+            String.format("Value for startIndex cannot be negative: %s", startIndex.get()));
       }
       return startIndex.get();
     }
@@ -255,7 +251,8 @@ public final class OffsetLinkBuilder implements LinkBuilder {
       }
       return uri.build().toString();
     } catch (URISyntaxException e) {
-      throw new InvalidRequestException("Invalid URI:" + e);
+      throw new InvalidRequestException(
+          "Issue creating URI link for paging due to query parameters or values.", e);
     }
   }
 }

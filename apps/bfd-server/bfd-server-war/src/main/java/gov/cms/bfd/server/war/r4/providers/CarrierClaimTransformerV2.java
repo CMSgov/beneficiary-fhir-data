@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.Reference;
 
 /**
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -174,6 +175,17 @@ public class CarrierClaimTransformerV2 {
     eob.addExtension(
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
+
+    // CARR_CLM_BLG_NPI_NUM => ExplanationOfBenefit.provider.identifier
+    claimGroup
+        .getCarrierClaimBlgNpiNumber()
+        .ifPresent(
+            value ->
+                eob.setProvider(
+                    new Reference()
+                        .setIdentifier(
+                            TransformerUtilsV2.createIdentifier(
+                                CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, value))));
 
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
