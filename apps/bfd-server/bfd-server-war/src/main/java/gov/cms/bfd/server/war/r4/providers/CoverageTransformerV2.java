@@ -91,10 +91,9 @@ final class CoverageTransformerV2 {
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary));
 
     setCoverageStatus(coverage, beneficiary.getPartATerminationCode());
-
-    beneficiary
-        .getMedicareCoverageStartDate()
-        .ifPresent(value -> TransformerUtilsV2.setPeriodStart(coverage.getPeriod(), value));
+    TransformerUtilsV2.setPeriodStart(
+        coverage.getPeriod(), beneficiary.getPartACoverageStartDate());
+    TransformerUtilsV2.setPeriodEnd(coverage.getPeriod(), beneficiary.getPartACoverageEndDate());
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
@@ -156,7 +155,8 @@ final class CoverageTransformerV2 {
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
     TransformerUtilsV2.setPeriodStart(
-        coverage.getPeriod(), beneficiary.getMedicareCoverageStartDate());
+        coverage.getPeriod(), beneficiary.getPartBCoverageStartDate());
+    TransformerUtilsV2.setPeriodEnd(coverage.getPeriod(), beneficiary.getPartBCoverageEndDate());
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
@@ -265,6 +265,10 @@ final class CoverageTransformerV2 {
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary));
+
+    TransformerUtilsV2.setPeriodStart(
+        coverage.getPeriod(), beneficiary.getPartDCoverageStartDate());
+    TransformerUtilsV2.setPeriodEnd(coverage.getPeriod(), beneficiary.getPartDCoverageEndDate());
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
