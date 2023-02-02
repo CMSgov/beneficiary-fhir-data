@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
+package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.locks.ReadWriteLock;

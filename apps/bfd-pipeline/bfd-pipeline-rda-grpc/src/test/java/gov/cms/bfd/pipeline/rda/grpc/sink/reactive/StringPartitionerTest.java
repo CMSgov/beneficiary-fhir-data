@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
+package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

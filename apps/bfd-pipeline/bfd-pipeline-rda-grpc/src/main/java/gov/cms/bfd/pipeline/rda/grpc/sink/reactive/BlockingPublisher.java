@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
+package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
 
 import java.util.concurrent.Semaphore;
 import javax.annotation.Nonnull;
