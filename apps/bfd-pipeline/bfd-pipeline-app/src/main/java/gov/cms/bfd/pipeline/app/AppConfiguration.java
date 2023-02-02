@@ -215,6 +215,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String DEFAULT_RDA_GRPC_AUTH_TOKEN = null;
 
   /**
+   * The name of the environment variable that should be used to indicate how many RDA messages can
+   * error without causing the job to stop processing prematurely.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "RDA_JOB_ERROR_LIMIT";
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingFissSeqNum()} ()} value.
    */
@@ -620,8 +626,10 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(mockServerConfig::s3Bucket);
     readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
         .ifPresent(mockServerConfig::s3Directory);
+    final int errorLimit = readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT).orElse(0);
+
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
+        jobConfig.build(), grpcConfig, mockServerConfig.build(), errorLimit, idHasherConfig);
   }
 
   /**

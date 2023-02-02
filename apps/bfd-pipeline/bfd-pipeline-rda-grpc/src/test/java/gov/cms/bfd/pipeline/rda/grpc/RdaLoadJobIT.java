@@ -141,7 +141,7 @@ public class RdaLoadJobIT {
                       fail("expected an exception to be thrown");
                     } catch (ProcessingException ex) {
                       assertEquals(fullBatchSize, ex.getProcessedCount());
-                      assertTrue(ex.getMessage().contains("invalid length"));
+                      assertTrue(ex.getMessage().contains("Error limit reached"));
                     }
                   });
           List<RdaFissClaim> claims = getRdaFissClaims(entityManager);
@@ -301,6 +301,7 @@ public class RdaLoadJobIT {
             .build(),
         rdaSourceConfig.build(),
         new RdaServerJob.Config(),
+        0,
         new IdHasher.Config(100, "thisisjustatest"));
   }
 

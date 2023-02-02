@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
+import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
@@ -32,12 +34,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +72,7 @@ public class AbstractClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(meters, appMetrics, dataSource, entityManagerFactory, clock);
-    sink = spy(new TestClaimRdaSink(appState, RdaApiProgress.ClaimType.FISS, true));
+    sink = spy(new TestClaimRdaSink(appState, RdaApiProgress.ClaimType.FISS, true, 1));
     sink.getMetrics().setLatestSequenceNumber(0);
   }
 
@@ -79,11 +83,13 @@ public class AbstractClaimRdaSinkTest {
    * method was not invoked.
    */
   @Test
-  void shouldTransformValidClaimsSuccessfully() throws IOException {
+  void shouldTransformValidClaimsSuccessfully() throws IOException, ProcessingException {
     final List<String> messages = List.of("message1", "message2", "message3");
 
     for (String message : messages) {
-      doReturn(createChangeClaimFromMessage(message)).when(sink).transformMessage(VERSION, message);
+      doReturn(Optional.of(createChangeClaimFromMessage(message)))
+          .when(sink)
+          .transformMessage(VERSION, message);
     }
 
     // Just to ensure default behavior isn't executed
@@ -110,7 +116,7 @@ public class AbstractClaimRdaSinkTest {
    * method was correctly invoked.
    */
   @Test
-  void shouldNotTransformInvalidClaimsSuccessfully() throws IOException {
+  void shouldNotTransformInvalidClaimsSuccessfully() throws IOException, ProcessingException {
     final String badMessage = "message2";
 
     final List<String> messages = List.of("message1", badMessage, "message3");
@@ -129,13 +135,11 @@ public class AbstractClaimRdaSinkTest {
       }
     }
 
-    doNothing()
+    doThrow(ProcessingException.class)
         .when(sink)
         .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
 
-    assertThrows(
-        DataTransformer.TransformationException.class,
-        () -> sink.transformMessages(VERSION, messages));
+    assertThrows(ProcessingException.class, () -> sink.transformMessages(VERSION, messages));
 
     verify(sink, times(1))
         .writeError(
@@ -143,11 +147,97 @@ public class AbstractClaimRdaSinkTest {
   }
 
   /**
+   * Tests that the {@link AbstractClaimRdaSink#writeError(String, Object,
+   * DataTransformer.TransformationException)} method does NOT throw a {@link ProcessingException}
+   * if the {@link MessageError} limit has NOT been exceeded.
+   *
+   * @throws IOException If there was a write error
+   * @throws ProcessingException If the error count was exceeded
+   */
+  @Test
+  void shouldCheckErrorCount() throws IOException, ProcessingException {
+    final String API_VERSION = "1";
+    final String MESSAGE = "message";
+    final DataTransformer.TransformationException exception =
+        new DataTransformer.TransformationException(
+            "Exception Message", List.of(new DataTransformer.ErrorMessage("field 1", "bad field")));
+
+    EntityTransaction mockTransaction = mock(EntityTransaction.class);
+    MessageError mockMessageError = mock(MessageError.class);
+
+    doNothing().when(mockTransaction).begin();
+
+    doNothing().when(mockTransaction).commit();
+
+    doReturn(mockTransaction).when(entityManager).getTransaction();
+
+    doReturn(mockMessageError)
+        .when(sink)
+        .createMessageError(API_VERSION, MESSAGE, exception.getErrors());
+
+    doNothing().when(sink).checkErrorCount();
+
+    sink.writeError(API_VERSION, MESSAGE, exception);
+
+    verify(mockTransaction, times(1)).begin();
+    verify(entityManager, times(1)).merge(any(MessageError.class));
+    verify(mockTransaction, times(1)).commit();
+    verify(sink, times(1)).checkErrorCount();
+  }
+
+  /**
+   * Tests that the {@link AbstractClaimRdaSink#writeError(String, Object,
+   * DataTransformer.TransformationException)} method does NOT throw a {@link ProcessingException}
+   * if the {@link MessageError} limit has NOT been exceeded.
+   */
+  @Test
+  void shouldNotThrowProcessingExceptionIfMessageErrorLimitNotExceeded() {
+    // unchecked - This is fine for a mock
+    //noinspection unchecked
+    TypedQuery<MessageError> mockQuery = mock(TypedQuery.class);
+
+    doReturn(mockQuery).when(mockQuery).setParameter(anyString(), any());
+
+    doReturn(1L).when(mockQuery).getSingleResult();
+
+    doReturn(mockQuery)
+        .when(entityManager)
+        .createQuery(
+            "select count(error) from MessageError error where status = :status", Long.class);
+
+    assertDoesNotThrow(() -> sink.checkErrorCount());
+  }
+
+  /**
+   * Tests that the {@link AbstractClaimRdaSink#writeError(String, Object,
+   * DataTransformer.TransformationException)} method DOES throw a {@link ProcessingException} if
+   * the {@link MessageError} limit HAS been exceeded.
+   */
+  @Test
+  void shouldThrowProcessingExceptionIfMessageErrorLimitExceeded() {
+    // unchecked - This is fine for a mock
+    //noinspection unchecked
+    TypedQuery<MessageError> mockQuery = mock(TypedQuery.class);
+
+    doReturn(mockQuery).when(mockQuery).setParameter(anyString(), any());
+
+    doReturn(2L).when(mockQuery).getSingleResult();
+
+    doReturn(mockQuery)
+        .when(entityManager)
+        .createQuery(
+            "select count(error) from MessageError error where status = :status", Long.class);
+
+    assertThrows(ProcessingException.class, () -> sink.checkErrorCount());
+  }
+
+  /**
    * Verify that {@link AbstractClaimRdaSink#transformMessage(String, Object)} success updates
    * success metric.
    */
   @Test
-  public void testSingleMessageTransformSuccessUpdatesMetric() {
+  public void testSingleMessageTransformSuccessUpdatesMetric()
+      throws IOException, ProcessingException {
     sink.transformMessage(VERSION, "message");
 
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
@@ -160,18 +250,24 @@ public class AbstractClaimRdaSinkTest {
    * failure metric.
    */
   @Test
-  public void testSingleMessageTransformFailureUpdatesMetric() {
-    doThrow(
-            new DataTransformer.TransformationException(
-                "oops", List.of(new DataTransformer.ErrorMessage("field", "oops!"))))
-        .when(sink)
-        .transformMessageImpl(any(), any());
+  public void testSingleMessageTransformFailureUpdatesMetric()
+      throws IOException, ProcessingException {
+    final String MESSAGE = "message";
+    DataTransformer.TransformationException transformException =
+        new DataTransformer.TransformationException(
+            "oops", List.of(new DataTransformer.ErrorMessage("field", "oops!")));
+
+    doThrow(transformException).when(sink).transformMessageImpl(any(), any());
+
+    doThrow(ProcessingException.class).when(sink).writeError(VERSION, MESSAGE, transformException);
 
     try {
-      sink.transformMessage(VERSION, "message");
+      sink.transformMessage(VERSION, MESSAGE);
       fail("should have thrown");
-    } catch (DataTransformer.TransformationException error) {
-      assertEquals("oops", error.getMessage());
+    } catch (ProcessingException expectedException) {
+      assertEquals(0, expectedException.getProcessedCount());
+    } catch (Exception unexpectedException) {
+      fail("unexpected exception thrown", unexpectedException);
     }
 
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
@@ -250,8 +346,9 @@ public class AbstractClaimRdaSinkTest {
     protected TestClaimRdaSink(
         PipelineApplicationState appState,
         RdaApiProgress.ClaimType claimType,
-        boolean autoUpdateLastSeq) {
-      super(appState, claimType, autoUpdateLastSeq);
+        boolean autoUpdateLastSeq,
+        int errorLimit) {
+      super(appState, claimType, autoUpdateLastSeq, errorLimit);
     }
 
     @Override
@@ -267,9 +364,9 @@ public class AbstractClaimRdaSinkTest {
     @Nonnull
     @Override
     RdaChange<String> transformMessageImpl(String apiVersion, String s) {
-      // ConstantConditions - This method is never actually executed in testing
-      //noinspection ConstantConditions
-      return null;
+      // unchecked - This is not important for this test, it's never unwrapped
+      //noinspection unchecked
+      return mock(RdaChange.class);
     }
 
     @Override
@@ -284,8 +381,7 @@ public class AbstractClaimRdaSinkTest {
 
     @Override
     MessageError createMessageError(
-        String apiVersion, String change, List<DataTransformer.ErrorMessage> errors)
-        throws IOException {
+        String apiVersion, String change, List<DataTransformer.ErrorMessage> errors) {
       return null;
     }
   }

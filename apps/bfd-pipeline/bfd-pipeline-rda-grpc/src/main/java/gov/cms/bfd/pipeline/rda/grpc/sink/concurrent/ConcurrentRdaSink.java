@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -123,8 +124,14 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
 
   @Nonnull
   @Override
-  public TClaim transformMessage(String apiVersion, TMessage message) {
+  public Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException {
     return writerPool.transformMessage(apiVersion, message);
+  }
+
+  @Override
+  public void checkErrorCount() throws ProcessingException {
+    writerPool.checkErrorCount();
   }
 
   /**
