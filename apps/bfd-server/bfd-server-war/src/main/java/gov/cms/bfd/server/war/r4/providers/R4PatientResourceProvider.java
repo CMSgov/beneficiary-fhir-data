@@ -1213,22 +1213,25 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private boolean queryExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
+    // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<BeneficiaryMonthly> beneExistsCriteria =
         builder.createQuery(BeneficiaryMonthly.class);
-    Root<BeneficiaryMonthly> root = beneExistsCriteria.from(BeneficiaryMonthly.class);
+    Root<BeneficiaryMonthly> beneMonthlyRoot = beneExistsCriteria.from(BeneficiaryMonthly.class);
 
-    Subquery<Integer> subQuery = beneExistsCriteria.subquery(Integer.class);
-    Root<BeneficiaryMonthly> beneMonthlyRoot = subQuery.from(BeneficiaryMonthly.class);
+    Subquery<Integer> beneExistsSubquery = beneExistsCriteria.subquery(Integer.class);
+    Root<BeneficiaryMonthly> beneMonthlyRootSubquery =
+        beneExistsSubquery.from(BeneficiaryMonthly.class);
 
-    subQuery
+    beneExistsSubquery
         .select(builder.literal(1))
         .where(
-            builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
+            builder.equal(beneMonthlyRootSubquery.get(BeneficiaryMonthly_.yearMonth), yearMonth),
             builder.equal(
-                beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+                beneMonthlyRootSubquery.get(BeneficiaryMonthly_.partDContractNumberId),
+                contractId));
 
-    beneExistsCriteria.select(root).where(builder.exists(subQuery));
+    beneExistsCriteria.select(beneMonthlyRoot).where(builder.exists(beneExistsSubquery));
 
     // Run the query and return the results.
     boolean matchingBeneExists = false;
