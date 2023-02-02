@@ -1,6 +1,6 @@
 # Creates AWS Glue Database named "bfd-insights-bfd-<environment>"
 module "database" {
-  source     = "../../../modules/database"
+  source     = "../../../../../../insights/terraform/modules/database"
   database   = local.database
   bucket     = data.aws_s3_bucket.bfd-insights-bucket.bucket
   bucket_cmk = data.aws_kms_key.kms_key.arn
@@ -9,7 +9,7 @@ module "database" {
 
 # Target Glue Table where ingested logs are eventually stored
 module "glue-table-api-requests" {
-  source         = "../../../modules/table"
+  source         = "../../../../../../insights/terraform/modules/table"
   table          = "${local.full_name_underscore}_api_requests"
   description    = "Target Glue Table where ingested logs are eventually stored"
   database       = module.database.name
