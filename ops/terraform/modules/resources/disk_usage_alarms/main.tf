@@ -90,7 +90,7 @@ EOF
 resource "aws_iam_policy" "autoscaling" {
   name        = "bfd-${var.env}-${local.lambda_name}-autoscaling"
   description = "Permissions for bfd-${var.env}-${local.lambda_name} to describe ASGs"
-  # Unfortunately AWS does not support anything but wildcarding for the resource defition for the
+  # Unfortunately AWS does not support anything but wildcarding for the resource definition for the
   # DescribeAutoScalingGroups action
   policy = <<-EOF
 {
