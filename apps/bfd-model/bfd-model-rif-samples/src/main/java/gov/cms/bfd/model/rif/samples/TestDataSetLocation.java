@@ -32,7 +32,7 @@ public enum TestDataSetLocation {
   public static final String BFD_BUCKET_TEST_DATA = "bfd-public-test-data";
   /** S3 Bucket Name. */
   private final String s3BucketName;
-  /** S3 Keuy PRefix. */
+  /** S3 Key Prefix. */
   private final String s3KeyPrefix;
 
   /**
