@@ -1172,7 +1172,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
       boolean matchingBeneExists =
-          queryExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+          queryBeneExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
       if (!matchingBeneExists) {
         return Collections.emptyList();
       }
@@ -1210,7 +1210,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return true if the {@link BeneficiaryMonthly} exists
    */
   @Trace
-  private boolean queryExistsByPartDContractCodeAndYearMonth(
+  private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
     // Create the query to run.
