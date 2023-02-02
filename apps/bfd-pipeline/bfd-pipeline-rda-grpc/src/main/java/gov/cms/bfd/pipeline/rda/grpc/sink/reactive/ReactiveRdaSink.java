@@ -9,11 +9,8 @@ import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -21,13 +18,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @Slf4j
@@ -266,7 +260,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       log.info("shutdown wait for latch");
       closer.close(() -> waitForLatch(waitTime));
       for (ClaimWriter<TMessage, TClaim> claimWriter : claimWriters) {
-        log.info("shutdown close claimWriter {}", claimWriter.id);
+        log.info("shutdown close claimWriter {}", claimWriter.getId());
         closer.close(claimWriter::close);
       }
       log.info("shutdown close sequenceWriter");
@@ -314,107 +308,5 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     log.info("close called");
     shutdown(Duration.ofMinutes(2));
     log.info("close complete");
-  }
-
-  static class SequenceNumberWriter<TMessage, TClaim> {
-    private final RdaSink<TMessage, TClaim> sink;
-    /** Used to track sequence numbers to update progress table in database. */
-    private final SequenceNumberTracker sequenceNumbers;
-
-    private long lastSequenceNumber = 0;
-
-    SequenceNumberWriter(RdaSink<TMessage, TClaim> sink, SequenceNumberTracker sequenceNumbers) {
-      this.sink = sink;
-      this.sequenceNumbers = sequenceNumbers;
-    }
-
-    Flux<Long> updateDb(Long time) {
-      long newSequenceNumber = sequenceNumbers.getSafeResumeSequenceNumber();
-      if (newSequenceNumber != lastSequenceNumber) {
-        try {
-          sink.updateLastSequenceNumber(newSequenceNumber);
-          log.debug(
-              "SequenceNumberWriter updated last={} new={}", lastSequenceNumber, newSequenceNumber);
-          lastSequenceNumber = newSequenceNumber;
-          return Flux.just(newSequenceNumber);
-        } catch (Exception ex) {
-          log.error("SequenceNumberWriter error: {}", ex.getMessage(), ex);
-          return Flux.error(ex);
-        }
-      } else {
-        return Flux.empty();
-      }
-    }
-
-    void close() throws Exception {
-      log.debug("SequenceNumberWriter closing");
-      updateDb(0L).singleOrEmpty().block();
-      sink.close();
-      log.info("SequenceNumberWriter closed");
-    }
-  }
-
-  @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-  static class ClaimWriter<TMessage, TClaim> {
-    @Getter @EqualsAndHashCode.Include private final int id;
-    private final RdaSink<TMessage, TClaim> sink;
-    private final int batchSize;
-    private final List<ApiMessage<TMessage>> messageBuffer;
-    private final Map<String, TClaim> claimBuffer;
-    private boolean idle;
-
-    ClaimWriter(int id, RdaSink<TMessage, TClaim> sink, int batchSize) {
-      this.id = id;
-      this.sink = sink;
-      this.batchSize = batchSize;
-      messageBuffer = new ArrayList<>();
-      claimBuffer = new LinkedHashMap<>();
-    }
-
-    synchronized Mono<BatchResult<TMessage>> processMessage(ApiMessage<TMessage> message) {
-      Mono<BatchResult<TMessage>> result = Mono.empty();
-      try {
-        final boolean writeNeeded;
-        if (message.getSequenceNumber() == ApiMessage.IdleSequenceNumber) {
-          writeNeeded = idle && claimBuffer.size() > 0;
-          idle = true;
-        } else if (message.getSequenceNumber() == ApiMessage.FlushSequenceNumber) {
-          writeNeeded = claimBuffer.size() > 0;
-          idle = false;
-        } else {
-          sink.transformMessage(message.getApiVersion(), message.getMessage())
-              .ifPresent(claim -> claimBuffer.put(message.getClaimId(), claim));
-          messageBuffer.add(message);
-          writeNeeded = claimBuffer.size() >= batchSize;
-          idle = false;
-        }
-        if (writeNeeded) {
-          var messages = List.copyOf(messageBuffer);
-          var claims = List.copyOf(claimBuffer.values());
-          messageBuffer.clear();
-          claimBuffer.clear();
-          final int processed = sink.writeClaims(claims);
-          //          log.info(
-          //              "ClaimWriter {} wrote unique={} all={} processed={} idle={} seq={}",
-          //              id,
-          //              claims.size(),
-          //              messages.size(),
-          //              processed,
-          //              idle,
-          //              message.sequenceNumber);
-          result = Mono.just(new BatchResult<>(processed, messages));
-        }
-      } catch (Exception ex) {
-        log.error("ClaimWriter {} error: {}", id, ex.getMessage(), ex);
-        result = Mono.error(ex);
-      }
-      return result;
-    }
-
-    synchronized void close() throws Exception {
-      log.debug("ClaimWriter {} closing", id);
-      sink.close();
-      log.info("ClaimWriter {} closed", id);
-    }
   }
 }
