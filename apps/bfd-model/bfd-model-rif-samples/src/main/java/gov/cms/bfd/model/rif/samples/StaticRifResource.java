@@ -88,6 +88,12 @@ public enum StaticRifResource {
   /** Sample A SNF static rif. */
   SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
 
+  /** Sample A SNF Four Character DRG Code static rif. */
+  SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE(
+      resourceUrl("rif-static-samples/sample-a-snf-with-four-character-drg-code.txt"),
+      RifFileType.SNF,
+      1),
+
   /** Sample A Hospice static rif. */
   SAMPLE_A_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 
