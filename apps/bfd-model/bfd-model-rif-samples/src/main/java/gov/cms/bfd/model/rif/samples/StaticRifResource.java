@@ -62,7 +62,7 @@ public enum StaticRifResource {
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
       1),
 
-  /** Sample C Carrier static rif. */
+  /** Sample A Carrier static rif. */
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   /** Sample A Carrier static rif. */
