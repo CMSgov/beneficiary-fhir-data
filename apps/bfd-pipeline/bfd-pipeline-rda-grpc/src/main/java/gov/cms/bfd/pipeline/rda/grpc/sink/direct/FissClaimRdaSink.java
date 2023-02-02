@@ -35,6 +35,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
    * @param appState the app state
    * @param transformer the transformer
    * @param autoUpdateLastSeq whether to automatically update the sequence number
+   * @param errorLimit the error limit
    */
   public FissClaimRdaSink(
       PipelineApplicationState appState,

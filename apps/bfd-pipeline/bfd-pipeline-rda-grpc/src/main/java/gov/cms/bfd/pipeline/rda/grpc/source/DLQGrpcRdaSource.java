@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TMessage, TClaim> {
 
-  /** The maximum amount of time to wait for an {@link RdaSink} to shut down */
+  /** The maximum amount of time to wait for an {@link RdaSink} to shut down. */
   private static final Duration MAX_SINK_SHUTDOWN_WAIT = Duration.ofMinutes(5);
 
   /** Object for use in querying the database. */

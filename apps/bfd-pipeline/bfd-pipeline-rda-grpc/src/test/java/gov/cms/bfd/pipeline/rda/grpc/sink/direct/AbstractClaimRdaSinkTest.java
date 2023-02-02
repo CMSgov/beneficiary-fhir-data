@@ -357,6 +357,7 @@ public class AbstractClaimRdaSinkTest {
      * @param appState the app state
      * @param claimType the claim type
      * @param autoUpdateLastSeq if the sequence number should be updated automatically
+     * @param errorLimit the error limit
      */
     protected TestClaimRdaSink(
         PipelineApplicationState appState,

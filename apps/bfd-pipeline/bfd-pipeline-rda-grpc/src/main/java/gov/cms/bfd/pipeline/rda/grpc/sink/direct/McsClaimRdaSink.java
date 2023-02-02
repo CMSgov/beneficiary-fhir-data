@@ -28,6 +28,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
    * @param appState the app state
    * @param transformer the transformer
    * @param autoUpdateLastSeq whether to automatically update the sequence number
+   * @param errorLimit the error limit
    */
   public McsClaimRdaSink(
       PipelineApplicationState appState,

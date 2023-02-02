@@ -56,6 +56,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   protected final RdaApiProgress.ClaimType claimType;
   /** Whether to automatically update the sequence number. */
   protected final boolean autoUpdateLastSeq;
+
+  /** The number of claim errors that can exist before the job will stop processing. */
   private final int errorLimit;
 
   /** Holds the underlying value of our sequence number gauges. */
