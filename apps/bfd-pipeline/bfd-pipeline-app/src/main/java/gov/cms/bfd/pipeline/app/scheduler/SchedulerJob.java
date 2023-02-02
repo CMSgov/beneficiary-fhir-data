@@ -27,6 +27,7 @@ import java.util.Set;
  * the job will always be running and runs a scheduling loop internally.
  */
 public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments> {
+  /** Represents that this job type is a scheduler. */
   public static final PipelineJobType<NullPipelineJobArguments> JOB_TYPE =
       new PipelineJobType<NullPipelineJobArguments>(SchedulerJob.class);
 
@@ -38,8 +39,11 @@ public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments>
    */
   public static long SCHEDULER_TICK_MILLIS = 10 * 1000;
 
+  /** The metrics for this job. */
   private final MetricRegistry appMetrics;
+  /** The orchestration object for the pipeline. */
   private final PipelineManager pipelineManager;
+  /** Holds the records of completed jobs. */
   private final PipelineJobRecordStore jobRecordsStore;
 
   /**
@@ -60,19 +64,19 @@ public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments>
     this.jobRecordsStore = jobRecordsStore;
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
     return Optional.empty();
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     return true;
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+  /** {@inheritDoc} */
   @Override
   public PipelineJobOutcome call() throws Exception {
     boolean scheduledAJob = false;

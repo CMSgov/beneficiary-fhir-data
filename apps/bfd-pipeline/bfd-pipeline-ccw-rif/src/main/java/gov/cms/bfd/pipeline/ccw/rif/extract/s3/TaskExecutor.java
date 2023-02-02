@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public final class TaskExecutor extends ScheduledThreadPoolExecutor {
   private static final Logger LOGGER = LoggerFactory.getLogger(TaskExecutor.class);
 
+  /** The name of the task. */
   private final String name;
 
   /**
@@ -35,10 +36,7 @@ public final class TaskExecutor extends ScheduledThreadPoolExecutor {
     this.name = name;
   }
 
-  /**
-   * @see java.util.concurrent.ThreadPoolExecutor#afterExecute(java.lang.Runnable,
-   *     java.lang.Throwable)
-   */
+  /** {@inheritDoc} */
   @Override
   protected void afterExecute(Runnable runnable, Throwable throwable) {
     super.afterExecute(runnable, throwable);

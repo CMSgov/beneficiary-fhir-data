@@ -31,9 +31,13 @@ import org.slf4j.LoggerFactory;
 public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDownloadResult> {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
+  /** The task manager for S3. */
   private final S3TaskManager s3TaskManager;
+  /** The metrics registry. */
   private final MetricRegistry appMetrics;
+  /** The extraction options. */
   private final ExtractionOptions options;
+  /** The manifest data. */
   private final DataSetManifestEntry manifestEntry;
 
   /**
@@ -55,7 +59,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
     this.manifestEntry = manifestEntry;
   }
 
-  /** @see java.util.concurrent.Callable#call() */
+  /** {@inheritDoc} */
   @Override
   public ManifestEntryDownloadResult call() throws Exception {
     try {
@@ -114,7 +118,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
   }
 
   /**
-   * Calculates and returns a Base64 encoded MD5chksum value for the file just downloaded from S3
+   * Calculates and returns a Base64 encoded MD5chksum value for the file just downloaded from S3.
    *
    * @param downloadedS3File the {@link InputStream} of the file just downloaded from S3
    * @return Base64 encoded md5 value
@@ -146,7 +150,12 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 
   /** Represents the results of a {@link ManifestEntryDownloadTask}. */
   public static final class ManifestEntryDownloadResult {
+    /** The {@link DataSetManifestEntry} whose file was downloaded. */
     private final DataSetManifestEntry manifestEntry;
+    /**
+     * The {@link Path} to the local copy of the {@link DataSetManifestEntry}'s contents, which
+     * should be deleted once it is no longer needed, to prevent disk space usage leaks.
+     */
     private final Path localDownload;
 
     /**
@@ -160,14 +169,19 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       this.localDownload = localDownload;
     }
 
-    /** @return the {@link DataSetManifestEntry} whose file was downloaded */
+    /**
+     * Gets the {@link #manifestEntry}.
+     *
+     * @return the manifest data
+     */
     public DataSetManifestEntry getManifestEntry() {
       return manifestEntry;
     }
 
     /**
-     * @return the {@link Path} to the local copy of the {@link DataSetManifestEntry}'s contents,
-     *     which should be deleted once it is no longer needed, to prevent disk space usage leaks
+     * Gets the {@link #localDownload}.
+     *
+     * @return the path to the local manifest copy
      */
     public Path getLocalDownload() {
       return localDownload;

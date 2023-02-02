@@ -4,6 +4,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 
 /** Represents the outcome of a failed {@link PipelineJob} execution. */
 public final class PipelineJobFailure {
+  /** Holds the exception that caused the failure. */
   private final Throwable exception;
 
   /**
@@ -17,6 +18,8 @@ public final class PipelineJobFailure {
   }
 
   /**
+   * Gets the {@link #exception} class.
+   *
    * @return the {@link Throwable#getClass()} of the exception that the {@link PipelineJob}
    *     execution produced
    */
@@ -25,6 +28,8 @@ public final class PipelineJobFailure {
   }
 
   /**
+   * Gets the {@link #exception} message.
+   *
    * @return the {@link Throwable#getMessage()} of the exception that the {@link PipelineJob}
    *     execution produced
    */
@@ -32,7 +37,7 @@ public final class PipelineJobFailure {
     return exception.getMessage();
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

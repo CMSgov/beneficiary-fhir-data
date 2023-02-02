@@ -31,6 +31,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -108,7 +109,11 @@ public final class PipelineTestUtils {
             Clock.systemUTC());
   }
 
-  /** @return the singleton {@link PipelineTestUtils} instance to use everywhere */
+  /**
+   * Gets the singleton {@link PipelineTestUtils} instance to use everywhere.
+   *
+   * @return the instance
+   */
   public static synchronized PipelineTestUtils get() {
     /*
      * Why are we using a singleton and caching all of these fields? Because creating some of the
@@ -124,8 +129,10 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * @return {@link PipelineApplicationState} that should be used across all of the tests, which
-   *     most notably contains the {@link HikariDataSource} and {@link EntityManagerFactory} to use
+   * Gets the {@link PipelineApplicationState} that should be used across all of the tests, which
+   * most notably contains the {@link HikariDataSource} and {@link EntityManagerFactory} to use.
+   *
+   * @return the application state
    */
   public PipelineApplicationState getPipelineApplicationState() {
     return pipelineApplicationState;
@@ -224,8 +231,10 @@ public final class PipelineTestUtils {
    * For compatibility with HSQLDB and Postgresql, all schema names must have case preserved but any
    * quotes in the name must be removed.
    *
+   * @param connection the connection
    * @param schemaNameSpecifier name of a schema from a hibernate annotation
    * @return value compatible with call to {@link Connection#setSchema(String)}
+   * @throws SQLException the sql exception
    */
   private String normalizeSchemaName(Connection connection, String schemaNameSpecifier)
       throws SQLException {
@@ -283,7 +292,7 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Get the list of loaded files from the passed in db, latest first
+   * Get the list of loaded files from the passed in db, latest first.
    *
    * @param entityManager to use
    * @return the list of loaded files in the db
@@ -296,7 +305,7 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Return a Files Event with a single dummy file
+   * Return a Files Event with a single dummy file.
    *
    * @return a new RifFilesEvent
    */

@@ -34,8 +34,11 @@ import org.slf4j.LoggerFactory;
 public final class S3RifFile implements RifFile {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3RifFile.class);
 
+  /** The metric registry. */
   private final MetricRegistry appMetrics;
+  /** The manifest data. */
   private final DataSetManifestEntry manifestEntry;
+  /** The manifest download result. */
   private final Future<ManifestEntryDownloadResult> manifestEntryDownload;
 
   /**
@@ -60,13 +63,13 @@ public final class S3RifFile implements RifFile {
     this.manifestEntryDownload = manifestEntryDownload;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getFileType() */
+  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return manifestEntry.getType();
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getDisplayName() */
+  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return String.format(
@@ -76,13 +79,13 @@ public final class S3RifFile implements RifFile {
         manifestEntry.getName());
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getCharset() */
+  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#open() */
+  /** {@inheritDoc} */
   @Override
   public InputStream open() {
     ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
@@ -101,6 +104,8 @@ public final class S3RifFile implements RifFile {
   }
 
   /**
+   * Downloads the manifest entry and waits for its completion before returning.
+   *
    * @return the completed {@link ManifestEntryDownloadResult} for {@link #manifestEntryDownload}
    */
   private ManifestEntryDownloadResult waitForDownload() {
@@ -162,7 +167,7 @@ public final class S3RifFile implements RifFile {
     LOGGER.debug("Cleaned up '{}'.", this);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     String localDownloadPath;

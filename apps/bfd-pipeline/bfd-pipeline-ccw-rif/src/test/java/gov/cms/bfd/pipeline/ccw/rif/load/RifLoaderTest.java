@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
-import javax.crypto.SecretKeyFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +19,8 @@ public final class RifLoaderTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderTest.class);
 
   /**
-   * Runs a couple of fake HICNs through {@link RifLoader#computeHicnHash(LoadAppOptions,
-   * SecretKeyFactory, String)} to verify that the expected result is produced.
+   * Runs a couple of fake HICNs through {@link RifLoader#computeHicnHash} to verify that the
+   * expected result is produced.
    */
   @Test
   public void computeHicnHash() {
@@ -50,8 +49,8 @@ public final class RifLoaderTest {
   }
 
   /**
-   * Runs a couple of fake MBIs through {@link RifLoader#computeMbiHash(LoadAppOptions,
-   * SecretKeyFactory, String)} to verify that the expected result is produced.
+   * Runs a couple of fake MBIs through {@link RifLoader#computeMbiHash} to verify that the expected
+   * result is produced.
    */
   @Test
   public void computeMbiHash() {
@@ -80,8 +79,8 @@ public final class RifLoaderTest {
   }
 
   /**
-   * Runs a couple of fake HICNs through {@link RifLoader#computeHicnHash(LoadAppOptions,
-   * SecretKeyFactory, String)} to verify that the expected result is produced.
+   * Runs a couple of fake HICNs through {@link RifLoader#computeHicnHash} to verify that the
+   * expected result is produced.
    */
   @Test
   public void isBeneficiaryHistoryEqual() {

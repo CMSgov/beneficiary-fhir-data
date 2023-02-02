@@ -9,6 +9,7 @@ package gov.cms.bfd.pipeline.sharedutils;
  *     implementations which do not need arguments)
  */
 public final class PipelineJobType<A extends PipelineJobArguments> {
+  /** The type id. */
   private final String typeId;
 
   /**
@@ -33,7 +34,7 @@ public final class PipelineJobType<A extends PipelineJobArguments> {
     this.typeId = jobClass.getTypeName();
   }
 
-  /** @see java.lang.Object#hashCode() */
+  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -42,7 +43,7 @@ public final class PipelineJobType<A extends PipelineJobArguments> {
     return result;
   }
 
-  /** @see java.lang.Object#equals(java.lang.Object) */
+  /** {@inheritDoc} */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
@@ -56,7 +57,7 @@ public final class PipelineJobType<A extends PipelineJobArguments> {
     return true;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     return typeId;
