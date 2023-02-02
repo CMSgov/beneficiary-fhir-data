@@ -6,6 +6,7 @@ import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -228,9 +229,14 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Nonnull
   @Override
-  public TClaim transformMessage(String apiVersion, TMessage message)
-      throws DataTransformer.TransformationException {
+  public Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws DataTransformer.TransformationException, IOException, ProcessingException {
     return sink.transformMessage(apiVersion, message);
+  }
+
+  @Override
+  public void checkErrorCount() throws ProcessingException {
+    sink.checkErrorCount();
   }
 
   @Override
@@ -396,9 +402,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
           writeNeeded = claimBuffer.size() > 0;
           idle = false;
         } else {
-          final var claim = sink.transformMessage(message.apiVersion, message.message);
+          sink.transformMessage(message.apiVersion, message.message)
+              .ifPresent(claim -> claimBuffer.put(message.claimId, claim));
           messageBuffer.add(message);
-          claimBuffer.put(message.claimId, claim);
           writeNeeded = claimBuffer.size() >= batchSize;
           idle = false;
         }
