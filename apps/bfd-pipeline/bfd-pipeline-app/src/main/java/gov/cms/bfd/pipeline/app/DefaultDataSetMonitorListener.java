@@ -24,9 +24,13 @@ import org.slf4j.LoggerFactory;
 public final class DefaultDataSetMonitorListener implements DataSetMonitorListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetMonitorListener.class);
 
+  /** Metrics for this class. */
   private final MetricRegistry appMetrics;
+  /** The application's error handler. */
   private final Consumer<Throwable> errorHandler;
+  /** Handles processing of new RIF files. */
   private final RifFilesProcessor rifProcessor;
+  /** Loads RIF files into the database. */
   private final RifLoader rifLoader;
 
   /**
@@ -48,10 +52,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
     this.rifLoader = rifLoader;
   }
 
-  /**
-   * @see
-   *     gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener#dataAvailable(gov.cms.bfd.model.rif.RifFilesEvent)
-   */
+  /** {@inheritDoc} */
   @Override
   public void dataAvailable(RifFilesEvent rifFilesEvent) {
     Timer.Context timerDataSet =
@@ -102,10 +103,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
     timerDataSet.stop();
   }
 
-  /**
-   * @see
-   *     gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener#errorOccurred(java.lang.Throwable)
-   */
+  /** {@inheritDoc} */
   @Override
   public void errorOccurred(Throwable error) {
     errorHandler.accept(error);

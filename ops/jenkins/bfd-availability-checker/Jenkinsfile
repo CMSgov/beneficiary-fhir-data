@@ -12,9 +12,33 @@ pipeline {
     // Nothing within this repository is required for running this pipeline, so skipping the default
     // checkout saves us some time
     skipDefaultCheckout()
-    // Only keep the last 10 runs as this pipeline will be running very frequently, so we don't need
-    // that much history
-    buildDiscarder(logRotator(numToKeepStr: '10'))
+    // Using the Build History Manager plugin we construct a rule to indefinitely keep all failing
+    // or unstable builds, and keep only the last ten successful builds
+    buildDiscarder(BuildHistoryManager([
+      // Match any failing or unstable builds. continueAfterMatch being false will ensure that
+      // the discarder does not execute any further rules and therefore all failing/unstable builds
+      // will be kept
+      [
+        conditions: [
+          BuildResult(matchFailure: true, matchUnstable: true)
+        ],
+        continueAfterMatch: false
+      ],
+      // Match any successful builds, but only up to the last 10 inclusive. continueAfterMatch
+      // being false only applies to the first ten, the remaining will fallthrough to the final
+      // rule
+      [
+        conditions: [
+          BuildResult(matchSuccess: true)
+        ],
+        matchAtMost: 10,
+        continueAfterMatch: false
+      ],
+      // Delete any remaining builds. In this case, this will delete any excess successful builds
+      [
+        actions: [DeleteBuild()]
+      ]
+    ]))
   }
 
   triggers {

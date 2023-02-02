@@ -12,8 +12,10 @@ import java.util.Optional;
 public final class RifLoadFailure extends RuntimeException {
   private static final long serialVersionUID = 5268467019558996698L;
 
+  /** Setting for whether to log the full record data when a record fails to load. */
   private static final boolean LOG_SOURCE_DATA = false;
 
+  /** The failed record events. */
   private final List<RifRecordEvent<?>> failedRecordEvents;
 
   /**
@@ -55,7 +57,9 @@ public final class RifLoadFailure extends RuntimeException {
   }
 
   /**
-   * @param inputBundle the {@link TransformedBundle} that failed to load
+   * Builds a message for the records that failed to load.
+   *
+   * @param failedRecordEvent the failed records
    * @return the value to use for {@link #getMessage()}
    */
   private static String buildMessage(RifRecordEvent<?> failedRecordEvent) {
@@ -71,7 +75,9 @@ public final class RifLoadFailure extends RuntimeException {
   }
 
   /**
-   * @param inputBundle the {@link TransformedBundle} that failed to load
+   * Builds a message for the records that failed to load.
+   *
+   * @param failedRecordEvents the failed record events
    * @return the value to use for {@link #getMessage()}
    */
   private static String buildMessage(List<RifRecordEvent<?>> failedRecordEvents) {
@@ -86,7 +92,12 @@ public final class RifLoadFailure extends RuntimeException {
           failedRecordEvents.get(0).getFileEvent().getFile().getFileType().name());
   }
 
-  /** @return the {@link RifRecordEvent} that failed to load, if known */
+  /**
+   * Gets the failed record events, if any.
+   *
+   * @return the {@link RifRecordEvent} that failed to load, or an empty {@link Optional} if no
+   *     records
+   */
   public Optional<List<RifRecordEvent<?>>> getFailedRecordEvents() {
     return Optional.ofNullable(failedRecordEvents);
   }

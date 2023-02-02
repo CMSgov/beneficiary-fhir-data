@@ -12,28 +12,37 @@ import org.slf4j.LoggerFactory;
 public final class MockDataSetMonitorListener implements DataSetMonitorListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(MockDataSetMonitorListener.class);
 
+  /** Counter for how many times the {@link #noDataAvailable()} has fired. */
   private int noDataAvailableEvents = 0;
+  /** A list of data events that have fired. */
   private final List<RifFilesEvent> dataEvents = new LinkedList<>();
+  /** A list of error events that have fired. */
   final List<Throwable> errorEvents = new LinkedList<>();
 
-  /** @see DataSetMonitorListener#noDataAvailable() */
+  /** {@inheritDoc} */
   @Override
   public void noDataAvailable() {
     noDataAvailableEvents++;
   }
 
-  /** @return the number of times the {@link #noDataAvailable()} event has been fired */
+  /**
+   * Gets the number of times the {@link #noDataAvailable()} event has fired.
+   *
+   * @return the number of times the {@link #noDataAvailable()} event has been fired.
+   */
   public int getNoDataAvailableEvents() {
     return noDataAvailableEvents;
   }
 
-  /** @see DataSetMonitorListener#dataAvailable(gov.cms.bfd.pipeline.ccw.rif.model.RifFilesEvent) */
+  /** {@inheritDoc} */
   @Override
   public void dataAvailable(RifFilesEvent rifFilesEvent) {
     dataEvents.add(rifFilesEvent);
   }
 
   /**
+   * Gets an immutable list of the data events.
+   *
    * @return the {@link List} of {@link RifFilesEvent}s that have been passed to {@link
    *     #dataAvailable(RifFilesEvent)}
    */
@@ -41,7 +50,7 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
     return Collections.unmodifiableList(dataEvents);
   }
 
-  /** @see DataSetMonitorListener#errorOccurred(java.lang.Throwable) */
+  /** {@inheritDoc} */
   @Override
   public void errorOccurred(Throwable error) {
     LOGGER.warn("Error received.", error);
@@ -49,6 +58,8 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
   }
 
   /**
+   * Gets an immutable list of the error events.
+   *
    * @return the {@link List} of {@link Throwable}s that have been passed to {@link
    *     #errorOccurred(Throwable)}
    */

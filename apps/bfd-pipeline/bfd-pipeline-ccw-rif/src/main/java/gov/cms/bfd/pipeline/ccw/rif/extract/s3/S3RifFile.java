@@ -34,8 +34,11 @@ import org.slf4j.LoggerFactory;
 public final class S3RifFile implements RifFile {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3RifFile.class);
 
+  /** The metric registry. */
   private final MetricRegistry appMetrics;
+  /** The manifest data. */
   private final DataSetManifestEntry manifestEntry;
+  /** The manifest download result. */
   private final Future<ManifestEntryDownloadResult> manifestEntryDownload;
 
   /**
@@ -101,6 +104,8 @@ public final class S3RifFile implements RifFile {
   }
 
   /**
+   * Downloads the manifest entry and waits for its completion before returning.
+   *
    * @return the completed {@link ManifestEntryDownloadResult} for {@link #manifestEntryDownload}
    */
   private ManifestEntryDownloadResult waitForDownload() {
