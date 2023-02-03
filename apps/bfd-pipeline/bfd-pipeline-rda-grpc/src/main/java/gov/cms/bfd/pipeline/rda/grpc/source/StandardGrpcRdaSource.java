@@ -249,6 +249,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
           }
 
           closer.close(() -> sink.shutdown(MAX_SINK_SHUTDOWN_WAIT));
+          closer.close(() -> processResult.addCount(sink.getProcessedCount()));
 
           try {
             closer.finish();
@@ -259,8 +260,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               processResult.setException(ex);
             }
           }
-
-          processResult.addCount(sink.getProcessedCount());
 
           return processResult;
         });
