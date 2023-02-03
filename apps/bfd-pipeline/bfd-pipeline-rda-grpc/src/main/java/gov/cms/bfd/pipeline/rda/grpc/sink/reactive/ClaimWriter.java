@@ -32,10 +32,10 @@ class ClaimWriter<TMessage, TClaim> {
     Mono<BatchResult<TMessage>> result = Mono.empty();
     try {
       final boolean writeNeeded;
-      if (message.getSequenceNumber() == ApiMessage.IdleSequenceNumber) {
+      if (message.isIdleMessage()) {
         writeNeeded = idle && claimBuffer.size() > 0;
         idle = true;
-      } else if (message.getSequenceNumber() == ApiMessage.FlushSequenceNumber) {
+      } else if (message.isFlushMessage()) {
         writeNeeded = claimBuffer.size() > 0;
         idle = false;
       } else {

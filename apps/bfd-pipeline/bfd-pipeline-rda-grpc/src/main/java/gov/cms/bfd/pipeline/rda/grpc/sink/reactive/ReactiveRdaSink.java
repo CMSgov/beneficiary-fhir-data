@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -33,21 +31,16 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    */
   private static final Duration IdleCheckInterval = Duration.ofMillis(500);
 
-  /** Used to synchronize access to {@link #running}. */
+  /** Used to synchronize access to mutable fields. */
   private final RWLock lock = new RWLock();
 
   /** Message used to tell a claim writer to flush its buffer immediately. */
-  final ApiMessage<TMessage> FlushMessage =
-      new ApiMessage<>(null, ApiMessage.FlushSequenceNumber, null, null);
+  final ApiMessage<TMessage> FlushMessage = ApiMessage.createFlushMessage();
 
   /**
    * Message used to allow a claim writer to flush its buffer when it has been idle for too long.
    */
-  final ApiMessage<TMessage> IdleMessage =
-      new ApiMessage<>(null, ApiMessage.IdleSequenceNumber, null, null);
-
-  /** Used to assign claims to workers based on their claimId values. */
-  private static final HashFunction Hasher = Hashing.goodFastHash(64);
+  final ApiMessage<TMessage> IdleMessage = ApiMessage.createIdleMessage();
 
   /** Used to track sequence numbers to update progress table in database. */
   private final SequenceNumberTracker sequenceNumbers;
@@ -142,7 +135,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
                 maxThreads)
             .publishOn(otherScheduler)
             .doFinally(o -> latch.countDown())
-            .subscribe(this::processResult, this::processError);
+            .subscribe(this::processSuccessfulBatch, this::processError);
     var sequenceNumberProcessing =
         Flux.interval(Duration.ofMillis(250), sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
@@ -168,7 +161,12 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     return getProcessedCount();
   }
 
-  private void processResult(BatchResult<TMessage> result) {
+  /**
+   * Updates state with a successful outcome.
+   *
+   * @param result the details of the successful batch
+   */
+  private void processSuccessfulBatch(BatchResult<TMessage> result) {
     publisher.allow(result.getMessages().size());
     for (ApiMessage<TMessage> message : result.getMessages()) {
       sequenceNumbers.removeWrittenSequenceNumber(message.getSequenceNumber());
@@ -176,6 +174,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     lock.doWrite(() -> currentProcessedCount += result.getProcessedCount());
   }
 
+  /**
+   * Updates {@link #error} with an exception thrown during message processing.
+   *
+   * @param ex the exception to store
+   */
   private void processError(Throwable ex) {
     lock.doWrite(
         () -> {
@@ -188,6 +191,11 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         });
   }
 
+  /**
+   * Remains true until shutdown is triggered.
+   *
+   * @return true if shutdown has not ben triggered
+   */
   private boolean isRunning() {
     return lock.read(() -> running);
   }
@@ -236,16 +244,16 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public int getProcessedCount() throws ProcessingException {
-    synchronized (lock) {
-      int answer = currentProcessedCount - prevProcessedCount;
-      prevProcessedCount = currentProcessedCount;
-      return answer;
-    }
+    return lock.write(
+        () -> {
+          int answer = currentProcessedCount - prevProcessedCount;
+          prevProcessedCount = currentProcessedCount;
+          return answer;
+        });
   }
 
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
-    //    new RuntimeException("SHUTDOWN CALLED").printStackTrace();
     log.info("shutdown called");
     lock.doWrite(
         () -> {
@@ -271,7 +279,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       closer.finish();
     } catch (Exception ex) {
       log.error("shutdown failed: ex={}", ex.getMessage(), ex);
-      throw new ProcessingException(ex, 0);
+      throw new ProcessingException(ex, getProcessedCount());
     }
   }
 
@@ -279,19 +287,28 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    * Waits for countdown latch to reach zero so that rest of shutdown can proceed. The claim and
    * sequence number writers decrement the latch as they complete so once it reach zero we know they
    * are finished. We retry a few times in case of interrupts to resolve problems with spurious
-   * interrupts during cancellation.
+   * interrupts during cancellation. We can't stop the shutdown process completely so we return even
+   * if the latch doesn't reach zero before the timeout elapses.
    *
    * @param waitTime how long to wait for the latch
    * @throws Exception if any exception caused the wait to fail
    */
   private void waitForLatch(Duration waitTime) throws Exception {
+    final long startMillis = System.currentTimeMillis();
     InterruptedException error = null;
+    boolean successful = false;
     for (int i = 1; i <= 10; ++i) {
       try {
-        log.info("interrupted? {}", Thread.interrupted());
-        latch.await(waitTime.toMillis(), TimeUnit.MILLISECONDS);
-        error = null;
-        break;
+        long elapsedMillis = System.currentTimeMillis() - startMillis;
+        long waitMillis = waitTime.toMillis() - elapsedMillis;
+        if (waitMillis <= 0) {
+          break;
+        }
+        if (latch.await(waitMillis, TimeUnit.MILLISECONDS)) {
+          error = null;
+          successful = true;
+          break;
+        }
       } catch (InterruptedException ex) {
         if (error == null) {
           error = ex;
@@ -300,6 +317,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     }
     if (error != null) {
       throw error;
+    }
+    if (!successful) {
+      log.warn("waitForLatch: wait time exceeded without reaching zero");
     }
   }
 
