@@ -10,6 +10,7 @@ import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Builder;
 import lombok.Value;
@@ -140,6 +141,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     /** Sends responses from the {@link #generator}. */
     @VisibleForTesting
     void sendResponses() {
+      final var random = new Random();
       if (running.get()) {
         try {
           while (running.get()
@@ -147,6 +149,9 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
               && !responseObserver.isCancelled()
               && !cancelled.get()
               && generator.hasNext()) {
+            //            if (random.nextInt(1_000) == 13) {
+            //              throw new IOException("random stop!!");
+            //            }
             responseObserver.onNext(generator.next());
           }
           if (responseObserver.isCancelled() || cancelled.get()) {

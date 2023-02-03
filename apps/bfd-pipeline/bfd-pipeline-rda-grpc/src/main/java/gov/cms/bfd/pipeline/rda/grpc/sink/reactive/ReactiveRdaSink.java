@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -58,7 +60,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private int currentProcessedCount;
 
   /** The {@link Exception} (if any) that terminated processing. */
-  private Throwable error;
+  private Exception error;
 
   /**
    * Used to synchronize shutdown by waiting for both claim and sequence number processing to
@@ -135,13 +137,13 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
                 maxThreads)
             .publishOn(otherScheduler)
             .doFinally(o -> latch.countDown())
-            .subscribe(this::processSuccessfulBatch, this::processError);
+            .subscribe(this::processBatchResult);
     var sequenceNumberProcessing =
         Flux.interval(Duration.ofMillis(250), sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
             .flatMap(sequenceNumberWriter::updateDb)
             .doFinally(o -> latch.countDown())
-            .subscribe(seq -> {}, this::processError);
+            .subscribe(seq -> {}, ex -> processBatchResult(new BatchResult<>((Exception) ex)));
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
     log.debug("created instance: threads={} batchSize={}", maxThreads, batchSize);
   }
@@ -162,33 +164,28 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   /**
-   * Updates state with a successful outcome.
+   * Updates state with the outcome of a batch write.
    *
    * @param result the details of the successful batch
    */
-  private void processSuccessfulBatch(BatchResult<TMessage> result) {
-    publisher.allow(result.getMessages().size());
-    for (ApiMessage<TMessage> message : result.getMessages()) {
-      sequenceNumbers.removeWrittenSequenceNumber(message.getSequenceNumber());
-    }
-    lock.doWrite(() -> currentProcessedCount += result.getProcessedCount());
-  }
-
-  /**
-   * Updates {@link #error} with an exception thrown during message processing.
-   *
-   * @param ex the exception to store
-   */
-  private void processError(Throwable ex) {
+  private void processBatchResult(BatchResult<TMessage> result) {
     lock.doWrite(
         () -> {
-          if (error == null) {
-            error = ex;
-          } else {
-            error.addSuppressed(ex);
+          currentProcessedCount += result.getProcessedCount();
+          if (result.getError() != null) {
+            if (error == null) {
+              error = result.getError();
+            } else {
+              error.addSuppressed(result.getError());
+            }
           }
-          running = false;
         });
+    publisher.allow(result.getMessages().size());
+    if (result.getError() == null) {
+      for (ApiMessage<TMessage> message : result.getMessages()) {
+        sequenceNumbers.removeWrittenSequenceNumber(message.getSequenceNumber());
+      }
+    }
   }
 
   /**
@@ -244,12 +241,18 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public int getProcessedCount() throws ProcessingException {
-    return lock.write(
+    final var countValue = new AtomicInteger();
+    final var errorValue = new AtomicReference<Exception>();
+    lock.doWrite(
         () -> {
-          int answer = currentProcessedCount - prevProcessedCount;
+          countValue.set(currentProcessedCount - prevProcessedCount);
+          errorValue.set(error);
           prevProcessedCount = currentProcessedCount;
-          return answer;
         });
+    if (errorValue.get() != null) {
+      throw new ProcessingException(errorValue.get(), countValue.get());
+    }
+    return countValue.get();
   }
 
   @Override
@@ -279,7 +282,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       closer.finish();
     } catch (Exception ex) {
       log.error("shutdown failed: ex={}", ex.getMessage(), ex);
-      throw new ProcessingException(ex, getProcessedCount());
+      throw new ProcessingException(ex, 0);
     }
   }
 
