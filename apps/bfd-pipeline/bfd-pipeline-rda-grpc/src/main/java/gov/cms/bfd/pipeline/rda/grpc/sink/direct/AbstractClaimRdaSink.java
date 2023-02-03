@@ -240,10 +240,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * Always returns zero since all claims are written synchronously by writeMessages.
    *
    * @return zero
-   * @throws ProcessingException if the operation fails
    */
   @Override
-  public int getProcessedCount() throws ProcessingException {
+  public int getProcessedCount() {
     return 0;
   }
 

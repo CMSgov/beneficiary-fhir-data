@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -82,18 +81,14 @@ class ClaimWriter<TMessage, TClaim> {
 
     Mono<BatchResult<TMessage>> result;
     try {
-      if (new Random().nextInt(100) == 13) {
-        throw new IOException("Random stop during write!");
-      }
       final int processed = sink.writeClaims(claims);
-      //          log.info(
-      //              "ClaimWriter {} wrote unique={} all={} processed={} idle={} seq={}",
-      //              id,
-      //              claims.size(),
-      //              messages.size(),
-      //              processed,
-      //              idle,
-      //              message.sequenceNumber);
+      //      log.info(
+      //          "ClaimWriter {} wrote unique={} all={} processed={} idle={}",
+      //          id,
+      //          claims.size(),
+      //          messages.size(),
+      //          processed,
+      //          idle);
       result = Mono.just(new BatchResult<>(messages, processed));
     } catch (Exception ex) {
       result = Mono.just(new BatchResult<>(messages, ex));

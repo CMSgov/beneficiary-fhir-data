@@ -150,6 +150,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public int writeMessages(String dataVersion, List<TMessage> messages) throws ProcessingException {
+    throwIfErrorPresent();
     for (TMessage message : messages) {
       String claimId = getClaimIdForMessage(message);
       long sequenceNumber = getSequenceNumberForObject(message);
@@ -240,19 +241,22 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   @Override
-  public int getProcessedCount() throws ProcessingException {
+  public int getProcessedCount() {
     final var countValue = new AtomicInteger();
-    final var errorValue = new AtomicReference<Exception>();
     lock.doWrite(
         () -> {
           countValue.set(currentProcessedCount - prevProcessedCount);
-          errorValue.set(error);
           prevProcessedCount = currentProcessedCount;
         });
-    if (errorValue.get() != null) {
-      throw new ProcessingException(errorValue.get(), countValue.get());
-    }
     return countValue.get();
+  }
+
+  private void throwIfErrorPresent() throws ProcessingException {
+    final var errorValue = new AtomicReference<Exception>();
+    lock.doRead(() -> errorValue.set(error));
+    if (errorValue.get() != null) {
+      throw new ProcessingException(errorValue.get(), 0);
+    }
   }
 
   @Override
