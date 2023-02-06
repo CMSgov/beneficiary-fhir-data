@@ -58,6 +58,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jpa.QueryHints;
@@ -176,7 +177,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "id");
-    // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
+    // there is another method with exclude list:
+    // requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
@@ -286,8 +288,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     /*
-     * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
-     * to override the operation name that was published by the possible call to read(...), above.
+     * Publish the operation name. Note: This is a bit later than we'd normally do
+     * this, as we need
+     * to override the operation name that was published by the possible call to
+     * read(...), above.
      */
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
@@ -343,7 +347,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     int year = Year.now().getValue();
     if (referenceYear != null && !StringUtils.isEmpty(referenceYear.getValueNotNull())) {
       /*
-       * TODO Once AB2D has switched to always specifying the year, the implicit `else` on this
+       * TODO Once AB2D has switched to always specifying the year, the implicit
+       * `else` on this
        * needs to become an invalid request.
        */
       try {
@@ -478,9 +483,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     String contractMonthField = partDFieldFor(partDContractMonth);
     String contractCode = coverageId.getValueNotNull();
 
-    // Fetching with joins is not compatible with setMaxResults as explained in this post:
+    // Fetching with joins is not compatible with setMaxResults as explained in this
+    // post:
     // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
-    // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
+    // So, in cases where there are joins and paging, we query in two steps: first
+    // fetch bene-ids
     // with paging and then fetch full benes with joins.
     boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
 
@@ -516,14 +523,18 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     boolean passDistinctThrough = false;
 
     /*
-      Because the DISTINCT JPQL keyword has two meanings based on the underlying query type, it’s important
-      to pass it through to the SQL statement only for scalar queries where the result set requires duplicates
-      to be removed by the database engine.
-
-      For parent-child entity queries where the child collection is using JOIN FETCH, the DISTINCT keyword should
-      only be applied after the ResultSet is got from JDBC, therefore avoiding passing DISTINCT to the SQL statement
-      that gets executed.
-    */
+     * Because the DISTINCT JPQL keyword has two meanings based on the underlying
+     * query type, it’s important
+     * to pass it through to the SQL statement only for scalar queries where the
+     * result set requires duplicates
+     * to be removed by the database engine.
+     *
+     * For parent-child entity queries where the child collection is using JOIN
+     * FETCH, the DISTINCT keyword should
+     * only be applied after the ResultSet is got from JDBC, therefore avoiding
+     * passing DISTINCT to the SQL statement
+     * that gets executed.
+     */
 
     // BFD379: original V2, no MBI logic here
     if (requestHeader.isMBIinIncludeIdentifiers()) {
@@ -766,32 +777,45 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     /*
      * Beneficiaries' MBIs can change over time and those past MBIs may land in
-     * BeneficiaryHistory records. Accordingly, we need to search for matching MBIs in both the
+     * BeneficiaryHistory records. Accordingly, we need to search for matching MBIs
+     * in both the
      * Beneficiary and the BeneficiaryHistory records.
      *
-     * There's no sane way to do this in a single query with JPA 2.1, it appears: JPA doesn't
-     * support UNIONs and it doesn't support subqueries in FROM clauses. That said, the ideal query
+     * There's no sane way to do this in a single query with JPA 2.1, it appears:
+     * JPA doesn't
+     * support UNIONs and it doesn't support subqueries in FROM clauses. That said,
+     * the ideal query
      * would look like this:
      *
-     * SELECT * FROM ( SELECT DISTINCT "beneficiaryId" FROM "Beneficiaries" WHERE "hicn" =
-     * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM "BeneficiariesHistory" WHERE "hicn" =
-     * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON matching_benes."beneficiaryId"
+     * SELECT * FROM ( SELECT DISTINCT "beneficiaryId" FROM "Beneficiaries" WHERE
+     * "hicn" =
+     * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM
+     * "BeneficiariesHistory" WHERE "hicn" =
+     * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON
+     * matching_benes."beneficiaryId"
      * = "Beneficiaries"."beneficiaryId" LEFT JOIN "BeneficiariesHistory" ON
-     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT JOIN
+     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT
+     * JOIN
      * "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" =
      * "MedicareBeneficiaryIdHistory"."beneficiaryId";
      *
-     * ... with the returned columns and JOINs being dynamic, depending on IncludeIdentifiers.
+     * ... with the returned columns and JOINs being dynamic, depending on
+     * IncludeIdentifiers.
      *
-     * In lieu of that, we run two queries: one to find MBI matches in BeneficiariesHistory,
-     * and a second to find BENE_ID or MBI matches in Beneficiaries (with all of their data, so
-     * we're ready to return the result). This is bad and dumb but I can't find a better working
+     * In lieu of that, we run two queries: one to find MBI matches in
+     * BeneficiariesHistory,
+     * and a second to find BENE_ID or MBI matches in Beneficiaries (with all of
+     * their data, so
+     * we're ready to return the result). This is bad and dumb but I can't find a
+     * better working
      * alternative.
      *
-     * (I'll just note that I did also try JPA/Hibernate native SQL queries but couldn't get the
+     * (I'll just note that I did also try JPA/Hibernate native SQL queries but
+     * couldn't get the
      * joins or fetch groups to work with them.)
      *
-     * If we want to fix this, we need to move identifiers out entirely to separate tables:
+     * If we want to fix this, we need to move identifiers out entirely to separate
+     * tables:
      * i.e., BeneficiaryMbis. We could then safely query these tables and join them
      * back to Beneficiaries (and hopefully the optimizer will play nice, too).
      */
@@ -1090,7 +1114,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    // This endpoint only supports returning unhashed MBIs (and not HICNs), so verify that was
+    // This endpoint only supports returning unhashed MBIs (and not HICNs), so
+    // verify that was
     // requested.
     if (!requestHeader.isMBIinIncludeIdentifiers() || requestHeader.isHICNinIncludeIdentifiers()) {
       throw new InvalidRequestException(
@@ -1146,26 +1171,35 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     String contractCode = coverageId.getValueNotNull();
 
     /*
-     * Workaround for BFD-1057: The `ORDER BY` required on our "find the bene IDs" query (below)
-     * intermittently causes the PostgreSQL query planner to run a table scan, which takes over an
-     * hour in prod. This _seems_ to be only occurring when the query would return no results. (Yes,
-     * this is odd and we don't entirely trust it.) So, when we're on the first page of results or
-     * not paging at all here, we first pull a count of expected matches here to see if there's any
+     * Workaround for BFD-1057: The `ORDER BY` required on our "find the bene IDs"
+     * query (below)
+     * intermittently causes the PostgreSQL query planner to run a table scan, which
+     * takes over an
+     * hour in prod. This _seems_ to be only occurring when the query would return
+     * no results. (Yes,
+     * this is odd and we don't entirely trust it.) So, when we're on the first page
+     * of results or
+     * not paging at all here, we first pull a count of expected matches here to see
+     * if there's any
      * reason to even run the next query.
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
-      long matchingBeneCount =
-          queryBeneCountByPartDContractCodeAndYearMonth(yearMonth, contractCode);
-      if (matchingBeneCount <= 0) {
+      boolean matchingBeneExists =
+          queryBeneExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+      if (!matchingBeneExists) {
         return Collections.emptyList();
       }
     }
 
     /*
-     * Fetching with joins is not compatible with setMaxResults as explained in this post:
-     * https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
-     * So, because we need to use a join, we query in two steps: first fetch bene-ids with paging
-     * and then fetch full benes with joins. (Note: We can't run this as a subquery, either, as JPA
+     * Fetching with joins is not compatible with setMaxResults as explained in this
+     * post:
+     * https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-
+     * pagination-best-practices
+     * So, because we need to use a join, we query in two steps: first fetch
+     * bene-ids with paging
+     * and then fetch full benes with joins. (Note: We can't run this as a subquery,
+     * either, as JPA
      * doesn't support `limit` on those.)
      */
 
@@ -1181,46 +1215,60 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Query bene count by part d contract code and year-month.
+   * Query bene exists by part d contract code and year-month.
    *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
-   * @return the count of matching {@link Beneficiary#getBeneficiaryId()} values
+   * @return true if the {@link BeneficiaryMonthly} exists
    */
   @Trace
-  private long queryBeneCountByPartDContractCodeAndYearMonth(
+  private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
+    // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Long> beneCountCriteria = builder.createQuery(Long.class);
-    Root<BeneficiaryMonthly> beneMonthlyRoot = beneCountCriteria.from(BeneficiaryMonthly.class);
-    beneCountCriteria.select(builder.count(beneMonthlyRoot));
-    beneCountCriteria.where(
-        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
-        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+    CriteriaQuery<BeneficiaryMonthly> beneExistsCriteria =
+        builder.createQuery(BeneficiaryMonthly.class);
+    Root<BeneficiaryMonthly> beneMonthlyRoot = beneExistsCriteria.from(BeneficiaryMonthly.class);
+
+    Subquery<Integer> beneExistsSubquery = beneExistsCriteria.subquery(Integer.class);
+    Root<BeneficiaryMonthly> beneMonthlyRootSubquery =
+        beneExistsSubquery.from(BeneficiaryMonthly.class);
+
+    beneExistsSubquery
+        .select(builder.literal(1))
+        .where(
+            builder.equal(beneMonthlyRootSubquery.get(BeneficiaryMonthly_.yearMonth), yearMonth),
+            builder.equal(
+                beneMonthlyRootSubquery.get(BeneficiaryMonthly_.partDContractNumberId),
+                contractId));
+
+    beneExistsCriteria.select(beneMonthlyRoot).where(builder.exists(beneExistsSubquery));
 
     // Run the query and return the results.
-    Optional<Long> matchingBeneCount = Optional.empty();
+    boolean matchingBeneExists = false;
     Long beneHistoryMatchesTimerQueryNanoSeconds = null;
-    Timer.Context matchingBeneCountTimer =
+    Timer.Context matchingBeneExistsTimer =
         metricRegistry
             .timer(
                 MetricRegistry.name(
                     getClass().getSimpleName(),
                     "query",
-                    "bene_count_by_year_month_part_d_contract_id"))
+                    "bene_exists_by_year_month_part_d_contract_id"))
             .time();
     try {
-      matchingBeneCount =
-          Optional.of(entityManager.createQuery(beneCountCriteria).getSingleResult());
-      return matchingBeneCount.get();
+      matchingBeneExists =
+          entityManager.createQuery(beneExistsCriteria).setMaxResults(1).getResultList().stream()
+              .findFirst()
+              .isPresent();
+      return matchingBeneExists;
     } finally {
-      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneCountTimer.stop();
+      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          "bene_count_by_year_month_part_d_contract_id",
+          "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
-          matchingBeneCount.isPresent() ? 1 : 0);
+          matchingBeneExists ? 1 : 0);
     }
   }
 
