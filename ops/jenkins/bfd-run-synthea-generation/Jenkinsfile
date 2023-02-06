@@ -148,6 +148,10 @@ spec:
         script {
           awsAuth.assumeRole()
 
+          // The generated output is placed within a folder with a timestamp in its name, so 
+          // the path to the end_state.properties is different each time. We use the find command
+          // to find the full path of the final end_state.properties in out/ regardless of the
+          // generated directory's name
           def endStateProperties = sh(
             returnStdout: true,
             script: 'find "$(pwd)"/out -name end_state.properties -type f'
