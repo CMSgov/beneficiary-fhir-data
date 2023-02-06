@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -31,10 +32,14 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    * will flush the worker's buffer to the database. Thus the period of time after which the flush
    * will happen is actually twice the interval.
    */
-  private static final Duration IdleCheckInterval = Duration.ofMillis(500);
+  private static final Duration IdleCheckInterval = Duration.ofMillis(2_500);
 
-  /** Used to synchronize access to mutable fields. */
-  private final RWLock lock = new RWLock();
+  /**
+   * Interval used to update the sequence number in the {@link gov.cms.bfd.model.rda.RdaApiProgress}
+   * table. More frequent updates reduce memory consumption by the {@link SequenceNumberTracker} but
+   * increase I/O overhead. This value is a good compromise.
+   */
+  private static final Duration SequenceNumberUpdateInterval = Duration.ofMillis(100);
 
   /** Message used to tell a claim writer to flush its buffer immediately. */
   final ApiMessage<TMessage> FlushMessage = ApiMessage.createFlushMessage();
@@ -51,16 +56,19 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   private final RdaSink<TMessage, TClaim> sink;
 
   /** Used to signal when a shutdown is in progress. */
-  private boolean running;
+  private final AtomicBoolean running;
 
-  /** Holds the last reported processed count. */
-  private int prevProcessedCount;
+  /**
+   * Holds the unreported processed count until it can be collected by {@link #getProcessedCount()}.
+   */
+  private final AtomicInteger unreportedProcessedCount;
 
-  /** Holds the current processed count. */
-  private int currentProcessedCount;
-
-  /** The {@link Exception} (if any) that terminated processing. */
-  private Exception error;
+  /**
+   * {@link Exception} (if any) that terminated processing. In some cases multiple exceptions might
+   * be thrown by the various threads. The first exception enough to stop processing so we just
+   * capture that one to avoid storing or logging hundreds of identical exceptions.
+   */
+  private final AtomicReference<Exception> errors;
 
   /**
    * Used to synchronize shutdown by waiting for both claim and sequence number processing to
@@ -95,6 +103,14 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    */
   private final SequenceNumberWriter<TMessage, TClaim> sequenceNumberWriter;
 
+  /**
+   * Constructs an instance with the specified configuration. Actual writes are delegated to
+   * single-threaded sink objects produced using the provided factory method.
+   *
+   * @param maxThreads number of writer threads used to write claims
+   * @param batchSize number of messages per batch for database writes
+   * @param sinkFactory factory method to produce appropriate single threaded sinks
+   */
   public ReactiveRdaSink(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
     sequenceNumbers = new SequenceNumberTracker(0);
@@ -104,10 +120,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             .mapToObj(writerId -> new ClaimWriter<>(writerId, sinkFactory.get(), batchSize))
             .collect(Collectors.toUnmodifiableList());
     sequenceNumberWriter = new SequenceNumberWriter<>(sinkFactory.get(), sequenceNumbers);
-    running = true;
-    prevProcessedCount = 0;
-    currentProcessedCount = 0;
-    error = null;
+    running = new AtomicBoolean(true);
+    unreportedProcessedCount = new AtomicInteger(0);
+    errors = new AtomicReference<>();
     latch = new CountDownLatch(2); // one each for claim and sequence number fluxes
     final var claimWriterScheduler =
         Schedulers.newBoundedElastic(
@@ -120,8 +135,9 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
     publisher = new BlockingPublisher<>(4 * maxThreads * batchSize);
     final var idleTimerFlux =
         Flux.interval(IdleCheckInterval, claimWriterScheduler)
-            .map(o -> IdleMessage)
-            .takeWhile(o -> isRunning());
+            .takeWhile(o -> isRunning())
+            .onBackpressureLatest()
+            .map(o -> IdleMessage);
     var claimProcessing =
         publisher
             .flux()
@@ -139,13 +155,13 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
             .doFinally(o -> latch.countDown())
             .subscribe(this::processBatchResult);
     var sequenceNumberProcessing =
-        Flux.interval(Duration.ofMillis(250), sequenceNumberWriterScheduler)
+        Flux.interval(SequenceNumberUpdateInterval, sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
+            .onBackpressureLatest()
             .flatMap(sequenceNumberWriter::updateDb)
             .doFinally(o -> latch.countDown())
             .subscribe(seq -> {}, ex -> processBatchResult(new BatchResult<>((Exception) ex)));
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
-    log.debug("created instance: threads={} batchSize={}", maxThreads, batchSize);
   }
 
   @Override
@@ -165,28 +181,22 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
   }
 
   /**
-   * Updates state with the outcome of a batch write.
+   * Performs necessary state updates based on the outcome of a batch write. Increments the
+   * uncollected processed messages count, records the error (if any) or (if successful) updates the
+   * set of written sequence numbers, then tells the publisher to allow more messages to be emitted.
    *
-   * @param result the details of the successful batch
+   * @param result the details of a completed batch from {@link ClaimWriter}
    */
   private void processBatchResult(BatchResult<TMessage> result) {
-    lock.doWrite(
-        () -> {
-          currentProcessedCount += result.getProcessedCount();
-          if (result.getError() != null) {
-            if (error == null) {
-              error = result.getError();
-            } else {
-              error.addSuppressed(result.getError());
-            }
-          }
-        });
-    publisher.allow(result.getMessages().size());
-    if (result.getError() == null) {
+    unreportedProcessedCount.addAndGet(result.getProcessedCount());
+    if (result.getError() != null) {
+      errors.compareAndSet(null, result.getError());
+    } else {
       for (ApiMessage<TMessage> message : result.getMessages()) {
         sequenceNumbers.removeWrittenSequenceNumber(message.getSequenceNumber());
       }
     }
+    publisher.allow(result.getMessages().size());
   }
 
   /**
@@ -195,7 +205,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
    * @return true if shutdown has not ben triggered
    */
   private boolean isRunning() {
-    return lock.read(() -> running);
+    return running.get();
   }
 
   /**
@@ -242,34 +252,23 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
 
   @Override
   public int getProcessedCount() {
-    final var countValue = new AtomicInteger();
-    lock.doWrite(
-        () -> {
-          countValue.set(currentProcessedCount - prevProcessedCount);
-          prevProcessedCount = currentProcessedCount;
-        });
-    return countValue.get();
+    return unreportedProcessedCount.getAndSet(0);
   }
 
   private void throwIfErrorPresent() throws ProcessingException {
-    final var errorValue = new AtomicReference<Exception>();
-    lock.doRead(() -> errorValue.set(error));
-    if (errorValue.get() != null) {
-      throw new ProcessingException(errorValue.get(), 0);
+    final var error = errors.getAndSet(null);
+    if (error != null) {
+      throw new ProcessingException(error, 0);
     }
   }
 
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
     log.info("shutdown called");
-    lock.doWrite(
-        () -> {
-          if (running) {
-            publisher.complete();
-            log.info("shutdown emit complete");
-            running = false;
-          }
-        });
+    if (running.getAndSet(false)) {
+      publisher.complete();
+      log.info("shutdown emit complete");
+    }
     try {
       final var closer = new MultiCloser();
       log.info("shutdown wait for latch");
@@ -282,8 +281,13 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       closer.close(sequenceNumberWriter::close);
       log.info("shutdown close sink");
       closer.close(sink::close);
+      log.info("shutdown check for errrors");
+      closer.close(this::throwIfErrorPresent);
       log.info("shutdown finish");
       closer.finish();
+    } catch (ProcessingException ex) {
+      log.error("shutdown failed: ex={}", ex.getMessage(), ex);
+      throw ex;
     } catch (Exception ex) {
       log.error("shutdown failed: ex={}", ex.getMessage(), ex);
       throw new ProcessingException(ex, 0);
