@@ -139,7 +139,13 @@ spec:
       steps {
         echo 'Replacing the old end_state.properties in the bfd-mgmt-synthea bucket...'
 
-        sh "aws s3 cp \"\$(pwd)/output/bfd/end_state.properties\" \"s3://bfd-mgmt-synthea/end_state/end_state.properties\""
+        script {
+          def endStateProperties = sh(
+            returnStdout: true, 
+            script: 'find "$(pwd)"/out -name end_state.properties -type f'
+          ).trim()
+          sh "aws s3 cp \"${endStateProperties}\" \"s3://bfd-mgmt-synthea/end_state/end_state.properties\""
+        }
       }
     }
   }
