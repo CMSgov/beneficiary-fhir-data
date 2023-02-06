@@ -16,7 +16,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
     - Look for `changes detected master`, and find the `git` hash for the latest `master` commit (example: ```Changes detected: master (null → 34a328cf9082bb7ab7bf640a632124ef59516f94)```).
     - Compare that `git hash` with the `git hash` found in the git repository for `master`; if the hash values match, you know that the pipeline will be building the latest `master`.
 
-5. From either the ```Branches``` or the ```Pull Requests``` view (toggled via the selector at top of page), select the code branch to be built. For this exercse, we'll be building the latest changes to ```master```. Selecting ```master``` from within the ```branches``` page, displays a ```Stage View``` showing the last 10 builds.
+5. From either the ```Branches``` or the ```Pull Requests``` view (toggled via the selector at top of page), select the code branch to be built. For this exercse, we'll be building the latest changes to ```master``` so selecting ```master``` from within the ```branches``` page, displays a ```Stage View``` showing the last 10 builds.
 
 6. Ensure no other jobs are currently building or queued up to build; it's also a good practice to check if another developer is performing work in the ```Test``` environment. This can be done by checking the ```Slack``` channel ```#bfd-builds```. If the ```Test``` environment is not clear, then one should either postpone the build, or contact the developer to see if they can relinqush their claim to the ```Test``` environment.
 
