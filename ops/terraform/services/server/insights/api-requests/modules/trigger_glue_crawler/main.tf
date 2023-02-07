@@ -37,7 +37,7 @@ resource "aws_lambda_function" "this" {
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
-  timeout          = 120
+  timeout          = 520 # 520 seconds gives enough time for backoff retries to be attempted
   environment {
     variables = {
       CRAWLER_NAME       = var.glue_crawler_name
