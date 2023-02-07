@@ -16,7 +16,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
     - Look for `changes detected master`, and find the `git` hash for the latest `master` commit (example: ```Changes detected: master (null → 34a328cf9082bb7ab7bf640a632124ef59516f94)```).
     - Compare that `git hash` with the `git hash` found in the git repository for `master`; if the hash values match, you know that the pipeline will be building the latest `master`.
 
-5. From either the ```Branches``` or the ```Pull Requests``` view (toggled via the selector at top of page), select the code branch to be built. For this exercse, we'll be building the latest changes to ```master``` so selecting ```master``` from within the ```branches``` page, displays a ```Stage View``` showing the last 10 builds.
+5. From either the ```Branches``` or the ```Pull Requests``` view (toggled via the selector at top of page), select the code branch to be built. For this exercse, we'll be building the latest changes to ```master``` so selecting ```master``` from within the ```branches``` page, displays a ```Stage View``` showing the last 10 builds of the `selected branch.
 
 6. Ensure no other jobs are currently building or queued up to build; it's also a good practice to check if another developer is performing work in the ```Test``` environment. This can be done by checking the ```Slack``` channel ```#bfd-builds```. If the ```Test``` environment is not clear, then one should either postpone the build, or contact the developer to see if they can relinqush their claim to the ```Test``` environment.
 
@@ -27,7 +27,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 8. From the ```Stage View``` for ```branch master```, selecting ```Build with Parameters``` link on left-side displays a set of parameters that can be applied to the pipeline build:
     - `deploy_prod_from_non_master` : if enabled, deploy to prod-like envs for builds of this project's non-master branches.
     - `deploy_prod_skip_confirm` : if enabled, skips prompting for confirmation before deploying to most prod-like envs.
-    - `build_platinum` : if enabled, build/update the _platinum_ base AMI; while no hard-fast rule for when to include this, an AMI is generally buit about once/week but can probably be skipped in most cases.
+    - `build_platinum` : if enabled, build/update the _platinum_ base AMI; while no hard-fast rule for when to deploy an updated AMI, it is generally done about once/week. An quick way to ascertain the last deployment, is to look at the ```Build Platinum AMI``` column in the ```Stage``` view; any builds of the AMI will show there.
     - `use_latest_images` : if enabled, defer to latest available AMIs; skips `App` and `App Image` Stages.
     - `verbose_mvn_logging` : if enabled, `mvn` will produce verbose logs.
     - `skip_migrator_deployment` : if enabled, AND building a non-trunk or non-master branch, then do not deploy the migrator to the `test` environment.
