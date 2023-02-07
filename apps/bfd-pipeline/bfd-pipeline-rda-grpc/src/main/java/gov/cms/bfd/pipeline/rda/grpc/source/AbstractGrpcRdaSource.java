@@ -151,9 +151,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
           try {
             channel.awaitTermination(1, TimeUnit.MINUTES);
           } catch (InterruptedException ex2) {
-            log.info(
-                "caught second InterruptedException while closing ManagedChannel - calling shutdownNow");
-            channel.shutdownNow();
+            log.info("caught second InterruptedException while closing ManagedChannel");
           }
         }
       }
