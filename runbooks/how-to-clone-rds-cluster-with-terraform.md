@@ -13,18 +13,19 @@ This runbook assumes you have sufficient access required to manipulate the remot
 All steps below assume you have the latest `master` in a local working copy of the BFD repository
 
 ### Initial Setup
-Define the ephemeral environment (`ephemeralEnv`) and seed environment (`TF_VAR_ephemeral_seed_environment`) environment variables. Optionally, define `TF_VAR_ephemeral_rds_snapshot_id_override`.
+Define the ephemeral environment (`ephemeralEnv`) and seed environment (`TF_VAR_ephemeral_environment_seed`) environment variables.
+Optionally, define `TF_VAR_ephemeral_rds_snapshot_id_override`.
 - the `ephemeralEnv`
     - should be meaningful, easily traceable
     - is used as the workspace name, as `$env` in e.g. resource identifiers `bfd-${env}-fhir`
     - could be the numeric portion of the JIRA key associated with your work, e.g. BFD-2090 becomes `2090`
-- `TF_VAR_ephemeral_seed_environment` seed environment is the targeted, _existing_ environment you intend to copy, e.g. `prod-sbx`
+- `TF_VAR_ephemeral_environment_seed` seed environment is required. Targets _existing_ environment you intend to copy, e.g. `prod-sbx`
 - `TF_VAR_ephemeral_rds_snapshot_id_override` is optional. If not specified, the latest snapshot associated with the seed environment's RDS cluster is selected.
 
 **Example**
 ```sh
 export ephemeralEnv=2090                          # environment to be named 2090
-export TF_VAR_ephemeral_seed_environment=prod-sbx # clones prod-sbx environment
+export TF_VAR_ephemeral_environment_seed=prod-sbx # clones prod-sbx environment
 # export TF_VAR_rds_snapshot_id_override=         # selects latest when omitted
 ```
 
