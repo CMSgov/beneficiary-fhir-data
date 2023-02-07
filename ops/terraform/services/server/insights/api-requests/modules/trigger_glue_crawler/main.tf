@@ -40,7 +40,9 @@ resource "aws_lambda_function" "this" {
   timeout          = 120
   environment {
     variables = {
-      CRAWLER_NAME = var.glue_crawler_name
+      CRAWLER_NAME       = var.glue_crawler_name
+      GLUE_DATABASE_NAME = var.glue_database
+      GLUE_TABLE_NAME    = var.glue_table
     }
   }
 
