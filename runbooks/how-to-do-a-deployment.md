@@ -42,7 +42,11 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 
 11. When the build pipeline finishes the deployment to ```Test```, the pipeline may pause requesting a ```Manual Approval``` to proceed on to ```prod-sbx, prod```. This gives the operator a chance to abort further processing if needed.
 
-12. When finished with a deploy from ```master```, there's a couple of _cleanup_ tasks that will need to be done:
+12. Selecting ```Proceed``` causes the pipeline to continue its processing:
+    - deploys to ```PROD-SBX``` 
+    - deploys to ```PROD```
+
+13. When the pipeline has completed the deploy from ```master```, there's a couple of minor tasks that will need to be done:
     - notify ```#bfd-builds``` channel that you are releasing your hold on the ```Test``` environment as needed (```/dibs off test```).  
     - Notify folks that a deployment to ```Prod``` has been completed; this is done by posting a message to the `#bfd-users` _Slack_ channel. While there is no prescribed content of the message, a best practice is to list each title and URL link for the PRs that were merged into `master` for this deploy; for example:
 ![Dibs-Off](resources/deploy-completed-slack.png)
