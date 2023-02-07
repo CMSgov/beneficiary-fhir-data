@@ -29,7 +29,7 @@ boto_config = Config(
 glue_client = boto3.client(service_name="glue", config=boto_config)
 
 
-def try_run_crawler(name: str) -> bool:
+def try_start_crawler(name: str) -> bool:
     for wait_time in START_CRAWLER_RETRY_TIMES:
         try:
             glue_client.start_crawler(Name=name)
@@ -85,14 +85,14 @@ def handler(event, context):
                 return
             except glue_client.exceptions.EntityNotFoundException:
                 print(
-                    f"A partition for year {year} and month {month} was not found, running the"
+                    f"A partition for year {year} and month {month} was not found, starting the"
                     f" {CRAWLER_NAME} crawler to add the new partition to {TABLE_NAME}..."
                 )
 
-                if try_run_crawler(CRAWLER_NAME):
-                    print(f"{CRAWLER_NAME} ran successfully")
+                if try_start_crawler(CRAWLER_NAME):
+                    print(f"{CRAWLER_NAME} started successfully")
                 else:
-                    print(f"{CRAWLER_NAME} was not able to be ran, stopping...")
+                    print(f"{CRAWLER_NAME} was not able to be started, stopping...")
 
                 return
             except (
