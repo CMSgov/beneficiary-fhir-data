@@ -18,3 +18,14 @@ locals {
     environment = local.environment
   }
 }
+
+module "trigger_glue_crawler" {
+  source = "./modules/trigger_glue_crawler"
+
+  account_id        = local.account_id
+  name_prefix       = local.full_name
+  glue_database     = module.database.name
+  glue_table        = module.glue-table-api-requests.name
+  glue_crawler_name = aws_glue_crawler.glue-crawler-api-requests.name
+  glue_crawler_arn  = aws_glue_crawler.glue-crawler-api-requests.arn
+}
