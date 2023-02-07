@@ -1,6 +1,7 @@
 import os
 import re
 import time
+from urllib.parse import unquote
 
 import boto3
 from botocore.config import Config
@@ -64,9 +65,10 @@ def handler(event, context):
         print(f"No bucket file found in event notification: {exc}")
         return
 
+    decoded_file_key = unquote(file_key)
     if match := re.search(
         f"databases/{DATABASE_NAME}/{TABLE_NAME}/year=(\d{{4}})/month=(\d{{2}})/.*",
-        file_key,
+        decoded_file_key,
         re.IGNORECASE,
     ):
         year = match.group(1)
