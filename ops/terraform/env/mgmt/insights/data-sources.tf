@@ -8,3 +8,8 @@ data "aws_lambda_function" "bfd_insights_error_slack" {
   for_each      = local.envs
   function_name = "${local.project}-${each.key}-bfd-insights-error-slack"
 }
+
+data "aws_lambda_function" "bfd_insights_trigger_glue_crawler" {
+  for_each      = local.envs
+  function_name = "${local.project}-insights-${local.project}-${each.key}-trigger-glue-crawler"
+}
