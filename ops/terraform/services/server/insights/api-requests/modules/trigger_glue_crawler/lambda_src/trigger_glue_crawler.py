@@ -47,6 +47,9 @@ def handler(event, context):
 
     try:
         record = event["Records"][0]
+    except KeyError as exc:
+        print(f"The incoming event was invalid: {exc}")
+        return
     except IndexError:
         print("Invalid event notification, no records found")
         return
