@@ -24,7 +24,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
     - post message: ```/dibs on test``` to stake claim to the test enviornemnt.
     - post message: ```/dibs off test``` to release claim to the test enviornemnt.
 
-8. From the ```Sate View``` for ```branch master```, select ```Build with Parameters``` link from the left-side displays a set of pipeline parameters that can be applied to the build:
+8. From the ```Stage View``` for ```branch master```, selecting ```Build with Parameters``` link on left-side displays a set of parameters that can be applied to the pipeline build:
     - `deploy_prod_from_non_master` : if enabled, deploy to prod-like envs for builds of this project's non-master branches.
     - `deploy_prod_skip_confirm` : if enabled, skips prompting for confirmation before deploying to most prod-like envs.
     - `build_platinum` : if enabled, build/update the _platinum_ base AMI; while no hard-fast rule for when to include this, an AMI is generally buit about once/week but can probably be skipped in most cases.
