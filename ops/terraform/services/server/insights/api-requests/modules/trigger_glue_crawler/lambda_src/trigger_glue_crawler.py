@@ -1,25 +1,38 @@
 import os
+import re
 import time
 
 import boto3
+from botocore.config import Config
 
 RETRY_TIMES = [15.0, 15.0, 30.0, 30.0, 60.0, 60.0, 60.0, 120.0, 120.0]
-"""Constant specifying a list of progressively longer wait times to continuously retry running the glue
-crawler in case multiple S3 event notifications are consumed by this lambda at once"""
+"""Constant specifying a list of progressively longer wait times to continuously retry running
+the glue crawler in case multiple S3 event notifications are consumed by this lambda at once"""
+REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
+CRAWLER_NAME = os.environ.get("CRAWLER_NAME")
+DATABASE_NAME = os.environ.get("GLUE_DATABASE_NAME")
+TABLE_NAME = os.environ.get("GLUE_TABLE_NAME")
 
-crawler_name = os.environ.get("CRAWLER_NAME")
-
-glue = boto3.client(service_name="glue", region_name="us-east-1")
+boto_config = Config(
+    region_name=REGION,
+    # Instructs boto3 to retry upto 10 times using an exponential backoff
+    retries={
+        "total_max_attempts": 10,
+        "mode": "adaptive",
+    },
+)
+glue_client = boto3.client(service_name="glue", config=boto_config)
 
 
 def try_run_crawler(name: str) -> bool:
     for wait_time in RETRY_TIMES:
         try:
-            glue.start_crawler(Name=name)
+            glue_client.start_crawler(Name=name)
             return True
-        except glue.exceptions.CrawlerRunningException:
+        except glue_client.exceptions.CrawlerRunningException:
             print(
-                f"{crawler_name} was already running, waiting {wait_time} seconds before retrying..."
+                f"{CRAWLER_NAME} was already running, waiting {wait_time} seconds before"
+                " retrying..."
             )
 
         time.sleep(wait_time)
@@ -28,11 +41,48 @@ def try_run_crawler(name: str) -> bool:
 
 
 def handler(event, context):
-    if not crawler_name:
-        print('"CRAWLER_NAME" environment variable unspecified, stopping...')
+    if not all([REGION, CRAWLER_NAME, DATABASE_NAME, TABLE_NAME]):
+        print("Not all necessary environment variables were defined, exiting...")
         return
 
-    if try_run_crawler(crawler_name):
-        print(f"{crawler_name} ran successfully")
+    try:
+        record = event["Records"][0]
+    except IndexError:
+        print("Invalid event notification, no records found")
+        return
+
+    try:
+        file_key = record["s3"]["object"]["key"]
+    except KeyError as exc:
+        print(f"No bucket file found in event notification: {exc}")
+        return
+
+    if match := re.search(
+        f"databases/{DATABASE_NAME}/{TABLE_NAME}/year=(\d{{4}})/month=(\d{{2}})/.*",
+        file_key,
+        re.IGNORECASE,
+    ):
+        year = match.group(1)
+        month = match.group(2)
+        try:
+            glue_client.get_partition(
+                DatabaseName=DATABASE_NAME,
+                TableName=TABLE_NAME,
+                PartitionValues=[year, month],
+            )
+
+            print(f"A partition for year {year} and month {month} already exists, stopping...")
+            return
+        except glue_client.exceptions.EntityNotFoundException:
+            print(
+                f"A partition for year {year} and month {month} was not found, running the"
+                f" {CRAWLER_NAME} crawler to add the new partition to {TABLE_NAME}..."
+            )
+        except Exception as exc:
+            print(f"An error occurred when trying to get partitions for {TABLE_NAME}: {exc}")
+            return
+
+    if try_run_crawler(CRAWLER_NAME):
+        print(f"{CRAWLER_NAME} ran successfully")
     else:
-        print(f"{crawler_name} was not able to be ran, stopping...")
+        print(f"{CRAWLER_NAME} was not able to be ran, stopping...")
