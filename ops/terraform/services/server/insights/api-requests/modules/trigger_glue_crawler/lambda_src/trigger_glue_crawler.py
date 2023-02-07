@@ -5,9 +5,13 @@ import time
 import boto3
 from botocore.config import Config
 
-RETRY_TIMES = [15.0, 15.0, 30.0, 30.0, 60.0, 60.0, 60.0, 120.0, 120.0]
+START_CRAWLER_RETRY_TIMES = [15.0, 15.0, 30.0, 30.0, 60.0, 60.0, 60.0, 120.0, 120.0]
 """Constant specifying a list of progressively longer wait times to continuously retry running
 the glue crawler in case multiple S3 event notifications are consumed by this lambda at once"""
+GET_PARTITION_RETRY_TIMES = [1.0, 2.0, 3.0, 6.0, 10.0, 10.0, 15.0, 30.0, 60.0]
+"""Constant specifying a list of progressively longer wait times to continuously retry getting
+the specified table's partition corresponding to the incoming S3 event notification if an error
+occurs that can be retried upon"""
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 CRAWLER_NAME = os.environ.get("CRAWLER_NAME")
 DATABASE_NAME = os.environ.get("GLUE_DATABASE_NAME")
@@ -25,7 +29,7 @@ glue_client = boto3.client(service_name="glue", config=boto_config)
 
 
 def try_run_crawler(name: str) -> bool:
-    for wait_time in RETRY_TIMES:
+    for wait_time in START_CRAWLER_RETRY_TIMES:
         try:
             glue_client.start_crawler(Name=name)
             return True
@@ -67,25 +71,41 @@ def handler(event, context):
     ):
         year = match.group(1)
         month = match.group(2)
-        try:
-            glue_client.get_partition(
-                DatabaseName=DATABASE_NAME,
-                TableName=TABLE_NAME,
-                PartitionValues=[year, month],
-            )
+        for retry_time in GET_PARTITION_RETRY_TIMES:
+            try:
+                glue_client.get_partition(
+                    DatabaseName=DATABASE_NAME,
+                    TableName=TABLE_NAME,
+                    PartitionValues=[year, month],
+                )
 
-            print(f"A partition for year {year} and month {month} already exists, stopping...")
-            return
-        except glue_client.exceptions.EntityNotFoundException:
-            print(
-                f"A partition for year {year} and month {month} was not found, running the"
-                f" {CRAWLER_NAME} crawler to add the new partition to {TABLE_NAME}..."
-            )
-        except Exception as exc:
-            print(f"An error occurred when trying to get partitions for {TABLE_NAME}: {exc}")
-            return
+                print(f"A partition for year {year} and month {month} already exists, stopping...")
+                return
+            except glue_client.exceptions.EntityNotFoundException:
+                print(
+                    f"A partition for year {year} and month {month} was not found, running the"
+                    f" {CRAWLER_NAME} crawler to add the new partition to {TABLE_NAME}..."
+                )
 
-    if try_run_crawler(CRAWLER_NAME):
-        print(f"{CRAWLER_NAME} ran successfully")
-    else:
-        print(f"{CRAWLER_NAME} was not able to be ran, stopping...")
+                if try_run_crawler(CRAWLER_NAME):
+                    print(f"{CRAWLER_NAME} ran successfully")
+                else:
+                    print(f"{CRAWLER_NAME} was not able to be ran, stopping...")
+
+                return
+            except (
+                glue_client.exceptions.InternalServiceException,
+                glue_client.exceptions.OperationTimeoutException,
+            ) as exc:
+                print(
+                    "A timeout or internal service exception occurred, retrying in"
+                    f" {retry_time} seconds; error: {exc}"
+                )
+            except Exception as exc:
+                print(
+                    f"An unknown error occurred when trying to get partitions for {TABLE_NAME}:"
+                    f" {exc}"
+                )
+                return
+
+            time.sleep(retry_time)
