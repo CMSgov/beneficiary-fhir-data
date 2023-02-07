@@ -3,6 +3,11 @@ variable "account_id" {
   type        = string
 }
 
+variable "insights_bucket_arn" {
+  description = "The ARN of the BFD Server's Insights S3 Bucket"
+  type        = string
+}
+
 variable "name_prefix" {
   description = "Global name prefix that is used to prefix all BFD Server Insights resources"
   type        = string

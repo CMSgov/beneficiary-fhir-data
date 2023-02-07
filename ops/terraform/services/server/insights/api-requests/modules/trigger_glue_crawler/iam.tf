@@ -1,10 +1,10 @@
 resource "aws_iam_policy" "glue" {
-  name        = "${local.lambda_full_name}-glue"
+  name = "${local.lambda_full_name}-glue"
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to start the ${var.glue_crawler_name} ",
     "Glue crawler"
   ])
-  policy      = <<-EOF
+  policy = <<-EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -19,12 +19,12 @@ EOF
 }
 
 resource "aws_iam_policy" "logs" {
-  name        = "${local.lambda_full_name}-logs"
+  name = "${local.lambda_full_name}-logs"
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to write to its corresponding CloudWatch ",
     "Log Group and Log Stream"
   ])
-  policy      = <<-EOF
+  policy = <<-EOF
 {
   "Version": "2012-10-17",
   "Statement": [
