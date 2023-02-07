@@ -16,7 +16,11 @@ resource "aws_iam_policy" "glue" {
     {
       "Effect": "Allow",
       "Action": "glue:GetPartition",
-      "Resource": "arn:aws:glue:us-east-1:${var.account_id}:table/${var.glue_database}/${var.glue_table}"
+      "Resource": [
+        "arn:aws:glue:us-east-1:${var.account_id}:catalog",
+        "arn:aws:glue:us-east-1:${var.account_id}:database/${var.glue_database}",
+        "arn:aws:glue:us-east-1:${var.account_id}:table/${var.glue_database}/${var.glue_table}"
+      ]
     }
   ]
 }
