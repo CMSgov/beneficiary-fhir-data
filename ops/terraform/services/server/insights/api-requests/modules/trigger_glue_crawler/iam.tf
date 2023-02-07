@@ -2,7 +2,7 @@ resource "aws_iam_policy" "glue" {
   name = "${local.lambda_full_name}-glue"
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to start the ${var.glue_crawler_name} ",
-    "Glue crawler"
+    "Glue crawler and to query specific partitions on the ${var.glue_table} Glue Table"
   ])
   policy = <<-EOF
 {
@@ -12,6 +12,11 @@ resource "aws_iam_policy" "glue" {
       "Effect": "Allow",
       "Action": "glue:StartCrawler",
       "Resource": "${var.glue_crawler_arn}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "glue:GetPartition",
+      "Resource": "arn:aws:glue:us-east-1:${var.account_id}:table/${var.glue_database}/${var.glue_table}"
     }
   ]
 }
