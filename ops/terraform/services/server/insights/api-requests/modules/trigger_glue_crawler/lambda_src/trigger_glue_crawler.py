@@ -111,3 +111,5 @@ def handler(event, context):
                 return
 
             time.sleep(retry_time)
+    else:
+        print(f"No year and month partitions found in path: {decoded_file_key}")
