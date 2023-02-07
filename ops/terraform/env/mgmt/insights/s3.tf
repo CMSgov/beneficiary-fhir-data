@@ -81,7 +81,6 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-# TODO: Replace the following when/if insights Terraform is merged with main Terraform
 resource "aws_s3_bucket_notification" "bucket_notifications" {
   bucket = module.bucket.id
 
