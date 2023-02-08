@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
@@ -176,13 +176,6 @@ class ClaimWriter<TMessage, TClaim> {
     Mono<BatchResult<TMessage>> result;
     try {
       final int processed = sink.writeClaims(claims);
-      //      log.info(
-      //          "ClaimWriter {} wrote unique={} all={} processed={} idle={}",
-      //          id,
-      //          claims.size(),
-      //          messages.size(),
-      //          processed,
-      //          idle);
       result = Mono.just(new BatchResult<>(messages, processed));
     } catch (Exception ex) {
       result = Mono.just(new BatchResult<>(messages, ex));

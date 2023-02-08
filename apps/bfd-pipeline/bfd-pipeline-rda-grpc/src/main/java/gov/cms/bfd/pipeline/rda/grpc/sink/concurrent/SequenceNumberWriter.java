@@ -1,8 +1,7 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker;
 import javax.annotation.concurrent.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -10,7 +9,8 @@ import reactor.core.publisher.Mono;
 /**
  * An object responsible for updating the progress table in the database with the appropriate
  * sequence number as claims are written to the database. Sequence numbers are provided by calls to
- * a {@link SequenceNumberTracker} and updates are written using a {@link RdaSink}.
+ * a {@link gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker} and updates are
+ * written using a {@link RdaSink}.
  *
  * @param <TMessage> type of RDA API gRPC stub object corresponding to a message
  * @param <TClaim> type of hibernate entity class corresponding to a claim
@@ -33,7 +33,8 @@ class SequenceNumberWriter<TMessage, TClaim> {
   private long previousSequenceNumber = 0;
 
   /**
-   * Create an instance using the provided {@link RdaSink} and {@link SequenceNumberTracker}.
+   * Create an instance using the provided {@link RdaSink} and {@link
+   * gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker}.
    *
    * @param sink used to write to the database
    * @param sequenceNumbers used to track sequence number changes
@@ -45,10 +46,10 @@ class SequenceNumberWriter<TMessage, TClaim> {
 
   /**
    * Updates the sequence number in the database. Uses the current value from the {@link
-   * SequenceNumberTracker}. If the value has not changed nothing is written and the returned {@link
-   * Mono} will have no value. If the value has changed the new value will be written to the
-   * database and emitted by the {@link Mono}. If the write false the {@link Mono} will emit the
-   * {@link Exception} associated with the failure.
+   * gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker}. If the value has not
+   * changed nothing is written and the returned {@link Mono} will have no value. If the value has
+   * changed the new value will be written to the database and emitted by the {@link Mono}. If the
+   * write false the {@link Mono} will emit the {@link Exception} associated with the failure.
    *
    * @return {@link Mono} describing the result of the update
    */

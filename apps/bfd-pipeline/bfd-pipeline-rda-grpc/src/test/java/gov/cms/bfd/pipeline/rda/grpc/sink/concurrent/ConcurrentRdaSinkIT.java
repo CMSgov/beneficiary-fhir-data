@@ -1,10 +1,9 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
-import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.TestDatabase;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,16 +16,23 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
-public class ReactiveRdaSinkTest {
+/** Tests the {@link ConcurrentRdaSink}. */
+public class ConcurrentRdaSinkIT {
+  /** Test value for version. */
   private static final String VERSION = "Version";
 
-  /** Tests the outcome if all messages are successfully processed */
+  /**
+   * Tests that the writer successfully writes all the queued claims to the database, all sinks are
+   * closed after writing, and the last sequence number is recorded correctly.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testSuccess() throws Exception {
     final TestDatabase database = new TestDatabase();
     final List<TestDatabase.Message> messages = createTestMessages();
-    try (ReactiveRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
-        new ReactiveRdaSink<>(17, 11, database::createSink)) {
+    try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
+        new ConcurrentRdaSink<>(17, 11, database::createSink)) {
       for (List<TestDatabase.Message> messageList : createBatches(messages, 9)) {
         pool.writeMessages(VERSION, messageList);
       }
@@ -36,7 +42,10 @@ public class ReactiveRdaSinkTest {
     assertEquals(messages.size(), database.getLastSequenceNumber());
   }
 
-  /** Tests the outcome if there are message transformation failures during processing */
+  /**
+   * Tests that when there is an exception when transforming one of the messages, we get a {@link
+   * ProcessingException} and the sinks are closed correctly.
+   */
   @Test
   public void testTransformFailure() {
     final TestDatabase database = new TestDatabase();
@@ -45,8 +54,8 @@ public class ReactiveRdaSinkTest {
     messages.set(messages.size() - 1, messages.get(messages.size() - 1).withFailOnTransform(true));
 
     Exception error = null;
-    try (ReactiveRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
-        new ReactiveRdaSink<>(5, 9, database::createSink)) {
+    try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
+        new ConcurrentRdaSink<>(5, 9, database::createSink)) {
       for (List<TestDatabase.Message> messageList : createBatches(messages, 9)) {
         pool.writeMessages(VERSION, messageList);
       }
@@ -61,7 +70,10 @@ public class ReactiveRdaSinkTest {
     assertTrue(database.allClosed(), "all sinks closed");
   }
 
-  /** Tests the outcome if there are issues writing errors out during processing */
+  /**
+   * Tests that when there is a failure writing one of the messages, we get a {@link
+   * ProcessingException} and the sinks are closed correctly.
+   */
   @Test
   public void testWriteFailure() {
     final TestDatabase database = new TestDatabase();
@@ -70,8 +82,8 @@ public class ReactiveRdaSinkTest {
     messages.set(messages.size() - 1, messages.get(messages.size() - 1).withFailOnWrite(true));
 
     Exception error = null;
-    try (ReactiveRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
-        new ReactiveRdaSink<>(5, 9, database::createSink)) {
+    try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
+        new ConcurrentRdaSink<>(5, 9, database::createSink)) {
       for (List<TestDatabase.Message> messageList : createBatches(messages, 9)) {
         pool.writeMessages(VERSION, messageList);
       }
@@ -85,6 +97,11 @@ public class ReactiveRdaSinkTest {
     assertTrue(database.allClosed(), "all sinks closed");
   }
 
+  /**
+   * Creates some messages for the test to queue and write.
+   *
+   * @return the list of messages
+   */
   private List<TestDatabase.Message> createTestMessages() {
     List<String> claimIds =
         IntStream.range(1000, 2000).mapToObj(String::valueOf).collect(Collectors.toList());
@@ -104,6 +121,12 @@ public class ReactiveRdaSinkTest {
     return messages;
   }
 
+  /**
+   * Gets the lists of claims expected to be written.
+   *
+   * @param messages the messages to be turned into claims
+   * @return the list of expected claims
+   */
   private List<TestDatabase.Claim> expectedClaims(List<TestDatabase.Message> messages) {
     Map<String, TestDatabase.Claim> uniqueClaims = new TreeMap<>();
     for (TestDatabase.Message message : messages) {
