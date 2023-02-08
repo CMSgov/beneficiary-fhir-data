@@ -36,6 +36,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TMessage, TClaim> {
 
+  /** The maximum amount of time to wait for an {@link RdaSink} to shut down */
+  private static final Duration MAX_SINK_SHUTDOWN_WAIT = Duration.ofMinutes(5);
+
   private final DLQDao dao;
   private final BiPredicate<Long, TMessage> sequencePredicate;
 
@@ -216,19 +219,19 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
                   + startingSequenceNumber,
               e);
         }
-
-        try {
-          sink.shutdown(Duration.ofMinutes(5));
-        } catch (Exception ex) {
-          if (processResult.getException() != null) {
-            processResult.getException().addSuppressed(ex);
-          } else {
-            processResult.setException(ex);
-          }
-        }
-
-        processResult.addCount(sink.getProcessedCount());
       }
+
+      try {
+        sink.shutdown(MAX_SINK_SHUTDOWN_WAIT);
+      } catch (Exception ex) {
+        if (processResult.getException() != null) {
+          processResult.getException().addSuppressed(ex);
+        } else {
+          processResult.setException(ex);
+        }
+      }
+
+      processResult.addCount(sink.getProcessedCount());
 
       return processResult;
     };

@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
 public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
+  /** Shortcut for calculating GIGA (filesize). */
   private static final int GIGA = 1000 * 1000 * 1000;
 
   /** The directory name that pending/incoming RIF data sets will be pulled from in S3. */
@@ -139,13 +140,19 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
               + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
               + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
+  /** The application metrics. */
   private final MetricRegistry appMetrics;
+  /** The extraction options. */
   private final ExtractionOptions options;
+  /** The data set listener for finding new files to load. */
   private final DataSetMonitorListener listener;
+  /** The manager for taking actions with S3. */
   private final S3TaskManager s3TaskManager;
+  /** The application state. */
   private final PipelineApplicationState appState;
+  /** If the application is in idempotent mode. */
   private final boolean isIdempotentMode;
-
+  /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
   /**
@@ -173,13 +180,13 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
     return Optional.of(new PipelineJobSchedule(1, ChronoUnit.SECONDS));
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     /*
@@ -189,7 +196,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     return false;
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+  /** {@inheritDoc} */
   @Override
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
@@ -344,9 +351,10 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   }
 
   /**
+   * Determines if all the objects listed in the specified manifest can be found in S3.
+   *
    * @param manifest the {@link DataSetManifest} that lists the objects to verify the presence of
-   * @return <code>true</code> if all of the objects listed in the specified manifest can be found
-   *     in S3, <code>false</code> if not
+   * @return <code>true</code> if all the objects listed can be found in S3
    */
   private boolean dataSetIsAvailable(DataSetManifest manifest) {
     /*
@@ -400,9 +408,9 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   }
 
   /**
-   * Perform pre-validation for a data load if the {@link #preValidationProperties} has content. At
-   * this time, only Synthea-based {@link DataSetManifest} have content that can be used for
-   * pre-validation.
+   * Perform pre-validation for a data load if the {@link
+   * DataSetManifest#getPreValidationProperties()} has content. At this time, only Synthea-based
+   * {@link DataSetManifest} have content that can be used for pre-validation.
    *
    * @param manifest the {@link DataSetManifest} that lists pre-validation properties to verify
    * @return <code>true</code> if all of the pre-validation parameters listed in the manifest do not
@@ -418,7 +426,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
       return true;
     }
 
-    /** we are processing Synthea data...setup a pre-validation interface. */
+    /* we are processing Synthea data...setup a pre-validation interface. */
     CcwRifLoadPreValidateInterface preValInterface = new CcwRifLoadPreValidateSynthea();
     // initialize the interface with the appState
     preValInterface.init(appState);

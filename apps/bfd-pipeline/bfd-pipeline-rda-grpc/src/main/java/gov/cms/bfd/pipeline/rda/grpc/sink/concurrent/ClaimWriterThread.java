@@ -2,9 +2,10 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.model.rda.MessageError;
+import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ReportingCallback.ProcessedBatch;
-import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -266,20 +268,18 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
      *
      * @param sink used to transform message into claim
      * @param entry holds apiVersion and message
+     * @throws IOException if there was an issue writing out a {@link MessageError}.
+     * @throws ProcessingException if there was an issue transforming the message
      */
-    void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry) {
-      try {
-        final String claimKey = sink.getClaimIdForMessage(entry.getObject());
-        final TClaim claim = sink.transformMessage(entry.getApiVersion(), entry.getObject());
+    void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry)
+        throws IOException, ProcessingException {
+      final String claimKey = sink.getClaimIdForMessage(entry.getObject());
+      final Optional<TClaim> claim =
+          sink.transformMessage(entry.getApiVersion(), entry.getObject());
+
+      if (claim.isPresent()) {
         allMessages.add(entry.getObject());
-        uniqueClaims.put(claimKey, claim);
-      } catch (DataTransformer.TransformationException transformationException) {
-        try {
-          sink.writeError(entry.getApiVersion(), entry.getObject(), transformationException);
-        } catch (IOException e) {
-          transformationException.addSuppressed(e);
-        }
-        throw transformationException;
+        uniqueClaims.put(claimKey, claim.get());
       }
     }
 

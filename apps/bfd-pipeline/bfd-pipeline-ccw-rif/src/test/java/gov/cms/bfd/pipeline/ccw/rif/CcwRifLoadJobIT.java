@@ -528,6 +528,8 @@ public final class CcwRifLoadJobIT {
    * @param inputLocation the input location (bucket key) where files should be placed initially
    * @param expectedOutputLocation the expected output location (bucket key) where files are
    *     expected to be moved after processing
+   * @param fileList the file list
+   * @param inManifest the in manifest
    * @throws Exception the exception
    */
   private void validateLoadAtLocations(

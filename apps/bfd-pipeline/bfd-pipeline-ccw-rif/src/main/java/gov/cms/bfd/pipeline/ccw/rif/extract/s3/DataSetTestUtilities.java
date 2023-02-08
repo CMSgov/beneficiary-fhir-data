@@ -30,6 +30,8 @@ import javax.xml.bind.Marshaller;
  */
 public class DataSetTestUtilities {
   /**
+   * Creates an S3 test bucket.
+   *
    * @param s3Client the {@link AmazonS3} client to use
    * @return a new, random {@link Bucket} for use in an integration test
    */
@@ -48,6 +50,8 @@ public class DataSetTestUtilities {
   }
 
   /**
+   * Creates a put request for the specified S3 bucket.
+   *
    * @param bucket the {@link Bucket} to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
    * @return a {@link PutObjectRequest} for the specified {@link DataSetManifest}
@@ -76,6 +80,8 @@ public class DataSetTestUtilities {
   }
 
   /**
+   * Creates a put request for the specified S3 bucket.
+   *
    * @param bucket the {@link Bucket} to place the new object in
    * @param keyPrefix the S3 key prefix to store the new object under
    * @param manifest the {@link DataSetManifest} to push as an object
@@ -154,6 +160,8 @@ public class DataSetTestUtilities {
   }
 
   /**
+   * Creates a put request for the specified S3 bucket.
+   *
    * @param bucket the {@link Bucket} to place the new object in
    * @param keyPrefix the S3 key prefix to store the new object under
    * @param manifest the {@link DataSetManifest} to create an object for

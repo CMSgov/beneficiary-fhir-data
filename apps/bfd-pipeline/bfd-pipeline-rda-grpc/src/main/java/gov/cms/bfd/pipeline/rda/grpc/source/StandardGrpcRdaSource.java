@@ -35,6 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 public class StandardGrpcRdaSource<TMessage, TClaim>
     extends AbstractGrpcRdaSource<TMessage, TClaim> {
 
+  /** The maximum amount of time to wait for an {@link RdaSink} to shut down */
+  private static final Duration MAX_SINK_SHUTDOWN_WAIT = Duration.ofMinutes(5);
+
   private final Clock clock;
   private final Optional<Long> startingSequenceNumber;
   /** Expected time before RDA API server drops its connection when it has nothing to send. */
@@ -176,6 +179,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   @Override
   public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
+    sink.checkErrorCount();
+
     return tryRetrieveAndProcessObjects(
         () -> {
           boolean flushBatch = true;
@@ -236,7 +241,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             closer.close(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
           }
 
-          closer.close(() -> sink.shutdown(Duration.ofMinutes(5)));
+          closer.close(() -> sink.shutdown(MAX_SINK_SHUTDOWN_WAIT));
 
           try {
             closer.finish();
