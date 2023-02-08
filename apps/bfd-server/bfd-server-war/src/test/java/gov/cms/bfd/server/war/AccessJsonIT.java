@@ -25,8 +25,7 @@ public class AccessJsonIT {
   /** Verifies that access.json is written to within BFD-server-war via API call. */
   @Test
   public void VerifyAccessJson() throws IOException {
-
-    /**
+    /*
      * Write to access.json by checking {@link
      * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
      * for a {@link Patient} that does exist in the DB, including identifiers to return the unhashed
