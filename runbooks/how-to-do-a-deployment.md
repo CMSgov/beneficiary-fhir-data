@@ -48,7 +48,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 
 13. At the conclusion of a deployment to each of the environments (`prod`, `prod-sbx`, `test`), the pipeline performs a step that runs a regression suite vs. the `BFD API Services`; the intent is to try to proactively verify that no functional or performance regression results from the deployment. It does this by capturing results from the deployment vs. a set of baseline numbers; this has historically been a top contributor to a deployment failures, mainly failing on performance degradation. If an environmanet fails, more detailed information can be found in:
     - for deployments based on `master`, we visualize historical regression results in `AWS QuickSight` for `test`, `prod-sbx`, and `prod`.
-    - for `non-master`deployments, `Jenkins` logs point operator to the raw `AWS CloudWatch` stored regression suite results 
+    - for for **all** deployments, `Jenkins` logs point operator to the raw `AWS CloudWatch` stored regression suite results 
 
 14. When the pipeline has completed the deploy from `master`, there's a couple of minor tasks that will need to be done:
     - notify `#bfd-builds` channel that you are releasing your hold on the `Test` environment as needed (`/dibs off test`).  
