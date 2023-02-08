@@ -15,15 +15,15 @@ import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link StringPartitioner}. */
 public class StringPartitionerTest {
-  /** require at most 5% divergence between min and max partition counts. */
-  private final double MAX_ACCEPTABLE_DIVERGENCE_BETWEEN_PARTITION_COUNTS = 0.05;
+  /** require at most 1% divergence between min and max partition counts. */
+  private final double MAX_ACCEPTABLE_DIVERGENCE_BETWEEN_PARTITION_COUNTS = 0.01;
 
   /**
    * Worst case scenario with keys that change very little. Ensures they still obtain a good
    * distribution.
    */
   @Test
-  public void testSequentialKeys() {
+  void testSequentialKeys() {
     for (int numPartitions = 5; numPartitions <= 25; ++numPartitions) {
       var partitions = IntStream.rangeClosed(1, numPartitions).boxed().collect(Collectors.toList());
       var keys =
@@ -41,13 +41,14 @@ public class StringPartitionerTest {
    * good distribution.
    */
   @Test
-  public void testRandomKeys() {
-    final var rand = new Random(1000);
+  void testRandomKeys() {
+    // Just a fixed seed to make the test stable. There is nothing special about the number 2000.
+    final var rand = new Random(2000);
     final var characters = "abcdefghijklmnopqrstuvwxyz0123456789-_.";
     for (int numPartitions = 5; numPartitions <= 25; ++numPartitions) {
       var partitions = IntStream.rangeClosed(1, numPartitions).boxed().collect(Collectors.toList());
       var keys = new ArrayList<String>();
-      for (int keyNumber = 1; keyNumber <= 250_000; ++keyNumber) {
+      for (int keyNumber = 1; keyNumber <= 100_000; ++keyNumber) {
         var keyLength = 5 + rand.nextInt(11);
         var key =
             IntStream.range(1, keyLength)

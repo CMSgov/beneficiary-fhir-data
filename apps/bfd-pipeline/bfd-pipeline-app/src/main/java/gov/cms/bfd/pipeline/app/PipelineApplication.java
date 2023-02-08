@@ -378,8 +378,8 @@ public final class PipelineApplication {
       jobs.add(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
 
-      //      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
-      //      LOGGER.info("Registered RdaMcsClaimLoadJob.");
+      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");
     }

@@ -158,7 +158,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
         Flux.interval(SequenceNumberUpdateInterval, sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
             .onBackpressureLatest()
-            .flatMap(sequenceNumberWriter::updateDb)
+            .flatMap(o -> sequenceNumberWriter.updateDb())
             .doFinally(o -> latch.countDown())
             .subscribe(seq -> {}, ex -> processBatchResult(new BatchResult<>((Exception) ex)));
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
@@ -281,7 +281,7 @@ public class ReactiveRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TCla
       closer.close(sequenceNumberWriter::close);
       log.info("shutdown close sink");
       closer.close(sink::close);
-      log.info("shutdown check for errrors");
+      log.info("shutdown check for errors");
       closer.close(this::throwIfErrorPresent);
       log.info("shutdown finish");
       closer.finish();

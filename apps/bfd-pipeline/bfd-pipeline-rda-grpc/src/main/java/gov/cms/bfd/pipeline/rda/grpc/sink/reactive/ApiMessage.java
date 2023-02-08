@@ -3,6 +3,12 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.reactive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Wrapper around an RDA API message object that adds additional derived values needed during
+ * message processing.
+ *
+ * @param <TMessage> The specific type of gRPC stub from the RDA API.
+ */
 @Data
 @AllArgsConstructor
 class ApiMessage<TMessage> {
