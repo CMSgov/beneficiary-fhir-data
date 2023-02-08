@@ -25,7 +25,6 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -517,7 +516,7 @@ public final class R4PatientResourceProviderIT {
    * and MBI.
    */
   @Test
-  public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() throws IOException {
+  public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
