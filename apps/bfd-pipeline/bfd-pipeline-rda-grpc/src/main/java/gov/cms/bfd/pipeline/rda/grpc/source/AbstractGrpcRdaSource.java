@@ -208,7 +208,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
     final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
-    log.info(
+    log.debug(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,
         batch.size(),

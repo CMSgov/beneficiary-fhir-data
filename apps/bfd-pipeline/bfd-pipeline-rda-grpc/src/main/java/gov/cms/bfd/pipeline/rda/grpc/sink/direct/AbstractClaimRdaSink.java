@@ -396,12 +396,6 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
     final Instant startTime = Instant.now();
-    //    try {
-    //      Thread.currentThread().sleep(10);
-    //    } catch (InterruptedException ex) {
-    //      // do nothing
-    //    }
-    //    var insertCount = changes.size();
     boolean commit = false;
     int insertCount = 0;
 

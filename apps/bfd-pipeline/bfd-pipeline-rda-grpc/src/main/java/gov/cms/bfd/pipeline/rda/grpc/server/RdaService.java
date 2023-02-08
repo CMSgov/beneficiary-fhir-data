@@ -149,9 +149,6 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
               && !responseObserver.isCancelled()
               && !cancelled.get()
               && generator.hasNext()) {
-            //            if (random.nextInt(1_000) == 13) {
-            //              throw new IOException("random stop!!");
-            //            }
             responseObserver.onNext(generator.next());
           }
           if (responseObserver.isCancelled() || cancelled.get()) {
