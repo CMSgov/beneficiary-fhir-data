@@ -208,30 +208,15 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    /* Configure the log output generation via a Jetty CustomRequestLog. Available format strings are
-     * documented here: https://www.eclipse.org/jetty/javadoc/jetty-10/org/eclipse/jetty/server/CustomRequestLog.html.
+    /* Configure the log output generation via a Jetty CustomRequestLog.
+     * As of Feb 8th 2023, the Access.log file has been removed, and BFD server is only writing to access.json.
+     * CustomRequestLog allows with minimal side effects to get the response output size, so a blank writer and format
+     * are instantiated to access the methods to get the response output size.
      *
-     * Response time units have varied during BFD's history as follows:
-     * Prior to Oct 28 2021 - milliseconds
-     * Oct 28 2021 - Mar 24 2022 - microseconds
-     * Since Mar 24 2022 - milliseconds
      */
-    Slf4jRequestLogWriter slfjRequestLogWriter = new Slf4jRequestLogWriter();
-    slfjRequestLogWriter.setLoggerName("com.company.request.log");
-    final String requestLogFormat =
-        "%{remote}a - \"%u\" %t \"%r\" \"%q\" %s %{CLF}S %{ms}T"
-            + " %{BlueButton-OriginalQueryId}i"
-            + " %{BlueButton-OriginalQueryCounter}i"
-            + " [%{BlueButton-OriginalQueryTimestamp}i]"
-            + " %{BlueButton-DeveloperId}i"
-            + " \"%{BlueButton-Developer}i\""
-            + " %{BlueButton-ApplicationId}i"
-            + " \"%{BlueButton-Application}i\""
-            + " %{BlueButton-UserId}i"
-            + " \"%{BlueButton-User}i\""
-            + " %{BlueButton-BeneficiaryId}i"
-            + " %{X-Request-ID}o";
-    final BfdRequestLog requestLog = new BfdRequestLog(slfjRequestLogWriter, requestLogFormat);
+    final String requestLogFormat = "";
+    final BfdRequestLog requestLog =
+        new BfdRequestLog(new Slf4jRequestLogWriter(), requestLogFormat);
 
     server.setRequestLog(requestLog);
 
@@ -330,11 +315,6 @@ public final class DataServerLauncherApp {
     public void log(Request request, Response response) {
       try {
         /*
-         * Call the implementation from CustomRequestLog to write the log entry.
-         */
-        super.log(request, response);
-
-        /*
          * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
          * CustomRequestLog to write the payload size to the access.log:
          * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
@@ -375,8 +355,6 @@ public final class DataServerLauncherApp {
         LOGGER_HTTP_ACCESS.info("response complete");
       } finally {
         BfdMDC.clear();
-        // Clear request log object to avoid heavy memory usage
-        server.setRequestLog(null);
       }
     }
   }
