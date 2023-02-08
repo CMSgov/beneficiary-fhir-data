@@ -20,9 +20,7 @@
 
 				<!-- Add line breaks between each entry, to make tailing the log simpler. -->
 				<appendLineSeparator>true</appendLineSeparator>
-
-				<immediateFlush>true</immediateFlush>
-
+				
 				<!-- Format timestamps per ISO8601. -->
 				<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SSSZ</timestampFormat>
 				<timestampFormatTimezoneId>UTC</timestampFormatTimezoneId>
