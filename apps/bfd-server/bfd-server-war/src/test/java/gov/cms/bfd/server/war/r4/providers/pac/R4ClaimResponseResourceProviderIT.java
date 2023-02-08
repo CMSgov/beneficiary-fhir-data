@@ -21,19 +21,24 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/** Integration test for the {@link R4ClaimResponseResourceProvider}. */
 public class R4ClaimResponseResourceProviderIT {
 
+  /** Test utils. */
   private static final RDATestUtils testUtils = new RDATestUtils();
 
+  /** An ignore pattern for testing. */
   private static final Set<String> IGNORE_PATTERNS =
       Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
 
+  /** Sets the test up. */
   @BeforeAll
   public static void init() {
     testUtils.init();
     testUtils.seedData(true);
   }
 
+  /** Cleans up the tests. */
   @AfterAll
   public static void tearDown() {
     testUtils.truncateTables();
@@ -42,7 +47,7 @@ public class R4ClaimResponseResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when a FISS {@link ClaimResponse} is looked up by
-   * a specific ID
+   * a specific ID.
    */
   @Test
   void shouldGetCorrectFissClaimResponseResourceById() {
@@ -59,7 +64,7 @@ public class R4ClaimResponseResourceProviderIT {
 
   /**
    * Tests to see if the correct response is given when an MCS {@link ClaimResponse} is looked up by
-   * a specific ID
+   * a specific ID.
    */
   @Test
   void shouldGetCorrectMcsClaimResponseResourceById() {

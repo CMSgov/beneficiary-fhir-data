@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -106,8 +107,13 @@ public class TestDatabase {
     @Override
     public void writeError(
         String apiVersion, Message message, DataTransformer.TransformationException exception)
-        throws IOException {
-      // Do nothing
+        throws ProcessingException {
+      throw new ProcessingException(new IllegalStateException("Error limit reached"), 0);
+    }
+
+    @Override
+    public void checkErrorCount() {
+      // Do Nothing
     }
 
     @Override
@@ -122,12 +128,12 @@ public class TestDatabase {
 
     @Nonnull
     @Override
-    public Claim transformMessage(String apiVersion, Message message) {
+    public Optional<Claim> transformMessage(String apiVersion, Message message) {
       if (message.isFailOnTransform()) {
         throw new DataTransformer.TransformationException(
             "fail", Collections.singletonList(new DataTransformer.ErrorMessage("none", "fail")));
       }
-      return message.toClaim(apiVersion);
+      return Optional.of(message.toClaim(apiVersion));
     }
 
     @Override
@@ -149,7 +155,7 @@ public class TestDatabase {
     }
 
     @Override
-    public synchronized void shutdown(Duration waitTime) throws ProcessingException {
+    public synchronized void shutdown(Duration waitTime) {
       throw new UnsupportedOperationException();
     }
 

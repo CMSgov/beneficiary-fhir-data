@@ -21,8 +21,11 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Quantity;
 
+/** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 public class HHAClaimTransformerV2 {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -46,7 +49,10 @@ public class HHAClaimTransformerV2 {
   }
 
   /**
+   * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link HHAClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
@@ -118,8 +124,8 @@ public class HHAClaimTransformerV2 {
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
-    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Inpatient for HHA Claims
+    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -136,7 +142,8 @@ public class HHAClaimTransformerV2 {
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
-        C4BBInstutionalClaimSubtypes.Inpatient);
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        claimGroup.getClaimQueryCode());
 
     // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
     TransformerUtilsV2.addInformationWithCode(

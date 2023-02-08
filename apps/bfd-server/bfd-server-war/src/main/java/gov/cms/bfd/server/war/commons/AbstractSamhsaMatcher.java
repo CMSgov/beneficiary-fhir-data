@@ -38,14 +38,21 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   /** The {@link CSVFormat} used to parse the SAMHSA-related code CSV files. */
   private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
 
+  /** The DRG CCW codebook url. */
   protected static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
+  /** The list of DRG codes. */
   private final Set<String> drgCodes;
+  /** The list of CPT codes. */
   private final Set<String> cptCodes;
+  /** The list of ICD9 Procedure codes. */
   private final Set<String> icd9ProcedureCodes;
+  /** The list of ICD9 Diagnosis codes. */
   private final Set<String> icd9DiagnosisCodes;
+  /** The list of ICD10 Procedure codes. */
   private final Set<String> icd10ProcedureCodes;
+  /** The list of ICD10 Diagnosis codes. */
   private final Set<String> icd10DiagnosisCodes;
 
   /**
@@ -403,8 +410,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @param coding The {@link Coding} to check.
    * @param samhsaCodes The {@link Set} of defined SAMHSA codes to compare against.
    * @param requiredSystem The expected {@link Coding} system of the given {@link Coding}.
-   * @return <code>true</code> if the given {@link Set<String>} of SAMHSA codes includes the given
-   *     {@link Coding} code. <code>false</code> otherwise.
+   * @return <code>true</code> if the given {@link String} {@link Set} of SAMHSA codes includes the
+   *     given {@link Coding} code. <code>false</code> otherwise.
    * @throws IllegalArgumentException if the given {@link Coding} system is not the same as the
    *     given requiredSystem
    */

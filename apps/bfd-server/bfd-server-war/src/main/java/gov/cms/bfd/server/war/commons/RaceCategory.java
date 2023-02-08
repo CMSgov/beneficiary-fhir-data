@@ -5,14 +5,26 @@ package gov.cms.bfd.server.war.commons;
  * org.hl7.fhir.r4.model.Patient}.
  */
 public enum RaceCategory {
+  /** Represents WHITE race category. */
   WHITE,
+  /** Represents BLACK_OR_AFRICAN_AMERICAN race category. */
   BLACK_OR_AFRICAN_AMERICAN,
+  /** Represents ASIAN race category. */
   ASIAN,
+  /** Represents AMERICAN_INDIAN_OR_ALASKA_NATIVE race category. */
   AMERICAN_INDIAN_OR_ALASKA_NATIVE,
+  /** Represents NATIVE_HAWAIIAN_OR_OTHER_PACIFIC_ISLANDER race category. */
   NATIVE_HAWAIIAN_OR_OTHER_PACIFIC_ISLANDER,
+  /** Represents UNKNOWN race category. */
   UNKNOWN,
+  /** Represents ASKED_NOT_FOUND race category. */
   ASKED_NOT_FOUND;
 
+  /**
+   * Gets the system for this {@link RaceCategory}.
+   *
+   * @return the system
+   */
   public String getSystem() {
     switch (this) {
       case UNKNOWN:
@@ -23,6 +35,11 @@ public enum RaceCategory {
     }
   }
 
+  /**
+   * Gets the code for this {@link RaceCategory}.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case WHITE:
@@ -44,6 +61,11 @@ public enum RaceCategory {
     }
   }
 
+  /**
+   * Gets the display for this {@link RaceCategory}.
+   *
+   * @return the display
+   */
   public String getDisplay() {
     switch (this) {
       case WHITE:

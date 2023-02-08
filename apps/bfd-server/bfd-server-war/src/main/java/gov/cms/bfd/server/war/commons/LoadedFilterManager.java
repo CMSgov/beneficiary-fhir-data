@@ -30,47 +30,72 @@ import org.springframework.stereotype.Component;
 public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
 
-  // A date before the lastUpdate feature was rolled out
+  /** A date before the lastUpdate feature was rolled out. */
   private static final Instant BEFORE_LAST_UPDATED_FEATURE = Instant.parse("2020-01-01T00:00:00Z");
 
-  // The connection to the DB
+  /** The connection to the DB. */
   private EntityManager entityManager;
 
-  // The filter set
+  /** The filter set. */
   private List<LoadedFileFilter> filters;
 
-  // The latest transaction time from the LoadedBatch files
+  /** The latest transaction time from the LoadedBatch files. */
   private Instant transactionTime;
 
-  // The last LoadedBatch.created in the filter set
+  /** The last LoadedBatch.created in the filter set. */
   private Instant lastBatchCreated;
 
-  // The first LoadedBatch.created in the filter set
+  /** The first LoadedBatch.created in the filter set. */
   private Instant firstBatchCreated;
 
   /**
    * A tuple of values: LoadedFile.loadedFileid, LoadedFile.created, max(LoadedBatch.created). Used
-   * for an optimized query that includes only what is needed to refresh filters
+   * for an optimized query that includes only what is needed to refresh filters.
    */
   public static class LoadedTuple {
+    /** The id for the loaded file. */
     private long loadedFileId;
+    /** The load start time for the loaded file. */
     private Instant firstUpdated;
+    /** The load end time for the loaded file. */
     private Instant lastUpdated;
 
+    /**
+     * Instantiates a new loaded tuple.
+     *
+     * @param loadedFileId the loaded file id
+     * @param firstUpdated the load start time
+     * @param lastUpdated the load end time
+     */
     public LoadedTuple(long loadedFileId, Instant firstUpdated, Instant lastUpdated) {
       this.loadedFileId = loadedFileId;
       this.firstUpdated = firstUpdated;
       this.lastUpdated = lastUpdated;
     }
 
+    /**
+     * Gets the {@link #loadedFileId}.
+     *
+     * @return the loaded file id
+     */
     public long getLoadedFileId() {
       return loadedFileId;
     }
 
+    /**
+     * Gets the {@link #firstUpdated}.
+     *
+     * @return the first updated
+     */
     public Instant getFirstUpdated() {
       return firstUpdated;
     }
 
+    /**
+     * Gets the {@link #lastUpdated}.
+     *
+     * @return the last updated
+     */
     public Instant getLastUpdated() {
       return lastUpdated;
     }
@@ -81,7 +106,11 @@ public class LoadedFilterManager {
     this.filters = new ArrayList<>();
   }
 
-  /** @return the list of current filters. Newest first. */
+  /**
+   * Gets the {@link #filters}.
+   *
+   * @return the list of current filters. Newest first.
+   */
   public List<LoadedFileFilter> getFilters() {
     return filters;
   }
@@ -99,7 +128,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * The return the first batch that the filter manager knows about
+   * The return the first batch that the filter manager knows about.
    *
    * @return the first batch's created timestamp
    */
@@ -111,7 +140,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * The return the first batch that the filter manager knows about
+   * The return the first batch that the filter manager knows about.
    *
    * @return the first batch's created timestamp
    */
@@ -123,7 +152,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Setup the JPA entityManager for the database to query
+   * Set up the JPA entityManager for the database to query.
    *
    * @param entityManager to use
    */
@@ -132,7 +161,7 @@ public class LoadedFilterManager {
     this.entityManager = entityManager;
   }
 
-  /** Called to finish initialization of the manager */
+  /** Called to finish initialization of the manager. */
   @PostConstruct
   public synchronized void init() {
     // The transaction time will either the last LoadedBatch or some earlier time
@@ -151,7 +180,11 @@ public class LoadedFilterManager {
    */
   public synchronized boolean isResultSetEmpty(
       Long beneficiaryId, DateRangeParam lastUpdatedRange) {
-    if (beneficiaryId == null) throw new IllegalArgumentException();
+    if (beneficiaryId == null) {
+      // This case should not happen and be caught/validated before this, therefore if we get here
+      // it is a code error
+      throw new IllegalArgumentException("Beneficiary id cannot be null/empty");
+    }
 
     if (!isInBounds(lastUpdatedRange)) {
       // Out of bounds has to be treated as unknown result
@@ -251,11 +284,11 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Set the current state in consistent fashion
+   * Set the current state in consistent fashion.
    *
-   * @param filters to use
-   * @param firstBatchCreated to use
-   * @param lastBatchCreated to use
+   * @param filters the filters
+   * @param firstBatchCreated the first batch created
+   * @param lastBatchCreated the last batch created
    */
   public synchronized void set(
       List<LoadedFileFilter> filters, Instant firstBatchCreated, Instant lastBatchCreated) {
@@ -290,7 +323,7 @@ public class LoadedFilterManager {
 
   /**
    * Create an updated {@link LoadedFileFilter} list from existing filters and newly loaded files
-   * and batches
+   * and batches.
    *
    * @param existingFilters that should be included
    * @param loadedTuples that come from new LoadedBatch
@@ -313,7 +346,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Build a new {@link LoadedFileFilter} list
+   * Build a new {@link LoadedFileFilter} list.
    *
    * @param loadedTuples that come from new LoadedBatch
    * @param fetchById to use retrieve list of LoadedBatch by id
@@ -383,7 +416,7 @@ public class LoadedFilterManager {
 
   /**
    * Return the max date from the LoadedBatch table. If no batches are present, then the schema
-   * migration time which will be a timestamp before the first loaded batch
+   * migration time which will be a timestamp before the first loaded batch.
    *
    * @return the max date
    */
@@ -396,7 +429,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Return the min date from the LoadedBatch table
+   * Return the min date from the LoadedBatch table.
    *
    * @return the min date
    */
@@ -409,7 +442,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Fetch the tuple of (loadedFileId, LoadedFile.created, max(LoadedBatch.created))
+   * Fetch the tuple of (loadedFileId, LoadedFile.created, max(LoadedBatch.created)).
    *
    * @param after limits the query to include batches created after this timestamp
    * @return tuples that meet the after criteria or an empty list

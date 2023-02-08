@@ -127,7 +127,7 @@
         {
             "height": 4,
             "width": 24,
-            "y": 36,
+            "y": 40,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -149,7 +149,7 @@
         {
             "height": 4,
             "width": 24,
-            "y": 40,
+            "y": 44,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -474,6 +474,29 @@
                 "region": "us-east-1",
                 "stat": "Average",
                 "period": 60
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 36,
+            "width": 24,
+            "height": 4,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks" } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks" } ]
+                ],
+                "sparkline": false,
+                "view": "singleValue",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 2592000,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "Availability over Last 30 Days"
             }
         }
     ]

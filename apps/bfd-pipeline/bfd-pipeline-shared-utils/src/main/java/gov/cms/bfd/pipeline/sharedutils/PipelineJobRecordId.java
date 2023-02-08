@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class PipelineJobRecordId {
   /** Used to generate unique values for {@link #id}. */
   private static final AtomicInteger ID_SEQUENCE = new AtomicInteger(0);
-
+  /** The unique record id. */
   private final long id;
 
   /** Constructs a new unique {@link PipelineJobRecordId}. */
@@ -14,7 +14,7 @@ public final class PipelineJobRecordId {
     this.id = ID_SEQUENCE.getAndIncrement();
   }
 
-  /** @see java.lang.Object#hashCode() */
+  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -23,7 +23,7 @@ public final class PipelineJobRecordId {
     return result;
   }
 
-  /** @see java.lang.Object#equals(java.lang.Object) */
+  /** {@inheritDoc} */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
@@ -34,7 +34,7 @@ public final class PipelineJobRecordId {
     return true;
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     return "" + id;

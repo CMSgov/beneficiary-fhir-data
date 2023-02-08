@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.commons;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -43,7 +44,7 @@ public class QueryUtils {
           lowerBoundPredicate = cb.greaterThan(lastUpdatedPath, lowerBound);
           break;
         default:
-          throw new IllegalArgumentException("_lastUpdate lower bound has an invalid prefix");
+          throw new InvalidRequestException("_lastUpdate lower bound has an invalid prefix");
       }
     } else {
       lowerBoundPredicate = null;
@@ -58,7 +59,7 @@ public class QueryUtils {
           upperBoundPredicate = cb.lessThanOrEqualTo(lastUpdatedPath, upperBound);
           break;
         default:
-          throw new IllegalArgumentException("_lastUpdate upper bound has an invalid prefix");
+          throw new InvalidRequestException("_lastUpdate upper bound has an invalid prefix");
       }
       if (lowerBoundPredicate == null) {
         return cb.or(cb.isNull(lastUpdatedPath), upperBoundPredicate);
@@ -67,8 +68,7 @@ public class QueryUtils {
       }
     } else {
       if (lowerBoundPredicate == null) {
-        throw new IllegalArgumentException(
-            ("_lastUpdate upper and lower bound cannot both be null"));
+        throw new InvalidRequestException("_lastUpdate upper and lower bound cannot both be null");
       } else {
         return lowerBoundPredicate;
       }
@@ -99,7 +99,7 @@ public class QueryUtils {
       } else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS.equals(lowerBound.getPrefix())) {
         predicates.add(builder.greaterThanOrEqualTo(dateExpression, from));
       } else {
-        throw new IllegalArgumentException(
+        throw new InvalidRequestException(
             String.format("Unsupported prefix supplied %s", lowerBound.getPrefix()));
       }
     }
@@ -113,7 +113,7 @@ public class QueryUtils {
       } else if (ParamPrefixEnum.LESSTHAN.equals(upperBound.getPrefix())) {
         predicates.add(builder.lessThan(dateExpression, to));
       } else {
-        throw new IllegalArgumentException(
+        throw new InvalidRequestException(
             String.format("Unsupported prefix supplied %s", upperBound.getPrefix()));
       }
     }
@@ -155,7 +155,7 @@ public class QueryUtils {
           }
           break;
         default:
-          throw new IllegalArgumentException("_lastUpdate lower bound has an invalid prefix");
+          throw new InvalidRequestException("_lastUpdate lower bound has an invalid prefix");
       }
     }
 
@@ -173,7 +173,7 @@ public class QueryUtils {
           }
           break;
         default:
-          throw new IllegalArgumentException("_lastUpdate upper bound has an invalid prefix");
+          throw new InvalidRequestException("_lastUpdate upper bound has an invalid prefix");
       }
     }
     return true;

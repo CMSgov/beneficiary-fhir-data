@@ -40,7 +40,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/** Integration tests for {@link R4PatientResourceProvider}. */
 public final class R4PatientResourceProviderIT {
+
+  /** Constant used for setting up tests with include identifiers = true. */
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
+  /** Constant for setting up tests with include identifiers without mbi. */
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
+
   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
    * that any existing data is deleted from the tables before running the test suite.
@@ -60,9 +67,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * that does exist in the DB.
    */
   @Test
   public void readExistingPatient() {
@@ -85,14 +91,13 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "true".
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * when include identifiers value = "true".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "true",
@@ -101,14 +106,13 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "mbi".
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * when include identifiers value = "mbi".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersMbi() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "mbi",
@@ -117,14 +121,13 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "false".
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * when include identifiers value = "false".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "false",
@@ -133,14 +136,13 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = "".
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * when include identifiers value = "".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
     assertExistingPatientIncludeIdentifiersExpected(
-        R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "",
@@ -149,10 +151,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value =
-   * "invalid-identifier-value" and that an exception is thrown.
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * when include identifiers value = "invalid-identifier-value" and that an exception is thrown.
    */
   @Test
   public void readExistingPatientIncludeIdentifiersInvalid1() {
@@ -160,7 +160,7 @@ public final class R4PatientResourceProviderIT {
         InvalidRequestException.class,
         () -> {
           assertExistingPatientIncludeIdentifiersExpected(
-              R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+              CNST_INCL_IDENTIFIERS_EXPECT_MBI,
               RequestHeaders.getHeaderWrapper(
                   R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
                   "invalid-identifier-value",
@@ -170,10 +170,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value =
-   * ["mbi,invalid-identifier-value"] and that an exception is thrown.
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * when include identifiers value = ["mbi,invalid-identifier-value"] and that an exception is
+   * thrown.
    */
   @Test
   public void readExistingPatientIncludeIdentifiersInvalid2() {
@@ -181,7 +180,7 @@ public final class R4PatientResourceProviderIT {
         InvalidRequestException.class,
         () -> {
           assertExistingPatientIncludeIdentifiersExpected(
-              R4PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+              CNST_INCL_IDENTIFIERS_EXPECT_MBI,
               RequestHeaders.getHeaderWrapper(
                   R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
                   "mbi,invalid-identifier-value",
@@ -191,11 +190,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} that does exist in the DB but has no {@link
-   * BeneficiaryHistory} or {@link MedicareBeneficiaryIdHistory} records when include identifiers
-   * value = ["true"].
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * that does exist in the DB but has no {@link BeneficiaryHistory} or {@link
+   * MedicareBeneficiaryIdHistory} records when include identifiers value = ["true"].
    */
   @Test
   public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
@@ -237,9 +234,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
+   * that does not exist in the DB.
    */
   @Test
   public void readMissingPatient() {
@@ -253,25 +249,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * throws an exception for a non-numeric {@link Patient} identifer.
-   */
-  @Test
-  public void readPatientForNonNumericPatientId() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-    assertThrows(
-        ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient.read().resource(Patient.class).withId("junk").execute();
-        });
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
+   * {@link Patient} that does exist in the DB.
    */
   @Test
   public void searchForExistingPatientByLogicalId() {
@@ -315,10 +294,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
+   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
+   * and MBI.
    */
   @Test
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersTrue() {
@@ -363,10 +341,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
+   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
+   * and MBI.
    */
   @Test
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersFalse() {
@@ -411,9 +388,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with paging.
+   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
+   * {@link Patient} that does exist in the DB, with paging.
    */
   @Test
   public void searchForPatientByLogicalIdWithPaging() {
@@ -454,9 +430,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
+   * {@link Patient} that does not exist in the DB.
    */
   @Test
   public void searchForMissingPatientByLogicalId() {
@@ -476,10 +451,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   *
-   * <p>works as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
+   * {@link Patient} that does exist in the DB.
    */
   @Test
   public void searchForExistingPatientByMbiHash() {
@@ -539,10 +512,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, including identifiers to
-   * return the unhashed HICN and MBI.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
+   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
+   * and MBI.
    */
   @Test
   public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() throws IOException {
@@ -723,9 +695,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with paging.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
+   * {@link Patient} that does exist in the DB, with paging.
    */
   @Test
   public void searchForExistingPatientByMbiHashWithPaging() {
@@ -772,9 +743,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for MBIs that should be present as a {@link BeneficiaryHistory} record.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * that should be present as a {@link BeneficiaryHistory} record.
    */
   @Test
   public void searchForExistingPatientByHistoricalMbiHash() {
@@ -812,10 +782,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for MBIs associated with {@link Beneficiary}s that have <strong>no</strong>
-   * {@link BeneficiaryHistory} records.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
    */
   @Test
   public void searchForExistingPatientByMbiWithNoHistory() {
@@ -852,10 +821,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for MBIs associated with {@link Beneficiary}s that have <strong>no</strong>
-   * {@link BeneficiaryHistory} records.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
    */
   @Test
   public void searchForExistingPatientByMbiWithNoHistoryIncludeIdentifiersTrue() {
@@ -892,9 +860,8 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
+   * {@link Patient} that does not exist in the DB.
    */
   @Test
   public void searchForMissingPatientByMbiHash() {
@@ -916,6 +883,10 @@ public final class R4PatientResourceProviderIT {
     assertEquals(0, searchResults.getTotal());
   }
 
+  /**
+   * Verifies that searching by a known existing part D contract number returns a result as
+   * expected.
+   */
   @Test
   public void searchForExistingPatientByPartDContractNum() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
@@ -945,6 +916,11 @@ public final class R4PatientResourceProviderIT {
     assertEquals(1, searchResults.getEntry().size());
   }
 
+  /**
+   * Verifies that searching by a known existing part D contract number (with 'include identifiers'
+   * in the header) returns a result as expected. Also ensures the unhashed MBI values are returned
+   * due to the 'include identifiers' header.
+   */
   @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
@@ -1103,6 +1079,15 @@ public final class R4PatientResourceProviderIT {
             .count());
   }
 
+  /**
+   * Verifies that searching by a known existing part D contract number (with 'include identifiers'
+   * set to {@code false} in the header) returns a result as expected. Also ensures the unhashed MBI
+   * values are NOT returned due to the 'include identifiers' header being {@code false}.
+   *
+   * <p>TODO: Is this test testing the wrong thing? The idea is that includeIdentifiers=false should
+   * not return unhashed MBIs but this test seems to test that they ARE returned as long as
+   * includeIdentifiers exists at all
+   */
   @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
@@ -1155,6 +1140,10 @@ public final class R4PatientResourceProviderIT {
     assertTrue(mbiUnhashedPresent);
   }
 
+  /**
+   * Verifies that searching by a known existing part D contract number returns results with proper
+   * paging values.
+   */
   @Test
   public void searchForPatientByPartDContractNumWithPaging() {
 
@@ -1193,6 +1182,7 @@ public final class R4PatientResourceProviderIT {
     assertNull(searchResults.getLink(Constants.LINK_NEXT));
   }
 
+  /** Verifies that searching by a known non-existent part D contract number returns no results. */
   @Test
   public void searchForMissingPatientByPartDContractNum() {
     IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
@@ -1215,6 +1205,10 @@ public final class R4PatientResourceProviderIT {
     assertEquals(0, searchResults.getEntry().size());
   }
 
+  /**
+   * Verifies that searching by lastUpdated with its various supported prefixes returns results as
+   * expected.
+   */
   @Test
   public void searchWithLastUpdated() {
     List<Object> loadedRecords =
@@ -1247,6 +1241,9 @@ public final class R4PatientResourceProviderIT {
     testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
   }
 
+  /**
+   * Verifies that searching by a known existing part D contract number and year returns results.
+   */
   @Test
   public void searchForExistingPatientByPartDContractNumAndYear() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
@@ -1276,6 +1273,10 @@ public final class R4PatientResourceProviderIT {
     assertEquals(1, searchResults.getEntry().size());
   }
 
+  /**
+   * Verifies that searching by a known non-existing part D contract number and year returns no
+   * results.
+   */
   @Test
   public void searchForNonExistingPatientByPartDContractNumAndYear() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
@@ -1305,6 +1306,9 @@ public final class R4PatientResourceProviderIT {
     assertEquals(0, searchResults.getEntry().size());
   }
 
+  /**
+   * Verifies that searching by a known invalid part D contract number returns results no results.
+   */
   @Test
   public void searchForPatientByPartDContractNumWithAInvalidContract() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
@@ -1334,6 +1338,10 @@ public final class R4PatientResourceProviderIT {
     assertEquals(0, searchResults.getEntry().size());
   }
 
+  /**
+   * Verifies that searching by a known existing part D contract number with an invalid year returns
+   * no results.
+   */
   @Test
   public void searchForPatientByPartDContractNumWithAInvalidYear() {
 
@@ -1365,13 +1373,11 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Asserts that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * contains expected/present identifiers for a {@link Patient}.
+   * Asserts that {@link R4PatientResourceProvider#read} contains expected/present identifiers for a
+   * {@link Patient}.
    *
-   * @param includeIdentifiersValue header value
    * @param expectingMbi true if expecting a MBI
-   * @param includeAddressValues header value
+   * @param requestHeader the request header
    */
   public void assertExistingPatientIncludeIdentifiersExpected(
       boolean expectingMbi, RequestHeaders requestHeader) {
@@ -1421,7 +1427,7 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * test helper
+   * Returns a header with include address fields.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value
@@ -1432,8 +1438,9 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * helper
+   * Creates a FHIR client for testing with the specified header.
    *
+   * @param requestHeader the request header
    * @return the client with extra params registered
    */
   public static IGenericClient createFhirClient(RequestHeaders requestHeader) {
@@ -1447,10 +1454,11 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * helper
+   * Creates a FHIR client for testing with the specified 'include identifiers' and 'include
+   * address' header values.
    *
-   * @param idHdrVal - includeIdentifiers header value
-   * @param addrHdrVal - includeAddressFields header value
+   * @param idHdrVal includeIdentifiers header value
+   * @param addrHdrVal includeAddressFields header value
    * @return the client
    */
   public static IGenericClient createFhirClient(String idHdrVal, String addrHdrVal) {
@@ -1472,13 +1480,13 @@ public final class R4PatientResourceProviderIT {
    *
    * <p>The hashType param chooses which type of values/hash to use. This is either "hicn" or "mbi".
    *
-   * @param fhirClient
-   * @param beneficiariesList
-   * @param beneficiariesHistoryList
-   * @param beneficiaryId
-   * @param unhashedValue
-   * @param useFromBeneficiaryTable
-   * @param expectsSingleBeneMatch
+   * @param fhirClient the fhir client
+   * @param beneficiariesList the beneficiaries list
+   * @param beneficiariesHistoryList the beneficiaries history list
+   * @param beneficiaryId the beneficiary id
+   * @param unhashedValue the unhashed value
+   * @param useFromBeneficiaryTable the use from beneficiary table
+   * @param expectsSingleBeneMatch if a single bene match is expected
    */
   private void assertPatientByHashTypeMatch(
       IGenericClient fhirClient,
@@ -1549,7 +1557,7 @@ public final class R4PatientResourceProviderIT {
   }
 
   /**
-   * Test the set of lastUpdated values
+   * Test the set of lastUpdated values.
    *
    * @param fhirClient to use
    * @param id the beneficiary id to use
@@ -1573,6 +1581,13 @@ public final class R4PatientResourceProviderIT {
     }
   }
 
+  /**
+   * Compares an expected patient to a {@link Beneficiary} transformed into a patient.
+   *
+   * @param beneficiary the beneficiary to test
+   * @param patient the expected patient
+   * @param headers the headers to use while transforming the bene
+   */
   private void comparePatient(Beneficiary beneficiary, Patient patient, RequestHeaders headers) {
     assertNotNull(patient);
 
@@ -1585,10 +1600,22 @@ public final class R4PatientResourceProviderIT {
     comparePatient(expected, patient);
   }
 
+  /**
+   * Compares an expected patient to a {@link Beneficiary} transformed into a patient.
+   *
+   * @param beneficiary the beneficiary
+   * @param patient the patient
+   */
   private void comparePatient(Beneficiary beneficiary, Patient patient) {
     comparePatient(beneficiary, patient, RequestHeaders.getHeaderWrapper());
   }
 
+  /**
+   * Compares a patient with another patient.
+   *
+   * @param expected the expected patient
+   * @param patient the patient to test
+   */
   private void comparePatient(Patient expected, Patient patient) {
     // The ID returned from the FHIR client differs from the transformer.  It adds URL information.
     // Here we verify that the resource it is pointing to is the same, and then set up to do a deep
@@ -1603,6 +1630,11 @@ public final class R4PatientResourceProviderIT {
     assertTrue(expected.equalsDeep(patient));
   }
 
+  /**
+   * Creates a FHIR client with 'include identifiers' set in the header.
+   *
+   * @return the client
+   */
   public static IGenericClient createFhirClientWithIncludeIdentifiersMbi() {
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(

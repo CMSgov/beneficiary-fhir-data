@@ -11,7 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/** A link builder for Patient resources using bene-id cursors */
+/** A link builder for Patient resources using bene-id cursors. */
 public final class PatientLinkBuilder implements LinkBuilder {
   /**
    * Maximum page size is one less than the maximum integer value to allow clients to request one
@@ -20,13 +20,23 @@ public final class PatientLinkBuilder implements LinkBuilder {
    */
   public static final int MAX_PAGE_SIZE = Integer.MAX_VALUE - 1;
 
+  /** The uri components. */
   private final UriComponents components;
+  /** The count. */
   private final Integer count;
+  /** The cursor value. */
   private final Long cursor;
+  /** If there is another page for this link. */
   private final boolean hasAnotherPage;
 
+  /** Represents the text for the cursor parameter. */
   public static final String PARAM_CURSOR = "cursor";
 
+  /**
+   * Instantiates a new Patient link builder.
+   *
+   * @param requestString the request string
+   */
   public PatientLinkBuilder(String requestString) {
     components = UriComponentsBuilder.fromUriString(requestString).build();
     count = extractCountParam(components);
@@ -35,6 +45,12 @@ public final class PatientLinkBuilder implements LinkBuilder {
     validate();
   }
 
+  /**
+   * Instantiates a new Patient link builder from an existing builder.
+   *
+   * @param prev the previous builder
+   * @param hasAnotherPage if there is another page
+   */
   public PatientLinkBuilder(PatientLinkBuilder prev, boolean hasAnotherPage) {
     components = prev.components;
     count = prev.count;
@@ -43,10 +59,14 @@ public final class PatientLinkBuilder implements LinkBuilder {
     validate();
   }
 
-  /** Check that the page size is valid */
+  /**
+   * Check that the page size is valid.
+   *
+   * @throws InvalidRequestException (http 400 error) if the page size is invalid
+   */
   private void validate() {
     if (getPageSize() <= 0) {
-      throw new InvalidRequestException("A zero or negative page size is unsupported");
+      throw new InvalidRequestException("Value for pageSize cannot be zero or negative: %s");
     }
     if (!(getPageSize() <= MAX_PAGE_SIZE)) {
       throw new InvalidRequestException("Page size must be less than " + MAX_PAGE_SIZE);
@@ -122,27 +142,54 @@ public final class PatientLinkBuilder implements LinkBuilder {
     }
   }
 
+  /**
+   * Gets the {@link #cursor}.
+   *
+   * @return the cursor
+   */
   public Long getCursor() {
     return cursor;
   }
 
+  /**
+   * Extracts the count from the component object.
+   *
+   * @param components the components
+   * @return the count, or {@code null} if the count text was {@code null} in the compntent object
+   * @throws InvalidRequestException (http 400 error) if the count could not be parsed into an
+   *     integer
+   */
   private Integer extractCountParam(UriComponents components) {
     String countText = components.getQueryParams().getFirst(Constants.PARAM_COUNT);
     if (countText != null) {
       try {
         return Integer.parseInt(countText);
       } catch (NumberFormatException ex) {
-        throw new InvalidRequestException("Invalid _count parameter: " + countText);
+        throw new InvalidRequestException(
+            String.format(
+                "Invalid argument in request URL: %s must be a number.", Constants.PARAM_COUNT));
       }
     }
     return null;
   }
 
+  /**
+   * Extracts the cursor from the component object.
+   *
+   * @param components the components
+   * @return the cursor, or {@code null} if the cursor text was {@code null} in the component object
+   */
   private Long extractCursorParam(UriComponents components) {
     String cursorText = components.getQueryParams().getFirst(PARAM_CURSOR);
     return cursorText != null && cursorText.length() > 0 ? Long.parseLong(cursorText) : null;
   }
 
+  /**
+   * Builds the url string using the cursor.
+   *
+   * @param cursor the cursor
+   * @return the url string
+   */
   private String buildUrl(Long cursor) {
     MultiValueMap<String, String> params = components.getQueryParams();
     if (cursor != null) {

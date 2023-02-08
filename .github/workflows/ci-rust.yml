@@ -2,7 +2,8 @@ name: 'CI - Rust'
 on:
   pull_request:
     paths:
-      - apps/utils/db-query-checker
+      - .github/workflows/ci-rust.yml
+      - apps/utils/db-query-checker/*
 
 jobs:
 

@@ -49,14 +49,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link CarrierClaimTransformerV2}. */
 public class CarrierClaimTransformerV2Test {
+  /** The claim under test. */
   CarrierClaim claim;
+  /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
+  /** The fhir context for parsing the file data. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
+
   /**
-   * Generates the Claim object to be used in multiple tests
+   * Generates the sample A claim object to be used in multiple tests.
    *
-   * @return claim object
-   * @throws FHIRException
+   * @return the claim object
+   * @throws FHIRException if there is an issue parsing the claim
    */
   public CarrierClaim generateClaim() throws FHIRException {
     List<Object> parsedRecords =
@@ -74,6 +80,11 @@ public class CarrierClaimTransformerV2Test {
     return claim;
   }
 
+  /**
+   * Loads the test data needed for each test.
+   *
+   * @throws IOException if there is an issue loading the file
+   */
   @BeforeEach
   public void before() throws IOException {
     claim = generateClaim();
@@ -91,10 +102,9 @@ public class CarrierClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformerV2#transform(MetricRegistry, Object,
-   * Optional<Boolean>)} works as expected when run against the {@link
-   * StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
+   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformerV2#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
+   * InpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -113,12 +123,11 @@ public class CarrierClaimTransformerV2Test {
             claim));
   }
 
-  private static final FhirContext fhirContext = FhirContext.forR4();
-
   /**
-   * Serializes the EOB and prints to the command line
+   * Serializes the EOB and prints to the command line.
    *
-   * @throws FHIRException
+   * @throws FHIRException if there is an issue with transforming the claim
+   * @throws IOException if there is an issue with reading the test file
    */
   @Disabled
   @Test
@@ -134,6 +143,11 @@ public class CarrierClaimTransformerV2Test {
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
+  /**
+   * Tests that the transformer sets the billable period.
+   *
+   * @throws Exception should not be thrown
+   */
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
@@ -145,6 +159,18 @@ public class CarrierClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"), eob.getBillablePeriod().getEnd());
   }
 
+  /** Verifies that a {@link CarrierClaim} has a Billing NPI Number. */
+  @Test
+  public void shouldHaveBillingNPINum() throws Exception {
+    // We just want to make sure it is set
+    assertNotNull(eob.getProvider().getIdentifier());
+    assertEquals(
+        "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+        eob.getProvider().getIdentifier().getSystem());
+    assertEquals("1234567890", eob.getProvider().getIdentifier().getValue());
+  }
+
+  /** Tests that the transformer sets the expected identifiers. */
   @Test
   public void shouldHaveIdentifiers() {
     assertEquals(2, eob.getIdentifier().size());
@@ -178,11 +204,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare2.equalsDeep(clmGrp2));
   }
 
+  /** Tests that the transformer sets the expected number of extensions for this claim type. */
   @Test
-  public void shouldHaveEstensions() {
+  public void shouldHaveExtensions() {
     assertEquals(7, eob.getExtension().size());
   }
 
+  /** Tests that the transformer sets the expected "near line" extensions. */
   @Test
   public void shouldHaveExtensionsWithNearLineCode() {
     Extension ex =
@@ -201,6 +229,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected carrier number extensions. */
   @Test
   public void shouldHaveExtensionsWithCarrierNumber() {
     Extension ex =
@@ -218,6 +247,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected carrier claim control number extensions. */
   @Test
   public void shouldHaveExtensionsWithCarrierClaimControlNumber() {
 
@@ -237,6 +267,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected payment download code extensions. */
   @Test
   public void shouldHaveExtensionsWithCarrierClaimPaymentDownloadCode() {
 
@@ -257,6 +288,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected assigned claim extensions. */
   @Test
   public void shouldHaveExtensionsWithCarrierAssignedClaim() {
 
@@ -276,6 +308,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected clinical trial number extensions. */
   @Test
   public void shouldHaveExtensionsWithClaimClinicalTrailNumber() {
 
@@ -296,6 +329,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected claim entry code extensions. */
   @Test
   public void shouldHaveExtensionsWithClaimEntryCodeNumber() {
 
@@ -316,12 +350,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /** SupportingInfo items */
+  /** Tests that the transformer sets the expected number of supporting info entries. */
   @Test
   public void shouldHaveSupportingInfoList() {
     assertEquals(2, eob.getSupportingInfo().size());
   }
 
+  /** Tests that the transformer sets the expected supporting info claim received date. */
   @Test
   public void shouldHaveSupportingInfoListForClaimReceivedDate() {
 
@@ -348,6 +383,11 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected supporting info line observation info.
+   *
+   * <p>TODO: Is this test named correctly?
+   */
   @Test
   public void shouldHaveSupportingInfoListForClaimReceivedDate2() {
 
@@ -374,43 +414,51 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected creation date. */
   @Test
   public void shouldHaveCreatedDate() {
     assertNotNull(eob.getCreated());
   }
 
+  /** Tests that the transformer sets the expected patient reference. */
   @Test
   public void shouldReferencePatient() {
     assertNotNull(eob.getPatient());
     assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
+  /** Tests that the transformer sets the expected insurance coverage reference. */
   @Test
   public void shouldInsuranceCoverage() {
     assertNotNull(eob.getInsurance());
     assertEquals("Coverage/part-b-567834", eob.getInsurance().get(0).getCoverage().getReference());
   }
 
+  /** Tests that the transformer sets the expected final action status. */
   @Test
   public void shouldSetFinalAction() {
     assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
+  /** Tests that the transformer sets the expected 'nature of request' value. */
   @Test
   public void shouldSetUse() {
     assertEquals(Use.CLAIM, eob.getUse());
   }
 
+  /** Tests that the transformer sets the expected id. */
   @Test
   public void shouldSetID() {
     assertEquals("ExplanationOfBenefit/carrier-" + claim.getClaimId(), eob.getId());
   }
 
+  /** Tests that the transformer sets the expected last updated date in the metadata. */
   @Test
   public void shouldSetLastUpdated() {
     assertNotNull(eob.getMeta().getLastUpdated());
   }
 
+  /** Tests that the transformer sets the expected Coding for line item produce/service. */
   @Test
   public void shouldHaveLineItemProductOrServiceCoding() {
     CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
@@ -431,6 +479,9 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(pos));
   }
 
+  /**
+   * Tests that the transformer sets the expected Supporting Information for claim received date.
+   */
   @Test
   public void shouldHaveClaimReceivedDateSupInfo() {
     SupportingInformationComponent sic =
@@ -456,12 +507,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
-  /** Diagnosis elements */
+  /** Tests that the transformer sets the expected number of diagnosis. */
   @Test
   public void shouldHaveDiagnosesList() {
     assertEquals(5, eob.getDiagnosis().size());
   }
 
+  /** Tests that the transformer sets the expected diagnosis entries. */
   @Test
   public void shouldHaveDiagnosesMembers() {
 
@@ -560,12 +612,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
   }
 
-  /** Top level Type */
+  /** Tests that the transformer sets the expected number of top level category type codings. */
   @Test
   public void shouldHaveExpectedTypeCoding() {
     assertEquals(3, eob.getType().getCoding().size());
   }
 
+  /** Tests that the transformer sets the expected values for the top level type codings. */
   @Test
   public void shouldHaveExpectedCodingValues() {
     CodeableConcept compare =
@@ -588,17 +641,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getType()));
   }
 
-  /**
-   * CareTeam list
-   *
-   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
-   * are added in the same order. This means we can look them up by sequence number.
-   */
+  /** Tests that the transformer sets the expected number of care team entries. */
   @Test
   public void shouldHaveCareTeamList() {
     assertEquals(4, eob.getCareTeam().size());
   }
 
+  /** Tests that the transformer sets the expected values for the care team member entries. */
   @Test
   public void shouldHaveCareTeamMembers() {
     // First member
@@ -674,11 +723,9 @@ public class CarrierClaimTransformerV2Test {
   }
 
   /**
-   * CareTeam list
+   * Tests the care team entries have the expected number of entries.
    *
-   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
-   * are added in the same order. This means we can look them up by sequence number. There should be
-   * a total of 4 unique care team members.
+   * <p>TODO: This seems like a removable duplicate of the above test(s)
    */
   @Test
   public void shouldHaveFourCareTeamEntries() throws IOException {
@@ -709,6 +756,7 @@ public class CarrierClaimTransformerV2Test {
     assertEquals(4, eob.getCareTeam().size());
   }
 
+  /** Tests that the transformer sets the expected line item quantity. */
   @Test
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
@@ -718,6 +766,10 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(quantity));
   }
 
+  /**
+   * Tests that the transformer sets the expected line item extensions and has the correct number of
+   * them.
+   */
   @Test
   public void shouldHaveLineItemExtension() {
     assertNotNull(eob.getItemFirstRep().getExtension());
@@ -826,11 +878,13 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare7.equalsDeep(ex7));
   }
 
+  /** Tests that the transformer sets the expected number of line item adjudications. */
   @Test
   public void shouldHaveLineItemAdjudications() {
     assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
   }
 
+  /** Tests that the transformer sets the expected line item denial reason adjudication entries. */
   @Test
   public void shouldHaveLineItemDenialReasonAdjudication() {
     AdjudicationComponent adjudication =
@@ -859,6 +913,9 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected line item paid to patient adjudication entries.
+   */
   @Test
   public void shouldHaveLineItemPaidToPatientAdjudication() {
     AdjudicationComponent adjudication =
@@ -884,6 +941,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item benefit adjudication entries. */
   @Test
   public void shouldHaveLineItemBenefitAdjudication() {
     AdjudicationComponent adjudication =
@@ -917,6 +975,9 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected line item paid to provider adjudication entries.
+   */
   @Test
   public void shouldHaveLineItemPaidToProviderAdjudication() {
     AdjudicationComponent adjudication =
@@ -943,6 +1004,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item deductible adjudication. */
   @Test
   public void shouldHaveLineItemDeductibleAdjudication() {
     AdjudicationComponent adjudication =
@@ -968,6 +1030,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected prior payer paid adjudication. */
   @Test
   public void shouldHaveLineItemPriorPayerPaidAdjudication() {
     AdjudicationComponent adjudication =
@@ -993,6 +1056,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item co-insurance adjudication entries. */
   @Test
   public void shouldHaveLineItemCoInsuranceAdjudication() {
     AdjudicationComponent adjudication =
@@ -1019,6 +1083,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item submitted adjudication entries. */
   @Test
   public void shouldHaveLineItemSubmittedAdjudication() {
     AdjudicationComponent adjudication =
@@ -1044,6 +1109,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item eligible adjudication entries. */
   @Test
   public void shouldHaveLineItemEligibleAdjudication() {
     AdjudicationComponent adjudication =
@@ -1070,11 +1136,15 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected number of benefit balance financial entries. */
   @Test
   public void shouldHaveBenefitBalanceFinancial() {
     assertEquals(5, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
+  /**
+   * Tests that the transformer sets the expected claim pass thru cash deductible financial entries.
+   */
   @Test
   public void shouldHaveClmPassThruCashDeductibleFinancial() {
     BenefitComponent benefit =
@@ -1100,6 +1170,10 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected claim pass thru claim provider payment amount
+   * entries.
+   */
   @Test
   public void shouldHaveClmPassThruClaimProviderPaymentAmountFinancial() {
     BenefitComponent benefit =
@@ -1125,6 +1199,10 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected claim pass thru claim provider payment amount to
+   * beneficiary entries.
+   */
   @Test
   public void shouldHaveClmPassThruClaimProviderPaymentAmountToBeneficiaryFinancial() {
     BenefitComponent benefit =
@@ -1150,6 +1228,10 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected claim pass thru submitted charge financial
+   * entries.
+   */
   @Test
   public void shouldHaveClmPassThruClaimSubmittedChargeFinancial() {
     BenefitComponent benefit =
@@ -1175,6 +1257,9 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected claim pass thru allowed charge financial entries.
+   */
   @Test
   public void shouldHaveClmPassThruClaimAllowedChargeFinancial() {
     BenefitComponent benefit =
@@ -1200,6 +1285,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected claim total charge amount entries. */
   @Test
   public void shouldHaveClmTotChrgAmtTotal() {
     // Only one so just pull it directly and compare
@@ -1224,7 +1310,7 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(total));
   }
 
-  /** Procedures */
+  /** Tests that the transformer sets the expected number of procedure entries. */
   @Test
   public void shouldHaveProcedureList() {
     assertEquals(0, eob.getProcedure().size());

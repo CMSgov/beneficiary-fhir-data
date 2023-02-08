@@ -22,12 +22,13 @@ import org.hl7.fhir.r4.model.codesystems.ClaimType;
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
 public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
+  /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
-   * mappings
+   * mappings.
    */
   private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME =
       Map.ofEntries(
@@ -43,15 +44,20 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
           Map.entry('t', ClaimResponse.RemittanceOutcome.PARTIAL),
           Map.entry('u', ClaimResponse.RemittanceOutcome.COMPLETE));
 
+  /** Instantiates a new Fiss claim response transformer v2. */
   private FissClaimResponseTransformerV2() {}
 
   /**
+   * Transforms a claim entity into a {@link ClaimResponse}.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
+  static ClaimResponse transform(
+      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }

@@ -27,10 +27,12 @@ import org.springframework.stereotype.Component;
 @Component
 public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationOfBenefit> {
 
-  // Valid system url for productOrService coding
+  /** Valid system url for productOrService coding. */
   private static final Set<String> HCPCS_SYSTEM = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
-  // Additional valid coding system URL for backwards-compatibility
-  // See: https://jira.cms.gov/browse/BFD-1345
+  /**
+   * Additional valid coding system URL for backwards-compatibility. See:
+   * https://jira.cms.gov/browse/BFD-1345.
+   */
   private static final Set<String> BACKWARDS_COMPATIBLE_HCPCS_SYSTEM =
       Set.of(
           TransformerConstants.CODING_SYSTEM_HCPCS,

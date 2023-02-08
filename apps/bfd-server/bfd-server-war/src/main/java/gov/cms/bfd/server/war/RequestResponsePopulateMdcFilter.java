@@ -29,13 +29,15 @@ import org.slf4j.LoggerFactory;
  * after each request, only partially.)
  */
 public final class RequestResponsePopulateMdcFilter implements Filter {
+  /** The logger for this filter. */
   private static final Logger LOGGER_MISC =
       LoggerFactory.getLogger(RequestResponsePopulateMdcFilter.class);
 
+  /** Used to compute the MDC key. */
   private static final String MDC_PREFIX = "http_access";
-
+  /** Prefix for requests. */
   private static final String REQUEST_PREFIX = "request";
-
+  /** Prefix for responses. */
   private static final String RESPONSE_PREFIX = "response";
 
   /** {@inheritDoc} */
@@ -56,7 +58,11 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
     }
   }
 
-  /** @param request the {@link ServletRequest} to record the standard {@link BfdMDC} entries for */
+  /**
+   * Handles populating the MDC logger for http requests.
+   *
+   * @param request the {@link ServletRequest} to record the standard {@link BfdMDC} entries for
+   */
   private static void handleRequest(ServletRequest request) {
     request.setAttribute(BfdMDC.REQUEST_START_KEY, System.currentTimeMillis());
 
@@ -109,6 +115,8 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
   }
 
   /**
+   * Gets the {@link X500Principal#getName()} for the client certificate if available.
+   *
    * @param request the {@link HttpServletRequest} to get the client principal DN (if any) for
    * @return the {@link X500Principal#getName()} for the client certificate, or <code>null</code> if
    *     that's not available
@@ -128,6 +136,9 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
   }
 
   /**
+   * Gets the {@link X509Certificate} for the {@link HttpServletRequest}'s client SSL certificate if
+   * available.
+   *
    * @param request the {@link HttpServletRequest} to get the client SSL certificate for
    * @return the {@link X509Certificate} for the {@link HttpServletRequest}'s client SSL
    *     certificate, or <code>null</code> if that's not available
@@ -143,6 +154,8 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
   }
 
   /**
+   * Handles populating the MDC logger for http responses.
+   *
    * @param request the {@link ServletRequest} to record the standard {@link BfdMDC} entries for
    * @param response the {@link ServletResponse} to record the standard {@link BfdMDC} entries for
    */

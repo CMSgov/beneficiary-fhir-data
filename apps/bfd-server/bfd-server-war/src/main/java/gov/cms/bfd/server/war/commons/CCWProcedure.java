@@ -7,6 +7,7 @@ import java.util.Optional;
 /** Models a ccwProcedure code entry in a claim. */
 public final class CCWProcedure extends IcdCode {
 
+  /** The procedure date. */
   private Optional<LocalDate> procedureDate;
 
   /**
@@ -31,7 +32,11 @@ public final class CCWProcedure extends IcdCode {
     this.procedureDate = procedureDate;
   }
 
-  /** @return the ICD procedure date or {@link Optional#empty()} if no date is present */
+  /**
+   * Gets the {@link #procedureDate}.
+   *
+   * @return the ICD procedure date or {@link Optional#empty()} if no date is present
+   */
   public Optional<LocalDate> getProcedureDate() {
     return procedureDate;
   }

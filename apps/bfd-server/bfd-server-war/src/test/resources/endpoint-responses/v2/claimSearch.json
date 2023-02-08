@@ -73,19 +73,6 @@
                 "type": {
                   "coding": [
                     {
-                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                      "code": "TAX",
-                      "display": "Tax ID number"
-                    }
-                  ]
-                },
-                "system": "https://bluebutton.cms.gov/resources/variables/fiss/fed-tax-nb",
-                "value": "abc123"
-              },
-              {
-                "type": {
-                  "coding": [
-                    {
                       "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
                       "code": "npi",
                       "display": "National Provider Identifier"
@@ -367,19 +354,6 @@
               }
             ],
             "identifier": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                      "code": "TAX",
-                      "display": "Tax ID number"
-                    }
-                  ]
-                },
-                "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-ein",
-                "value": "1231231231"
-              },
               {
                 "type": {
                   "coding": [

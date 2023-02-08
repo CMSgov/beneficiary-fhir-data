@@ -148,7 +148,11 @@ public final class PipelineManager implements AutoCloseable {
     jobRecordStore.submitPendingJob(SchedulerJob.JOB_TYPE, null);
   }
 
-  /** @return the {@link ListeningScheduledExecutorService} to use for {@link #jobExecutor} */
+  /**
+   * Creates an executor to listen for and run jobs.
+   *
+   * @return the {@link ListeningScheduledExecutorService} to use for {@link #jobExecutor}
+   */
   private static ListeningScheduledExecutorService createJobExecutor() {
     ScheduledThreadPoolExecutor jobExecutorInner =
         new ScheduledThreadPoolExecutor(JOB_EXECUTOR_THREADS);
@@ -188,6 +192,8 @@ public final class PipelineManager implements AutoCloseable {
   }
 
   /**
+   * Gets the set of jobs that have registered schedules.
+   *
    * @return the {@link Set} of jobs registered via {@link #registerJob(PipelineJob)} that have
    *     {@link PipelineJob#getSchedule()} values
    */
@@ -271,6 +277,7 @@ public final class PipelineManager implements AutoCloseable {
         jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
         jobsEnqueuedHandles.remove(jobRecordId);
       }
+      LOGGER.error("Handle job failure in Pipeline: " + exception.getMessage(), exception);
     }
   }
 
@@ -292,7 +299,7 @@ public final class PipelineManager implements AutoCloseable {
    * Handle normal job completion by de-queueing and recording completion.
    *
    * @param jobRecordId the {@link PipelineJobRecord} of the job
-   * @param jobOutcome
+   * @param jobOutcome the outcome of the job to record
    */
   private void handleJobCompletion(PipelineJobRecordId jobRecordId, PipelineJobOutcome jobOutcome) {
     synchronized (jobsEnqueuedHandles) {
@@ -378,7 +385,7 @@ public final class PipelineManager implements AutoCloseable {
     timerStop.stop();
   }
 
-  /** @see java.lang.AutoCloseable#close() */
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     stop();
@@ -393,7 +400,9 @@ public final class PipelineManager implements AutoCloseable {
    *     implementations which do not need arguments)
    */
   private static final class PipelineJobHandle<A extends PipelineJobArguments> {
+    /** The {@link PipelineJob} that the paired {@link Future} is for. */
     private final PipelineJob<A> job;
+    /** The {@link Future} representing an execution of the paired {@link PipelineJob}. */
     private final Future<PipelineJobOutcome> future;
 
     /**
@@ -426,7 +435,9 @@ public final class PipelineManager implements AutoCloseable {
    *     implementations which do not need arguments)
    */
   private final class PipelineJobWrapper<A extends PipelineJobArguments> implements PipelineJob<A> {
+    /** The {@link PipelineJob} to wrap and monitor. */
     private final PipelineJob<A> wrappedJob;
+    /** The {@link PipelineJobRecord} for the job to wrap and monitor. */
     private final PipelineJobRecord<A> jobRecord;
 
     /**
@@ -441,30 +452,34 @@ public final class PipelineManager implements AutoCloseable {
       jobRecordStore.recordJobEnqueue(jobRecord.getId());
     }
 
-    /** @return the {@link PipelineJobRecord} for this {@link PipelineJobWrapper} */
+    /**
+     * Gets the {@link #jobRecord}.
+     *
+     * @return the {@link PipelineJobRecord} for this {@link PipelineJobWrapper}
+     */
     public PipelineJobRecord<A> getJobRecord() {
       return jobRecord;
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getType() */
+    /** {@inheritDoc} */
     @Override
     public PipelineJobType<A> getType() {
       return wrappedJob.getType();
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+    /** {@inheritDoc} */
     @Override
     public Optional<PipelineJobSchedule> getSchedule() {
       return wrappedJob.getSchedule();
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+    /** {@inheritDoc} */
     @Override
     public boolean isInterruptible() {
       return wrappedJob.isInterruptible();
     }
 
-    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+    /** {@inheritDoc} */
     @Override
     public PipelineJobOutcome call() throws Exception {
       jobRecordStore.recordJobStart(jobRecord.getId());
@@ -483,6 +498,8 @@ public final class PipelineManager implements AutoCloseable {
 
         // Restore the interrupt so things can get back to shutting down.
         Thread.currentThread().interrupt();
+        LOGGER.error(
+            "PipeLineJobOutcome interrupt failed with the the following: " + e.getMessage(), e);
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         handleJobFailure(jobRecord.getId(), e);
@@ -499,25 +516,25 @@ public final class PipelineManager implements AutoCloseable {
    */
   private final class PipelineJobCallback<A extends PipelineJobArguments>
       implements FutureCallback<PipelineJobOutcome> {
+    /** The {@link PipelineJobRecordId} that this {@link PipelineJobCallback} is for. */
     private final PipelineJobRecord<A> jobRecord;
 
     /**
      * Constructs a new {@link PipelineJobWrapper} for the specified {@link PipelineJob}.
      *
      * @param jobRecord the {@link PipelineJobRecordId} that this {@link PipelineJobCallback} is for
-     * @param jobRecordStore the {@link PipelineJobRecordStore} to send job monitoring data to
      */
     public PipelineJobCallback(PipelineJobRecord<A> jobRecord) {
       this.jobRecord = jobRecord;
     }
 
-    /** @see com.google.common.util.concurrent.FutureCallback#onSuccess(java.lang.Object) */
+    /** {@inheritDoc} */
     @Override
     public void onSuccess(PipelineJobOutcome result) {
       // Nothing to do here.
     }
 
-    /** @see com.google.common.util.concurrent.FutureCallback#onFailure(java.lang.Throwable) */
+    /** {@inheritDoc} */
     @Override
     public void onFailure(Throwable jobThrowable) {
       if (jobThrowable instanceof CancellationException) {
@@ -528,6 +545,8 @@ public final class PipelineManager implements AutoCloseable {
          */
         handleJobCancellation(jobRecord.getId());
       }
+      LOGGER.error(
+          "OnFailure Job Pipeline failed with: " + jobThrowable.getMessage(), jobThrowable);
     }
   }
 }

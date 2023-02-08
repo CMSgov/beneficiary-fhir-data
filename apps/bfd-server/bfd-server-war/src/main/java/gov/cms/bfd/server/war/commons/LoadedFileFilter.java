@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.Instant;
 import org.apache.spark.util.sketch.BloomFilter;
 
@@ -11,23 +12,25 @@ import org.apache.spark.util.sketch.BloomFilter;
  * href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom Filters</a>) which are space efficient.
  */
 public class LoadedFileFilter {
+  /** False positive percentage value used in creating the bloom filter. */
   public static final double FALSE_POSITIVE_PERCENTAGE = 0.01;
 
-  // The entry of the LoadedFiles table
+  /** The entry of the LoadedFiles table. */
   private final long loadedFileId;
 
-  // batches in the filters
+  /** The count of batches in the filters. */
   private final int batchesCount;
 
-  // The interval of time when the RIF load took place
+  /** The start time the RIF load took place. */
   private final Instant firstUpdated;
+  /** The end time the RIF load took place. */
   private final Instant lastUpdated;
 
-  // The beneficiaries that were updated in the RIF load
+  /** The beneficiaries that were updated in the RIF load. */
   private final BloomFilter updatedBeneficiaries;
 
   /**
-   * Build a filter for a LoadedFile
+   * Build a filter for a LoadedFile.
    *
    * @param loadedFileId for this filter
    * @param batchesCount of the number of batches in this filter
@@ -71,7 +74,7 @@ public class LoadedFileFilter {
           }
           break;
         default:
-          throw new IllegalArgumentException("Invalid upper bound in _lastUpdated");
+          throw new InvalidRequestException("Invalid upper bound in _lastUpdated");
       }
     }
 
@@ -89,7 +92,7 @@ public class LoadedFileFilter {
           }
           break;
         default:
-          throw new IllegalArgumentException("Invalid lower bound in _lastUpdated");
+          throw new InvalidRequestException("Invalid lower bound in _lastUpdated");
       }
     }
 
@@ -97,7 +100,7 @@ public class LoadedFileFilter {
   }
 
   /**
-   * Might the filter contain the passed in beneficiary
+   * Determines if the filter might contain the passed in beneficiary.
    *
    * @param beneficiaryId to test
    * @return true if the filter may contain the beneficiary
@@ -106,28 +109,44 @@ public class LoadedFileFilter {
     return updatedBeneficiaries.mightContain(beneficiaryId);
   }
 
-  /** @return the fileId */
+  /**
+   * Gets the {@link #loadedFileId}.
+   *
+   * @return the fileId
+   */
   public long getLoadedFileId() {
     return loadedFileId;
   }
 
-  /** @return the firstUpdated */
+  /**
+   * Gets the {@link #firstUpdated}.
+   *
+   * @return the firstUpdated
+   */
   public Instant getFirstUpdated() {
     return firstUpdated;
   }
 
-  /** @return the lastUpdated */
+  /**
+   * Gets the {@link #lastUpdated}.
+   *
+   * @return the lastUpdated
+   */
   public Instant getLastUpdated() {
     return lastUpdated;
   }
 
-  /** @return the updatedBeneficiaries */
+  /**
+   * Gets the {@link #updatedBeneficiaries}.
+   *
+   * @return the updatedBeneficiaries
+   */
   public BloomFilter getUpdatedBeneficiaries() {
     return updatedBeneficiaries;
   }
 
   /**
-   * Create a bloom filter with passed size
+   * Create a bloom filter with passed size.
    *
    * @param count to allocate
    * @return a new BloomFilter
@@ -136,6 +155,11 @@ public class LoadedFileFilter {
     return BloomFilter.create(count, FALSE_POSITIVE_PERCENTAGE);
   }
 
+  /**
+   * Gets the {@link #batchesCount}.
+   *
+   * @return the batches count
+   */
   public int getBatchesCount() {
     return batchesCount;
   }

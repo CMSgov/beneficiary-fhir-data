@@ -66,10 +66,20 @@ public enum StaticRifResource {
   SAMPLE_A_INPATIENT(
       resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
+  SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE(
+      resourceUrl("rif-static-samples/sample-a-inpatient-with-four-character-drg-code.txt"),
+      RifFileType.INPATIENT,
+      1),
+
   SAMPLE_A_OUTPATIENT(
       resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
   SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
+
+  SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE(
+      resourceUrl("rif-static-samples/sample-a-snf-with-four-character-drg-code.txt"),
+      RifFileType.SNF,
+      1),
 
   SAMPLE_A_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 

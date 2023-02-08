@@ -6,22 +6,22 @@ package gov.cms.bfd.server.war.commons.carin;
  * Identifier Type</a>.
  */
 public enum C4BBIdentifierType {
-  /** National Provider Identifier. * */
+  /** National Provider Identifier. */
   NPI,
-  /** Payer ID. * */
+  /** Payer ID. */
   PAYERID,
-  /** NAIC Code. * */
+  /** NAIC Code. */
   NAICCODE,
-  /** Patient Account Number. * */
+  /** Patient Account Number. */
   PAT,
   /**
    * Indicates that the patient identifier is a unique member identifier assigned by a payer across
-   * all lines of business. *
+   * all lines of business.
    */
   UM,
   /**
    * Indicates that the claim identifier is that assigned by a payer for a claim received from a
-   * provider or subscriber. *
+   * provider or subscriber.
    */
   UC;
 

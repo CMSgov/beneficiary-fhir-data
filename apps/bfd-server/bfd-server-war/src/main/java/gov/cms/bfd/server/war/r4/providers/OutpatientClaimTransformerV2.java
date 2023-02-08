@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
@@ -30,6 +31,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 public class OutpatientClaimTransformerV2 {
 
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -56,8 +59,10 @@ public class OutpatientClaimTransformerV2 {
   }
 
   /**
+   * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
@@ -164,13 +169,9 @@ public class OutpatientClaimTransformerV2 {
     // Common group level fields between Inpatient, Outpatient and SNF
     // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM =>
     // ExplanationOfBenefit.benefitBalance.financial
-    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     // CLM_MCO_PD_SW => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
-        eob,
-        claimGroup.getBloodDeductibleLiabilityAmount(),
-        claimGroup.getClaimQueryCode(),
-        claimGroup.getMcoPaidSw());
+        eob, claimGroup.getBloodDeductibleLiabilityAmount(), claimGroup.getMcoPaidSw());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
@@ -185,6 +186,7 @@ public class OutpatientClaimTransformerV2 {
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Outpatient for Outpatient Claims
+    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -201,7 +203,8 @@ public class OutpatientClaimTransformerV2 {
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
-        C4BBInstutionalClaimSubtypes.Outpatient);
+        C4BBInstutionalClaimSubtypes.Outpatient,
+        Optional.of(claimGroup.getClaimQueryCode()));
 
     // Handle Diagnosis
     // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept

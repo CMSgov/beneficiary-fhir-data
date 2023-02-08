@@ -6,7 +6,7 @@ package gov.cms.bfd.server.war.commons.carin;
  * C4BB Claim Institutional Care Team Role</a>.
  */
 public enum C4BBClaimInstitutionalCareTeamRole {
-  /** The primary care provider.* */
+  /** The primary care provider. */
   PRIMARY,
   /** The attending physician. * */
   ATTENDING,

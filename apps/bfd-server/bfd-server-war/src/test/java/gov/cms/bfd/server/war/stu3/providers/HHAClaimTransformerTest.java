@@ -23,12 +23,11 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.HHAClaimTransformer}. */
+/** Unit tests for {@link HHAClaimTransformer}. */
 public final class HHAClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.HHAClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
+   * Verifies that {@link HHAClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

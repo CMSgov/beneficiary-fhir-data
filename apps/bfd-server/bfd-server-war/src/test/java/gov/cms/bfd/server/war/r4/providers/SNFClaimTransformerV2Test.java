@@ -53,15 +53,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for {@link SNFClaimTransformerV2}. */
 public class SNFClaimTransformerV2Test {
+  /** The parsed claim used to generate the EOB and for validating with. */
   SNFClaim claim;
+  /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+  /** The fhir context for parsing the test file. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
 
   /**
-   * Generates the Claim object to be used in multiple tests
+   * Generates the Claim object to be used in multiple tests.
    *
-   * @return
-   * @throws FHIRException
+   * @return the claim object
+   * @throws FHIRException if there was an issue creating the claim
    */
   public SNFClaim generateClaim() throws FHIRException {
     List<Object> parsedRecords =
@@ -77,6 +82,11 @@ public class SNFClaimTransformerV2Test {
     return claim;
   }
 
+  /**
+   * Sets up the claim and EOB before each test.
+   *
+   * @throws IOException if there is an issue reading the test file
+   */
   @BeforeEach
   public void before() throws IOException {
     claim = generateClaim();
@@ -93,18 +103,19 @@ public class SNFClaimTransformerV2Test {
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
-  private static final FhirContext fhirContext = FhirContext.forR4();
-
+  /** Tests that the transformer sets the expected id. */
   @Test
   public void shouldSetID() {
     assertEquals("ExplanationOfBenefit/snf-" + claim.getClaimId(), eob.getId());
   }
 
+  /** Tests that the transformer sets the expected last updated date in the metadata. */
   @Test
   public void shouldSetLastUpdated() {
     assertNotNull(eob.getMeta().getLastUpdated());
   }
 
+  /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it
@@ -115,20 +126,35 @@ public class SNFClaimTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL)));
   }
 
+  /** Tests that the transformer sets the expected 'nature of request' value. */
   @Test
   public void shouldSetUse() {
     assertEquals(Use.CLAIM, eob.getUse());
   }
 
+  /** Tests that the transformer sets the expected final action status. */
   @Test
   public void shouldSetFinalAction() {
     assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
+  /**
+   * Tests that the transformer sets the billable period.
+   *
+   * @throws Exception should not be thrown
+   */
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
     assertNotNull(eob.getBillablePeriod());
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
+    Coding valueCoding = (Coding) extension.getValue();
+    assertEquals("Final bill", valueCoding.getDisplay());
+    assertEquals("3", valueCoding.getCode());
+
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2013-12-01"),
         eob.getBillablePeriod().getStart());
@@ -136,17 +162,23 @@ public class SNFClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2013-12-18"), eob.getBillablePeriod().getEnd());
   }
 
+  /** Tests that the transformer sets the expected patient reference. */
   @Test
   public void shouldReferencePatient() {
     assertNotNull(eob.getPatient());
     assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
+  /** Tests that the transformer sets the expected creation date. */
   @Test
   public void shouldHaveCreatedDate() {
     assertNotNull(eob.getCreated());
   }
 
+  /**
+   * Tests that the transformer sets the expected number of facility type extensions and the correct
+   * values.
+   */
   @Test
   public void shouldHaveFacilityTypeExtension() {
     assertNotNull(eob.getFacility());
@@ -168,21 +200,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /**
-   * CareTeam list
-   *
-   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
-   * are added in the same order. This means we can look them up by sequence number.
-   */
+  /** Tests that the transformer sets the expected number of care team entries. */
   @Test
   public void shouldHaveCareTeamList() {
     assertEquals(4, eob.getCareTeam().size());
   }
 
-  /**
-   * Testing all of these in one test, just because there isn't a distinct identifier really for
-   * each
-   */
+  /** Tests that the transformer sets the expected values for the care team member entries. */
   @Test
   public void shouldHaveCareTeamMembers() {
     // First member
@@ -234,12 +258,15 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare4.equalsDeep(member4));
   }
 
-  /** SupportingInfo items */
+  /** Tests that the transformer sets the expected number of supporting info entries. */
   @Test
   public void shouldHaveSupportingInfoList() {
     assertEquals(15, eob.getSupportingInfo().size());
   }
 
+  /**
+   * Tests that the transformer sets the expected Supporting Information for claim received date.
+   */
   @Test
   public void shouldHaveClaimReceivedDateSupInfo() {
     SupportingInformationComponent sic =
@@ -265,6 +292,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim inpatient admission type codes. */
   @Test
   public void shouldHaveClmIpAdmsnTypeCdSupInfo() {
     SupportingInformationComponent sic =
@@ -295,6 +323,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim source admission type codes. */
   @Test
   public void shouldHaveClmSrcIpAdmsnCdSupInfo() {
     SupportingInformationComponent sic =
@@ -323,6 +352,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH verified non-covered stay from date supporting
+   * info.
+   */
   @Test
   public void shouldHaveNchVrfdNcvrdStayFromDtSupInfo() throws Exception {
     SupportingInformationComponent sic =
@@ -355,6 +388,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary medicare benefits exhausted date
+   * supporting info.
+   */
   @Test
   public void shouldHaveNchBeneMdcrBnftsExhtdDtISupInfo() {
     SupportingInformationComponent sic =
@@ -382,6 +419,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected diagnosis related group (MS-DRG) codes. */
   @Test
   public void shouldHaveClmDrgCdSupInfo() {
     SupportingInformationComponent sic =
@@ -408,6 +446,55 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests to make sure a four digit DiagnosisRelatedGroupCd exists for snf claims. */
+  @Test
+  public void shouldHaveFourCharacterDRGClmDrgCdSupInfo() throws IOException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_FOUR_CHARACTER_DRG_CODE.getResources()));
+
+    SNFClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(r -> (SNFClaim) r)
+            .findFirst()
+            .get();
+    ExplanationOfBenefit genEob =
+        SNFClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+    SupportingInformationComponent sic =
+        TransformerTestUtilsV2.findSupportingInfoByCode(
+            "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", eob.getSupportingInfo());
+
+    SupportingInformationComponent compare =
+        TransformerTestUtilsV2.createSupportingInfo(
+            // We don't care what the sequence number is here
+            sic.getSequence(),
+            // Category
+            Arrays.asList(
+                new Coding(
+                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+                    "info",
+                    "Information"),
+                new Coding(
+                    "https://bluebutton.cms.gov/resources/codesystem/information",
+                    "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
+                    "Claim Diagnosis Related Group Code (or MS-DRG Code)")),
+            // Code
+            new Coding("https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "6455", null));
+
+    assertTrue(compare.equalsDeep(sic));
+  }
+
+  /** Tests that the transformer sets the expected NCH patient status indicator codes. */
   @Test
   public void shouldHaveNchPtntStusIndCdSupInfo() {
     SupportingInformationComponent sic =
@@ -438,6 +525,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim HHA total visit count supporting info. */
   @Test
   public void shouldHaveAdmissionPeriodSupInfo() throws Exception {
     SupportingInformationComponent sic =
@@ -464,6 +552,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected NCH qualified stay from date supporting info. */
   @Test
   public void shouldHaveNchQlfydStayFromDtSupInfo() throws Exception {
     SupportingInformationComponent sic =
@@ -496,6 +585,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim PPS indicator code supporting info. */
   @Test
   public void shouldHaveClmPpsIndCdSupInfo() {
     SupportingInformationComponent sic =
@@ -526,6 +616,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected blood pints furnished supporting info. */
   @Test
   public void shouldHaveNchBloodPntsFrnshdQtySupInfo() {
     SupportingInformationComponent sic =
@@ -558,6 +649,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim PPS indicator code supporting info. */
   @Test
   public void shouldHaveClmMcoPdSwSupInfo() {
     SupportingInformationComponent sic =
@@ -588,6 +680,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected type of bill supporting info. */
   @Test
   public void shouldHaveTypeOfBillSupInfo() {
     SupportingInformationComponent sic =
@@ -612,6 +705,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected discharge status supporting info. */
   @Test
   public void shouldHaveDischargeStatusSupInfo() {
     SupportingInformationComponent sic =
@@ -635,6 +729,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer code supporting info. */
   @Test
   public void shouldHaveNchPrmryPyrCdSupInfo() {
     SupportingInformationComponent sic =
@@ -665,12 +760,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
-  /** Diagnosis elements */
+  /** Tests that the transformer sets the expected number of diagnosis. */
   @Test
   public void shouldHaveDiagnosesList() {
     assertEquals(5, eob.getDiagnosis().size());
   }
 
+  /** Tests that the transformer sets the expected diagnosis entries. */
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
@@ -760,12 +856,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp5.equalsDeep(diag5));
   }
 
-  /** Procedures */
+  /** Tests that the transformer sets the expected number of procedure entries. */
   @Test
   public void shouldHaveProcedureList() {
     assertEquals(1, eob.getProcedure().size());
   }
 
+  /** Tests that the transformer sets the expected procedure entries. */
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
@@ -780,7 +877,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 9214");
   }
 
-  /** Insurance */
+  /**
+   * Tests that the transformer sets the expected number of insurance entries with the expected
+   * values.
+   */
   @Test
   public void shouldReferenceCoverageInInsurance() {
     // Only one insurance object if there is more than we need to fix the focal set to point to the
@@ -798,17 +898,19 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(insurance));
   }
 
-  /** Line Items */
+  /** Tests that the transformer sets the expected number of line items. */
   @Test
   public void shouldHaveLineItems() {
     assertEquals(1, eob.getItem().size());
   }
 
+  /** Tests that the transformer sets the expected number of line item sequences. */
   @Test
   public void shouldHaveLineItemSequence() {
     assertEquals(1, eob.getItemFirstRep().getSequence());
   }
 
+  /** Tests that the transformer sets the expected line item care team reference. */
   @Test
   public void shouldHaveLineItemCareTeamRef() {
     // The order isn't important but this should reference a care team member
@@ -816,6 +918,7 @@ public class SNFClaimTransformerV2Test {
     assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
   }
 
+  /** Tests that the transformer sets the expected line item revenue codes. */
   @Test
   public void shouldHaveLineItemRevenue() {
     CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
@@ -835,6 +938,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(revenue));
   }
 
+  /** Tests that the transformer sets the expected Coding for line item produce/service. */
   @Test
   public void shouldHaveLineItemProductOrServiceCoding() {
     CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
@@ -849,6 +953,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(pos));
   }
 
+  /** Tests that the transformer sets the expected line location (address). */
   @Test
   public void shouldHaveLineItemLocation() {
     Address address = eob.getItemFirstRep().getLocationAddress();
@@ -858,6 +963,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(address));
   }
 
+  /** Tests that the transformer sets the expected line item quantity. */
   @Test
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
@@ -866,11 +972,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(quantity));
   }
 
+  /** Tests that the transformer sets the expected number of line item adjudications. */
   @Test
   public void shouldHaveLineItemAdjudications() {
     assertEquals(3, eob.getItemFirstRep().getAdjudication().size());
   }
 
+  /** Tests that the transformer sets the expected adjudication center rate amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrRateAmt() {
     AdjudicationComponent adjudication =
@@ -901,6 +1009,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected adjudication revenue center to charge amount. */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrTotChrgAmt() {
     AdjudicationComponent adjudication =
@@ -931,6 +1040,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected adjudication revenue center non-covered charge
+   * amount.
+   */
   @Test
   public void shouldHaveLineItemAdjudicationRevCntrNcvrdChrgAmt() {
     AdjudicationComponent adjudication =
@@ -961,6 +1074,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected claim total charge amount entries. */
   @Test
   public void shouldHaveClmTotChrgAmtTotal() {
     // Only one so just pull it directly and compare
@@ -986,7 +1100,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(total));
   }
 
-  /** Payment */
+  /** Tests that the transformer sets the expected payment value. */
   @Test
   public void shouldHavePayment() {
     PaymentComponent compare =
@@ -997,13 +1111,16 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getPayment()));
   }
 
-  /** Total */
+  /** Tests that the transformer sets the expected number of total entries. */
   @Test
   public void shouldHaveTotal() {
     assertEquals(1, eob.getTotal().size());
   }
 
-  /** Benefit Balance */
+  /**
+   * Tests that the transformer sets the expected number of benefit balance entries and the correct
+   * values.
+   */
   @Test
   public void shouldHaveBenefitBalance() {
     assertEquals(1, eob.getBenefitBalance().size());
@@ -1021,11 +1138,13 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getBenefitBalanceFirstRep().getCategory()));
   }
 
+  /** Tests that the transformer sets the expected number of benefit balance financial entries. */
   @Test
   public void shouldHaveBenefitBalanceFinancial() {
     assertEquals(15, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
+  /** Tests that the transformer sets the expected medicare utilization day count. */
   @Test
   public void shouldHaveClmUtlztnDayCntFinancial() {
     BenefitComponent benefit =
@@ -1048,6 +1167,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected beneficiary total coinsurance days count code. */
   @Test
   public void shouldHaveBeneTotCoinsrncDaysCntFinancial() {
     BenefitComponent benefit =
@@ -1070,6 +1190,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected medicare non utilization days count code. */
   @Test
   public void shouldHaveClmNonUtlztnDaysCntFinancial() {
     BenefitComponent benefit =
@@ -1092,6 +1213,9 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary inpatient deductible amount code.
+   */
   @Test
   public void shouldHaveNchBeneIpDdctblAmtFinancial() {
     BenefitComponent benefit =
@@ -1117,6 +1241,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary part A coinsurance liability
+   * amount code.
+   */
   @Test
   public void shouldHaveNchBenePtaCoinsrncLbltyAmtFinancial() {
     BenefitComponent benefit =
@@ -1142,6 +1270,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH inpatient non-covered charge amount code. */
   @Test
   public void shouldHaveNchIpNcvrdChrgAmtFinancial() {
     BenefitComponent benefit =
@@ -1167,6 +1296,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH inpatient total deductible amount code. */
   @Test
   public void shouldHaveNchIpTotDdctnAmtFinancial() {
     BenefitComponent benefit =
@@ -1192,6 +1322,9 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected PPS capital disproportionate share amount code.
+   */
   @Test
   public void shouldHaveClmPpsCptlDsprprtntShrAmtFinancial() {
     BenefitComponent benefit =
@@ -1217,6 +1350,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS capital exception amount code. */
   @Test
   public void shouldHaveClmPpsCptlExcptnAmtFinancial() {
     BenefitComponent benefit =
@@ -1242,6 +1376,9 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected PPS capital federal specific portion amount code.
+   */
   @Test
   public void shouldHaveClmPpsCptlFspAmtFinancial() {
     BenefitComponent benefit =
@@ -1267,6 +1404,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected PPS capital indirect medical education amount
+   * code.
+   */
   @Test
   public void shouldHaveClmPpsCptlImeAmtFinancial() {
     BenefitComponent benefit =
@@ -1292,6 +1433,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS capital outlier amount code. */
   @Test
   public void shouldHaveClmPpsCptlOutlierAmtFinancial() {
     BenefitComponent benefit =
@@ -1317,6 +1459,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS old capital hold harmless amount code. */
   @Test
   public void shouldHaveClmPpsCptlHldHrmlsAmtFinancial() {
     BenefitComponent benefit =
@@ -1342,6 +1485,10 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary blood deductible liability amount
+   * code.
+   */
   @Test
   public void shouldHaveNchBeneBloodDdcblLbltyAmtFinancial() {
     BenefitComponent benefit =
@@ -1367,6 +1514,7 @@ public class SNFClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer claim paid amount. */
   @Test
   public void shouldHavePrpayamtFinancial() {
     BenefitComponent benefit =
@@ -1394,7 +1542,7 @@ public class SNFClaimTransformerV2Test {
 
   /**
    * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
-   * quantity is not zero
+   * quantity is not zero.
    */
   @Test
   public void shouldHaveRevenueCenterUnit() {
@@ -1464,9 +1612,10 @@ public class SNFClaimTransformerV2Test {
   }
 
   /**
-   * Serializes the EOB and prints to the command line
+   * Serializes the EOB and prints to the command line.
    *
-   * @throws FHIRException
+   * @throws FHIRException if there is an issue with transforming the claim
+   * @throws IOException if there is an issue with reading the test file
    */
   @Disabled
   @Test

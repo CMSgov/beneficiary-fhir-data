@@ -50,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/** Tests the {@link ClaimDao}. */
 @ExtendWith(MockitoExtension.class)
 class ClaimDaoTest {
   /** Dummy type used just for this unit test. */

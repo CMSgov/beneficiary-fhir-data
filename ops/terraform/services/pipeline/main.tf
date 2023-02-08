@@ -4,6 +4,7 @@ locals {
   layer            = "data"
   established_envs = ["test", "prod-sbx", "prod"]
   create_etl_user  = local.is_prod || var.force_etl_user_creation
+  jdbc_suffix      = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
@@ -20,10 +21,14 @@ locals {
   }
 
   # NOTE: nonsensitive service-oriented and common config
-  nonsensitive_common_map     = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
-  nonsensitive_common_config  = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
-  nonsensitive_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))
-  nonsensitive_service_config = { for key, value in local.nonsensitive_service_map : split("/", key)[5] => value }
+  nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
+  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
+
+  nonsensitive_ccw_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_ccw.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_ccw.values))
+  nonsensitive_ccw_service_config = { for key, value in local.nonsensitive_ccw_service_map : split("/", key)[6] => value }
+
+  nonsensitive_rda_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_rda.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_rda.values))
+  nonsensitive_rda_service_config = { for key, value in local.nonsensitive_rda_service_map : split("/", key)[6] => value }
 
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
   seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)
@@ -98,9 +103,32 @@ locals {
   vpn_security_group_id = data.aws_security_group.vpn.id
   ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   subnet_id             = data.aws_subnet.main.id
+
+  # pipeline specific configrations
+  pipeline_instance_configs = {
+    rda = {
+      enabled       = var.create_rda_pipeline
+      instance_name = "rda"
+      instance_type = local.nonsensitive_rda_service_config["instance_type"]
+      tags = {
+        Name = "bfd-${local.env}-${local.service}-rda"
+      }
+    }
+    ccw = {
+      enabled       = var.create_ccw_pipeline
+      instance_name = "ccw"
+      instance_type = local.nonsensitive_ccw_service_config["instance_type"]
+      tags = {
+        Name = "bfd-${local.env}-${local.service}-ccw"
+      }
+    }
+  }
+  pipeline_instances = { for k, v in local.pipeline_instance_configs : k => local.pipeline_instance_configs[k] if local.pipeline_instance_configs[k].enabled }
 }
 
-resource "aws_instance" "this" {
+resource "aws_instance" "pipeline" {
+  for_each = { for server in local.pipeline_instances : server.instance_name => server }
+
   ami                                  = local.ami_id
   associate_public_ip_address          = false
   availability_zone                    = local.availability_zone
@@ -108,36 +136,39 @@ resource "aws_instance" "this" {
   ebs_optimized                        = true
   iam_instance_profile                 = aws_iam_instance_profile.this.name
   instance_initiated_shutdown_behavior = "stop"
-  instance_type                        = local.nonsensitive_service_config["instance_type"]
+  instance_type                        = each.value.instance_type
   key_name                             = local.nonsensitive_common_config["key_pair"]
   monitoring                           = true
   secondary_private_ips                = []
   source_dest_check                    = true
   subnet_id                            = local.subnet_id
-  tags = {
-    Layer    = local.layer
-    Name     = "bfd-${local.env}-${local.legacy_service}"
-    role     = local.legacy_service
-    snapshot = true
-  }
+  tags = merge(
+    {
+      Layer    = local.layer
+      role     = local.legacy_service
+      snapshot = true
+    },
+    each.value.tags
+  )
 
   tenancy = "default"
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    account_id      = local.account_id
-    env             = local.env
-    pipeline_bucket = aws_s3_bucket.this.bucket
-    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
+    account_id        = local.account_id
+    env               = local.env
+    pipeline_bucket   = aws_s3_bucket.this.bucket
+    pipeline_instance = each.value.instance_name
+    writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
   })
 
   volume_tags = merge(
     local.default_tags,
     {
       Layer    = local.layer
-      Name     = "bfd-${local.env}-${local.legacy_service}"
       role     = local.legacy_service
       snapshot = true
-    }
+    },
+    each.value.tags
   )
 
   vpc_security_group_ids = [

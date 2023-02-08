@@ -46,6 +46,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<version>${javadoc.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Common utility classes -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -116,6 +121,39 @@
 								<mkdir dir="${basedir}/target/npi-org-csv-output"/>
 							</tasks>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<configuration>
+						<configLocation>checkstyle.xml</configLocation>
+						<!-- Only look in source directories, basically ignores generated code -->
+						<sourceDirectories>
+							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+						</sourceDirectories>
+					</configuration>
+					<version>${checkstyle.plugin.version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${checkstyle.version}</version>
+						</dependency>
+					</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>verify</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

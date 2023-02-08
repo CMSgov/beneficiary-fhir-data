@@ -1708,6 +1708,14 @@
         "reference" : "Patient/567834"
       },
       "billablePeriod" : {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+            "code" : "3",
+            "display" : "Final bill"
+          }
+        } ],
         "start" : "2015-06-23",
         "end" : "2015-06-23"
       },
@@ -4903,6 +4911,12 @@
           "value" : "CMS"
         }
       },
+      "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+          "value" : "1234567890"
+        }
+      },
       "referral" : {
         "identifier" : {
           "type" : {
@@ -5654,6 +5668,14 @@
         "reference" : "Patient/567834"
       },
       "billablePeriod" : {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+            "code" : "3",
+            "display" : "Final bill"
+          }
+        } ],
         "start" : "2014-01-01",
         "end" : "2014-01-30"
       },

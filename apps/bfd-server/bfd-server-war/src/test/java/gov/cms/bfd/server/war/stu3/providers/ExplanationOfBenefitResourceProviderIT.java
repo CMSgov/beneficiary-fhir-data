@@ -85,9 +85,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * CarrierClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -116,35 +115,32 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * throws an exception as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit}
-   * that provides an non-numeric claim identifer.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception as expected
+   * for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that provides an non-numeric
+   * claim identifier.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
   public void readEobForNonNumericClaimId() throws FHIRException {
-    ca.uhn.fhir.rest.server.exceptions.InternalErrorException thrown =
-        assertThrows(
-            ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
-            () -> {
-              IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
-              ExplanationOfBenefit eob =
-                  fhirClient
-                      .read()
-                      .resource(ExplanationOfBenefit.class)
-                      .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
-                      .execute();
-            },
-            "Unsupported ID pattern: junk");
+          ExplanationOfBenefit eob =
+              fhirClient
+                  .read()
+                  .resource(ExplanationOfBenefit.class)
+                  .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
+                  .execute();
+        },
+        "ExplanationOfBenefit ID pattern: 'junk' does not match expected pattern: characterString-idNumber");
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist
-   * in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingCarrierClaim() {
@@ -163,9 +159,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -194,9 +189,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * DMEClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingDMEClaim() {
@@ -215,9 +209,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * HHAClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -253,9 +246,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingHHAClaim() {
@@ -274,9 +266,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -312,9 +303,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingHospiceClaim() {
@@ -333,9 +323,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -371,9 +360,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist
-   * in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingInpatientClaim() {
@@ -392,9 +380,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * OutpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -430,9 +417,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingOutpatientClaim() {
@@ -451,9 +437,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -482,9 +467,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingPartDEvent() {
@@ -503,9 +487,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB using a negative ID.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in the DB using a negative
+   * ID.
    */
   @Test
   public void readEobForMissingNegativePartDEvent() {
@@ -524,9 +508,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid
-   * {@link ExplanationOfBenefitResourceProvider#IdParam} parameter.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid id parameter.
    */
   @Test
   public void readEobForInvalidIdParamPartDEvent() {
@@ -545,9 +528,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -583,9 +565,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingSNFClaim() {
@@ -1967,6 +1948,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
         "Expected number resources return to be equal to count");
   }
 
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works a {@code null}
+   * lastUpdated parameter.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
   @Test
   public void searchEobWithNullLastUpdated() throws FHIRException {
     // Load a records and clear the lastUpdated field for one
@@ -2026,6 +2013,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
         "Expected the search for lastUpdated >= now()-100 to not include null lastUpdated resources");
   }
 
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works when searching
+   * by service date.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
   @Test
   public void searchEobWithServiceDate() {
     Beneficiary beneficiary = loadSampleA();
@@ -2072,10 +2065,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
+   * Filters a {@link List} of the {@link ExplanationOfBenefit}s from the specified {@link Bundle}
+   * that match the specified {@link ClaimType}.
+   *
    * @param bundle the {@link Bundle} to filter
-   * @param claimType the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} to use as a filter
-   * @return a filtered {@link List} of the {@link ExplanationOfBenefit}s from the specified {@link
-   *     Bundle} that match the specified {@link gov.cms.bfd.server.war.stu3.providers.ClaimType}
+   * @param claimType the {@link ClaimType} to use as a filter
+   * @return the filtered list
    */
   private static List<ExplanationOfBenefit> filterToClaimType(Bundle bundle, ClaimType claimType) {
     List<ExplanationOfBenefit> results =
@@ -2093,6 +2088,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
     return results;
   }
 
+  /**
+   * Filters a {@link List} of the {@link ExplanationOfBenefit}s from the specified resources that
+   * match the specified {@link ClaimType}.
+   *
+   * @param resources the resources
+   * @param claimType the {@link ClaimType} to use as a filter
+   * @return the filtered list
+   */
   private static List<ExplanationOfBenefit> filterToClaimTypeFromList(
       List<IBaseResource> resources, ClaimType claimType) {
     List<ExplanationOfBenefit> results =
@@ -2111,7 +2114,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Test the set of lastUpdated values
+   * Test the set of lastUpdated values.
    *
    * @param fhirClient to use
    * @param id the bene id to use
@@ -2132,7 +2135,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Load Sample A into the test database
+   * Load Sample A into the test database.
    *
    * @return the beneficary record loaded by Sample A
    */
@@ -2146,7 +2149,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Find the first Beneficiary from a record list returned by {@link ServerTestUtils#loadData(List}
+   * Find the first Beneficiary from a record list returned by {@link ServerTestUtils#loadData}.
    *
    * @param loadedRecords to use
    * @return the first Beneficiary
@@ -2160,8 +2163,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Find the first CarrierClaim from a record list returned by {@link
-   * ServerTestUtils#loadData(List}
+   * Find the first CarrierClaim from a record list returned by {@link ServerTestUtils#loadData}.
    *
    * @param loadedRecords to use
    * @return the first CarrierClaim in the records
@@ -2175,11 +2177,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Fetch a bundle
+   * Does a FHIR search by last updated, returning the results as a bundle.
    *
    * @param fhirClient to use
    * @param id the bene id to use
    * @param lastUpdatedParam to added to the fetch
+   * @return the search result
    */
   private Bundle fetchWithLastUpdated(IGenericClient fhirClient, Long id, String lastUpdatedParam) {
     String url =
@@ -2191,7 +2194,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * To setup a database, clear the lastUpdated of passed in claim
+   * To setup a database, clear the lastUpdated of passed in claim.
    *
    * @param claimId to use
    */
@@ -2205,6 +2208,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
             });
   }
 
+  /**
+   * Does a FHIR search by service date, returning the results as a bundle.
+   *
+   * @param fhirClient the fhir client
+   * @param id the id
+   * @param serviceEndParam the service end param
+   * @return the search results
+   */
   private Bundle fetchWithServiceDate(IGenericClient fhirClient, Long id, String serviceEndParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"

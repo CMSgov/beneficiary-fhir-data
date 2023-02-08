@@ -22,6 +22,8 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class HHAClaimTransformer {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -44,7 +46,10 @@ final class HHAClaimTransformer {
   }
 
   /**
+   * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link HHAClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */

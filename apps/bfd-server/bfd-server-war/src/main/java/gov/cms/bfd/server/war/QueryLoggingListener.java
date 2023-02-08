@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public final class QueryLoggingListener implements QueryExecutionListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryLoggingListener.class);
 
+  /** Used to compute various MDC keys. */
   private static final String MDC_KEY_PREFIX = "database_query";
 
   /** {@inheritDoc} */
@@ -111,6 +112,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
   /** Enumerates the various query types. */
   static enum QueryType {
+    /** Represents the query for beneficiary by id (no hicn/mbi returned). */
     BENE_BY_ID_OMIT_IDENTIFIERS(
         "bene_by_id_omit_hicns_and_mbis",
         (s ->
@@ -118,7 +120,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains("bene_id=")
                 && !s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
-
+    /** Represents the query for beneficiary by id. */
     BENE_BY_ID_INCLUDE_IDENTIFIERS(
         "bene_by_id_include_hicns_and_mbis",
         (s ->
@@ -126,84 +128,105 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains("bene_id=")
                 && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
-
+    /** Represents the query for beneficiary by mbi (via bene history). */
     BENE_BY_MBI_HISTORY(
         "bene_by_mbi_mbis_from_beneficiarieshistory",
         (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
-
+    /** Represents the query for beneficiary by hicn (via bene history). */
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn_hicns_from_beneficiarieshistory",
         (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
-
+    /** Represents the query for beneficiary by hicn or id (no hicn/mbi returned). */
     BENE_BY_HICN_OR_ID_OMIT_IDENTIFIERS(
         "bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis",
         (s ->
             s.contains(" from beneficiaries ")
                 && !s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
-
+    /** Represents the query for beneficiary by hicn or id. */
     BENE_BY_HICN_OR_ID_INCLUDE_IDENTIFIERS(
         "bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis",
         (s ->
             s.contains(" from beneficiaries ")
                 && s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
-
+    /** Represents the query for beneficiary by coverage contract. */
     BENE_BY_COVERAGE(
         "bene_by_coverage",
         (s -> s.contains(" from beneficiaries ") && s.contains("where beneficiar0_.ptd_cntrct_"))),
-
+    /** Represents the query for EOB by bene id (carrier). */
     EOBS_BY_BENE_ID_CARRIER("eobs_by_bene_id_carrier", (s -> s.contains(" from carrier_claims "))),
-
+    /** Represents the query for EOB by bene id (DME). */
     EOBS_BY_BENE_ID_DME("eobs_by_bene_id_dme", (s -> s.contains(" from dme_claims "))),
-
+    /** Represents the query for EOB by bene id (HHA). */
     EOBS_BY_BENE_ID_HHA("eobs_by_bene_id_hha", (s -> s.contains(" from hha_claims "))),
-
+    /** Represents the query for EOB by bene id (hospice). */
     EOBS_BY_BENE_ID_HOSPICE("eobs_by_bene_id_hospice", (s -> s.contains(" from hospice_claims "))),
-
+    /** Represents the query for EOB by bene id (inpatient). */
     EOBS_BY_BENE_ID_INPATIENT(
         "eobs_by_bene_id_inpatient", (s -> s.contains(" from inpatient_claims "))),
-
+    /** Represents the query for EOB by bene id (outpatient). */
     EOBS_BY_BENE_ID_OUTPATIENT(
         "eobs_by_bene_id_outpatient", (s -> s.contains(" from outpatient_claims "))),
-
+    /** Represents the query for EOB by bene id (partD). */
     EOBS_BY_BENE_ID_PDE("eobs_by_bene_id_pde", (s -> s.contains(" from partd_events "))),
-
+    /** Represents the query for EOB by bene id (SNF). */
     EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from snf_claims "))),
-
+    /** Represents the query for partially adjudicated claims (fiss). */
     FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
-
+    /** Represents the query for partially adjudicated claims (mcs). */
     MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from rda.mcs")),
-
+    /** Represents the query for mbi cache lookup. */
     MBI_CACHE("mbi_cache_lookup", s -> s.contains("from rda.mbi_cache")),
-
+    /** Represents the query for loaded batches. */
     LOADED_BATCH("loaded_batch", (s -> s.contains(" from loaded_batches "))),
-
+    /** Represents the query for loaded files. */
     LOADED_FILE("loaded_file", (s -> s.contains(" from loaded_files "))),
-
+    /**
+     * Represents the query for checking if a beneficiary exists given the partD contract id and
+     * year month.
+     */
+    BENE_EXISTS_BY_YEAR_MONTH_PARTD_CONTRACT_ID(
+        "bene_exists_by_year_month_part_d_contract_id",
+        (s ->
+            s.contains(" from beneficiary_monthly ")
+                && s.contains("year_month=")
+                && s.contains("partd_contract_number_id="))),
+    /** Represents an unknown query (one not explicitly defined in this list). */
     UNKNOWN("unknown", null);
 
+    /** A unique identifier for this {@link QueryType}, suitable for use in logs and such. */
     private final String id;
+    /**
+     * The {@link Predicate} that should return <code>true</code> if a given {@link
+     * QueryInfo#getQuery()} represents this {@link QueryType}.
+     */
     private final Predicate<String> queryTextRegex;
 
     /**
-     * Enum constant contructor.
+     * Constructs a new QueryType.
      *
      * @param id the value to use for {@link #getQueryTypeId()}
-     * @param the {@link Predicate} that should return <code>true</code> if a given {@link
-     *     QueryInfo#getQuery()} represents this {@link QueryType}
+     * @param queryTextRegex the {@link Predicate} that should return <code>true</code> if a given
+     *     {@link QueryInfo#getQuery()} represents this {@link QueryType}
      */
     private QueryType(String id, Predicate<String> queryTextRegex) {
       this.id = id;
       this.queryTextRegex = queryTextRegex;
     }
 
-    /** @return a unique identifier for this {@link QueryType}, suitable for use in logs and such */
+    /**
+     * Gets the {@link #id}.
+     *
+     * @return a unique identifier for this {@link QueryType}, suitable for use in logs and such
+     */
     public String getQueryTypeId() {
       return id;
     }
 
     /**
+     * Computes the query type based on the {@link QueryInfo}.
+     *
      * @param queryInfo the {@link QueryInfo} to compute a {@link QueryType} for
      * @return the {@link QueryType} that matches the specified {@link QueryInfo}, or {@link
      *     #UNKNOWN} if no match could be determined

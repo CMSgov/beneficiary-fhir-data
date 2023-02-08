@@ -14,6 +14,7 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
@@ -40,6 +41,7 @@ import io.micrometer.core.instrument.util.HierarchicalNameMapper;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.sql.DatabaseMetaData;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import org.postgresql.core.BaseConnection;
+import org.postgresql.jdbc.PgConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,6 +173,34 @@ public final class PipelineApplication {
     final HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
 
+    HikariProxyConnection dbConn = null;
+    try {
+      dbConn = (HikariProxyConnection) pooledDataSource.getConnection();
+      DatabaseMetaData dbmeta = dbConn.getMetaData();
+      String dbName = dbmeta.getDatabaseProductName();
+      LOGGER.info(
+          "Database: {}, Driver version: major: {}, minor: {}; JDBC version, major: {}, minor: {}",
+          dbName,
+          dbmeta.getDriverMajorVersion(),
+          dbmeta.getDriverMinorVersion(),
+          dbmeta.getJDBCMajorVersion(),
+          dbmeta.getJDBCMinorVersion());
+
+      if (dbName.equals("PostgreSQL")) {
+        BaseConnection pSqlConnection = dbConn.unwrap(BaseConnection.class);
+        LOGGER.info(
+            "pgjdbc, logServerDetail: {}",
+            ((PgConnection) pSqlConnection).getLogServerErrorDetail());
+      }
+    } finally {
+      if (dbConn != null) {
+        try {
+          dbConn.close();
+        } catch (Exception ex) {
+        }
+      }
+    }
+
     /*
      * Create all jobs and run their smoke tests.
      */
@@ -289,6 +321,7 @@ public final class PipelineApplication {
    * Create all pipeline jobs and return them in a list.
    *
    * @param appConfig our {@link AppConfiguration} for configuring jobs
+   * @param appMeters the app meters
    * @param appMetrics our {@link MetricRegistry} for metrics reporting
    * @param pooledDataSource our {@link javax.sql.DataSource}
    * @return list of {@link PipelineJob}s to be registered
@@ -354,6 +387,8 @@ public final class PipelineApplication {
   }
 
   /**
+   * Creates the CCW RIF loader job and returns it.
+   *
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use

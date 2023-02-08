@@ -18,11 +18,11 @@ use crate::csv_log::output_csv_row;
 /// Used to uniquely identify each DB query.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
 pub enum DatabaseQuery {
-    SelectDistinctPartDContractIds,
-    SelectBeneCountByPartDContractIdAndYearMonth,
-    SelectBeneIdsByPartDContractIdAndYearMonth,
-    SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
-    SelectBeneRecordsByBeneIds,
+    DistinctPartDContractIds,
+    BeneCountByPartDContractIdAndYearMonth,
+    BeneIdsByPartDContractIdAndYearMonth,
+    BeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
+    BeneRecordsByBeneIds,
 }
 
 lazy_static! {
@@ -35,19 +35,19 @@ lazy_static! {
          * seems to get a bit goofy if they're in here.
          */
          sql_queries.insert(
-            DatabaseQuery::SelectDistinctPartDContractIds,
+            DatabaseQuery::DistinctPartDContractIds,
             include_str!("./db_queries/select_distinct_part_d_contract_ids.sql"));
          sql_queries.insert(
-            DatabaseQuery::SelectBeneCountByPartDContractIdAndYearMonth,
+            DatabaseQuery::BeneCountByPartDContractIdAndYearMonth,
             include_str!("./db_queries/select_bene_count_by_part_d_contract_id_and_year_month.sql"));
          sql_queries.insert(
-            DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonth,
+            DatabaseQuery::BeneIdsByPartDContractIdAndYearMonth,
             include_str!("./db_queries/select_bene_ids_by_part_d_contract_id_and_year_month.sql"));
          sql_queries.insert(
-            DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
+            DatabaseQuery::BeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
             include_str!("./db_queries/select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id.sql"));
          sql_queries.insert(
-            DatabaseQuery::SelectBeneRecordsByBeneIds,
+            DatabaseQuery::BeneRecordsByBeneIds,
             include_str!("./db_queries/select_bene_records_by_bene_ids.sql"));
 
         sql_queries
@@ -121,7 +121,7 @@ mod tests {
     #[test]
     fn test_query_map() {
         assert!(DATABASE_QUERY_SQL
-            .get(&DatabaseQuery::SelectBeneRecordsByBeneIds)
+            .get(&DatabaseQuery::BeneRecordsByBeneIds)
             .is_some());
     }
 }

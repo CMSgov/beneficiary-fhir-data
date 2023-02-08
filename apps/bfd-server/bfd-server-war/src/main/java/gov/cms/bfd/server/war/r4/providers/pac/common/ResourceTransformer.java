@@ -17,7 +17,8 @@ public interface ResourceTransformer<T extends IBaseResource> {
    *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the FISS/MCS record to be transformed
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a new FHIR resource
    */
-  T transform(MetricRegistry metricRegistry, Object claim);
+  T transform(MetricRegistry metricRegistry, Object claim, boolean includeTaxNumbers);
 }

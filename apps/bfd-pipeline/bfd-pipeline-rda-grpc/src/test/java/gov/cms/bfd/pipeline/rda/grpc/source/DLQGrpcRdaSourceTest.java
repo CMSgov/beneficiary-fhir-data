@@ -263,6 +263,6 @@ public class DLQGrpcRdaSourceTest {
     verify(mockDao)
         .updateState(FISS_ERROR_TWO_SEQ, MessageError.ClaimType.FISS, MessageError.Status.OBSOLETE);
 
-    verify(mockSink, times(2)).shutdown(any(Duration.class));
+    verify(mockSink, times(1)).shutdown(any(Duration.class));
   }
 }

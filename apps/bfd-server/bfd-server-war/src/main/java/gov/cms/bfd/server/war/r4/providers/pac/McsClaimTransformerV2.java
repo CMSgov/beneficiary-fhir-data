@@ -36,10 +36,11 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
+  /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
 
-  /** Valid ICD Types */
+  /** Valid ICD Types. */
   private static final List<String> VALID_ICD_TYPES = List.of("0", "9");
 
   /**
@@ -49,6 +50,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static final List<String> CANCELED_STATUS_CODES = List.of("r", "z", "9");
 
+  /** Instantiates a new Mcs claim transformer v2. */
   private McsClaimTransformerV2() {}
 
   /**
@@ -57,16 +59,18 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the MCS {@link RdaMcsClaim} to transform
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
+  static Claim transform(
+      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaMcsClaim) claimEntity);
+      return transformClaim((RdaMcsClaim) claimEntity, includeTaxNumbers);
     }
   }
 
@@ -74,15 +78,17 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * Transforms a given {@link RdaMcsClaim} into a FHIR {@link Claim} object.
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaMcsClaim}
    */
-  private static Claim transformClaim(RdaMcsClaim claimGroup) {
+  private static Claim transformClaim(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
     claim.setContained(
         List.of(
-            McsTransformerV2.getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
+            McsTransformerV2.getContainedPatient(claimGroup),
+            getContainedProvider(claimGroup, includeTaxNumbers)));
     claim
         .getIdentifier()
         .add(createClaimIdentifier(BBCodingSystems.MCS.ICN, claimGroup.getIdrClmHdIcn()));
@@ -111,16 +117,19 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * Organization} object containing the provider data.
    *
    * @param claimGroup the {@link RdaMcsClaim} to parse.
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return The generated {@link Organization} object with the parsed patient data.
    */
-  private static Resource getContainedProvider(RdaMcsClaim claimGroup) {
+  private static Resource getContainedProvider(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
     Organization organization = new Organization();
     List<Extension> extensions = organization.getExtension();
     addExtension(extensions, BBCodingSystems.MCS.BILL_PROV_TYPE, claimGroup.getIdrBillProvType());
     addExtension(extensions, BBCodingSystems.MCS.BILL_PROV_SPEC, claimGroup.getIdrBillProvSpec());
 
-    addFedTaxNumberIdentifier(
-        organization, BBCodingSystems.MCS.BILL_PROV_EIN, claimGroup.getIdrBillProvEin());
+    if (includeTaxNumbers) {
+      addFedTaxNumberIdentifier(
+          organization, BBCodingSystems.MCS.BILL_PROV_EIN, claimGroup.getIdrBillProvEin());
+    }
     addNpiIdentifier(organization, claimGroup.getIdrBillProvNpi());
     organization.setId("provider-org");
 
