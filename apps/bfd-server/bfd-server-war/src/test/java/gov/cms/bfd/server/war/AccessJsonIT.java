@@ -76,7 +76,8 @@ public class AccessJsonIT {
 
     // Verify that the access JSON is working, as expected.
     try {
-      TimeUnit.MILLISECONDS.sleep(500); // Needed in some configurations to resolve a race condition
+      TimeUnit.MILLISECONDS.sleep(
+          1000); // Needed in some configurations to resolve a race condition
     } catch (InterruptedException e) {
     }
 
