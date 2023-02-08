@@ -84,14 +84,14 @@ spec:
         sh 'git config --global --add safe.directory "$WORKSPACE"'
       }
     }
-    
+
     stage('Pull bfd-mgmt-synthea-generation') {
       steps {
         script {
           awsAuth.assumeRole()
 
           registryId = sh(
-            returnStdout: true, 
+            returnStdout: true,
             script: "aws ecr describe-registry --region \"${env.AWS_REGION}\" | jq -r '.registryId'"
           ).trim()
           privateRegistryUri = "${registryId}.dkr.ecr.${env.AWS_REGION}.amazonaws.com"
@@ -102,11 +102,14 @@ spec:
         }
       }
     }
-    
+
     stage('Retrieve end_state.properties') {
       steps {
         echo 'Pulling the latest end_state.properties from the bfd-mgmt-synthea bucket'
 
+        script {
+          awsAuth.assumeRole()
+        }
         sh "aws s3 cp \"s3://bfd-mgmt-synthea/end_state/end_state.properties\" ."
       }
     }
@@ -126,20 +129,35 @@ spec:
       steps {
         echo 'Uploading generated output to bfd-mgmt-synthea bucket...'
 
+        script {
+          awsAuth.assumeRole()
+        }
         sh "aws s3 cp \"\$(pwd)/out/\" \"s3://bfd-mgmt-synthea/generated\" --recursive"
       }
     }
 
     stage('Update Old end_state.properties') {
-      when { 
-        expression { 
-          return params.UPDATE_END_STATE_S3 
-        } 
+      when {
+        expression {
+          return params.UPDATE_END_STATE_S3
+        }
       }
       steps {
         echo 'Replacing the old end_state.properties in the bfd-mgmt-synthea bucket...'
 
-        sh "aws s3 cp \"\$(pwd)/output/bfd/end_state.properties\" \"s3://bfd-mgmt-synthea/end_state/end_state.properties\""
+        script {
+          awsAuth.assumeRole()
+
+          // The generated output is placed within a folder with a timestamp in its name, so 
+          // the path to the end_state.properties is different each time. We use the find command
+          // to find the full path of the final end_state.properties in out/ regardless of the
+          // generated directory's name
+          def endStateProperties = sh(
+            returnStdout: true,
+            script: 'find "$(pwd)"/out -name end_state.properties -type f'
+          ).trim()
+          sh "aws s3 cp \"${endStateProperties}\" \"s3://bfd-mgmt-synthea/end_state/end_state.properties\""
+        }
       }
     }
   }

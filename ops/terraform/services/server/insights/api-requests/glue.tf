@@ -1160,15 +1160,30 @@ module "glue-table-api-requests" {
     {
       "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_duration_milliseconds",
       "type"    = "string",
-      "comment" = ""
+      "comment" = "Deprecated"
     },
     {
       "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_duration_nanoseconds",
       "type"    = "string",
-      "comment" = ""
+      "comment" = "Deprecated"
     },
     {
       "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_record_count",
+      "type"    = "string",
+      "comment" = "Deprecated"
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_exists_by_year_month_part_d_contract_id_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_exists_by_year_month_part_d_contract_id_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_exists_by_year_month_part_d_contract_id_record_count",
       "type"    = "string",
       "comment" = ""
     },
