@@ -24,11 +24,17 @@ import org.slf4j.LoggerFactory;
 public final class S3TaskManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3TaskManager.class);
 
+  /** The metrics registry. */
   private final MetricRegistry appMetrics;
+  /** The extraction options. */
   private final ExtractionOptions options;
+  /** The amazon s3 client. */
   private final AmazonS3 s3Client;
+  /** The s3 transfer manager. */
   private final TransferManager s3TransferManager;
+  /** The executor for file downloads. */
   private final TaskExecutor downloadTasksExecutor;
+  /** The executor for file moves. */
   private final TaskExecutor moveTasksExecutor;
 
   /**
@@ -55,12 +61,20 @@ public final class S3TaskManager {
     this.downloadTasks = new HashMap<>();
   }
 
-  /** @return the {@link AmazonS3} client being used by this {@link S3TaskManager} */
+  /**
+   * Gets the {@link #s3Client}.
+   *
+   * @return the {@link AmazonS3} client being used by this {@link S3TaskManager}
+   */
   public AmazonS3 getS3Client() {
     return s3Client;
   }
 
-  /** @return the Amazon S3 {@link TransferManager} being used by this {@link S3TaskManager} */
+  /**
+   * Gets the {@link #s3TransferManager}.
+   *
+   * @return the Amazon S3 {@link TransferManager} being used by this {@link S3TaskManager}
+   */
   public TransferManager getS3TransferManager() {
     return s3TransferManager;
   }
@@ -151,7 +165,11 @@ public final class S3TaskManager {
     LOGGER.debug("Shut down.");
   }
 
-  /** @param task the {@link DataSetMoveTask} to be asynchronously run */
+  /**
+   * Submits a task to the {@link #moveTasksExecutor}.
+   *
+   * @param task the {@link DataSetMoveTask} to be asynchronously run
+   */
   public void submit(DataSetMoveTask task) {
     moveTasksExecutor.submit(task);
   }

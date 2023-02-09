@@ -34,18 +34,23 @@ public class RdaLoadOptions implements Serializable {
   private final AbstractRdaLoadJob.Config jobConfig;
   private final RdaSourceConfig rdaSourceConfig;
   private final RdaServerJob.Config mockServerConfig;
+  /** The number of transformation errors that can exist before a job will exit */
+  private final int errorLimit;
+
   private final IdHasher.Config idHasherConfig;
 
   public RdaLoadOptions(
       AbstractRdaLoadJob.Config jobConfig,
       RdaSourceConfig rdaSourceConfig,
       RdaServerJob.Config mockServerConfig,
+      int errorLimit,
       IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
     this.rdaSourceConfig =
         Preconditions.checkNotNull(rdaSourceConfig, "rdaSourceConfig is a required parameter");
     this.mockServerConfig =
         Preconditions.checkNotNull(mockServerConfig, "mockServerConfig is a required parameter");
+    this.errorLimit = errorLimit;
     this.idHasherConfig =
         Preconditions.checkNotNull(idHasherConfig, "idHasherConfig is a required parameter");
   }
@@ -123,14 +128,15 @@ public class RdaLoadOptions implements Serializable {
               appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
-        sink = new FissClaimRdaSink(appState, transformer, true);
+        sink = new FissClaimRdaSink(appState, transformer, true, errorLimit);
       } else {
         sink =
             ConcurrentRdaSink.createSink(
                 jobConfig.getWriteThreads(),
                 jobConfig.getBatchSize(),
                 autoUpdateSequenceNumbers ->
-                    new FissClaimRdaSink(appState, transformer, autoUpdateSequenceNumbers));
+                    new FissClaimRdaSink(
+                        appState, transformer, autoUpdateSequenceNumbers, errorLimit));
       }
 
       return sink;
@@ -192,14 +198,15 @@ public class RdaLoadOptions implements Serializable {
               appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
-        sink = new McsClaimRdaSink(appState, transformer, true);
+        sink = new McsClaimRdaSink(appState, transformer, true, errorLimit);
       } else {
         sink =
             ConcurrentRdaSink.createSink(
                 jobConfig.getWriteThreads(),
                 jobConfig.getBatchSize(),
                 autoUpdateSequenceNumbers ->
-                    new McsClaimRdaSink(appState, transformer, autoUpdateSequenceNumbers));
+                    new McsClaimRdaSink(
+                        appState, transformer, autoUpdateSequenceNumbers, errorLimit));
       }
 
       return sink;

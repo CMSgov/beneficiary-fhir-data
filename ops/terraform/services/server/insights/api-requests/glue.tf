@@ -1,6 +1,7 @@
 # Creates AWS Glue Database named "bfd-insights-bfd-<environment>"
 module "database" {
-  source     = "../../../modules/database"
+  # TODO: Update the source of this module when common insights modules are re-homed
+  source     = "../../../../../../insights/terraform/modules/database"
   database   = local.database
   bucket     = data.aws_s3_bucket.bfd-insights-bucket.bucket
   bucket_cmk = data.aws_kms_key.kms_key.arn
@@ -9,7 +10,8 @@ module "database" {
 
 # Target Glue Table where ingested logs are eventually stored
 module "glue-table-api-requests" {
-  source         = "../../../modules/table"
+  # TODO: Update the source of this module when common insights modules are re-homed
+  source         = "../../../../../../insights/terraform/modules/table"
   table          = "${local.full_name_underscore}_api_requests"
   description    = "Target Glue Table where ingested logs are eventually stored"
   database       = module.database.name
@@ -1158,15 +1160,30 @@ module "glue-table-api-requests" {
     {
       "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_duration_milliseconds",
       "type"    = "string",
-      "comment" = ""
+      "comment" = "Deprecated"
     },
     {
       "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_duration_nanoseconds",
       "type"    = "string",
-      "comment" = ""
+      "comment" = "Deprecated"
     },
     {
       "name"    = "mdc_jpa_query_bene_count_by_year_month_part_d_contract_id_record_count",
+      "type"    = "string",
+      "comment" = "Deprecated"
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_exists_by_year_month_part_d_contract_id_duration_milliseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_exists_by_year_month_part_d_contract_id_duration_nanoseconds",
+      "type"    = "string",
+      "comment" = ""
+    },
+    {
+      "name"    = "mdc_jpa_query_bene_exists_by_year_month_part_d_contract_id_record_count",
       "type"    = "string",
       "comment" = ""
     },

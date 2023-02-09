@@ -193,6 +193,8 @@ public final class AppConfigurationIT {
   }
 
   /**
+   * Creates a process builder for launching a separate JVM.
+   *
    * @return a {@link ProcessBuilder} that will launch {@link #main(String[])} as a separate JVM
    *     process
    */
@@ -209,6 +211,8 @@ public final class AppConfigurationIT {
   }
 
   /**
+   * Collects the specified process stdout.
+   *
    * @param process the {@link Process} to collect the output of
    * @return the output of the specified {@link Process} in a format suitable for debugging
    */

@@ -103,7 +103,7 @@ public class McsClaimRdaSinkIT {
           final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer =
               new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
-          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
+          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true, 0);
           final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
@@ -207,7 +207,7 @@ public class McsClaimRdaSinkIT {
           final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer =
               new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
-          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
+          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true, 0);
           final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
