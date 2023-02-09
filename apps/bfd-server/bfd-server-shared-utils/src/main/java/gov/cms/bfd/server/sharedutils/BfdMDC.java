@@ -179,6 +179,14 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_REQUEST_URL =
       computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "url");
 
+  /** MDC key for the http request uri. */
+  public static final String HTTP_ACCESS_REQUEST_URI =
+      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri");
+
+  /** MDC key for the http request_Start_Key. */
+  public static final String REQUEST_START_KEY =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
+
   /** MDC key for the http response duration per kb. */
   public static final String HTTP_ACCESS_RESPONSE_DURATION_PER_KB =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "duration_per_kb");
@@ -189,35 +197,35 @@ public class BfdMDC {
 
   /** MDC key for the http response header content encoding. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_ENCODING =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_Content-Encoding");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Encoding");
 
   /** MDC key for the http response header content location. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_LOCATION =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_Content-Location");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Location");
 
   /** MDC key for the http response header content type. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_TYPE =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_Content-Type");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Type");
 
   /** MDC key for the http response header date. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_DATE =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_Date");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Date");
 
   /** MDC key for the http response header last modified. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_LAST_MODIFIED =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_Last-Modified");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Last-Modified");
 
   /** MDC key for the http response header x powered by. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_POWERED_BY =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_X-Powered-By");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "X-Powered-By");
 
   /** MDC key for the http response header x request id. */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header_X-Request-ID");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "X-Request-ID");
 
-  /** MDC key for the http request uri. */
+  /** MDC key for the http output size in bytes. */
   public static final String HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES =
-      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri");
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "output_size_in_bytes");
 
   /** MDC key for the http output status. */
   public static final String HTTP_ACCESS_RESPONSE_STATUS =
@@ -234,10 +242,6 @@ public class BfdMDC {
   /** MDC key for the jpa query include true record count. */
   public static final String JPA_QUERY_RECORD_COUNT =
       computeMDCKey(JPA_PREFIX, INCLUDE_TRUE_PREFIX, "record_count");
-
-  /** MDC key for the http request_start_Key. */
-  public static final String REQUEST_START_KEY =
-      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
 
   /** MDC key for the resources returned. */
   public static final String RESOURCES_RETURNED = computeMDCKey("resources_returned_count");

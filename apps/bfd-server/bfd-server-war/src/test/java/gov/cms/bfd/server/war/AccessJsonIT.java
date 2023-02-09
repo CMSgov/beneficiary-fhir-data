@@ -76,8 +76,7 @@ public class AccessJsonIT {
 
     // Verify that the access JSON is working, as expected.
     try {
-      TimeUnit.MILLISECONDS.sleep(
-          1000); // Needed in some configurations to resolve a race condition
+      TimeUnit.MILLISECONDS.sleep(500); // Needed in some configurations to resolve a race condition
     } catch (InterruptedException e) {
     }
 
@@ -119,6 +118,7 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_OPERATION));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_QUERY_STR));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_TYPE));
+    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_URI));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_URL));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS));
