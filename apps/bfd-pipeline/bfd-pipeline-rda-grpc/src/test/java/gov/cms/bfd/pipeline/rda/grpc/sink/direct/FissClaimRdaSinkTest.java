@@ -248,7 +248,8 @@ public class FissClaimRdaSinkTest {
     doReturn(mockTypedQuery)
         .when(entityManager)
         .createQuery(
-            "select count(error) from MessageError error where status = :status", Long.class);
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
 
     try {
       sink.writeMessages(VERSION, messages);

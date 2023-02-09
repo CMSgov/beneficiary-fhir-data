@@ -169,8 +169,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public void checkErrorCount() throws ProcessingException {
     var query =
         entityManager.createQuery(
-            "select count(error) from MessageError error where status = :status", Long.class);
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
     query.setParameter("status", MessageError.Status.UNRESOLVED);
+    query.setParameter("claimType", MessageError.ClaimType.valueOf(claimType.name()));
     long errorCount = query.getSingleResult();
 
     if (errorCount > errorLimit) {
