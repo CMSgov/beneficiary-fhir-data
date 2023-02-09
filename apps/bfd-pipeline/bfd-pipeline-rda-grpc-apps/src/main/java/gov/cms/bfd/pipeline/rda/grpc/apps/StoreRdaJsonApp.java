@@ -35,7 +35,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     private final Supplier<MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder>> methodSource;
 
     /**
-     * Sets what claimtype to use.
+     * Constructor for ClaimType.
      *
      * @param methodSource sets the source to either Fiss or Mcs
      */

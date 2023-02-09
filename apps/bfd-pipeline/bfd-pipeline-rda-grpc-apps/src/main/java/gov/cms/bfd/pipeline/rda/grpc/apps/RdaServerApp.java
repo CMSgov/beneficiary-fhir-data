@@ -58,20 +58,20 @@ public class RdaServerApp {
     LOGGER.info("server stopping.");
   }
 
-  /** The config class to store config options for port, seed, and the number to send to s3. */
+  /** Configuration details for the RDI server. */
   private static class Config {
-    /** The port to use. */
+    /** The port to use for the RDI Server. */
     private final int port;
-    /** The seed value. */
+    /** The seed value for the RDI Server. */
     private final long seed;
-    /** The max number to send. */
+    /** The max number to send for the RDI Server. */
     private final int maxToSend;
 
-    /** Sets the fiss claim file. */
+    /** The fiss claim file for the RDI Server. */
     @Nullable private final File fissClaimFile;
-    /** Sets the mcs claim file. */
+    /** The mcs claim file for the RDI Server. */
     @Nullable private final File mcsClaimFile;
-    /** Sets the s3 file client. */
+    /** The s3 file client for the RDI Server. */
     @Nullable private final S3JsonMessageSources s3Sources;
 
     /**

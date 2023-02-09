@@ -153,7 +153,7 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * Sets database options for db Url, user, password, and the max poolsize.
+     * Creates the {@link DatabaseOptions} from this configuration.
      *
      * @return the database options to be used
      */
