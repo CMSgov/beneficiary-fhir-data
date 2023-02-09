@@ -415,7 +415,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Get Record Count as {@link integer}.
+   * Get Record Count as {@link Integer}.
    *
    * @return the number of beneficiaries/claims/drug events in the RIF file excluding line items
    */
