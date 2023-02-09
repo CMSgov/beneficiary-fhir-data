@@ -119,7 +119,7 @@ public class RdaServerApp {
     }
 
     /**
-     * Gets the {@link #port}
+     * Gets the {@link #port}.
      *
      * @return port number
      */
