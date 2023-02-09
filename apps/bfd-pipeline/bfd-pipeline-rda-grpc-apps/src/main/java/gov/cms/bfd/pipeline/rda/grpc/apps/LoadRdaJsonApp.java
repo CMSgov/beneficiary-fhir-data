@@ -47,7 +47,7 @@ public class LoadRdaJsonApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadRdaJsonApp.class);
 
   /**
-   * Main method to load the System Properties for the Config, start the log4jReporter, startthe
+   * Main method to load the System Properties for the Config, start the log4jReporter, start the
    * metrics, and start the RDA pipeline.
    *
    * @param args to be passed in by the command line
