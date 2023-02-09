@@ -414,7 +414,11 @@ public enum StaticRifResource {
     return rifFileType;
   }
 
-  /** @return the number of beneficiaries/claims/drug events in the RIF file excluding line items */
+  /**
+   * Gets the record count.
+   *
+   * @return the number of beneficiaries/claims/drug events in the RIF file excluding line items
+   */
   public int getRecordCount() {
     return recordCount;
   }
