@@ -125,7 +125,7 @@ public class BfdMDC {
 
   /** MDC key for the http request header include tax numbers. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS =
-      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "includetaxnumbers");
+      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "IncludeTaxNumbers");
 
   /** MDC key for the http request header accept. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_ACCEPT =
@@ -141,7 +141,7 @@ public class BfdMDC {
 
   /** MDC key for the http request header include address fields. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS =
-      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "includeaddressfields");
+      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "IncludeAddressFields");
 
   /** MDC key for the http request header connection. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING =
@@ -153,7 +153,7 @@ public class BfdMDC {
 
   /** MDC key for the http request header include identifiers. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS =
-      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "includeidentifiers");
+      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "IncludeIdentifiers");
 
   /** MDC key for the http request header user agent. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_USER_AGENT =
