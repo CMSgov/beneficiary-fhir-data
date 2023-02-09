@@ -49,9 +49,9 @@ import org.apache.commons.io.FilenameUtils;
 @Slf4j
 public class RDABridge {
 
-  /** Sets the default output file. */
+  /** Default output file. */
   private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
-  /** Sets the default input file. */
+  /** Default input file. */
   private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
 
   /** Enumeration for the source types. */
@@ -62,33 +62,33 @@ public class RDABridge {
     MCS
   }
 
-  /** Sets the output flag. */
+  /** Output flag. */
   private static final String OUTPUT_FLAG = "o";
-  /** Sets the mbi flag. */
+  /** Mbi flag. */
   private static final String MBI_FLAG = "b";
-  /** Sets the fiss flag. */
+  /** Fiss flag. */
   private static final String FISS_FLAG = "f";
-  /** Sets the mcs flag. */
+  /** Mcs flag. */
   private static final String MCS_FLAG = "m";
-  /** Sets the fiss output flag. */
+  /** Fiss output flag. */
   private static final String FISS_OUTPUT_FLAG = "g";
-  /** Sets the mcs output flag. */
+  /** Mcs output flag. */
   private static final String MCS_OUTPUT_FLAG = "n";
-  /** Sets the fiss sequence start. */
+  /** Fiss sequence start. */
   private static final String FISS_SEQ_START = "s";
-  /** Sets the mcs sequence start. */
+  /** Mcs sequence start. */
   private static final String MCS_SEQ_START = "z";
-  /** Sets the external config flag. */
+  /** External config flag. */
   private static final String EXTERNAL_CONFIG_FLAG = "e";
-  /** Sets the build attribution file. */
+  /** Build attribution file. */
   private static final String BUILD_ATTRIBUTION_FILE = "a";
-  /** Sets the attribution size. */
+  /** Attribution size. */
   private static final String ATTRIBUTION_SIZE = "x";
-  /** Sets the attribution script file. */
+  /** Attribution script file. */
   private static final String ATTRIBUTION_SCRIPT_FILE = "q";
-  /** Sets the attribution template file. */
+  /** Attribution template file. */
   private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
-  /** Sets the attribution fiss ratio. */
+  /** Attribution fiss ratio. */
   private static final String ATTRIBUTION_FISS_RATIO = "u";
 
   /** Maps of file extensions and parsers for turning various file types into RIF files. */
