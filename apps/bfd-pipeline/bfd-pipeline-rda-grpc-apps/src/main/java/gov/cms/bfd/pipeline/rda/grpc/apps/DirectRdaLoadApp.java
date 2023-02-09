@@ -120,6 +120,6 @@ public class DirectRdaLoadApp {
             .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
             .build();
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, new RdaServerJob.Config(), idHasherConfig);
+        jobConfig.build(), grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
   }
 }
