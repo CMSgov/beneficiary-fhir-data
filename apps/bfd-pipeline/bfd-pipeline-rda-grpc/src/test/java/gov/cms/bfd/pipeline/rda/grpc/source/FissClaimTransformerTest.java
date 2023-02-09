@@ -2530,7 +2530,7 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissAuditTrail.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissAuditTrail} and {@link RdaFissAuditTrail} instances.
+   * Used for tests that operate on {@link FissAuditTrail} and {@link RdaFissAuditTrail} instances.
    */
   class AuditTrailFieldTester
       extends AbstractFieldTester<FissAuditTrail.Builder, RdaFissAuditTrail> {
@@ -2560,7 +2560,7 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissBeneZPayer.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissBeneZPayer} and {@link RdaFissPayer} instances.
+   * Used for tests that operate on {@link FissBeneZPayer} and {@link RdaFissPayer} instances.
    */
   class BeneZPayerFieldTester extends AbstractFieldTester<FissBeneZPayer.Builder, RdaFissPayer> {
     /** {@inheritDoc} */
@@ -2589,7 +2589,7 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissInsuredPayer.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissInsuredPayer} and {@link RdaFissPayer} instances.
+   * Used for tests that operate on {@link FissInsuredPayer} and {@link RdaFissPayer} instances.
    */
   class InsuredPayerFieldTester
       extends AbstractFieldTester<FissInsuredPayer.Builder, RdaFissPayer> {
@@ -2619,8 +2619,7 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissProcedureCode.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissProcedureCode} and {@link RdaFissProcCode}
-   * instances.
+   * Used for tests that operate on {@link FissProcedureCode} and {@link RdaFissProcCode} instances.
    */
   class ProcCodeFieldTester
       extends AbstractFieldTester<FissProcedureCode.Builder, RdaFissProcCode> {
@@ -2651,7 +2650,7 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissDiagnosisCode.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissDiagnosisCode} and {@link RdaFissDiagnosisCode}
+   * Used for tests that operate on {@link FissDiagnosisCode} and {@link RdaFissDiagnosisCode}
    * instances.
    */
   class DiagnosisCodeFieldTester

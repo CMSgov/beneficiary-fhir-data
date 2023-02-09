@@ -2006,7 +2006,7 @@ public class McsClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link McsAdjustment.Builder} instances and to trigger a transformation of a claim. Used
-   * for tests that operator on {@link McsAdjustment} and {@link RdaMcsAdjustment} instances.
+   * for tests that operate on {@link McsAdjustment} and {@link RdaMcsAdjustment} instances.
    */
   class AdjustmentFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsAdjustment.Builder, RdaMcsAdjustment> {
@@ -2096,7 +2096,7 @@ public class McsClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link McsDiagnosisCode.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link McsDiagnosisCode} and {@link RdaMcsDiagnosisCode}
+   * Used for tests that operate on {@link McsDiagnosisCode} and {@link RdaMcsDiagnosisCode}
    * instances.
    */
   class DiagCodeFieldTester
@@ -2129,7 +2129,7 @@ public class McsClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link McsLocation.Builder} instances and to trigger a transformation of a claim. Used
-   * for tests that operator on {@link McsLocation} and {@link RdaMcsLocation} instances.
+   * for tests that operate on {@link McsLocation} and {@link RdaMcsLocation} instances.
    */
   class LocationFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsLocation.Builder, RdaMcsLocation> {
