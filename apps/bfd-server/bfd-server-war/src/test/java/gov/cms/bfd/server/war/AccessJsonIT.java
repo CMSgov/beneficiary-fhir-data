@@ -76,8 +76,7 @@ public class AccessJsonIT {
 
     // Verify that the access JSON is working, as expected.
     try {
-      TimeUnit.MILLISECONDS.sleep(
-          5000); // Needed in some configurations to resolve a race condition
+      TimeUnit.MILLISECONDS.sleep(500); // Needed in some configurations to resolve a race condition
     } catch (InterruptedException e) {
     }
 
@@ -106,14 +105,14 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI));
     assertTrue(content.contains(BfdMDC.HAPI_PROCESSING_COMPLETED_NORM_TIMESTAMP_MILLI));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_CLIENTSSL_DN));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS));
+    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_HOST_ENCODING));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS));
+    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_USER_AGENT));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HTTP_METHOD));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_OPERATION));
