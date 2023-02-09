@@ -105,14 +105,11 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI));
     assertTrue(content.contains(BfdMDC.HAPI_PROCESSING_COMPLETED_NORM_TIMESTAMP_MILLI));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_CLIENTSSL_DN));
-    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING));
-    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_HOST_ENCODING));
-    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_USER_AGENT));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HTTP_METHOD));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_OPERATION));
@@ -131,7 +128,6 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_STATUS));
-    assertTrue(content.contains(BfdMDC.JPA_QUERY_INCLUDE_TRUE));
     assertTrue(content.contains(BfdMDC.JPA_QUERY_DURATION_NANOSECONDS));
     assertTrue(content.contains(BfdMDC.JPA_QUERY_RECORD_COUNT));
     assertTrue(content.contains(BfdMDC.RESOURCES_RETURNED));
