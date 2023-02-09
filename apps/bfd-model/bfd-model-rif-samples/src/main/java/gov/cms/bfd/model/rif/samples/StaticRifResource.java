@@ -468,11 +468,11 @@ public enum StaticRifResource {
   }
 
   /**
-   * Supplier URL.
+   * Gets the {@link Supplier} for the {@link URL} to the resource's contents.
    *
    * @param resourceName the name of the resource on the classpath (as might be passed to {@link
    *     ClassLoader#getResource(String)})
-   * @return a {@link Supplier} for the {@link URL} to the resource's contents
+   * @return the resource url
    */
   private static Supplier<URL> resourceUrl(String resourceName) {
     return () -> {
