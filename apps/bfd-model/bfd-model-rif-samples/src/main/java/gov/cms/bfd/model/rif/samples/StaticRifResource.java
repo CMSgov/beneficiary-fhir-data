@@ -395,7 +395,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Get Resource Url.
+   * Get Resource Url as {@link URL}.
    *
    * @return the {@link URL} to the resource's contents
    */
@@ -406,7 +406,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Get Rif File Type.
+   * Get Rif File Type as {@link URL}.
    *
    * @return the {@link RifFileType} of the RIF file
    */
@@ -415,7 +415,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Get Record Count.
+   * Get Record Count as {@link integer}.
    *
    * @return the number of beneficiaries/claims/drug events in the RIF file excluding line items
    */
@@ -459,7 +459,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Convert to rif file.
+   * Convert to rif file as {@link RifFile}.
    *
    * @return a {@link RifFile} based on this {@link StaticRifResource}
    */

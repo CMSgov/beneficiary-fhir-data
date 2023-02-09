@@ -109,7 +109,7 @@ public final class SampleDataColumnsTest {
   }
 
   /**
-   * Get Columns In Enum.
+   * Get Columns In Enum as a {@link Enum}.
    *
    * @param rifFileType the {@link RifFileType} to get the column {@link Enum}s for
    * @return the RIF column {@link Enum}s for the specified {@link RifFileType}
@@ -133,8 +133,8 @@ public final class SampleDataColumnsTest {
    *
    * @param columns the array of columns to format {@link T}
    * @param columnNameFunction the {@link Function} to convert each column entry to the column name
-   * @return the specified columns {@link T}, but in the format used in RIF header rows
    * @param <T> to header format
+   * @return the specified columns {@link T}, but in the format used in RIF header rows
    */
   private static <T> String toHeaderFormat(T[] columns, Function<T, String> columnNameFunction) {
     StringBuilder formattedColumns = new StringBuilder();

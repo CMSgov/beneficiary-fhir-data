@@ -57,7 +57,7 @@ public enum TestDataSetLocation {
   }
 
   /**
-   * Get S3 bucket name.
+   * Get S3 bucket name as a {@link String}.
    *
    * @return the name of the S3 bucket that the test data is stored in
    */
@@ -66,7 +66,7 @@ public enum TestDataSetLocation {
   }
 
   /**
-   * Get S3 Key Prefix.
+   * Get S3 Key Prefix as a {@link String}.
    *
    * @return the key prefix of all the (publicly accessible) S3 objects containing the test data
    */
