@@ -9,6 +9,6 @@ import lombok.Data;
 public class SinkArguments {
   /** Output Path is the path of the associated Fiss or MCS file. */
   private final Path outputPath;
-  /** this field is what keeps track of the processed sequence numbers of the consumed files. */
+  /** This field is what keeps track of the processed sequence numbers of the consumed files. */
   private final WrappedCounter sequenceCounter;
 }
