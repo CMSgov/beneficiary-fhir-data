@@ -136,7 +136,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   private static class Config {
     /** GRPC config to be stored and used. */
     final RdaSourceConfig grpcConfig;
-    /** The correct claim type to be used. */
+    /** The claim type to be used. */
     private final ClaimType claimType;
     /** The maximum number of output to receive. */
     private final int maxToReceive;
