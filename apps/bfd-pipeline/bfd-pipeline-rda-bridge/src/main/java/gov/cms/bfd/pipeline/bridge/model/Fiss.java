@@ -14,21 +14,21 @@ import java.util.List;
  * corresponding column enum class.
  */
 public class Fiss {
-  /** Admitting Dianosis Code is set to Inpatient Claim Admitting Diagnosis Code name. */
+  /** Admitting Dianosis Code. */
   public static final String ADMTG_DGNS_CD = InpatientClaimColumn.ADMTG_DGNS_CD.name();
-  /** Bene Id is set to Inpatient Claim Bene Id Code name. */
+  /** Beneficiary ID. */
   public static final String BENE_ID = InpatientClaimColumn.BENE_ID.name();
-  /** Claim Type Code is set to Inpatient Claim Type Code name. */
+  /** Claim Facility Type Code. */
   public static final String CLM_FAC_TYPE_CD = InpatientClaimColumn.CLM_FAC_TYPE_CD.name();
-  /** Claim Frequency Code is set to Inpatient Claim Claim Frequency Code name. */
+  /** Claim Frequency Code. */
   public static final String CLM_FREQ_CD = InpatientClaimColumn.CLM_FREQ_CD.name();
-  /** Claim From Date is set to Inpatient Claim Claim From Date name. */
+  /** Claim From Date. */
   public static final String CLM_FROM_DT = InpatientClaimColumn.CLM_FROM_DT.name();
-  /** Claim Id is set to Inpatient Claim Claim Id name. */
+  /** Claim Id. */
   public static final String CLM_ID = InpatientClaimColumn.CLM_ID.name();
-  /** Claim Line Number is set to Inpatient Claim Claim Line Number name. */
+  /** Claim Line Number. */
   public static final String CLM_LINE_NUM = InpatientClaimColumn.CLM_LINE_NUM.name();
-  /** Claim POA Indicator is set to Inpatient Claim POA Indicator name. */
+  /** Claim POA Indicator. */
   public static final List<String> CLM_POA_IND_SW =
       listNumberedEnumNames(InpatientClaimColumn.values(), CLM_POA_IND_SW1);
   /**

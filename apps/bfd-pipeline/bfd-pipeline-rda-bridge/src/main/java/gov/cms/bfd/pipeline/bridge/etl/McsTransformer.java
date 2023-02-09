@@ -29,7 +29,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
-  /** Sets the mbiMap. */
+  /** Maps the mbi number to its benficiary data. */
   private final Map<String, BeneficiaryData> mbiMap;
 
   /**

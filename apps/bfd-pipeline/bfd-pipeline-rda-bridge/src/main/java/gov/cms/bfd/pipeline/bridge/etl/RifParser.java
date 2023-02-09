@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RifParser implements Parser<String> {
 
-  /** Sets the Delimiter for the rif. */
+  /** Delimiter for the rif. */
   private static final String DELIMITER = "\\|";
 
   /** Source of the RifParser. */
@@ -23,7 +23,7 @@ public class RifParser implements Parser<String> {
    * orders.
    */
   private final Map<String, Integer> headerIndexMap = new HashMap<>();
-  /** rowCounter returns {@link long}. */
+  /** The row counter to set the row number in the rif data returns {@link long}. */
   private long rowCounter = 0;
 
   /**

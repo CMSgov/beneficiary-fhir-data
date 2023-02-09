@@ -12,40 +12,40 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BeneficiaryData {
 
-  /** MBI Number is set to Beneficiary MBI Num name. */
+  /** MBI Number. */
   public static final String MBI_NUM = BeneficiaryColumn.MBI_NUM.name();
-  /** Bene Id is set to Beneficiary Id name. */
+  /** Beneficiary ID. */
   public static final String BENE_ID = BeneficiaryColumn.BENE_ID.name();
-  /** Bene Hic Number is set to Beneficiary Hic Number name. */
+  /** Beneficiary Hic Number. */
   public static final String BENE_CRNT_HIC_NUM = BeneficiaryColumn.BENE_CRNT_HIC_NUM.name();
 
-  /** Bene Name is set to Beneficiary Name name. */
+  /** Beneficiary Sur Name. */
   public static final String BENE_SRNM_NAME = BeneficiaryColumn.BENE_SRNM_NAME.name();
-  /** Bene Given Name is set to Beneficiary Given Name name. */
+  /** Beneficiary Given Name. */
   public static final String BENE_GVN_NAME = BeneficiaryColumn.BENE_GVN_NAME.name();
-  /** Bene Middle Name is set to Beneficiary Middle Name name. */
+  /** Beneficiary Middle Name. */
   public static final String BENE_MDL_NAME = BeneficiaryColumn.BENE_MDL_NAME.name();
-  /** Bene Birth Date is set to Beneficiar yBirth Date name. */
+  /** Beneficiary Birth Date. */
   public static final String BENE_BIRTH_DT = BeneficiaryColumn.BENE_BIRTH_DT.name();
-  /** Bene Sex Identification Code is set to Beneficiary Sex Identification Code name. */
+  /** Neneficiary Sex Identification Code. */
   public static final String BENE_SEX_IDENT_CD = BeneficiaryColumn.BENE_SEX_IDENT_CD.name();
 
-  /** beneId returns {@link String}. */
+  /** Benenficiary ID returns {@link String}. */
   private final String beneId;
-  /** mbi returns {@link String}. */
+  /** MBI Number returns {@link String}. */
   private final String mbi;
-  /** hicNo returns {@link String}. */
+  /** HICN Number returns {@link String}. */
   private final String hicNo;
 
-  /** firstName returns {@link String}. */
+  /** Beneficiary First Name returns {@link String}. */
   private final String firstName;
-  /** lastName returns {@link String}. */
+  /** Beneficiary Last Name returns {@link String}. */
   private final String lastName;
-  /** midName returns {@link String}. */
+  /** Beneficiary Middle Name returns {@link String}. */
   private final String midName;
-  /** dob returns {@link String}. */
+  /** Beneficiary Date of Birth returns {@link String}. */
   private final String dob;
-  /** gender returns {@link String}. */
+  /** Beneficiary Gender returns {@link String}. */
   private final String gender;
 
   /**

@@ -4,11 +4,11 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import java.nio.file.Path;
 import lombok.Data;
 
-/** Data class for SinkArguments. */
+/** Data class used for Fiss and MCs file path and its associated seequence in that file. */
 @Data
 public class SinkArguments {
-  /** outputPath returns {@link Path}. */
+  /** Output Path is the path of the associated Fiss or MCS file and returns {@link Path}. */
   private final Path outputPath;
-  /** sequenceCounter returns {@link WrappedCounter}. */
+  /** Sequence counter is a counter for the file and returns {@link WrappedCounter}. */
   private final WrappedCounter sequenceCounter;
 }

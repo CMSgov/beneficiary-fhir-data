@@ -19,12 +19,15 @@ import java.util.Set;
  * @param <T> The type of data being stored.
  */
 public class DataSampler<T> implements Iterable<T> {
-  /** Private field to set hashmap that will be used for the dataSet. */
+  /**
+   * Dataset is a hashmap that corresponds to the Sample Id of mbis for the key and the associate
+   * benficiary data.
+   */
   private final Map<Integer, Set<T>> dataSet = new HashMap<>();
 
-  /** Private field to set a sample for the DataSampler. */
+  /** Sample proportions are sets of ids and a normalized proportion of the data. */
   private final Map<Integer, Float> sampleProportions;
-  /** Private field to the max values for the DataSet. */
+  /** The maximum value allowed allowed for the sampler id. */
   private final int maxValues;
 
   /**

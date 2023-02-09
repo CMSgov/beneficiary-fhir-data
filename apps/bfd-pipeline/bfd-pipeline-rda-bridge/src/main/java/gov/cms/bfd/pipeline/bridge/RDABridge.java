@@ -91,11 +91,11 @@ public class RDABridge {
   /** Sets the attribution fiss ratio. */
   private static final String ATTRIBUTION_FISS_RATIO = "u";
 
-  /** Sets the parser map. */
+  /** Maps of file extensions and parsers for turning various file types into RIF files. */
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
 
-  /** Sets the sink map. */
+  /** Maps the file output type. */
   private static final Map<
           String, ThrowingFunction<Sink<MessageOrBuilder>, SinkArguments, IOException>>
       sinkMap = Map.of("ndjson", NdJsonSink::new);

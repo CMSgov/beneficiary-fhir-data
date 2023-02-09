@@ -157,7 +157,8 @@ public class McsTransformerIT {
   }
 
   /**
-   * New first claim tests.
+   * New first claim tests. This function provides that the first claim is processed and the
+   * expected values are set and the same as the Test Data class.
    *
    * @return {@link Arguments}
    */
