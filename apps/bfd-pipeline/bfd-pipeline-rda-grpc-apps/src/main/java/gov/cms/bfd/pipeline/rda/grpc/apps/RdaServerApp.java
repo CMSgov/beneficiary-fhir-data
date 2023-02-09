@@ -118,11 +118,7 @@ public class RdaServerApp {
       }
     }
 
-    /**
-     * Returns the port number.
-     *
-     * @return port number
-     */
+    /** @return port number */
     private int getPort() {
       return port;
     }
