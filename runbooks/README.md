@@ -51,6 +51,8 @@ Table of Contents
    * [Prod Load Additional Steps](./how-to-run-synthea-automation.md#prod-load-additional-steps)
    * [Troubleshooting (High Level)](./how-to-run-synthea-automation.md#troubleshooting-high-level)
 
+* [How to Perform a BFD Deployment](./how-to-do-a-deployment.md#how-to-perform-a-bfd-deployment)
+
 * [How to Mark SNYK Findings as Ignored](./how-to-mark-snyk-findings-ignored.md#how-to-mark-snyk-findings-as-ignored)
 
 * [How to Detach BFD Server Instances for Development or Debugging](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#how-to-detach-bfd-server-instances-for-development-or-debugging)
