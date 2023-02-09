@@ -76,7 +76,7 @@ public class McsTransformerIT {
   /**
    * Produces expected claims and their data samples.
    *
-   * @return {@link Stream} of arguments.
+   * @return {@link Stream} of arguments
    */
   private static Stream<Arguments> shouldProduceExpectedClaimsAndDataSamples() {
     return Stream.of(
@@ -90,10 +90,10 @@ public class McsTransformerIT {
   /**
    * Test helper function to produced expected claims and their data samples.
    *
-   * @param testName the name of the test.
-   * @param arguments the arguments for the test.
-   * @param expectedValues the expected values for the test.
-   * @param expectedException the expected exception.
+   * @param testName the name of the test
+   * @param arguments the arguments for the test
+   * @param expectedValues the expected values for the test
+   * @param expectedException the expected exception
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -404,8 +404,8 @@ public class McsTransformerIT {
   /**
    * Helper method to create {@link McsClaimChange} objects.
    *
-   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object.
-   * @return The created {@link McsClaimChange} object.
+   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object
+   * @return The created {@link McsClaimChange} object
    */
   private static McsClaimChange createMcsClaimChange(McsClaim claim) {
     return createMcsClaimChange(claim, TestData.CARR_CLM_CNTL_NUM, 1);
@@ -414,10 +414,10 @@ public class McsTransformerIT {
   /**
    * Helper method to create {@link McsClaimChange} objects.
    *
-   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object.
-   * @param icn The ICN to use.
-   * @param sequenceNumber THe sequence number to use.
-   * @return The created {@link McsClaimChange} object.
+   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object
+   * @param icn The ICN to use
+   * @param sequenceNumber THe sequence number to use
+   * @return The created {@link McsClaimChange} object
    */
   private static McsClaimChange createMcsClaimChange(
       McsClaim claim, String icn, int sequenceNumber) {
@@ -570,7 +570,7 @@ public class McsTransformerIT {
         /**
          * Gets the {@link fieldName} from the dataMap.
          *
-         * @param fieldName of the data map.
+         * @param fieldName of the data map
          * @return {@link Optional}
          */
         @Override

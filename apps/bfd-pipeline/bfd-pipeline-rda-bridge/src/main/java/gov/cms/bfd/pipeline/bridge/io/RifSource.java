@@ -17,8 +17,8 @@ public class RifSource implements Source<String> {
   /**
    * RifSource constructor method.
    *
-   * @param inputPath is the inputpath.
-   * @throws IOException throws IOException.
+   * @param inputPath is the inputpath
+   * @throws IOException throws IOException
    */
   public RifSource(Path inputPath) throws IOException {
     reader = Files.newBufferedReader(inputPath, StandardCharsets.UTF_8);

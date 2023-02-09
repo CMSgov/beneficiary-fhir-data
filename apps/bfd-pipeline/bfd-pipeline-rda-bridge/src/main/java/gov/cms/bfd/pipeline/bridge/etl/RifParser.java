@@ -74,9 +74,9 @@ public class RifParser implements Parser<String> {
   @RequiredArgsConstructor
   public static class RifData extends Data<String> {
 
-    /** Sets the rifDateFormat. */
+    /** The Rif Date Format. */
     private final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
-    /** Sets the standardFormat. */
+    /** The Standard Format. */
     private final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     /** Identifies the row id. */

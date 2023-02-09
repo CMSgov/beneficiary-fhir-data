@@ -16,7 +16,7 @@ public class WrappedMessage {
   /**
    * Gets the {@link #message}.
    *
-   * @return the message.
+   * @return the message
    */
   public MessageOrBuilder getMessage() {
     return message;
@@ -25,7 +25,7 @@ public class WrappedMessage {
   /**
    * Sets the {@link #message}.
    *
-   * @param message sets the message.
+   * @param message sets the message
    */
   public void setMessage(MessageOrBuilder message) {
     this.message = message;
@@ -34,7 +34,7 @@ public class WrappedMessage {
   /**
    * Gets the {@link #lineNumber}.
    *
-   * @return the line number.
+   * @return the line number
    */
   public long getLineNumber() {
     return lineNumber;
@@ -43,7 +43,7 @@ public class WrappedMessage {
   /**
    * Sets the {@link #lineNumber}.
    *
-   * @param lineNumber sets the line number.
+   * @param lineNumber sets the line number
    */
   public void setLineNumber(long lineNumber) {
     this.lineNumber = lineNumber;

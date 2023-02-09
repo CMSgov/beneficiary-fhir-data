@@ -197,7 +197,7 @@ class RDABridgeIT {
   /**
    * Returns the path of the Bene_History_Csv file.
    *
-   * @return returns the {@link Path} of the bene history file.
+   * @return returns the {@link Path} of the bene history file
    */
   private Path getResourcePath() {
     // ConstantConditions - It'll be there, don't worry.
