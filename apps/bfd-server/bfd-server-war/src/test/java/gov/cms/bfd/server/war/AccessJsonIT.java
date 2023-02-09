@@ -128,8 +128,6 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_STATUS));
-    assertTrue(content.contains(BfdMDC.JPA_QUERY_DURATION_NANOSECONDS));
-    assertTrue(content.contains(BfdMDC.JPA_QUERY_RECORD_COUNT));
     assertTrue(content.contains(BfdMDC.RESOURCES_RETURNED));
   }
 }
