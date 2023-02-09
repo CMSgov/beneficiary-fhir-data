@@ -395,7 +395,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Get Resource Url as {@link URL}.
+   * Gets the {@link #resourceUrl}.
    *
    * @return the {@link URL} to the resource's contents
    */
