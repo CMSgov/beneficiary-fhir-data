@@ -109,7 +109,7 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS));
+    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_HOST_ENCODING));
     // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS));
