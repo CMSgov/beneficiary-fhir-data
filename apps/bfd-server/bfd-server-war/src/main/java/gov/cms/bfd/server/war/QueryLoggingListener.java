@@ -182,6 +182,16 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     LOADED_BATCH("loaded_batch", (s -> s.contains(" from loaded_batches "))),
     /** Represents the query for loaded files. */
     LOADED_FILE("loaded_file", (s -> s.contains(" from loaded_files "))),
+    /**
+     * Represents the query for checking if a beneficiary exists given the partD contract id and
+     * year month.
+     */
+    BENE_EXISTS_BY_YEAR_MONTH_PARTD_CONTRACT_ID(
+        "bene_exists_by_year_month_part_d_contract_id",
+        (s ->
+            s.contains(" from beneficiary_monthly ")
+                && s.contains("year_month=")
+                && s.contains("partd_contract_number_id="))),
     /** Represents an unknown query (one not explicitly defined in this list). */
     UNKNOWN("unknown", null);
 

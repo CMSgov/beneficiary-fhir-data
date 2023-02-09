@@ -146,6 +146,7 @@ public class HospiceClaimTransformerV2 {
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Inpatient for Hospice Claims
+    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -162,7 +163,8 @@ public class HospiceClaimTransformerV2 {
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
-        C4BBInstutionalClaimSubtypes.Inpatient);
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        claimGroup.getClaimQueryCode());
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept

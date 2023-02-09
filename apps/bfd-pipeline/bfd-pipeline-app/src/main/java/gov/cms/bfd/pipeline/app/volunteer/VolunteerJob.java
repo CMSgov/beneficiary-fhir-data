@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public final class VolunteerJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(VolunteerJob.class);
 
+  /** Represents this job type is a volunteer job (accepts pending jobs). */
   public static final PipelineJobType<NullPipelineJobArguments> JOB_TYPE =
       new PipelineJobType<NullPipelineJobArguments>(VolunteerJob.class);
 
@@ -33,8 +34,11 @@ public final class VolunteerJob implements PipelineJob<NullPipelineJobArguments>
    */
   public static long VOLUNTEER_TICK_MILLIS = 10 * 1000;
 
+  /** The metrics for this job. */
   private final MetricRegistry appMetrics;
+  /** The orchestration object for the pipeline. */
   private final PipelineManager pipelineManager;
+  /** Holds the records of completed jobs. */
   private final PipelineJobRecordStore jobRecordsStore;
 
   /**
@@ -54,19 +58,19 @@ public final class VolunteerJob implements PipelineJob<NullPipelineJobArguments>
     this.jobRecordsStore = jobRecordsStore;
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
     return Optional.empty();
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     return true;
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+  /** {@inheritDoc} */
   @Override
   public PipelineJobOutcome call() throws Exception {
     boolean enqueuedAJob = false;

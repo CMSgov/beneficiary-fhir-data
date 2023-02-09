@@ -29,18 +29,15 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Tests downloaded S3 file attributes such as MD5ChkSum */
+/** Tests downloaded S3 file attributes such as MD5ChkSum. */
 public final class ManifestEntryDownloadTaskIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
+  /** The S3 task manager. */
   private S3TaskManager s3TaskManager;
 
-  public ManifestEntryDownloadTaskIT() {
-    this.s3TaskManager = null;
-  }
-
   /**
-   * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value
+   * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value.
    */
   @SuppressWarnings("deprecation")
   @Test

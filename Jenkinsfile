@@ -307,6 +307,13 @@ try {
 							]
 						)
 
+						// Deploy the API requests Insights Lambda
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server/insights/api-requests"
+						)
+
 						awsAuth.assumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
@@ -438,6 +445,13 @@ try {
 								]
 							)
 
+							// Deploy the API requests Insights Lambda
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
+							)
+
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
@@ -548,6 +562,13 @@ try {
 								tfVars: [
 									docker_image_tag_override: params.server_regression_image_override
 								]
+							)
+
+							// Deploy the API requests Insights Lambda
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
 							)
 
 							awsAuth.assumeRole()

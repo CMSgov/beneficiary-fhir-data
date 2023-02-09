@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -52,6 +53,11 @@ public class RdaSinkTest {
     }
 
     @Override
+    public void checkErrorCount() {
+      // Do Nothing
+    }
+
+    @Override
     public String getClaimIdForMessage(Integer object) {
       return String.valueOf(object);
     }
@@ -69,12 +75,12 @@ public class RdaSinkTest {
 
     @Nonnull
     @Override
-    public Integer transformMessage(String apiVersion, Integer integer) {
-      return integer;
+    public Optional<Integer> transformMessage(String apiVersion, Integer integer) {
+      return Optional.of(integer);
     }
 
     @Override
-    public int writeClaims(Collection<Integer> objects) throws ProcessingException {
+    public int writeClaims(Collection<Integer> objects) {
       throw new UnsupportedOperationException();
     }
 
@@ -84,6 +90,6 @@ public class RdaSinkTest {
     }
 
     @Override
-    public void shutdown(Duration waitTime) throws ProcessingException {}
+    public void shutdown(Duration waitTime) {}
   }
 }

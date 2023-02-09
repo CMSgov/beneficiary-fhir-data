@@ -182,7 +182,8 @@ public class LoadRdaJsonApp {
               .port(port)
               .maxIdle(Duration.ofDays(1))
               .build();
-      return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
+      return new RdaLoadOptions(
+          jobConfig, grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
     }
 
     /**

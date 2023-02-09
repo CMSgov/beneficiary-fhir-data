@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9" timestamp="2022-10-18T19:24:11Z" sequenceId="1001" syntheticData="true">
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10" timestamp="2022-10-18T19:24:11Z" sequenceId="1001" syntheticData="true">
   <entry name="beneficiary_2012.csv" type="BENEFICIARY"/>
   <entry name="beneficiary_2013.csv" type="BENEFICIARY"/>
   <entry name="beneficiary_2014.csv" type="BENEFICIARY"/>

@@ -57,9 +57,11 @@ public final class RifFilesProcessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
   /**
+   * Produces a {@link RifFileRecords} with the {@link RifRecordEvent}s produced from the specified
+   * {@link RifFileEvent}.
+   *
    * @param rifFileEvent the {@link RifFileEvent} that is being processed
-   * @return a {@link RifFileRecords} with the {@link RifRecordEvent}s produced from the specified
-   *     {@link RifFileEvent}
+   * @return the record from the rif file
    */
   public RifFileRecords produceRecords(RifFileEvent rifFileEvent) {
     RifFile file = rifFileEvent.getFile();
@@ -160,6 +162,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a beneficiary event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
    *     must be from a {@link RifFileType#BENEFICIARY} {@link RifFile}
@@ -184,6 +188,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a beneficiary history event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
    *     must be from a {@link RifFileType#BENEFICIARY_HISTORY} {@link RifFile}
@@ -207,9 +213,11 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a medicare beneficiary id history event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
-   *     must be from a {@link RifFileType#Medicare_Beneficiary_Id_History} {@link RifFile}
+   *     must be from a {@link RifFileType#MEDICARE_BENEFICIARY_ID_HISTORY} {@link RifFile}
    * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
    */
   private static RifRecordEvent<MedicareBeneficiaryIdHistory>
@@ -231,6 +239,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a part D event record.
+   *
    * @param fileEvent the {@link RifFilesEvent} being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#PDE} {@link RifFile}
@@ -250,6 +260,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds an inpatient claim event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed that is being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#INPATIENT} {@link RifFile}
@@ -268,6 +280,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds an outpatient claim event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed that is being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#OUTPATIENT} {@link RifFile}
@@ -286,6 +300,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a carrier claim event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#CARRIER} {@link RifFile}
@@ -304,6 +320,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds an SNF event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#SNF} {@link RifFile}
@@ -322,6 +340,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a hospice claim event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#HOSPICE} {@link RifFile}
@@ -340,6 +360,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds an HHA event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#HHA} {@link RifFile}
@@ -358,6 +380,8 @@ public final class RifFilesProcessor {
   }
 
   /**
+   * Builds a DME claim event record.
+   *
    * @param fileEvent the {@link RifFileEvent} being processed
    * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
    *     RifFileType#DME} {@link RifFile}
