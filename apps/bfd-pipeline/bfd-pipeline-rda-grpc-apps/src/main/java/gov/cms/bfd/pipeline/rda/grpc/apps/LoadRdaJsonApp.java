@@ -165,7 +165,7 @@ public class LoadRdaJsonApp {
      * Creates and returns the options to load for the RDA app.
      *
      * @param port the port to be used for the RDA pipeline
-     * @return the options used for the RDS pipeline
+     * @return the options used for the RDA pipeline
      */
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
