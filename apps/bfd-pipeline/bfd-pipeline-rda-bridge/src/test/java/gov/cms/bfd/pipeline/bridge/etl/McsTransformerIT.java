@@ -74,7 +74,7 @@ public class McsTransformerIT {
   }
 
   /**
-   * Produces expeted claims and their data samples.
+   * Produces expected claims and their data samples.
    *
    * @return {@link Stream} of arguments.
    */
@@ -438,67 +438,67 @@ public class McsTransformerIT {
 
   /** Test Data class set. */
   private static class TestData {
-    /** Line Number returns {@link String}. */
+    /** Line Number. */
     private static final String LINE_NUM = "1";
-    /** Bene Id returns {@link String}. */
+    /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
-    /** Bene First Name returns {@link String}. */
+    /** Beneficiary First Name. */
     private static final String BENE_FIRST_NAME = "F";
-    /** Bene Last Name returns {@link String}. */
+    /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastna";
-    /** Bene Middle Initial returns {@link String}. */
+    /** Beneficiary Middle Initial. */
     private static final String BENE_MID_INIT = "M";
-    /** Bene DOB returns {@link String}. */
+    /** Beneficiary DOB. */
     private static final String BENE_DOB = "2020-01-01";
-    /** Bene gender returns {@link String}. */
+    /** Beneficiary gender. */
     private static final int BENE_GENDER = 1;
-    /** Carrier Claim Control Number returns {@link String}. */
+    /** Carrier Claim Control Number.. */
     private static final String CARR_CLM_CNTL_NUM = "icn12345678";
-    /** Claim From Date returns {@link String}. */
+    /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
-    /** Claim Thru Date returns {@link String}. */
+    /** Claim Thru Date. */
     private static final String CLM_THRU_DT = "03-Mar-2001";
-    /** NCH Carrier Claim Submitted Charge Amount returns {@link String}. */
+    /** NCH Carrier Claim Submitted Charge Amount. */
     private static final String NCH_CARR_CLM_SBMTD_CHRG_AMT = "832.12";
-    /** Original NPI Number returns {@link String}. */
+    /** Original NPI Number. */
     private static final String ORG_NPI_NUM = "8888888888";
-    /** Claim Id returns {@link String}. */
+    /** Claim Id. */
     private static final String CLM_ID = "-999999999";
-    /** Diagnosis Code returns {@link String}. */
+    /** Diagnosis Code. */
     private static final String ICD_DGNS_CD1 = "JJJJ";
-    /** Diagnosis Version Code returns {@link String}. */
+    /** Diagnosis Version Code. */
     private static final String ICD_DGNS_VRSN_CD1 = "0";
-    /** Line Diagnosis Code returns {@link String}. */
+    /** Line Diagnosis Code. */
     private static final String LINE_ICD_DGNS_CD = "12";
-    /** Line Diagnosis Version Code returns {@link String}. */
+    /** Line Diagnosis Version Code. */
     private static final String LINE_ICD_DGNS_VRSN_CD = "0";
-    /** HCPCS Code returns {@link String}. */
+    /** HCPCS Code. */
     private static final String HCPCS_CD = "123";
-    /** HCPCS first code returns {@link String}. */
+    /** HCPCS first code. */
     private static final String HCPCS_1ST_MDFR_CD = "abc";
-    /** HCPCS second code returns {@link String}. */
+    /** HCPCS second code. */
     private static final String HCPCS_2ND_MDFR_CD = "cba";
-    /** Line Expns Date returns {@link String}. */
+    /** Line Expns Date. */
     private static final String LINE_1ST_EXPNS_DT = "20-Feb-2008";
-    /** Line Last Expns Date returns {@link String}. */
+    /** Line Last Expns Date. */
     private static final String LINE_LAST_EXPNS_DT = "30-Jun-2008";
-    /** MBI returns {@link String}. */
+    /** MBI number. */
     private static final String MBI = "mbimbimbimbi";
-    /** Hardcoded Bill EIN returns {@link String}. */
+    /** Hardcoded Bill EIN. */
     private static final String HARDCODED_BILL_PROV_EIN = "XX-XXXXXXX";
-    /** Hardcoded Bill Specreturns {@link String}. */
+    /** Hardcoded Bill Spec. */
     private static final String HARDCODED_BILL_PROV_SPEC = "01";
-    /** Hardcoded Bill Type returns {@link String}. */
+    /** Hardcoded Bill Type. */
     private static final String HARDCODED_BILL_PROV_TYPE = "20";
-    /** Hardcoded Bill Received Date returns {@link String}. */
+    /** Hardcoded Bill Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
-    /** Hardcoded Control ID returns {@link String}. */
+    /** Hardcoded Control ID. */
     private static final String HARDCODED_CONTROL_ID = "00000";
-    /** Hardcoded Status Date returns {@link String}. */
+    /** Hardcoded Status Date. */
     private static final String HARDCODED_STATUS_DATE = "1970-01-01";
-    /** Fiss Sample ID returns {@link int}. */
+    /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
-    /** Mcs Sample ID returns {@link int}. */
+    /** Mcs Sample ID. */
     private static final int MCS_SAMPLE_ID = 1;
 
     /**
