@@ -112,25 +112,25 @@ public class LoadRdaJsonApp {
    * sizes, fissFile, and mcsFile.
    */
   private static class Config {
-    /** Stores the hash pepper. */
+    /** The hash pepper. */
     private final String hashPepper;
-    /** Stores the hash iterations. */
+    /** The hash iterations. */
     private final int hashIterations;
-    /** Stores the database url. */
+    /** The database url. */
     private final String dbUrl;
-    /** Stores the database user. */
+    /** The database user. */
     private final String dbUser;
-    /** Stores the database password. */
+    /** The database password. */
     private final String dbPassword;
-    /** Stores the number of write threads. */
+    /** The number of write threads. */
     private final int writeThreads;
-    /** Stores the batch size. */
+    /** The batch size. */
     private final int batchSize;
-    /** Stores whether to run the schema migration. */
+    /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
-    /** Stores the file for fiss claims. */
+    /** The file for fiss claims. */
     private final Optional<File> fissFile;
-    /** Stores the file for mcs claims. */
+    /** The file for mcs claims. */
     private final Optional<File> mcsFile;
 
     /**
