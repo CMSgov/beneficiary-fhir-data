@@ -30,22 +30,22 @@ public class BeneficiaryData {
   /** Neneficiary Sex Identification Code. */
   public static final String BENE_SEX_IDENT_CD = BeneficiaryColumn.BENE_SEX_IDENT_CD.name();
 
-  /** Benenficiary ID returns {@link String}. */
+  /** Benenficiary ID. */
   private final String beneId;
-  /** MBI Number returns {@link String}. */
+  /** MBI Number. */
   private final String mbi;
-  /** HICN Number returns {@link String}. */
+  /** HICN Number. */
   private final String hicNo;
 
-  /** Beneficiary First Name returns {@link String}. */
+  /** Beneficiary First Name. */
   private final String firstName;
-  /** Beneficiary Last Name returns {@link String}. */
+  /** Beneficiary Last Name. */
   private final String lastName;
-  /** Beneficiary Middle Name returns {@link String}. */
+  /** Beneficiary Middle Name. */
   private final String midName;
-  /** Beneficiary Date of Birth returns {@link String}. */
+  /** Beneficiary Date of Birth. */
   private final String dob;
-  /** Beneficiary Gender returns {@link String}. */
+  /** Beneficiary Gender. */
   private final String gender;
 
   /**

@@ -6,7 +6,7 @@ public class WrappedCounter {
   private long counter;
 
   /**
-   * Constructor to set the start of the counter variable.
+   * Constructor instantiates a new {@link WrappedCounter} for counting between method scopes.
    *
    * @param start sets the start of the counter.
    */

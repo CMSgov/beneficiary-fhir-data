@@ -139,9 +139,12 @@ public class DataSampler<T> implements Iterable<T> {
    * @param <T> The type of data to store in the created {@link DataSampler} instance.
    */
   public static class Builder<T> {
-    /** Sets the max Values to the maximum integer value. */
+    /**
+     * Defines the maximum number of data values the {@link DataSampler} will be configured to
+     * store.
+     */
     private int maxValues = Integer.MAX_VALUE;
-    /** Sets the sampleProportions to a hashmap. */
+    /** Defines the sample data values the {@link DataSampler} will be configured to store. */
     private final Map<Integer, Float> sampleProportions = new HashMap<>();
 
     /**
@@ -194,9 +197,9 @@ public class DataSampler<T> implements Iterable<T> {
    */
   public class DataSamplerIterator implements Iterator<T> {
 
-    /** Sets the mapIterators. */
+    /** Map of iterators used during the Data Sampler for FISS and MCS data. */
     private final Iterator<Set<T>> mapIterator;
-    /** Sets the curretSetIterator. */
+    /** The Curret Iterator for the mapIterator for FISS and MCS data. */
     private Iterator<T> currentSetIterator;
 
     /**

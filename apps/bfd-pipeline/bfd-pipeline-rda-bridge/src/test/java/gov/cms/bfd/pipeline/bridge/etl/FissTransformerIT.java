@@ -159,7 +159,8 @@ public class FissTransformerIT {
   }
 
   /**
-   * This tests is for a new first claim test cases.
+   * This function sets the {@link Arguments} with the expected data for the default/first claim for
+   * the FissClaim, the default data map, and the default MBI to compare against the actual results.
    *
    * @return {@link Arguments} the expected claim lines and their associated numbers
    */
@@ -194,7 +195,8 @@ public class FissTransformerIT {
   }
 
   /**
-   * This test is to test that the first claim has a invalid line number.
+   * This function returns {@link Arguments} for expected results for a test case where an invalid
+   * line number will throw an expected IllegalStateException.
    *
    * @return {@link Arguments} the expected claim lines and their associated numbers
    */
@@ -232,8 +234,8 @@ public class FissTransformerIT {
   }
 
   /**
-   * Recurring claim test case function tests that there is a claim 1 followed by a different claim
-   * 2.
+   * Returns the {@link Arguments} where the data is set for the second claim to use the same data
+   * as the first claim to test recurring claims.
    *
    * @return {@link Arguments} the expected claim lines and their associated numbers
    */
@@ -275,7 +277,8 @@ public class FissTransformerIT {
   }
 
   /**
-   * Recurring Claim Invalid Line Number Case.
+   * Sets {@link Arguments} to return the same claim in Line Number 1 and Line Number 3 to test
+   * recurring claims with different line numbers.
    *
    * @return {@link Arguments} the expected claim lines and their associated numbers
    */
@@ -319,7 +322,7 @@ public class FissTransformerIT {
   }
 
   /**
-   * Non first claim case.
+   * Sets {@link Arguments} the claim to a new claim that has been previously processed.
    *
    * @return {@link Arugments} the expected claim lines and their associated numbers
    */

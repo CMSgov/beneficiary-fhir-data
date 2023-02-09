@@ -18,10 +18,7 @@ public class RifParser implements Parser<String> {
 
   /** Source of the RifParser. */
   private final Source<String> source;
-  /**
-   * headerIndexMap is a mapping of the index and their associated number in their respective
-   * orders.
-   */
+  /** The map of the header values to their column index in the rif file. */
   private final Map<String, Integer> headerIndexMap = new HashMap<>();
   /** The row counter to set the row number in the rif data returns {@link long}. */
   private long rowCounter = 0;
