@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - burling/bfd-2334
+      - 'burling/bfd-2334'
     paths:
       - ops/Dockerfile
       - .github/workflows/ci-base-container-image.yml

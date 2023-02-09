@@ -13,4 +13,4 @@ jobs:
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-server-load
-      image_tag: bfd-2334 #FIXME
+      image_tag: burling-bfd-2334 #FIXME
