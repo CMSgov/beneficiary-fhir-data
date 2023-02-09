@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 public class WriterThreadPoolIT {
   private static final String VERSION = "Version";
 
+  /** Tests the outcome if all messages are successfully processed */
   @Test
   public void testSuccess() throws Exception {
     final TestDatabase database = new TestDatabase();
@@ -33,8 +34,9 @@ public class WriterThreadPoolIT {
     assertEquals(messages.size(), database.getLastSequenceNumber());
   }
 
+  /** Tests the outcome if there are message transformation failures during processing */
   @Test
-  public void testTransformFailure() throws Exception {
+  public void testTransformFailure() {
     final TestDatabase database = new TestDatabase();
     final List<TestDatabase.Message> messages = createTestMessages();
     // trigger a transform error on last message
@@ -57,8 +59,9 @@ public class WriterThreadPoolIT {
     assertTrue(database.allClosed(), "all sinks closed");
   }
 
+  /** Tests the outcome if there are issues writing errors out during processing */
   @Test
-  public void testWriteFailure() throws Exception {
+  public void testWriteFailure() {
     final TestDatabase database = new TestDatabase();
     final List<TestDatabase.Message> messages = createTestMessages();
     // trigger an i/o error on last message

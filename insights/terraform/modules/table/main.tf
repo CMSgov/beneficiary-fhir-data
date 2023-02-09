@@ -105,7 +105,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
   # need to undo whatever changes the Crawler makes
   lifecycle {
     ignore_changes = [
-      storage_descriptor,
+      # TODO: Consider removing everything here
       parameters
     ]
   }

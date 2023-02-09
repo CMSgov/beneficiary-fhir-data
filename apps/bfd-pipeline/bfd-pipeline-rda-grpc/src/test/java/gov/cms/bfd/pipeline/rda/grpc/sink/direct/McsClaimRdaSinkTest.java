@@ -19,6 +19,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsLocation;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,11 +83,12 @@ public class McsClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(meters, appMetrics, dataSource, entityManagerFactory, clock);
-    sink = new McsClaimRdaSink(appState, transformer, true);
+    sink = new McsClaimRdaSink(appState, transformer, true, 0);
     sink.getMetrics().setLatestSequenceNumber(0);
     nextSeq = 0L;
   }
 
+  /** Tests the names of the metrics */
   @Test
   public void metricNames() {
     assertEquals(
@@ -110,6 +113,7 @@ public class McsClaimRdaSinkTest {
             .collect(Collectors.toList()));
   }
 
+  /** Tests the outcome of a successful batch merge */
   @Test
   public void mergeSuccessful() throws Exception {
     final List<RdaChange<RdaMcsClaim>> batch =
@@ -141,6 +145,7 @@ public class McsClaimRdaSinkTest {
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
+  /** Tests the outcome of when a batch merge throws an exception */
   @Test
   public void mergeFatalError() {
     final List<RdaChange<RdaMcsClaim>> batch =
@@ -179,12 +184,14 @@ public class McsClaimRdaSinkTest {
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
+  /** Tests that the close methods are called on the dependencies */
   @Test
   public void closeMethodsAreCalled() throws Exception {
     sink.close();
     verify(entityManager).close();
   }
 
+  /** Tests the outcome of a claim that fails to transform */
   @Test
   public void transformClaimFailure() throws Exception {
     final var claims = ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
@@ -195,13 +202,27 @@ public class McsClaimRdaSinkTest {
         .when(transformer)
         .transformClaim(messages.get(1));
 
+    // unchecked - This is fine for a mock
+    //noinspection unchecked
+    TypedQuery<MessageError> mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(1L).when(mockTypedQuery).getSingleResult();
+
+    doReturn(mockTypedQuery)
+        .when(mockTypedQuery)
+        .setParameter("status", MessageError.Status.UNRESOLVED);
+
+    doReturn(mockTypedQuery)
+        .when(entityManager)
+        .createQuery(
+            "select count(error) from MessageError error where status = :status", Long.class);
+
     try {
       sink.writeMessages(VERSION, messages);
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
-      assertThat(
-          error.getCause(), CoreMatchers.instanceOf(DataTransformer.TransformationException.class));
+      assertThat(error.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
     }
 
     verify(transaction, times(1)).begin();

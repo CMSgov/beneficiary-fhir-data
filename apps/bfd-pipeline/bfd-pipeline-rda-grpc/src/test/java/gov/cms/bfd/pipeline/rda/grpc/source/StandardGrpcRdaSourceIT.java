@@ -343,12 +343,17 @@ public class StandardGrpcRdaSourceIT {
     public synchronized int writeMessage(String dataVersion, FissClaimChange message)
         throws ProcessingException {
       try {
-        var change = transformMessage(dataVersion, message);
-        values.add(mapper.writeValueAsString(change.getClaim()));
+        var changeOpt = transformMessage(dataVersion, message);
+        values.add(mapper.writeValueAsString(changeOpt.get().getClaim()));
         return 1;
       } catch (Exception ex) {
         throw new ProcessingException(ex, 0);
       }
+    }
+
+    @Override
+    public void checkErrorCount() {
+      // Do nothing
     }
 
     @Override
@@ -366,13 +371,14 @@ public class StandardGrpcRdaSourceIT {
 
     @Nonnull
     @Override
-    public RdaChange<RdaFissClaim> transformMessage(String apiVersion, FissClaimChange message) {
+    public Optional<RdaChange<RdaFissClaim>> transformMessage(
+        String apiVersion, FissClaimChange message) {
       var change = transformer.transformClaim(message);
       change.getClaim().setApiSource(apiVersion);
       if (change.getClaim().getMbiRecord() != null) {
         change.getClaim().getMbiRecord().setLastUpdated(null);
       }
-      return change;
+      return Optional.of(change);
     }
 
     @Override
