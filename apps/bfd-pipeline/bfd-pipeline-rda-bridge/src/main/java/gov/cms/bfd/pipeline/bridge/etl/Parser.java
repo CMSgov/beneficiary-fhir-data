@@ -49,7 +49,7 @@ public interface Parser<T> extends Closeable {
 
     /** enumeration for Date type used for rif parser date. */
     public enum Type {
-      /** Date value for enum. */
+      /** Represents a date type from parsed data. */
       DATE
     }
 
