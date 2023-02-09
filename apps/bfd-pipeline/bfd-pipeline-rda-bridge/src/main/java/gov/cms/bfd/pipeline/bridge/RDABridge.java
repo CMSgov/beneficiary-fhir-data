@@ -62,33 +62,33 @@ public class RDABridge {
     MCS
   }
 
-  /** Output flag. */
+  /** Output flag is the directory where the output files will be written to. */
   private static final String OUTPUT_FLAG = "o";
-  /** Mbi flag. */
+  /** Mbi flag is the Benefit History file to read from. */
   private static final String MBI_FLAG = "b";
-  /** Fiss flag. */
+  /** Fiss flag is the FISS file to read from. */
   private static final String FISS_FLAG = "f";
-  /** Mcs flag. */
+  /** Mcs flagis the MCS file to read from. */
   private static final String MCS_FLAG = "m";
-  /** Fiss output flag. */
+  /** Fiss output flag is the FISS RDA output file. */
   private static final String FISS_OUTPUT_FLAG = "g";
-  /** Mcs output flag. */
+  /** Mcs output flag is the MCS RDA output file. */
   private static final String MCS_OUTPUT_FLAG = "n";
-  /** Fiss sequence start. */
+  /** Fiss sequence start is the starting point for FISS sequence values. */
   private static final String FISS_SEQ_START = "s";
-  /** Mcs sequence start. */
+  /** Mcs sequence start is the starting point for MCS sequence values. */
   private static final String MCS_SEQ_START = "z";
-  /** External config flag. */
+  /** External config flag is the path to the yaml file containing run configs. */
   private static final String EXTERNAL_CONFIG_FLAG = "e";
-  /** Build attribution file. */
+  /** Build attribution file indicates if the attribution sql script should be generated". */
   private static final String BUILD_ATTRIBUTION_FILE = "a";
-  /** Attribution size. */
+  /** Attribution size is the number of MBIs to pull for building the attribution file. */
   private static final String ATTRIBUTION_SIZE = "x";
-  /** Attribution script file. */
+  /** Attribution script file is the attribution script file to write to. */
   private static final String ATTRIBUTION_SCRIPT_FILE = "q";
-  /** Attribution template file. */
+  /** Attribution template file is the template file to use for building the attribution script. */
   private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
-  /** Attribution fiss ratio. */
+  /** Attribution fiss ratio is the ratio of fiss to mcs MBIs to use in attribution. */
   private static final String ATTRIBUTION_FISS_RATIO = "u";
 
   /** Maps of file extensions and parsers for turning various file types into RIF files. */
