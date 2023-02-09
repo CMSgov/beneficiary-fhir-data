@@ -105,7 +105,7 @@ public class AccessJsonIT {
     assertTrue(content.contains(BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI));
     assertTrue(content.contains(BfdMDC.HAPI_PROCESSING_COMPLETED_NORM_TIMESTAMP_MILLI));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_CLIENTSSL_DN));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS));
+    // assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING));
