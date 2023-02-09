@@ -75,7 +75,7 @@ public class RdaServerApp {
     @Nullable private final S3JsonMessageSources s3Sources;
 
     /**
-     * Configs the S3bucket for connectivity for Fiss and Mcs claims.
+     * Configures the S3bucket for connectivity for Fiss and Mcs claims.
      *
      * @param args that are sent in
      * @throws Exception if there is a connectivity issue to S3
