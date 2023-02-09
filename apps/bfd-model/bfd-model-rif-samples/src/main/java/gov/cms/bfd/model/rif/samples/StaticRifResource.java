@@ -406,7 +406,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Gets the {@link RifFileType}.
+   * Gets the {@link #rifFileType}.
    *
    * @return the {@link RifFileType} of the RIF file
    */
@@ -459,7 +459,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Gets the {@link RifFile}.
+   * Returns the Static Rif file as a {@link RifFile}.
    *
    * @return a {@link RifFile} based on this {@link StaticRifResource}
    */

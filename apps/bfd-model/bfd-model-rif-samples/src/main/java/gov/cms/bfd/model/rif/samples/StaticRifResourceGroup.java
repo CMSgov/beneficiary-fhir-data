@@ -144,7 +144,7 @@ public enum StaticRifResourceGroup {
   }
 
   /**
-   * Gets the {@link StaticRifResource}.
+   * Gets the {@link #resources}.
    *
    * @return the related {@link StaticRifResource}s grouped into this {@link StaticRifResourceGroup}
    */
