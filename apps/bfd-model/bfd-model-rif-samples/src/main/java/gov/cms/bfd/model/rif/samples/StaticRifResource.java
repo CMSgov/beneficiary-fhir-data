@@ -366,13 +366,13 @@ public enum StaticRifResource {
       RifFileType.BENEFICIARY_HISTORY,
       7);
 
-  /** The Resource URL Supplier. */
+  /** The Resource URL Supplier for the different RIF files. */
   private final Supplier<URL> resourceUrlSupplier;
-  /** The Rif File Type. */
+  /** The Rif File Type of the beneficiary files (EX: Beneficiary, Carrier, etc). */
   private final RifFileType rifFileType;
-  /** The Record Count. */
+  /** The Record Count of the beneficiaries/claims/drug events in the RIF file. */
   private final int recordCount;
-  /** The Resource URL. */
+  /** The Resource URL of the resource's contents. */
   private URL resourceUrl;
 
   /**
@@ -406,7 +406,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Gets the File Type of the Rif File as {@link RifFileType}.
+   * Gets the {@link RifFileType}.
    *
    * @return the {@link RifFileType} of the RIF file
    */
@@ -414,11 +414,7 @@ public enum StaticRifResource {
     return rifFileType;
   }
 
-  /**
-   * Gets the Record Count of the beneficiaries/claims/drug events in the RIF file.
-   *
-   * @return the number of beneficiaries/claims/drug events in the RIF file excluding line items
-   */
+  /** @return the number of beneficiaries/claims/drug events in the RIF file excluding line items */
   public int getRecordCount() {
     return recordCount;
   }
@@ -459,7 +455,7 @@ public enum StaticRifResource {
   }
 
   /**
-   * Convert to rif file as {@link RifFile}.
+   * Gets the {@link RifFile}.
    *
    * @return a {@link RifFile} based on this {@link StaticRifResource}
    */
