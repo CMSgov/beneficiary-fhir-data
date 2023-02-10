@@ -1394,8 +1394,6 @@ resource "aws_glue_crawler" "glue-crawler-api-requests" {
   )
   name = "${local.full_name}-api-requests-crawler"
   role = data.aws_iam_role.iam-role-glue.arn
-  # Run this crawler to create the new partition at 00:30 on the first of every month
-  schedule = "cron(30 0 1 * ? *)"
 
   catalog_target {
     database_name = module.database.name
