@@ -78,7 +78,7 @@ public class FissTransformerIT {
   /**
    * Happy path testing to produce expected claims and data samples.
    *
-   * @return {@link Stream}
+   * @return the expected data samples
    */
   private static Stream<Arguments> shouldProduceExpectedClaimsAndDataSamples() {
     return Stream.of(
