@@ -39,29 +39,50 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
 
   /**
-   * Denotes the preferred execution of a sink
+   * Denotes the preferred execution of a sink.
    *
    * <p>This enum is used with sink factories to help determine what type of sink should be created
    * by the factory. When followup actions depend on the outcome of a sink write, synchronous
    * execution may be desired.
    */
   public enum SinkTypePreference {
+    /** Represents no type preference. */
     NONE,
+    /** Represents a synchronous type preference. */
     SYNCHRONOUS,
+    /** Represents an asynchronous type preference. */
     ASYNCHRONOUS
   }
 
+  /** The job configuration. */
   private final Config config;
+  /** Factory for creating pre-job tasks. */
   private final Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory;
+  /** Factory for the RDA source. */
   private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
+  /** Factory for the RDA sink. */
   private final ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception>
       sinkFactory;
-  private final Logger logger; // each subclass provides its own logger
+  /** Logger provided from each subclass. */
+  private final Logger logger;
+  /** Holds the metric data. */
   private final Metrics metrics;
-  // This is used to enforce that this job can only be executed by a single thread at any given
-  // time. If multiple threads call the job at the same time only the first will do any work.
+  /**
+   * This is used to enforce that this job can only be executed by a single thread at any given
+   * time. If multiple threads call the job at the same time only the first will do any work.
+   */
   private final Semaphore runningSemaphore;
 
+  /**
+   * Instantiates a new abstract rda load job.
+   *
+   * @param config the configuration for this job
+   * @param preJobTaskFactory the pre job task factory
+   * @param sourceFactory the source factory
+   * @param sinkFactory the sink factory
+   * @param appMetrics the app metrics
+   * @param logger the logger
+   */
   AbstractRdaLoadJob(
       Config config,
       Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory,
@@ -176,11 +197,17 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
         new PipelineJobSchedule(config.getRunInterval().toMillis(), ChronoUnit.MILLIS));
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     return true;
   }
 
+  /**
+   * Gets the {@link #metrics}.
+   *
+   * @return the metrics
+   */
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
@@ -227,6 +254,16 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     /** Determines if the DLQ should be processed for subsequent job runs. */
     private final boolean processDLQ;
 
+    /**
+     * Instantiates a new config.
+     *
+     * @param runInterval the run interval
+     * @param batchSize the batch size
+     * @param writeThreads the number of write threads
+     * @param startingFissSeqNum the starting fiss seq num
+     * @param startingMcsSeqNum the starting MCS seq num
+     * @param processDLQ if the job should process the DLQ
+     */
     @Builder
     private Config(
         Duration runInterval,
@@ -295,6 +332,12 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     /** Number of objects that have been successfully processed. */
     private final Counter processed;
 
+    /**
+     * Instantiates a new metric object.
+     *
+     * @param appMetrics the app metrics
+     * @param jobClass the job class for naming the metrics
+     */
     private Metrics(MeterRegistry appMetrics, Class<?> jobClass) {
       final String base = jobClass.getSimpleName();
       calls = appMetrics.counter(MetricRegistry.name(base, "calls"));

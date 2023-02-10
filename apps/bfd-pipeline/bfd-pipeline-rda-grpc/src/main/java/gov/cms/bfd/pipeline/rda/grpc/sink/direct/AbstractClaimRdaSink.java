@@ -44,18 +44,26 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractClaimRdaSink<TMessage, TClaim>
     implements RdaSink<TMessage, RdaChange<TClaim>> {
+  /** The database entity manager. */
   protected final EntityManager entityManager;
+  /** The metric reporter. */
   protected final Metrics metrics;
+  /** Clock for creating timestamps. */
   protected final Clock clock;
+  /** The log manager. */
   protected final Logger logger;
+  /** Represents the claim type for this sink. */
   protected final RdaApiProgress.ClaimType claimType;
+  /** Whether to automatically update the sequence number. */
   protected final boolean autoUpdateLastSeq;
+
+  /** The number of claim errors that can exist before the job will stop processing. */
   private final int errorLimit;
 
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  /** Used to write out RDA messages to json strings */
+  /** Used to write out RDA messages to json strings. */
   protected static final JsonFormat.Printer protobufObjectWriter =
       JsonFormat.printer().omittingInsignificantWhitespace();
 
@@ -85,6 +93,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     this.errorLimit = errorLimit;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     if (entityManager != null && entityManager.isOpen()) {
@@ -247,6 +256,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {}
 
+  /**
+   * Gets the {@link #metrics}.
+   *
+   * @return the metrics
+   */
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
@@ -256,7 +270,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
-   * @param change an incoming RdaChange object from which to extract meta data
+   * @param change an incoming RdaChange object from which to extract metadata
    * @return an object ready for insertion into the database
    */
   abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
@@ -482,7 +496,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Counter objectsWritten;
     /** Number of objects stored using <code>persist()</code>. */
     private final Counter objectsPersisted;
-    /** Number of objects stored using <code>merge()</code> */
+    /** Number of objects stored using <code>merge()</code>. */
     private final Counter objectsMerged;
     /** Number of objects successfully transformed. */
     private final Counter transformSuccesses;
@@ -506,7 +520,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final AtomicLong latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
-    /** The number of insert statements executed */
+    /** The number of insert statements executed. */
     private final DistributionSummary insertCount;
 
     /**
@@ -538,7 +552,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
 
     /**
-     * Sets the {@link #latestSequenceNumber}
+     * Sets the {@link #latestSequenceNumber}.
      *
      * @param value value to set
      */

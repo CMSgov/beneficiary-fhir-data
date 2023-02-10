@@ -28,14 +28,14 @@ abstract class AbstractRandomClaimGenerator<T> {
    * letters like 'l').
    */
   private static final String ALPHA = "bcdfghjkmnpqrstvwxz";
-  /** Numbers, zero through nine */
+  /** Numbers, zero through nine. */
   private static final String DIGIT = "1234567890";
-  /** Aggregated sequence of letters and numbers */
+  /** Aggregated sequence of letters and numbers. */
   private static final String ALNUM = ALPHA + DIGIT;
-  /** The maximum number of days in the past that a random date value can be generated for */
+  /** The maximum number of days in the past that a random date value can be generated for. */
   private static final int MAX_DAYS_AGO = 180;
 
-  /** The base seed value used for all generated random values */
+  /** The base seed value used for all generated random values. */
   private final long seed;
 
   /**
@@ -43,10 +43,10 @@ abstract class AbstractRandomClaimGenerator<T> {
    * Runnable...)} should be executed regardless of random results.
    */
   private final boolean optionalOverride;
-  /** The {@link Clock} object to use with generating time based values */
+  /** The {@link Clock} object to use with generating time based values. */
   private final Clock clock;
 
-  /** The sequence number of the generated claim, which regulates randomness between claims */
+  /** The sequence number of the generated claim, which regulates randomness between claims. */
   private int sequence;
 
   /**
@@ -103,7 +103,11 @@ abstract class AbstractRandomClaimGenerator<T> {
     return randomClaim;
   }
 
-  /** Implementation defined logic for creating a random claim */
+  /**
+   * Implementation defined logic for creating a random claim.
+   *
+   * @return the claim type
+   */
   public abstract T createRandomClaim();
 
   /**
@@ -363,9 +367,14 @@ abstract class AbstractRandomClaimGenerator<T> {
   /** Provides an isolated context for creating a subset of random data. */
   private static class RandomValueContext {
 
-    /** The {@link Random} instance for this context */
+    /** The {@link Random} instance for this context. */
     private final Random random;
 
+    /**
+     * Instantiates the class random value based on the specified seed.
+     *
+     * @param seed the seed for randomization
+     */
     public RandomValueContext(long seed) {
       random = new Random(seed);
     }
@@ -425,7 +434,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     }
 
     /**
-     * Returns a random boolean value
+     * Returns a random boolean value.
      *
      * @return A random boolean value
      */
@@ -434,7 +443,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     }
   }
 
-  /** Helper class for managing path layers */
+  /** Helper class for managing path layers. */
   interface PathLayer {
     /** Should remove a path layer only if one was previously added. */
     void remove();

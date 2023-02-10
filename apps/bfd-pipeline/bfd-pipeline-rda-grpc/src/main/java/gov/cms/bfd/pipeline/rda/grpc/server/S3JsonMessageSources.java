@@ -14,14 +14,22 @@ import org.slf4j.LoggerFactory;
  */
 public class S3JsonMessageSources {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3JsonMessageSources.class);
+  /** S3 key prefix for Fiss files. */
   public static final String FISS_OBJECT_KEY_PREFIX = "fiss";
+  /** S3 key prefix for MCS files. */
   public static final String MCS_OBJECT_KEY_PREFIX = "mcs";
+  /** S3 suffix for files. */
   private static final String FILE_SUFFIX = "ndjson";
 
+  /** The client for interacting with AWS S3 buckets and files. */
   private final AmazonS3 s3Client;
+  /** The bucket to use for S3 interactions. */
   @Getter private final String bucketName;
+  /** The directory path to save files to. */
   @Getter private final String directoryPath;
+  /** S3 key prefix for Fiss files. */
   private final String fissPrefix;
+  /** S3 key prefix for MCS files. */
   private final String mcsPrefix;
 
   /**
@@ -145,6 +153,14 @@ public class S3JsonMessageSources {
         mcsPrefix, FILE_SUFFIX, minSeq, maxSeq);
   }
 
+  /**
+   * Creates a message source from the object at the specified key location and parser.
+   *
+   * @param <T> the type parameter
+   * @param ndjsonObjectKey the key of the object to read
+   * @param parser the parser to parse the object
+   * @return a message source created from the parsed object
+   */
   private <T> MessageSource<T> createMessageSource(
       String ndjsonObjectKey, JsonMessageSource.Parser<T> parser) {
     LOGGER.info(
@@ -152,6 +168,13 @@ public class S3JsonMessageSources {
     return new S3JsonMessageSource<>(s3Client.getObject(bucketName, ndjsonObjectKey), parser);
   }
 
+  /**
+   * Normalizes the directory path string by adding a backslash at the end if one does not exist and
+   * ensuring the path is never null.
+   *
+   * @param directoryPath the directory path to normalize
+   * @return the normalized string
+   */
   private static String normalizeDirectoryPath(String directoryPath) {
     if (Strings.isNullOrEmpty(directoryPath)) {
       directoryPath = "";

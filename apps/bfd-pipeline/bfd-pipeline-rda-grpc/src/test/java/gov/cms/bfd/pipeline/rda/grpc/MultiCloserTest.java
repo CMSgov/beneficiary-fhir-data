@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link MultiCloser}. */
 public class MultiCloserTest {
 
   /** Tests that all closeables are executed with no exceptions. */

@@ -18,13 +18,22 @@ import java.util.Set;
  * with the mock server to test client authentication.
  */
 public class SimpleAuthorizationInterceptor implements ServerInterceptor {
+  /** The authorization header name. */
   static final String AUTH_HEADER_NAME = "authorization";
+  /** The authorization header prefix. */
   static final String AUTH_HEADER_PREFIX = "Bearer ";
+  /** The metadata key. */
   static final Metadata.Key<String> METADATA_KEY =
       Metadata.Key.of(AUTH_HEADER_NAME, Metadata.ASCII_STRING_MARSHALLER);
 
+  /** The set of authorized tokens. */
   private final Set<String> authorizedTokens;
 
+  /**
+   * Instantiates a new Simple authorization interceptor.
+   *
+   * @param authorizedTokens the authorized tokens
+   */
   public SimpleAuthorizationInterceptor(Iterable<String> authorizedTokens) {
     this.authorizedTokens = ImmutableSet.copyOf(authorizedTokens);
   }
@@ -32,6 +41,14 @@ public class SimpleAuthorizationInterceptor implements ServerInterceptor {
   /**
    * Verifies that the client is authorized by comparing the appropriate header in the Metadata to
    * our configuration. Throws a StatusRuntimeException if the client is not authorized.
+   *
+   * @param serverCall the server call being intercepted
+   * @param metadata the call metadata
+   * @param serverCallHandler the call handler, for echoing the call if it's valid
+   * @param <ReqT> the call request type
+   * @param <RespT> the call response type
+   * @return the listener for the echoed call, if it was valid (else a {@link
+   *     StatusRuntimeException} is thrown)
    */
   public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
       final ServerCall<ReqT, RespT> serverCall,

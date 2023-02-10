@@ -15,10 +15,6 @@
         Loads partially adjudicated claims data exported from RDA gRPC service into the BFD database.
     </description>
 
-    <properties>
-        <checkstyle.skip>true</checkstyle.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>gov.cms.bfd</groupId>

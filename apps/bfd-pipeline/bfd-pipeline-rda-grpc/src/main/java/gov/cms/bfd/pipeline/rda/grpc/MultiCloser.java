@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MultiCloser {
 
+  /** A recording of an exception that occurred during closing resources. */
   private Exception error = null;
 
   /**
@@ -45,7 +46,13 @@ public class MultiCloser {
     }
   }
 
+  /** Interface for defining a resource that needs to be closed.. */
   public interface Closer {
+    /**
+     * Closes a resource.
+     *
+     * @throws Exception any exception thrown during closing the resource
+     */
     void close() throws Exception;
   }
 }
