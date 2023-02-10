@@ -90,7 +90,7 @@ public class FissTransformerIT {
   }
 
   /**
-   * Happy path test to produce expected claims and data samples.
+   * Happy path test to ensure for various scenarios, claim responses are generated as expected and certain pieces of data are set correctly when passed through the {@link FissTransformer}.
    *
    * @param testName for the test name
    * @param arguments for the arguments of the test
