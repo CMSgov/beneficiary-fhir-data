@@ -58,14 +58,28 @@ public class RdaServerApp {
     LOGGER.info("server stopping.");
   }
 
+  /** Configuration details for the RDI server. */
   private static class Config {
+    /** The port to use for the RDI Server. */
     private final int port;
+    /** The seed value for the RDI Server. */
     private final long seed;
+    /** The max number to send for the RDI Server. */
     private final int maxToSend;
+
+    /** The fiss claim file for the RDI Server. */
     @Nullable private final File fissClaimFile;
+    /** The mcs claim file for the RDI Server. */
     @Nullable private final File mcsClaimFile;
+    /** The s3 file client for the RDI Server. */
     @Nullable private final S3JsonMessageSources s3Sources;
 
+    /**
+     * Configures the S3bucket for connectivity for Fiss and Mcs claims.
+     *
+     * @param args that are sent in
+     * @throws Exception if there is a connectivity issue to S3
+     */
     private Config(String[] args) throws Exception {
       final ConfigLoader config =
           ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
@@ -90,6 +104,13 @@ public class RdaServerApp {
       }
     }
 
+    /**
+     * Checks the s3 connectivity for the specified claim factory.
+     *
+     * @param claimType specifies whether to use the fiss or mcs claims
+     * @param factory message factory to use
+     * @throws Exception if the specied claim factory can't be opened
+     */
     private void checkS3Connectivity(String claimType, MessageSource.Factory<?> factory)
         throws Exception {
       try (MessageSource<?> source = factory.apply(0)) {
@@ -97,10 +118,22 @@ public class RdaServerApp {
       }
     }
 
+    /**
+     * Gets the {@link #port}.
+     *
+     * @return port number
+     */
     private int getPort() {
       return port;
     }
 
+    /**
+     * Creates the fiss claims to process.
+     *
+     * @param sequenceNumber the starting number
+     * @return the Fiss claims
+     * @throws Exception if source cannot be closed
+     */
     private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
       if (fissClaimFile != null) {
         LOGGER.info(
@@ -122,6 +155,14 @@ public class RdaServerApp {
       }
     }
 
+    /**
+     * Create Mcs Claims depending on the source of the claims. The source can be from a file, S3
+     * bucket, or a random claim source.
+     *
+     * @param sequenceNumber to start at
+     * @return the Mcs Claims
+     * @throws Exception if the sources cannot be closed
+     */
     private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
       if (mcsClaimFile != null) {
         LOGGER.info(
