@@ -11,9 +11,6 @@ vault.password
 # Ignore packer manifest files
 manifest_*
 
-# Ignore Ansible log files.
-logs/
-
 # Ignore Terraform compiles files and modules
 *.tfstate
 *.tfstate.backup
