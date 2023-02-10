@@ -557,11 +557,7 @@ public class McsTransformerIT {
       return new Parser.Data<>() {
         private final Map<String, String> dataMap = parserData;
 
-        /**
-         * Gets the {@link long} of the entryNumber.
-         *
-         * @return {@link long}
-         */
+        /** {@inheritDoc} */
         @Override
         public long getEntryNumber() {
           return 1;
