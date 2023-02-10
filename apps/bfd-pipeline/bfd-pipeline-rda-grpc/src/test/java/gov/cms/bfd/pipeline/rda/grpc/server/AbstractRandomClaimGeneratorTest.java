@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
-/** Tests the functionality of the {@link AbstractRandomClaimGenerator} class */
+/** Tests the functionality of the {@link AbstractRandomClaimGenerator} class. */
 class AbstractRandomClaimGeneratorTest {
 
   /** The fully developed set of random data that could potentially be produced. */
@@ -112,30 +112,49 @@ class AbstractRandomClaimGeneratorTest {
     }
   }
 
-  /** Special derived class for testing purposes */
+  /** Special derived class for testing purposes. */
   private static class TestGenerator extends AbstractRandomClaimGenerator<Map<String, Object>> {
 
+    /** A mask that dictates which fields are selected for altered testing. */
     private byte fieldMask;
+    /** Determines how often a field is set when randomly generated. */
     private TestingState testingState;
+    /** The minimum length of generated string values. */
     private int min;
+    /** The maximum length of generated string values. */
     private int max;
+    /** The maximum value for randomly generated integers. */
     private int maxInt;
 
-    /** Test enum for random enum selection */
+    /** Test enum for random enum selection. */
     private enum MyEnums {
+      /** Sample one. */
       ONE,
+      /** Sample two. */
       TWO,
+      /** Sample three. */
       THREE,
+      /** Sample four. */
       FOUR
     }
 
-    /** Helper enum for executing various testing states */
+    /** Helper enum for executing various testing states. */
     private enum TestingState {
+      /** Always adds to the field set. */
       ALWAYS,
+      /** Field is optional in the set. */
       OPTIONAL,
+      /** Do not add to the field set. */
       MISSING
     }
 
+    /**
+     * Instantiates a new test generator.
+     *
+     * @param seed the seed
+     * @param optionalOverride the optional override
+     * @param clock the clock for timestamps
+     */
     TestGenerator(long seed, boolean optionalOverride, Clock clock) {
       super(seed, optionalOverride, clock);
     }
@@ -144,10 +163,11 @@ class AbstractRandomClaimGeneratorTest {
      * Generates the random test data to use in testing.
      *
      * @param fieldMask A mask that dictates which fields are selected for altered testing
-     * @param min The minimum length of generated string values.
-     * @param max The maximum length of generated string values.
-     * @param maxInt The maximum value for randomly generated integers.
-     * @return A {@link Map} of randomly generated data.
+     * @param testingState the testing state
+     * @param min The minimum length of generated string values
+     * @param max The maximum length of generated string values
+     * @param maxInt The maximum value for randomly generated integers
+     * @return A {@link Map} of randomly generated data
      */
     public Map<String, Object> generateRandomMap(
         byte fieldMask, TestingState testingState, int min, int max, int maxInt) {
@@ -212,13 +232,19 @@ class AbstractRandomClaimGeneratorTest {
     }
   }
 
-  /** Helper class for storing different test field logic and their associated property name */
+  /** Helper class for storing different test field logic and their associated property name. */
   private static class FieldSet {
-    /** The name of the field being set */
+    /** The name of the field being set. */
     private final String propertyName;
-    /** The logic used to supply the field value */
+    /** The logic used to supply the field value. */
     private final Supplier<Object> valueSupplier;
 
+    /**
+     * Instantiates a new Field set.
+     *
+     * @param propertyName the property name
+     * @param valueSupplier the value supplier
+     */
     private FieldSet(String propertyName, Supplier<Object> valueSupplier) {
       this.propertyName = propertyName;
       this.valueSupplier = valueSupplier;

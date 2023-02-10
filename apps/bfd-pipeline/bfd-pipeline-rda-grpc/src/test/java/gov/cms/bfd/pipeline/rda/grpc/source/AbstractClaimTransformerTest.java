@@ -15,15 +15,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+/** Tests the {@link AbstractClaimTransformer}. */
 public class AbstractClaimTransformerTest {
 
+  /** Repeated value representing phase 1. */
   private static final short PHASE_ONE = 1;
+  /** Repeated value representing phase 2. */
   private static final short PHASE_TWO = 2;
+  /** Repeated value representing phase 3. */
   private static final short PHASE_THREE = 3;
+  /** Repeated value representing phase sequence 0. */
   private static final short PHASE_SEQ_ZERO = 0;
+  /** Repeated value representing phase sequence 1. */
   private static final short PHASE_SEQ_ONE = 1;
+  /** Repeated value representing phase sequence 2. */
   private static final short PHASE_SEQ_TWO = 2;
 
+  /**
+   * Data for the parameterized test.
+   *
+   * @return the stream of arguments for the test
+   */
   public static Stream<Arguments> shouldTransformSource() {
     final String DATE = "2022-07-29";
     final String TIMESTAMP = "2022-07-30T05:47:25.9Z";
@@ -83,6 +95,14 @@ public class AbstractClaimTransformerTest {
                     RdaChange.Source.Fields.transmissionTimestamp, "invalid timestamp"))));
   }
 
+  /**
+   * Uses provided data to ensure that the transformer performs the expected actions.
+   *
+   * @param testName the test name for reporting
+   * @param from the record's source
+   * @param expectedSource the expected source for validating
+   * @param expectedErrors the expected errors if any
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
   void shouldTransformSource(

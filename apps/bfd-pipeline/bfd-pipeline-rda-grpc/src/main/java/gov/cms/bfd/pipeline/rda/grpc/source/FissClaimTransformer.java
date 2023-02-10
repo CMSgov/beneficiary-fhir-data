@@ -94,7 +94,7 @@ public class FissClaimTransformer extends AbstractClaimTransformer {
    * A function compatible with the {@link gov.cms.model.dsl.codegen.library.ExternalTransformation}
    * interface that can be passed to the {@link #claimParser} constructor. This method will be
    * called for every {@link FissClaim} message object to invoke the {@link #mbiCache} with the MBI
-   * from the message and set the {@link RdaFissClaim#mbiRecord} field appropriately.
+   * from the message and set the {@link RdaFissClaim#getMbiRecord()} field appropriately.
    *
    * @param transformer {@link DataTransformer} used to validate/copy data
    * @param namePrefix prefix for field name used in error reporting

@@ -5,5 +5,10 @@ package gov.cms.bfd.pipeline.rda.grpc;
  * Runnable except that method is allowed to throw.
  */
 public interface ThrowableAction {
+  /**
+   * Performs an action.
+   *
+   * @throws Exception any exception that occurs as a result of this action
+   */
   void act() throws Exception;
 }

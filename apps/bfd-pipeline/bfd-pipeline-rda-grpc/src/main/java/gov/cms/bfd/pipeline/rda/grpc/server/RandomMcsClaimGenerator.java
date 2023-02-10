@@ -41,39 +41,60 @@ import java.util.Set;
  * zero).
  */
 public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsClaim> {
+  /** The max adjustments to generate. */
   private static final int MAX_ADJUSTMENTS = 10;
+  /** The max audits to generate. */
   private static final int MAX_AUDITS = 20;
+  /** The max details to generate. */
   private static final int MAX_DETAILS = 4;
+  /** The max diagnosis codes to generate. */
   private static final int MAX_DIAG_CODES = 7;
+  /** The max locations to generate. */
   private static final int MAX_LOCATIONS = 8;
+  /** A list of the enums for the MCS claim types. */
   private static final List<McsClaimType> McsClaimTypeEnums = enumValues(McsClaimType.values());
+  /** A list of the enums for the MCS beneficiary sexes. */
   private static final List<McsBeneficiarySex> McsBeneficiarySexEnums =
       enumValues(McsBeneficiarySex.values());
+  /** A list of the enums for the MCS status codes. */
   private static final List<McsStatusCode> McsStatusCodeEnums;
+  /** A list of the enums for the MCS billing provider indicators. */
   private static final List<McsBillingProviderIndicator> McsBillingProviderIndicatorEnums =
       enumValues(McsBillingProviderIndicator.values());
+  /** A list of the enums for the MCS billing provider status codes. */
   private static final List<McsBillingProviderStatusCode> McsBillingProviderStatusCodeEnums =
       enumValues(McsBillingProviderStatusCode.values());
+  /** A list of the enums for the MCS diagnosis icd types. */
   private static final List<McsDiagnosisIcdType> McsDiagnosisIcdTypeEnums =
       enumValues(McsDiagnosisIcdType.values());
+  /** A list of the enums for the MCS detail statuses. */
   private static final List<McsDetailStatus> McsDetailStatusEnums =
       enumValues(McsDetailStatus.values());
+  /** A list of the enums for the MCS claim assignment codes. */
   private static final List<McsClaimAssignmentCode> McsClaimAssignmentCodeEnums =
       enumValues(McsClaimAssignmentCode.values());
+  /** A list of the enums for the MCS claim level indicators. */
   private static final List<McsClaimLevelIndicator> McsClaimLevelIndicatorEnums =
       enumValues(McsClaimLevelIndicator.values());
+  /** A list of the enums for the MCS audit indicators. */
   private static final List<McsAuditIndicator> McsAuditIndicatorEnums =
       enumValues(McsAuditIndicator.values());
+  /** A list of the enums for the MCS split reason codes. */
   private static final List<McsSplitReasonCode> McsSplitReasonCodeEnums =
       enumValues(McsSplitReasonCode.values());
+  /** A list of the enums for the MCS types of service. */
   private static final List<McsTypeOfService> McsTypeOfServiceEnums =
       enumValues(McsTypeOfService.values());
+  /** A list of the enums for the MCS two digit plan of services. */
   private static final List<McsTwoDigitPlanOfService> McsTwoDigitPlanOfServiceEnums =
       enumValues(McsTwoDigitPlanOfService.values());
+  /** A list of the enums for the MCS cutback audit indicators. */
   private static final List<McsCutbackAuditIndicator> McsCutbackAuditIndicatorEnums =
       enumValues(McsCutbackAuditIndicator.values());
+  /** A list of the enums for the MCS cutback audit dispositions. */
   private static final List<McsCutbackAuditDisposition> McsCutbackAuditDispositionEnums =
       enumValues(McsCutbackAuditDisposition.values());
+  /** A list of the enums for the MCS location activity codes. */
   private static final List<McsLocationActivityCode> McsLocationActivityCodeEnums =
       enumValues(McsLocationActivityCode.values());
 
@@ -132,9 +153,10 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Adds random values to the basic fields of the given claim object
+   * Adds random values to the basic fields of the given claim object.
    *
    * @param claim The claim object to add random base field values to
+   * @param detailCount the detail count
    */
   private void addRandomFieldValues(McsClaim.Builder claim, int detailCount) {
     always("idrContrId", () -> claim.setIdrContrId(randomDigit(1, 5)));
@@ -220,7 +242,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Adds randomly generated adjustment objects to the claim
+   * Adds randomly generated adjustment objects to the claim.
    *
    * @param claim The claim object instance to add random adjustment objects to
    */
@@ -253,7 +275,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Adds randomly generated audit objects to the claim
+   * Adds randomly generated audit objects to the claim.
    *
    * @param claim The claim object instance to add random audit objects to
    */
@@ -287,7 +309,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Adds a random diagnosis code to the given claim object
+   * Adds a random diagnosis code to the given claim object.
    *
    * @param claim The claim object to add the random diagnosis code to
    * @param idrClmHdIcn The ICN of the current claim being created
@@ -319,7 +341,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Adds a random details to the given claim object
+   * Adds a random details to the given claim object.
    *
    * @param claim The claim object to add the random details to
    * @param detailCount The number of details to add
@@ -435,7 +457,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Adds randomly generated location objects to the claim
+   * Adds randomly generated location objects to the claim.
    *
    * @param claim The claim object instance to add random location objects to
    */
@@ -471,6 +493,8 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   /**
    * Ensures the "from" date and "to" date are set using the min/max dates in all the details (if
    * any). If either is missing from the details neither of the dates are set in the claim.
+   *
+   * @param claim the claim to adjust
    */
   private void adjustServiceDatesFromDetails(McsClaim.Builder claim) {
     final Optional<String> minDate =

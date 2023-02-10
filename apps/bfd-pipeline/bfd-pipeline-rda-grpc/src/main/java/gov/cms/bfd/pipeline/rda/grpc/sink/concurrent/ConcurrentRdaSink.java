@@ -69,6 +69,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return writerPool.readMaxExistingSequenceNumber();
@@ -112,16 +113,19 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     return count;
   }
 
+  /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(TMessage object) {
     return writerPool.getClaimIdForMessage(object);
   }
 
+  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(TMessage object) {
     return writerPool.getSequenceNumberForObject(object);
   }
 
+  /** {@inheritDoc} */
   @Nonnull
   @Override
   public Optional<TClaim> transformMessage(String apiVersion, TMessage message)
@@ -145,6 +149,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     throw new ProcessingException(new UnsupportedOperationException(), 0);
   }
 
+  /** {@inheritDoc} */
   @Override
   public int getProcessedCount() throws ProcessingException {
     return writerPool.getProcessedCount();

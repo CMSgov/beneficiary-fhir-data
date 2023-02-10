@@ -5,9 +5,10 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-/** Utility class for tests */
+/** Utility class for tests. */
 public class TestUtils {
 
+  /** Private constructor to avoid instantiation. */
   private TestUtils() {
     // Nothing to do.
   }

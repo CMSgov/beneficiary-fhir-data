@@ -10,7 +10,16 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for the {@link RandomFissClaimGenerator}. */
 public class RandomFissClaimGeneratorTest {
+
+  /**
+   * Asserts that given a set seed and clock, the random generator creates an expected claim for
+   * ensuring that tests using a randomly generated claim will be repeatable.
+   *
+   * @throws InvalidProtocolBufferException if there is an issue turning the generated claim into
+   *     json for comparison
+   */
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
     final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
