@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * its setter method on demand using a unique name.
  */
 public class NumericGauges {
+  /** The values for the gauges. */
   private final Map<String, AtomicLong> gaugeValues = Collections.synchronizedMap(new HashMap<>());
 
   /**

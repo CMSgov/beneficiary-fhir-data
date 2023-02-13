@@ -10,18 +10,33 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/** Tests the {@link ConcurrentRdaSink}. */
 public class ConcurrentRdaSinkTest {
+  /** Test value for version. */
   private static final String VERSION = "Version";
 
+  /** Mock write thread pool to pull from for the test. */
   @Mock private WriterThreadPool<TestDatabase.Message, TestDatabase.Claim> pool;
+  /** The concurrent sink under test. */
   private ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> sink;
 
+  /**
+   * Sets the test mocks and sink up.
+   *
+   * @throws Exception if there is an issue during test setup
+   */
   @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
     sink = new ConcurrentRdaSink<>(pool);
   }
 
+  /**
+   * Verifies that when writing multiple messages, each message is only enqueued to the pool once
+   * and the correct total number of messages are processed.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testWriteMessagesSuccessNoSequenceNumberChanges() throws Exception {
     final TestDatabase.Message messageA1 = new TestDatabase.Message("a", "a1", 1);
@@ -40,6 +55,12 @@ public class ConcurrentRdaSinkTest {
     verifyNoMoreInteractions(pool);
   }
 
+  /**
+   * Verifies that when writing multiple messages, each message is only enqueued to the pool once
+   * and the correct total number of messages are processed and the sequence numbers are updated.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testWriteMessagesSuccessUpdatesSequenceNumbers() throws Exception {
     final TestDatabase.Message messageA1 = new TestDatabase.Message("a", "a1", 1);
@@ -59,6 +80,12 @@ public class ConcurrentRdaSinkTest {
     verifyNoMoreInteractions(pool);
   }
 
+  /**
+   * Verifies that if there is an exception during updating the sequence number, the message is
+   * still enqueued to the pool.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testWriteMessagesThrows() throws Exception {
     Exception error = new RuntimeException("oops");

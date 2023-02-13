@@ -16,7 +16,14 @@ import java.util.Iterator;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link WrappedClaimSource}. */
 public class WrappedClaimSourceTest {
+
+  /**
+   * Verifies that wrapping an empty source results in an empty wrapped source.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void emptySource() throws Exception {
     final MessageSource<FissClaim> realSource = new EmptyMessageSource<>();
@@ -25,6 +32,12 @@ public class WrappedClaimSourceTest {
     assertFalse(wrapped.hasNext());
   }
 
+  /**
+   * Verifies that wrapping a source with many claims results in a wrapped source with all the
+   * claims contained.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void allClaims() throws Exception {
     final List<FissClaim> claims =
@@ -45,6 +58,12 @@ public class WrappedClaimSourceTest {
     assertFalse(wrapped.hasNext());
   }
 
+  /**
+   * Verifies that wrapping a source with many claims and calling {@link WrappedClaimSource#skip}
+   * skips the expected number of claims as if skipping within the original source.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void skipStartingClaims() throws Exception {
     final List<McsClaim> claims =
@@ -69,6 +88,12 @@ public class WrappedClaimSourceTest {
     assertFalse(wrapped.hasNext());
   }
 
+  /**
+   * Verifies that wrapping a source with many claims while also converting them to a different type
+   * results in a wrapped source with the claims of the new type and the correct data.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testChangeType() throws Exception {
     final List<McsClaim> claims =
@@ -140,20 +165,30 @@ public class WrappedClaimSourceTest {
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
   }
 
+  /**
+   * Gets a message source from the specified claim list.
+   *
+   * @param <T> the claim type
+   * @param claims the claims to turn into a message source
+   * @return the message source
+   */
   private static <T> MessageSource<T> fromList(List<T> claims) {
     return new MessageSource<T>() {
       final Iterator<T> iterator = claims.iterator();
 
+      /** {@inheritDoc} */
       @Override
       public boolean hasNext() throws Exception {
         return iterator.hasNext();
       }
 
+      /** {@inheritDoc} */
       @Override
       public T next() throws Exception {
         return iterator.next();
       }
 
+      /** {@inheritDoc} */
       @Override
       public void close() throws Exception {}
     };

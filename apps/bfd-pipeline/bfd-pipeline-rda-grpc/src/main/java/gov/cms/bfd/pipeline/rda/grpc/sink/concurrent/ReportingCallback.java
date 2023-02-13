@@ -11,8 +11,20 @@ import lombok.Value;
  * @param <TMessage> the type of objects being written.
  */
 public interface ReportingCallback<TMessage> {
+
+  /**
+   * Accepts a processed batch.
+   *
+   * @param result the batch
+   * @throws InterruptedException if the thread is interrupted during execution
+   */
   void accept(ProcessedBatch<TMessage> result) throws InterruptedException;
 
+  /**
+   * Represents a processed batch.
+   *
+   * @param <T> the type of the objects in the batch
+   */
   @Value
   class ProcessedBatch<T> {
     /** Number of objects that were successfully processed. */

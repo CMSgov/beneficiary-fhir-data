@@ -7,7 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link ProcessingException}. */
 public class ProcessingExceptionTest {
+  /**
+   * Verifies that {@link ProcessingException#isInterrupted} returns the expected value for various
+   * inputs.
+   */
   @Test
   public void testInterruptedDetection() {
     Throwable error = null;
@@ -29,6 +34,10 @@ public class ProcessingExceptionTest {
     assertTrue(ProcessingException.isInterrupted(error));
   }
 
+  /**
+   * Verifies the original cause is correctly set whether the root exception or another processing
+   * exception is used.
+   */
   @Test
   public void testOriginalCause() {
     IOException cause = new IOException();

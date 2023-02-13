@@ -64,16 +64,16 @@ public class DLQGrpcRdaSourceTest {
     doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
-  /** Testing value to use for the first FISS error sequence number */
+  /** Testing value to use for the first FISS error sequence number. */
   private static final long FISS_ERROR_ONE_SEQ = 5L;
 
-  /** Testing value to use for the second FISS error sequence number */
+  /** Testing value to use for the second FISS error sequence number. */
   private static final long FISS_ERROR_TWO_SEQ = 15L;
 
-  /** Testing value to use for the first MCS error sequence number */
+  /** Testing value to use for the first MCS error sequence number. */
   private static final long MCS_ERROR_ONE_SEQ = 7L;
 
-  /** Testing value to use for the second MCS error sequence number */
+  /** Testing value to use for the second MCS error sequence number. */
   private static final long MCS_ERROR_TWO_SEQ = 9L;
 
   /** The FISS {@link MessageError} objects to use in testing. */
@@ -100,7 +100,7 @@ public class DLQGrpcRdaSourceTest {
               .sequenceNumber(MCS_ERROR_TWO_SEQ)
               .build());
 
-  /** Checks that the logic lambda was successfully and correctly invoked for FISS claims */
+  /** Checks that the logic lambda was successfully and correctly invoked for FISS claims. */
   @Test
   void shouldInvokeLogicLambdaFISS()
       throws NoSuchFieldException, IllegalAccessException, ProcessingException {
@@ -134,7 +134,7 @@ public class DLQGrpcRdaSourceTest {
     assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
   }
 
-  /** Checks that the logic lambda was successfully and correctly invoked for MCS claims */
+  /** Checks that the logic lambda was successfully and correctly invoked for MCS claims. */
   @Test
   void shouldInvokeLogicLambdaForMCS()
       throws NoSuchFieldException, IllegalAccessException, ProcessingException {

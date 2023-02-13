@@ -10,10 +10,16 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
+/** Utility class for assertions related to transformations. */
 public class TransformerTestUtils {
   /**
    * The McsClaimTransformerTest and FissClaimTransformerTest need to be able to compare lists of
    * objects and there isn't a standard matcher that is compatible and handles ordering properly.
+   *
+   * @param <T> the function param type
+   * @param expectedSet the expected set
+   * @param actualSet the actual set
+   * @param priority the priority for ordering
    */
   public static <T> void assertListContentsHaveSamePropertyValues(
       Set<T> expectedSet, Set<T> actualSet, ToIntFunction<T> priority) {

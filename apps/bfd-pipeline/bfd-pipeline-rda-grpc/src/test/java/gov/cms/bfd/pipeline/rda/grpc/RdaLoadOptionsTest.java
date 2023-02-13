@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 /** Tests related to the {@link RdaLoadOptions} class. */
 public class RdaLoadOptionsTest {
 
-  /** Tests that the {@link RdaLoadOptions} can be serialized without issue */
+  /** Tests that the {@link RdaLoadOptions} can be serialized without issue. */
   @Test
   public void configIsSerializable() throws Exception {
     final RdaLoadOptions original =
