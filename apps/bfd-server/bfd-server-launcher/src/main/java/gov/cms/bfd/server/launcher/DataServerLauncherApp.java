@@ -23,6 +23,7 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.resource.Resource;
@@ -207,30 +208,15 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog. Available format strings are
-     * documented here: https://www.eclipse.org/jetty/javadoc/jetty-10/org/eclipse/jetty/server/CustomRequestLog.html.
+    /* Configure the log output generation via a Jetty CustomRequestLog.
+     * As of Feb 8th 2023, the Access.log file has been removed, and BFD server is only writing to access.json.
+     * CustomRequestLog allows with minimal side effects to get the response output size, so a blank writer and format
+     * are instantiated to access the methods to get the response output size.
      *
-     * Response time units have varied during BFD's history as follows:
-     * Prior to Oct 28 2021 - milliseconds
-     * Oct 28 2021 - Mar 24 2022 - microseconds
-     * Since Mar 24 2022 - milliseconds
      */
-    final String accessLogFileName =
-        System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
-    final String requestLogFormat =
-        "%{remote}a - \"%u\" %t \"%r\" \"%q\" %s %{CLF}S %{ms}T"
-            + " %{BlueButton-OriginalQueryId}i"
-            + " %{BlueButton-OriginalQueryCounter}i"
-            + " [%{BlueButton-OriginalQueryTimestamp}i]"
-            + " %{BlueButton-DeveloperId}i"
-            + " \"%{BlueButton-Developer}i\""
-            + " %{BlueButton-ApplicationId}i"
-            + " \"%{BlueButton-Application}i\""
-            + " %{BlueButton-UserId}i"
-            + " \"%{BlueButton-User}i\""
-            + " %{BlueButton-BeneficiaryId}i"
-            + " %{X-Request-ID}o";
-    final BfdRequestLog requestLog = new BfdRequestLog(accessLogFileName, requestLogFormat);
+    final String requestLogFormat = "";
+    final BfdRequestLog requestLog =
+        new BfdRequestLog(new Slf4jRequestLogWriter(), requestLogFormat);
 
     server.setRequestLog(requestLog);
 
@@ -301,31 +287,26 @@ public final class DataServerLauncherApp {
    * callback functionality appropriate for writing access logs which contain information for each
    * request received by the server.
    *
-   * <p>This implementation is responsible for writing to two different log files upon completion of
+   * <p>This implementation is responsible for writing to the following log file upon completion of
    * each request:
    *
    * <ul>
    *   <li>access.json - a structured log built from the {@link BfdMDC}
-   *   <li>access.log - an unstructured NCSA style log that should be considered deprecated and
-   *       slated for removal
    * </ul>
-   *
-   * TODO: BFD-1844 Remove access.log.
    */
   private static class BfdRequestLog extends CustomRequestLog {
     /**
      * Construct a BFD Request Log.
      *
-     * @param accessLogFileName filename for the unstructured log 'access.log'
-     * @param accessLogFormat format for the unstructured log 'access.log'
+     * @param writer source for the structured log
+     * @param accessLogFormat format for the structured log
      */
-    public BfdRequestLog(String accessLogFileName, String accessLogFormat) {
-      super(accessLogFileName, accessLogFormat);
+    public BfdRequestLog(Slf4jRequestLogWriter writer, String accessLogFormat) {
+      super(writer, accessLogFormat);
     }
 
     /**
-     * Log a message for a request/response pair to both the access.log (via the Jetty
-     * CustomRequestLog) and the access.json (via Logback).
+     * Log a message for a request/response pair to the access.json (via Logback).
      *
      * @param request the request
      * @param response the response
@@ -333,11 +314,6 @@ public final class DataServerLauncherApp {
     @Override
     public void log(Request request, Response response) {
       try {
-        /*
-         * Call the implementation from CustomRequestLog to write the access.log entry.
-         */
-        super.log(request, response);
-
         /*
          * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
          * CustomRequestLog to write the payload size to the access.log:
