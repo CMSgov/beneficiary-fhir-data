@@ -7,19 +7,74 @@
   hosts: all
   user: ec2-user
   become: true
-  gather_facts: no
+  gather_facts: false
   vars:
-    ansible_ssh_pipelining: no
+    ansible_ssh_pipelining: false
+    python3_tar_source: https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz
+    python3_version: '3.9'
+    python3_minor_version: '9'
 
   tasks:
     - import_role:
         name: base_patch
     - name: Enable java11 repository
       command: amazon-linux-extras enable java-openjdk11
+    - name: Enable ansible2 repository
+      command: amazon-linux-extras enable ansible2
     - name: Install dependencies
       yum:
         name:
-          - java-11-openjdk-devel
-          - git
-          - ansible
+          - "@Development Tools" # equivalent to `yum groupinstall "Development Tools"`
           - amazon-cloudwatch-agent
+          - ansible
+          - gcc
+          - git
+          - java-11-openjdk-devel
+          - libffi-devel
+          - openssl11
+          - selinux-policy
+          - sudo
+          - systemd
+          - tar
+          - unzip
+      vars:
+        ansible_python_interpreter: /usr/bin/python
+
+    - name: Download python3 tar
+      get_url:
+        url: "{{ python3_tar_source }}"
+        dest: /python3.tgz
+
+    - name: Extract python3.tgz
+      unarchive:
+        src: /python3.tgz
+        dest: /
+        creates: /Python-{{ python3_version }}/
+        remote_src: yes
+
+    - name: Configure, make, make altinstall python3
+      shell:
+        cmd: |
+          ./configure && \
+          make && \
+          make altinstall
+        chdir: /Python-{{ python3_version }}
+
+    - name: Create symbolic links
+      file:
+        src: "{{ item.src }}"
+        path: "{{ item.path }}"
+        state: link
+      loop:
+        - src: /usr/local/bin/python3.{{ python3_minor_version }}
+          path: /usr/bin/python3
+        - src: /usr/local/bin/pip3.{{ python3_minor_version }}
+          path: /usr/bin/pip3
+
+    - name: Remove python3 installation files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop:
+        - path: /Python-{{ python3_version }}
+        - path: /python3.tgz
