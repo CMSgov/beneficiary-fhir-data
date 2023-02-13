@@ -558,6 +558,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingMcsSeqNum);
     readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
     final RdaSourceConfig grpcConfig =
         RdaSourceConfig.builder()
             .serverType(

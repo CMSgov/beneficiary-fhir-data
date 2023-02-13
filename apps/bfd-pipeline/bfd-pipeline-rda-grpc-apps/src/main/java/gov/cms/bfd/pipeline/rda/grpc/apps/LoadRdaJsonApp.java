@@ -157,6 +157,11 @@ public class LoadRdaJsonApp {
     private final String dbUser;
     /** The password for the database */
     private final String dbPassword;
+    /**
+     * Indicates the type of {@link AbstractRdaLoadJob.SinkTypePreference} to use when building
+     * sinks
+     */
+    private final AbstractRdaLoadJob.SinkTypePreference sinkTypePreference;
     /** The number of write threads to use when igesting data */
     private final int writeThreads;
     /** The number of records to write to the database in each batch */
@@ -181,6 +186,10 @@ public class LoadRdaJsonApp {
       dbUser = options.stringValue("database.user", "");
       dbPassword = options.stringValue("database.password", "");
 
+      sinkTypePreference =
+          options
+              .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference::valueOf)
+              .orElse(AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR);
       writeThreads = options.intValue("job.writeThreads", 1);
       batchSize = options.intValue("job.batchSize", 100);
       runSchemaMigration = options.booleanValue("job.migration", false);
@@ -216,6 +225,7 @@ public class LoadRdaJsonApp {
               .runInterval(Duration.ofDays(1))
               .writeThreads(writeThreads)
               .batchSize(batchSize)
+              .sinkTypePreference(sinkTypePreference)
               .build();
       final RdaSourceConfig grpcConfig =
           RdaSourceConfig.builder()
