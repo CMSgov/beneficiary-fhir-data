@@ -12,31 +12,45 @@ import javax.persistence.PersistenceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Integration test for the {@link MbiCache}. */
 public class MbiCacheIT {
+  /** Configuration for the object used for hashing values. */
   private final IdHasher.Config hashConfig =
       IdHasher.Config.builder()
           .hashIterations(1)
           .hashPepperString("just-a-test")
           .cacheSize(3)
           .build();
+  /** Used for hashing in tests. */
   private final IdHasher normalHasher = new IdHasher(hashConfig);
 
+  /** Test mbi 1. */
   private final String mbi1 = "1";
+  /** Test mbi hash 1. */
   private final String hash1 = normalHasher.computeIdentifierHash(mbi1);
+  /** Test mbi 2. */
   private final String mbi2 = "2";
+  /** Test mbi hash 2. */
   private final String hash2 = normalHasher.computeIdentifierHash(mbi2);
+  /** Test mbi 3. */
   private final String mbi3 = "3";
+  /** Test mbi hash 3. */
   private final String hash3 = normalHasher.computeIdentifierHash(mbi3);
+  /** Test mbi 4. */
   private final String mbi4 = "4";
+  /** Test mbi hash 4. */
   private final String hash4 = normalHasher.computeIdentifierHash(mbi4);
 
+  /** The test metric object. */
   private MetricRegistry appMetrics;
 
+  /** Sets the test parameters up each test. */
   @BeforeEach
   void setUp() {
     appMetrics = new MetricRegistry();
   }
 
+  /** Verifies that the computed cache updates the metrics when lookups are made against it. */
   @Test
   public void computedCacheUpdatesMetrics() {
     MbiCache mbiCache = MbiCache.computedCache(hashConfig);
@@ -51,6 +65,12 @@ public class MbiCacheIT {
     assertEquals(0, mbiCache.getMetrics().getTotalRetries());
   }
 
+  /**
+   * Verifies that when the cache gets multiple requests for records that are not in the cache, they
+   * is added to the cache and proper metrics are recorded for the cache misses.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void createsNewRecordWhenNoneExists() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -75,6 +95,12 @@ public class MbiCacheIT {
         });
   }
 
+  /**
+   * Verifies that when the cache is hit, it uses the saved hash value instead of looking
+   * up/computing a new one.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void usesExistingRecordWhenOneExists() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -100,6 +126,12 @@ public class MbiCacheIT {
         });
   }
 
+  /**
+   * Verifies that when the same mbi is called multiple times, the cache is used on repeats to avoid
+   * unneeded queries.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void usesInMemoryCacheToAvoidExtraQueries() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -136,6 +168,12 @@ public class MbiCacheIT {
         });
   }
 
+  /**
+   * Verifies that if an error is thrown while attempting to get a value from the cache, it will
+   * retry a set number of times before skipping the cache and looking up the value in the database.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void retryFiveTimes() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(

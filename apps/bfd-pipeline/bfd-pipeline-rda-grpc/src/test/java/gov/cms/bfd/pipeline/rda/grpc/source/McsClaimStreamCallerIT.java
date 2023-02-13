@@ -14,13 +14,20 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
+/** Integration tests for the {@link McsClaimStreamCaller}. */
 public class McsClaimStreamCallerIT {
-  // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
+  /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+  /** The transformer to create results for correctness verification. */
   private final McsClaimTransformer transformer =
       new McsClaimTransformer(
           clock, MbiCache.computedCache(new IdHasher.Config(10, "justsomestring")));
 
+  /**
+   * Verifies the caller can respond to a basic request and the results contain the expected values.
+   *
+   * @throws Exception indicates a test failure / setup issue
+   */
   @Test
   public void basicCall() throws Exception {
     RdaServer.InProcessConfig.builder()
@@ -48,6 +55,11 @@ public class McsClaimStreamCallerIT {
             });
   }
 
+  /**
+   * Verifies the caller's results have sequential sequence numbers.
+   *
+   * @throws Exception indicates a test failure / setup issue
+   */
   @Test
   public void sequenceNumbers() throws Exception {
     RdaServer.InProcessConfig.builder()
@@ -70,6 +82,12 @@ public class McsClaimStreamCallerIT {
             });
   }
 
+  /**
+   * Transforms a {@link McsClaimChange} to a {@link RdaMcsClaim}.
+   *
+   * @param change the change to transform
+   * @return the resulting RDA MCS claim
+   */
   private RdaMcsClaim transform(McsClaimChange change) {
     return transformer.transformClaim(change).getClaim();
   }

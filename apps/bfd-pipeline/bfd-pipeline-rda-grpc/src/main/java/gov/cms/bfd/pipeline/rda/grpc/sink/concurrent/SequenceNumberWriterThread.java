@@ -60,6 +60,12 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   /** Used to tell the thread to stop running. */
   private final AtomicBoolean stopped;
 
+  /**
+   * Instantiates a new Sequence number writer thread.
+   *
+   * @param sinkFactory the sink factory
+   * @param errorReportingFunction the error reporting function
+   */
   public SequenceNumberWriterThread(
       Supplier<RdaSink<TMessage, TClaim>> sinkFactory,
       ReportingCallback<TMessage> errorReportingFunction) {
@@ -196,12 +202,21 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
     }
   }
 
+  /**
+   * Reports a processing error.
+   *
+   * @param error the error
+   * @throws InterruptedException if the reporting function is interrupted
+   */
   private void reportError(Exception error) throws InterruptedException {
     errorReportingFunction.accept(new ProcessedBatch<>(0, Collections.emptyList(), error));
   }
 
+  /** Represents a queue entry. */
   @AllArgsConstructor
   private static class Entry {
+
+    /** The sequence number of the entry. */
     private final long sequenceNumber;
   }
 }

@@ -19,8 +19,17 @@ import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
 public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcsClaim> {
+  /** The claim transformer. */
   private final McsClaimTransformer transformer;
 
+  /**
+   * Instantiates a new Mcs claim rda sink.
+   *
+   * @param appState the app state
+   * @param transformer the transformer
+   * @param autoUpdateLastSeq whether to automatically update the sequence number
+   * @param errorLimit the error limit
+   */
   public McsClaimRdaSink(
       PipelineApplicationState appState,
       McsClaimTransformer transformer,
@@ -31,16 +40,19 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
   }
 
+  /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(McsClaimChange object) {
     return object.getClaim().getIdrClmHdIcn();
   }
 
+  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(McsClaimChange object) {
     return object.getSeq();
   }
 
+  /** {@inheritDoc} */
   @Nonnull
   @Override
   RdaChange<RdaMcsClaim> transformMessageImpl(String apiVersion, McsClaimChange message) {
@@ -49,6 +61,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
     return change;
   }
 
+  /** {@inheritDoc} */
   @Override
   int getInsertCount(RdaMcsClaim claim) {
     return 1 // Add one for the base claim
@@ -59,6 +72,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         + claim.getLocations().size();
   }
 
+  /** {@inheritDoc} */
   @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
     final RdaMcsClaim claim = change.getClaim();
@@ -82,6 +96,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .build();
   }
 
+  /** {@inheritDoc} */
   @Override
   MessageError createMessageError(
       String apiVersion, McsClaimChange change, List<DataTransformer.ErrorMessage> errors)

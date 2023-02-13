@@ -5,15 +5,16 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-/** Utility class for tests */
+/** Utility class for tests. */
 public class TestUtils {
 
+  /** Private constructor to avoid instantiation. */
   private TestUtils() {
     // Nothing to do.
   }
 
   /**
-   * Sets the value of a class field, even if it's private, and potentially if it's final
+   * Sets the value of a class field, even if it's private, and potentially if it's final.
    *
    * @param object The object to change a field value for
    * @param fieldName The name of the field to change the value for

@@ -17,15 +17,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link ClaimWriterThread}. */
 public class ClaimWriterThreadTest {
+  /** Test value for version. */
   private static final String VERSION = "Version";
 
+  /** The database to use to test the claims were written. */
   private TestDatabase database;
+  /** The test sink. */
   private RdaSink<TestDatabase.Message, TestDatabase.Claim> sink;
+  /** Keeps track of the callbacks made during the test. */
   private List<ProcessedBatch<TestDatabase.Message>> callbacks;
+  /** The main test claim writer thread under test. */
   private ClaimWriterThread<TestDatabase.Message, TestDatabase.Claim> thread;
+  /** The buffer to use for the claim writer. */
   private ClaimWriterThread.Buffer<TestDatabase.Message, TestDatabase.Claim> buffer;
 
+  /**
+   * Sets up the test resources before each test.
+   *
+   * @throws Exception if there is an issue with setup
+   */
   @BeforeEach
   public void setUp() throws Exception {
     database = new TestDatabase();

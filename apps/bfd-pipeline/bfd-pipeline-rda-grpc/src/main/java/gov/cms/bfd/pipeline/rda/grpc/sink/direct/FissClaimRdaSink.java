@@ -26,8 +26,17 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
    */
   private static final Pattern InvalidDcnRegex = Pattern.compile("(^[0 ]+$)|(^.{14}XXX)");
 
+  /** The claim transformer. */
   private final FissClaimTransformer transformer;
 
+  /**
+   * Instantiates a new Fiss claim rda sink.
+   *
+   * @param appState the app state
+   * @param transformer the transformer
+   * @param autoUpdateLastSeq whether to automatically update the sequence number
+   * @param errorLimit the error limit
+   */
   public FissClaimRdaSink(
       PipelineApplicationState appState,
       FissClaimTransformer transformer,
@@ -49,16 +58,19 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return !InvalidDcnRegex.matcher(fissClaimChange.getDcn()).find();
   }
 
+  /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(FissClaimChange object) {
     return object.getClaim().getDcn();
   }
 
+  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(FissClaimChange object) {
     return object.getSeq();
   }
 
+  /** {@inheritDoc} */
   @Nonnull
   @Override
   RdaChange<RdaFissClaim> transformMessageImpl(String apiVersion, FissClaimChange message) {
@@ -67,6 +79,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return change;
   }
 
+  /** {@inheritDoc} */
   @Override
   int getInsertCount(RdaFissClaim claim) {
     return 1 // Add one for the base claim
@@ -76,6 +89,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         + claim.getAuditTrail().size();
   }
 
+  /** {@inheritDoc} */
   @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaFissClaim> change) {
     final RdaFissClaim claim = change.getClaim();
@@ -95,6 +109,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .build();
   }
 
+  /** {@inheritDoc} */
   @Override
   MessageError createMessageError(
       String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)

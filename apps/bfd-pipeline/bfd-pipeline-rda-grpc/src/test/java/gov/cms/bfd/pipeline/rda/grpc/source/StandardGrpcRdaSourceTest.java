@@ -614,6 +614,12 @@ public class StandardGrpcRdaSourceTest {
     verify(channel).shutdownNow();
   }
 
+  /**
+   * Creates an {@link Integer} {@link GrpcResponseStream} from the given values.
+   *
+   * @param values the values to create a stream from
+   * @return the grpc response stream
+   */
   private GrpcResponseStream<Integer> createResponse(int... values) {
     return new GrpcResponseStream<>(clientCall, Arrays.stream(values).iterator());
   }

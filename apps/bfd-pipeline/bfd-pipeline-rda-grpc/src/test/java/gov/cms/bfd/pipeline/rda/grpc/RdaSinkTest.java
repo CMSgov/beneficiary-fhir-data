@@ -13,17 +13,28 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link RdaSink}. */
 public class RdaSinkTest {
+  /** The rda sink under test. */
   private final RdaSink<Integer, Integer> sink = new TestSink();
 
+  /**
+   * Verifies that {@link RdaSink#writeMessages} correctly counts the number of written messages.
+   *
+   * @throws Exception indicates test exception
+   */
   @Test
   public void batchSuccessful() throws Exception {
     int count = sink.writeMessages("", Arrays.asList(1, 2, 3, 4));
     assertEquals(4, count);
   }
 
+  /**
+   * Verifies that {@link RdaSink#writeMessages} correctly throws an exception on failures and
+   * counts the number of exceptions.
+   */
   @Test
-  public void batchFailures() throws Exception {
+  public void batchFailures() {
     try {
       sink.writeMessages("", Arrays.asList(1, 2, 5, 4));
       fail("sink should have thrown");
@@ -40,7 +51,9 @@ public class RdaSinkTest {
     }
   }
 
+  /** A test implementation of an RDA sink. */
   private static class TestSink implements RdaSink<Integer, Integer> {
+    /** {@inheritDoc} */
     @Override
     public int writeMessage(String dataVersion, Integer object) throws ProcessingException {
       if (object == 5) {
@@ -52,6 +65,7 @@ public class RdaSinkTest {
       return 1;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void checkErrorCount() {
       // Do Nothing
@@ -62,33 +76,40 @@ public class RdaSinkTest {
       return String.valueOf(object);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void updateLastSequenceNumber(long lastSequenceNumber) {}
 
+    /** {@inheritDoc} */
     @Override
     public long getSequenceNumberForObject(Integer object) {
       return object;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {}
 
+    /** {@inheritDoc} */
     @Nonnull
     @Override
     public Optional<Integer> transformMessage(String apiVersion, Integer integer) {
       return Optional.of(integer);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int writeClaims(Collection<Integer> objects) {
       throw new UnsupportedOperationException();
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getProcessedCount() throws ProcessingException {
       return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shutdown(Duration waitTime) {}
   }
