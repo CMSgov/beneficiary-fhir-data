@@ -15,10 +15,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link WriterThreadPool}. */
 public class WriterThreadPoolIT {
+  /** Test value for version. */
   private static final String VERSION = "Version";
 
-  /** Tests the outcome if all messages are successfully processed */
+  /**
+   * Tests that the writer successfully writes all the queued claims to the database, all sinks are
+   * closed after writing, and the last sequence number is recorded correctly.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testSuccess() throws Exception {
     final TestDatabase database = new TestDatabase();
@@ -34,7 +41,10 @@ public class WriterThreadPoolIT {
     assertEquals(messages.size(), database.getLastSequenceNumber());
   }
 
-  /** Tests the outcome if there are message transformation failures during processing */
+  /**
+   * Tests that when there is an exception when transforming one of the messages, we get a {@link
+   * ProcessingException} and the sinks are closed correctly.
+   */
   @Test
   public void testTransformFailure() {
     final TestDatabase database = new TestDatabase();
@@ -59,7 +69,10 @@ public class WriterThreadPoolIT {
     assertTrue(database.allClosed(), "all sinks closed");
   }
 
-  /** Tests the outcome if there are issues writing errors out during processing */
+  /**
+   * Tests that when there is a failure writing one of the messages, we get a {@link
+   * ProcessingException} and the sinks are closed correctly.
+   */
   @Test
   public void testWriteFailure() {
     final TestDatabase database = new TestDatabase();
@@ -83,6 +96,11 @@ public class WriterThreadPoolIT {
     assertTrue(database.allClosed(), "all sinks closed");
   }
 
+  /**
+   * Creates some messages for the test to queue and write.
+   *
+   * @return the list of messages
+   */
   private List<TestDatabase.Message> createTestMessages() {
     List<String> claimIds =
         IntStream.range(1000, 2000).mapToObj(String::valueOf).collect(Collectors.toList());
@@ -102,6 +120,12 @@ public class WriterThreadPoolIT {
     return messages;
   }
 
+  /**
+   * Gets the lists of claims expected to be written.
+   *
+   * @param messages the messages to be turned into claims
+   * @return the list of expected claims
+   */
   private List<TestDatabase.Claim> expectedClaims(List<TestDatabase.Message> messages) {
     Map<String, TestDatabase.Claim> uniqueClaims = new TreeMap<>();
     for (TestDatabase.Message message : messages) {

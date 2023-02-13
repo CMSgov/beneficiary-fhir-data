@@ -57,10 +57,17 @@ public interface MessageSource<T> extends AutoCloseable {
    * Used to define lambdas that can create a {@link MessageSource} instance for a given starting
    * sequence number.
    *
-   * @param <T>
+   * @param <T> the type
    */
   @FunctionalInterface
   interface Factory<T> {
+    /**
+     * Applies a function to the supplied input.
+     *
+     * @param sequenceNumber the sequence number
+     * @return the message source
+     * @throws Exception if there is any issue applying the function
+     */
     MessageSource<T> apply(long sequenceNumber) throws Exception;
   }
 }

@@ -35,6 +35,12 @@ import org.slf4j.LoggerFactory;
  * </ol>
  */
 public class DirectRdaLoadApp {
+  /**
+   * Sets up the database options to use, the pipeline to use, and creates the pipeline job for RDA.
+   *
+   * @param args that are passed in
+   * @throws Exception if the pipeline encounters a problem loading or reading
+   */
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.err.printf("usage: %s configfile claimType%n", DirectRdaLoadApp.class.getSimpleName());
@@ -80,6 +86,14 @@ public class DirectRdaLoadApp {
     }
   }
 
+  /**
+   * Create a job for the pipeline with the correct claim type of fiss or mcs.
+   *
+   * @param jobConfig the config to use
+   * @param appState sets the state for the pipeline
+   * @param claimType whether to use fiss or mcs claims
+   * @return the pipeline job for mcs or fiss
+   */
   private static Optional<PipelineJob<?>> createPipelineJob(
       RdaLoadOptions jobConfig, PipelineApplicationState appState, String claimType) {
     switch (claimType.toLowerCase()) {
@@ -92,6 +106,13 @@ public class DirectRdaLoadApp {
     }
   }
 
+  /**
+   * This sets up the database options of db url, user, password, and max connections.
+   *
+   * @param options the database options to set
+   * @param threadCount the number of threads to use
+   * @return the database options
+   */
   private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
     return new DatabaseOptions(
         options.stringValue("database.url", null),
@@ -100,6 +121,12 @@ public class DirectRdaLoadApp {
         options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)));
   }
 
+  /**
+   * Reads and sets the rda options to load from a config file.
+   *
+   * @param options the config options to use
+   * @return the rda confic load options
+   */
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(ConfigLoader options) {
     final IdHasher.Config idHasherConfig =
         new IdHasher.Config(

@@ -25,8 +25,15 @@ import org.slf4j.Logger;
  *     FissClaimChange or McsClaimChange in real code
  */
 public abstract class GrpcStreamCaller<TResponse> {
+
+  /** The passed-in logger. */
   protected final Logger logger;
 
+  /**
+   * Instantiates a new grpc stream caller.
+   *
+   * @param logger the logger to use for this caller
+   */
   protected GrpcStreamCaller(Logger logger) {
     this.logger = logger;
   }

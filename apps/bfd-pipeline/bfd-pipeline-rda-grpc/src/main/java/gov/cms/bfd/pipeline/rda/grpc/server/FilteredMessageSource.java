@@ -10,8 +10,11 @@ import java.util.function.Predicate;
  * @param <T> type of objects being returned by the source.
  */
 public class FilteredMessageSource<T> implements MessageSource<T> {
+  /** The source to be filtered. */
   private final MessageSource<T> source;
+  /** The filter to apply to the source. */
   private final Predicate<T> filter;
+  /** The next value from the source. */
   private T nextValue;
 
   /**
@@ -26,6 +29,7 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
     this.filter = filter;
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() throws Exception {
     // allow for cases of hasNext() being called multiple times in a row
@@ -42,6 +46,7 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
     return false;
   }
 
+  /** {@inheritDoc} */
   @Override
   public T next() throws Exception {
     if (nextValue == null) {
@@ -52,6 +57,7 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
     return answer;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     source.close();

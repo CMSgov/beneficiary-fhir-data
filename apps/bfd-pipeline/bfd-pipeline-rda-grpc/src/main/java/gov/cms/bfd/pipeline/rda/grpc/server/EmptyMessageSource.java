@@ -21,16 +21,19 @@ public class EmptyMessageSource<T> implements MessageSource<T> {
     return ignored -> new EmptyMessageSource<>();
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() throws Exception {
     return false;
   }
 
+  /** {@inheritDoc} */
   @Override
   public T next() throws Exception {
     throw new NoSuchElementException();
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {}
 }

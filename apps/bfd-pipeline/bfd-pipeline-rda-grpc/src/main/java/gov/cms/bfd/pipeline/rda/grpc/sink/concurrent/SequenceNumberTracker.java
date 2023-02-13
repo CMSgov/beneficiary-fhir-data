@@ -23,8 +23,12 @@ import javax.annotation.concurrent.ThreadSafe;
  */
 @ThreadSafe
 public class SequenceNumberTracker {
-  // Use a TreeSet so that values are sorted in ascending order.
+  /**
+   * The sequence numbers for messages returned but not yet written to the database. Use a TreeSet
+   * so that values are sorted in ascending order.
+   */
   private final Set<Long> activeSequenceNumbers = new TreeSet<>();
+  /** Keeps track of the current highest sequence number. */
   private long maxSequenceNumber;
 
   /**

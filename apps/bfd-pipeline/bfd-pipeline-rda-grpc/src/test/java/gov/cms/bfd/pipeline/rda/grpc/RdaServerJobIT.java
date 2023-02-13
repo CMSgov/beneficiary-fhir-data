@@ -35,20 +35,34 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
+/** Integration tests for the RDA server. */
 public class RdaServerJobIT {
+  /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
+  /** The Fiss claim source. */
   private static final ByteSource fissClaimsSource =
       Resources.asByteSource(Resources.getResource("FISS.ndjson"));
+  /** The MCS claim source. */
   private static final ByteSource mcsClaimsSource =
       Resources.asByteSource(Resources.getResource("MCS.ndjson"));
 
+  /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+  /** The hasher used for testing hashed values. */
   private final IdHasher.Config hasherConfig = new IdHasher.Config(100, "whatever");
+  /** The Fiss claim transformer to test the server data. */
   private final FissClaimTransformer fissTransformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+  /** The MCS claim transformer to test the server data. */
   private final McsClaimTransformer mcsTransformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
+  /**
+   * Tests the server job in {@link RdaServerJob.Config.ServerMode#Random} configuration (generating
+   * random data) and ensures the seeded random data returns as expected.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testRandom() throws Exception {
     final RdaServerJob.Config config =
@@ -92,6 +106,12 @@ public class RdaServerJobIT {
     }
   }
 
+  /**
+   * Tests the server job in {@link RdaServerJob.Config.ServerMode#S3} configuration (data from S3)
+   * and ensures the data returns as expected.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void testS3() throws Exception {
     AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
@@ -152,6 +172,11 @@ public class RdaServerJobIT {
     }
   }
 
+  /**
+   * Tests the server job can be started, stopped, and restarted without issues.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void jobRunsCorrectlyMultipleTimes() throws Exception {
     final RdaServerJob.Config config =
@@ -191,6 +216,12 @@ public class RdaServerJobIT {
     }
   }
 
+  /**
+   * Verifies that a value matches a regex.
+   *
+   * @param actual the value to test
+   * @param regex the regex to test against
+   */
   private void assertMatches(String actual, String regex) {
     if (!Strings.nullToEmpty(actual).matches(regex)) {
       fail(String.format("value did not match regex: regex='%s' value='%s'", regex, actual));
@@ -200,6 +231,9 @@ public class RdaServerJobIT {
   /**
    * Waits at most 30 seconds for the server to get started. It's possible for the thread pool to
    * take longer to start than the test takes to create its StreamCallers.
+   *
+   * @param job the job to wait for
+   * @throws InterruptedException if the thread sleep is interrupted
    */
   private static void waitForServerToStart(RdaServerJob job) throws InterruptedException {
     Thread.sleep(500);
@@ -211,6 +245,9 @@ public class RdaServerJobIT {
   /**
    * Waits at most 30 seconds for the server to get started. It's possible for the thread pool to
    * take longer to start than the test takes to create its StreamCallers.
+   *
+   * @param job the job to wait for
+   * @throws InterruptedException if the thread sleep is interrupted
    */
   private static void waitForServerToStop(RdaServerJob job) throws InterruptedException {
     Thread.sleep(500);

@@ -10,10 +10,19 @@ import java.util.NoSuchElementException;
  * number seed and number of claims to return are specified in the constructor.
  */
 public class RandomFissClaimSource implements MessageSource<FissClaim> {
+  /** The random claim generator. */
   private final RandomFissClaimGenerator generator;
+  /** The maximum number of claims to send. */
   private final int maxToSend;
+  /** The number of sent claims. */
   private int sent;
 
+  /**
+   * Instantiates a new {@link RandomFissClaimSource}.
+   *
+   * @param seed the seed for randomization
+   * @param maxToSend the max number of claims to send
+   */
   public RandomFissClaimSource(long seed, int maxToSend) {
     generator = new RandomFissClaimGenerator(seed);
     sent = 0;
@@ -21,11 +30,13 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
     this.maxToSend = maxToSend;
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() {
     return sent < maxToSend;
   }
 
+  /** {@inheritDoc} */
   @Override
   public FissClaim next() {
     if (sent >= maxToSend) {
@@ -35,9 +46,15 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
     return generator.randomClaim();
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() {}
 
+  /**
+   * Wraps the generator such that a message source is returned.
+   *
+   * @return the message source
+   */
   public MessageSource<FissClaimChange> toClaimChanges() {
     return WrappedClaimSource.wrapFissClaims(
         this, generator.getClock(), RdaChange.MIN_SEQUENCE_NUM);

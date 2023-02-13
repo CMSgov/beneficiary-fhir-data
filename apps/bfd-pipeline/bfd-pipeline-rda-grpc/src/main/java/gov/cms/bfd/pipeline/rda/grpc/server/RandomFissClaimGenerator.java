@@ -42,57 +42,83 @@ import java.util.List;
  * zero).
  */
 public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissClaim> {
+  /** The max proc codes to generate. */
   private static final int MAX_PROC_CODES = 7;
+  /** The max diagnosis codes to generate. */
   private static final int MAX_DIAG_CODES = 7;
+  /** The max payers to generate. */
   private static final int MAX_PAYERS = 5;
+  /** The max audits to generate. */
   private static final int MAX_AUDITS = 20;
+  /** A list of the enums for the fiss claim statuses. */
   private static final List<FissClaimStatus> FissClaimStatusEnums =
       enumValues(FissClaimStatus.values());
+  /** A list of the enums for the fiss processing types. */
   private static final List<FissProcessingType> FissProcessingTypeEnums =
       enumValues(FissProcessingType.values());
+  /** A list of the enums for the fiss current locations. */
   private static final List<FissCurrentLocation2> FissCurrentLocation2Enums =
       enumValues(FissCurrentLocation2.values());
+  /** A list of the enums for the fiss admission diagnosis indicators. */
   private static final List<FissDiagnosisPresentOnAdmissionIndicator>
       FissDiagnosisPresentOnAdmissionIndicatorEnums =
           enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
+  /** A list of the enums for the fiss bill facility types. */
   private static final List<FissBillFacilityType> FissBillFacilityTypeEnums =
       enumValues(FissBillFacilityType.values());
+  /** A list of the enums for the fiss bill classifications. */
   private static final List<FissBillClassification> FissBillClassificationEnums =
       enumValues(FissBillClassification.values());
+  /** A list of the enums for the fiss bill classification for clinics. */
   private static final List<FissBillClassificationForClinics>
       FissBillClassificationForClinicsEnums = enumValues(FissBillClassificationForClinics.values());
+  /** A list of the enums for the fiss bill classification for special facilities. */
   private static final List<FissBillClassificationForSpecialFacilities>
       FissBillClassificationForSpecialFacilitiesEnums =
           enumValues(FissBillClassificationForSpecialFacilities.values());
+  /** A list of the enums for the fiss bill frequency. */
   private static final List<FissBillFrequency> FissBillFrequencyEnums =
       enumValues(FissBillFrequency.values());
+  /** A list of the enums for the fiss payers codes. */
   private static final List<FissPayersCode> FissPayersCodeEnums =
       enumValues(FissPayersCode.values());
+  /** A list of the enums for the fiss release of information. */
   private static final List<FissReleaseOfInformation> FissReleaseOfInformationEnums =
       enumValues(FissReleaseOfInformation.values());
+  /** A list of the enums for the fiss assignment of benefits indicators. */
   private static final List<FissAssignmentOfBenefitsIndicator>
       FissAssignmentOfBenefitsIndicatorEnums =
           enumValues(FissAssignmentOfBenefitsIndicator.values());
+  /** A list of the enums for the fiss patient relationship codes. */
   private static final List<FissPatientRelationshipCode> FissPatientRelationshipCodeEnums =
       enumValues(FissPatientRelationshipCode.values());
+  /** A list of the enums for the fiss beneficiary sexes. */
   private static final List<FissBeneficiarySex> FissBeneficiarySexEnums =
       enumValues(FissBeneficiarySex.values());
+  /** A list of the enums for the fiss adjustment requestor codes. */
   private static final List<FissAdjustmentRequestorCode> FissAdjustmentRequestorCodeEnums =
       enumValues(FissAdjustmentRequestorCode.values());
+  /** A list of the enums for the fiss adjustment codes. */
   private static final List<FissCancelAdjustmentCode> FissCancelAdjustmentCodeEnums =
       enumValues(FissCancelAdjustmentCode.values());
+  /** A list of the enums for the fiss sources of admission. */
   private static final List<FissSourceOfAdmission> FissSourceOfAdmissionEnums =
       enumValues(FissSourceOfAdmission.values());
+  /** A list of the enums for the fiss physician flags. */
   private static final List<FissPhysicianFlag> FissPhysicianFlagEnums =
       enumValues(FissPhysicianFlag.values());
+  /** A list of the enums for the fiss new health insurance claim number indicators. */
   private static final List<FissProcessNewHealthInsuranceClaimNumberIndicator>
       FissProcessNewHealthInsuranceClaimNumberIndicatorEnums =
           enumValues(FissProcessNewHealthInsuranceClaimNumberIndicator.values());
+  /** A list of the enums for the fiss repository indicators. */
   private static final List<FissRepositoryIndicator> FissRepositoryIndicatorEnums =
       enumValues(FissRepositoryIndicator.values());
+  /** A list of the enums for the fiss health insurance claim number / medicare bene identifiers. */
   private static final List<FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier>
       FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifierEnums =
           enumValues(FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.values());
+  /** A list of the enums for the fiss adjustment medicare bene id indicators. */
   private static final List<FissAdjustmentMedicareBeneficiaryIdentifierIndicator>
       FissAdjustmentMedicareBeneficiaryIdentifierIndicatorEnums =
           enumValues(FissAdjustmentMedicareBeneficiaryIdentifierIndicator.values());
@@ -112,6 +138,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
    *
    * @param seed seed for the PRNG
    * @param optionalOverride true if all optional fields should be populated
+   * @param clock the clock
    */
   @VisibleForTesting
   RandomFissClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
@@ -135,7 +162,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Adds random values to the basic fields of the given claim object
+   * Adds random values to the basic fields of the given claim object.
    *
    * @param claim The claim object to add random base field values to
    */
@@ -291,7 +318,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Adds a random procedure code to the given claim object
+   * Adds a random procedure code to the given claim object.
    *
    * @param claim The claim object to add the random procedure code to
    */
@@ -327,7 +354,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Adds a random diagnosis code to the given claim object
+   * Adds a random diagnosis code to the given claim object.
    *
    * @param claim The claim object to add the random diagnosis code to
    */
@@ -360,7 +387,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Add a random payer to the given claim object
+   * Add a random payer to the given claim object.
    *
    * @param claim The claim object to add a random payer to
    */
@@ -385,7 +412,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Add a random BeneZ payer to the given payer builder
+   * Add a random BeneZ payer to the given payer builder.
    *
    * @param parent The payer builder object to add to
    * @param position The "position" of the payer instance to insert, used for rdaPosition
@@ -439,7 +466,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Add random insured payer object to the given payer builder object
+   * Add random insured payer object to the given payer builder object.
    *
    * @param parent The payer builder object to add to
    * @param position The "position" of the payer instance to insert, used for rdaPosition
@@ -494,7 +521,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   }
 
   /**
-   * Adds randomly generated audit objects to the claim
+   * Adds randomly generated audit objects to the claim.
    *
    * @param claim The claim object instance to add random audit objects to
    */

@@ -351,6 +351,15 @@ public class AbstractRdaLoadJobTest {
 
   /** Test class used to perform the associated {@link AbstractRdaLoadJob} testing. */
   private static class TestingLoadJob extends AbstractRdaLoadJob<Integer, Integer> {
+    /**
+     * Instantiates a new Testing load job.
+     *
+     * @param config the config
+     * @param preJobTask the pre job task
+     * @param sourceFactory the source factory
+     * @param sinkFactory the sink factory
+     * @param appMetrics the app metrics
+     */
     public TestingLoadJob(
         Config config,
         Callable<RdaSource<Integer, Integer>> preJobTask,
