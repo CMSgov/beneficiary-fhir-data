@@ -9,13 +9,18 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
+/** This class parses the Rif. */
 @RequiredArgsConstructor
 public class RifParser implements Parser<String> {
 
+  /** Delimiter for the rif. */
   private static final String DELIMITER = "\\|";
 
+  /** Source of the RifParser. */
   private final Source<String> source;
+  /** The map of the header values to their column index in the rif file. */
   private final Map<String, Integer> headerIndexMap = new HashMap<>();
+  /** The row counter to set the row number in the rif data returns {@link long}. */
   private long rowCounter = 0;
 
   /**
@@ -65,14 +70,20 @@ public class RifParser implements Parser<String> {
     source.close();
   }
 
+  /** Data class for the Rif. */
   @RequiredArgsConstructor
   public static class RifData extends Data<String> {
 
+    /** The Rif Date Format. */
     private final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+    /** The Standard Format. */
     private final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    /** Identifies the row id. */
     private final long rowId;
+    /** Header Index Map keeps track of header value and index. */
     private final Map<String, Integer> headerIndexMap;
+    /** Keeps track of the data for the row. */
     private final String[] rowData;
 
     @Override
