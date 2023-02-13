@@ -44,7 +44,7 @@ public class RdaSourceConfig implements Serializable {
    * the RDA API server and thus not requiring an ERROR log entry.
    */
   private final Duration minIdleTimeBeforeConnectionDrop;
-  /** Authorization token expiration date, in epoch seconds */
+  /** Authorization token expiration date, in epoch seconds. */
   private final Long expirationDate;
   /** The token to pass to the RDA API server to authenticate the client. */
   @Nullable private final String authenticationToken;
@@ -55,10 +55,26 @@ public class RdaSourceConfig implements Serializable {
    * served by a mock RDA API server running as a pipeline job.
    */
   public enum ServerType {
+    /** Represents a remote server, the normal configuration. */
     Remote,
+    /**
+     * Represents an in-process server, used when populating an environment with synthetic data
+     * served by a mock RDA API server running as a pipeline job.
+     */
     InProcess
   }
 
+  /**
+   * Instantiates a new Rda source config.
+   *
+   * @param serverType the server type
+   * @param host the host
+   * @param port the port
+   * @param inProcessServerName the in process server name
+   * @param maxIdle the max idle
+   * @param minIdleTimeBeforeConnectionDrop the min idle time before connection drop
+   * @param authenticationToken the authentication token
+   */
   @Builder
   private RdaSourceConfig(
       ServerType serverType,
@@ -96,6 +112,11 @@ public class RdaSourceConfig implements Serializable {
     }
   }
 
+  /**
+   * Creates a managed channel.
+   *
+   * @return the managed channel
+   */
   public ManagedChannel createChannel() {
     return createChannelBuilder()
         .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
@@ -103,6 +124,11 @@ public class RdaSourceConfig implements Serializable {
         .build();
   }
 
+  /**
+   * Creates a managed channel builder with settings determined by the {@link ServerType}.
+   *
+   * @return the managed channel builder
+   */
   private ManagedChannelBuilder<?> createChannelBuilder() {
     if (serverType == ServerType.InProcess) {
       return createInProcessChannelBuilder();
@@ -152,6 +178,11 @@ public class RdaSourceConfig implements Serializable {
     return answer;
   }
 
+  /**
+   * Creates a remove channel builder.
+   *
+   * @return the channel builder
+   */
   private ManagedChannelBuilder<?> createRemoteChannelBuilder() {
     final ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forAddress(host, port);
     if (host.equals("localhost")) {
@@ -160,6 +191,11 @@ public class RdaSourceConfig implements Serializable {
     return builder;
   }
 
+  /**
+   * Creates an in process channel builder.
+   *
+   * @return the channel builder
+   */
   private ManagedChannelBuilder<?> createInProcessChannelBuilder() {
     return InProcessChannelBuilder.forName(inProcessServerName);
   }
@@ -199,8 +235,10 @@ public class RdaSourceConfig implements Serializable {
     return minIdleTimeBeforeConnectionDrop.toMillis();
   }
 
+  /** A data object for JWT claims. */
   @Data
   private static class JWTClaims {
+    /** The expiration date of the token, in epoch seconds. */
     private Long exp;
   }
 }

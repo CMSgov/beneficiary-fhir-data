@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 /** GrpcStreamCaller implementation that calls the RDA FissClaim service. */
 public class FissClaimStreamCaller extends GrpcStreamCaller<FissClaimChange> {
+
+  /** Instantiates a new Fiss claim stream caller. */
   public FissClaimStreamCaller() {
     super(LoggerFactory.getLogger(FissClaimStreamCaller.class));
   }

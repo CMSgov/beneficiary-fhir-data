@@ -30,8 +30,10 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link FissClaimRdaSink} with integrated dependencies. */
 public class FissClaimRdaSinkIT {
 
+  /** The alphabetical sorting mapper to use for testing. */
   private static final ObjectMapper mapper =
       JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 

@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 
+/** Class for creating a local RDA server for testing purposes. */
 public class RdaServer {
   /**
    * Creates a local RDA API server for testing.
@@ -123,15 +124,16 @@ public class RdaServer {
     }
   }
 
+  /** Configuration for the RDA server. */
   @Getter
   private abstract static class BaseConfig {
     /** Version for the RdaService to report when getVersion is called. */
     private final RdaService.Version version;
 
-    /** Factory used to create {@link MessageSource<FissClaimChange>} objects on demand. */
+    /** Factory used to create {@link MessageSource} objects on demand. */
     private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
 
-    /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
+    /** Factory used to create {@link MessageSource} objects on demand. */
     private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
 
     /**
@@ -139,6 +141,14 @@ public class RdaServer {
      */
     private final Set<String> authorizedTokens;
 
+    /**
+     * Instantiates a new configuration.
+     *
+     * @param version the version
+     * @param fissSourceFactory the fiss source factory
+     * @param mcsSourceFactory the mcs source factory
+     * @param authorizedTokens the authorized tokens
+     */
     BaseConfig(
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
@@ -152,7 +162,11 @@ public class RdaServer {
       this.authorizedTokens = authorizedTokens;
     }
 
-    /** @return properly configured RdaService instance */
+    /**
+     * Creates a configured rda service.
+     *
+     * @return properly configured RdaService instance
+     */
     public RdaService createService() {
       return RdaService.Config.builder()
           .version(version)
@@ -166,6 +180,7 @@ public class RdaServer {
   /** Configuration data for running a server on a local port. */
   @Getter
   public static class LocalConfig extends BaseConfig {
+    /** The server hostname. */
     private final String hostname;
 
     /**
@@ -174,6 +189,16 @@ public class RdaServer {
      */
     private final int port;
 
+    /**
+     * Creates a new configuration.
+     *
+     * @param version the version
+     * @param fissSourceFactory the fiss source factory
+     * @param mcsSourceFactory the mcs source factory
+     * @param authorizedTokens the authorized tokens
+     * @param hostname the hostname
+     * @param port the port
+     */
     @Builder
     private LocalConfig(
         RdaService.Version version,
@@ -198,6 +223,11 @@ public class RdaServer {
       runWithLocalServer(this, action);
     }
 
+    /**
+     * Determines if this server has a hostname.
+     *
+     * @return {@code true} if this server has a hostname
+     */
     public boolean hasHostname() {
       return !Strings.isNullOrEmpty(hostname);
     }
@@ -212,6 +242,15 @@ public class RdaServer {
      */
     private final String serverName;
 
+    /**
+     * Instantiates a new configuration.
+     *
+     * @param version the version
+     * @param fissSourceFactory the fiss source factory
+     * @param mcsSourceFactory the mcs source factory
+     * @param authorizedTokens the authorized tokens
+     * @param serverName the server name
+     */
     @Builder
     private InProcessConfig(
         RdaService.Version version,
@@ -225,7 +264,7 @@ public class RdaServer {
 
     /**
      * Shorthand for calling {@link RdaServer#runWithInProcessServer(InProcessConfig,
-     * ThrowableConsumer)}* with this config object.
+     * ThrowableConsumer)} with this config object.
      *
      * @param action the action to execute
      * @throws Exception any exception is passed through to the caller

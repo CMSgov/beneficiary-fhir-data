@@ -34,17 +34,26 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   /** Holds the underlying value of our uptime gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  /** The {@link ManagedChannel} the source messages will be streamed on */
+  /** The {@link ManagedChannel} the source messages will be streamed on. */
   protected ManagedChannel channel;
-  /** Client for calling the remote RDA gRPC service */
+  /** Client for calling the remote RDA gRPC service. */
   protected final GrpcStreamCaller<TMessage> caller;
-  /** The type of claim being read from the source (i.e. FISS/MCS) */
+  /** The type of claim being read from the source (i.e. FISS/MCS). */
   protected final String claimType;
-  /** Factory for creating {@link CallOptions} */
+  /** Factory for creating {@link CallOptions}. */
   protected final Supplier<CallOptions> callOptionsFactory;
-  /** Metrics for doing later application and processing analysis */
+  /** Metrics for doing later application and processing analysis. */
   @Getter protected final DLQGrpcRdaSource.Metrics metrics;
 
+  /**
+   * Instantiates a new abstract grpc rda source.
+   *
+   * @param channel the channel
+   * @param caller the caller
+   * @param claimType the claim type
+   * @param callOptionsFactory the call options factory
+   * @param appMetrics the app metrics
+   */
   protected AbstractGrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
@@ -116,8 +125,11 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   /** Data class for holding processing results. */
   @Data
   protected static class ProcessResult {
+    /** If this process is interrupted. */
     private boolean interrupted = false;
+    /** The count of results. */
     private int count = 0;
+    /** Holds any unexpected issue with the processing. */
     private Exception exception = null;
 
     /**
@@ -235,7 +247,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     private final AtomicLong uptime;
 
     /**
-     * Constructor to create a Metrics object
+     * Constructor to create a Metrics object.
      *
      * @param baseClass The class the {@link Metrics} object is being created for.
      * @param appMetrics The {@link MetricRegistry} used to create the needed metrics tools.

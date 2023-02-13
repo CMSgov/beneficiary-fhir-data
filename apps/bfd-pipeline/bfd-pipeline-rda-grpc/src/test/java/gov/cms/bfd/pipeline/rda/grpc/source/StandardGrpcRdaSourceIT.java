@@ -37,7 +37,9 @@ import javax.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Integration test for the {@link StandardGrpcRdaSource}. */
 public class StandardGrpcRdaSourceIT {
+  /** Example paid claim. */
   private static final String SOURCE_CLAIM_1 =
       "{"
           + "  \"dcn\": \"63843470\","
@@ -74,6 +76,7 @@ public class StandardGrpcRdaSourceIT {
           + "  ],"
           + "  \"medaProvId\": \"oducjgzt67joc\""
           + "}";
+  /** Example rejected claim. */
   private static final String SOURCE_CLAIM_2 =
       "{"
           + "  \"dcn\": \"2643602\","
@@ -106,7 +109,9 @@ public class StandardGrpcRdaSourceIT {
           + "    }"
           + "  ]"
           + "}";
+  /** Example of two claims separated by a line. */
   private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
+  /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
           + "  \"apiSource\" : \"0.10\",\n"
@@ -153,6 +158,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"sequenceNumber\" : 0,\n"
           + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
+  /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
           + "  \"apiSource\" : \"0.10\",\n"
@@ -196,21 +202,36 @@ public class StandardGrpcRdaSourceIT {
           + "  \"totalChargeAmount\" : 55.91\n"
           + "}";
 
-  // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
+  /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+  /** The test hasher. */
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
+  /** The transformer to create results for correctness verification. */
   private final FissClaimTransformer transformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
+  /** The stream caller for calling the service. */
   private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
+  /** The test metrics. */
   private MeterRegistry appMetrics;
+  /** The json sink. */
   private JsonCaptureSink sink;
 
+  /**
+   * Sets the test dependencies up.
+   *
+   * @throws Exception if there is an error setting up the test
+   */
   @BeforeEach
   public void setUp() throws Exception {
     appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
   }
 
+  /**
+   * Verifies that a GRPC call without an auth token required can successfully return claims.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void grpcCallNoAuthTokenNeeded() throws Exception {
     createServerConfig()
@@ -230,6 +251,12 @@ public class StandardGrpcRdaSourceIT {
             });
   }
 
+  /**
+   * Verifies that a GRPC call with an auth token required and supplied can successfully return
+   * claims.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void grpcCallWithCorrectAuthToken() throws Exception {
     createServerConfig()
@@ -251,6 +278,12 @@ public class StandardGrpcRdaSourceIT {
             });
   }
 
+  /**
+   * Verifies that a GRPC call with an auth token required and no token supplied throws an auth
+   * exception.
+   *
+   * @throws Exception indicates test failure (correct exception is caught)
+   */
   @Test
   public void grpcCallWithMissingAuthToken() throws Exception {
     createServerConfig()
@@ -275,6 +308,12 @@ public class StandardGrpcRdaSourceIT {
             });
   }
 
+  /**
+   * Verifies that a GRPC call with an auth token required and an incorrect token supplied throws an
+   * auth exception.
+   *
+   * @throws Exception indicates test failure (correct exception is caught)
+   */
   @Test
   public void grpcCallWithIncorrectAuthToken() throws Exception {
     createServerConfig()
@@ -300,6 +339,11 @@ public class StandardGrpcRdaSourceIT {
             });
   }
 
+  /**
+   * Creates the local server config for the test.
+   *
+   * @return the server config
+   */
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
         .fissSourceFactory(
@@ -310,6 +354,12 @@ public class StandardGrpcRdaSourceIT {
                     sequenceNumber - 1));
   }
 
+  /**
+   * Creates the source config for the test.
+   *
+   * @param port the port to use
+   * @return the server config
+   */
   private RdaSourceConfig.RdaSourceConfigBuilder createSourceConfig(Integer port) {
     return RdaSourceConfig.builder()
         .serverType(RdaSourceConfig.ServerType.Remote)
@@ -318,16 +368,26 @@ public class StandardGrpcRdaSourceIT {
         .maxIdle(Duration.ofSeconds(30));
   }
 
+  /**
+   * Creates the grpc source from a config.
+   *
+   * @param config the config for the source
+   * @return the grpc rda source
+   */
   @Nonnull
   private StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
       RdaSourceConfig config) {
     return new StandardGrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
   }
 
+  /** The sink for json data. */
   private class JsonCaptureSink implements RdaSink<FissClaimChange, RdaChange<RdaFissClaim>> {
+    /** The values being written. */
     private final List<String> values = new ArrayList<>();
+    /** The mapper for the json mapping config. */
     private final ObjectMapper mapper;
 
+    /** Creates a json capture sink with a set configuration. */
     public JsonCaptureSink() {
       mapper =
           new JsonMapper()
@@ -339,6 +399,7 @@ public class StandardGrpcRdaSourceIT {
               .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized int writeMessage(String dataVersion, FissClaimChange message)
         throws ProcessingException {
@@ -351,6 +412,7 @@ public class StandardGrpcRdaSourceIT {
       }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void checkErrorCount() {
       // Do nothing
@@ -361,14 +423,17 @@ public class StandardGrpcRdaSourceIT {
       return object.getClaim().getDcn();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void updateLastSequenceNumber(long lastSequenceNumber) {}
 
+    /** {@inheritDoc} */
     @Override
     public long getSequenceNumberForObject(FissClaimChange object) {
       return object.getSeq();
     }
 
+    /** {@inheritDoc} */
     @Nonnull
     @Override
     public Optional<RdaChange<RdaFissClaim>> transformMessage(
@@ -381,22 +446,31 @@ public class StandardGrpcRdaSourceIT {
       return Optional.of(change);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int writeClaims(Collection<RdaChange<RdaFissClaim>> objects) throws ProcessingException {
       throw new UnsupportedOperationException();
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getProcessedCount() throws ProcessingException {
       return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shutdown(Duration waitTime) throws ProcessingException {}
 
+    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {}
 
+    /**
+     * Gets the values.
+     *
+     * @return the values
+     */
     public synchronized List<String> getValues() {
       return values;
     }

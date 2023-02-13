@@ -11,7 +11,15 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link RandomMcsClaimGenerator}. */
 public class RandomMcsClaimGeneratorTest {
+  /**
+   * Verifies when a single MCS claim is generated using a seed, it's fields match the expected
+   * values.
+   *
+   * @throws InvalidProtocolBufferException indicates test failure (failure to parse to json for
+   *     comparison)
+   */
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
     final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
