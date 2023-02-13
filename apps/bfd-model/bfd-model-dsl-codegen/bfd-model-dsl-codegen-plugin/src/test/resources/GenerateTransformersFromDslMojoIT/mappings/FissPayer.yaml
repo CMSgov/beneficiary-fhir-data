@@ -6,7 +6,7 @@ mappings:
       name: FissPayers
       schema: pre_adj
       primaryKeyColumns:
-        - dcn
+        - parentClaim
         - priority
       columns:
         - name: priority

@@ -18,7 +18,7 @@
 
     <properties>
         <commons-cli.version>1.5.0</commons-cli.version>
-
+        <checkstyle.skip>true</checkstyle.skip>
         <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
         <bfd-pipeline-rda-grpcs.version>1.0.0-SNAPSHOT</bfd-pipeline-rda-grpcs.version>
     </properties>
@@ -58,6 +58,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <!-- Templating Engine -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.31</version>
         </dependency>
         <!-- BFD -->
         <dependency>

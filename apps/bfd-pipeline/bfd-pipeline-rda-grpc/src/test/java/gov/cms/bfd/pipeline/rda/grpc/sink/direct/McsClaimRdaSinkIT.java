@@ -30,8 +30,10 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link McsClaimRdaSink} with integrated dependencies. */
 public class McsClaimRdaSinkIT {
 
+  /** The alphabetical sorting mapper to use for testing. */
   private static final ObjectMapper mapper =
       JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
@@ -61,13 +63,13 @@ public class McsClaimRdaSinkIT {
 
           final RdaMcsDetail detail = new RdaMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          detail.setPriority((short) 0);
+          detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          diagCode.setPriority((short) 0);
+          diagCode.setRdaPosition((short) 1);
           diagCode.setIdrDiagIcdType("T");
           diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);
@@ -103,7 +105,7 @@ public class McsClaimRdaSinkIT {
           final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer =
               new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
-          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
+          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true, 0);
           final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
@@ -165,13 +167,13 @@ public class McsClaimRdaSinkIT {
 
           final RdaMcsDetail detail = new RdaMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          detail.setPriority((short) 0);
+          detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          diagCode.setPriority((short) 0);
+          diagCode.setRdaPosition((short) 1);
           diagCode.setIdrDiagIcdType(invalidDiagIcdType);
           diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);
@@ -207,7 +209,7 @@ public class McsClaimRdaSinkIT {
           final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer =
               new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
-          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
+          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true, 0);
           final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
@@ -232,7 +234,7 @@ public class McsClaimRdaSinkIT {
                     new DataTransformer.ErrorMessage(
                         "idrContrId", "invalid length: expected=[1,5] actual=18"),
                     new DataTransformer.ErrorMessage(
-                        "diagCode-0-idrDiagIcdType", "invalid length: expected=[0,1] actual=16"));
+                        "diagCodes-0-idrDiagIcdType", "invalid length: expected=[0,1] actual=16"));
 
             assertEquals(Long.valueOf(7), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.MCS, error.getClaimType());

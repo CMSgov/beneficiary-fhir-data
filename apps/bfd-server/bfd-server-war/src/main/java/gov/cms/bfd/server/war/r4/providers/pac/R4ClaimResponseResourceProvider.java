@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<ClaimResponse> {
 
+  /** The map of claim types. */
   private static final Map<String, ResourceTypeV2<ClaimResponse, ?>> claimTypeMap =
       ImmutableMap.of("fiss", ClaimResponseTypeV2.F, "mcs", ClaimResponseTypeV2.M);
 
@@ -24,13 +25,9 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
     return ClaimResponseTypeV2.parse(typeText);
   }
 
-  /**
-   * Returns a set of all supported resource types.
-   *
-   * @return Set of all supported resource types.
-   */
+  /** {@inheritDoc} */
   @VisibleForTesting
-  Set<ResourceTypeV2<ClaimResponse, ?>> getResourceTypes() {
+  Set<ResourceTypeV2<ClaimResponse, ?>> getDefinedResourceTypes() {
     return Sets.newHashSet(ClaimResponseTypeV2.values());
   }
 

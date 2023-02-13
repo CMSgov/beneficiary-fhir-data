@@ -1,10 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
@@ -16,9 +12,16 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,17 +44,26 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractClaimRdaSink<TMessage, TClaim>
     implements RdaSink<TMessage, RdaChange<TClaim>> {
+  /** The database entity manager. */
   protected final EntityManager entityManager;
+  /** The metric reporter. */
   protected final Metrics metrics;
+  /** Clock for creating timestamps. */
   protected final Clock clock;
+  /** The log manager. */
   protected final Logger logger;
+  /** Represents the claim type for this sink. */
   protected final RdaApiProgress.ClaimType claimType;
+  /** Whether to automatically update the sequence number. */
   protected final boolean autoUpdateLastSeq;
+
+  /** The number of claim errors that can exist before the job will stop processing. */
+  private final int errorLimit;
 
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  /** Used to write out RDA messages to json strings */
+  /** Used to write out RDA messages to json strings. */
   protected static final JsonFormat.Printer protobufObjectWriter =
       JsonFormat.printer().omittingInsignificantWhitespace();
 
@@ -65,24 +77,29 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param claimType used to write claim type when recording sequence number updates
    * @param autoUpdateLastSeq controls whether sequence numbers are automatically written to the
    *     database
+   * @param errorLimit the number of claim errors that can exist before the job will stop processing
    */
   protected AbstractClaimRdaSink(
       PipelineApplicationState appState,
       RdaApiProgress.ClaimType claimType,
-      boolean autoUpdateLastSeq) {
+      boolean autoUpdateLastSeq,
+      int errorLimit) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
-    metrics = new Metrics(getClass(), appState.getMetrics());
+    metrics = new Metrics(getClass(), appState.getMeters());
     clock = appState.getClock();
     logger = LoggerFactory.getLogger(getClass());
     this.claimType = claimType;
     this.autoUpdateLastSeq = autoUpdateLastSeq;
+    this.errorLimit = errorLimit;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     if (entityManager != null && entityManager.isOpen()) {
       entityManager.close();
     }
+    resetLatencyMetrics();
   }
 
   /**
@@ -138,15 +155,36 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param apiVersion The version of the api used to get the message.
    * @param message The message that was being transformed when the error occurred.
    * @param exception The exception that was thrown while transforming the message.
-   * @throws IOException If there was an issue writing to the database.
+   * @throws IOException if there was an issue writing to the database.
+   * @throws ProcessingException If the error limit was reached.
    */
   @Override
   public void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
-      throws IOException {
+      throws IOException, ProcessingException {
     entityManager.getTransaction().begin();
     entityManager.merge(createMessageError(apiVersion, message, exception.getErrors()));
     entityManager.getTransaction().commit();
+
+    checkErrorCount();
+  }
+
+  /**
+   * Checks if the allowed number of unresolved {@link MessageError}s in the database was exceeded.
+   *
+   * @throws ProcessingException If the error limit was reached.
+   */
+  @Override
+  public void checkErrorCount() throws ProcessingException {
+    var query =
+        entityManager.createQuery(
+            "select count(error) from MessageError error where status = :status", Long.class);
+    query.setParameter("status", MessageError.Status.UNRESOLVED);
+    long errorCount = query.getSingleResult();
+
+    if (errorCount > errorLimit) {
+      throw new ProcessingException(new IllegalStateException("Error limit reached"), 0);
+    }
   }
 
   /**
@@ -178,10 +216,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public int writeClaims(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
     final long maxSeq = maxSequenceInBatch(claims);
     try {
-      metrics.calls.mark();
-      updateLatencyMetric(claims);
+      metrics.calls.increment();
+      updateLatencyMetrics(claims);
       mergeBatch(maxSeq, claims);
-      metrics.objectsMerged.mark(claims.size());
+      metrics.objectsMerged.increment(claims.size());
       logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
@@ -190,11 +228,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           maxSeq,
           error.getMessage(),
           error);
-      metrics.failures.mark();
+      metrics.failures.increment();
       throw new ProcessingException(error, 0);
     }
-    metrics.successes.mark();
-    metrics.objectsWritten.mark(claims.size());
+    metrics.successes.increment();
+    metrics.objectsWritten.increment(claims.size());
     return claims.size();
   }
 
@@ -218,6 +256,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {}
 
+  /**
+   * Gets the {@link #metrics}.
+   *
+   * @return the metrics
+   */
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
@@ -227,7 +270,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
-   * @param change an incoming RdaChange object from which to extract meta data
+   * @param change an incoming RdaChange object from which to extract metadata
    * @return an object ready for insertion into the database
    */
   abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
@@ -267,20 +310,24 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Transforms all of the messages in the collection into {@link RdaChange} objects and returns a
+   * Transforms all the messages in the collection into {@link RdaChange} objects and returns a
    * {@link List} of the converted changes.
    *
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param messages collection of RDA API message objects of the correct type for this sync
    * @return the converted claims
-   * @throws DataTransformer.TransformationException if any message in the collection is invalid
+   * @throws ProcessingException if any message in the collection triggered an error
    */
   @VisibleForTesting
   List<RdaChange<TClaim>> transformMessages(String apiVersion, Collection<TMessage> messages)
-      throws DataTransformer.TransformationException {
+      throws ProcessingException {
     var claims = new ArrayList<RdaChange<TClaim>>();
-    for (TMessage message : messages) {
-      claims.add(transformMessage(apiVersion, message));
+    try {
+      for (TMessage message : messages) {
+        transformMessage(apiVersion, message).ifPresent(claims::add);
+      }
+    } catch (IOException e) {
+      throw new ProcessingException(e, 0);
     }
     return claims;
   }
@@ -294,26 +341,29 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    *
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param message an RDA API message object of the correct type for this sync
-   * @return the converted claim
-   * @throws DataTransformer.TransformationException if the message is invalid
+   * @return an optional containing the converted claim if successful, {@link Optional#empty()}
+   *     otherwise
+   * @throws IOException if there was an issue writing out a {@link MessageError}
+   * @throws ProcessingException if there was an issue transforming the message
    */
   @Nonnull
   @Override
-  public RdaChange<TClaim> transformMessage(String apiVersion, TMessage message)
-      throws DataTransformer.TransformationException {
+  public Optional<RdaChange<TClaim>> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException {
+    Optional<RdaChange<TClaim>> result;
+
     try {
       var change = transformMessageImpl(apiVersion, message);
-      metrics.transformSuccesses.mark();
-      return change;
+      metrics.transformSuccesses.increment();
+      result = Optional.of(change);
     } catch (DataTransformer.TransformationException transformationException) {
-      metrics.transformFailures.mark();
-      try {
-        writeError(apiVersion, message, transformationException);
-      } catch (IOException e) {
-        transformationException.addSuppressed(e);
-      }
-      throw transformationException;
+      metrics.transformFailures.increment();
+      logger.error("Claim transformation error", transformationException);
+      writeError(apiVersion, message, transformationException);
+      result = Optional.empty();
     }
+
+    return result;
   }
 
   /**
@@ -346,8 +396,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param changes collection of claims to write to the database
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
+    final Instant startTime = Instant.now();
     boolean commit = false;
-    final Timer.Context timerContext = metrics.dbUpdateTime.time();
     int insertCount = 0;
 
     try {
@@ -374,9 +424,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         entityManager.getTransaction().rollback();
       }
       entityManager.clear();
-      timerContext.stop();
-      metrics.dbBatchSize.update(changes.size());
-      metrics.insertCount.update(insertCount);
+      metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
+      metrics.dbBatchSize.record(changes.size());
+      metrics.insertCount.record(insertCount);
     }
   }
 
@@ -397,17 +447,35 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Updates the latency metric by adding the age of each claim to the histogram.
+   * Updates the latency metrics by adding the age of each claim to the histograms.
    *
    * @param claims claims to process
    */
-  private void updateLatencyMetric(Collection<RdaChange<TClaim>> claims) {
+  private void updateLatencyMetrics(Collection<RdaChange<TClaim>> claims) {
+    final long nowMillis = clock.millis();
     for (RdaChange<TClaim> claim : claims) {
-      final long nowMillis = clock.millis();
       final long changeMillis = claim.getTimestamp().toEpochMilli();
-      final long age = Math.max(0L, nowMillis - changeMillis);
-      metrics.changeAgeMillis.update(age);
+      final long changeAge = Math.max(0L, nowMillis - changeMillis);
+      metrics.changeAgeMillis.record(changeAge);
+
+      final LocalDate extractDate = claim.getSource().getExtractDate();
+      if (extractDate != null) {
+        final ZonedDateTime extractTime = extractDate.atStartOfDay().atZone(clock.getZone());
+        final long extractMillis = extractTime.toInstant().toEpochMilli();
+        final long extractAge = Math.max(0L, nowMillis - extractMillis);
+        metrics.extractAgeMillis.record(extractAge);
+      }
     }
+  }
+
+  /**
+   * Called by {@link #close} method to reset latency metrics to zero when job has completed. This
+   * prevents the dashboard latency graphs showing the last value continuously between job
+   * executions.
+   */
+  private void resetLatencyMetrics() {
+    metrics.changeAgeMillis.record(0L);
+    metrics.extractAgeMillis.record(0L);
   }
 
   /**
@@ -419,33 +487,41 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @VisibleForTesting
   static class Metrics {
     /** Number of times the sink has been called to store objects. */
-    private final Meter calls;
+    private final Counter calls;
     /** Number of calls that successfully stored the objects. */
-    private final Meter successes;
+    private final Counter successes;
     /** Number of calls that failed to store the objects. */
-    private final Meter failures;
+    private final Counter failures;
     /** Number of objects written. */
-    private final Meter objectsWritten;
+    private final Counter objectsWritten;
     /** Number of objects stored using <code>persist()</code>. */
-    private final Meter objectsPersisted;
-    /** Number of objects stored using <code>merge()</code> */
-    private final Meter objectsMerged;
+    private final Counter objectsPersisted;
+    /** Number of objects stored using <code>merge()</code>. */
+    private final Counter objectsMerged;
     /** Number of objects successfully transformed. */
-    private final Meter transformSuccesses;
+    private final Counter transformSuccesses;
     /** Number of objects which failed to be transformed. */
-    private final Meter transformFailures;
-    /** Milliseconds between change timestamp and current time. */
-    private final Histogram changeAgeMillis;
+    private final Counter transformFailures;
+    /**
+     * Milliseconds between change timestamp and current time, measures the latency between BFD
+     * ingestion and when RDA ingestion.
+     */
+    private final DistributionSummary changeAgeMillis;
+    /**
+     * Milliseconds between extract date and current time, measures the latency between BFD
+     * ingestion and when the MAC processes the data .
+     */
+    private final DistributionSummary extractAgeMillis;
     /** Tracks the elapsed time when we write claims to the database. */
     private final Timer dbUpdateTime;
     /** Tracks the number of updates per database transaction. */
-    private final Histogram dbBatchSize;
+    private final DistributionSummary dbBatchSize;
     /** Latest sequnce number from writing a batch. * */
-    private final Gauge<?> latestSequenceNumber;
+    private final AtomicLong latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
-    /** The number of insert statements executed */
-    private final Histogram insertCount;
+    /** The number of insert statements executed. */
+    private final DistributionSummary insertCount;
 
     /**
      * Initializes all the metrics.
@@ -453,28 +529,30 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
      * @param klass used to derive metric names
      * @param appMetrics where to store the metrics
      */
-    private Metrics(Class<?> klass, MetricRegistry appMetrics) {
+    private Metrics(Class<?> klass, MeterRegistry appMetrics) {
       final String base = klass.getSimpleName();
-      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
-      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
-      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
-      objectsWritten = appMetrics.meter(MetricRegistry.name(base, "writes", "total"));
-      objectsPersisted = appMetrics.meter(MetricRegistry.name(base, "writes", "persisted"));
-      objectsMerged = appMetrics.meter(MetricRegistry.name(base, "writes", "merged"));
-      transformSuccesses = appMetrics.meter(MetricRegistry.name(base, "transform", "successes"));
-      transformFailures = appMetrics.meter(MetricRegistry.name(base, "transform", "failures"));
+      calls = appMetrics.counter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.counter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.counter(MetricRegistry.name(base, "failures"));
+      objectsWritten = appMetrics.counter(MetricRegistry.name(base, "writes", "total"));
+      objectsPersisted = appMetrics.counter(MetricRegistry.name(base, "writes", "persisted"));
+      objectsMerged = appMetrics.counter(MetricRegistry.name(base, "writes", "merged"));
+      transformSuccesses = appMetrics.counter(MetricRegistry.name(base, "transform", "successes"));
+      transformFailures = appMetrics.counter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =
-          appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+          appMetrics.summary(MetricRegistry.name(base, "change", "latency", "millis"));
+      extractAgeMillis =
+          appMetrics.summary(MetricRegistry.name(base, "extract", "latency", "millis"));
       dbUpdateTime = appMetrics.timer(MetricRegistry.name(base, "writes", "elapsed"));
-      dbBatchSize = appMetrics.histogram(MetricRegistry.name(base, "writes", "batchSize"));
+      dbBatchSize = appMetrics.summary(MetricRegistry.name(base, "writes", "batchSize"));
       String latestSequenceNumberGaugeName = MetricRegistry.name(base, "lastSeq");
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
-      insertCount = appMetrics.histogram(MetricRegistry.name(base, "insertCount"));
+      insertCount = appMetrics.summary(MetricRegistry.name(base, "insertCount"));
     }
 
     /**
-     * Sets the {@link #latestSequenceNumber}
+     * Sets the {@link #latestSequenceNumber}.
      *
      * @param value value to set
      */

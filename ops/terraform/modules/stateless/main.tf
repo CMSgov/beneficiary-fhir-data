@@ -27,6 +27,24 @@ locals {
     ]
   }
   vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
+
+  # Specifying per-environment alarms here rather than through variables and in each env-specific
+  # stateless module as it will be easier to lift this out when stateless/stateful is refactored
+  log_alarms_topic_arns_by_env = {
+    prod = {
+      alarm = data.aws_sns_topic.cloudwatch_alarms.arn
+      ok    = data.aws_sns_topic.cloudwatch_ok.arn
+    }
+    # TODO: Replace testing SNS topics in BFD-2244
+    prod-sbx = {
+      alarm = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+      ok    = data.aws_sns_topic.cloudwatch_ok_testing.arn
+    }
+    test = {
+      alarm = null
+      ok    = null
+    }
+  }
 }
 
 
@@ -76,6 +94,15 @@ data "aws_sns_topic" "cloudwatch_alarms" {
 }
 data "aws_sns_topic" "cloudwatch_ok" {
   name = "bfd-${var.env_config.env}-cloudwatch-ok"
+}
+
+# Temporary CloudWatch SLO alarms topics
+# TODO: Remove in BFD-1773
+data "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
+  name = "bfd-${var.env_config.env}-cloudwatch-alarms-alert-testing"
+}
+data "aws_sns_topic" "cloudwatch_ok_testing" {
+  name = "bfd-${var.env_config.env}-cloudwatch-alarms-ok-testing"
 }
 
 # aurora security group
@@ -247,125 +274,40 @@ module "fhir_asg" {
 
 
 ## FHIR server metrics, per partner
-#
-
 module "bfd_server_metrics" {
   source = "../resources/bfd_server_metrics"
   env    = var.env_config.env
-  asg_id = module.fhir_asg.asg_id
-}
-# TODO: purge all access.txt 
-#all 
-module "bfd_server_metrics_all" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "all"
-    partner_regex = "*"
-  }
 }
 
-# bluebutton
-module "bfd_server_metrics_bb" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "bb"
-    partner_regex = "*BlueButton*"
-  }
+module "bfd_server_slo_alarms" {
+  source                   = "../resources/bfd_server_slo_alarms"
+  env                      = var.env_config.env
+  alert_notification_arn   = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+  warning_notification_arn = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
+  ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing.arn
 }
 
-# bcda
-module "bfd_server_metrics_bcda" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "bcda"
-    partner_regex = "*bcda*"
-  }
-}
-
-# dpc
-module "bfd_server_metrics_dpc" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "dpc"
-    partner_regex = "*dpc*"
-  }
-}
-
-# ab2d
-module "bfd_server_metrics_ab2d" {
-  source = "../resources/bfd_server_metrics_txt"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "ab2d"
-    partner_regex = "*ab2d*"
-  }
-}
-
-
-## FHIR server alarms, partner specific
-#
-
-# TODO: Deprecate this alarm in favor of metric math expression to more accurately
-# represet our error budget
-module "bfd_server_alarm_all_500s" {
-  source = "../resources/bfd_server_alarm"
-
-  env = var.env_config.env
-
-  alarm_config = {
-    alarm_name       = "all-500s"
-    partner_name     = "all"
-    metric_prefix    = "http-requests/count-500"
-    eval_periods     = "15"
-    period           = "60"
-    datapoints       = "15"
-    statistic        = "Sum"
-    ext_statistic    = null
-    threshold        = "8.0"
-    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  }
-}
-
-module "bfd_server_alarm_all_eob_6s-p95" {
-  source = "../resources/bfd_server_alarm"
-
-  env = var.env_config.env
-
-  alarm_config = {
-    alarm_name       = "all-eob-6s-p95"
-    partner_name     = "all"
-    metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "15"
-    period           = "60"
-    datapoints       = "15"
-    statistic        = null
-    ext_statistic    = "p95"
-    threshold        = "6000.0" # milliseconds
-    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  }
+module "bfd_server_log_alarms" {
+  source                 = "../resources/bfd_server_log_alarms"
+  env                    = var.env_config.env
+  alarm_notification_arn = local.log_alarms_topic_arns_by_env[var.env_config.env].alarm
+  ok_notification_arn    = local.log_alarms_topic_arns_by_env[var.env_config.env].ok
 }
 
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {
-  source              = "../resources/bfd_cw_dashboards"
-  dashboard_name      = var.dashboard_name
-  dashboard_namespace = var.dashboard_namespace
-  asg                 = module.fhir_asg.asg_id
+  source         = "../resources/bfd_cw_dashboards"
+  dashboard_name = var.dashboard_name
+  env            = var.env_config.env
+}
+
+module "cw_alarms_slack_notifier" {
+  source = "../resources/cw_alarms_slack_notifier"
+  env    = var.env_config.env
+}
+
+module "disk_usage_alarms" {
+  source = "../resources/disk_usage_alarms"
+  env    = var.env_config.env
 }

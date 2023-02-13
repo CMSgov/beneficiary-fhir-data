@@ -2,9 +2,15 @@ package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,45 +23,67 @@ import lombok.Singular;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MappingBean {
+public class MappingBean implements ModelBean {
+  /**
+   * Implementation of {@link Comparator} that can be used to sort mappings by their {@link
+   * MappingBean#id} values.
+   */
+  public static final Comparator<MappingBean> IdComparator =
+      Comparator.comparing(mapping -> Strings.nullToEmpty(mapping.getId()));
+
   /** Unique identifier for the mapping. */
-  private String id;
+  @NotNull @JavaName private String id;
 
   /** Full class name for source message object. */
+  @JavaName(type = JavaNameType.Compound)
   private String messageClassName;
 
   /** Full class name for entity object. */
+  @NotNull
+  @JavaName(type = JavaNameType.Compound)
   private String entityClassName;
 
   /** Full class name for transformer object to be generated. */
+  @JavaName(type = JavaNameType.Compound)
   private String transformerClassName;
 
   /** Defines the type of objects being transformed (either GRPC or CSV). */
-  private SourceType sourceType = SourceType.Grpc;
+  @NotNull private SourceType sourceType = SourceType.Grpc;
 
   /** Defines how nullable values are passed to and from field accessor methods. */
+  @NotNull
   private NullableFieldAccessorType nullableFieldAccessorType = NullableFieldAccessorType.Standard;
 
   /** Meta data for the database table. */
-  private TableBean table;
+  @NotNull @Valid private TableBean table;
 
   /** Minimum valid string length for non-null string fields. */
   @Builder.Default private int minStringLength = 1;
 
   /** Meta data for enum types. */
-  @Singular private List<EnumTypeBean> enumTypes = new ArrayList<>();
+  @NotNull @Singular private List<@Valid EnumTypeBean> enumTypes = new ArrayList<>();
 
   /** Meta data for transformations used to copy data from message to entity. */
-  @Singular private List<TransformationBean> transformations = new ArrayList<>();
-
-  /** Meta data for arrays. */
-  @Singular private List<ArrayBean> arrays = new ArrayList<>();
+  @NotNull @Singular private List<@Valid TransformationBean> transformations = new ArrayList<>();
 
   /** Meta data for any external transformations used in transformer. */
-  @Singular private List<ExternalTransformationBean> externalTransformations = new ArrayList<>();
+  @NotNull @Singular
+  private List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();
 
   /** List of extra interfaces to add to the entity class. */
-  @Singular private List<String> entityInterfaces = new ArrayList<>();
+  @NotNull @Singular
+  private List<@JavaName(type = JavaNameType.Compound) String> entityInterfaces = new ArrayList<>();
+
+  /**
+   * Finds the {@link EnumTypeBean} in this mapping with the given name and returns it.
+   *
+   * @param enumName name of the enum
+   * @return {@link Optional} containing the {@link EnumTypeBean} for the given name if there was
+   *     one, empty otherwise
+   */
+  public Optional<EnumTypeBean> getEnum(String enumName) {
+    return enumTypes.stream().filter(e -> enumName.equals(e.getName())).findAny();
+  }
 
   /**
    * Finds the {@link EnumTypeBean} in this mapping with the given name and returns it.
@@ -65,9 +93,7 @@ public class MappingBean {
    * @throws IllegalArgumentException if no such enum exists
    */
   public EnumTypeBean findEnum(String enumName) {
-    return enumTypes.stream()
-        .filter(e -> enumName.equals(e.getName()))
-        .findAny()
+    return getEnum(enumName)
         .orElseThrow(
             () ->
                 new IllegalArgumentException(
@@ -85,12 +111,12 @@ public class MappingBean {
   }
 
   /**
-   * Determines if any {@code arrays} have been defined.
+   * Determines if any array transformations have been defined.
    *
-   * @return true if one or more {code arrays} have been defined
+   * @return true if one or more array transformations have been defined
    */
-  public boolean hasArrayElements() {
-    return arrays.size() > 0;
+  public boolean hasArrayTransformations() {
+    return transformations.stream().anyMatch(TransformationBean::isArray);
   }
 
   /**
@@ -158,16 +184,48 @@ public class MappingBean {
   }
 
   /**
-   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are not related
-   * to one of the {@link ArrayBean} fields in this {@link MappingBean}.
+   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are associated
+   * with an array transformer.
+   *
+   * @return list of {@link JoinBean}
+   */
+  public List<JoinBean> getArrayJoins() {
+    final Set<String> arrayFields = getArrayFieldNames();
+    return table.getJoins().stream()
+        .filter(j -> arrayFields.contains(j.getFieldName()))
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  /**
+   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are not
+   * associated with an array transformer.
    *
    * @return filtered list of {@link JoinBean}
    */
   public List<JoinBean> getNonArrayJoins() {
-    var arrayFieldNames = arrays.stream().map(ArrayBean::getTo).collect(Collectors.toSet());
+    final Set<String> arrayFields = getArrayFieldNames();
     return table.getJoins().stream()
-        .filter(j -> !arrayFieldNames.contains(j.getFieldName()))
+        .filter(j -> !arrayFields.contains(j.getFieldName()))
         .collect(ImmutableList.toImmutableList());
+  }
+
+  /**
+   * Builds a set of all field names that are referenced by a {@link TransformationBean} whose
+   * {@link TransformationBean#isArray()} method returns true. Intended for use by {@link
+   * #getArrayJoins()} and {@link #getNonArrayJoins()}.
+   *
+   * @return {@link Set} containing all array field names
+   */
+  private Set<String> getArrayFieldNames() {
+    return transformations.stream()
+        .filter(TransformationBean::isArray)
+        .map(TransformationBean::getTo)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public String getDescription() {
+    return "mapping " + id;
   }
 
   /** Enum used to define the type of source objects for the transformations. */

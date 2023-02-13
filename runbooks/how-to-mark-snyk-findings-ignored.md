@@ -1,3 +1,5 @@
+# How to Mark SNYK Findings as Ignored
+
 Follow this runbook to mark a SNYK finding that has been determined not to be a vulnerability or that is considered an
 acceptable risk as 'Ignored' in the [SNYK dashboard](https://app.snyk.io/org/bluebutton-fd-oeda).
 

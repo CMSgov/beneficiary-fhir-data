@@ -34,10 +34,15 @@ import java.util.Optional;
  * which is not what we need.
  */
 public final class PipelineJobRecord<A extends PipelineJobArguments> {
+  /** The pipeline job id. */
   private final PipelineJobRecordId id;
+  /** The pipeline job type. */
   private final PipelineJobType<A> jobType;
+  /** The pipeline job arguments. */
   private final A jobArguments;
+  /** The pipeline job creation time. */
   private final Instant createdTime;
+  /** The pipeline job canceled time. */
   private Optional<Instant> canceledTime;
 
   /**
@@ -68,9 +73,13 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
    */
   private volatile Optional<Instant> enqueuedTime;
 
+  /** The pipeline job start time. */
   private Optional<Instant> startedTime;
+  /** The pipeline job completion time. */
   private Optional<Instant> completedTime;
+  /** The pipeline job outcome (if success). */
   private Optional<PipelineJobOutcome> outcome;
+  /** The pipeline job outcome (if failure). */
   private Optional<PipelineJobFailure> failure;
 
   /**
@@ -94,41 +103,65 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /**
+   * Gets the {@link #id}.
+   *
    * @return the {@link PipelineJobRecordId} that uniquely identifies this {@link PipelineJobRecord}
    */
   public PipelineJobRecordId getId() {
     return id;
   }
 
-  /** @return the {@link PipelineJobType} that this {@link PipelineJobRecord} is for */
+  /**
+   * Gets the {@link #jobType}.
+   *
+   * @return the {@link PipelineJobType} that this {@link PipelineJobRecord} is for
+   */
   public PipelineJobType<A> getJobType() {
     return jobType;
   }
 
   /**
-   * @return the {@link PipelineJobArguments} that the job should be run with, if any (<code>null
-   *     </code> if there are none)
+   * Gets the {@link #jobArguments}.
+   *
+   * @return the {@link PipelineJobArguments} that the job should be run with, if any (<code>
+   *     null     </code> if there are none)
    */
   public A getJobArguments() {
     return jobArguments;
   }
 
-  /** @return the {@link Instant} that this {@link PipelineJobRecord} was created at */
+  /**
+   * Gets the {@link #createdTime}.
+   *
+   * @return the {@link Instant} that this {@link PipelineJobRecord} was created at
+   */
   public Instant getCreatedTime() {
     return createdTime;
   }
 
-  /** @return the {@link Instant} that this job was canceled at, if any */
+  /**
+   * Gets the {@link #canceledTime}.
+   *
+   * @return the {@link Instant} that this job was canceled at, if any
+   */
   public Optional<Instant> getCanceledTime() {
     return canceledTime;
   }
 
-  /** @return <code>true</code> if the job has been canceled, <code>false</code> if it has not */
+  /**
+   * Determines if the job has been cancelled.
+   *
+   * @return <code>true</code> if the job has been canceled, <code>false</code> if it has not
+   */
   public boolean isCanceled() {
     return canceledTime.isPresent();
   }
 
-  /** @param canceledTime the value to set {@link #getCanceledTime()} to */
+  /**
+   * Sets the {@link #canceledTime}.
+   *
+   * @param canceledTime the value to set {@link #getCanceledTime()} to
+   */
   public void setCanceledTime(Instant canceledTime) {
     if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
     if (this.completedTime.isPresent()) throw new BadCodeMonkeyException();
@@ -136,12 +169,20 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
     this.canceledTime = Optional.of(canceledTime);
   }
 
-  /** @return the {@link Instant} that this job was enqueued to an executor for execution, if any */
+  /**
+   * Gets the {@link #enqueuedTime}.
+   *
+   * @return the {@link Instant} that this job was enqueued to an executor for execution, if any
+   */
   public Optional<Instant> getEnqueuedTime() {
     return enqueuedTime;
   }
 
-  /** @param enqueuedTime the value to set {@link #getEnqueuedTime()} to */
+  /**
+   * Sets the {@link #enqueuedTime}.
+   *
+   * @param enqueuedTime the value to set {@link #getEnqueuedTime()} to
+   */
   public void setEnqueuedTime(Instant enqueuedTime) {
     // Validate the state transition.
     if (this.enqueuedTime.isPresent()) throw new BadCodeMonkeyException();
@@ -152,22 +193,38 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
     this.enqueuedTime = Optional.of(enqueuedTime);
   }
 
-  /** @return <code>true</code> if this job has been enqueued, <code>false</code> if it has not */
+  /**
+   * Determines if this job has been enqueued.
+   *
+   * @return <code>true</code> if this job has been enqueued, <code>false</code> if it has not
+   */
   public boolean isEnqueued() {
     return enqueuedTime.isPresent();
   }
 
-  /** @return the {@link Instant} that this job started running at, if any */
+  /**
+   * Gets the {@link #startedTime}.
+   *
+   * @return the {@link Instant} that this job started running at, if any
+   */
   public Optional<Instant> getStartedTime() {
     return startedTime;
   }
 
-  /** @return <code>true</code> if this job has started running, <code>false</code> if it has not */
+  /**
+   * Determines if the job has been started.
+   *
+   * @return <code>true</code> if this job has started running, <code>false</code> if it has not
+   */
   public boolean isStarted() {
     return startedTime.isPresent();
   }
 
-  /** @param startedTime the value to set {@link #getStartedTime()} to */
+  /**
+   * Sets the {@link #startedTime}.
+   *
+   * @param startedTime the value to set {@link #getStartedTime()} to
+   */
   public void setStartedTime(Instant startedTime) {
     if (!this.enqueuedTime.isPresent()) throw new BadCodeMonkeyException();
     if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
@@ -177,12 +234,18 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
     this.startedTime = Optional.of(startedTime);
   }
 
-  /** @return the {@link Instant} that this job completed at, if any */
+  /**
+   * Gets the {@link #completedTime}.
+   *
+   * @return the {@link Instant} that this job completed at, if any
+   */
   public Optional<Instant> getCompletedTime() {
     return completedTime;
   }
 
   /**
+   * Determines if the job is completed (success or failure).
+   *
    * @return <code>true</code> if the job has completed (either successfully or with a failure),
    *     <code>false</code> if it has not
    */
@@ -191,6 +254,8 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /**
+   * Gets the duration of the job if complete.
+   *
    * @return a {@link Duration} representing how long the job ran for, or {@link Optional#empty()}
    *     if it hasn't started or completed
    */
@@ -205,6 +270,8 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /**
+   * Gets the {@link #outcome}.
+   *
    * @return the {@link PipelineJobOutcome} for this job if it has completed successfully, or {@link
    *     Optional#empty()} if it is either as-yet-incomplete or if it failed (in which case, {@link
    *     #getFailure()} will have a value)
@@ -214,6 +281,8 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /**
+   * Gets the {@link #failure}.
+   *
    * @return the {@link PipelineJobFailure} for this job if it has completed with a failure, or
    *     {@link Optional#empty()} if it is either as-yet-incomplete or if it succeeded (in which
    *     case, {@link #getOutcome()} will have a value)
@@ -223,6 +292,8 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /**
+   * Determines if the job completed successfully.
+   *
    * @return <code>true</code> if {@link #getOutcome()} is present, <code>false</code> if it's not
    */
   public boolean isCompletedSuccessfully() {
@@ -261,7 +332,7 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
     this.failure = Optional.of(failure);
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

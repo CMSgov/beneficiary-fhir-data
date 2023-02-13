@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -15,6 +16,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +30,13 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
 public final class DMEClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
+   * Verifies that {@link DMEClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     DMEClaim claim =
@@ -50,7 +51,8 @@ public final class DMEClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob, Optional.of(true));
   }
@@ -64,7 +66,9 @@ public final class DMEClaimTransformerTest {
    *     DMEClaim}@param includedTaxNumbers whether or not to include tax numbers are expected to be
    *     included in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   * false</code>)
+   * @param includedTaxNumbers the value for IncludeTaxNumbers in the request to inform the expected
+   *     result
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(

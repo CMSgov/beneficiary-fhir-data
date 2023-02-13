@@ -16,12 +16,19 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 
 /** Supplies test data for the RDA based unit tests. */
@@ -39,13 +46,23 @@ public class RDATestUtils {
           RdaMcsClaim.class,
           Mbi.class);
 
+  /** Path to use for persistence units. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+  /** Test mbi. */
   public static final String MBI = "123456MBI";
+  /** Test mbi hash. */
   public static final String MBI_HASH = "a7f8e93f09";
+  /** Test mbi has (old). */
   public static final String MBI_OLD_HASH = "3816a4c752";
+  /** Test fiss claim (DCN). */
+  public static final String FISS_CLAIM_A_DCN = "123456";
+  /** Test fiss claim (DCN). */
+  public static final String FISS_CLAIM_B_DCN = "123457";
 
+  /** The entity manager. */
   private EntityManager entityManager;
 
+  /** Initializes the test utility. */
   public void init() {
     final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
 
@@ -57,17 +74,27 @@ public class RDATestUtils {
             .createEntityManager();
   }
 
+  /** Closes all resources. */
   public void destroy() {
     if (entityManager != null) {
       entityManager.close();
     }
   }
 
+  /**
+   * Gets the {@link #entityManager}.
+   *
+   * @return the entity manager
+   */
   public EntityManager getEntityManager() {
     return entityManager;
   }
 
-  /** Seed data into the database for testing. */
+  /**
+   * Seed data into the database for testing.
+   *
+   * @param includeOldHash whether to include the old hash
+   */
   public void seedData(boolean includeOldHash) {
     doTransaction(
         em -> {
@@ -78,6 +105,12 @@ public class RDATestUtils {
           em.merge(mcsTestDataA(mbi));
           em.merge(mcsTestDataB(mbi));
         });
+  }
+
+  /** Inserts an MBI cache record for use with test case claims. */
+  public void seedMbiRecord() {
+    final var mbi = Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(MBI_OLD_HASH).build();
+    doTransaction(em -> em.merge(mbi));
   }
 
   /** Delete all the test data from the db. */
@@ -130,33 +163,36 @@ public class RDATestUtils {
   }
 
   /**
-   * One FISS claim for testing
+   * One FISS claim for testing.
    *
+   * @param mbi the mbi
    * @return The FISS test claim A
    */
   private RdaFissClaim fissTestDataA(Mbi mbi) {
+    final var lastUpdated = LocalDateTime.of(1970, 8, 1, 0, 0, 0).toInstant(ZoneOffset.UTC);
     RdaFissClaim claim =
         RdaFissClaim.builder()
             .sequenceNumber(1L)
-            .dcn("123456")
+            .dcn(FISS_CLAIM_A_DCN)
             .hicNo("hicnumber")
             .currStatus('a')
             .currLoc1('z')
             .currLoc2("Somda")
             .medaProvId("meda12345")
+            .medaProv_6("meda12")
             .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1234.32"))
-            .receivedDate(LocalDate.ofEpochDay(0))
-            .currTranDate(LocalDate.ofEpochDay(1))
+            .receivedDate(LocalDate.of(1970, 1, 1))
+            .currTranDate(LocalDate.of(1970, 1, 2))
             .admitDiagCode("admitcd")
             .principleDiag("princcd")
             .npiNumber("8876543211")
             .mbiRecord(mbi)
             .fedTaxNumber("abc123")
             .lobCd("r")
-            .lastUpdated(Instant.ofEpochMilli(0))
-            .stmtCovFromDate(LocalDate.ofEpochDay(190))
-            .stmtCovToDate(LocalDate.ofEpochDay(200))
+            .lastUpdated(lastUpdated)
+            .stmtCovFromDate(LocalDate.of(1970, 7, 10))
+            .stmtCovToDate(LocalDate.of(1970, 7, 20))
             .servTypeCd("A")
             .freqCd("C")
             .build();
@@ -164,38 +200,36 @@ public class RDATestUtils {
     Set<RdaFissProcCode> procCodes =
         Set.of(
             RdaFissProcCode.builder()
-                .dcn("123456")
-                .priority((short) 0)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 1)
                 .procCode("CODEABC")
                 .procFlag("FLAG")
-                .procDate(LocalDate.ofEpochDay(200))
-                .lastUpdated(Instant.ofEpochMilli(0))
+                .procDate(LocalDate.of(1970, 7, 20))
                 .build(),
             RdaFissProcCode.builder()
-                .dcn("123456")
-                .priority((short) 1)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 2)
                 .procCode("CODECBA")
                 .procFlag("FLA2")
-                .lastUpdated(Instant.ofEpochMilli(0))
                 .build());
 
     Set<RdaFissDiagnosisCode> diagnosisCodes =
         Set.of(
             RdaFissDiagnosisCode.builder()
-                .dcn("123456")
-                .priority((short) 0)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 1)
                 .diagCd2("admitcd")
                 .diagPoaInd("Z")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn("123456")
-                .priority((short) 1)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 2)
                 .diagCd2("other")
                 .diagPoaInd("U")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn("123456")
-                .priority((short) 2)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 3)
                 .diagCd2("princcd")
                 .diagPoaInd("n")
                 .build());
@@ -203,8 +237,8 @@ public class RDATestUtils {
     Set<RdaFissPayer> payers =
         Set.of(
             RdaFissPayer.builder()
-                .dcn("123456")
-                .priority((short) 0)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 1)
                 .beneFirstName("jim")
                 .beneMidInit("k")
                 .beneLastName("baker")
@@ -214,8 +248,8 @@ public class RDATestUtils {
                 .payersName("MEDICARE")
                 .build(),
             RdaFissPayer.builder()
-                .dcn("123456")
-                .priority((short) 1)
+                .dcn(FISS_CLAIM_A_DCN)
+                .rdaPosition((short) 2)
                 .insuredName("BAKER  JIM  K")
                 .payerType(RdaFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
@@ -229,15 +263,17 @@ public class RDATestUtils {
   }
 
   /**
-   * One FISS claim for testing
+   * One FISS claim for testing.
    *
+   * @param mbi the mbi
    * @return The FISS test claim B
    */
   private RdaFissClaim fissTestDataB(Mbi mbi) {
+    final var lastUpdated = LocalDateTime.of(1970, 8, 7, 0, 0, 0).toInstant(ZoneOffset.UTC);
     RdaFissClaim claim =
         RdaFissClaim.builder()
             .sequenceNumber(2L)
-            .dcn("123457")
+            .dcn(FISS_CLAIM_B_DCN)
             .hicNo("hicnumbe2")
             .currStatus('\0')
             .currLoc1('r')
@@ -245,17 +281,17 @@ public class RDATestUtils {
             .medaProvId("meda12346")
             .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1235.32"))
-            .receivedDate(LocalDate.ofEpochDay(8))
-            .currTranDate(LocalDate.ofEpochDay(12))
+            .receivedDate(LocalDate.of(1970, 1, 9))
+            .currTranDate(LocalDate.of(1970, 1, 13))
             .admitDiagCode("admitcc")
             .principleDiag("princcc")
             .npiNumber("8876543212")
             .mbiRecord(mbi)
             .fedTaxNumber("abc124")
             .lobCd("k")
-            .lastUpdated(Instant.ofEpochMilli(5000))
-            .stmtCovFromDate(LocalDate.ofEpochDay(209))
-            .stmtCovToDate(LocalDate.ofEpochDay(211))
+            .lastUpdated(lastUpdated)
+            .stmtCovFromDate(LocalDate.of(1970, 7, 30))
+            .stmtCovToDate(LocalDate.of(1970, 8, 3))
             .servTypeCd("A")
             .freqCd("C")
             .build();
@@ -263,31 +299,30 @@ public class RDATestUtils {
     Set<RdaFissProcCode> procCodes =
         Set.of(
             RdaFissProcCode.builder()
-                .dcn("123457")
-                .priority((short) 0)
+                .dcn(FISS_CLAIM_B_DCN)
+                .rdaPosition((short) 1)
                 .procCode("CODEABD")
                 .procFlag("FLAC")
-                .procDate(LocalDate.ofEpochDay(211))
-                .lastUpdated(Instant.ofEpochMilli(5000))
+                .procDate(LocalDate.of(1970, 7, 31))
                 .build());
 
     Set<RdaFissDiagnosisCode> diagnosisCodes =
         Set.of(
             RdaFissDiagnosisCode.builder()
-                .dcn("123457")
-                .priority((short) 0)
+                .dcn(FISS_CLAIM_B_DCN)
+                .rdaPosition((short) 1)
                 .diagCd2("princcc")
                 .diagPoaInd("Y")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn("123457")
-                .priority((short) 1)
+                .dcn(FISS_CLAIM_B_DCN)
+                .rdaPosition((short) 2)
                 .diagCd2("other2")
                 .diagPoaInd("w")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn("123457")
-                .priority((short) 2)
+                .dcn(FISS_CLAIM_B_DCN)
+                .rdaPosition((short) 3)
                 .diagCd2("admitcc")
                 .diagPoaInd("1")
                 .build());
@@ -295,8 +330,8 @@ public class RDATestUtils {
     Set<RdaFissPayer> payers =
         Set.of(
             RdaFissPayer.builder()
-                .dcn("123457")
-                .priority((short) 0)
+                .dcn(FISS_CLAIM_B_DCN)
+                .rdaPosition((short) 1)
                 .beneFirstName("alice")
                 .beneMidInit("r")
                 .beneLastName("smith")
@@ -306,8 +341,8 @@ public class RDATestUtils {
                 .payersName("MEDICARE")
                 .build(),
             RdaFissPayer.builder()
-                .dcn("123457")
-                .priority((short) 1)
+                .dcn(FISS_CLAIM_B_DCN)
+                .rdaPosition((short) 2)
                 .insuredName("SMITH  ALICE  R")
                 .payerType(RdaFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
@@ -321,8 +356,9 @@ public class RDATestUtils {
   }
 
   /**
-   * One MCS claim for testing
+   * One MCS claim for testing.
    *
+   * @param mbi the mbi
    * @return The MCS test claim A
    */
   private RdaMcsClaim mcsTestDataA(Mbi mbi) {
@@ -339,7 +375,7 @@ public class RDATestUtils {
             .idrBeneMidInit("D")
             .idrBeneSex("M")
             .idrStatusCode("5")
-            .idrStatusDate(LocalDate.ofEpochDay(191))
+            .idrStatusDate(LocalDate.of(1970, 7, 11))
             .idrBillProvNpi("9876789102")
             .idrBillProvNum("4444422222")
             .idrBillProvEin("1231231231")
@@ -354,44 +390,43 @@ public class RDATestUtils {
             .idrDeductible(new BigDecimal("23.00"))
             .idrBillProvStatusCd("Z")
             .idrTotBilledAmt(new BigDecimal("23.00"))
-            .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
+            .idrClaimReceiptDate(LocalDate.of(1970, 2, 24))
             .mbiRecord(mbi)
-            .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(208))
-            .idrHdrToDateOfSvc(LocalDate.ofEpochDay(210))
+            .idrHdrFromDateOfSvc(LocalDate.of(1970, 7, 28))
+            .idrHdrToDateOfSvc(LocalDate.of(1970, 7, 30))
             .lastUpdated(Instant.ofEpochMilli(4000))
             .build();
 
-    Set<RdaMcsDetail> procCodes =
+    Set<RdaMcsDetail> details =
         Set.of(
             RdaMcsDetail.builder()
-                .priority((short) 0)
+                .idrDtlNumber((short) 1)
                 .idrClmHdIcn("654321")
-                .idrDtlToDate(LocalDate.ofEpochDay(208))
+                .idrDtlToDate(LocalDate.of(1970, 7, 30))
                 .idrProcCode("FDSAE")
+                .idrDtlPrimaryDiagCode("HF3IJIF")
                 .idrModOne("A")
                 .build(),
             RdaMcsDetail.builder()
-                .priority((short) 1)
+                .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654321")
-                .idrProcCode("FDAAA")
                 .idrModTwo("B")
                 .build());
 
-    claim.setDetails(procCodes);
+    claim.setDetails(details);
 
     claim.setDiagCodes(
         Set.of(
-            new RdaMcsDiagnosisCode(
-                "654321", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
-            new RdaMcsDiagnosisCode(
-                "654321", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+            new RdaMcsDiagnosisCode("654321", (short) 1, "0", "HF3IJIF"),
+            new RdaMcsDiagnosisCode("654321", (short) 2, "9", "HF3IJIG")));
 
     return claim;
   }
 
   /**
-   * One MCS claim for testing
+   * One MCS claim for testing.
    *
+   * @param mbi the mbi
    * @return The MCS test claim B
    */
   private RdaMcsClaim mcsTestDataB(Mbi mbi) {
@@ -409,7 +444,7 @@ public class RDATestUtils {
             .idrBeneMidInit("D")
             .idrBeneSex("M")
             .idrStatusCode(NOT_VALID_CODE)
-            .idrStatusDate(LocalDate.ofEpochDay(2))
+            .idrStatusDate(LocalDate.of(1970, 1, 3))
             .idrBillProvNpi("9876789102")
             .idrBillProvNum("4444422222")
             .idrBillProvEin("1231231231")
@@ -424,38 +459,127 @@ public class RDATestUtils {
             .idrDeductible(new BigDecimal("11.00"))
             .idrBillProvStatusCd(null)
             .idrTotBilledAmt(new BigDecimal("23.00"))
-            .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
+            .idrClaimReceiptDate(LocalDate.of(1970, 2, 24))
             .mbiRecord(mbi)
-            .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(198))
-            .idrHdrToDateOfSvc(LocalDate.ofEpochDay(200))
+            .idrHdrFromDateOfSvc(LocalDate.of(1970, 7, 18))
+            .idrHdrToDateOfSvc(LocalDate.of(1970, 7, 20))
             .lastUpdated(Instant.ofEpochMilli(4000))
             .build();
 
-    Set<RdaMcsDetail> procCodes =
+    Set<RdaMcsDetail> details =
         Set.of(
             RdaMcsDetail.builder()
-                .priority((short) 0)
+                .idrDtlNumber((short) 1)
                 .idrClmHdIcn("654323")
-                .idrDtlToDate(LocalDate.ofEpochDay(208))
+                .idrDtlToDate(LocalDate.of(1970, 7, 28))
                 .idrProcCode("FDSAE")
                 .idrModOne("A")
                 .build(),
             RdaMcsDetail.builder()
-                .priority((short) 1)
+                .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654323")
                 .idrProcCode("FDAAA")
                 .idrModTwo("B")
                 .build());
 
-    claim.setDetails(procCodes);
+    claim.setDetails(details);
 
     claim.setDiagCodes(
         Set.of(
-            new RdaMcsDiagnosisCode(
-                "654323", (short) 0, (short) 1, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
-            new RdaMcsDiagnosisCode(
-                "654323", (short) 1, (short) 2, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+            new RdaMcsDiagnosisCode("654323", (short) 1, "0", "HF3IJIF"),
+            new RdaMcsDiagnosisCode("654323", (short) 2, "9", "HF3IJIG")));
 
     return claim;
+  }
+
+  /**
+   * Writes a single {@link RdaMcsClaim} record and associated details based on the given criteria.
+   *
+   * @param claimId value for {@link RdaMcsClaim#getIdrClmHdIcn}
+   * @param lastUpdated value for {@link RdaMcsClaim#getLastUpdated} as a date
+   * @param claimServiceDate value for {@link RdaMcsClaim#getIdrHdrToDateOfSvc}
+   * @param detailServiceDates values for {@link RdaMcsDetail} record {@link
+   *     RdaMcsDetail#getIdrDtlToDate}
+   */
+  public void seedMcsClaimForServiceIdTest(
+      String claimId,
+      LocalDate lastUpdated,
+      LocalDate claimServiceDate,
+      List<LocalDate> detailServiceDates) {
+    final String NOT_VALID_CODE = "?";
+    RdaMcsClaim claim =
+        RdaMcsClaim.builder()
+            .sequenceNumber(1L)
+            .idrClmHdIcn(claimId)
+            .idrContrId("contr")
+            .idrHic("HicValue")
+            .idrClaimType("R")
+            .idrDtlCnt(56)
+            .idrBeneLast_1_6("SMITH")
+            .idrBeneFirstInit("J")
+            .idrBeneMidInit("D")
+            .idrBeneSex("M")
+            .idrStatusCode(NOT_VALID_CODE)
+            .idrStatusDate(LocalDate.of(1970, 1, 3))
+            .idrBillProvNpi("9876789102")
+            .idrBillProvNum("4444422222")
+            .idrBillProvEin("1231231231")
+            .idrBillProvType("AB")
+            .idrBillProvSpec("BA")
+            .idrBillProvGroupInd("A")
+            .idrBillProvPriceSpec("FF")
+            .idrBillProvCounty("GG")
+            .idrBillProvLoc("HH")
+            .idrTotAllowed(new BigDecimal("224.41"))
+            .idrCoinsurance(new BigDecimal("14.32"))
+            .idrDeductible(new BigDecimal("11.00"))
+            .idrBillProvStatusCd(null)
+            .idrTotBilledAmt(new BigDecimal("23.00"))
+            .idrClaimReceiptDate(LocalDate.of(1970, 2, 24))
+            .lastUpdated(lastUpdated.atTime(12, 0, 0).toInstant(ZoneOffset.UTC))
+            .idrHdrToDateOfSvc(claimServiceDate)
+            .build();
+
+    var index = new AtomicInteger(1);
+    Set<RdaMcsDetail> details =
+        detailServiceDates.stream()
+            .map(
+                serviceDate ->
+                    RdaMcsDetail.builder()
+                        .idrDtlNumber((short) index.getAndIncrement())
+                        .idrClmHdIcn(claimId)
+                        .idrDtlToDate(serviceDate)
+                        .idrProcCode("FDSAE")
+                        .idrModOne("A")
+                        .build())
+            .collect(Collectors.toSet());
+
+    claim.setDetails(details);
+
+    claim.setDiagCodes(
+        Set.of(
+            new RdaMcsDiagnosisCode(claimId, (short) 1, "0", "HF3IJIF"),
+            new RdaMcsDiagnosisCode(claimId, (short) 2, "1", "HF3IJIG")));
+
+    doTransaction(
+        em -> {
+          Mbi mbi = lookupTestMbiRecord(em);
+          claim.setMbiRecord(mbi);
+          em.merge(claim);
+        });
+  }
+
+  /**
+   * Used to look up the {@link Mbi} value that we wrote to the database in an earlier transaction.
+   *
+   * @param em our {@link EntityManager}
+   * @return the {@link Mbi}
+   */
+  private Mbi lookupTestMbiRecord(EntityManager em) {
+    final CriteriaBuilder builder = em.getCriteriaBuilder();
+    final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+    final Root<Mbi> root = criteria.from(Mbi.class);
+    criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), MBI));
+    return em.createQuery(criteria).getSingleResult();
   }
 }

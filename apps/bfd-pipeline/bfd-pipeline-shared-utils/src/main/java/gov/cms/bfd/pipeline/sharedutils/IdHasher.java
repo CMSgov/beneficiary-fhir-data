@@ -19,16 +19,24 @@ import org.apache.commons.codec.binary.Hex;
  * from RifLoader.
  */
 public class IdHasher {
-  /*
-   * Bigger is better here as it reduces chances of collisions, but
-   * the equivalent Python Django hashing functions used by the
-   * frontend default to this value, so we'll go with it.
+  /**
+   * Key length for hashing.
+   *
+   * <p>Bigger is better here as it reduces chances of collisions, but the equivalent Python Django
+   * hashing functions used by the frontend default to this value, so we'll go with it.
    */
   public static final int DERIVED_KEY_LENGTH = 256;
 
+  /** The configuration. */
   @Getter private final Config config;
+  /** The factory for generating secret keys. */
   private final SecretKeyFactory secretKeyFactory;
 
+  /**
+   * Instantiates a new {@link IdHasher}.
+   *
+   * @param config the config for the hasher
+   */
   public IdHasher(Config config) {
     this.config = config;
     secretKeyFactory = createSecretKeyFactory();
@@ -65,7 +73,11 @@ public class IdHasher {
     }
   }
 
-  /** @return a new {@link SecretKeyFactory} for the <code>PBKDF2WithHmacSHA256</code> algorithm */
+  /**
+   * Creates a secret key factory.
+   *
+   * @return a new {@link SecretKeyFactory} for the <code>PBKDF2WithHmacSHA256</code> algorithm
+   */
   private SecretKeyFactory createSecretKeyFactory() {
     try {
       return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -79,20 +91,41 @@ public class IdHasher {
   @AllArgsConstructor
   public static class Config implements Serializable {
     private static final long serialVersionUID = 4911655334835485L;
+    /** The default cache size. */
     private static final int DEFAULT_CACHE_SIZE = 100;
 
+    /** The number of hash iterations to use. */
     @Getter private final int hashIterations;
+    /** The hash pepper. */
     private final byte[] hashPepper;
+    /** The cache size. */
     @Builder.Default @Getter private final int cacheSize = DEFAULT_CACHE_SIZE;
 
+    /**
+     * Instantiates a new Config.
+     *
+     * @param hashIterations the hash iterations
+     * @param hashPepper the hash pepper
+     */
     public Config(int hashIterations, byte[] hashPepper) {
       this(hashIterations, hashPepper, DEFAULT_CACHE_SIZE);
     }
 
+    /**
+     * Instantiates a new Config.
+     *
+     * @param hashIterations the hash iterations
+     * @param hashPepper the hash pepper
+     */
     public Config(int hashIterations, String hashPepper) {
       this(hashIterations, hashPepper.getBytes(StandardCharsets.UTF_8), DEFAULT_CACHE_SIZE);
     }
 
+    /**
+     * Gets the {@link #hashPepper}.
+     *
+     * @return a clone of the hash pepper
+     */
     public byte[] getHashPepper() {
       // arrays aren't immutable so it's safest to return a copy
       return hashPepper.clone();
@@ -103,8 +136,15 @@ public class IdHasher {
      * builder. We just need to add extra method for setting the hashPepper as either a string.
      */
     public static class ConfigBuilder {
+      /** The hash pepper. */
       private byte[] hashPepper;
 
+      /**
+       * Uses the hash pepper string to construct a new config builder with that value.
+       *
+       * @param hashPepper the hash pepper
+       * @return the config builder
+       */
       public ConfigBuilder hashPepperString(String hashPepper) {
         this.hashPepper = hashPepper.getBytes(StandardCharsets.UTF_8);
         return this;

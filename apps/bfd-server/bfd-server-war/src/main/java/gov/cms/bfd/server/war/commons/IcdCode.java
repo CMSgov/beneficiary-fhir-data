@@ -11,6 +11,10 @@ public abstract class IcdCode {
   /** The {@link Coding#getSystem()} used for ICD-9 diagnosis codes. */
   public static final String CODING_SYSTEM_ICD_9 = "http://hl7.org/fhir/sid/icd-9-cm";
 
+  /** The {@link Coding#getSystem()} used for ICD-9 medicare codes. */
+  public static final String CODING_SYSTEM_ICD_9_MEDICARE =
+      "http://www.cms.gov/Medicare/Coding/ICD9";
+
   /** The {@link Coding#getSystem()} used for ICD-10 diagnosis codes. */
   public static final String CODING_SYSTEM_ICD_10 = "http://hl7.org/fhir/sid/icd-10";
 
@@ -21,7 +25,14 @@ public abstract class IcdCode {
   public static final String CODING_SYSTEM_ICD_10_MEDICARE =
       "http://www.cms.gov/Medicare/Coding/ICD10";
 
+  /** The ICD code. */
   private final String icdCode;
+  /**
+   * The CCW encoding (per <a href=
+   * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
+   * CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
+   * version.
+   */
   private final Character icdVersionCode;
 
   /**
@@ -42,6 +53,9 @@ public abstract class IcdCode {
   }
 
   /**
+   * Determines if the input {@link CodeableConcept} contains a {@link Coding} that matches this
+   * {@link IcdCode}.
+   *
    * @param codeableConcept the {@link CodeableConcept} to check
    * @return <code>true</code> if the specified {@link CodeableConcept} contains a {@link Coding}
    *     that matches this {@link IcdCode}, <code>false</code> if not
@@ -54,7 +68,11 @@ public abstract class IcdCode {
         != 0;
   }
 
-  /** @return a {@link CodeableConcept} that contains this {@link IcdCode} */
+  /**
+   * Creates a {@link CodeableConcept} that contains this {@link IcdCode}.
+   *
+   * @return the new {@link CodeableConcept}
+   */
   public CodeableConcept toCodeableConcept() {
     CodeableConcept codeableConcept = new CodeableConcept();
     Coding coding = codeableConcept.addCoding();
@@ -68,19 +86,29 @@ public abstract class IcdCode {
     return codeableConcept;
   }
 
-  /** @return the ICD code textual value */
+  /**
+   * Gets the {@link #icdCode}.
+   *
+   * @return the ICD code textual value
+   */
   public String getCode() {
     return icdCode;
   }
 
-  /** @return the version of this {@link IcdCode} */
+  /**
+   * Gets the {@link #icdVersionCode}.
+   *
+   * @return the version of this {@link IcdCode}
+   */
   public Character getVersion() {
     return icdVersionCode;
   }
 
   /**
-   * @return the <a href= "https://www.hl7.org/fhir/terminologies-systems.html"> FHIR Coding
-   *     system</a> value for this {@link IcdCode}' {@link #icdVersionCode} value
+   * Gets the the <a href= "https://www.hl7.org/fhir/terminologies-systems.html"> FHIR Coding
+   * system</a> value for this {@link IcdCode}' {@link #icdVersionCode} value.
+   *
+   * @return the fhir coding system value
    */
   public String getFhirSystem() {
     String system;

@@ -7,12 +7,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -34,6 +35,12 @@ import org.slf4j.LoggerFactory;
  * </ol>
  */
 public class DirectRdaLoadApp {
+  /**
+   * Sets up the database options to use, the pipeline to use, and creates the pipeline job for RDA.
+   *
+   * @param args that are passed in
+   * @throws Exception if the pipeline encounters a problem loading or reading
+   */
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.err.printf("usage: %s configfile claimType%n", DirectRdaLoadApp.class.getSimpleName());
@@ -61,6 +68,7 @@ public class DirectRdaLoadApp {
     System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
     try (PipelineApplicationState appState =
         new PipelineApplicationState(
+            new SimpleMeterRegistry(),
             metrics,
             pooledDataSource,
             PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
@@ -78,6 +86,14 @@ public class DirectRdaLoadApp {
     }
   }
 
+  /**
+   * Create a job for the pipeline with the correct claim type of fiss or mcs.
+   *
+   * @param jobConfig the config to use
+   * @param appState sets the state for the pipeline
+   * @param claimType whether to use fiss or mcs claims
+   * @return the pipeline job for mcs or fiss
+   */
   private static Optional<PipelineJob<?>> createPipelineJob(
       RdaLoadOptions jobConfig, PipelineApplicationState appState, String claimType) {
     switch (claimType.toLowerCase()) {
@@ -90,6 +106,13 @@ public class DirectRdaLoadApp {
     }
   }
 
+  /**
+   * This sets up the database options of db url, user, password, and max connections.
+   *
+   * @param options the database options to set
+   * @param threadCount the number of threads to use
+   * @return the database options
+   */
   private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
     return new DatabaseOptions(
         options.stringValue("database.url", null),
@@ -98,6 +121,12 @@ public class DirectRdaLoadApp {
         options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)));
   }
 
+  /**
+   * Reads and sets the rda options to load from a config file.
+   *
+   * @param options the config options to use
+   * @return the rda confic load options
+   */
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(ConfigLoader options) {
     final IdHasher.Config idHasherConfig =
         new IdHasher.Config(
@@ -110,14 +139,14 @@ public class DirectRdaLoadApp {
             .writeThreads(options.intValue("job.writeThreads", 1));
     options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
     options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
-    final GrpcRdaSource.Config grpcConfig =
-        GrpcRdaSource.Config.builder()
-            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+    final RdaSourceConfig grpcConfig =
+        RdaSourceConfig.builder()
+            .serverType(RdaSourceConfig.ServerType.Remote)
             .host(options.stringValue("api.host", "localhost"))
             .port(options.intValue("api.port", 5003))
             .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
             .build();
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, new RdaServerJob.Config(), idHasherConfig);
+        jobConfig.build(), grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
   }
 }

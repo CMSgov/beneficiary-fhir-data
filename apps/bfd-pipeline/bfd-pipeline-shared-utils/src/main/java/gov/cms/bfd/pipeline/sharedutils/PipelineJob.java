@@ -16,16 +16,20 @@ import java.util.concurrent.Callable;
  */
 public interface PipelineJob<A extends PipelineJobArguments> extends Callable<PipelineJobOutcome> {
   /**
-   * @return the {@link PipelineJobType} that uniquely identifies this {@link PipelineJob}
-   *     implementation
+   * Gets the {@link PipelineJobType} that uniquely identifies this {@link PipelineJob}
+   * implementation.
+   *
+   * @return the pipeline job type
    */
   default PipelineJobType<A> getType() {
     return new PipelineJobType<>(this);
   }
 
   /**
-   * @return the schedule to run this {@link PipelineJob} on, if any, or {@link Optional#empty()} if
-   *     the {@link PipelineJob} should not be run on a schedule
+   * Gets the schedule to run this {@link PipelineJob} on.
+   *
+   * @return the schedule if any, or {@link Optional#empty()} if the {@link PipelineJob} should not
+   *     be run on a schedule
    */
   Optional<PipelineJobSchedule> getSchedule();
 
@@ -49,6 +53,18 @@ public interface PipelineJob<A extends PipelineJobArguments> extends Callable<Pi
    *     (via {@link Thread#interrupt()}, <code>false</code> if it's not
    */
   boolean isInterruptible();
+
+  /**
+   * Perform a job-specific smoke test and returns true if the test was successful. A failed test
+   * indicates that the job cannot proceed and should not be scheduled. The default implementation
+   * simply returns true.
+   *
+   * @return true if the test passed, false otherwise
+   * @throws Exception test can pass through uncaught exceptions for reporting by the pipeline app
+   */
+  default boolean isSmokeTestSuccessful() throws Exception {
+    return true;
+  }
 
   /**
    * Each scheduled/triggered execution of this {@link PipelineJob}, the job orchestrator will run

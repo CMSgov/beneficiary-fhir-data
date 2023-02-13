@@ -1,0 +1,45 @@
+mappings:
+  - id:    
+    table:
+      name:
+      primaryKeyColumns:
+        -
+      equalsColumns:
+        -
+      columns:
+        - name:
+          dbName:
+          javaType:
+          javaAccessorType:
+          enumType:
+      joins:
+        - fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+        - class: parent
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+        - class: child
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+        - class: array
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+    enumTypes:
+      - name:
+        values:
+          - BeneZ
+          -
+    transformations:
+      - from:
+        to:
+        transformer:
+    externalTransformations:
+      -

@@ -18,7 +18,7 @@
         "resourceType": "ClaimResponse",
         "id": "f-123456",
         "meta": {
-          "lastUpdated": "1970-01-01T00:00:00.000+00:00"
+          "lastUpdated": "1970-08-01T00:00:00.000+00:00"
         },
         "contained": [
           {
@@ -41,6 +41,7 @@
             ],
             "name": [
               {
+                "text": "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
                 "family": "baker",
                 "given": [
                   "jim",
@@ -63,6 +64,10 @@
           {
             "url": "https://bluebutton.cms.gov/resources/variables/fiss/recd-dt-cymd",
             "valueDate": "1970-01-01"
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-tran-dt-cymd",
+            "valueDate": "1970-01-02"
           }
         ],
         "identifier": [
@@ -76,7 +81,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
             "value": "123456"
           }
         ],
@@ -134,7 +139,8 @@
             ],
             "name": [
               {
-                "family": "S.",
+                "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+                "family": "SMITH",
                 "given": [
                   "J.",
                   "D."
@@ -172,7 +178,7 @@
                 }
               ]
             },
-            "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
             "value": "654323"
           }
         ],

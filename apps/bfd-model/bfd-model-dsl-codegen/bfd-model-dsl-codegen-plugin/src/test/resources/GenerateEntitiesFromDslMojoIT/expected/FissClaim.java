@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -200,12 +198,12 @@ public class FissClaim {
   @SequenceGenerator(
       name = "beneficiaryhistory_beneficiaryhistoryid_seq",
       sequenceName = "beneficiaryhistory_beneficiaryhistoryid_seq",
-      allocationSize = 50
+      allocationSize = 50,
+      schema = "`pre_adj`"
   )
   private long beneHistoryId;
 
   @OneToMany(
-      mappedBy = "dcn",
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL
@@ -221,7 +219,7 @@ public class FissClaim {
    */
   @OneToMany(
       mappedBy = "parentClaim",
-      fetch = FetchType.LAZY,
+      fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL
   )
@@ -230,13 +228,13 @@ public class FissClaim {
       size = 100
   )
   @Builder.Default
-  private List<FissPayer> payers = new LinkedList<>();
+  private Set<FissPayer> payers = new HashSet<>();
 
   @ManyToOne(
       fetch = FetchType.EAGER
   )
   @JoinColumn(
-      name = "`mbiId`"
+      name = "`mbi_id`"
   )
   private Mbi mbiRecord;
 
@@ -392,8 +390,12 @@ public class FissClaim {
     this.procCodes = procCodes;
   }
 
-  public List<FissPayer> getPayers() {
+  public Set<FissPayer> getPayers() {
     return payers;
+  }
+
+  public void setPayers(Set<FissPayer> payers) {
+    this.payers = payers;
   }
 
   public Mbi getMbiRecord() {

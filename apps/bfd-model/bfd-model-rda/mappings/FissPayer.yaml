@@ -7,7 +7,7 @@ mappings:
     schema: rda
     primaryKeyColumns:
     - dcn
-    - priority
+    - rdaPosition
     columns:
     - name: dcn
       sqlType: varchar(23)
@@ -17,10 +17,11 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
-    - name: priority
+    - name: rdaPosition
       sqlType: smallint
       javaType: short
       nullable: false
+      dbName: rda_position
     - name: payerType
       enumType: PayerType
       sqlType: varchar(20)
@@ -165,14 +166,6 @@ mappings:
     - name: insuredDobText
       sqlType: varchar(9)
       dbName: insured_dob_text
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
-    - name: lastUpdated
-      sqlType: timestamp with time zone
-      dbName: last_updated
     comment: FISS Payer
   enumTypes:
   - name: PayerType
@@ -182,8 +175,6 @@ mappings:
   transformations:
   - from: PARENT
     to: dcn
-  - from: INDEX
-    to: priority
   - from: beneZPayer
     to: payerType
     transformer: EnumValueIfPresent
@@ -287,5 +278,3 @@ mappings:
   - from: beneZPayer.rdaPosition
     transformer: UintToShort
     optionalComponents: FieldOnly
-  - from: NOW
-    to: lastUpdated

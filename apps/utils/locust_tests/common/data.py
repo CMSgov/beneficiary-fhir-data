@@ -26,14 +26,14 @@ def load_from_parsed_opts(
     Returns:
         List: A list of data returned by the load function
     """
-    if not parsed_opts.database_uri:
-        logging.getLogger().error('"database_uri" was not defined in parsed options')
+    if not parsed_opts.database_constr:
+        logging.getLogger().error('"database_constr" was not defined in parsed options')
         return []
 
-    database_uri = str(parsed_opts.database_uri)
+    database_constr = str(parsed_opts.database_constr)
     table_sample_percent = float(parsed_opts.table_sample_percent)
     return load_from_uri(
-        database_uri,
+        database_constr,
         load_function,
         *args,
         use_table_sample=use_table_sample,
@@ -43,7 +43,7 @@ def load_from_parsed_opts(
 
 
 def load_from_uri(
-    database_uri: str,
+    database_constr: str,
     load_function: Callable,
     *args,
     use_table_sample: bool = False,
@@ -56,9 +56,9 @@ def load_from_uri(
     logger.info("Collecting %s test data...", data_type_name)
     if use_table_sample:
         logger.info(f"Table Sampling at: {table_sample_percent}")
-        results = load_function(uri=database_uri, table_sample_pct=table_sample_percent, *args)
+        results = load_function(uri=database_constr, table_sample_pct=table_sample_percent, *args)
     else:
-        results = load_function(uri=database_uri, *args)
+        results = load_function(uri=database_constr, *args)
 
     logger.info(f"Loaded {len(results)} results from the database")
     return results

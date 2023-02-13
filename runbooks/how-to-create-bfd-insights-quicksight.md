@@ -16,74 +16,240 @@ the right.
     - "Choose Your Table" modal
         - Catalog: `AwsDataCatalog`
         - Database: `bfd-insights-bfd-prod`
-        - Table: `bfd_insights_bfd_prod_daily_combined`
+        - Table: `new_benes_by_day`
         - Select
-    - "Finish datset creation" modal
+    - "Finish dataset creation" modal
         - Select "Import to SPICE for quicker analysis"
         - Check "Email owners when a refresh fails"
-        - Visualize
+        - Select "Edit/Preview data"
+    - "Data Prep"
+        - Select "Add Calculated Field"
+          - Name: `yearMonth`
+          - Calculation: `formatDate({day}, 'yyyy-MM')`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `daily_running_count_total`
+          - Calculation: `runningSum(sum({bfd_new_benes}), [{day} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `daily_running_count_ab2d`
+          - Calculation: `runningSum(sum({ab2d_new_benes}), [{day} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `daily_running_count_bb2`
+          - Calculation: `runningSum(sum({bb2_new_benes}), [{day} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `daily_running_count_bcda`
+          - Calculation: `runningSum(sum({bcda_new_benes}), [{day} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `daily_running_count_dpc`
+          - Calculation: `runningSum(sum({dpc_new_benes}), [{day} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `daily_running_count_bulk`
+          - Calculation: `runningSum(sum({bulk_new_benes}), [{day} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `monthly_running_count_total`
+          - Calculation: `runningSum(sum({bfd_new_benes}), [{yearMonth} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `monthly_running_count_ab2d`
+          - Calculation: `runningSum(sum({ab2d_new_benes}), [{yearMonth} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `monthly_running_count_bb2`
+          - Calculation: `runningSum(sum({bb2_new_benes}), [{yearMonth} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `monthly_running_count_bcda`
+          - Calculation: `runningSum(sum({bcda_new_benes}), [{yearMonth} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `monthly_running_count_dpc`
+          - Calculation: `runningSum(sum({dpc_new_benes}), [{yearMonth} ASC])`
+          - Save
+        - Select "Add Calculated Field"
+          - Name: `monthly_running_count_bulk`
+          - Calculation: `runningSum(sum({bulk_new_benes}), [{yearMonth} ASC])`
+          - Save
+        - Select "Publish & Visualize"
 3. Analysis screen.
-    - Create the "Beneficiaries" sheet.
-        - Under Visual Types (on the left), select the second icon for KPI. It looks like an up
-        arrow and down arrow.
-        - Expand "Field Wells" at the top if it isn't already expanded.
-        - Drag `benes_queried` from the left to the "Value" field well at the top. It should
-        aggregate by "Sum".
-        - Click the pencil in the upper right of the sheet to edit.
-            - Expand "Title".
-            - Edit title. Make it "Count of Beneficiaries Queried" and select "Align Center".
-            - Edit subtitle. Make this one "If a beneficiary is queried five times, it counts
-            here all five times." Select "Align Center".
-            - Close the "Format visual" tab.
-        - Right-click on the down-arrow next to "Sheet 1" and Rename the sheet to "Beneficiaries".
-    - Create the "Queried per Day" sheet.
-        - Click the + next to the first sheet to add a new sheet.
-        - Under Visual Types (on the left), select "Vertical Bar Chart", the seventh icon.
-        - Expand "Field Wells" at the top if it isn't already expanded.
-            - Drag `benes_queried` from the left to "Value" field well at the top. It should
-            aggregate by "Sum".
-            - Drag `day` to the "X Axis" field well at the top.
-        - Click the pencil in the upper right of the sheet to edit.
-            - Expand "Title".
-            - Edit title. Make it "Beneficiaries Queried per Day" and select "Align Center".
-            - Edit subtitle. Make this one "If a beneficiary is queried five times, it counts
-            here all five times." Select "Align Center".
-            - Close the "Format visual" tab.
-        - Right-click on the down-arrow next to "Sheet 2" and Rename the sheet to "Queried per
-        Day".
-    - Create the "Unique Beneficiaries" sheet.
-        - Click the + next to the first sheet to add a new sheet.
-        - Under Visual Types (on the left), select the second icon for KPI. It looks like an up
-        arrow and down arrow.
-        - Expand "Field Wells" at the top if it isn't already expanded.
-        - Drag `benes_first_seen` from the left to the "Value" field well at the top. It should
-        aggregate by "Sum".
-        - Click the pencil in the upper right of the sheet to edit.
-            - Expand "Title".
-            - Edit title. Make it "Count of Unique Beneficiaries" and select "Align Center".
-            - Edit subtitle. Make this one "If a beneficiary is queried five times, it counts
-            here only once." Select "Align Center".
-            - Close the "Format visual" tab.
-        - Right-click on the down-arrow next to "Sheet 3" and Rename the sheet to "Unique
-        Beneficiaries".
-    - Create the "First Seen per Day" sheet.
-        - Click the + next to the first sheet to add a new sheet.
-        - Under Visual Types (on the left), select "Vertical Bar Chart", the seventh icon.
-        - Expand "Field Wells" at the top if it isn't already expanded.
-            - Drag `benes_first_seen` from the left to "Value" field well at the top. It should
-            aggregate by "Sum".
-            - Drag `day` to the "X Axis" field well at the top.
-        - Click the pencil in the upper right of the sheet to edit.
-            - Expand "Title".
-            - Edit title. Make it "First Seen per Day" and select "Align Center".
-            - Edit subtitle. Make this one "If a beneficiary is queried five times, it counts
-            here only once and only on the day first queried." Select "Align Center".
-            - Close the "Format visual" tab.
-        - Right-click on the down-arrow next to "Sheet 4" and Rename the sheet to "First Seen per
-        Day".
+    - Create Calculated Fields that Require Aggregation Functions (must be added to the _Analysis_,
+      not the Dataset)
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_total`
+        - Calculation: `sum({bfd_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_ab2d`
+        - Calculation: `sum({ab2d_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_bb2`
+        - Calculation: `sum({bb2_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_bcda`
+        - Calculation: `sum({bcda_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_dpc`
+        - Calculation: `sum({dpc_new_benes}, [yearMonth])`
+        - Save
+      - Select "Add" then "Add Calculated Field"
+        - Name: `monthly_unique_count_bulk`
+        - Calculation: `sum({bulk_new_benes}, [yearMonth])`
+        - Save
+    - Create the "All APIs" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "Stacked area line chart" and configure:
+        - X axis: `day`
+        - Value: `daily_running_count_total`
+        - Title: `Unique Medicare Enrollees (All APIs)`
+        - X-axis title: `Date`
+        - Y-axis title: `Cumulative Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bfd_new_benes (Sum)
+        - Title: `Unique Medicare Enrollees (All APIs)`
+    - Create the "Bulk APIs" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "Stacked area line chart" and configure:
+        - X axis: `day`
+        - Value: `daily_running_count_bulk`
+        - Title: `Unique Medicare Enrollees (Bulk APIs)`
+        - X-axis title: `Date`
+        - Y-axis title: `Cumulative Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bulk_new_benes (Sum)
+        - Title: `Unique Medicare Enrollees (Bulk APIs)`
+    - Create the "AB2D" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "Stacked area line chart" and configure:
+        - X axis: `day`
+        - Value: `daily_running_count_ab2d`
+        - Title: `Unique Medicare Enrollees (AB2D)`
+        - X-axis title: `Date`
+        - Y-axis title: `Cumulative Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: ab2d_new_benes (Sum)
+        - Title: `Unique Medicare Enrollees (AB2D)`
+    - Create the "BB2" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "Stacked area line chart" and configure:
+        - X axis: `day`
+        - Value: `daily_running_count_bb2`
+        - Title: `Unique Medicare Enrollees (BB2)`
+        - X-axis title: `Date`
+        - Y-axis title: `Cumulative Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bb2_new_benes (Sum)
+        - Title: `Unique Medicare Enrollees (BB2)`
+    - Create the "BCDA" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "Stacked area line chart" and configure:
+        - X axis: `day`
+        - Value: `daily_running_count_bcda`
+        - Title: `Unique Medicare Enrollees (BCDA)`
+        - X-axis title: `Date`
+        - Y-axis title: `Cumulative Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bcda_new_benes (Sum)
+        - Title: `Unique Medicare Enrollees (BCDA)`
+    - Create the "DPC" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "Stacked area line chart" and configure:
+        - X axis: `day`
+        - Value: `daily_running_count_dpc`
+        - Title: `Unique Medicare Enrollees (DPC)`
+        - X-axis title: `Date`
+        - Y-axis title: `Cumulative Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: dpc_new_benes (Sum)
+        - Title: `Unique Medicare Enrollees (DPC)`
+    - Create the "Monthly" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bfd_new_benes (Sum)
+        - Title: `Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: ab2d_new_benes (Sum)
+        - Title: `AB2D Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bb2_new_benes (Sum)
+        - Title: `BB2 Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bcda_new_benes (Sum)
+        - Title: `BCDA Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: dpc_new_benes (Sum)
+        - Title: `DPC Total Unique Medicare Enrollees`
+      - Add a new visualization of type "Table" and configure:
+        - Group by: `yearMonth`
+        - Value: `monthly_running_count_*`
+        - Title: `Cumulative Unique Medicare Enrollees`
+        - Group-by column names:
+          - yearMonth -> `Month`
+        - Value column names:
+          - monthly_running_count_ab2d -> `AB2D`
+          - monthly_running_count_bb2 -> `BB2`
+          - monthly_running_count_bcda -> `BCDA`
+          - monthly_running_count_dpc -> `DPC`
+          - monthly_running_count_bulk -> `Bulk APIs`
+          - monthly_running_count_total -> `All APIs`
+      - Add a new visualization of type "Table" and configure:
+        - Group by: `yearMonth`
+        - Value: `monthly_unique_count_*`
+        - Title: `New Unique Medicare Enrollees`
+        - Group-by column names:
+          - yearMonth -> `Month`
+        - Value column names:
+          - monthly_unique_count_ab2d -> `AB2D`
+          - monthly_unique_count_bb2 -> `BB2`
+          - monthly_unique_count_bcda -> `BCDA`
+          - monthly_unique_count_dpc -> `DPC`
+          - monthly_unique_count_bulk -> `Bulk APIs`
+          - monthly_unique_count_total -> `All APIs`
+    - Create the "Daily" sheet. (Use the + symbol to add a new sheet)
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bfd_new_benes (Sum)
+        - Title: `Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: ab2d_new_benes (Sum)
+        - Title: `AB2D Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bb2_new_benes (Sum)
+        - Title: `BB2 Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: bcda_new_benes (Sum)
+        - Title: `BCDA Total Unique Medicare Enrollees`
+      - Add a new visualization of type "KPI" and configure:
+        - Value: dpc_new_benes (Sum)
+        - Title: `DPC Total Unique Medicare Enrollees`
+      - Add a new visualization of type "Table" and configure:
+        - Group by: `day`
+        - Value: `daily_running_count_*`
+        - Title: `Cumulative Unique Medicare Enrollees`
+        - Group-by column names:
+          - day -> `Date`
+        - Value column names:
+          - daily_running_count_ab2d -> `AB2D`
+          - daily_running_count_bb2 -> `BB2`
+          - daily_running_count_bcda -> `BCDA`
+          - daily_running_count_dpc -> `DPC`
+          - daily_running_count_bulk -> `Bulk APIs`
+          - daily_running_count_total -> `All APIs`
+      - Add a new visualization of type "Table" and configure:
+        - Group by: `day`
+        - Value: `*_new_benes(Sum)`
+        - Title: `New Unique Medicare Enrollees`
+        - Group-by column names:
+          - day -> `Date`
+        - Value column names:
+          - ab2d_new_benes -> `AB2D`
+          - bb2_new_benes -> `BB2`
+          - bcda_new_benes -> `BCDA`
+          - dpc_new_benes -> `DPC`
+          - bulk_new_benes -> `Bulk APIs`
+          - bfd_new_benes -> `All APIs`
 4. Create the dashboard.
     - While still on the analysis screen, in the upper-right, click Share > Publish Dashboard.
-    Make it "BFD Beneficiaries (Prod)".
+    Title it "BFD Unique Medicare Enrollees".
     - The default options should otherwise be fine, so click Publish Dashboard.
 5. Make the dashboard public.
     - While still on the dashboard screen, in the upper right, click Share > Share dashboard.

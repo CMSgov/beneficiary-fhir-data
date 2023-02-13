@@ -3,5 +3,6 @@ output "name" {
 }
 
 output "partitions" {
-  value = [{name="dt", type=string, comment="Approximate delivery time"}]
+  # NOTE: temporarily re-quoted string for 0.13 compatability
+  value = [{name="dt", type="string", comment="Approximate delivery time"}]
 }

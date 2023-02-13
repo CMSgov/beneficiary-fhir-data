@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -15,6 +16,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -30,14 +32,14 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
 public final class CarrierClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
+   * CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     CarrierClaim claim =
@@ -53,7 +55,8 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
@@ -63,20 +66,54 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
+   * CarrierClaim}. has two care members under the care team component and doesnt duplicate its
+   * results
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleURecord() throws FHIRException {
+  public void shouldHaveTwoCareTeamMembers() throws FHIRException, IOException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+    CarrierClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit eob =
+        CarrierClaimTransformer.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.of(true),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+
+    assertEquals(2, eob.getCareTeam().size());
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
+   * works as expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link
+   * CarrierClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void transformSampleURecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     CarrierClaim claim =
@@ -91,7 +128,8 @@ public final class CarrierClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob, Optional.of(true));
   }

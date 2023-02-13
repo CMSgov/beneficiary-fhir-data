@@ -11,6 +11,17 @@ package gov.cms.bfd.pipeline.rda.grpc;
  */
 public interface RdaSource<TMessage, TClaim> extends AutoCloseable {
   /**
+   * Perform a smoke test and return true if the test is successful.
+   *
+   * @param sink to process batches of objects
+   * @return true if the test is successful
+   * @throws Exception can be thrown during the test to indicate failure condition
+   */
+  default boolean performSmokeTest(RdaSink<TMessage, TClaim> sink) throws Exception {
+    return true;
+  }
+
+  /**
    * Retrieve some number of objects from the source and pass them to the sink for processing.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink

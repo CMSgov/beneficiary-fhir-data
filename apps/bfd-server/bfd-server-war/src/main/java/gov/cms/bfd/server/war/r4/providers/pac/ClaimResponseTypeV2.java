@@ -24,7 +24,7 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaFissClaim.class,
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.dcn,
-          RdaFissClaim.Fields.stmtCovToDate,
+          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
           FissClaimResponseTransformerV2::transform);
 
   /** Instance for MCS claims. */
@@ -35,7 +35,7 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaMcsClaim.class,
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
-          RdaMcsClaim.Fields.idrHdrToDateOfSvc,
+          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc),
           McsClaimResponseTransformerV2::transform);
 
   /** Immutable list of all possible instances of this class. */
@@ -45,30 +45,30 @@ public final class ClaimResponseTypeV2<TEntity>
    * Constructor is private to ensure only instances defined in this class are allowed.
    *
    * @param nameForParsing name used when parsing parameter string to find appropriate instance
-   * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
+   * @param typeLabel value returned by {@link ResourceTypeV2#getTypeLabel()}
    * @param entityClass the entity class for the associated resource
-   * @param entityMbiAttribute the attribute name for the mbi value on the entity class
-   * @param entityMbiHashAttribute the attribute name for the mbiHash value on the entity class
+   * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
-   * @param entityEndDateAttribute the attribute name for the service end date on the entity class
+   * @param entityServiceDateAttributes the attribute name for the service end date on the entity
+   *     class
    * @param transformer the transformer used to convert from the given entity to the associated
    *     resource type
    */
   private ClaimResponseTypeV2(
       String nameForParsing,
-      String nameForMetrics,
+      String typeLabel,
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      String entityEndDateAttribute,
+      List<String> entityServiceDateAttributes,
       ResourceTransformer<ClaimResponse> transformer) {
     super(
         nameForParsing,
-        nameForMetrics,
+        typeLabel,
         entityClass,
         entityMbiRecordAttribute,
         entityIdAttribute,
-        entityEndDateAttribute,
+        entityServiceDateAttributes,
         transformer);
   }
 

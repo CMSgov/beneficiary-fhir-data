@@ -31,6 +31,8 @@ import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class PartDEventTransformerV2 {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -56,8 +58,10 @@ final class PartDEventTransformerV2 {
   }
 
   /**
+   * Transforms a specified {@link PartDEvent} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link PartDEvent} to transform
-   * @param drugCodeDisplayLookup the {@FdaDrugCodeDisplayLookup } to return FDA Drug Codes
+   * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */

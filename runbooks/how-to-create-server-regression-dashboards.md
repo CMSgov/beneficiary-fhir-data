@@ -89,8 +89,12 @@ data.
         metadata.timestamp as raw_timestamp
       from "bfd-insights-bfd-test"."bfd_insights_bfd_test_server_regression"
       where
-        metadata.hash = 'ae770dea971f3be467a42717654a42c5c26c7da394f690c3db23e9aa4c4e2f92'
+        metadata.hash = '85d93b342368c8f57f8e78ea6c56979ad5e32901776aaeaffdd8467e4cee1df9'
         and contains(metadata.tags, 'master')
+        and (
+           metadata.validation_result = 'PASSED'
+           or metadata.validation_result = 'NOT_APPLICABLE'
+        )
       order by metadata.timestamp asc
       ```
 
@@ -134,8 +138,12 @@ data.
         metadata.timestamp as raw_timestamp
       from "bfd-insights-bfd-prod-sbx"."bfd_insights_bfd_prod_sbx_server_regression"
       where
-        metadata.hash = '6dde56a7a303693c0d5b92820619d86929a3a3840d2c2be8d038d76a7b0fe637'
+        metadata.hash = '71a5310d52e0ffb8c03dc74cdee7bf635bc7fbd75dfe1d8f647fcfb11e5b65ce'
         and contains(metadata.tags, 'master')
+        and (
+           metadata.validation_result = 'PASSED'
+           or metadata.validation_result = 'NOT_APPLICABLE'
+        )
       order by metadata.timestamp asc
       ```
 
@@ -179,8 +187,12 @@ data.
         metadata.timestamp as raw_timestamp
       from "bfd-insights-bfd-prod"."bfd_insights_bfd_prod_server_regression"
       where
-        metadata.hash = 'b0971964769c07457547f8a2084dd9014566da3d7a366d42e5dce01b4f12148e'
+        metadata.hash = '727a44e865e717728ac409e8e23a7e13ce73a155874f3832a0caef1fde17e95c'
         and contains(metadata.tags, 'master')
+        and (
+           metadata.validation_result = 'PASSED'
+           or metadata.validation_result = 'NOT_APPLICABLE'
+        )
       order by metadata.timestamp asc
       ```
 

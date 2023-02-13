@@ -7,7 +7,7 @@ mappings:
     schema: rda
     primaryKeyColumns:
     - dcn
-    - priority
+    - rdaPosition
     columns:
     - name: dcn
       sqlType: varchar(23)
@@ -17,14 +17,14 @@ mappings:
         specific claims, and to differentiate between claims for the beneficiary;
         it may be used to access data for the record depending on the copybook it
         used for. This is a unique field created by the system.'
-    - name: priority
+    - name: rdaPosition
       sqlType: smallint
       javaType: short
       nullable: false
+      dbName: rda_position
     - name: diagCd2
       sqlType: varchar(7)
       minLength: 0
-      nullable: false
       dbName: diag_cd2
     - name: diagPoaInd
       sqlType: varchar(1)
@@ -45,19 +45,9 @@ mappings:
       dbName: bit_flags
       comment: 'Bit Flags: This field identifies the reason for a cancel without a
         corresponding repayment.'
-    - name: rdaPosition
-      sqlType: smallint
-      javaType: short
-      nullable: false
-      dbName: rda_position
-    - name: lastUpdated
-      sqlType: timestamp with time zone
-      dbName: last_updated
   transformations:
   - from: PARENT
     to: dcn
-  - from: INDEX
-    to: priority
   - from: diagCd2
     optionalComponents: None
   - from: diagPoaInd
@@ -69,5 +59,3 @@ mappings:
   - from: rdaPosition
     transformer: UintToShort
     optionalComponents: None
-  - from: NOW
-    to: lastUpdated

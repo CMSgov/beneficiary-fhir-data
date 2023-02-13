@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
@@ -13,6 +14,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -24,17 +26,16 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer}. */
+/** Unit tests for {@link SNFClaimTransformer}. */
 public final class SNFClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
+   * Verifies that {@link SNFClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     SNFClaim claim =
@@ -44,15 +45,16 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        SNFClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
-            claim);
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
-    assertMatches(claim, eob);
+    ExplanationOfBenefit eob = SNFClaimTransformer.transform(transformerContext, claim);
+
+    assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -62,9 +64,13 @@ public final class SNFClaimTransformerTest {
    * @param claim the {@link SNFClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     SNFClaim}
+   * @param transformerContext the {@link TransformerContext} that was generated from the specified
+   *     {@link SNFClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      SNFClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -144,6 +150,7 @@ public final class SNFClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

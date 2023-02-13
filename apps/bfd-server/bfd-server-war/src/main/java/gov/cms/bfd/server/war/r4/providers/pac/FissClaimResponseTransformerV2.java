@@ -3,58 +3,61 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaFissPayer;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
-import gov.cms.bfd.server.war.commons.CCWUtils;
-import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.ClaimResponse;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
 public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
+  /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
+  /**
+   * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
+   * mappings.
+   */
   private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME =
-      Map.of(
-          ' ', ClaimResponse.RemittanceOutcome.QUEUED,
-          'a', ClaimResponse.RemittanceOutcome.QUEUED,
-          's', ClaimResponse.RemittanceOutcome.PARTIAL,
-          'p', ClaimResponse.RemittanceOutcome.COMPLETE,
-          'd', ClaimResponse.RemittanceOutcome.COMPLETE,
-          'i', ClaimResponse.RemittanceOutcome.PARTIAL,
-          'r', ClaimResponse.RemittanceOutcome.COMPLETE,
-          't', ClaimResponse.RemittanceOutcome.PARTIAL,
-          'm', ClaimResponse.RemittanceOutcome.PARTIAL);
+      Map.ofEntries(
+          Map.entry(' ', ClaimResponse.RemittanceOutcome.QUEUED),
+          Map.entry('a', ClaimResponse.RemittanceOutcome.QUEUED),
+          Map.entry('d', ClaimResponse.RemittanceOutcome.COMPLETE),
+          Map.entry('f', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('i', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('m', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('p', ClaimResponse.RemittanceOutcome.COMPLETE),
+          Map.entry('r', ClaimResponse.RemittanceOutcome.COMPLETE),
+          Map.entry('s', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('t', ClaimResponse.RemittanceOutcome.PARTIAL),
+          Map.entry('u', ClaimResponse.RemittanceOutcome.COMPLETE));
 
+  /** Instantiates a new Fiss claim response transformer v2. */
   private FissClaimResponseTransformerV2() {}
 
   /**
+   * Transforms a claim entity into a {@link ClaimResponse}.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
+   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
+  static ClaimResponse transform(
+      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -75,12 +78,12 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getDcn());
-    claim.setContained(List.of(getContainedPatient(claimGroup)));
+    claim.setContained(List.of(FissTransformerV2.getContainedPatient(claimGroup)));
+    claim.getIdentifier().add(createClaimIdentifier(BBCodingSystems.FISS.DCN, claimGroup.getDcn()));
     claim.setExtension(getExtension(claimGroup));
-    claim.setIdentifier(getIdentifier(claimGroup));
     claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);
     claim.setOutcome(getOutcome(claimGroup.getCurrStatus()));
-    claim.setType(getType());
+    claim.setType(createCodeableConcept(ClaimType.INSTITUTIONAL));
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
     claim.setPatient(new Reference("#patient"));
@@ -93,41 +96,6 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   }
 
   /**
-   * Returns a {@link Patient} {@link Resource} if the associated data is present in the given
-   * {@link RdaFissClaim}.
-   *
-   * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
-   * @return A {@link Patient} object built from the associated data in the given {@link
-   *     RdaFissClaim}, or null if the appropriate data wasn't present.
-   */
-  private static Resource getContainedPatient(RdaFissClaim claimGroup) {
-    Optional<RdaFissPayer> optional =
-        claimGroup.getPayers().stream()
-            .filter(p -> p.getPayerType() == RdaFissPayer.PayerType.BeneZ)
-            .findFirst();
-
-    Patient patient;
-
-    if (optional.isPresent()) {
-      RdaFissPayer benePayer = optional.get();
-
-      patient =
-          getContainedPatient(
-              claimGroup.getMbi(),
-              new PatientInfo(
-                  benePayer.getBeneFirstName(),
-                  benePayer.getBeneLastName(),
-                  ifNotNull(benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
-                  benePayer.getBeneDob(),
-                  benePayer.getBeneSex()));
-    } else {
-      patient = getContainedPatient(claimGroup.getMbi(), null);
-    }
-
-    return patient;
-  }
-
-  /**
    * Builds a list of {@link Extension} objects using data from the given {@link RdaFissClaim}.
    *
    * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
@@ -135,44 +103,11 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
    */
   private static List<Extension> getExtension(RdaFissClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
-    extensions.add(
-        new Extension(BBCodingSystems.FISS.CURR_STATUS)
-            .setValue(
-                new Coding(
-                    BBCodingSystems.FISS.CURR_STATUS, "" + claimGroup.getCurrStatus(), null)));
+    addExtension(extensions, BBCodingSystems.FISS.CURR_STATUS, "" + claimGroup.getCurrStatus());
+    addExtension(extensions, BBCodingSystems.FISS.RECD_DT_CYMD, claimGroup.getReceivedDate());
+    addExtension(extensions, BBCodingSystems.FISS.CURR_TRAN_DT_CYMD, claimGroup.getCurrTranDate());
 
-    if (claimGroup.getReceivedDate() != null) {
-      extensions.add(
-          new Extension(BBCodingSystems.FISS.RECD_DT_CYMD)
-              .setValue(new DateType(localDateToDate(claimGroup.getReceivedDate()))));
-    }
-
-    if (claimGroup.getCurrTranDate() != null) {
-      extensions.add(new Extension(BBCodingSystems.FISS.CURR_TRAN_DT_CYMD));
-    }
-
-    return List.copyOf(extensions);
-  }
-
-  /**
-   * Builds a list of {@link Identifier} objects using data from the given {@link RdaFissClaim}.
-   *
-   * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
-   * @return A list of {@link Identifier} objects build from the given {@link RdaFissClaim} data.
-   */
-  private static List<Identifier> getIdentifier(RdaFissClaim claimGroup) {
-    return List.of(
-        new Identifier()
-            .setType(
-                new CodeableConcept(
-                    new Coding(
-                        C4BBIdentifierType.UC.getSystem(),
-                        C4BBIdentifierType.UC.toCode(),
-                        C4BBIdentifierType.UC.getDisplay())))
-            .setSystem(
-                CCWUtils.calculateVariableReferenceUrl(
-                    CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM))
-            .setValue(claimGroup.getDcn()));
+    return extensions;
   }
 
   /**
@@ -185,20 +120,5 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private static ClaimResponse.RemittanceOutcome getOutcome(char statusCode) {
     return STATUS_TO_OUTCOME.getOrDefault(
         Character.toLowerCase(statusCode), ClaimResponse.RemittanceOutcome.PARTIAL);
-  }
-
-  /**
-   * Builds a {@link CodeableConcept} object containing type information for this claim type.
-   *
-   * @return A {@link CodeableConcept} object containing type information for this claim type.
-   */
-  private static CodeableConcept getType() {
-    return new CodeableConcept()
-        .setCoding(
-            List.of(
-                new Coding(
-                    ClaimType.INSTITUTIONAL.getSystem(),
-                    ClaimType.INSTITUTIONAL.toCode(),
-                    ClaimType.INSTITUTIONAL.getDisplay())));
   }
 }

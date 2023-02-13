@@ -10,7 +10,14 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link RandomFissClaimGenerator} can correctly generate claims. */
 public class RandomFissClaimSourceTest {
+
+  /**
+   * Validate that when the max number to send is 0, no claims are loaded into the source.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void zeroMaxToReturn() throws Exception {
     RandomFissClaimSource source = new RandomFissClaimSource(0, 0);
@@ -18,6 +25,12 @@ public class RandomFissClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
+  /**
+   * Validate that when the max number to send is 1, one claim is loaded into the source and that
+   * claim has data.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void oneMaxToReturn() throws Exception {
     RandomFissClaimSource source = new RandomFissClaimSource(0, 1);
@@ -28,6 +41,12 @@ public class RandomFissClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
+  /**
+   * Validate that when the max number to send is 3, three claims are loaded into the source and
+   * attempting to go beyond that throws an exception.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void threeMaxToReturn() throws Exception {
     RandomFissClaimSource source = new RandomFissClaimSource(0, 3);
@@ -47,6 +66,11 @@ public class RandomFissClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
+  /**
+   * Validates that the sequence numbers generated for claims is sequential.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void sequenceNumbers() throws Exception {
     MessageSource<FissClaimChange> source =
@@ -57,6 +81,13 @@ public class RandomFissClaimSourceTest {
     assertFalse(source.hasNext());
   }
 
+  /**
+   * Validate that there is no next item in the source and attempting to go beyond this point throws
+   * an exception.
+   *
+   * @param source the source
+   * @throws Exception the exception
+   */
   private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
     try {
       source.next();

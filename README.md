@@ -89,9 +89,10 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 1. Install pre-commit hooks `mvn -f apps initialize`
 
 ### Native Setup
-1. Change to the `apps/bfd-data-fda` directory and `mvn clean install`. 
-2. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-3. Set up a Postgres 14 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+1. Change to the `apps/bfd-data-fda` directory and run `mvn clean install`. 
+2. Change to the `apps/bfd-data-npi` directory and run `mvn clean install`.
+3. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
+4. Set up a Postgres 14 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
     ```sh
     docker run \
       -d \
@@ -103,7 +104,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -v 'bfd_pgdata:/var/lib/postgresql/data' \
       postgres:14 -c max_connections=200
     ```
-4. Set up a local S3 using Minio Docker Container
+5. Set up a local S3 using Minio Docker Container
     ```sh
     docker run \
       -p 9000:9000 \
@@ -112,7 +113,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
       minio/minio server /data --console-address ":9001"
     ```
-5. Run mvn install with the following 
+6. Run mvn install with the following 
     ```
      mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
     ```

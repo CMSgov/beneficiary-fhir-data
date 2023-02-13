@@ -29,12 +29,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.LoadedFilterManager}. */
+/** Integration tests for {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerIT {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
+  /** The bene id to use for testing. */
   private static final long SAMPLE_BENE = 567834L;
+  /** An invalid bene id. */
   private static final long INVALID_BENE = 1L;
 
   /**
@@ -55,6 +57,10 @@ public final class LoadedFilterManagerIT {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
+  /**
+   * Ensures there is no filter result found when searching the filter for an invalid bene, even
+   * after a refresh.
+   */
   @Test
   public void emptyFilters() {
     PipelineTestUtils.get()
@@ -90,6 +96,10 @@ public final class LoadedFilterManagerIT {
             });
   }
 
+  /**
+   * Ensures there is a filter result found when searching the filter for a valid bene after a
+   * refresh.
+   */
   @Test
   public void refreshFilters() {
     PipelineTestUtils.get()
@@ -124,7 +134,7 @@ public final class LoadedFilterManagerIT {
             });
   }
 
-  /** Test isResultSetEmpty with one filter */
+  /** Test isResultSetEmpty with one filter. */
   @Test
   public void isResultSetEmpty() {
     PipelineTestUtils.get()
@@ -177,7 +187,7 @@ public final class LoadedFilterManagerIT {
             });
   }
 
-  /** Test isResultSetEmpty with multiple refreshes */
+  /** Test isResultSetEmpty with multiple refreshes. */
   @Test
   public void testWithMultipleRefreshes() {
     PipelineTestUtils.get()
@@ -232,7 +242,12 @@ public final class LoadedFilterManagerIT {
             });
   }
 
-  /** @param sampleResources the sample RIF resources to load */
+  /**
+   * Loads data for the test.
+   *
+   * @param dataSource the data source
+   * @param sampleResources the sample RIF resources to load
+   */
   private static void loadData(DataSource dataSource, List<StaticRifResource> sampleResources) {
     LoadAppOptions loadOptions = CcwRifLoadTestUtils.getLoadOptions();
     RifFilesEvent rifFilesEvent =

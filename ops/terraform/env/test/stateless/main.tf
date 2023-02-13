@@ -1,18 +1,21 @@
-terraform {
-  required_version = "> 0.12.30, < 0.13"
-}
-
-provider "aws" {
-  version = "~> 3.44.0"
-  region  = "us-east-1"
+locals {
+  env = "test"
+  default_tags = {
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Environment    = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/env/${local.env}/stateless"
+  }
 }
 
 module "stateless" {
   source = "../../../modules/stateless"
 
   env_config = {
-    env  = "test"
-    tags = { application = "bfd", business = "oeda", stack = "test", Environment = "test" }
+    env  = local.env
+    tags = local.default_tags
   }
 
   fhir_ami        = var.fhir_ami
@@ -22,6 +25,6 @@ module "stateless" {
 
   ## Cloudwatch Dashboard ##
   ## This is where the dashboard params are passed ##
-  dashboard_name      = "bfd-server-test"
-  dashboard_namespace = "bfd-test/bfd-server"
+  dashboard_name      = "bfd-${local.env}-server"
+  dashboard_namespace = "bfd-${local.env}/bfd-server"
 }

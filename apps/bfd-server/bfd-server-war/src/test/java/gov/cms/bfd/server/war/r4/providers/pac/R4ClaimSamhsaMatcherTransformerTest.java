@@ -24,19 +24,27 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * "Higher" level testing to see if the transformers are in line with the expectations of the SAMHSA
- * filtering mechanics
+ * filtering mechanics.
  */
 public class R4ClaimSamhsaMatcherTransformerTest {
 
+  /** Represents a code that will not match a samhsa matcher. */
   private static final String NON_SAMHSA_CODE = "NOTSAMHSA";
 
+  /** Represents a code that will match a samhsa ICD9 matcher. */
   private static final String ICD_9_DX_SAMHSA_CODE = "291.0";
+  /** Represents a code that will match a samhsa ICD9 proc matcher. */
   private static final String ICD_9_PROC_SAMHSA_CODE = "94.45";
+  /** Represents a code that will match a samhsa ICD10 matcher. */
   private static final String ICD_10_DX_SAMHSA_CODE = "F10.10";
+  /** Represents a code that will match a samhsa ICD10 matcher. */
   private static final String ICD_10_PROC_SAMHSA_CODE = "HZ30ZZZ";
+  /** Represents a code that will match a CPT samhsa matcher. */
   private static final String CPT_SAMHSA_CODE = "H0005";
 
+  /** A date to use for ICD9 testing. */
   private static final LocalDate ICD_9_DATE = LocalDate.of(2000, 1, 1);
+  /** A date to use for ICD10 testing. */
   private static final LocalDate ICD_10_DATE = LocalDate.of(2020, 1, 1);
 
   /**
@@ -121,6 +129,14 @@ public class R4ClaimSamhsaMatcherTransformerTest {
   /**
    * These tests check if the transformed FISS claims result in the expected SAMHSA filtering
    * outcomes.
+   *
+   * @param testName the test name for reporting
+   * @param toDate the "to" date to set for the statement date
+   * @param diagCodes the diag codes to use for the principal and admitting codes (index 0 and 1
+   *     respectively)
+   * @param procCodes the proc codes to set for the procedure(s)
+   * @param expectedResult the expected result
+   * @param errorMessagePostFix the error message post fix
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -146,7 +162,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             .mapToObj(
                 i -> {
                   RdaFissDiagnosisCode diagCode = new RdaFissDiagnosisCode();
-                  diagCode.setPriority((short) i);
+                  diagCode.setRdaPosition((short) (i + 1));
                   diagCode.setDiagCd2(diagCodes.get(i));
 
                   return diagCode;
@@ -161,7 +177,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                 i -> {
                   RdaFissProcCode procCode = new RdaFissProcCode();
                   procCode.setProcDate(LocalDate.EPOCH);
-                  procCode.setPriority((short) i);
+                  procCode.setRdaPosition((short) (i + 1));
                   procCode.setProcCode(procCodes.get(i));
 
                   return procCode;
@@ -170,7 +186,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setProcCodes(procedures);
 
-    Claim claim = FissClaimTransformerV2.transform(new MetricRegistry(), entity);
+    Claim claim = FissClaimTransformerV2.transform(new MetricRegistry(), entity, true);
 
     R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
 
@@ -213,6 +229,12 @@ public class R4ClaimSamhsaMatcherTransformerTest {
   /**
    * These tests check if the transformed MCS claims result in the expected SAMHSA filtering
    * outcomes.
+   *
+   * @param testName the test name for reporting
+   * @param diagCodes the diagnosis codes to use in the test
+   * @param procCodes the proc codes to use in the test
+   * @param expectedResult the expected result
+   * @param errorMessagePostFix the error message post fix
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -233,7 +255,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                   String[] dx = diagCodes.get(i).split(":");
 
                   RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
-                  diagCode.setPriority((short) i);
+                  diagCode.setRdaPosition((short) (i + 1));
                   diagCode.setIdrDiagIcdType(dx[0]);
                   diagCode.setIdrDiagCode(dx[1]);
 
@@ -249,7 +271,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                 i -> {
                   RdaMcsDetail procCode = new RdaMcsDetail();
                   procCode.setIdrDtlToDate(LocalDate.EPOCH);
-                  procCode.setPriority((short) i);
+                  procCode.setIdrDtlNumber((short) (i + 1));
                   procCode.setIdrProcCode(procCodes.get(i));
 
                   return procCode;
@@ -258,7 +280,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setDetails(procedures);
 
-    Claim claim = McsClaimTransformerV2.transform(new MetricRegistry(), entity);
+    Claim claim = McsClaimTransformerV2.transform(new MetricRegistry(), entity, true);
 
     R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
 

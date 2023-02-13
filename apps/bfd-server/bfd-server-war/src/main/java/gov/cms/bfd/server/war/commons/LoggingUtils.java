@@ -61,10 +61,20 @@ public class LoggingUtils {
   }
 
   /**
+   * Log resource count returned to client given size of single element or bundle to BfdMDC.
+   *
+   * @param count of resources returned to client to log
+   */
+  public static void logResourceCountToMdc(int count) {
+    BfdMDC.put("resources_returned_count", String.format("%d", count));
+  }
+
+  /**
    * Helper function for aggregating bene_ids within a bundle in v1. If no bene_ids found, an empty
    * set is returned.
    *
    * @param bundle that is searched through for valid bene_ids
+   * @return the set
    */
   static Set<Long> findBeneIds(org.hl7.fhir.dstu3.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();
@@ -111,6 +121,7 @@ public class LoggingUtils {
    * set is returned.
    *
    * @param bundle that is searched through for valid bene_ids
+   * @return the set of bene ids, or an empty set if none were found
    */
   static Set<Long> findBeneIds(org.hl7.fhir.r4.model.Bundle bundle) {
     Set<Long> beneIds = new HashSet<Long>();

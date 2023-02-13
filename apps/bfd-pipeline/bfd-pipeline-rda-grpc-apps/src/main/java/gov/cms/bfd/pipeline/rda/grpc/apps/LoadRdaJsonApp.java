@@ -10,7 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -19,6 +19,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -43,8 +44,15 @@ import org.slf4j.LoggerFactory;
  * data so either or both can be provided as needed.
  */
 public class LoadRdaJsonApp {
-  private static final Logger logger = LoggerFactory.getLogger(LoadRdaJsonApp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoadRdaJsonApp.class);
 
+  /**
+   * Main method to load the System Properties for the Config, start the log4jReporter, start the
+   * metrics, and start the RDA pipeline.
+   *
+   * @param args to be passed in by the command line
+   * @throws Exception if the RDA builder doesnt close or open
+   */
   public static void main(String[] args) throws Exception {
     final ConfigLoader.Builder options = ConfigLoader.builder();
     if (args.length == 1) {
@@ -64,7 +72,7 @@ public class LoadRdaJsonApp {
             .build();
     reporter.start(5, TimeUnit.SECONDS);
     try {
-      logger.info("starting RDA API local server");
+      LOGGER.info("starting RDA API local server");
       RdaServer.LocalConfig.builder()
           .fissSourceFactory(config::createFissClaimsSource)
           .mcsSourceFactory(config::createMcsClaimsSource)
@@ -76,18 +84,19 @@ public class LoadRdaJsonApp {
                 final HikariDataSource pooledDataSource =
                     PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
                 if (config.runSchemaMigration) {
-                  logger.info("running database migration");
+                  LOGGER.info("running database migration");
                   DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
                 }
                 try (PipelineApplicationState appState =
                     new PipelineApplicationState(
+                        new SimpleMeterRegistry(),
                         metrics,
                         pooledDataSource,
                         PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
                         Clock.systemUTC())) {
                   final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
                   for (PipelineJob<?> job : jobs) {
-                    logger.info("starting job {}", job.getClass().getSimpleName());
+                    LOGGER.info("starting job {}", job.getClass().getSimpleName());
                     job.call();
                   }
                 }
@@ -98,18 +107,37 @@ public class LoadRdaJsonApp {
     }
   }
 
+  /**
+   * Private singleton class to load the config for values for hashing, database options, batch
+   * sizes, fissFile, and mcsFile.
+   */
   private static class Config {
+    /** The hash pepper. */
     private final String hashPepper;
+    /** The hash iterations. */
     private final int hashIterations;
+    /** The database url. */
     private final String dbUrl;
+    /** The database user. */
     private final String dbUser;
+    /** The database password. */
     private final String dbPassword;
+    /** The number of write threads. */
     private final int writeThreads;
+    /** The batch size. */
     private final int batchSize;
+    /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
+    /** The file for fiss claims. */
     private final Optional<File> fissFile;
+    /** The file for mcs claims. */
     private final Optional<File> mcsFile;
 
+    /**
+     * Constructor to load the Configuration options for the private fields above.
+     *
+     * @param options to load for the RDA pipeline
+     */
     private Config(ConfigLoader options) {
       hashPepper = options.stringValue("hash.pepper", "notarealpepper");
       hashIterations = options.intValue("hash.iterations", 2);
@@ -124,10 +152,21 @@ public class LoadRdaJsonApp {
       mcsFile = options.readableFileOption("file.mcs");
     }
 
+    /**
+     * Creates the {@link DatabaseOptions} from this configuration.
+     *
+     * @return the database options to be used
+     */
     private DatabaseOptions createDatabaseOptions() {
       return new DatabaseOptions(dbUrl, dbUser, dbPassword, 10);
     }
 
+    /**
+     * Creates and returns the options to load for the RDA app.
+     *
+     * @param port the port to be used for the RDA pipeline
+     * @return the options used for the RDA pipeline
+     */
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
       final AbstractRdaLoadJob.Config jobConfig =
@@ -136,24 +175,45 @@ public class LoadRdaJsonApp {
               .writeThreads(writeThreads)
               .batchSize(batchSize)
               .build();
-      final GrpcRdaSource.Config grpcConfig =
-          GrpcRdaSource.Config.builder()
-              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+      final RdaSourceConfig grpcConfig =
+          RdaSourceConfig.builder()
+              .serverType(RdaSourceConfig.ServerType.Remote)
               .host("localhost")
               .port(port)
               .maxIdle(Duration.ofDays(1))
               .build();
-      return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
+      return new RdaLoadOptions(
+          jobConfig, grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
     }
 
+    /**
+     * Creates the FissClaims from the fissFile.
+     *
+     * @param sequenceNumber for each FissClaim
+     * @return objects that produce FissClaim objects
+     */
     private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {
       return createClaimsSourceForFile(fissFile, JsonMessageSource::parseFissClaimChange);
     }
 
+    /**
+     * Creates the McsClaims from the mcsFile.
+     *
+     * @param sequenceNumber for each McsClaim
+     * @return objects that produce McsClaim objects
+     */
     private MessageSource<McsClaimChange> createMcsClaimsSource(long sequenceNumber) {
       return createClaimsSourceForFile(mcsFile, JsonMessageSource::parseMcsClaimChange);
     }
 
+    /**
+     * Creates the claims for the RDA app.
+     *
+     * @param <T> generic message source to be used by both Fiss and Mcs claims
+     * @param jsonFile the claim source json file
+     * @param parser the claim parser
+     * @return objects that produce claim objects
+     */
     private <T> MessageSource<T> createClaimsSourceForFile(
         Optional<File> jsonFile, JsonMessageSource.Parser<T> parser) {
       if (jsonFile.isPresent()) {
@@ -163,6 +223,13 @@ public class LoadRdaJsonApp {
       }
     }
 
+    /**
+     * This function creates the pipeline jobs for Fiss and Mcs claims from the app state.
+     *
+     * @param jobConfig the RDA options to load
+     * @param appState the pipeline application state
+     * @return the pipeline jobs to execute
+     */
     private List<PipelineJob<?>> createPipelineJobs(
         RdaLoadOptions jobConfig, PipelineApplicationState appState) {
       List<PipelineJob<?>> answer = new ArrayList<>();

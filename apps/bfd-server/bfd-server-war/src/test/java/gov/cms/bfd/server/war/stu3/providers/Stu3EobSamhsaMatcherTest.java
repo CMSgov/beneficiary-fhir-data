@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -19,6 +20,7 @@ import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,21 +39,33 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
  * ExplanationOfBenefitResourceProvider} is covered by {@link
- * ExplanationOfBenefitResourceProviderIT#searchForEobsWithSamhsaFiltering()} and related
+ * ExplanationOfBenefitResourceProviderIT#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
  * integration tests.
  */
 public final class Stu3EobSamhsaMatcherTest {
   // TODO complete and verify that these exactly match real values in our DB
+  /** The SAMHSA CPT code. */
   public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
+  /** The SAMHSA ICD9 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
+  /** The SAMHSA ICD9 procedure code. */
   public static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
+  /** The SAMHSA ICD10 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
+  /** The SAMHSA ICD10 procedure code. */
   public static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
+  /** The SAMHSA DRG code. */
   public static final String SAMPLE_SAMHSA_DRG_CODE = "522";
 
+  /** The DRG reference url. */
   private static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
+  /**
+   * Sets the data for use in the parameterized tests.
+   *
+   * @return the stream fed into the test
+   */
   public static Stream<Arguments> data() {
     final String HCPCS = TransformerConstants.CODING_SYSTEM_HCPCS;
     final String OTHER = "other system";
@@ -78,6 +92,15 @@ public final class Stu3EobSamhsaMatcherTest {
             "should NOT return true (all known systems), but DID."));
   }
 
+  /**
+   * Tests that for each data set {@link Stu3EobSamhsaMatcher#containsOnlyKnownSystems} returns the
+   * expected value.
+   *
+   * @param name the test description for reporting
+   * @param systems the systems to test
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if the test fails
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource("data")
   public void containsOnlyKnownSystemsTest(
@@ -103,18 +126,20 @@ public final class Stu3EobSamhsaMatcherTest {
         expectedResult, matcher.containsOnlyKnownSystems(mockConcept), name + " " + errorMessage);
   }
 
+  /** Nested class for holding the non-parameterized tests. */
   @Nested
   public class NonParameterizedTests {
     /**
-     * Verifies that {@link
-     * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
-     * returns <code>
-     * false</code> for claims that have no SAMHSA-related codes.
+     * Verifies that {@link Stu3EobSamhsaMatcher#test} returns {@code false} for claims that have no
+     * SAMHSA-related codes.
      */
     @Test
-    public void nonSamhsaRelatedClaims() {
+    public void nonSamhsaRelatedClaims() throws IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
+      FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+          FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+      NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -131,7 +156,8 @@ public final class Stu3EobSamhsaMatcherTest {
                         new MetricRegistry(),
                         r,
                         Optional.empty(),
-                        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+                        fdaDrugCodeDisplayLookup,
+                        npiOrgLookup);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -151,7 +177,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchCarrierClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchCarrierClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
@@ -174,7 +200,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchCarrierClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchCarrierClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
@@ -197,7 +223,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchCarrierClaimsByCptProcedure() throws FHIRException {
+    public void matchCarrierClaimsByCptProcedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
@@ -217,7 +243,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException {
+    public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
       String SAMPLE_SAMHSA_CPT_NEW_CODE = "G2067";
 
@@ -238,7 +264,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchDmeClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchDmeClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
@@ -261,7 +287,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchDmeClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchDmeClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
@@ -284,7 +310,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchDmeClaimsByCptProcedure() throws FHIRException {
+    public void matchDmeClaimsByCptProcedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
@@ -304,7 +330,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchInpatientClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchInpatientClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
@@ -327,7 +353,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchInpatientClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchInpatientClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
@@ -350,7 +376,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchInpatientClaimsByIcd9Procedure() throws FHIRException {
+    public void matchInpatientClaimsByIcd9Procedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
@@ -373,7 +399,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchInpatientClaimsByIcd10Procedure() throws FHIRException {
+    public void matchInpatientClaimsByIcd10Procedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
@@ -396,7 +422,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchInpatientClaimsByDrg() throws FHIRException {
+    public void matchInpatientClaimsByDrg() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
@@ -420,7 +446,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchOutpatientClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchOutpatientClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
@@ -443,7 +469,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchOutpatientClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchOutpatientClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
@@ -466,7 +492,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchOutpatientClaimsByCptProcedure() throws FHIRException {
+    public void matchOutpatientClaimsByCptProcedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
@@ -486,7 +512,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchOutpatientClaimsByIcd9Procedure() throws FHIRException {
+    public void matchOutpatientClaimsByIcd9Procedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
@@ -509,7 +535,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchOutpatientClaimsByIcd10Procedure() throws FHIRException {
+    public void matchOutpatientClaimsByIcd10Procedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
@@ -532,7 +558,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchHhaClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchHhaClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
@@ -555,7 +581,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchHhaClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchHhaClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
@@ -578,7 +604,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchHhaClaimsByCptProcedure() throws FHIRException {
+    public void matchHhaClaimsByCptProcedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
@@ -598,7 +624,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchHospiceClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchHospiceClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
@@ -621,7 +647,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchHospiceClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchHospiceClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
@@ -644,7 +670,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchHospiceClaimsByCptProcedure() throws FHIRException {
+    public void matchHospiceClaimsByCptProcedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
@@ -664,7 +690,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchSnfClaimsByIcd9Diagnosis() throws FHIRException {
+    public void matchSnfClaimsByIcd9Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
@@ -687,7 +713,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchSnfClaimsByIcd10Diagnosis() throws FHIRException {
+    public void matchSnfClaimsByIcd10Diagnosis() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
@@ -710,7 +736,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchSnfClaimsByCptProcedure() throws FHIRException {
+    public void matchSnfClaimsByCptProcedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
@@ -730,7 +756,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchSnfClaimsByIcd9Procedure() throws FHIRException {
+    public void matchSnfClaimsByIcd9Procedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
@@ -753,7 +779,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchSnfClaimsByIcd10Procedure() throws FHIRException {
+    public void matchSnfClaimsByIcd10Procedure() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
@@ -776,7 +802,7 @@ public final class Stu3EobSamhsaMatcherTest {
      * @throws FHIRException (indicates problem with test data)
      */
     @Test
-    public void matchSnfClaimsByDrg() throws FHIRException {
+    public void matchSnfClaimsByDrg() throws FHIRException, IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
@@ -791,13 +817,16 @@ public final class Stu3EobSamhsaMatcherTest {
     }
 
     /**
+     * Gets the sample A claim from a file resource.
+     *
      * @param claimType the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} to get a sample
      *     {@link ExplanationOfBenefit} for
      * @return a sample {@link ExplanationOfBenefit} of the specified {@link
      *     gov.cms.bfd.server.war.stu3.providers.ClaimType} (derived from the {@link
      *     StaticRifResourceGroup#SAMPLE_A} sample RIF records)
+     * @throws IOException the io exception
      */
-    private ExplanationOfBenefit getSampleAClaim(ClaimType claimType) {
+    private ExplanationOfBenefit getSampleAClaim(ClaimType claimType) throws IOException {
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
       Object sampleRifRecordForClaimType =
@@ -810,7 +839,8 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               sampleRifRecordForClaimType,
               Optional.empty(),
-              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+              NPIOrgLookup.createNpiOrgLookupForTesting());
 
       return sampleEobForClaimType;
     }

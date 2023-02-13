@@ -3,29 +3,26 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
+import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link ClaimWriterThread.Buffer}. */
 // NewClassNamingConvention - Identifies hierarchy with test name
 @SuppressWarnings("NewClassNamingConvention")
 public class ClaimWriterThread_BufferTest {
 
   /** Checks that a valid claim is added successfully without throwing an exception. */
   @Test
-  void shouldAddValidClaimSuccessfully() {
+  void shouldAddValidClaimSuccessfully() throws IOException, ProcessingException {
     final String mockApiVersion = "version";
     final String mockMessage = "message";
     final String mockClaimKey = "key";
@@ -42,9 +39,9 @@ public class ClaimWriterThread_BufferTest {
 
     doReturn(mockMessage).when(mockEntry).getObject();
 
-    doReturn(mockClaimKey).when(mockSink).getDedupKeyForMessage(mockMessage);
+    doReturn(mockClaimKey).when(mockSink).getClaimIdForMessage(mockMessage);
 
-    doReturn(mockClaim).when(mockSink).transformMessage(mockApiVersion, mockMessage);
+    doReturn(Optional.of(mockClaim)).when(mockSink).transformMessage(mockApiVersion, mockMessage);
 
     ClaimWriterThread.Buffer<String, String> buffer = new ClaimWriterThread.Buffer<>();
 
@@ -54,12 +51,12 @@ public class ClaimWriterThread_BufferTest {
   }
 
   /**
-   * Checks that an invalid claim was sent to {@link RdaSink#writeError(Object,
+   * Checks that an invalid claim was sent to {@link RdaSink#writeError(String, Object,
    * DataTransformer.TransformationException)} and throws a {@link
    * DataTransformer.TransformationException}.
    */
   @Test
-  void shouldThrowExceptionWhenAddingInvalidClaim() throws IOException {
+  void shouldThrowExceptionWhenAddingInvalidClaim() throws IOException, ProcessingException {
     final String mockApiVersion = "version";
     final String mockMessage = "message";
     final String mockClaimKey = "key";
@@ -75,24 +72,12 @@ public class ClaimWriterThread_BufferTest {
 
     doReturn(mockMessage).when(mockEntry).getObject();
 
-    doReturn(mockClaimKey).when(mockSink).getDedupKeyForMessage(mockMessage);
+    doReturn(mockClaimKey).when(mockSink).getClaimIdForMessage(mockMessage);
 
-    doThrow(DataTransformer.TransformationException.class)
-        .when(mockSink)
-        .transformMessage(mockApiVersion, mockMessage);
-
-    doNothing()
-        .when(mockSink)
-        .writeError(anyString(), anyString(), any(DataTransformer.TransformationException.class));
+    doThrow(ProcessingException.class).when(mockSink).transformMessage(mockApiVersion, mockMessage);
 
     ClaimWriterThread.Buffer<String, String> buffer = new ClaimWriterThread.Buffer<>();
 
-    assertThrows(
-        DataTransformer.TransformationException.class, () -> buffer.add(mockSink, mockEntry));
-    verify(mockSink, times(1))
-        .writeError(
-            eq(mockApiVersion),
-            eq(mockMessage),
-            any(DataTransformer.TransformationException.class));
+    assertThrows(ProcessingException.class, () -> buffer.add(mockSink, mockEntry));
   }
 }

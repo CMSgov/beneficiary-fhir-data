@@ -26,7 +26,7 @@ public class ModelUtilTest {
    * method verifies that this pattern holds for the provided list of names and first enum name.
    *
    * @param names names produced by {@link ModelUtil#listNumberedEnumNames}
-   * @param firstNameInSequence first enum value whose name appears in the list
+   * @param firstEnumInSequence first enum value whose name appears in the list
    */
   static void assertNamesFollowSequence(List<String> names, Enum<?> firstEnumInSequence) {
     final String firstNameInSequence = firstEnumInSequence.name();

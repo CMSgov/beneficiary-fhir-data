@@ -19,27 +19,40 @@ import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
 public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcsClaim> {
+  /** The claim transformer. */
   private final McsClaimTransformer transformer;
 
+  /**
+   * Instantiates a new Mcs claim rda sink.
+   *
+   * @param appState the app state
+   * @param transformer the transformer
+   * @param autoUpdateLastSeq whether to automatically update the sequence number
+   * @param errorLimit the error limit
+   */
   public McsClaimRdaSink(
       PipelineApplicationState appState,
       McsClaimTransformer transformer,
-      boolean autoUpdateLastSeq) {
-    super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq);
+      boolean autoUpdateLastSeq,
+      int errorLimit) {
+    super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq, errorLimit);
     this.transformer =
         transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
   }
 
+  /** {@inheritDoc} */
   @Override
-  public String getDedupKeyForMessage(McsClaimChange object) {
+  public String getClaimIdForMessage(McsClaimChange object) {
     return object.getClaim().getIdrClmHdIcn();
   }
 
+  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(McsClaimChange object) {
     return object.getSeq();
   }
 
+  /** {@inheritDoc} */
   @Nonnull
   @Override
   RdaChange<RdaMcsClaim> transformMessageImpl(String apiVersion, McsClaimChange message) {
@@ -48,6 +61,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
     return change;
   }
 
+  /** {@inheritDoc} */
   @Override
   int getInsertCount(RdaMcsClaim claim) {
     return 1 // Add one for the base claim
@@ -58,12 +72,13 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         + claim.getLocations().size();
   }
 
+  /** {@inheritDoc} */
   @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
     final RdaMcsClaim claim = change.getClaim();
     final var locations = new StringList();
     claim.getLocations().stream()
-        .sorted(Comparator.comparing(RdaMcsLocation::getPriority))
+        .sorted(Comparator.comparing(RdaMcsLocation::getRdaPosition))
         .forEach(loc -> locations.addIfNonEmpty(loc.getIdrLocCode()));
     return RdaClaimMessageMetaData.builder()
         .sequenceNumber(change.getSequenceNumber())
@@ -71,7 +86,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .claimId(claim.getIdrClmHdIcn())
         .mbiRecord(claim.getMbiRecord())
         .claimState(claim.getIdrStatusCode())
-        .receivedDate(claim.getLastUpdated())
+        .lastUpdated(claim.getLastUpdated())
         .locations(locations)
         .transactionDate(claim.getIdrStatusDate())
         .phase(change.getSource().getPhase())
@@ -81,6 +96,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .build();
   }
 
+  /** {@inheritDoc} */
   @Override
   MessageError createMessageError(
       String apiVersion, McsClaimChange change, List<DataTransformer.ErrorMessage> errors)
@@ -92,6 +108,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .apiSource(apiVersion)
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))
         .message(protobufObjectWriter.print(change))
+        .status(MessageError.Status.UNRESOLVED)
         .build();
   }
 }

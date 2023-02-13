@@ -76,16 +76,22 @@ import org.junit.jupiter.api.Test;
  * of the verification methods.
  */
 public class FissClaimTransformerTest {
-  // using a fixed Clock ensures our timestamp is predictable
+  /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
+  /** The test hasher. */
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
+  /** The transformer under test. */
   private final FissClaimTransformer transformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
+  /** Creates fiss claim changes for testing changes are as expected. */
   private FissClaimChange.Builder changeBuilder;
+  /** Creates a claim for testing in changes and transformations. */
   private FissClaim.Builder claimBuilder;
+  /** A claim object used for validation (the expected value of the transformation/change). */
   private RdaFissClaim claim;
 
+  /** Resets test objects and sets up shared resources between each test. */
   @BeforeEach
   public void setUp() {
     changeBuilder = FissClaimChange.newBuilder();
@@ -94,6 +100,10 @@ public class FissClaimTransformerTest {
     claim.setSequenceNumber(0L);
   }
 
+  /**
+   * Tests the minimum valid claim and a change built from a minimum valid claim builder result in
+   * the same final claim properties.
+   */
   @Test
   public void minimumValidClaim() {
     claim.setDcn("dcn");
@@ -145,7 +155,9 @@ public class FissClaimTransformerTest {
     claim.setPracLocState("ls");
     claim.setPracLocZip("123456789012345");
     claim.setStmtCovFromDate(LocalDate.of(2020, 2, 3));
+    claim.setStmtCovFromDateText("2020-02-03");
     claim.setStmtCovToDate(LocalDate.of(2021, 4, 5));
+    claim.setStmtCovToDateText("2021-04-05");
     claim.setLobCd("1");
     claim.setServTypeCd("6");
     claim.setServTypeCdMapping(RdaFissClaim.ServTypeCdMapping.Clinic);
@@ -174,7 +186,9 @@ public class FissClaimTransformerTest {
         .setPracLocState("ls")
         .setPracLocZip("123456789012345")
         .setStmtCovFromCymd("2020-02-03")
+        .setStmtCovFromCymdText("2020-02-03")
         .setStmtCovToCymd("2021-04-05")
+        .setStmtCovToCymdText("2021-04-05")
         .setLobCdEnum(FissBillFacilityType.BILL_FACILITY_TYPE_HOSPITAL)
         .setServTypeCdForClinicsEnum(
             FissBillClassificationForClinics
@@ -208,9 +222,14 @@ public class FissClaimTransformerTest {
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissProcCodes(
-            FissProcedureCode.newBuilder().setProcCd("code-1").setProcFlag("fl-1").build())
+            FissProcedureCode.newBuilder()
+                .setRdaPosition(1)
+                .setProcCd("code-1")
+                .setProcFlag("fl-1")
+                .build())
         .addFissProcCodes(
             FissProcedureCode.newBuilder()
+                .setRdaPosition(2)
                 .setProcCd("code-2")
                 .setProcFlag("fl-2")
                 .setProcDt("2021-07-06")
@@ -223,18 +242,16 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissProcCode code = new RdaFissProcCode();
     code.setDcn("dcn");
-    code.setPriority((short) 0);
+    code.setRdaPosition((short) 1);
     code.setProcCode("code-1");
     code.setProcFlag("fl-1");
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     code = new RdaFissProcCode();
     code.setDcn("dcn");
-    code.setPriority((short) 1);
+    code.setRdaPosition((short) 2);
     code.setProcCode("code-2");
     code.setProcFlag("fl-2");
     code.setProcDate(LocalDate.of(2021, 7, 6));
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -242,7 +259,7 @@ public class FissClaimTransformerTest {
         .setClaim(claimBuilder.build());
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getProcCodes(), transformed.getProcCodes(), RdaFissProcCode::getPriority);
+        claim.getProcCodes(), transformed.getProcCodes(), RdaFissProcCode::getRdaPosition);
   }
 
   /**
@@ -259,6 +276,7 @@ public class FissClaimTransformerTest {
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
+                .setRdaPosition(1)
                 .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED)
@@ -266,6 +284,7 @@ public class FissClaimTransformerTest {
                 .build())
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
+                .setRdaPosition(2)
                 .setDiagCd2("code-2")
                 .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
@@ -279,18 +298,16 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissDiagnosisCode code = new RdaFissDiagnosisCode();
     code.setDcn("dcn");
-    code.setPriority((short) 0);
+    code.setRdaPosition((short) 1);
     code.setDiagCd2("");
     code.setDiagPoaInd("W");
     code.setBitFlags("1234");
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     code = new RdaFissDiagnosisCode();
     code.setDcn("dcn");
-    code.setPriority((short) 1);
+    code.setRdaPosition((short) 2);
     code.setDiagCd2("code-2");
     code.setDiagPoaInd("N");
-    code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -299,7 +316,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getDiagCodes(), transformed.getDiagCodes(), RdaFissDiagnosisCode::getPriority);
+        claim.getDiagCodes(), transformed.getDiagCodes(), RdaFissDiagnosisCode::getRdaPosition);
   }
 
   /**
@@ -318,6 +335,7 @@ public class FissClaimTransformerTest {
             FissPayer.newBuilder()
                 .setInsuredPayer(
                     FissInsuredPayer.newBuilder()
+                        .setRdaPosition(1)
                         .setPayersIdEnum(FissPayersCode.PAYERS_CODE_BLACK_LUNG)
                         .setPayersName("payers-name")
                         .setRelIndEnum(
@@ -351,7 +369,7 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissPayer payer = new RdaFissPayer();
     payer.setDcn("dcn");
-    payer.setPriority((short) 0);
+    payer.setRdaPosition((short) 1);
     payer.setPayerType(RdaFissPayer.PayerType.Insured);
     payer.setPayersId("H");
     payer.setPayersName("payers-name");
@@ -371,7 +389,6 @@ public class FissClaimTransformerTest {
     payer.setInsuredRelX12("13");
     payer.setInsuredDob(LocalDate.of(2021, 11, 22));
     payer.setInsuredDobText("11222021");
-    payer.setLastUpdated(claim.getLastUpdated());
     claim.getPayers().add(payer);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -380,7 +397,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getPriority);
+        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getRdaPosition);
   }
 
   /**
@@ -399,6 +416,7 @@ public class FissClaimTransformerTest {
             FissPayer.newBuilder()
                 .setBeneZPayer(
                     FissBeneZPayer.newBuilder()
+                        .setRdaPosition(1)
                         .setPayersIdEnum(FissPayersCode.PAYERS_CODE_BLACK_LUNG)
                         .setPayersName("payers-name")
                         .setRelIndEnum(
@@ -433,7 +451,7 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissPayer payer = new RdaFissPayer();
     payer.setDcn("dcn");
-    payer.setPriority((short) 0);
+    payer.setRdaPosition((short) 1);
     payer.setPayerType(RdaFissPayer.PayerType.BeneZ);
     payer.setPayersId("H");
     payer.setPayersName("payers-name");
@@ -453,7 +471,6 @@ public class FissClaimTransformerTest {
     payer.setTreatAuthCd("auth-code");
     payer.setInsuredSex("M");
     payer.setInsuredRelX12("13");
-    payer.setLastUpdated(claim.getLastUpdated());
     claim.getPayers().add(payer);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -462,7 +479,7 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getPriority);
+        claim.getPayers(), transformed.getPayers(), RdaFissPayer::getRdaPosition);
   }
 
   /**
@@ -484,7 +501,7 @@ public class FissClaimTransformerTest {
                 .setBadtOperId("2")
                 .setBadtReas("3")
                 .setBadtCurrDateCymd("2021-12-03")
-                .setRdaPosition(0)
+                .setRdaPosition(1)
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
@@ -494,13 +511,12 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaFissAuditTrail auditTrail = new RdaFissAuditTrail();
     auditTrail.setDcn("dcn");
-    auditTrail.setPriority((short) 0);
+    auditTrail.setRdaPosition((short) 1);
     auditTrail.setBadtStatus("M");
     auditTrail.setBadtLoc("1");
     auditTrail.setBadtOperId("2");
     auditTrail.setBadtReas("3");
     auditTrail.setBadtCurrDate(LocalDate.of(2021, 12, 3));
-    auditTrail.setLastUpdated(claim.getLastUpdated());
     claim.getAuditTrail().add(auditTrail);
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
@@ -509,9 +525,13 @@ public class FissClaimTransformerTest {
     RdaFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getAuditTrail(), transformed.getAuditTrail(), RdaFissAuditTrail::getPriority);
+        claim.getAuditTrail(), transformed.getAuditTrail(), RdaFissAuditTrail::getRdaPosition);
   }
 
+  /**
+   * Validates that missing fields in a change generate the expected error messages when
+   * transforming that change via the {@link FissClaimTransformer}.
+   */
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
     final long SEQUENCE_NUM = 37;
@@ -548,6 +568,9 @@ public class FissClaimTransformerTest {
 
   // region Claim tests
 
+  /**
+   * Tests the dcn field is properly copied when a message object is passed through the transformer.
+   */
   @Test
   public void testClaimDcn() {
     new ClaimFieldTester()
@@ -555,6 +578,10 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setDcn, RdaFissClaim::getDcn, "dcn", 23);
   }
 
+  /**
+   * Tests the hicNo field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimHicNo() {
     new ClaimFieldTester()
@@ -562,6 +589,10 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setHicNo, RdaFissClaim::getHicNo, "hicNo", 12);
   }
 
+  /**
+   * Tests the currStatus field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimCurrStatus() {
     new ClaimFieldTester()
@@ -577,6 +608,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the currLoc1 field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimCurrLoc1() {
     new ClaimFieldTester()
@@ -592,6 +627,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the currLoc2 field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimCurrLoc2() {
     new ClaimFieldTester()
@@ -607,6 +646,10 @@ public class FissClaimTransformerTest {
             5);
   }
 
+  /**
+   * Tests the provStateCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimProvStateCd() {
     new ClaimFieldTester()
@@ -617,6 +660,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the provTypFacilCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimProvTypFacilCd() {
     new ClaimFieldTester()
@@ -627,6 +674,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the provEmerInd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimProvEmerInd() {
     new ClaimFieldTester()
@@ -637,6 +688,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the provDeptId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimProvDeptId() {
     new ClaimFieldTester()
@@ -647,6 +702,10 @@ public class FissClaimTransformerTest {
             3);
   }
 
+  /**
+   * Tests the medaProvId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimMedaProvId() {
     new ClaimFieldTester()
@@ -657,6 +716,10 @@ public class FissClaimTransformerTest {
             13);
   }
 
+  /**
+   * Tests the medaProv_6 field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimMedaProv6() {
     new ClaimFieldTester()
@@ -667,6 +730,10 @@ public class FissClaimTransformerTest {
             6);
   }
 
+  /**
+   * Tests the totalChargeAmount field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimTotalChargeAmount() {
     new ClaimFieldTester()
@@ -676,6 +743,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.totalChargeAmount);
   }
 
+  /**
+   * Tests the recdDtCymd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimRecdDtCymd() {
     new ClaimFieldTester()
@@ -685,6 +756,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.receivedDate);
   }
 
+  /**
+   * Tests the currTranDtCymd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimCurrTranDtCymd() {
     new ClaimFieldTester()
@@ -694,6 +769,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.currTranDate);
   }
 
+  /**
+   * Tests the claimAdmDiagCode field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAdmDiagCode() {
     new ClaimFieldTester()
@@ -704,6 +783,10 @@ public class FissClaimTransformerTest {
             7);
   }
 
+  /**
+   * Tests the principleDiag field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPrincipleDiag() {
     new ClaimFieldTester()
@@ -714,6 +797,10 @@ public class FissClaimTransformerTest {
             7);
   }
 
+  /**
+   * Tests the npiNumber field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimNpiNumber() {
     new ClaimFieldTester()
@@ -724,6 +811,10 @@ public class FissClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the mbi field and hash is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimMbi() {
     new ClaimFieldTester()
@@ -733,6 +824,10 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setMbi, RdaFissClaim::getMbiHash, 11, idHasher);
   }
 
+  /**
+   * Tests the fedTaxNumber field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimFedTaxNb() {
     new ClaimFieldTester()
@@ -743,6 +838,10 @@ public class FissClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the pracLocAddr1 field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPracLocAddr1() {
     new ClaimFieldTester()
@@ -753,6 +852,10 @@ public class FissClaimTransformerTest {
             2147483647);
   }
 
+  /**
+   * Tests the pracLocAddr2 field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPracLocAddr2() {
     new ClaimFieldTester()
@@ -763,6 +866,10 @@ public class FissClaimTransformerTest {
             2147483647);
   }
 
+  /**
+   * Tests the pracLocCity field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPracLocCity() {
     new ClaimFieldTester()
@@ -773,6 +880,10 @@ public class FissClaimTransformerTest {
             2147483647);
   }
 
+  /**
+   * Tests the pracLocState field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPracLocState() {
     new ClaimFieldTester()
@@ -783,6 +894,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the pracLocZip field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPracLocZip() {
     new ClaimFieldTester()
@@ -793,6 +908,10 @@ public class FissClaimTransformerTest {
             15);
   }
 
+  /**
+   * Tests the stmtCovFromDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimStmtCovFromCymd() {
     new ClaimFieldTester()
@@ -802,6 +921,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.stmtCovFromDate);
   }
 
+  /**
+   * Tests the stmtCovToDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimStmtCovToCymd() {
     new ClaimFieldTester()
@@ -811,6 +934,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.stmtCovToDate);
   }
 
+  /**
+   * Tests the lobCd field is properly parsed and copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimLobCd() {
     new ClaimFieldTester()
@@ -826,6 +953,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the servTypeCd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimServTypCd() {
     new ClaimFieldTester()
@@ -841,6 +972,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the freqCd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimFreqCd() {
     new ClaimFieldTester()
@@ -856,6 +991,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the billTypCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimBillTypCd() {
     new ClaimFieldTester()
@@ -866,6 +1005,10 @@ public class FissClaimTransformerTest {
             3);
   }
 
+  /**
+   * Tests the rejectCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimRejectCd() {
     new ClaimFieldTester()
@@ -876,6 +1019,10 @@ public class FissClaimTransformerTest {
             5);
   }
 
+  /**
+   * Tests the fullPartDenInd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimFullPartDenInd() {
     new ClaimFieldTester()
@@ -886,6 +1033,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the nonPayInd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimNonPayInd() {
     new ClaimFieldTester()
@@ -896,6 +1047,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the xrefDcnNbr field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimXrefDcnNbr() {
     new ClaimFieldTester()
@@ -906,6 +1061,10 @@ public class FissClaimTransformerTest {
             23);
   }
 
+  /**
+   * Tests the adjReqCd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimAdjReqCd() {
     new ClaimFieldTester()
@@ -921,6 +1080,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the adjReasCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAdjReasCd() {
     new ClaimFieldTester()
@@ -931,6 +1094,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the cancelXrefDcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimCancelXrefDcn() {
     new ClaimFieldTester()
@@ -941,6 +1108,10 @@ public class FissClaimTransformerTest {
             23);
   }
 
+  /**
+   * Tests the cancelDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimCancelDate() {
     new ClaimFieldTester()
@@ -950,6 +1121,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.cancelDate);
   }
 
+  /**
+   * Tests the cancAdjCd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimCancAdjCd() {
     new ClaimFieldTester()
@@ -965,6 +1140,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the originalXrefDcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOriginalXrefDcn() {
     new ClaimFieldTester()
@@ -975,6 +1154,10 @@ public class FissClaimTransformerTest {
             23);
   }
 
+  /**
+   * Tests the paidDt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimPaidDt() {
     new ClaimFieldTester()
@@ -982,6 +1165,10 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setPaidDtCymd, RdaFissClaim::getPaidDt, RdaFissClaim.Fields.paidDt);
   }
 
+  /**
+   * Tests the admDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAdmDate() {
     new ClaimFieldTester()
@@ -991,6 +1178,10 @@ public class FissClaimTransformerTest {
             RdaFissClaim.Fields.admDate);
   }
 
+  /**
+   * Tests the admSource field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimAdmSource() {
     new ClaimFieldTester()
@@ -1006,6 +1197,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the primaryPayerCode field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimPrimaryPayerCode() {
     new ClaimFieldTester()
@@ -1021,6 +1216,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the attendPhysId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAttendPhysId() {
     new ClaimFieldTester()
@@ -1031,6 +1230,10 @@ public class FissClaimTransformerTest {
             16);
   }
 
+  /**
+   * Tests the attendPhysLname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAttendPhysLname() {
     new ClaimFieldTester()
@@ -1041,6 +1244,10 @@ public class FissClaimTransformerTest {
             17);
   }
 
+  /**
+   * Tests the attendPhysFname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAttendPhysFname() {
     new ClaimFieldTester()
@@ -1051,6 +1258,10 @@ public class FissClaimTransformerTest {
             18);
   }
 
+  /**
+   * Tests the attendPhysMint field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAttendPhysMint() {
     new ClaimFieldTester()
@@ -1061,6 +1272,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the attendPhysFlag field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimAttendPhysFlag() {
     new ClaimFieldTester()
@@ -1076,6 +1291,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the operatingPhysId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOperatingPhysId() {
     new ClaimFieldTester()
@@ -1086,6 +1305,10 @@ public class FissClaimTransformerTest {
             16);
   }
 
+  /**
+   * Tests the operPhysLname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOperPhysLname() {
     new ClaimFieldTester()
@@ -1096,6 +1319,10 @@ public class FissClaimTransformerTest {
             17);
   }
 
+  /**
+   * Tests the operPhysFname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOperPhysFname() {
     new ClaimFieldTester()
@@ -1106,6 +1333,10 @@ public class FissClaimTransformerTest {
             18);
   }
 
+  /**
+   * Tests the operPhysMint field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOperPhysMint() {
     new ClaimFieldTester()
@@ -1116,6 +1347,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the operPhysFlag field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimOperPhysFlag() {
     new ClaimFieldTester()
@@ -1131,6 +1366,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the othPhysId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOthPhysId() {
     new ClaimFieldTester()
@@ -1141,6 +1380,10 @@ public class FissClaimTransformerTest {
             16);
   }
 
+  /**
+   * Tests the othPhysLname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOthPhysLname() {
     new ClaimFieldTester()
@@ -1151,6 +1394,10 @@ public class FissClaimTransformerTest {
             17);
   }
 
+  /**
+   * Tests the othPhysFname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOthPhysFname() {
     new ClaimFieldTester()
@@ -1161,6 +1408,10 @@ public class FissClaimTransformerTest {
             18);
   }
 
+  /**
+   * Tests the othPhysMint field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimOthPhysMint() {
     new ClaimFieldTester()
@@ -1171,6 +1422,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the othPhysFlag field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimOthPhysFlag() {
     new ClaimFieldTester()
@@ -1186,6 +1441,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the xrefHicNbr field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimXrefHicNbr() {
     new ClaimFieldTester()
@@ -1196,6 +1455,10 @@ public class FissClaimTransformerTest {
             12);
   }
 
+  /**
+   * Tests the procNewHicInd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimProcNewHicInd() {
     new ClaimFieldTester()
@@ -1211,6 +1474,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the newHic field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimNewHic() {
     new ClaimFieldTester()
@@ -1218,6 +1485,10 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setNewHic, RdaFissClaim::getNewHic, RdaFissClaim.Fields.newHic, 12);
   }
 
+  /**
+   * Tests the reposInd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimReposInd() {
     new ClaimFieldTester()
@@ -1233,6 +1504,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the reposHic field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimReposHic() {
     new ClaimFieldTester()
@@ -1243,6 +1518,10 @@ public class FissClaimTransformerTest {
             12);
   }
 
+  /**
+   * Tests the mbiSubmBeneInd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimMbiSubmBeneInd() {
     new ClaimFieldTester()
@@ -1258,6 +1537,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the adjMbiInd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimAdjMbiInd() {
     new ClaimFieldTester()
@@ -1274,6 +1557,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the adjMbi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimAdjMbi() {
     new ClaimFieldTester()
@@ -1281,6 +1568,10 @@ public class FissClaimTransformerTest {
             FissClaim.Builder::setAdjMbi, RdaFissClaim::getAdjMbi, RdaFissClaim.Fields.adjMbi, 11);
   }
 
+  /**
+   * Tests the medicalRecordNo field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimMedicalRecordNo() {
     new ClaimFieldTester()
@@ -1294,6 +1585,10 @@ public class FissClaimTransformerTest {
   // endregion Claim tests
   // region DiagnosisCode tests
 
+  /**
+   * Tests the diagCd2 field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDiagnosisCodeDiagCd2() {
     new DiagnosisCodeFieldTester(false)
@@ -1304,6 +1599,10 @@ public class FissClaimTransformerTest {
             7);
   }
 
+  /**
+   * Tests the diagPoaInd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDiagnosisCodePoaInd() {
     new DiagnosisCodeFieldTester(true)
@@ -1319,6 +1618,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the bitFlags field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDiagnosisCodeBitFlags() {
     new DiagnosisCodeFieldTester(false)
@@ -1329,6 +1632,10 @@ public class FissClaimTransformerTest {
             4);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDiagnosisCodeRdaPosition() {
     new DiagnosisCodeFieldTester(true)
@@ -1341,6 +1648,10 @@ public class FissClaimTransformerTest {
   // endregion ProcCode tests
   // region ProcCode tests
 
+  /**
+   * Tests the procCode field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testProcCodeProcCd() {
     new ProcCodeFieldTester()
@@ -1351,6 +1662,10 @@ public class FissClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the procFlag field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testProcCodeProcFlag() {
     new ProcCodeFieldTester()
@@ -1361,6 +1676,10 @@ public class FissClaimTransformerTest {
             4);
   }
 
+  /**
+   * Tests the procDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testProcCodeProcDt() {
     new ProcCodeFieldTester()
@@ -1370,6 +1689,10 @@ public class FissClaimTransformerTest {
             RdaFissProcCode.Fields.procDate);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testProcCodeRdaPosition() {
     new ProcCodeFieldTester()
@@ -1382,6 +1705,10 @@ public class FissClaimTransformerTest {
   // endregion ProcCode tests
   // region BeneZPayer tests
 
+  /**
+   * Tests the payersId field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testBeneZPayerPayersId() {
     new BeneZPayerFieldTester()
@@ -1397,6 +1724,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the payersName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerPayersName() {
     new BeneZPayerFieldTester()
@@ -1407,6 +1738,10 @@ public class FissClaimTransformerTest {
             32);
   }
 
+  /**
+   * Tests the relInd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testBeneZPayerRelInd() {
     new BeneZPayerFieldTester()
@@ -1422,6 +1757,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the assignInd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testBeneZPayerAssignInd() {
     new BeneZPayerFieldTester()
@@ -1437,6 +1776,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the providerNumber field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerProviderNumber() {
     new BeneZPayerFieldTester()
@@ -1447,6 +1790,10 @@ public class FissClaimTransformerTest {
             13);
   }
 
+  /**
+   * Tests the adjDcnIcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerAdjDcnIcn() {
     new BeneZPayerFieldTester()
@@ -1457,6 +1804,10 @@ public class FissClaimTransformerTest {
             23);
   }
 
+  /**
+   * Tests the priorPmt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerPriorPmt() {
     new BeneZPayerFieldTester()
@@ -1466,6 +1817,10 @@ public class FissClaimTransformerTest {
             RdaFissPayer.Fields.priorPmt);
   }
 
+  /**
+   * Tests the estAmtDue field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerEstAmtDue() {
     new BeneZPayerFieldTester()
@@ -1475,6 +1830,10 @@ public class FissClaimTransformerTest {
             RdaFissPayer.Fields.estAmtDue);
   }
 
+  /**
+   * Tests the beneRel field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testBeneZPayerBeneRel() {
     new BeneZPayerFieldTester()
@@ -1490,6 +1849,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the beneLastName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerBeneLastName() {
     new BeneZPayerFieldTester()
@@ -1500,6 +1863,10 @@ public class FissClaimTransformerTest {
             15);
   }
 
+  /**
+   * Tests the beneFirstName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerBeneFirstName() {
     new BeneZPayerFieldTester()
@@ -1510,6 +1877,10 @@ public class FissClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the beneMidInit field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerBeneMidInit() {
     new BeneZPayerFieldTester()
@@ -1520,6 +1891,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the beneSsnHic field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerBeneSsnHic() {
     new BeneZPayerFieldTester()
@@ -1530,6 +1905,10 @@ public class FissClaimTransformerTest {
             19);
   }
 
+  /**
+   * Tests the insuredGroupName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerInsuredGroupName() {
     new BeneZPayerFieldTester()
@@ -1540,6 +1919,10 @@ public class FissClaimTransformerTest {
             17);
   }
 
+  /**
+   * Tests the beneDob field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerBeneDob() {
     new BeneZPayerFieldTester()
@@ -1549,6 +1932,10 @@ public class FissClaimTransformerTest {
             RdaFissPayer.Fields.beneDob);
   }
 
+  /**
+   * Tests the beneSex field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testBeneZPayerBeneSex() {
     new BeneZPayerFieldTester()
@@ -1564,6 +1951,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the treatAuthCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerTreatAuthCd() {
     new BeneZPayerFieldTester()
@@ -1574,6 +1965,10 @@ public class FissClaimTransformerTest {
             18);
   }
 
+  /**
+   * Tests the insuredSex field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testBeneZPayerInsuredSex() {
     new BeneZPayerFieldTester()
@@ -1589,6 +1984,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the insuredRelX12 field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testBeneZPayerInsuredRelX12() {
     new BeneZPayerFieldTester()
@@ -1604,6 +2003,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testBeneZPayerRdaPosition() {
     new BeneZPayerFieldTester()
@@ -1616,6 +2019,10 @@ public class FissClaimTransformerTest {
   // endregion BeneZPayer tests
   // region InsuredPayer tests
 
+  /**
+   * Tests the payersId field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testInsuredPayerPayersId() {
     new InsuredPayerFieldTester()
@@ -1631,6 +2038,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the payersName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerPayersName() {
     new InsuredPayerFieldTester()
@@ -1641,6 +2052,10 @@ public class FissClaimTransformerTest {
             32);
   }
 
+  /**
+   * Tests the relInd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testInsuredPayerRelInd() {
     new InsuredPayerFieldTester()
@@ -1656,6 +2071,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the assignInd field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testInsuredPayerAssignInd() {
     new InsuredPayerFieldTester()
@@ -1671,6 +2090,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the providerNumber field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerProviderNumber() {
     new InsuredPayerFieldTester()
@@ -1681,6 +2104,10 @@ public class FissClaimTransformerTest {
             13);
   }
 
+  /**
+   * Tests the adjDcnIcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerAdjDcnIcn() {
     new InsuredPayerFieldTester()
@@ -1691,6 +2118,10 @@ public class FissClaimTransformerTest {
             23);
   }
 
+  /**
+   * Tests the priorPmt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerPriorPmt() {
     new InsuredPayerFieldTester()
@@ -1700,6 +2131,10 @@ public class FissClaimTransformerTest {
             RdaFissPayer.Fields.priorPmt);
   }
 
+  /**
+   * Tests the estAmtDue field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerEstAmtDue() {
     new InsuredPayerFieldTester()
@@ -1709,6 +2144,10 @@ public class FissClaimTransformerTest {
             RdaFissPayer.Fields.estAmtDue);
   }
 
+  /**
+   * Tests the insuredRel field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testInsuredPayerInsuredRel() {
     new InsuredPayerFieldTester()
@@ -1724,6 +2163,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the insuredName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerInsuredName() {
     new InsuredPayerFieldTester()
@@ -1734,6 +2177,10 @@ public class FissClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the insuredSsnHic field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerInsuredSsnHic() {
     new InsuredPayerFieldTester()
@@ -1744,6 +2191,10 @@ public class FissClaimTransformerTest {
             19);
   }
 
+  /**
+   * Tests the insuredGroupName field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerInsuredGroupName() {
     new InsuredPayerFieldTester()
@@ -1754,6 +2205,10 @@ public class FissClaimTransformerTest {
             17);
   }
 
+  /**
+   * Tests the insuredGroupNbr field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerInsuredGroupNbr() {
     new InsuredPayerFieldTester()
@@ -1764,6 +2219,10 @@ public class FissClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the treatAuthCd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerTreatAuthCd() {
     new InsuredPayerFieldTester()
@@ -1774,6 +2233,10 @@ public class FissClaimTransformerTest {
             18);
   }
 
+  /**
+   * Tests the insuredSex field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testInsuredPayerInsuredSex() {
     new InsuredPayerFieldTester()
@@ -1789,6 +2252,10 @@ public class FissClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the insuredRelX12 field is properly parsed copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testInsuredPayerInsuredRelX12() {
     new InsuredPayerFieldTester()
@@ -1804,6 +2271,10 @@ public class FissClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the insuredDob field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerInsuredDob() {
     new InsuredPayerFieldTester()
@@ -1813,6 +2284,10 @@ public class FissClaimTransformerTest {
             RdaFissPayer.Fields.insuredDob);
   }
 
+  /**
+   * Tests the insuredDobText field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerInsuredDobText() {
     new InsuredPayerFieldTester()
@@ -1823,6 +2298,10 @@ public class FissClaimTransformerTest {
             9);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testInsuredPayerRdaPosition() {
     new InsuredPayerFieldTester()
@@ -1835,6 +2314,10 @@ public class FissClaimTransformerTest {
   // endregion InsuredPayer tests
   // region AuditTrail tests
 
+  /**
+   * Tests the badtStatus field is properly parsed when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAuditTrailBadtStatus() {
     new AuditTrailFieldTester()
@@ -1845,6 +2328,10 @@ public class FissClaimTransformerTest {
             " ");
   }
 
+  /**
+   * Tests the badtLoc field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAudiTrailBadtLoc() {
     new AuditTrailFieldTester()
@@ -1855,6 +2342,10 @@ public class FissClaimTransformerTest {
             5);
   }
 
+  /**
+   * Tests the badtOperId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAudiTrailBadtOperId() {
     new AuditTrailFieldTester()
@@ -1865,6 +2356,10 @@ public class FissClaimTransformerTest {
             9);
   }
 
+  /**
+   * Tests the badtReas field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAudiTrailBadtReas() {
     new AuditTrailFieldTester()
@@ -1875,6 +2370,10 @@ public class FissClaimTransformerTest {
             5);
   }
 
+  /**
+   * Tests the badtCurrDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAudiTrailBadtCurrDate() {
     new AuditTrailFieldTester()
@@ -1884,6 +2383,10 @@ public class FissClaimTransformerTest {
             RdaFissAuditTrail.Fields.badtCurrDate);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAudiTrailRdaPosition() {
     new AuditTrailFieldTester()
@@ -1953,6 +2456,12 @@ public class FissClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
+  /**
+   * Asserts that a transformed change matches the change type and property values of an expected
+   * claim.
+   *
+   * @param changeType the change type to validate
+   */
   private void assertChangeMatches(RdaChange.Type changeType) {
     RdaChange<RdaFissClaim> changed = transformer.transformClaim(changeBuilder.build());
     assertEquals(changeType, changed.getType());
@@ -1973,6 +2482,7 @@ public class FissClaimTransformerTest {
   private abstract class AbstractFieldTester<TBuilder, TEntity>
       extends ClaimTransformerFieldTester<
           FissClaim.Builder, FissClaim, RdaFissClaim, TBuilder, TEntity> {
+    /** {@inheritDoc} */
     @Override
     FissClaim.Builder createClaimBuilder() {
       return FissClaim.newBuilder()
@@ -1982,7 +2492,7 @@ public class FissClaimTransformerTest {
           .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
           .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaChange<RdaFissClaim> transformClaim(FissClaim claim) {
       var changeBuilder =
@@ -1992,7 +2502,7 @@ public class FissClaimTransformerTest {
               .setClaim(claim);
       return transformer.transformClaim(changeBuilder.build());
     }
-
+    /** {@inheritDoc} */
     @Override
     FissClaim buildClaim(FissClaim.Builder builder) {
       return builder.build();
@@ -2005,11 +2515,12 @@ public class FissClaimTransformerTest {
    * tests that operator on {@link FissClaim} and {@link RdaFissClaim} instances.
    */
   class ClaimFieldTester extends AbstractFieldTester<FissClaim.Builder, RdaFissClaim> {
+    /** {@inheritDoc} */
     @Override
     FissClaim.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       return claimBuilder;
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaFissClaim getTestEntity(RdaFissClaim claim) {
       return claim;
@@ -2019,10 +2530,11 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissAuditTrail.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissAuditTrail} and {@link RdaFissAuditTrail} instances.
+   * Used for tests that operate on {@link FissAuditTrail} and {@link RdaFissAuditTrail} instances.
    */
   class AuditTrailFieldTester
       extends AbstractFieldTester<FissAuditTrail.Builder, RdaFissAuditTrail> {
+    /** {@inheritDoc} */
     @Override
     FissAuditTrail.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissAuditTrailBuilderList().isEmpty()) {
@@ -2030,16 +2542,15 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissAuditTrailBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaFissAuditTrail getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getAuditTrail().size());
       RdaFissAuditTrail answer = claim.getAuditTrail().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
       return "auditTrail-0-" + basicLabel;
@@ -2049,9 +2560,10 @@ public class FissClaimTransformerTest {
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissBeneZPayer.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissBeneZPayer} and {@link RdaFissPayer} instances.
+   * Used for tests that operate on {@link FissBeneZPayer} and {@link RdaFissPayer} instances.
    */
   class BeneZPayerFieldTester extends AbstractFieldTester<FissBeneZPayer.Builder, RdaFissPayer> {
+    /** {@inheritDoc} */
     @Override
     FissBeneZPayer.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissPayersBuilderList().isEmpty()) {
@@ -2059,29 +2571,29 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissPayersBuilder(0).getBeneZPayerBuilder();
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaFissPayer getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getPayers().size());
       RdaFissPayer answer = claim.getPayers().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "payer-0-" + basicLabel;
+      return "payers-0-" + basicLabel;
     }
   }
 
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissInsuredPayer.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissInsuredPayer} and {@link RdaFissPayer} instances.
+   * Used for tests that operate on {@link FissInsuredPayer} and {@link RdaFissPayer} instances.
    */
   class InsuredPayerFieldTester
       extends AbstractFieldTester<FissInsuredPayer.Builder, RdaFissPayer> {
+    /** {@inheritDoc} */
     @Override
     FissInsuredPayer.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissPayersBuilderList().isEmpty()) {
@@ -2089,30 +2601,29 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissPayersBuilder(0).getInsuredPayerBuilder();
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaFissPayer getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getPayers().size());
       RdaFissPayer answer = claim.getPayers().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "payer-0-" + basicLabel;
+      return "payers-0-" + basicLabel;
     }
   }
 
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissProcedureCode.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissProcedureCode} and {@link RdaFissProcCode}
-   * instances.
+   * Used for tests that operate on {@link FissProcedureCode} and {@link RdaFissProcCode} instances.
    */
   class ProcCodeFieldTester
       extends AbstractFieldTester<FissProcedureCode.Builder, RdaFissProcCode> {
+    /** {@inheritDoc} */
     @Override
     FissProcedureCode.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissProcCodesBuilderList().isEmpty()) {
@@ -2121,31 +2632,31 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissProcCodesBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaFissProcCode getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getProcCodes().size());
       RdaFissProcCode answer = claim.getProcCodes().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "procCode-0-" + basicLabel;
+      return "procCodes-0-" + basicLabel;
     }
   }
 
   /**
    * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
    * create {@link FissDiagnosisCode.Builder} instances and to trigger a transformation of a claim.
-   * Used for tests that operator on {@link FissDiagnosisCode} and {@link RdaFissDiagnosisCode}
+   * Used for tests that operate on {@link FissDiagnosisCode} and {@link RdaFissDiagnosisCode}
    * instances.
    */
   class DiagnosisCodeFieldTester
       extends AbstractFieldTester<FissDiagnosisCode.Builder, RdaFissDiagnosisCode> {
 
+    /** Whether the diagnosis code should be populated. */
     private final boolean addDiagCode;
 
     /**
@@ -2159,6 +2670,7 @@ public class FissClaimTransformerTest {
       this.addDiagCode = addDiagCode;
     }
 
+    /** {@inheritDoc} */
     @Override
     FissDiagnosisCode.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissDiagCodesBuilderList().isEmpty()) {
@@ -2169,19 +2681,18 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissDiagCodesBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaFissDiagnosisCode getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getDiagCodes().size());
       RdaFissDiagnosisCode answer = claim.getDiagCodes().iterator().next();
       assertEquals("dcn", answer.getDcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "diagCode-0-" + basicLabel;
+      return "diagCodes-0-" + basicLabel;
     }
   }
 

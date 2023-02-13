@@ -2,7 +2,8 @@ name: 'CI - Rust'
 on:
   pull_request:
     paths:
-      - apps/utils/db-query-checker
+      - .github/workflows/ci-rust.yml
+      - apps/utils/db-query-checker/*
 
 jobs:
 
@@ -12,29 +13,29 @@ jobs:
         project:
           - name: db-query-checker
             directory: apps/utils/db-query-checker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         # Note: This only affects `run` steps; not actions.
         working-directory: ${{ matrix.project.directory }}
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Try to use cache from this or ancestor branches.
       # Also sets a hook that will cache this build after the job is complete.
       - name: 'Cache cargo registry'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo index'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo build'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ${{ matrix.project.directory }}/target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
@@ -62,29 +63,29 @@ jobs:
         project:
           - name: db-query-checker
             directory: apps/utils/db-query-checker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         # Note: This only affects `run` steps; not actions.
         working-directory: ${{ matrix.project.directory }}
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Try to use cache from this or ancestor branches.
       # Also sets a hook that will cache this build after the job is complete.
       - name: 'Cache cargo registry'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo index'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
       - name: 'Cache cargo build'
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ${{ matrix.project.directory }}/target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}

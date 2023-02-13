@@ -22,6 +22,7 @@ from common.stats.stats_config import (
     StatsConfiguration,
     StatsStorageType,
 )
+from common.validation import ValidationResult
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
@@ -159,6 +160,8 @@ class StatsFileLoader(StatsLoader):
                 loaded_metadata.hash == self.metadata.hash,
                 loaded_metadata.compare_result
                 in (FinalCompareResult.NOT_APPLICABLE, FinalCompareResult.PASSED),
+                loaded_metadata.validation_result
+                in (ValidationResult.NOT_APPLICABLE, ValidationResult.PASSED),
                 # Pick some delta that the runtimes should be under -- in this case, we're using 3
                 # seconds
                 # TODO: Determine the right delta for checking for matching runtimes
@@ -266,6 +269,10 @@ class StatsAthenaLoader(StatsLoader):
             (
                 f"(metadata.compare_result='{FinalCompareResult.NOT_APPLICABLE.value}' OR "
                 f"metadata.compare_result='{FinalCompareResult.PASSED.value}')"
+            ),
+            (
+                f"(metadata.validation_result='{ValidationResult.NOT_APPLICABLE.value}' OR "
+                f"metadata.validation_result='{ValidationResult.PASSED.value}')"
             ),
             # TODO: Determine the right delta for checking for matching runtimes
             f"(metadata.total_runtime - {self.metadata.total_runtime}) < {TOTAL_RUNTIME_DELTA}",

@@ -22,12 +22,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformerV2 {
 
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -51,8 +55,10 @@ final class DMEClaimTransformerV2 {
   }
 
   /**
-   * @param claimGroup the CCW {@link DMEClaim} to transform
+   * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the CCW {@link TransformerContext} to transform
+   * @param claimGroup the CCW {@link DMEClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
@@ -164,6 +170,13 @@ final class DMEClaimTransformerV2 {
     return eob;
   }
 
+  /**
+   * Adds information to the eob using the claim line information.
+   *
+   * @param claimGroup the claim group with the lines to get data from
+   * @param eob the eob to add information to
+   * @param transformerContext the transformer context
+   */
   private static void handleClaimLines(
       DMEClaim claimGroup, ExplanationOfBenefit eob, TransformerContext transformerContext) {
     for (DMEClaimLine line : claimGroup.getLines()) {
@@ -193,22 +206,35 @@ final class DMEClaimTransformerV2 {
               line.getProviderNPI());
 
       // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
+      if (performing.isPresent()) {
+        performing.get().setResponsible(true);
 
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing
+            .get()
+            .setQualification(
                 TransformerUtilsV2.createCodeableConcept(
                     eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        boolean performingHasMatchingExtension =
+            (line.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+                    performing.get(),
+                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(line.getProviderParticipatingIndCode().get()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.PRTCPTNG_IND_CD,
+                      line.getProviderParticipatingIndCode()));
+        }
+      }
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (item.getLocation() != null) {

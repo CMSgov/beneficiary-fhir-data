@@ -151,9 +151,9 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1497758544"
+          "value" : "0000000000"
         },
-        "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -166,9 +166,9 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1497758544"
+          "value" : "0000000000"
         },
-        "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -1249,8 +1249,9 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1811111111"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -1263,8 +1264,9 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1811111111"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -1832,8 +1834,9 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "5555553305"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -1846,8 +1849,9 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "5555553305"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -2097,9 +2101,9 @@
         } ]
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw2",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw2",
             "code" : "N",
             "display" : "Diagnosis was not present at the time of admission"
           }
@@ -2111,12 +2115,19 @@
             "code" : "A52",
             "display" : "LATE SYPHILIS"
           } ]
-        }
+        },
+        "type" : [ {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+            "code" : "other",
+            "display" : "Required when other conditions coexist or develop subsequently during the treatment"
+          } ]
+        } ]
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw3",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw3",
             "code" : "N",
             "display" : "Diagnosis was not present at the time of admission"
           }
@@ -2128,12 +2139,19 @@
             "code" : "A06",
             "display" : "AMEBIASIS"
           } ]
-        }
+        },
+        "type" : [ {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+            "code" : "other",
+            "display" : "Required when other conditions coexist or develop subsequently during the treatment"
+          } ]
+        } ]
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw4",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw4",
             "code" : "N",
             "display" : "Diagnosis was not present at the time of admission"
           }
@@ -2145,12 +2163,19 @@
             "code" : "A15",
             "display" : "RESPIRATORY TUBERCULOSIS"
           } ]
-        }
+        },
+        "type" : [ {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+            "code" : "other",
+            "display" : "Required when other conditions coexist or develop subsequently during the treatment"
+          } ]
+        } ]
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw5",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw5",
             "code" : "N",
             "display" : "Diagnosis was not present at the time of admission"
           }
@@ -2162,12 +2187,19 @@
             "code" : "B01",
             "display" : "VARICELLA [CHICKENPOX]"
           } ]
-        }
+        },
+        "type" : [ {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+            "code" : "other",
+            "display" : "Required when other conditions coexist or develop subsequently during the treatment"
+          } ]
+        } ]
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+          "url" : "https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw1",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system" : "https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw1",
             "code" : "N",
             "display" : "Diagnosis was not present at the time of admission"
           }
@@ -2186,18 +2218,12 @@
             "code" : "external-first",
             "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
           } ]
-        }, {
-          "coding" : [ {
-            "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-            "code" : "principal",
-            "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
-          } ]
         } ]
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+          "url" : "https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw2",
           "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+            "system" : "https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw2",
             "code" : "Y",
             "display" : "Diagnosis was present at the time of admission (POA)"
           }
@@ -2585,8 +2611,9 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1111111111"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -2599,8 +2626,9 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1111111111"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,
@@ -3712,8 +3740,8 @@
           "url" : "http://hl7.org/fhir/sid/us-npi",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
-            "code" : "1497758544",
-            "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+            "code" : "0000000000",
+            "display" : "Fake ORG Name"
           }
         } ],
         "sequence" : 2,
@@ -4145,8 +4173,9 @@
       "organization" : {
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "999999999"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "facility" : {
         "extension" : [ {
@@ -4159,8 +4188,9 @@
         } ],
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "999999999"
-        }
+          "value" : "0000000000"
+        },
+        "display" : "Fake ORG Name"
       },
       "information" : [ {
         "sequence" : 1,

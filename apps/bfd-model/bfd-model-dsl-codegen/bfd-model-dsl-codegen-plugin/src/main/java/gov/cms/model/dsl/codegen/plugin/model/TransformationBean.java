@@ -1,6 +1,10 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
+import gov.cms.model.dsl.codegen.plugin.model.validation.TransformerName;
+import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +24,22 @@ import lombok.Singular;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TransformationBean {
+public class TransformationBean implements ModelBean {
+  /**
+   * Special value for {@link TransformationBean#transformer} to signify that the transformation is
+   * to copy an array rather than a column.
+   */
+  public static final String ArrayTransformName = "Array";
+
   /** Name of the field/property in the source object to transform. */
+  @NotNull
+  @JavaName(type = JavaNameType.Property)
   private String from;
   /**
    * Name of the field/property in the destination object to copy the data to. Can be omitted (left
    * null) if the destination field name is identical to the source field name.
    */
+  @JavaName(type = JavaNameType.Property)
   private String to;
   /**
    * Specifies which components (if any) of the {@code from} are optional (possess a {@code has}
@@ -41,7 +54,7 @@ public class TransformationBean {
    * gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil} for how this is mapped to actual
    * transformer instances.
    */
-  private String transformer;
+  @TransformerName private String transformer;
   /** Default value to use if a field is optional and has no value in the source object. */
   private String defaultValue;
   /**
@@ -49,6 +62,15 @@ public class TransformationBean {
    * transformer. Which key/value pairs are appropriate depend on the transformer.
    */
   @Singular Map<String, String> transformerOptions = new HashMap<>();
+
+  /**
+   * Used to quickly determine if a transformation is used to indicate an array transformation.
+   *
+   * @return true if this is an array transformation
+   */
+  public boolean isArray() {
+    return ArrayTransformName.equals(transformer);
+  }
 
   /**
    * Determines the appropriate destination object field name to use. This will be the value of the
@@ -124,7 +146,7 @@ public class TransformationBean {
   }
 
   /**
-   * Looks up a transformer option by name. The value is expetced to be a comma separated list of
+   * Looks up a transformer option by name. The value is expected to be a comma separated list of
    * values. Creates a list containing each of the individual values.
    *
    * @param optionName name of the option
@@ -133,6 +155,11 @@ public class TransformationBean {
    */
   public Optional<List<String>> transformerListOption(String optionName) {
     return transformerOption(optionName).map(value -> List.of(value.split(" *, *")));
+  }
+
+  @Override
+  public String getDescription() {
+    return "transformation of " + from;
   }
 
   /** Enum that defines possible values for the {@link #optionalComponents} field. */

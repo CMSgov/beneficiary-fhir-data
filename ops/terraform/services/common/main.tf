@@ -1,20 +1,34 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 locals {
-  env     = terraform.workspace
-  service = "common"
+  env            = terraform.workspace
+  service        = "common"
+  legacy_service = "admin"
+  layer          = "data"
+
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.name
+
+  # NOTE: AWS Account Roots for Access Log Delivery
+  # https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html
+  aws_classic_loadbalancer_account_roots = {
+    us-east-1 = "arn:aws:iam::127311923021:root"
+    us-west-2 = "arn:aws:iam::797873946194:root"
+  }
 
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
   seed_env         = lookup(local.nonsensitive_config, "ephemeral_environment_seed", null)
   is_ephemeral_env = local.seed_env == null ? false : true
 
-  shared_tags = {
-    Environment = local.env
-    application = "bfd"
-    business    = "oeda"
-    stack       = local.env
+  # TODO: support ephemeral environments... which bucket should the ephemeral environment use for its admin bucket?
+  admin_bucket   = "bfd-${local.env}-admin-${local.account_id}"
+  logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
+
+  default_tags = {
+    Environment    = local.env
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/common"
   }
 
   # Two-step map creation and redefinition creates `config` and `secret` maps of simplified parameter names to values
@@ -24,9 +38,10 @@ locals {
   sensitive_config    = { for key, value in local.sensitive_map : split("/", key)[5] => value }
 
   # Supports custom, YAML-encoded, environment-specific parameter groups
-  parameter_group_parameters_file = fileexists("${path.module}/db-parameter-group-parameters/${local.env}.yaml") ? "${path.module}/db-parameter-group-parameters/${local.env}.yaml" : "${path.module}/db-parameter-group-parameters/default.yaml"
-  db_parameters                   = toset(yamldecode(file(local.parameter_group_parameters_file)))
-
+  db_cluster_parameter_group_file = fileexists("${path.module}/db-cluster-parameters/${local.env}.yaml") ? "${path.module}/db-cluster-parameters/${local.env}.yaml" : "${path.module}/db-cluster-parameters/default-${local.rds_aurora_family}.yaml"
+  db_node_parameter_group_file    = fileexists("${path.module}/db-node-parameters/${local.env}.yaml") ? "${path.module}/db-node-parameters/${local.env}.yaml" : "${path.module}/db-node-parameters/default-${local.rds_aurora_family}.yaml"
+  db_cluster_parameters           = toset(yamldecode(file(local.db_cluster_parameter_group_file)))
+  db_parameters                   = toset(yamldecode(file(local.db_node_parameter_group_file)))
 
   # Security Group SSM lookups
   enterprise_tools_security_group = local.nonsensitive_config["enterprise_tools_security_group"]
@@ -46,10 +61,15 @@ locals {
 
   # General SSM lookups
   kms_key_alias = local.nonsensitive_config["kms_key_alias"]
+  kms_key_id    = data.aws_kms_key.cmk.arn
   vpc_name      = local.nonsensitive_config["vpc_name"]
 }
 
 data "aws_availability_zones" "main" {}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
 
 data "aws_vpc" "main" {
   filter {

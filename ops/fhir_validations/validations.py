@@ -1,5 +1,6 @@
 import argparse
 import glob
+import os
 import re
 import subprocess
 from typing import List, Tuple
@@ -82,7 +83,11 @@ def validate_resources(validator_path: str, version: str, ignore_list: dict, fil
     output_lines = output.split('\n')
 
     file_name = "loading_output"
-    errors_per_file = {}
+
+    if len(files) == 1:
+        file_name = "/" + os.path.basename(files[0])
+
+    errors_per_file = {file_name: []}
 
     for line in output_lines:
         if line.startswith('-- '):

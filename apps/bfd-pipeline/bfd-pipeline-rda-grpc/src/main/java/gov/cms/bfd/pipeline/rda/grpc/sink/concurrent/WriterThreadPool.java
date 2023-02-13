@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -20,8 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Manages a pool of worker threads to write claim and sequence number updates to a database
@@ -31,17 +32,31 @@ import org.slf4j.LoggerFactory;
  * @param <TMessage> RDA API message class
  * @param <TClaim> JPA claim entity class
  */
+@Slf4j
 public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(WriterThreadPool.class);
+  /** Used to assign claims to workers based on their claimId values. */
   private static final HashFunction Hasher = Hashing.goodFastHash(32);
 
+  /** Used to track sequence numbers to update progress table in database. */
   private final SequenceNumberTracker sequenceNumbers;
+  /** Used to perform database i/o. */
   private final RdaSink<TMessage, TClaim> sink;
+  /** Our thread pool used to execute writers. */
   private final ExecutorService threadPool;
+  /** Used to receive messages from main thread. */
   private final BlockingQueue<ReportingCallback.ProcessedBatch<TMessage>> outputQueue;
+  /** Used to update sequence number in background. */
   private final SequenceNumberWriterThread<TMessage, TClaim> sequenceNumberWriter;
+  /** Our collection of claim writers. */
   private final List<ClaimWriterThread<TMessage, TClaim>> writers;
 
+  /**
+   * Create new instance with the provided configuration.
+   *
+   * @param maxThreads size of thread pool
+   * @param batchSize number of claims per batch
+   * @param sinkFactory factory to create {@link RdaSink} instances
+   */
   public WriterThreadPool(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
     Preconditions.checkArgument(maxThreads > 0);
@@ -61,8 +76,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
       var writer = new ClaimWriterThread<>(sinkFactory, batchSize, outputQueue::put);
       writers.add(writer);
       threadPool.submit(writer);
-      LOGGER.info(
-          "added writer writer: sink={} writer={}", sink.getClass().getSimpleName(), writer);
+      log.info("added writer writer: sink={} writer={}", sink.getClass().getSimpleName(), writer);
     }
     this.writers = writers.build();
   }
@@ -79,7 +93,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    */
   public void addToQueue(String apiVersion, TMessage object) throws Exception {
     sequenceNumbers.addActiveSequenceNumber(sink.getSequenceNumberForObject(object));
-    final String key = sink.getDedupKeyForMessage(object);
+    final String key = sink.getClaimIdForMessage(object);
     final int hash = Hasher.hashString(key, StandardCharsets.UTF_8).asInt();
     final int writerIndex = Math.abs(hash) % writers.size();
     writers.get(writerIndex).add(apiVersion, object);
@@ -119,19 +133,65 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     return count;
   }
 
-  public String getDedupKeyForMessage(TMessage object) {
-    return sink.getDedupKeyForMessage(object);
+  /**
+   * The primary key for the claim contained in the message. Used by callers to remove duplicates
+   * from a collection of objects prior to calling writeMessages. Callers may log this value so it
+   * must not contain any PII or PHI.
+   *
+   * @param object object to get a key from
+   * @return a unique key to dedup objects of this type
+   */
+  public String getClaimIdForMessage(TMessage object) {
+    return sink.getClaimIdForMessage(object);
   }
 
+  /**
+   * Extract the sequence number from the message object and return it.
+   *
+   * @param object object to get the sequence number from
+   * @return the sequence number within the message object
+   */
   public long getSequenceNumberForObject(TMessage object) {
     return sink.getSequenceNumberForObject(object);
   }
 
+  /**
+   * Checks if the error limit has been exceeded.
+   *
+   * @throws ProcessingException If the error limit was reached.
+   */
+  public void checkErrorCount() throws ProcessingException {
+    sink.checkErrorCount();
+  }
+
+  /**
+   * Use the provided RDA API message object plus the API version string to produce an appropriate
+   * entity object for writing to the database. This operation is provided by the sink because the
+   * sink has to be aware of the specific types involved and also because that allows the message
+   * transformation to be performed in worker threads rather than in the main thread.
+   *
+   * @param apiVersion appropriate string for the apiSource column of the claim table
+   * @param message an RDA API message object of the correct type for this sync
+   * @return an optional containing the appropriate entity object containing the data from the
+   *     message if successfully converted, {@link Optional#empty()} otherwise
+   * @throws IOException If there was an issue writing out a {@link DataTransformer.ErrorMessage}
+   * @throws ProcessingException If there was an issue transforming the message
+   */
   @Nonnull
-  public TClaim transformMessage(String apiVersion, TMessage message) {
+  public Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException {
     return sink.transformMessage(apiVersion, message);
   }
 
+  /**
+   * The pipeline job passes a starting sequence number to the RDA API to get a stream of change
+   * objects for processing. This method allows the sink to provide the next logical starting
+   * sequence number for the call. An Optional is returned to handle the case when no records have
+   * been added to the database yet.
+   *
+   * @return Possibly empty Optional containing highest recorded sequence number.
+   * @throws ProcessingException if the operation fails
+   */
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return sink.readMaxExistingSequenceNumber();
   }
@@ -159,35 +219,42 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * @throws Exception if the closer encounters an issue
    */
   public void shutdown(Duration waitTime) throws Exception {
-    LOGGER.info("shutdown started");
+    log.info("shutdown started");
     final MultiCloser closer = new MultiCloser();
     writers.forEach(
         writer -> {
-          LOGGER.info("calling claimWriterThread.close: writer={}", writer);
+          log.info("calling claimWriterThread.close: writer={}", writer);
           closer.close(() -> writer.close());
         });
-    LOGGER.info("calling sequenceNumberWriterThread.close");
+    log.info("calling sequenceNumberWriterThread.close");
     closer.close(sequenceNumberWriter::close);
-    LOGGER.info("calling threadPool.shutdown");
+    log.info("calling threadPool.shutdown");
     closer.close(threadPool::shutdown);
     closer.close(
         () -> {
-          LOGGER.info("calling threadPool.awaitTermination");
+          log.info("calling threadPool.awaitTermination");
           awaitThreadPoolTermination(waitTime);
         });
-    LOGGER.info("calling updateSequenceNumberDirectly");
+    log.info("calling updateSequenceNumberDirectly");
     closer.close(this::updateSequenceNumberDirectly);
-    LOGGER.info("shutdown complete");
+    log.info("shutdown complete");
     closer.finish();
   }
 
+  /**
+   * Wait for thread pool to terminate.
+   *
+   * @param waitTime maximum time to wait
+   * @throws InterruptedException if wait is interrupted
+   * @throws IOException if pool never terminates
+   */
   private void awaitThreadPoolTermination(Duration waitTime)
       throws InterruptedException, IOException {
     boolean successful;
     try {
       successful = threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
     } catch (InterruptedException ex) {
-      LOGGER.info("interrupted while waiting for thread pool termination, retrying once...");
+      log.info("interrupted while waiting for thread pool termination, retrying once...");
       successful = threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
     }
     if (!successful) {
@@ -201,14 +268,20 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     if (!threadPool.isShutdown()) {
       closer.close(() -> shutdown(Duration.ofMinutes(5)));
     }
-    LOGGER.info("calling this.updateSequenceNumberForClose");
+    log.info("calling this.updateSequenceNumberForClose");
     closer.close(this::updateSequenceNumberForClose);
-    LOGGER.info("calling sink.close");
+    log.info("calling sink.close");
     closer.close(sink::close);
-    LOGGER.info("close complete");
+    log.info("close complete");
     closer.finish();
   }
 
+  /**
+   * Updates the sequence number in the database to the current safe value. Write takes place in the
+   * caller's thread.
+   *
+   * @throws ProcessingException if the write false
+   */
   private void updateSequenceNumberDirectly() throws ProcessingException {
     final long sequenceNumber = sequenceNumbers.getSafeResumeSequenceNumber();
     if (sequenceNumber > 0) {
@@ -231,7 +304,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   private void updateSequenceNumberForClose() throws Exception {
     int count = getProcessedCount();
     if (count != 0) {
-      LOGGER.warn("uncollected final processedCount: {}", count);
+      log.warn("uncollected final processedCount: {}", count);
     }
     updateSequenceNumberDirectly();
   }

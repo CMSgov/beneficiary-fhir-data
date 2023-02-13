@@ -41,21 +41,31 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaServerJob.class);
+  /** The amount of time in minutes the server has to shut down without timing out. */
   private static final Duration SERVER_SHUTDOWN_TIMEOUT = Duration.ofMinutes(5);
 
+  /** The server configuration. */
   private final Config config;
+  /** Keeps track of how many servers are running, primarily for integration testing. */
   private final AtomicInteger running;
 
+  /**
+   * Instantiates a new rda server job.
+   *
+   * @param config the job configuration
+   */
   public RdaServerJob(Config config) {
     this.config = config;
     running = new AtomicInteger();
   }
 
+  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
     return Optional.of(new PipelineJobSchedule(config.runInterval.toMillis(), ChronoUnit.MILLIS));
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     return true;
@@ -112,6 +122,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     return running.get() > 0;
   }
 
+  /** Configuration for the server job. */
   @Getter
   @EqualsAndHashCode
   public static class Config implements Serializable {
@@ -154,15 +165,31 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     /** The S3 connection details when operating in {@code S3} mode. */
     @EqualsAndHashCode.Exclude private final S3JsonMessageSources s3Sources;
 
+    /** Indicates the source the server will return data from. */
     public enum ServerMode {
+      /** Indicates the server will generate its own random data. */
       Random,
+      /** Indicates the server will get data from S3. */
       S3
     }
 
+    /** Instantiates a new config. */
     public Config() {
       this(ServerMode.Random, DEFAULT_SERVER_NAME, null, null, null, null, null, null);
     }
 
+    /**
+     * Instantiates a new config.
+     *
+     * @param serverMode the server mode
+     * @param serverName the server name
+     * @param runInterval the run interval
+     * @param randomSeed the random seed
+     * @param randomMaxClaims the random max claims
+     * @param s3Region the s3 region
+     * @param s3Bucket the s3 bucket
+     * @param s3Directory the s3 directory
+     */
     @Builder
     private Config(
         ServerMode serverMode,
@@ -195,6 +222,11 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       }
     }
 
+    /**
+     * Creates an RDA service version.
+     *
+     * @return the version
+     */
     private RdaService.Version createVersion() {
       RdaService.Version.VersionBuilder versionBuilder = RdaService.Version.builder();
       if (serverMode == ServerMode.S3) {
@@ -205,6 +237,13 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       return versionBuilder.build();
     }
 
+    /**
+     * Creates randomly generated Fiss claims.
+     *
+     * @param sequenceNumber the sequence number
+     * @return the message source for the generated claims
+     * @throws Exception any error that occurs during claim generation
+     */
     private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
       if (serverMode == ServerMode.S3) {
         LOGGER.info(
@@ -222,6 +261,13 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       }
     }
 
+    /**
+     * Creates randomly generated MCS claims.
+     *
+     * @param sequenceNumber the sequence number
+     * @return the message source for the generated claims
+     * @throws Exception any error that occurs during claim generation
+     */
     private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
       if (serverMode == ServerMode.S3) {
         LOGGER.info(

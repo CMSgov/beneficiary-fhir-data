@@ -21,6 +21,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
  */
 final class HospiceClaimTransformer {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -35,18 +37,22 @@ final class HospiceClaimTransformer {
             .time();
 
     if (!(claim instanceof HospiceClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
   }
 
   /**
+   * Transforms a specified {@link HospiceClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link HospiceClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
-  private static ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      HospiceClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -100,6 +106,7 @@ final class HospiceClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

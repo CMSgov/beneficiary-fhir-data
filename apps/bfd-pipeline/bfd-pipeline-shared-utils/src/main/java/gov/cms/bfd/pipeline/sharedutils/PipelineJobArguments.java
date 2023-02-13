@@ -9,9 +9,12 @@ import java.io.UncheckedIOException;
  * executions of a {@link PipelineJob} implementation.
  */
 public interface PipelineJobArguments {
+  /** The object mapper for serialization. */
   static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   /**
+   * Serializes the {@link PipelineJobArguments} to a string.
+   *
    * @return a full-fidelity, round-trippable representation of these {@link PipelineJobArguments},
    *     serialized as a {@link String}
    */
@@ -24,6 +27,8 @@ public interface PipelineJobArguments {
   }
 
   /**
+   * Deserialize the {@link PipelineJobArguments} from a string into the specified class.
+   *
    * @param <A> the {@link Class} of this {@link PipelineJobArguments} implementation
    * @param serializedArguments a serialized representation of an instance of this {@link
    *     PipelineJobArguments} implementation, as produced by {@link #serialize()}

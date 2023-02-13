@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationOfBenefit> {
 
-  // Valid system url for productOrService coding
+  /** Valid system url for productOrService coding. * */
   private static final Set<String> HCPCS_SYSTEM = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
 
   /** {@inheritDoc} */

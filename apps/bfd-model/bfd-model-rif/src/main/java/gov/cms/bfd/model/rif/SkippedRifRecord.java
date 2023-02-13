@@ -163,8 +163,9 @@ public class SkippedRifRecord {
   /** Represents the allowed/known values for {@link SkippedRifRecord#getSkipReason()}. */
   public static enum SkipReasonCode {
     /**
-     * The code that represents the filtering for non-null and 2022 benes, implemented as part of <a
-     * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>.
+     * The code that represents the filtering for non-null and 2023 benes, implemented as part of <a
+     * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
+     * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>.
      */
     DELAYED_BACKDATED_ENROLLMENT_BFD_1566;
   }

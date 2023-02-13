@@ -3,9 +3,12 @@ package gov.cms.model.dsl.codegen.plugin.model;
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
+import gov.cms.model.dsl.codegen.plugin.model.validation.EnumExistsInSameMapping;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
+import gov.cms.model.dsl.codegen.plugin.model.validation.SqlType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.GenerationType;
@@ -18,8 +21,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ColumnBean {
+@Builder(toBuilder = true)
+public class ColumnBean implements ModelBean {
   /** Regex used to recognize numeric columns by their SQL type. */
   private static final Pattern NumericTypeRegex =
       Pattern.compile("(numeric|decimal)\\((\\d+)(,(\\d+))?\\)", Pattern.CASE_INSENSITIVE);
@@ -43,28 +46,28 @@ public class ColumnBean {
   private static final Pattern DateTypeRegex = Pattern.compile("date", Pattern.CASE_INSENSITIVE);
 
   /** Name of the field in the entity object corresponding to this column. */
-  private String name;
+  @NotNull @JavaName private String name;
   /** Alternative name used in database for this column. Defaults to {@link ColumnBean#name}. */
-  private String dbName;
+  @JavaName private String dbName;
   /** SQL database type for this column. */
-  private String sqlType;
+  @SqlType private String sqlType;
   /** Specific java type for the field in the entity object corresponding to this column. */
-  private String javaType;
+  @JavaType private String javaType;
   /**
    * Alternative type for generated accessor methods (getter/setter) for the field in the entity
    * object corresponding to this column.
    */
-  private String javaAccessorType;
+  @JavaType private String javaAccessorType;
   /**
    * Name of an enum type defined in the same mapping as this column. Should be found by calling
    * {@link MappingBean#findEnum(String)} on the mapping.
    */
-  private String enumType;
+  @EnumExistsInSameMapping @JavaName private String enumType;
   /** Text for insertion into the generated entity as a javadoc comment on the field. */
   private String comment;
   /** Indicates whether the column in the database is nullable. */
   @Builder.Default private boolean nullable = true;
-  /** Indicates whether the column in the database is an {@link GenerationType.IDENTITY} column. */
+  /** Indicates whether the column in the database is an {@link GenerationType#IDENTITY} column. */
   @Builder.Default private boolean identity = false;
   /**
    * Indicates whether to add the updatable argument to the {@link javax.persistence.Column}
@@ -72,17 +75,22 @@ public class ColumnBean {
    */
   @Builder.Default private boolean updatable = true;
   /**
-   * The {@link FieldType} for the field. Either {@link FieldType.Column} or {@link
-   * FieldType.Transient}.
+   * The {@link FieldType} for the field. Either {@link FieldType#Column} or {@link
+   * FieldType#Transient}.
    */
-  @Builder.Default private FieldType fieldType = FieldType.Column;
+  @NotNull @Builder.Default private FieldType fieldType = FieldType.Column;
   /**
    * Minimum allowed length for non-null string value. Negative value means no column specific
    * number has been set.
    */
   @Builder.Default private int minLength = -1;
+  /**
+   * When true this column exists in the database table but is not exposed as a field in the entity
+   * class. Intended for use as the target of {@link JoinBean#joinColumnName}.
+   */
+  @Builder.Default private boolean dbOnly = false;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
-  private SequenceBean sequence;
+  @Valid private SequenceBean sequence;
 
   /**
    * This enum is used to define the type of annotation to use for the field. RIF uses some {@link
@@ -296,6 +304,11 @@ public class ColumnBean {
     return sequence != null;
   }
 
+  @Override
+  public String getDescription() {
+    return "column " + name;
+  }
+
   /**
    * Determines an appropriate java type to use based on the value of our {@link
    * ColumnBean#sqlType}.
@@ -303,29 +316,9 @@ public class ColumnBean {
    * @return an appropriate java type to use based on our {@link ColumnBean#sqlType}
    */
   private TypeName mapSqlTypeToTypeName() {
-    final String sqlType = this.sqlType.toLowerCase();
-    if (sqlType.contains("char")) {
-      return ClassName.get(String.class);
-    }
-    if (sqlType.contains("smallint")) {
-      return ClassName.get(Short.class);
-    }
-    if (sqlType.equals("bigint")) {
-      return ClassName.get(Long.class);
-    }
-    if (sqlType.equals("int")) {
-      return ClassName.get(Integer.class);
-    }
-    if (sqlType.contains("decimal") || sqlType.contains("numeric")) {
-      return ClassName.get(BigDecimal.class);
-    }
-    if (sqlType.contains("date")) {
-      return ClassName.get(LocalDate.class);
-    }
-    if (sqlType.contains("timestamp")) {
-      return ClassName.get(Instant.class);
-    }
-    throw new RuntimeException("no mapping for sqlType " + sqlType + " and field " + name);
+    return ModelUtil.mapSqlTypeToTypeName(sqlType)
+        .orElseThrow(
+            () -> new RuntimeException("no mapping for sqlType " + sqlType + " and field " + name));
   }
 
   /**

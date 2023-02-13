@@ -5,22 +5,43 @@ package gov.cms.bfd.server.war.commons;
  * gov.cms.bfd.model.rif.Beneficiary}.
  */
 public enum CoverageClass {
+  /** Group coverage. */
   GROUP,
+  /** Subgroup coverage. */
   SUBGROUP,
+  /** Plan coverage. */
   PLAN,
+  /** Subplan coverage. */
   SUBPLAN,
+  /** Class coverage. */
   CLASS,
+  /** Subclass coverage. */
   SUBCLASS,
+  /** Sequence coverage. */
   SEQUENCE,
+  /** RX Bin coverage. */
   RXBIN,
+  /** RX PCN coverage. */
   RXPCN,
+  /** RX ID coverage. */
   RXID,
+  /** RX Group coverage. */
   RXGROUP;
 
+  /**
+   * Gets the system.
+   *
+   * @return the system
+   */
   public String getSystem() {
     return "http://terminology.hl7.org/CodeSystem/coverage-class";
   }
 
+  /**
+   * Gets the code.
+   *
+   * @return the code
+   */
   public String toCode() {
     switch (this) {
       case GROUP:
@@ -50,6 +71,11 @@ public enum CoverageClass {
     }
   }
 
+  /**
+   * Gets the display.
+   *
+   * @return the display
+   */
   public String getDisplay() {
     switch (this) {
       case GROUP:

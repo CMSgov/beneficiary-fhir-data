@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -10,6 +9,9 @@ import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -35,22 +37,61 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     implements PipelineJob<NullPipelineJobArguments> {
+
+  /**
+   * Denotes the preferred execution of a sink.
+   *
+   * <p>This enum is used with sink factories to help determine what type of sink should be created
+   * by the factory. When followup actions depend on the outcome of a sink write, synchronous
+   * execution may be desired.
+   */
+  public enum SinkTypePreference {
+    /** Represents no type preference. */
+    NONE,
+    /** Represents a synchronous type preference. */
+    SYNCHRONOUS,
+    /** Represents an asynchronous type preference. */
+    ASYNCHRONOUS
+  }
+
+  /** The job configuration. */
   private final Config config;
+  /** Factory for creating pre-job tasks. */
+  private final Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory;
+  /** Factory for the RDA source. */
   private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
-  private final Callable<RdaSink<TResponse, TClaim>> sinkFactory;
-  private final Logger logger; // each subclass provides its own logger
+  /** Factory for the RDA sink. */
+  private final ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception>
+      sinkFactory;
+  /** Logger provided from each subclass. */
+  private final Logger logger;
+  /** Holds the metric data. */
   private final Metrics metrics;
-  // This is used to enforce that this job can only be executed by a single thread at any given
-  // time. If multiple threads call the job at the same time only the first will do any work.
+  /**
+   * This is used to enforce that this job can only be executed by a single thread at any given
+   * time. If multiple threads call the job at the same time only the first will do any work.
+   */
   private final Semaphore runningSemaphore;
 
+  /**
+   * Instantiates a new abstract rda load job.
+   *
+   * @param config the configuration for this job
+   * @param preJobTaskFactory the pre job task factory
+   * @param sourceFactory the source factory
+   * @param sinkFactory the sink factory
+   * @param appMetrics the app metrics
+   * @param logger the logger
+   */
   AbstractRdaLoadJob(
       Config config,
+      Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory,
       Callable<RdaSource<TResponse, TClaim>> sourceFactory,
-      Callable<RdaSink<TResponse, TClaim>> sinkFactory,
-      MetricRegistry appMetrics,
+      ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception> sinkFactory,
+      MeterRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
+    this.preJobTaskFactory = Preconditions.checkNotNull(preJobTaskFactory);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
     this.logger = logger;
@@ -73,6 +114,11 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
+      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.SYNCHRONOUS)) {
+        source.retrieveAndProcessObjects(1, sink);
+      }
+
       int processedCount;
       try {
         processedCount = callRdaServiceAndStoreRecords();
@@ -82,6 +128,22 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
     } finally {
       runningSemaphore.release();
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>This implementation calls {@link RdaSource#performSmokeTest} to perform the actual testing.
+   *
+   * @return true if the test completed successfully
+   * @throws Exception if the test threw an exception
+   */
+  @Override
+  public boolean isSmokeTestSuccessful() throws Exception {
+    try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
+        RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
+      return source.performSmokeTest(sink);
     }
   }
 
@@ -99,9 +161,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     int processedCount = 0;
     Exception error = null;
     try {
-      metrics.calls.mark();
+      metrics.calls.increment();
       try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {
@@ -110,15 +172,15 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     } catch (Exception ex) {
       error = ex;
     }
-    metrics.processed.mark(processedCount);
+    metrics.processed.increment(processedCount);
     final long stopMillis = System.currentTimeMillis();
     logger.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
     if (error != null) {
-      metrics.failures.mark();
+      metrics.failures.increment();
       logger.error("processing aborted by an exception: message={}", error.getMessage(), error);
       throw new ProcessingException(error, processedCount);
     }
-    metrics.successes.mark();
+    metrics.successes.increment();
     return processedCount;
   }
 
@@ -135,11 +197,17 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
         new PipelineJobSchedule(config.getRunInterval().toMillis(), ChronoUnit.MILLIS));
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     return true;
   }
 
+  /**
+   * Gets the {@link #metrics}.
+   *
+   * @return the metrics
+   */
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
@@ -183,18 +251,33 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      */
     @Nullable private final Long startingMcsSeqNum;
 
+    /** Determines if the DLQ should be processed for subsequent job runs. */
+    private final boolean processDLQ;
+
+    /**
+     * Instantiates a new config.
+     *
+     * @param runInterval the run interval
+     * @param batchSize the batch size
+     * @param writeThreads the number of write threads
+     * @param startingFissSeqNum the starting fiss seq num
+     * @param startingMcsSeqNum the starting MCS seq num
+     * @param processDLQ if the job should process the DLQ
+     */
     @Builder
     private Config(
         Duration runInterval,
         int batchSize,
         int writeThreads,
         @Nullable Long startingFissSeqNum,
-        @Nullable Long startingMcsSeqNum) {
+        @Nullable Long startingMcsSeqNum,
+        boolean processDLQ) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
       this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
       this.startingFissSeqNum = startingFissSeqNum;
       this.startingMcsSeqNum = startingMcsSeqNum;
+      this.processDLQ = processDLQ;
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
@@ -202,12 +285,33 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
     }
 
+    /**
+     * Returns the configured starting FISS sequence number (if it exists) wrapped in an {@link
+     * Optional}.
+     *
+     * @return The configured starting FISS sequence number wrapped in an {@link Optional}
+     */
     public Optional<Long> getStartingFissSeqNum() {
       return Optional.ofNullable(startingFissSeqNum);
     }
 
+    /**
+     * Returns the configured starting MCS sequence number (if it exists) wrapped in an {@link
+     * Optional}.
+     *
+     * @return The configured starting MCS sequence number wrapped in an {@link Optional}
+     */
     public Optional<Long> getStartingMcsSeqNum() {
       return Optional.ofNullable(startingMcsSeqNum);
+    }
+
+    /**
+     * Returns true if the job has been configured to process the DLQ, false otherwise.
+     *
+     * @return true if the job has been configured to process the DLQ, false otherwise.
+     */
+    public boolean shouldProcessDLQ() {
+      return processDLQ;
     }
   }
 
@@ -220,20 +324,26 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
   @VisibleForTesting
   static class Metrics {
     /** Number of times the job has been called. */
-    private final Meter calls;
+    private final Counter calls;
     /** Number of calls that completed successfully. */
-    private final Meter successes;
+    private final Counter successes;
     /** Number of calls that ended in some sort of failure. */
-    private final Meter failures;
+    private final Counter failures;
     /** Number of objects that have been successfully processed. */
-    private final Meter processed;
+    private final Counter processed;
 
-    private Metrics(MetricRegistry appMetrics, Class<?> jobClass) {
+    /**
+     * Instantiates a new metric object.
+     *
+     * @param appMetrics the app metrics
+     * @param jobClass the job class for naming the metrics
+     */
+    private Metrics(MeterRegistry appMetrics, Class<?> jobClass) {
       final String base = jobClass.getSimpleName();
-      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
-      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
-      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
-      processed = appMetrics.meter(MetricRegistry.name(base, "processed"));
+      calls = appMetrics.counter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.counter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.counter(MetricRegistry.name(base, "failures"));
+      processed = appMetrics.counter(MetricRegistry.name(base, "processed"));
     }
   }
 }

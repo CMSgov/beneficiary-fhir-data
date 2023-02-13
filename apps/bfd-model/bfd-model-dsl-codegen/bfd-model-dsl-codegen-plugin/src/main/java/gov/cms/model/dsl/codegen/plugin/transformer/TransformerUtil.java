@@ -12,6 +12,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 /**
  * Class containing static helper methods for implementing and finding implementations of {@link
@@ -239,7 +240,7 @@ public class TransformerUtil {
   public static Optional<FieldTransformer> selectTransformerForField(
       ColumnBean column, TransformationBean transformation) {
     if (transformation.hasTransformer()) {
-      return Optional.ofNullable(transformersByName.get(transformation.getTransformer()));
+      return getFieldTransformer(transformation.getTransformer());
     }
 
     Optional<FieldTransformer> answer =
@@ -267,6 +268,17 @@ public class TransformerUtil {
     }
 
     return answer;
+  }
+
+  /**
+   * Looks for a {@link FieldTransformer} with the given name.
+   *
+   * @param transformerName name of the {@link FieldTransformer}
+   * @return {@link Optional} containing the transformer, empty otherwise
+   */
+  @Nonnull
+  public static Optional<FieldTransformer> getFieldTransformer(String transformerName) {
+    return Optional.ofNullable(transformersByName.get(transformerName));
   }
 
   /**

@@ -1,7 +1,6 @@
 resource "aws_security_group" "this" {
   description = "Allow ${local.service} intra-group communications in ${local.env}"
   name        = "bfd-${local.env}-${local.service}"
-  tags        = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}" })
   vpc_id      = data.aws_vpc.main.id
 
   egress {

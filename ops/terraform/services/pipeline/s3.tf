@@ -1,23 +1,21 @@
-# TODO add retention policy
 resource "aws_s3_bucket" "this" {
   bucket        = local.is_ephemeral_env ? null : local.pipeline_bucket
   bucket_prefix = local.is_ephemeral_env ? "bfd-${local.env}-${local.legacy_service}" : null
 
-  tags = merge(
-    local.shared_tags,
-    {
-      Layer = local.layer,
-      role  = local.legacy_service
-    }
-  )
+  tags = {
+    Layer = local.layer,
+    role  = local.legacy_service
+  }
 }
 
 # block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "this" {
   bucket = aws_s3_bucket.this.id
 
-  block_public_acls   = true
-  block_public_policy = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
@@ -35,6 +33,7 @@ resource "aws_s3_bucket_logging" "this" {
 
   bucket        = aws_s3_bucket.this.id
   target_bucket = local.logging_bucket
+  # TODO: correct the target prefix by adding a trailing '/'
   target_prefix = "${local.legacy_service}_s3_access_logs"
 }
 

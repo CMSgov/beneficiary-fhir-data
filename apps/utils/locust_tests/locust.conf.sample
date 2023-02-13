@@ -11,7 +11,7 @@ users = 100
 # These parameters are custom-defined parameters needed to run BFD-specific tests.
 # See the README for more information
 spawned-runtime = 10s
-database-uri = postgres://.../bfd
+database-connection-string = postgres://.../bfd
 table-sample-percent = 0.25
 client-cert-path = /some/path/to/client/cert
 stats-store-file = true

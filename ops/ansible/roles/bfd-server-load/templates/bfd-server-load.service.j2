@@ -1,0 +1,12 @@
+[Unit]
+Description=BFD server-load Service
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+WorkingDirectory={{ server_load_dir }}
+ExecStart={{ server_load_dir }}/bfd-server-load-service.sh
+User={{ server_load_user }}
+
+[Install]
+WantedBy=multi-user.target

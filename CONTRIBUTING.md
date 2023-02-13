@@ -104,6 +104,10 @@ Once all automated checks pass and two reviewers have approved your pull request
 
 If you have any questions feel free to reach out on the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel in CMS slack!
 
+### Style and Documentation
+
+For tips on how to adhere to the code documentation rules and general style tips, check out the [BFD Style Guide](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/docs/style/style-guide.md)
+
 **FAQ**
 
 Q: What if the core team rejects my PR?

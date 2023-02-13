@@ -2,12 +2,14 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -19,6 +21,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -53,19 +56,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for {@link HospiceClaimTransformerV2}. */
 public final class HospiceClaimTransformerV2Test {
 
+  /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The EOB under test created from the {@link #claim}. */
   private ExplanationOfBenefit eob = null;
+  /** The parsed claim used to generate the EOB and for validating with. */
   private HospiceClaim claim = null;
+
   /**
-   * Generates the Claim object to be used in multiple tests
+   * Generates the Claim object to be used in multiple tests.
    *
-   * @return
-   * @throws FHIRException
+   * @throws FHIRException if there was an issue creating the claim
    */
   @BeforeEach
-  public void generateClaim() throws FHIRException {
+  public void generateClaim() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -80,13 +87,20 @@ public final class HospiceClaimTransformerV2Test {
     createEOB(Optional.of(false));
   }
 
-  private void createEOB(Optional<Boolean> includeTaxNumber) {
+  /**
+   * Creates an eob for the test.
+   *
+   * @param includeTaxNumber whether to include tax numbers
+   * @throws IOException if there is an issue reading the test file
+   */
+  private void createEOB(Optional<Boolean> includeTaxNumber) throws IOException {
     ExplanationOfBenefit genEob =
         HospiceClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 includeTaxNumber,
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -94,9 +108,9 @@ public final class HospiceClaimTransformerV2Test {
   }
 
   /**
-   * Serializes the EOB and prints to the command line
+   * Serializes the EOB and prints to the command line.
    *
-   * @throws FHIRException
+   * @throws FHIRException if there is a parsing exception with the eob json
    */
   @Disabled
   @Test
@@ -106,36 +120,37 @@ public final class HospiceClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.SNFClaimTransformerV2#transform(MetricRegistry, Object,
-   * Optional<Boolean>)} works as expected when run against the {@link
-   * StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
+   * Verifies that {@link SNFClaimTransformerV2#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     assertMatches(
         claim,
         HospiceClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim));
   }
 
-  /** Common top level ExplanationOfBenefit values */
+  /** Tests that the transformer sets the expected id. */
   @Test
   public void shouldSetId() {
     assertEquals("ExplanationOfBenefit/hospice-" + claim.getClaimId(), eob.getId());
   }
 
+  /** Tests that the transformer sets the expected last updated date in the metadata. */
   @Test
   public void shouldSetLastUpdated() {
     assertNotNull(eob.getMeta().getLastUpdated());
   }
 
+  /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
@@ -145,22 +160,27 @@ public final class HospiceClaimTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL)));
   }
 
+  /** Tests that the transformer sets the expected 'nature of request' value. */
   @Test
   public void shouldSetUse() {
     assertEquals(Use.CLAIM, eob.getUse());
   }
 
+  /** Tests that the transformer sets the expected final action status. */
   @Test
   public void shouldSetFinalAction() {
     assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
+  /** Tests that the transformer sets the expected outcome. */
   @Test
   public void shouldSetOutcomeStatus() {
     assertEquals(ExplanationOfBenefit.RemittanceOutcome.COMPLETE, eob.getOutcome());
   }
 
-  /** Provider Local Reference */
+  /**
+   * Tests that the transformer sets the expected number of provider references and correct value.
+   */
   @Test
   public void shouldHaveProviderReference() {
     List<Resource> containEntries = eob.getContained();
@@ -169,19 +189,23 @@ public final class HospiceClaimTransformerV2Test {
     assertEquals("#provider-org", eob.getProvider().getReference());
   }
 
-  /** Patient Reference */
+  /** Tests that the transformer sets the expected patient reference. */
   @Test
   public void shouldHavePatientReference() {
     assertNotNull(eob.getPatient());
     assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
+  /** Tests that the transformer sets the expected creation date. */
   @Test
   public void shouldHaveCreatedDate() {
     assertNotNull(eob.getCreated());
   }
 
-  /** Provider Identifier(s) */
+  /**
+   * Tests that the transformer sets the expected number of contained identifiers and they have the
+   * correct values.
+   */
   @Test
   public void shouldHaveContainedIdentifier() {
     List<Resource> actuals = eob.getContained();
@@ -204,7 +228,7 @@ public final class HospiceClaimTransformerV2Test {
 
     ident = new Identifier();
     ident
-        .setValue("999999999")
+        .setValue("0000000000")
         .setSystem("http://hl7.org/fhir/sid/us-npi")
         .getType()
         .addCoding()
@@ -218,6 +242,7 @@ public final class HospiceClaimTransformerV2Test {
     }
   }
 
+  /** Tests that the transformer sets the expected identifiers. */
   @Test
   public void shouldHaveIdentifiers() {
     List<Identifier> expected = eob.getIdentifier();
@@ -243,6 +268,10 @@ public final class HospiceClaimTransformerV2Test {
     }
   }
 
+  /**
+   * Tests that the transformer sets the expected number of extensions and they have the correct
+   * values.
+   */
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
@@ -322,6 +351,10 @@ public final class HospiceClaimTransformerV2Test {
     }
   }
 
+  /**
+   * Tests that the transformer sets the expected number of type codings and they have the correct
+   * values.
+   */
   @Test
   public void shouldHaveTypeCodings() {
     CodeableConcept cc = eob.getType();
@@ -350,10 +383,23 @@ public final class HospiceClaimTransformerV2Test {
     }
   }
 
+  /**
+   * Tests that the transformer sets the billable period.
+   *
+   * @throws Exception should not be thrown
+   */
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
     assertNotNull(eob.getBillablePeriod());
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
+    Coding valueCoding = (Coding) extension.getValue();
+    assertEquals("Final bill", valueCoding.getDisplay());
+    assertEquals("3", valueCoding.getCode());
+
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-01"),
         eob.getBillablePeriod().getStart());
@@ -361,6 +407,42 @@ public final class HospiceClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-30"), eob.getBillablePeriod().getEnd());
   }
 
+  /** Tests that the billable period is not set if claim query code is null. */
+  public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    HospiceClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(r -> (HospiceClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    claim.setClaimQueryCode(Optional.empty());
+    claim.setLastUpdated(Instant.now());
+
+    ExplanationOfBenefit genEob =
+        HospiceClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    // We just want to make sure it is not set
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNull(extension);
+  }
+
+  /** Tests that the transformer sets the expected insurer. */
   @Test
   public void shouldSetInsurer() throws Exception {
     Reference expected = eob.getInsurer();
@@ -370,6 +452,10 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(expected));
   }
 
+  /**
+   * Tests that the transformer sets the expected number of facility type extensions and the correct
+   * values.
+   */
   @Test
   public void shouldHaveFacilityTypeExtension() {
     assertNotNull(eob.getFacility());
@@ -391,6 +477,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected values for the care team member entries. */
   @Test
   public void shouldHaveCareTeamMembers() {
     // First member
@@ -458,6 +545,10 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare3.equalsDeep(member3));
   }
 
+  /**
+   * Tests that the transformer sets the expected number of diagnosis and they have the correct
+   * values.
+   */
   @Test
   public void shouldHaveAllDiagnosis() {
     List<DiagnosisComponent> expected = eob.getDiagnosis();
@@ -538,7 +629,10 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(cmp3.equalsDeep(diag3));
   }
 
-  /** Insurance */
+  /**
+   * Tests that the transformer sets the expected number of insurance entries with the expected
+   * values.
+   */
   @Test
   public void shouldReferenceCoverageInInsurance() {
     //     // Only one insurance object if there is more than we need to fix the focal set to point
@@ -555,6 +649,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(insurance));
   }
 
+  /** Tests that the transformer sets the expected revenue center rate amount. */
   @Test
   public void shouldHaveLineItemRevCenterRateAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -583,6 +678,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center total charge amount. */
   @Test
   public void shouldHaveLineItemRevCenterTotalChargeAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -614,6 +710,10 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected adjudication revenue center non-covered charge
+   * amount.
+   */
   @Test
   public void shouldHaveLineItemRevCenterNonRecoverdChargeAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -645,6 +745,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item revenue center provider amount. */
   @Test
   public void shouldHaveLineItemRevCenterMedicareProviderAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -676,6 +777,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected line item revenue center provider amount. */
   @Test
   public void shouldHaveLineItemRevCenterPaidToProviderAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -707,6 +809,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center payment amount to bene. */
   @Test
   public void shouldHaveLineItemRevCenterBenePaymentAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -738,6 +841,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected adjudication revenue center payment amount. */
   @Test
   public void shouldHaveLineItemRevCenterMedicarePaymentAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -769,6 +873,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected claim total charge amount entries. */
   @Test
   public void shouldHaveTotalChargeAmtAdjudication() {
     // Only one so just pull it directly and compare
@@ -796,6 +901,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(total));
   }
 
+  /** Tests that the transformer sets the expected payment value. */
   @Test
   public void shouldHavePaymentTotal() {
     PaymentComponent expected = eob.getPayment();
@@ -809,6 +915,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(expected));
   }
 
+  /** Tests that the transformer sets the expected medicare utilization day count. */
   @Test
   public void shouldHaveCBenefitDayCnt() {
     BenefitComponent benefit =
@@ -835,7 +942,9 @@ public final class HospiceClaimTransformerV2Test {
 
   /**
    * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
-   * quantity is not zero
+   * quantity is not zero.
+   *
+   * <p>TODO: Is this test testing the right thing? Says when not zero, but expects value of 0
    */
   @Test
   public void shouldHaveRevenueCenterUnit() {
@@ -843,6 +952,7 @@ public final class HospiceClaimTransformerV2Test {
         CcwCodebookMissingVariable.REV_CNTR_UNIT_CNT, BigDecimal.valueOf(0), eob.getItem());
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer claim paid amount. */
   @Test
   public void shouldHaveCBenefitClaimPaidAmt() {
     BenefitComponent benefit =

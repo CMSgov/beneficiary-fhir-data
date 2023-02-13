@@ -1,5 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin;
 
+import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
@@ -10,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
@@ -52,6 +54,7 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
       outputFile.getParentFile().mkdirs();
       try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)))) {
         RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
+        MojoUtil.validateModel(root);
         List<MappingBean> rootMappings = getSortedMappings(root);
         out.println("/*");
         out.println(" ************************** WARNING **************************");
@@ -106,6 +109,9 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    */
   private void printCreateTableSqlForMapping(RootBean root, MappingBean mapping, PrintWriter out) {
     final var table = mapping.getTable();
+    final var primaryKeyColumns = getPrimaryKeyColumns(mapping);
+    final var columns = getAllColumns(mapping);
+    final var quoteNames = table.isQuoteNames();
     out.println("/*");
     out.print(" * ");
     out.println(table.getName());
@@ -113,9 +119,9 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
     out.print("CREATE TABLE ");
     writeTableName(table, out);
     out.println(" (");
-    for (var column : table.getColumns()) {
+    for (var column : columns) {
       out.print("    ");
-      out.print(quoted(column.getName()));
+      out.print(name(quoteNames, column.getColumnName()));
       out.print(" ");
       out.print(column.getSqlType());
       if (!column.isNullable()) {
@@ -124,21 +130,22 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
       out.println(",");
     }
     out.print("    CONSTRAINT ");
-    out.print(quoted(table.getName() + "_key"));
+    out.print(name(quoteNames, table.getName() + "_key"));
     out.print(" PRIMARY KEY (");
-    writeNames(table.getPrimaryKeyColumns(), out);
+    writeColumnNames(quoteNames, primaryKeyColumns, out);
     out.print(")");
     final var parent = findParent(root, mapping);
     if (parent != null) {
+      final var parentPrimaryKeyColumns = getPrimaryKeyColumns(parent);
       out.println(",");
       out.print("    CONSTRAINT ");
-      out.print(quoted(table.getName() + "_parent"));
+      out.print(name(quoteNames, table.getName() + "_parent"));
       out.print(" FOREIGN KEY (");
-      writeNames(parent.getPrimaryKeyColumns(), out);
+      writeColumnNames(quoteNames, parentPrimaryKeyColumns, out);
       out.print(") REFERENCES ");
-      writeTableName(parent, out);
+      writeTableName(parent.getTable(), out);
       out.print("(");
-      writeNames(parent.getPrimaryKeyColumns(), out);
+      writeColumnNames(quoteNames, parentPrimaryKeyColumns, out);
       out.print(")");
     }
     out.println();
@@ -154,15 +161,17 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    */
   private void printAddColumnSqlForMapping(MappingBean mapping, PrintWriter out) {
     final var table = mapping.getTable();
+    final var columns = getAllColumns(mapping);
+    final var quoteNames = table.isQuoteNames();
     out.println("/*");
     out.print(" * ");
     out.println(table.getName());
     out.println(" */");
-    for (var column : table.getColumns()) {
+    for (var column : columns) {
       out.print("ALTER TABLE ");
       writeTableName(table, out);
       out.print(" ADD ");
-      out.print(quoted(column.getName()));
+      out.print(name(quoteNames, column.getColumnName()));
       out.print(" ");
       out.print(column.getSqlType());
       if (!column.isNullable()) {
@@ -170,6 +179,53 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
       }
       out.println(";");
     }
+  }
+
+  /**
+   * Returns a list of {@link ColumnBean} that can be used to generate SQL for primary key columns
+   * of a specific {@link MappingBean}. The list will contain columns from any primary key joins
+   * followed by regular columns.
+   *
+   * @param mapping {@link MappingBean} to create SQL for
+   * @return list containing {@link ColumnBean} for all primary key columns of the table
+   */
+  private List<ColumnBean> getPrimaryKeyColumns(MappingBean mapping) {
+    // this map ensures no column is included twice
+    final var columns = new LinkedHashMap<String, ColumnBean>();
+    for (ColumnBean column : mapping.getTable().getPrimaryKeyColumnBeans()) {
+      columns.put(column.getColumnName(), column);
+    }
+    return List.copyOf(columns.values());
+  }
+
+  /**
+   * Returns a list of {@link ColumnBean} that can be used to generate SQL for all columns of a
+   * specific {@link MappingBean}. The list will contain columns from any non-array joins followed
+   * by regular columns.
+   *
+   * @param mapping {@link MappingBean} to create SQL for
+   * @return list containing {@link ColumnBean} for all columns in the table
+   */
+  private List<ColumnBean> getAllColumns(MappingBean mapping) {
+    // this map ensures no column is included twice
+    final var columns = new LinkedHashMap<String, ColumnBean>();
+    for (ColumnBean column : mapping.getTable().getColumns()) {
+      columns.put(column.getColumnName(), column);
+    }
+    return List.copyOf(columns.values());
+  }
+
+  /**
+   * Writes the names of the specified columns (separated by commas) to the provided {@link
+   * PrintWriter}.
+   *
+   * @param quoted causes the names to be wrapped in quotes when true
+   * @param columns list of columns to write the names of
+   * @param out {@link PrintWriter} to write name to
+   */
+  private void writeColumnNames(boolean quoted, List<ColumnBean> columns, PrintWriter out) {
+    final var names = columns.stream().map(ColumnBean::getColumnName).collect(Collectors.toList());
+    writeNames(quoted, names, out);
   }
 
   /**
@@ -181,53 +237,57 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    */
   private void writeTableName(TableBean table, PrintWriter out) {
     if (table.hasSchema()) {
-      out.print(quoted(table.getSchema()));
+      out.print(name(table.isQuoteNames(), table.getSchema()));
       out.print(".");
     }
-    out.print(quoted(table.getName()));
+    out.print(name(table.isQuoteNames(), table.getName()));
   }
 
   /**
    * Writes the specified names (separated by commas) to the provided {@link PrintWriter}.
    *
+   * @param quoted causes the names to be wrapped in quotes when true
    * @param names list of names to write
    * @param out {@link PrintWriter} to write name to
    */
-  private void writeNames(List<String> names, PrintWriter out) {
+  private void writeNames(boolean quoted, List<String> names, PrintWriter out) {
     for (int i = 0; i < names.size(); ++i) {
       if (i > 0) {
         out.print(", ");
       }
-      out.print(quoted(names.get(i)));
+      out.print(name(quoted, names.get(i)));
     }
   }
 
   /**
    * Searches all known {@link MappingBean}s to find one that contains an array of objects defined
-   * by the specified {@link MappingBean}. If one is found its {@link TableBean} is returned.
-   * Otherwise {@code null} is returned.
+   * by the specified {@link MappingBean}. If one is found it is returned. Otherwise {@code null} is
+   * returned.
    *
    * @param root {@link RootBean} containing all known mappings
    * @param mapping {@link MappingBean} to find parent of
-   * @return the parent mapping's {@link TableBean} or {@code null} if no parent exists
+   * @return the parent mapping or {@code null} if no parent exists
    */
-  private TableBean findParent(RootBean root, MappingBean mapping) {
-    var parent =
+  private MappingBean findParent(RootBean root, MappingBean mapping) {
+    final var parent =
         root.getMappings().stream()
             .filter(
-                m -> m.getArrays().stream().anyMatch(a -> a.getMapping().equals(mapping.getId())))
-            .findFirst()
-            .map(MappingBean::getTable);
+                m ->
+                    m.getArrayJoins().stream()
+                        .anyMatch(a -> a.getEntityMapping().equals(mapping.getId())))
+            .findFirst();
     return parent.orElse(null);
   }
 
   /**
-   * Wraps the provided string in quotes.
+   * Wraps the provided string in quotes if the flag is true. Otherwise returns the string
+   * unchanged.
    *
+   * @param quoted causes the string to be wrapped in quotes when true
    * @param value string to wrap
-   * @return the wrapped string
+   * @return the (possibly quoted) string
    */
-  private String quoted(String value) {
-    return "\"" + value + "\"";
+  private String name(boolean quoted, String value) {
+    return quoted ? "\"" + value + "\"" : value;
   }
 }

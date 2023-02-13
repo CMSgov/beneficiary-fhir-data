@@ -11,7 +11,15 @@ These tests are intended to be run from a server instance which has access permi
 do this is outside the scope of this document, but instructions for this can be found in this more detailed run guide on confluence:
 https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests. 
 
+The following test suites ([Locustfiles](https://docs.locust.io/en/stable/writing-a-locustfile.html)) are available to run:
 
+| Suite Name | Path | Purpose
+| - | - | - |
+| V2 Regression Suite | `v2/regression_suite.py` | Used to test performance regressions for BFD Server's most popular V2 API endpoints |
+| PACA Smoke Tests | `v2/partially_adjudicated_smoketest.py` | Tests for Partially Adjudicated Claims endpoints to error check the transformers |
+| PACA Test Suite | `v2/partially_adjudicated_smoketest.py` | Tests for Partially Adjudicated Claims endpoints to test their performance |
+| V1 Regression Suite | `v1/regression_suite.py` | Used to test performance regressions for BFD Server's most popular V1 API endpoints |
+| Load Testing Suite | `high_volume_suite.py` | Used to exhibit distributed load on a target BFD Server to produce performance metrics under stress. Invoked by the `bfd-run-server-load` Jenkins pipeline job |
 ## Dependencies
 
 > **Important:** This project is targeting Python 3.8. Ensure that your local Python is version 3.8 **before** attempting to work in this project!
@@ -68,10 +76,12 @@ Tests are run by invoking Locust locally, either via the `locust` binary or via 
 
 > **Note 2:** The arguments here can also be defined via environment variables, similarly to Locust's built-in arguments.
 
+> **Note 3:** `--host`, a Locust-provided parameter, _must_ include the protocol (i.e. HTTP/HTTPS), port. For example, `https://google.com` is a _valid_ value for `--host` whereas `google.com/` **is not**!
+
 | Command Line | Environment Variable | Config File | Required? | Default Value | Description |
 | - | - | - | - | - | - |
 | `--client-cert-path` | `LOCUST_BFD_CLIENT_CERT_PATH` | `client-cert-path` | Yes | N/A |  The path to the PEM file we copied/modified earlier |
-| `--database-uri` | `LOCUST_BFD_DATABASE_URI` | `database-uri` | Yes | N/A | Specifies the necessary parameters for connecting to a database in a "connection-string"-like format: `<db_type>://<username>:<password>@<db_host>:<db_port>/<db_table>` |
+| `--database-connection-string` | `LOCUST_BFD_DATABASE_CONNECTION_STRING` | `database-connection-string` | Yes | N/A | Specifies the necessary parameters for connecting to a database in a "connection-string"-like format: `<db_type>://<username>:<password>@<db_host>:<db_port>/<db_table>`. `password` _must_ be url-encoded |
 | `--spawned-runtime` | `LOCUST_USERS_SPAWNED_RUNTIME` | `spawned-runtime` | No | `None` | Specifies the test runtime limit that begins after _all users have spawned_ when running tests with the custom `UserInitAwareLoadShape` load shape, which should be **all** of the tests in this repository. If unspecified, tests run **indefinitely** after _all users_ have spawned. Specifying `0<s/h/m>` will stop the tests **immediately** once _all users_ have spawned. Note that this is **not the same option** as `--run-time`, which handles the total runtime limit for the Locust run including non-test tasks and does not compensate for spawn rate. |
 | `--server-public-key` | `LOCUST_BFD_SERVER_PUBLIC_KEY` | `server-public-key` | No | `""` | To allow the tests to trust the server responses, you can add the path to the public certificate here. This is not required to run the tests successfully, and may not be needed as a parameter at all. Does not cause any issues if omitted
 | `--table-sample-percent` | `LOCUST_DATA_TABLE_SAMPLE_PERCENT` | `table-sample-percent` | No | `0.25` | Determines how big a slice of the Beneficiaries table we want to use when finding endpoints for testing. Defaults to 0.25 (one-quarter of one percent), which is plenty for production databases with millions of rows. Note that this is only meant to randomize and streamline the data query, but if this option is set too small, it would act as a cap on the number of rows available. For the Test environment or local testing, it might be best to set to 100, which will effectively *not* use table sampling

@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -12,15 +13,19 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import io.micrometer.cloudwatch.CloudWatchConfig;
 import java.io.Serializable;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -69,11 +74,11 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * The name of the environment variable that should be used to provide an integer size for the
    * in-memory cache of computed hicn/mbi hash values. Used to set the {@link
-   * IdHasher.Config#getCachSize()}.
+   * IdHasher.Config#getCacheSize()}.
    */
   private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
 
-  /** Default value for {@link IdHasher.Config#getCachSize()}. */
+  /** Default value for {@link IdHasher.Config#getCacheSize()}. */
   private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
 
   /**
@@ -96,20 +101,20 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} value, which is a bit complex; please see
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} value, which is a bit complex; please see
    * its description for details.
    */
-  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES =
-      "FILTERING_NON_NULL_AND_NON_2022_BENES";
+  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES =
+      "FILTERING_NON_NULL_AND_NON_2023_BENES";
 
   /**
-   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES}
+   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES}
    * configuration environment variable when it is not set.
    *
    * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
    * removed as soon as is reasonable.
    */
-  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES = false;
+  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES = true;
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
@@ -145,16 +150,16 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that specifies which type of RDA API server to connect to.
-   * {@link GrpcRdaSource.Config#getServerType()}
+   * {@link RdaSourceConfig#getServerType()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE}. */
-  public static final GrpcRdaSource.Config.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
-      GrpcRdaSource.Config.ServerType.Remote;
+  public static final RdaSourceConfig.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
+      RdaSourceConfig.ServerType.Remote;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getHost()} ()} value.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getHost()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_HOST}. */
@@ -162,7 +167,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getPort()} value.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getPort()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
@@ -171,17 +176,17 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * The name of the environment variable that specifies the name of an in-process mock RDA API
    * server. This name is used when instantiating the server as well as when connecting to it.
-   * {@link GrpcRdaSource.Config#getInProcessServerName()}
+   * {@link RdaSourceConfig#getInProcessServerName()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
       "RDA_GRPC_INPROC_SERVER_NAME";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME} */
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME}. */
   public static final String DEFAULT_RDA_GRPC_INPROC_SERVER_NAME = "MockRdaServer";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} value. This variable value
-   * should be in seconds.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getMaxIdle()} value. This variable value should be
+   * in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
@@ -189,7 +194,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMinIdleTimeBeforeConnectionDrop()} value.
+   * #getRdaLoadOptions()} {@link StandardGrpcRdaSource}'s minIdleMillisBeforeConnectionDrop value.
    * This variable value should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
@@ -203,11 +208,17 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getAuthenticationToken()} value.
+   * #getRdaLoadOptions()} {@link RdaSourceConfig#getAuthenticationToken()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN}. */
   public static final String DEFAULT_RDA_GRPC_AUTH_TOKEN = null;
+
+  /**
+   * The name of the environment variable that should be used to indicate how many RDA messages can
+   * error without causing the job to stop processing prematurely.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "RDA_JOB_ERROR_LIMIT";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -222,6 +233,13 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
       "RDA_JOB_STARTING_MCS_SEQ_NUM";
+
+  /**
+   * The name of the boolean environment variable that should be used to determine if the {@link
+   * gov.cms.bfd.pipeline.rda.grpc.source.DLQGrpcRdaSource} task should be run on subsequent job
+   * runs.
+   */
+  public static final String ENV_VAR_KEY_PROCESS_DLQ = "RDA_JOB_PROCESS_DLQ";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -275,15 +293,74 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
   /**
+   * Environment variable containing the namespace to use when sending Micrometer metrics to
+   * CloudWatch. This is a required environment variable if {@link #ENV_VAR_KEY_CCW_RIF_JOB_ENABLED}
+   * is set to true.
+   */
+  public static final String ENV_VAR_MICROMETER_CW_NAMESPACE = "MICROMETER_CW_NAMESPACE";
+
+  /**
+   * Environment variable containing the update interval to use when sending Micrometer metrics to
+   * CloudWatch. The value must be in ISO-8601 format as parsed by {@link Duration#parse}. Default
+   * value is PT1M (1 minute). More frequent updates provide higher resolution but can also increase
+   * CW costs.
+   */
+  public static final String ENV_VAR_MICROMETER_CW_INTERVAL = "MICROMETER_CW_INTERVAL";
+
+  /**
+   * Environment variable indicating whether Micrometer metrics should be sent to CloudWatch.
+   * Defaults to false.
+   */
+  public static final String ENV_VAR_MICROMETER_CW_ENABLED = "MICROMETER_CW_ENABLED";
+
+  /**
+   * Environment variable indicating whether Micrometer metrics should be sent to JMX. Defaults to
+   * false. Can be used when testing the pipeline locally to monitor metrics as the pipeline runs.
+   */
+  public static final String ENV_VAR_MICROMETER_JMX_ENABLED = "MICROMETER_JMX_ENABLED";
+
+  /**
+   * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
+   * allowed list avoids increasing AWS charges as new metrics are defined for use in NewRelic that
+   * are not necessary in Cloudwatch. These need to be the base metric names, not one of the several
+   * auto-generated aggregate metric names with suffixes like {@code .avg}.
+   */
+  public static Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
+      Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
+
+  /**
+   * Instance of {@link MicrometerConfigHelper} used to create a {@link CloudWatchConfig} instance.
+   * Contains the property name to environment variable name mappings for supported {@link
+   * CloudWatchConfig} properties as well as default values for some environment variables.
+   */
+  @VisibleForTesting
+  static final MicrometerConfigHelper MICROMETER_CW_CONFIG_HELPER =
+      new MicrometerConfigHelper(
+          List.of(
+              new MicrometerConfigHelper.PropertyMapping(
+                  "cloudwatch.enabled", ENV_VAR_MICROMETER_CW_ENABLED, Optional.of("false")),
+              new MicrometerConfigHelper.PropertyMapping(
+                  "cloudwatch.namespace", ENV_VAR_MICROMETER_CW_NAMESPACE, Optional.empty()),
+              new MicrometerConfigHelper.PropertyMapping(
+                  "cloudwatch.step", ENV_VAR_MICROMETER_CW_INTERVAL, Optional.of("PT1M"))),
+          System::getenv);
+
+  /**
    * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
    * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
    * simultaneously.
    */
   private static final int RECORD_BATCH_SIZE = 100;
 
-  // this can be null if the RDA job is not configured, Optional is not Serializable
+  /**
+   * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
+   * Serializable.
+   */
   @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
-  // this can be null if the RDA job is not configured, Optional is not Serializable
+  /**
+   * The RDA rif load options. This can be null if the RDA job is not configured, Optional is not
+   * Serializable.
+   */
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
@@ -304,12 +381,20 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     this.rdaLoadOptions = rdaLoadOptions;
   }
 
-  /** @return the {@link CcwRifLoadOptions} that the application will use */
+  /**
+   * Gets the {@link #ccwRifLoadOptions}.
+   *
+   * @return the {@link CcwRifLoadOptions} that the application will use
+   */
   public Optional<CcwRifLoadOptions> getCcwRifLoadOptions() {
     return Optional.ofNullable(ccwRifLoadOptions);
   }
 
-  /** @return the {@link RdaLoadOptions} that the application will use */
+  /**
+   * Gets the {@link #rdaLoadOptions}.
+   *
+   * @return the {@link RdaLoadOptions} that the application will use
+   */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
     return Optional.ofNullable(rdaLoadOptions);
   }
@@ -349,9 +434,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
     int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
     boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
-    boolean filteringNonNullAndNon2022Benes =
-        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES)
-            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES);
+    boolean filteringNonNullAndNon2023Benes =
+        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES)
+            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
 
     MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
     DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(loaderThreads);
@@ -365,7 +450,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
                 .build(),
             loaderThreads,
             idempotencyRequired,
-            filteringNonNullAndNon2022Benes,
+            filteringNonNullAndNon2023Benes,
             RECORD_BATCH_SIZE);
 
     CcwRifLoadOptions ccwRifLoadOptions =
@@ -466,8 +551,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * Loads the configuration settings related to the RDA gRPC API data load jobs. Ths job and most
    * of its settings are optional. Because the API may exist in some environments but not others a
-   * separate environment variable indicates whether or not the settings should be loaded.
+   * separate environment variable indicates whether the settings should be loaded.
    *
+   * @param idHasherConfig the id hasher config
    * @return a valid RdaLoadOptions if job is configured, otherwise null
    */
   @Nullable
@@ -492,11 +578,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(jobConfig::startingFissSeqNum);
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingMcsSeqNum);
-    final GrpcRdaSource.Config grpcConfig =
-        GrpcRdaSource.Config.builder()
+    readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    final RdaSourceConfig grpcConfig =
+        RdaSourceConfig.builder()
             .serverType(
                 readEnvParsedOptional(
-                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, GrpcRdaSource.Config.ServerType::valueOf)
+                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType::valueOf)
                     .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE))
             .host(
                 readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST)
@@ -539,8 +626,38 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(mockServerConfig::s3Bucket);
     readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
         .ifPresent(mockServerConfig::s3Directory);
+    final int errorLimit = readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT).orElse(0);
+
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
+        jobConfig.build(), grpcConfig, mockServerConfig.build(), errorLimit, idHasherConfig);
+  }
+
+  /**
+   * Checks environment variable to determine if the feed of Micrometer metrics to JMX should be
+   * enabled.
+   *
+   * @return true if the feed should be configured
+   */
+  public static boolean isJmxMetricsEnabled() {
+    return readEnvParsedOptional(ENV_VAR_MICROMETER_JMX_ENABLED, Boolean::parseBoolean)
+        .orElse(false);
+  }
+
+  /**
+   * Creates an implementation of {@link CloudWatchConfig} that looks for environment variables to
+   * find values for properties. Environment variable lookup is done using {@link
+   * #MICROMETER_CW_CONFIG_HELPER}.
+   *
+   * @return an instance of {@link CloudWatchConfig}
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if any
+   *     required properties are missing or if any environment variables have invalid values.
+   */
+  public static CloudWatchConfig getCloudWatchRegistryConfig() {
+    final CloudWatchConfig config = MICROMETER_CW_CONFIG_HELPER::get;
+    if (config.enabled()) {
+      MICROMETER_CW_CONFIG_HELPER.throwIfConfigurationNotValid(config.validate());
+    }
+    return config;
   }
 
   /**

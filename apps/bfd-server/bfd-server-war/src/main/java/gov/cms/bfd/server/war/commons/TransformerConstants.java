@@ -93,6 +93,7 @@ public final class TransformerConstants {
    */
   public static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
+  /** The constant for the USD code. */
   public static final String CODED_MONEY_USD = "USD";
 
   /** For custom [Resource].meta.tags entries. */
@@ -100,8 +101,9 @@ public final class TransformerConstants {
 
   /**
    * Used to notify end users when they receive {@link Patient} records impacted by <a
-   * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a>. See the documentation on <code>
-   * LoadAppOptions.isFilteringNonNullAndNon2022Benes()</code> for details
+   * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
+   * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>. See the documentation on <code>
+   * LoadAppOptions.isFilteringNonNullAndNon2023Benes()</code> for details
    */
   public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT =
       "delayed-backdated-enrollment";
@@ -113,6 +115,7 @@ public final class TransformerConstants {
   public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY =
       "Impacted by delayed backdated enrollment data.";
 
+  /** The type value for benefit balance code set. */
   public static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";
 
@@ -141,7 +144,13 @@ public final class TransformerConstants {
   public static final String CODING_SYSTEM_BBAPI_EOB_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/eob-type";
 
-  // FIXME this URL has a typo -- first 'c' shouldn't have been there
+  /**
+   * The constant CODING_CCW_TYPE_SERVICE.
+   *
+   * <p>FIXME this URL has a typo -- first 'c' shouldn't have been there
+   *
+   * <p>No longer in use; should this be removed?
+   */
   private static final String CODING_CCW_TYPE_SERVICE =
       "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
@@ -156,6 +165,11 @@ public final class TransformerConstants {
    */
   public static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
+  /** Used as the {@link Coding#getSystem()} for {@link ItemComponent#getType()} entries. */
+  public static final String CODING_SYSTEM_CARIN_HCPCS =
+      "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+
+  /** Used as the {@link Coding#getSystem()} for CPT. */
   public static final String CODING_SYSTEM_CPT = "http://www.ama-assn.org/go/cpt";
 
   /**
@@ -195,7 +209,7 @@ public final class TransformerConstants {
    */
   public static final String CODED_IDENTIFIER_TYPE_NPI_DISPLAY = "National Provider Identifier";
 
-  /** System for encoding UPIN values */
+  /** System for encoding UPIN values. */
   public static final String CODING_UPIN =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBPractitionerIdentifierType";
 
@@ -286,8 +300,10 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "pint". */
   public static final String CODING_SYSTEM_UCUM_PINT_DISPLAY = "pint";
 
+  /** Used to set the coverage issuer for CMS. */
   public static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
 
+  /** Used to set the coverage plan for Medicare. */
   public static final String COVERAGE_PLAN = "Medicare";
 
   /** The {@link Coverage#getGrouping()} {@link GroupComponent#getSubPlan()} value for Part A. */
@@ -341,7 +357,7 @@ public final class TransformerConstants {
 
   /**
    * The {@link Identifier#getSystem()} used in {@link Patient} resources to store the beneficiaryId
-   * (BENE_ID)
+   * (BENE_ID).
    */
   public static final String CODING_BBAPI_BENE_ID = BASE_URL_BBAPI_RESOURCES + "/variables/bene_id";
 
@@ -354,7 +370,7 @@ public final class TransformerConstants {
   /**
    * CARIN Code System for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
-   * C4BB Identifier Type</a>
+   * C4BB Identifier Type</a>.
    */
   public static final String CARIN_IDENTIFIER_SYSTEM =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
@@ -362,52 +378,52 @@ public final class TransformerConstants {
   /**
    * CARIN Code System Display Value for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
-   * C4BB Identifier Type</a>
+   * C4BB Identifier Type</a>.
    */
   public static final String PATIENT_PI_ID_DISPLAY = "Patient internal identifier";
 
   /**
    * CARIN Code System Display Value for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
-   * C4BB Identifier Type</a>
+   * C4BB Identifier Type</a>.
    */
   public static final String PATIENT_MR_ID_DISPLAY = "Medical record number";
 
   /**
    * CARIN Code System Display Value for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
-   * C4BB Identifier Type</a>
+   * C4BB Identifier Type</a>.
    */
   public static final String PATIENT_MC_ID_DISPLAY = "Patient's Medicare number";
 
   /**
    * CARIN Code System Display Value for Member Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
-   * C4BB Identifier Type</a>
+   * C4BB Identifier Type</a>.
    */
   public static final String PATIENT_MB_ID_DISPLAY = "Member Number";
 
   /**
    * US Core Value Set URL for Race Category unknown <a href=
    * "https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
-   * Category</a>
+   * Category</a>.
    */
   public static final String HL7_RACE_UNKNOWN_CODE = "UNK";
 
   /**
    * US Core Value Set URL for Race Category unknown <a
    * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
-   * Category</a>
+   * Category</a>.
    */
   public static final String HL7_RACE_UNKNOWN_DISPLAY = "Unknown";
 
-  /** System for encoding UNK/null values */
+  /** System for encoding UNK/null values. */
   public static final String CODING_V3_NULL = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
 
   /**
    * US Core Code System URL for Race Category <a
    * href="http://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-race.html">CodeSystem:
-   * US Core Race</a>
+   * US Core Race</a>.
    */
   public static final String CODING_RACE_US =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
@@ -415,7 +431,7 @@ public final class TransformerConstants {
   /**
    * CARIN Code System URL for Supporting Info Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
-   * C4BB Supporting Info Type</a>
+   * C4BB Supporting Info Type</a>.
    */
   public static final String CARIN_SUPPORTING_INFO_TYPE =
       "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
@@ -423,13 +439,13 @@ public final class TransformerConstants {
   /**
    * CodeSystem: C4BB Supporting Info Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
-   * C4BB Supporting Info Type</a>
+   * C4BB Supporting Info Type</a>.
    */
   public static final String C4BB_SUPPORTING_INFO_TYPE =
       "http://hl7.org/fhir/ValueSet/claim-informationcategory";
 
   /**
-   * Code system used for {@link ItemComponent#getRevenue()}
+   * Code system used for {@link ItemComponent#getRevenue()}.
    *
    * <p>ValueSet: NUBC Revenue Codes <a
    * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-AHANUBCRevenueCodes.html">ValueSet: NUBC
@@ -437,4 +453,12 @@ public final class TransformerConstants {
    */
   public static final String NUBC_REVENUE_CODE_SYSTEM =
       "https://www.nubc.org/CodeSystem/RevenueCodes";
+
+  /**
+   * C4BB Institutional Claim SubType Code System <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBInstitutionalClaimSubType.html">CodeSystem:
+   * C4BB Institutional Claim SubType Code System</a>.
+   */
+  public static final String C4BB_Institutional_Claim_SubType =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
 }

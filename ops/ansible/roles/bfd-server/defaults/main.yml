@@ -30,3 +30,6 @@ data_server_v2_enabled: false
 
 # Whether or not partially adjudicated claims data resources are enabled.
 pac_resources_enabled: false
+
+# Configures the type of enabled source types for PAC claims
+pac_claim_source_types: 'fiss,mcs'

@@ -2,7 +2,6 @@
 resource "aws_route53_zone" "main" {
   name          = var.public ? var.parent != null ? "${var.name}.${var.parent.name}" : var.name : "bfd-${var.env_config.env}.local"
   comment       = var.public ? "BFD public zone for ${var.env_config.env}." : "BFD private zone for ${var.env_config.env}."
-  tags          = var.env_config.tags
   force_destroy = true
 
   # VPC is only valid for private zones

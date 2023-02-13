@@ -27,15 +27,21 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Unit tests for the {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerTest {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
+  /** Sample valid bene for the test. */
   private static final long SAMPLE_BENE = 567834L;
+  /** Sample invalid bene for the test. */
   private static final long INVALID_BENE = 1L;
+  /** Array of batches for the test. */
   private static final LoadedBatch[] preBatches = new LoadedBatch[8];
+  /** Array of dates for the test. */
   private static final Instant[] preDates = new Instant[preBatches.length * 5];
 
+  /** Sets up required test data. */
   @BeforeAll
   public static void beforeAll() {
     // Create a few time stamps to play with
@@ -49,6 +55,7 @@ public final class LoadedFilterManagerTest {
     }
   }
 
+  /** Validates that the filter is empty when no batches are added to the db. */
   @Test
   public void buildEmptyFilter() {
     final MockDb mockDb = new MockDb().insert(1, preDates[2]);
@@ -57,6 +64,9 @@ public final class LoadedFilterManagerTest {
     assertEquals(0, loadedFilter.size());
   }
 
+  /**
+   * Validates that the filter exists and has the expected matches when a batch is added to the db.
+   */
   @Test
   public void buildOneFilter() {
     final MockDb mockDb = new MockDb().insert(1, preDates[0]).insert(preBatches[0]);
@@ -73,6 +83,10 @@ public final class LoadedFilterManagerTest {
     assertFalse(filters.get(0).mightContain(INVALID_BENE));
   }
 
+  /**
+   * Validates that the filters exist and have the expected matches when many batches are added to
+   * the db.
+   */
   @Test
   public void buildManyFilter() {
     final MockDb mockDb =
@@ -87,6 +101,10 @@ public final class LoadedFilterManagerTest {
     assertEquals(1, filters.get(2).getBatchesCount());
   }
 
+  /**
+   * Validates that the filters exist and have the expected matches when many batches are added to
+   * the db piecemeal.
+   */
   @Test
   public void updateManyFilters() {
     final MockDb mockDb1 =
@@ -117,6 +135,7 @@ public final class LoadedFilterManagerTest {
     assertEquals(4, filters3.get(0).getLoadedFileId());
   }
 
+  /** Tests the {@link LoadedFilterManager#isResultSetEmpty} works for various ranges. */
   @Test
   public void testIsResultSetEmpty() {
     final MockDb mockDb =
@@ -154,6 +173,7 @@ public final class LoadedFilterManagerTest {
     assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, afterRange));
   }
 
+  /** Tests a typical flow for using the filter. */
   @Test
   public void testTypicalSequence() {
     final MockDb mockDb =
@@ -179,6 +199,7 @@ public final class LoadedFilterManagerTest {
     assertEquals(1, cFilters.get(1).getBatchesCount());
   }
 
+  /** Tests an error scenario: adding a new batch not in the same file id. */
   @Test
   public void testErrorSequence() {
     final MockDb mockDb =
@@ -204,6 +225,10 @@ public final class LoadedFilterManagerTest {
     assertEquals(1, cFilters.get(0).getBatchesCount());
   }
 
+  /**
+   * Tests that required date comparison assumptions needed for the {@link LoadedFilterManager} to
+   * work remain.
+   */
   @Test
   public void testDateComparisonAssumptions() throws ParseException {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -223,6 +248,9 @@ public final class LoadedFilterManagerTest {
     assertTrue(lastBatchCreated.isBefore(currentLastBatchCreated));
   }
 
+  /**
+   * Tests that removing a loaded file still has a remaining filter for a file that was not removed.
+   */
   @Test
   public void testTrimFilters() {
     // Build a couple of filters
@@ -246,31 +274,62 @@ public final class LoadedFilterManagerTest {
     assertSame(bFilters.get(0), aFilters.get(0));
   }
 
-  /** Helper class that mocks a DB for LoadedFilterManager testing */
+  /** Helper class that mocks a DB for LoadedFilterManager testing. */
   private static class MockDb {
+    /** Batches for loading. */
     private final ArrayList<LoadedBatch> batches = new ArrayList<>();
+    /** Files for loading. */
     private final ArrayList<LoadedFile> files = new ArrayList<>();
 
+    /**
+     * Inserts a batch into the mock db.
+     *
+     * @param batches the batches to insert
+     * @return the mock db
+     */
     MockDb insert(LoadedBatch... batches) {
       Collections.addAll(this.batches, batches);
       return this;
     }
 
+    /**
+     * Inserts the file id and firstUpdated date to the mock db.
+     *
+     * @param loadedFileId the file id
+     * @param firstUpdated the first updated date
+     * @return the mock db
+     */
     MockDb insert(long loadedFileId, Instant firstUpdated) {
       files.add(new LoadedFile(loadedFileId, "BENEFICIARY", firstUpdated));
       return this;
     }
 
+    /**
+     * Fetches from the database by id.
+     *
+     * @param loadedFiledId the loaded filed id
+     * @return the list of results
+     */
     List<LoadedBatch> fetchById(Long loadedFiledId) {
       return batches.stream()
           .filter(b -> b.getLoadedFileId() == loadedFiledId)
           .collect(Collectors.toList());
     }
 
+    /**
+     * Fetches all files from the db.
+     *
+     * @return the list of results
+     */
     List<LoadedFile> fetchAllFiles() {
       return files;
     }
 
+    /**
+     * Fetches all tuples from the database.
+     *
+     * @return the list of tuples
+     */
     ArrayList<LoadedFilterManager.LoadedTuple> fetchAllTuples() {
       if (batches.size() + files.size() == 0) {
         return new ArrayList<>();

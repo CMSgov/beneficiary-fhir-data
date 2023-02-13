@@ -23,7 +23,9 @@ import org.apache.commons.csv.CSVRecord;
  * {@link Stream}s</strong>, only sequential ones.
  */
 public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>> {
+  /** An iterator for a record. */
   private final Iterator<CSVRecord> singleRecordIter;
+  /** Grouper for csv records. */
   private final CsvRecordGrouper grouper;
 
   /**
@@ -46,13 +48,13 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
     this.grouper = grouper;
   }
 
-  /** @see java.util.Iterator#hasNext() */
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() {
     return recordFromNextGroup.isPresent() || singleRecordIter.hasNext();
   }
 
-  /** @see java.util.Iterator#next() */
+  /** {@inheritDoc} */
   @Override
   public List<CSVRecord> next() {
     if (!hasNext()) throw new NoSuchElementException();
@@ -90,6 +92,8 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
    */
   public interface CsvRecordGrouper {
     /**
+     * Determines if two records should belong to the same group.
+     *
      * @param record1 the first {@link CSVRecord} to compare
      * @param record2 the second {@link CSVRecord} to compare
      * @return <code>true</code> if the specified {@link CSVRecord}s should be part of the same
@@ -103,6 +107,7 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
    * a single shared column (typically the claim ID).
    */
   public static final class ColumnValueCsvRecordGrouper implements CsvRecordGrouper {
+    /** The name of the column to group by. */
     private final Enum<?> groupingColumn;
 
     /**
@@ -115,7 +120,7 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
       this.groupingColumn = groupingColumn;
     }
 
-    /** @see CsvRecordGroupingIterator.CsvRecordGrouper#areSameGroup(CSVRecord, CSVRecord) */
+    /** {@inheritDoc} */
     @Override
     public boolean areSameGroup(CSVRecord record1, CSVRecord record2) {
       if (record1 == null) throw new InvalidRifFileFormatException("Carrier record 1 is null");

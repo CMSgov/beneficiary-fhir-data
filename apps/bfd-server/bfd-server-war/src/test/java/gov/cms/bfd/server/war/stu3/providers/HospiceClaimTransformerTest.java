@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimLine;
@@ -12,6 +13,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -21,17 +23,16 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.HospiceClaimTransformer}. */
+/** Unit tests for {@link HospiceClaimTransformer}. */
 public final class HospiceClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.HospiceClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
+   * Verifies that {@link HospiceClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     HospiceClaim claim =
@@ -41,14 +42,15 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        HospiceClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
-            claim);
-    assertMatches(claim, eob);
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+
+    ExplanationOfBenefit eob = HospiceClaimTransformer.transform(transformerContext, claim);
+    assertMatches(claim, eob, transformerContext);
   }
 
   /**
@@ -58,9 +60,13 @@ public final class HospiceClaimTransformerTest {
    * @param claim the {@link HospiceClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     HospiceClaim}
+   * @param transformerContext the {@link TransformerContext} that was generated from the specified
+   *     {@link HospiceClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(HospiceClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      HospiceClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -93,6 +99,7 @@ public final class HospiceClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

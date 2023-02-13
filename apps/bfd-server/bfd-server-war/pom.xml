@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<datasource-proxy.version>1.8</datasource-proxy.version>
+		<datasource-proxy.version>1.8.1</datasource-proxy.version>
 		<jersey.version>2.25.1</jersey.version>
 
 		<!-- Configure the BFD Server, as it will be run via the exec
@@ -28,7 +28,6 @@
 			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
 			for details. -->
 		<bash.exe>bash</bash.exe>
-		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
 
 	<dependencyManagement>
@@ -230,6 +229,15 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
+
+                <dependency>
+                    <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+                    <!-- providd because it's only needed at compile time -->
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+
 		<dependency>
 			<!-- Used to proxy JDBC usage, for monitoring. -->
 			<groupId>net.ttddyy</groupId>
@@ -261,6 +269,13 @@
 			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
+                <dependency>
+                        <!-- Mockito utilities for JUnit / Jupiter. -->
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-junit-jupiter</artifactId>
+                        <version>${mockito.version}</version>
+                        <scope>test</scope>
+                </dependency>
         <!-- This will get hamcrest-core automatically -->
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -303,7 +318,7 @@
 			<!-- Used for Bloom filters -->
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sketch_2.12</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
@@ -446,6 +461,8 @@
 								<argument>${local.pac.enabled}</argument>
 								<argument>-o</argument>
 								<argument>${local.pac.oldMbiHash.enabled}</argument>
+								<argument>-s</argument>
+								<argument>${local.pac.claimSourceTypes}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->

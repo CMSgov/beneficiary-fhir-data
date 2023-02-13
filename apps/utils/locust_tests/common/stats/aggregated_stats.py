@@ -11,6 +11,7 @@ from locust.env import Environment
 from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
 
 from common.stats.stats_config import StatsEnvironment
+from common.validation import ValidationResult
 
 ResponseTimePercentiles = Dict[str, Union[int, float]]
 """A type representing a dictionary of stringified percentile keys to their integer or
@@ -236,6 +237,9 @@ class StatsMetadata:
     compare_result: FinalCompareResult = FinalCompareResult.NOT_APPLICABLE
     """Indicates the result of comparison against a baseline. Used to filter out failures when
     doing comparisons during load"""
+    validation_result: ValidationResult = ValidationResult.NOT_APPLICABLE
+    """Indicates the result of validation (checking >0 failures, and static percentile SLAs). Used
+    to filter out failing runs when doing comparisons"""
 
     @classmethod
     def from_locust_env(

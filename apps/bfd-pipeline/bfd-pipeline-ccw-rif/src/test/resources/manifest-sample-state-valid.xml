@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10" timestamp="2022-10-18T19:24:11Z" sequenceId="1001" syntheticData="true">
+  <entry name="beneficiary_2012.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2013.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2014.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2015.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2016.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2017.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2018.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2019.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2020.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2021.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_2022.csv" type="BENEFICIARY"/>
+  <entry name="beneficiary_history.csv" type="BENEFICIARY_HISTORY"/>
+  <entry name="carrier.csv" type="CARRIER"/>
+  <entry name="dme.csv" type="DME"/>
+  <entry name="hha.csv" type="HHA"/>
+  <entry name="hospice.csv" type="HOSPICE"/>
+  <entry name="inpatient.csv" type="INPATIENT"/>
+  <entry name="outpatient.csv" type="OUTPATIENT"/>
+  <entry name="pde.csv" type="PDE"/>
+  <entry name="snf.csv" type="SNF"/>
+  <preValidationProperties>
+	<clm_grp_id_start>-100001170</clm_grp_id_start>
+	<pde_id_start>-100000623</pde_id_start>
+	<carr_clm_cntl_num_start>-100000388</carr_clm_cntl_num_start>
+	<fi_doc_cntl_num_start>-1000001591</fi_doc_cntl_num_start>
+	<hicn_start>T01000010A</hicn_start>
+	<bene_id_start>-1000010</bene_id_start>
+	<clm_id_start>-100000547</clm_id_start>
+	<mbi_start>1S00E00AA10</mbi_start>
+	<bene_id_end>-1000020</bene_id_end>
+	<clm_id_end>-1000005480</clm_id_end>
+	<pde_id_end>-100000640</pde_id_end>
+	<generated>Tue Oct 18 15:24:11 EDT 2022</generated>
+  </preValidationProperties>
+</dataSetManifest>

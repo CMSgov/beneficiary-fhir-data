@@ -163,8 +163,10 @@ message FissClaim {
   optional string prac_loc_zip = 34;
 
   optional string stmt_cov_from_cymd = 39;
+  optional string stmt_cov_from_cymd_text = 102;
 
   optional string stmt_cov_to_cymd = 40;
+  optional string stmt_cov_to_cymd_text = 103;
 
   // Location of Bill
   oneof lob_cd {
@@ -230,6 +232,7 @@ message FissClaim {
 
   // Admission Date
   optional string adm_date_cymd = 66;
+  optional string adm_date_cymd_text = 104;
 
   // Source of Admission
   oneof adm_source {

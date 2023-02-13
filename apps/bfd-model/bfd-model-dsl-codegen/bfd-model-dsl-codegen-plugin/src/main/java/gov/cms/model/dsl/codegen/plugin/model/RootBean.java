@@ -37,7 +37,7 @@ public class RootBean {
    * @return {@link Optional} containing the mapping if it exists or empty if it does not exist
    */
   public Optional<MappingBean> findMappingWithId(String id) {
-    return mappings.stream().filter(m -> m.getId().equals(id)).findAny();
+    return mappings.stream().filter(m -> id.equals(m.getId())).findAny();
   }
 
   /**
@@ -47,6 +47,38 @@ public class RootBean {
    * @return {@link Optional} containing the mapping if it exists or empty if it does not exist
    */
   public Optional<MappingBean> findMappingWithEntityClassName(String entityClassName) {
-    return mappings.stream().filter(m -> m.getEntityClassName().equals(entityClassName)).findAny();
+    return mappings.stream().filter(m -> entityClassName.equals(m.getEntityClassName())).findAny();
+  }
+
+  /**
+   * Search for a {@link MappingBean} for the given {@link JoinBean}. Uses either the {@link
+   * JoinBean#entityClass} or {@link JoinBean#entityMapping} (whichever is defined) to find a
+   * matching {@link MappingBean}.
+   *
+   * @param join {@link JoinBean} to find mapping for
+   * @return {@link Optional} containing the mapping if it exists or empty if it does not exist
+   */
+  public Optional<MappingBean> findMappingForJoinBean(JoinBean join) {
+    if (join.getEntityMapping() != null) {
+      return findMappingWithId(join.getEntityMapping());
+    } else {
+      return findMappingWithEntityClassName(join.getEntityClass());
+    }
+  }
+
+  /**
+   * Find and return the appropriate class name for the entity class of the {@link JoinBean}.
+   *
+   * @param join {@link JoinBean} to find entity for
+   * @return {@link Optional} containing the class name if it exists or empty if it does not exist
+   */
+  public Optional<String> getEntityClassForJoin(JoinBean join) {
+    Optional<String> className;
+    if (join.getEntityClass() != null) {
+      className = Optional.of(join.getEntityClass());
+    } else {
+      className = findMappingWithId(join.getEntityMapping()).map(MappingBean::getEntityClassName);
+    }
+    return className;
   }
 }

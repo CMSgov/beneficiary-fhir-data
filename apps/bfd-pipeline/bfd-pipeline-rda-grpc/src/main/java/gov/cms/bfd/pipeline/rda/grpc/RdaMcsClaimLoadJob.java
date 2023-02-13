@@ -1,8 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +16,23 @@ import org.slf4j.LoggerFactory;
 public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaChange<RdaMcsClaim>> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaMcsClaimLoadJob.class);
 
+  /**
+   * Instantiates a new RDA MCS claim load job.
+   *
+   * @param config the configuration for this job
+   * @param preJobTaskFactory the pre job task factory
+   * @param sourceFactory the source factory
+   * @param sinkFactory the sink factory
+   * @param appMetrics the app metrics
+   */
   public RdaMcsClaimLoadJob(
       Config config,
+      Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTaskFactory,
       Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> sourceFactory,
-      Callable<RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>> sinkFactory,
-      MetricRegistry appMetrics) {
-    super(config, sourceFactory, sinkFactory, appMetrics, LOGGER);
+      ThrowingFunction<
+              RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>, SinkTypePreference, Exception>
+          sinkFactory,
+      MeterRegistry appMetrics) {
+    super(config, preJobTaskFactory, sourceFactory, sinkFactory, appMetrics, LOGGER);
   }
 }

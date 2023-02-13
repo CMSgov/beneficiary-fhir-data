@@ -30,7 +30,9 @@ public class V1Server extends RestfulServer {
 
   private static final long serialVersionUID = 1L;
 
+  /** Represents the capabilities publisher value. */
   static final String CAPABILITIES_PUBLISHER = "Centers for Medicare & Medicaid Services";
+  /** Represents the capabilities server name. */
   static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
   /** Constructs a new {@link V1Server} instance. */
@@ -113,5 +115,9 @@ public class V1Server extends RestfulServer {
     // Default to XML and pretty printing.
     setDefaultResponseEncoding(EncodingEnum.JSON);
     setDefaultPrettyPrint(false);
+
+    // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
+    // executed
+    registerInterceptor(new TimerInterceptor());
   }
 }

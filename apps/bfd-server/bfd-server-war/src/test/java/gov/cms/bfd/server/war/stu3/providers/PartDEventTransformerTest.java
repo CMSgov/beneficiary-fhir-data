@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -28,68 +29,105 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer}. */
 public final class PartDEventTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
+   * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         PartDEventTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     assertMatches(claim, eob);
   }
 
+  /**
+   * Verifies that {@link IdentifierType#NPI} values can be found after {@link
+   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   *
+   * @throws FHIRException (indicates test failure)
+   * @throws IOException (indicates test failure)
+   */
   @Test
-  public void transformSampleARecordWithNPI() throws FHIRException {
+  public void transformSampleARecordWithNPI() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "01";
     String serviceProviderCode = IdentifierType.NPI.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
+  /**
+   * Verifies that {@link IdentifierType#UPIN} values can be found after {@link
+   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   *
+   * @throws FHIRException (indicates test failure)
+   * @throws IOException (indicates test failure)
+   */
   @Test
-  public void transformSampleARecordWithUPIN() throws FHIRException {
+  public void transformSampleARecordWithUPIN() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "06";
     String serviceProviderCode = IdentifierType.UPIN.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
+  /**
+   * Verifies that {@link IdentifierType#NCPDP} values can be found after {@link
+   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   *
+   * @throws FHIRException (indicates test failure)
+   * @throws IOException (indicates test failure)
+   */
   @Test
-  public void transformSampleARecordWithNCPDP() throws FHIRException {
+  public void transformSampleARecordWithNCPDP() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "07";
     String serviceProviderCode = IdentifierType.NCPDP.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
+  /**
+   * Verifies that {@link IdentifierType#SL} values can be found after {@link
+   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   *
+   * @throws FHIRException (indicates test failure)
+   * @throws IOException (indicates test failure)
+   */
   @Test
-  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
+  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "08";
     String serviceProviderCode = IdentifierType.SL.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
+  /**
+   * Verifies that {@link IdentifierType#TAX} values can be found after {@link
+   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   *
+   * @throws FHIRException (indicates test failure)
+   * @throws IOException (indicates test failure)
+   */
   @Test
-  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
+  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException, IOException {
     String serviceProviderIdQualiferCode = "11";
     String serviceProviderCode = IdentifierType.TAX.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer#transform(com.codahale.metrics.MetricRegistry,
-   * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
-   * and {@link String serviceProviderCode}.
+   * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
+   * {@link String serviceProviderIdQualiferCode} and {@link String serviceProviderCode}.
+   *
+   * @param serviceProviderIdQualiferCode the service provider id qualifier code
+   * @param serviceProviderCode the service provider code
+   * @throws IOException (indicates test failure)
    */
-  private void checkOrgAndFacility(
-      String serviceProviderIdQualiferCode, String serviceProviderCode) {
+  private void checkOrgAndFacility(String serviceProviderIdQualiferCode, String serviceProviderCode)
+      throws IOException {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
@@ -97,7 +135,8 @@ public final class PartDEventTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
@@ -105,6 +144,11 @@ public final class PartDEventTransformerTest {
         serviceProviderCode, claim.getServiceProviderId(), eob.getFacility());
   }
 
+  /**
+   * Gets the part d event claim from the sample A file.
+   *
+   * @return the part d event claim
+   */
   private PartDEvent getPartDEventClaim() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

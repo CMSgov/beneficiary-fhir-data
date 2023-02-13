@@ -43,6 +43,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
@@ -54,6 +60,22 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
+
+		<dependency>
+			<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+                <dependency>
+			<!-- Used to transmit metrics to JMX for local testing. -->
+                        <groupId>io.micrometer</groupId>
+                        <artifactId>micrometer-registry-jmx</artifactId>
+                </dependency>
+                <dependency>
+			<!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
+                        <groupId>io.micrometer</groupId>
+                        <artifactId>micrometer-registry-cloudwatch</artifactId>
+                </dependency>
 
 		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
@@ -76,7 +98,6 @@
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<!-- HSQL is used in this project's integration tests, which means it

@@ -17,9 +17,9 @@ import gov.cms.model.dsl.codegen.plugin.accessor.GrpcGetter;
 import gov.cms.model.dsl.codegen.plugin.accessor.OptionalSetter;
 import gov.cms.model.dsl.codegen.plugin.accessor.RifGetter;
 import gov.cms.model.dsl.codegen.plugin.accessor.StandardSetter;
-import gov.cms.model.dsl.codegen.plugin.model.ArrayBean;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.ExternalTransformationBean;
+import gov.cms.model.dsl.codegen.plugin.model.JoinBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.Modifier;
+import lombok.AllArgsConstructor;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -71,7 +72,7 @@ import org.apache.maven.project.MavenProject;
  *       methods produce an entity instance with all of its single fields populated.
  *   <li>One private {@code transformMessageArraysToX()} method for each message class that contains
  *       at least one array of sub-messages. Each of these methods accepts an existing entity
- *       instance and populates any collections (as defined by {@link ArrayBean}) in the instance.
+ *       instance and populates any collections in the instance.
  * </ul>
  */
 @Mojo(name = "transformers", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
@@ -137,6 +138,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
     try {
       final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
+      MojoUtil.validateModel(root);
       for (MappingBean mapping : root.getMappings()) {
         if (mapping.hasTransformer()) {
           TypeSpec rootEntity = createTransformerClassForMapping(root, mapping);
@@ -202,7 +204,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
     classBuilder.addMethod(createTransformRootMessageMethod(mapping));
     for (MappingBean aMapping : allMappings) {
       classBuilder.addMethod(createTransformMethodForMapping(aMapping));
-      if (aMapping.hasArrayElements()) {
+      if (aMapping.hasArrayTransformations()) {
         classBuilder.addMethod(createTransformArraysMethodForMapping(root, aMapping));
       }
     }
@@ -220,7 +222,8 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
    * @return List of all mappings reachable from {@code firstMapping} (including {@code
    *     firstMapping}).
    */
-  private List<MappingBean> findAllMappingsForRootMapping(RootBean root, MappingBean firstMapping) {
+  private List<MappingBean> findAllMappingsForRootMapping(RootBean root, MappingBean firstMapping)
+      throws MojoExecutionException {
     final ImmutableList.Builder<MappingBean> answer = ImmutableList.builder();
     final Set<String> visited = new HashSet<>();
     final List<MappingBean> queue = new ArrayList<>();
@@ -230,9 +233,9 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
       MappingBean mapping = queue.remove(0);
       visited.add(mapping.getId());
       answer.add(mapping);
-      for (ArrayBean element : mapping.getArrays()) {
-        Optional<MappingBean> elementMapping = root.findMappingWithId(element.getMapping());
-        if (elementMapping.isPresent() && !visited.contains(element.getMapping())) {
+      for (ArrayTransformSpec spec : getAllArrayTransforms(mapping)) {
+        Optional<MappingBean> elementMapping = root.findMappingForJoinBean(spec.join);
+        if (elementMapping.isPresent() && !visited.contains(elementMapping.get().getId())) {
           queue.add(elementMapping.get());
         }
       }
@@ -250,6 +253,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
    */
   private List<FieldSpec> createFieldsForMapping(MappingBean mapping) {
     return mapping.getTransformations().stream()
+        .filter(t -> !t.isArray())
         .flatMap(
             transformation -> {
               final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
@@ -273,6 +277,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
    */
   private List<CodeBlock> createFieldInitializersForMapping(MappingBean mapping) {
     return mapping.getTransformations().stream()
+        .filter(t -> !t.isArray())
         .flatMap(
             transformation -> {
               final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
@@ -405,7 +410,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
         FieldTransformer.TRANSFORMER_VAR,
         FieldTransformer.NOW_VAR,
         "");
-    if (mapping.hasArrayElements()) {
+    if (mapping.hasArrayTransformations()) {
       builder.addStatement(
           "$L($L,$L,$L,$L,$S)",
           createTransformArraysMethodNameForMapping(mapping),
@@ -417,6 +422,42 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
     }
     builder.addStatement("return $L", FieldTransformer.DEST_VAR);
     return builder.build();
+  }
+
+  /** Used as a return value for {@link GenerateTransformersFromDslMojo#getAllArrayTransforms}. */
+  @AllArgsConstructor
+  @VisibleForTesting
+  static class ArrayTransformSpec {
+    /** Copy of {@link TransformationBean#from} value. */
+    private final String from;
+    /** Matching {#link {@link JoinBean} to transform. */
+    private final JoinBean join;
+  }
+
+  /**
+   * Finds all {@link TransformationBean} in the mapping that specify a join to be transformed as an
+   * array and returns them in a list of {@link ArrayTransformSpec} objects.
+   *
+   * @param mapping {@link MappingBean} for message/entity to be processed
+   * @return the list of {@link ArrayTransformSpec}
+   * @throws MojoExecutionException if a mapping is invalid
+   */
+  List<ArrayTransformSpec> getAllArrayTransforms(MappingBean mapping)
+      throws MojoExecutionException {
+    List<ArrayTransformSpec> specs = new ArrayList<>();
+    for (TransformationBean transformation : mapping.getTransformations()) {
+      if (transformation.isArray()) {
+        Optional<JoinBean> join = mapping.findJoinByFieldName(transformation.getTo());
+        if (join.isPresent()) {
+          specs.add(new ArrayTransformSpec(transformation.getFrom(), join.get()));
+        } else {
+          throw MojoUtil.createException(
+              "array transform references field with no matching join: mapping=%s from=%s to=%s",
+              mapping.getId(), transformation.getFrom(), transformation.getTo());
+        }
+      }
+    }
+    return List.copyOf(specs);
   }
 
   /**
@@ -454,6 +495,10 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
             ? StandardSetter.Instance
             : OptionalSetter.Instance;
     for (TransformationBean transformation : mapping.getTransformations()) {
+      // array transformations are handled separately so skip any that we encounter here
+      if (transformation.isArray()) {
+        continue;
+      }
       final ColumnBean column = mapping.getTable().findColumnByName(transformation.getTo());
       final CodeBlock transformationCode =
           TransformerUtil.selectTransformerForField(column, transformation)
@@ -507,29 +552,29 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
             .addParameter(DataTransformer.class, FieldTransformer.TRANSFORMER_VAR)
             .addParameter(Instant.class, FieldTransformer.NOW_VAR)
             .addParameter(String.class, FieldTransformer.NAME_PREFIX_VAR);
-    for (ArrayBean arrayBean : mapping.getArrays()) {
+    for (ArrayTransformSpec spec : getAllArrayTransforms(mapping)) {
       final MappingBean elementMapping =
-          root.findMappingWithId(arrayBean.getMapping())
+          root.findMappingForJoinBean(spec.join)
               .orElseThrow(
                   () ->
                       MojoUtil.createException(
                           "array element of %s references undefined mapping %s",
-                          mapping.getId(), arrayBean.getMapping()));
+                          mapping.getId(), spec.join.getEntityMapping()));
       CodeBlock.Builder loop =
           CodeBlock.builder()
               .beginControlFlow(
                   "for (short index = 0; index < $L.get$LCount(); ++index)",
                   FieldTransformer.SOURCE_VAR,
-                  TransformerUtil.capitalize(arrayBean.getFrom()));
+                  TransformerUtil.capitalize(spec.from));
       loop.addStatement(
               "final String itemNamePrefix = $L + $S + \"-\" + index + \"-\"",
               FieldTransformer.NAME_PREFIX_VAR,
-              arrayBean.getNamePrefix())
+              spec.join.getFieldName())
           .addStatement(
               "final $T itemFrom = $L.get$L(index)",
               TransformerUtil.toClassName(elementMapping.getMessageClassName()),
               FieldTransformer.SOURCE_VAR,
-              TransformerUtil.capitalize(arrayBean.getFrom()))
+              TransformerUtil.capitalize(spec.from))
           .addStatement(
               "final $T itemTo = $L(itemFrom,$L,$L,itemNamePrefix)",
               TransformerUtil.toClassName(elementMapping.getEntityClassName()),
@@ -551,11 +596,12 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
               TransformerUtil.capitalize(elementField.getTo()));
         }
       }
-      if (arrayBean.hasParentField()) {
-        loop.addStatement(
-            "itemTo.set$L(to)", TransformerUtil.capitalize(arrayBean.getParentField()));
+      // When mappedBy is a primary key the field is a value not an object so we don't initialize it
+      // using to.
+      if (spec.join.hasMappedBy() && !mapping.getTable().isPrimaryKey(spec.join.getMappedBy())) {
+        loop.addStatement("itemTo.set$L(to)", TransformerUtil.capitalize(spec.join.getMappedBy()));
       }
-      if (elementMapping.hasArrayElements()) {
+      if (elementMapping.hasArrayTransformations()) {
         loop.addStatement(
             "$L(itemFrom,itemTo,$L,$L,itemNamePrefix)",
             createTransformArraysMethodNameForMapping(mapping),
@@ -565,7 +611,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
       loop.addStatement(
               "$L.get$L().add(itemTo)",
               FieldTransformer.DEST_VAR,
-              TransformerUtil.capitalize(arrayBean.getTo()))
+              TransformerUtil.capitalize(spec.join.getFieldName()))
           .endControlFlow();
       builder.addCode(loop.build());
     }

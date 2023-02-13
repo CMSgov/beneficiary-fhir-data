@@ -189,17 +189,30 @@ resource "aws_s3_bucket_policy" "cross_account" {
               "Action": [
                   "s3:AbortMultipartUpload",
                   "s3:GetBucketLocation",
-                  "s3:GetObject*",
                   "s3:ListBucket",
                   "s3:ListBucketMultipartUploads",
-                  "s3:PutObject*",
-                  "s3:DeleteObject*"
+                  "s3:*Object"
               ],
               "Resource": [
                   "${aws_s3_bucket.main.arn}/*",
                   "${aws_s3_bucket.main.arn}"
               ]
-          }
+          },
+        {
+            "Sid": "AllowSSLRequestsOnly",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": "s3:*",
+            "Resource": [
+                  "${aws_s3_bucket.main.arn}",
+                  "${aws_s3_bucket.main.arn}/*"
+            ],
+            "Condition": {
+                "Bool": {
+                    "aws:SecureTransport": "false"
+                }
+            }
+        }
       ]
     }
     POLICY

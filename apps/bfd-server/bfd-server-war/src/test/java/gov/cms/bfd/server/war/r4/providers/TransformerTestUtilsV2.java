@@ -9,6 +9,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.CarrierClaimColumn;
+import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.DMEClaimColumn;
+import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -47,19 +53,22 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.opentest4j.AssertionFailedError;
 
+/** Test utilities helpful in setting up test data or running a test. */
 public final class TransformerTestUtilsV2 {
-  /* Do this very slow operation once */
+  /** The fhir context for parsing the test file. Do this very slow operation once. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /**
-   * Test the transformation of common group level header fields between all claim types
+   * Test the transformation of common group level header fields between all claim types.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimId CLM_ID
    * @param beneficiaryId BENE_ID
-   * @param claimType {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} to process
+   * @param claimType {@link ClaimTypeV2} to process
    * @param claimGroupId CLM_GRP_ID
-   * @param coverageType {@link gov.cms.bfd.server.war.stu3.providers.MedicareSegment}
+   * @param coverageType {@link MedicareSegment}
    * @param dateFrom CLM_FROM_DT
    * @param dateThrough CLM_THRU_DT
    * @param paymentAmount CLM_PMT_AMT
@@ -143,6 +152,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected identifier exists.
+   *
    * @param expectedSystem the expected {@link Identifier#getSystem()} value
    * @param expectedId the expected {@link Identifier#getValue()} value
    * @param actuals the actual {@link Identifier} to verify
@@ -156,6 +167,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected identifiers are equal.
+   *
    * @param expectedIdentifierSystem the expected {@link Identifier#getSystem()} value
    * @param expectedIdentifierValue the expected {@link Identifier#getValue()} value
    * @param reference the actual {@link Reference} to verify
@@ -170,6 +183,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected reference identifiers are equal.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedIdentifierValue the expected {@link Identifier#getValue()} of the {@link
    *     Reference#getIdentifier()}
@@ -185,6 +200,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected extension coding exists.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedCode the expected {@link Coding#getCode()}
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
@@ -198,7 +215,9 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * FIXME change name of this and related methods to assertHasExtensionCoding(...)
+   * Asserts the expected extension coding exists.
+   *
+   * <p>FIXME change name of this and related methods to assertHasExtensionCoding(...)
    *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
@@ -223,6 +242,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected extension coding exists.
+   *
    * @param fhirElement the FHIR element to check the extension of
    * @param expectedExtensionUrl the expected {@link Extension#getUrl()} of the {@link Extension} to
    *     look for
@@ -243,6 +264,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected identifier exists.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()} value
    * @param actualIdentifiers the actual {@link Identifier}s to verify a match can be found within
@@ -263,6 +286,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected coding exists.
+   *
    * @param expectedSystem the expected {@link Coding#getSystem()} value
    * @param expectedCode the expected {@link Coding#getCode()} value
    * @param actualCode the actual {@link Coding} to verify
@@ -272,6 +297,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected coding exists.
+   *
    * @param expectedSystem the expected {@link Coding#getSystem()} value
    * @param expectedCode the expected {@link Coding#getCode()} value
    * @param actualCode the actual {@link List}&lt;{@link Coding}&gt; to verify
@@ -281,9 +308,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected coding exists.
+   *
    * @param expectedSystem the expected {@link Coding#getSystem()} value
    * @param expectedVersion the expected {@link Coding#getVersion()} value
-   * @param expectedVersion the expected {@link Coding#getDisplay()} value
+   * @param expectedDisplay the expected {@link Coding#getDisplay()} value
    * @param expectedCode the expected {@link Coding#getCode()} value
    * @param actualCode the actual {@link List}&lt;{@link Coding}&gt; to verify
    */
@@ -309,6 +338,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected identifiers match the expected value.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()} value
    * @param actual the actual {@link Identifier} to verify
@@ -323,6 +354,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the expected dates are equal.
+   *
    * @param expected the expected {@link LocalDate}
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
@@ -332,6 +365,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Finds a care team entry for the specified provider identifier.
+   *
    * @param expectedProviderNpi the {@link Identifier#getValue()} of the provider to find a matching
    *     {@link CareTeamComponent} for
    * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
@@ -346,6 +381,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Finds a care team entry for the specified provider tax number.
+   *
    * @param expectedProviderTaxNumber the {@link Identifier#getValue()} of the provider to find a
    *     matching {@link CareTeamComponent} for
    * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
@@ -363,10 +400,13 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Finds a care team entry for the specified provider identifier.
+   *
    * @param expectedIdentifierSystem the {@link Identifier#getSystem()} of the provider to find a
    *     matching {@link CareTeamComponent} for
    * @param expectedIdentifierValue the {@link Identifier#getValue()} of the provider to find a
    *     matching {@link CareTeamComponent} for
+   * @param expectedRole the expected role
    * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
    * @return the {@link CareTeamComponent} whose {@link CareTeamComponent#getProvider()} is an
    *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
@@ -389,6 +429,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Validates if the reference matches the identifier.
+   *
    * @param expectedIdentifierSystem the expected {@link Identifier#getSystem()} to match
    * @param expectedIdentifierValue the expected {@link Identifier#getValue()} to match
    * @param actualReference the {@link Reference} to check
@@ -410,7 +452,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Does the role of the care team component match what is expected
+   * Does the role of the care team component match what is expected.
    *
    * @param expectedRole expected role; maybe empty
    * @param actualComponent the Care Team Component to test
@@ -428,6 +470,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that the provided EOB has the specified supporting information details.
+   *
    * @param categoryVariable the {@link CcwCodebookVariable} matching the {@link
    *     SupportingInformationComponent#getCategory()} to find
    * @param codeSystemVariable the {@link CcwCodebookVariable} that should have been mapped to
@@ -509,8 +553,8 @@ public final class TransformerTestUtilsV2 {
    * CarrierClaimLine} and {@link DMEClaimLine} are listed below and their corresponding RIF CCW
    * fields (denoted in all CAPS below from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
    *
-   * @param item the {@ ItemComponent} to test
-   * @param eob the {@ ExplanationOfBenefit} to test
+   * @param item the {@link ItemComponent} to test
+   * @param eob the {@link ExplanationOfBenefit} to test
    * @param serviceCount LINE_SRVC_CNT,
    * @param placeOfServiceCode LINE_PLACE_OF_SRVC_CD,
    * @param firstExpenseDate LINE_1ST_EXPNS_DT,
@@ -534,7 +578,7 @@ public final class TransformerTestUtilsV2 {
    * @param hctHgbTestResult LINE_HCT_HGB_RSLT_NUM,
    * @param cmsServiceTypeCode LINE_CMS_TYPE_SRVC_CD,
    * @param nationalDrugCode LINE_NDC_CD
-   * @throws FHIRException
+   * @throws FHIRException if there is a transformation issue
    */
   static void assertEobCommonItemCarrierDMEEquals(
       ItemComponent item,
@@ -631,6 +675,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the EOB has the specified supporting information.
+   *
    * @param categoryVariable the {@link CcwCodebookVariable} matching the {@link
    *     SupportingInformationComponent#getCategory()} to find
    * @param eob the {@link ExplanationOfBenefit} to search
@@ -654,6 +700,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Verifies a {@link Coding} exists within the specified {@link CodeableConcept}.
+   *
    * @param concept the {@link CodeableConcept} to check
    * @param codingSystem the {@link Coding#getSystem()} to match
    * @param codingCode the {@link Coding#getCode()} to match
@@ -665,9 +713,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Verifies a @link Coding} exists within the specified {@link CodeableConcept}.
+   *
    * @param concept the {@link CodeableConcept} to check
    * @param codingSystem the {@link Coding#getSystem()} to match
-   * @param codingSystem the {@link Coding#getVersion()} to match
+   * @param codingVersion the {@link Coding#getVersion()} to match
    * @param codingCode the {@link Coding#getCode()} to match
    * @return <code>true</code> if the specified {@link CodeableConcept} contains the specified
    *     {@link Coding}, <code>false</code> if it does not
@@ -686,6 +736,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts an extension date year equals the provided value.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
    * @param expectedDateYear the expected {@link Coding#getCode()}
@@ -706,6 +758,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts a {@link CodeableConcept} has an expected {@link Coding}.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedCode the expected {@link Coding#getCode()}
    * @param actualConcept the FHIR {@link CodeableConcept} to verify
@@ -719,6 +773,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts a {@link CodeableConcept} has an expected {@link Coding}.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedCode the expected {@link Coding#getCode()}
    * @param actualConcept the FHIR {@link CodeableConcept} to verify
@@ -738,6 +794,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts a coding has the expected values.
+   *
    * @param expectedSystem the expected {@link Coding#getSystem()} value
    * @param expectedCode the expected {@link Coding#getCode()} value
    * @param actual the actual {@link Coding} to verify
@@ -747,6 +805,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts a coding has the expected values.
+   *
    * @param expectedSystem the expected {@link Coding#getSystem()} value
    * @param expectedVersion the expected {@link Coding#getVersion()} value
    * @param expectedCode the expected {@link Coding#getCode()} value
@@ -771,6 +831,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts a quantity has the expected value.
+   *
    * @param expectedValue the expected {@link Quantity#getValue()}
    * @param actual the actual {@link Quantity} to verify
    */
@@ -782,6 +844,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that the adjudication total in an EOB matches the expected value.
+   *
    * @param categoryVariable the {@link CcwCodebookVariable} for the {@link Extension#getUrl()} to
    *     find and verify
    * @param expectedAmountValue the expected {@link Extension#getValue()} {@link Money#getValue()}
@@ -805,6 +869,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that the adjudication total in an EOB matches the expected value.
+   *
    * @param categoryVariable the {@link CcwCodebookVariable} for the {@link Extension#getUrl()} to
    *     find and verify
    * @param expectedAmountValue the expected {@link Extension#getValue()} {@link Money#getValue()}
@@ -819,11 +885,13 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts the value in a {@link Money} matches the expected value.
+   *
    * @param expectedAmountValue the expected {@link Money#getValue()}
    * @param actualValue the actual {@link Money} to verify
    */
   private static void assertMoneyValue(BigDecimal expectedAmountValue, Money actualValue) {
-    /**
+    /*
      * TODO: Money coding? assertEquals(TransformerConstants.CODING_MONEY, actualValue.getSystem());
      * assertEquals(TransformerConstants.CODED_MONEY_USD, actualValue.getCode());
      */
@@ -844,6 +912,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that an extension identifier matches the expected values.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()}
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
@@ -854,6 +924,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that an extension identifier matches the expected values.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
    * @param expectedValue the expected {@link Quantity#getValue()}
@@ -876,6 +948,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that an extension quantity matches the expected values.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Quantity#getValue()}
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
@@ -887,6 +961,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Asserts that an extension quantity matches the expected value.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
    * @param expectedValue the expected {@link Quantity#getValue()}
@@ -910,10 +986,9 @@ public final class TransformerTestUtilsV2 {
   /**
    * Verifies that the Item Component has an extension with the extension url that is passed in.
    *
-   * @param expectedD
    * @param ccwVariable the expected {@link CcwCodebookInterface}
    * @param expectedValue the expected {@link BigDecimal}
-   * @param itemComponents the FHIR element to find and verify the {@link List<ItemComponent>} of
+   * @param itemComponents the FHIR element to find and verify the {@link ItemComponent} list of
    */
   static void assertExtensionQuantityEquals(
       CcwCodebookInterface ccwVariable,
@@ -954,7 +1029,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Test that the resource being tested has a matching lastUpdated
+   * Test that the resource being tested has a matching lastUpdated.
    *
    * @param expectedDateTime from the entity
    * @param actualResource that is being created by the transform
@@ -989,7 +1064,7 @@ public final class TransformerTestUtilsV2 {
    * (denoted in all CAPS below from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to test
-   * @param benficiaryId BENE_ID, *
+   * @param beneficiaryId BENE_ID,
    * @param carrierNumber CARR_NUM,
    * @param clinicalTrialNumber CLM_CLNCL_TRIL_NUM,
    * @param beneficiaryPartBDeductAmount CARR_CLM_CASH_DDCTBL_APLD_AMT,
@@ -1049,7 +1124,9 @@ public final class TransformerTestUtilsV2 {
         CcwCodebookVariable.NCH_CARR_CLM_ALOWD_AMT, allowedChargeAmount, eob);
   }
 
-  /*
+  /**
+   * Assert that two periods are equal.
+   *
    * @param expectedStartDate the expected value for {@link Period#getStart()}
    * @param expectedEndDate the expected value for {@link Period#getEnd()}
    * @param actualPeriod the {@link Period} to verify
@@ -1066,10 +1143,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds an {@link Identifier} in a list based on the System URL
+   * Finds an {@link Identifier} in a list based on the System URL.
    *
-   * @param system
-   * @param identifiers
+   * @param system the system
+   * @param identifiers the identifiers
+   * @return the identifier
    */
   static Identifier findIdentifierBySystem(String system, List<Identifier> identifiers) {
     Optional<Identifier> id =
@@ -1081,10 +1159,14 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Creates an {@link Identifier} to be used in tests
+   * Creates an {@link Identifier} to be used in tests.
    *
-   * @param system
-   * @param identifiers
+   * @param system the system
+   * @param value the value
+   * @param codeSystem the code system
+   * @param code the code
+   * @param codeDisplay the code display
+   * @return the identifier
    */
   static Identifier createIdentifier(
       String system, String value, String codeSystem, String code, String codeDisplay) {
@@ -1097,10 +1179,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds an {@link Extension} in a list based on the Extension URL
+   * Finds an {@link Extension} in a list based on the Extension URL.
    *
-   * @param url
-   * @param extensions
+   * @param url the url
+   * @param extensions the extensions
+   * @return the extension
    */
   static Extension findExtensionByUrl(String url, List<Extension> extensions) {
     Optional<Extension> ex = extensions.stream().filter(e -> url.equals(e.getUrl())).findFirst();
@@ -1111,11 +1194,12 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds an {@link Extension} in a list based on the Extension URL and System URL
+   * Finds an {@link Extension} in a list based on the Extension URL and System URL.
    *
    * @param url the expected {@link Extension#getUrl()} of the {@link Extension} to look for
    * @param system the expected {@link Coding#getSystem()} value
    * @param extensions the list of extensions to filter through
+   * @return the extension
    */
   static Extension findExtensionByUrlAndSystem(
       String url, String system, List<Extension> extensions) {
@@ -1139,10 +1223,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds a specific {@link Coding} in a list given the system
+   * Finds a specific {@link Coding} in a list given the system.
    *
-   * @param system
-   * @param codings
+   * @param system the system
+   * @param codings the codings
+   * @return the coding
    */
   static Coding findCodingBySystem(String system, List<Coding> codings) {
     Optional<Coding> coding =
@@ -1154,10 +1239,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds a Care Team member by Sequence value
+   * Finds a Care Team member by Sequence value.
    *
-   * @param seq
-   * @param team
+   * @param seq the seq
+   * @param team the team
+   * @return the care team component
    */
   static CareTeamComponent findCareTeamBySequence(int seq, List<CareTeamComponent> team) {
     Optional<CareTeamComponent> ctc = team.stream().filter(c -> c.getSequence() == seq).findFirst();
@@ -1168,7 +1254,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Helper that creates a {@link CareTeamComponent} to be used in unit tests
+   * Helper that creates a {@link CareTeamComponent} to be used in unit tests.
    *
    * @param sequence The sequence to set
    * @param npi The NPI for the member
@@ -1194,11 +1280,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds a {@link SupportingInformationComponent} based on the value of a Code of the Category
+   * Finds a {@link SupportingInformationComponent} based on the value of a Code of the Category.
    *
-   * @param code
-   * @param components
-   * @return
+   * @param code the code
+   * @param components the components
+   * @return supporting information component
    */
   static SupportingInformationComponent findSupportingInfoByCode(
       String code, List<SupportingInformationComponent> components) {
@@ -1218,12 +1304,12 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Helper to create a {@link SupportingInformationComponent}
+   * Helper to create a {@link SupportingInformationComponent}.
    *
    * @param sequence The sequence number to set
    * @param category A list of {@link Coding} elements to use for Category
    * @param code A Coding to use for Code
-   * @return
+   * @return supporting information component
    */
   static SupportingInformationComponent createSupportingInfo(
       int sequence, List<Coding> category, Coding code) {
@@ -1234,11 +1320,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Helper to create a {@link SupportingInformationComponent}
+   * Helper to create a {@link SupportingInformationComponent}.
    *
    * @param sequence The sequence number to set
    * @param category A list of {@link Coding} elements to use for Category
-   * @return
+   * @return supporting information component
    */
   static SupportingInformationComponent createSupportingInfo(int sequence, List<Coding> category) {
     return new SupportingInformationComponent()
@@ -1247,11 +1333,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds a {@link DiagnosisComponent} in a list based on the coding of the diagnosis
+   * Finds a {@link DiagnosisComponent} in a list based on the coding of the diagnosis.
    *
-   * @param code
-   * @param components
-   * @return
+   * @param code the code
+   * @param components the components
+   * @return diagnosis component
    */
   static DiagnosisComponent findDiagnosisByCode(String code, List<DiagnosisComponent> components) {
     Optional<DiagnosisComponent> diag =
@@ -1271,7 +1357,7 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Helper that creates a {@link DiagnosisComponent} for testing
+   * Helper that creates a {@link DiagnosisComponent} for testing.
    *
    * @param seq The sequence number
    * @param codes A list of codings to use for the Diagnosis CodeableConcept
@@ -1279,7 +1365,7 @@ public final class TransformerTestUtilsV2 {
    * @param poasw Nullable - The increment for the "Present on Admission" extension
    * @param poaval Nullable - The type for the "Present on Admission" extension
    * @param poa Nullable - The Code to set for "Present on Admission" ("Y" or "N")
-   * @return
+   * @return diagnosis component
    */
   static DiagnosisComponent createDiagnosis(
       int seq, List<Coding> codes, Coding type, Integer poasw, String poaval, String poa) {
@@ -1304,13 +1390,31 @@ public final class TransformerTestUtilsV2 {
     return diag;
   }
 
-  /** Creates a {@link DiagnosisComponent} using the "clm_poa_ind_sw" type */
+  /**
+   * Creates a {@link DiagnosisComponent} using the "clm_poa_ind_sw" type.
+   *
+   * @param seq the seq
+   * @param codes the codes
+   * @param type the type
+   * @param poasw the poasw
+   * @param poaval the poaval
+   * @return the diagnosis component
+   */
   static DiagnosisComponent createDiagnosis(
       int seq, List<Coding> codes, Coding type, Integer poasw, String poaval) {
     return createDiagnosis(seq, codes, type, poasw, poaval, "clm_poa_ind_sw");
   }
 
-  /** Creates a {@link DiagnosisComponent} using the "clm_e_poa_ind_sw" (external) type */
+  /**
+   * Creates a {@link DiagnosisComponent} using the "clm_e_poa_ind_sw" (external) type.
+   *
+   * @param seq the seq
+   * @param codes the codes
+   * @param type the type
+   * @param poasw the poasw
+   * @param poaval the poaval
+   * @return the diagnosis component
+   */
   static DiagnosisComponent createExDiagnosis(
       int seq, List<Coding> codes, Coding type, Integer poasw, String poaval) {
     return createDiagnosis(seq, codes, type, poasw, poaval, "clm_e_poa_ind_sw");
@@ -1318,11 +1422,11 @@ public final class TransformerTestUtilsV2 {
 
   /**
    * Finds a {@link ProcedureComponent} in a list, based on a code in the Procedure's
-   * CodeableConcept
+   * CodeableConcept.
    *
-   * @param code
-   * @param components
-   * @return
+   * @param code the code
+   * @param components the components
+   * @return procedure component
    */
   static ProcedureComponent findProcedureByCode(String code, List<ProcedureComponent> components) {
     Optional<ProcedureComponent> proc =
@@ -1341,12 +1445,12 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Creates a {@link ProcedureComponent} for use in testing
+   * Creates a {@link ProcedureComponent} for use in testing.
    *
    * @param seq The sequence number to set
    * @param codes A List of {@link Coding}s to set to the procedureCodeableConcept
    * @param date A String date when the procedure was performed
-   * @return
+   * @return procedure component
    */
   static ProcedureComponent createProcedure(int seq, List<Coding> codes, String date) {
     // The CCW Procedure extraction uses a LocalDate and converts it to Date
@@ -1360,11 +1464,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds an {@link AdjudicationComponent} using a code in the category
+   * Finds an {@link AdjudicationComponent} using a code in the category.
    *
-   * @param code
-   * @param components
-   * @return
+   * @param code the code
+   * @param components the components
+   * @return adjudication component
    */
   static AdjudicationComponent findAdjudicationByCategory(
       String code, List<AdjudicationComponent> components) {
@@ -1384,12 +1488,12 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds an {@link AdjudicationComponent} using a code in the category and value in amount
+   * Finds an {@link AdjudicationComponent} using a code in the category and value in amount.
    *
-   * @param code
-   * @param amount
-   * @param components
-   * @return
+   * @param code the code
+   * @param amount the amount
+   * @param components the components
+   * @return adjudication component
    */
   static AdjudicationComponent findAdjudicationByCategoryAndAmount(
       String code, BigDecimal amount, List<AdjudicationComponent> components) {
@@ -1412,11 +1516,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds an {@link AdjudicationComponent} using a code in the reason
+   * Finds an {@link AdjudicationComponent} using a code in the reason.
    *
-   * @param code
-   * @param components
-   * @return
+   * @param code the code
+   * @param components the components
+   * @return adjudication component
    */
   static AdjudicationComponent findAdjudicationByReason(
       String code, List<AdjudicationComponent> components) {
@@ -1436,11 +1540,11 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
-   * Finds a {@link BenefitComponent} in a list based on a Code in the component's Type
+   * Finds a {@link BenefitComponent} in a list based on a Code in the component's Type.
    *
-   * @param code
-   * @param components
-   * @return
+   * @param code the code
+   * @param components the components
+   * @return benefit component
    */
   static BenefitComponent findFinancial(String code, List<BenefitComponent> components) {
     Optional<BenefitComponent> benefit =
@@ -1457,6 +1561,8 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Assert extension coding does not exist.
+   *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
    * @param actualElement the FHIR element to find and verify the {@link Extension} of

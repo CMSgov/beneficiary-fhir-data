@@ -24,6 +24,8 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 final class DMEClaimTransformer {
 
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -45,8 +47,10 @@ final class DMEClaimTransformer {
   }
 
   /**
-   * @param claimGroup the {@DMEClaim } to use
-   * @param transformerContext the {@TransformerContext } to use
+   * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
+   * @param claimGroup the {@link DMEClaim} to use
+   * @param transformerContext the {@link TransformerContext} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
@@ -175,11 +179,22 @@ final class DMEClaimTransformer {
             TransformerUtils.createCodeableConcept(
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
-        performingCareTeamMember.addExtension(
-            TransformerUtils.createExtensionCoding(
-                eob,
-                CcwCodebookVariable.PRTCPTNG_IND_CD,
-                claimLine.getProviderParticipatingIndCode()));
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        boolean performingHasMatchingExtension =
+            (claimLine.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtils.careTeamHasMatchingExtension(
+                    performingCareTeamMember,
+                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(claimLine.getProviderParticipatingIndCode()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          performingCareTeamMember.addExtension(
+              TransformerUtils.createExtensionCoding(
+                  eob,
+                  CcwCodebookVariable.PRTCPTNG_IND_CD,
+                  claimLine.getProviderParticipatingIndCode()));
+        }
       }
 
       TransformerUtils.mapHcpcs(

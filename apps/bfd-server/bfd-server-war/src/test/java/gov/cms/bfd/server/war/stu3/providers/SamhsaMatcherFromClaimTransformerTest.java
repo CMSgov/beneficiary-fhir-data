@@ -5,6 +5,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -21,6 +22,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,23 +41,39 @@ import org.junit.jupiter.params.provider.MethodSource;
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
 public class SamhsaMatcherFromClaimTransformerTest {
 
+  /** The matcher used in tests. */
   private Stu3EobSamhsaMatcher samhsaMatcher;
+  /** The DRG system url for use in test cases. */
   private static final String DRG_SYSTEM =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
+  /** A blacklisted HCPCS code. */
   private static final String BLACKLISTED_HCPCS_CODE = "G2215";
+  /** A non-SAMHSA HCPCS code. */
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
+  /** A blacklisted IC9 diagnosis code. */
   private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
+  /** A blacklisted IC10 diagnosis code. */
   private static final String BLACKLISTED_IC10_DIAGNOSIS_CODE = "F10.10";
+  /** A blacklisted IC9 procedure code. */
   private static final String BLACKLISTED_IC9_PROCEDURE_CODE = "94.45";
+  /** A blacklisted IC10 procedure code. */
   private static final String BLACKLISTED_IC10_PROCEDURE_CODE = "HZ2ZZZZ";
+  /** A non-blacklisted IC code. */
   private static final String NON_BLACKLISTED_IC_CODE = "111111";
+  /** A blacklisted DRG diagnosis code. */
   private static final String BLACKLISTED_DRG_DIAGNOSIS_CODE = "522";
+  /** A non-blacklisted DRG diagnosis code. */
   private static final String NON_BLACKLISTED_DRG_DIAGNOSIS_CODE = "1111111";
 
+  /** Claim indicator for PDE. */
   private static final String PART_D_EVENT_CLAIM = "PDE";
+  /** Claim indicator for DME. */
   private static final String DME_CLAIM = "DME";
+  /** Claim indicator for HHA. */
   private static final String HHA_CLAIM = "HHA";
+  /** Claim indicator for Hospice. */
   private static final String HOSPICE_CLAIM = "HOSPICE";
+  /** Claim indicator for Carrier. */
   private static final String CARRIER_CLAIM = "CARRIER";
 
   /** Sets up the test. */
@@ -69,7 +87,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    *
    * @return the collection
    */
-  public static Stream<Arguments> data() {
+  public static Stream<Arguments> data() throws IOException {
 
     // Load and transform the various claim types for testing
 
@@ -78,7 +96,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(InpatientClaim.class));
 
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
@@ -88,7 +107,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(OutpatientClaim.class));
 
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
@@ -98,7 +118,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(DMEClaim.class));
 
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
@@ -108,7 +129,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(HHAClaim.class));
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
@@ -117,7 +139,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(HospiceClaim.class));
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
@@ -126,7 +149,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(SNFClaim.class));
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
@@ -135,7 +159,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(CarrierClaim.class));
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
@@ -144,7 +169,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             getClaim(PartDEvent.class));
 
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
@@ -162,6 +188,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * TransformerConstants.CODING_SYSTEM_HCPCS) and the CPT code is blacklisted, the SAMHSA matcher's
    * test method will successfully identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -186,6 +215,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * TransformerConstants.CODING_SYSTEM_HCPCS) and the code is not included in the blacklist, the
    * SAMHSA matcher's test method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -204,6 +236,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * Verifies that when the item[n].productOrService.coding[n].system is an unknown/unexpected
    * value, the matcher will identify this as a SAMHSA related ExplanationOfBenefit using its
    * fallback logic to assume the claim is SAMHSA.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -226,6 +261,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * TransformerConstants.CODING_SYSTEM_HCPCS, has no eob.diagnosis SAMHSA code, and has no
    * eob.procedure SAMHSA code, then the SAMHSA matcher's test method will not identify this as a
    * SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -239,6 +277,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -263,6 +304,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -284,6 +328,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is not blacklisted the SAMHSA matcher's test
    * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -299,6 +346,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -323,6 +373,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -344,6 +397,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is not blacklisted the SAMHSA matcher's test
    * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -357,6 +413,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
    * contains a blacklisted package DRG code, the matcher returns a SAMHSA match.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -377,6 +436,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
    * contains a non-blacklisted package DRG code, the matcher returns false.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -391,6 +453,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
    * contains an unknown package system, the matcher returns a SAMHSA match. This is a fallback
    * mechanism to ensure unknown systems are filtered.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -413,6 +478,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -442,6 +510,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -468,6 +539,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is not blacklisted the SAMHSA matcher's test
    * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -483,6 +557,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -512,6 +589,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -538,6 +618,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is not blacklisted the SAMHSA matcher's test
    * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("data")
@@ -663,6 +746,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @param system the system value
    * @param code the code
    * @param shouldMatch if the matcher should match on this combination
+   * @param explanationOfBenefit the explanation of benefit
    */
   private void verifySamhsaMatcherForDiagnosisIcd(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
@@ -703,6 +787,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @param system the system value
    * @param code the code
    * @param shouldMatch if the matcher should match on this combination
+   * @param explanationOfBenefit the explanation of benefit
    */
   private void verifySamhsaMatcherForDiagnosisPackage(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
@@ -745,6 +830,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @param system the system value
    * @param code the code
    * @param shouldMatch if the matcher should match on this combination
+   * @param explanationOfBenefit the explanation of benefit
    */
   private void verifySamhsaMatcherForProcedureIcd(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {

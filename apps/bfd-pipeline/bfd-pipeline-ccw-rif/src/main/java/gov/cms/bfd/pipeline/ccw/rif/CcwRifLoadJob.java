@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
@@ -69,6 +70,7 @@ import org.slf4j.LoggerFactory;
 public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
+  /** Shortcut for calculating GIGA (filesize). */
   private static final int GIGA = 1000 * 1000 * 1000;
 
   /** The directory name that pending/incoming RIF data sets will be pulled from in S3. */
@@ -89,6 +91,12 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
    * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
    */
   public static final String S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS = "Synthetic/Done";
+
+  /**
+   * The directory name that failed RIF data sets are moved to {@link
+   * #S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS} will be moved to in S3.
+   */
+  public static final String S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS = "Synthetic/Failed";
 
   /**
    * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} goes and
@@ -132,41 +140,53 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
               + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
               + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
+  /** The application metrics. */
   private final MetricRegistry appMetrics;
+  /** The extraction options. */
   private final ExtractionOptions options;
+  /** The data set listener for finding new files to load. */
   private final DataSetMonitorListener listener;
+  /** The manager for taking actions with S3. */
   private final S3TaskManager s3TaskManager;
-
+  /** The application state. */
+  private final PipelineApplicationState appState;
+  /** If the application is in idempotent mode. */
+  private final boolean isIdempotentMode;
+  /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
   /**
    * Constructs a new {@link CcwRifLoadJob} instance.
    *
-   * @param appMetrics the {@link MetricRegistry} for the overall application
+   * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
+   * @param isIdempotentMode the {@link boolean} TRUE if running in idenpotent mode
    */
   public CcwRifLoadJob(
-      MetricRegistry appMetrics,
+      PipelineApplicationState appState,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
-      DataSetMonitorListener listener) {
-    this.appMetrics = appMetrics;
+      DataSetMonitorListener listener,
+      boolean isIdempotentMode) {
+    this.appState = appState;
+    this.appMetrics = appState.getMetrics();
     this.options = options;
     this.s3TaskManager = s3TaskManager;
     this.listener = listener;
+    this.isIdempotentMode = isIdempotentMode;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
     return Optional.of(new PipelineJobSchedule(1, ChronoUnit.SECONDS));
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     /*
@@ -176,7 +196,7 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     return false;
   }
 
-  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+  /** {@inheritDoc} */
   @Override
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
@@ -238,59 +258,92 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     LOGGER.info(
         "Data set syntheticData indicator is: {}",
         String.valueOf(manifestToProcess.isSyntheticData()));
-    List<S3RifFile> rifFiles =
-        manifestToProcess.getEntries().stream()
-            .map(
-                manifestEntry ->
-                    new S3RifFile(
-                        appMetrics, manifestEntry, s3TaskManager.downloadAsync(manifestEntry)))
-            .collect(Collectors.toList());
-    RifFilesEvent rifFilesEvent =
-        new RifFilesEvent(
-            manifestToProcess.getTimestamp(),
-            manifestToProcess.isSyntheticData(),
-            new ArrayList<>(rifFiles));
 
     /*
-     * To save time for the next data set, peek ahead at it. If it's available and
-     * it looks like there's enough disk space, start downloading it early in the
-     * background.
+     * The {@link DataSetManifest} can have an optional element {@link PreValidationProperties}
+     * which contains elements that can be used to preform a pre-validation verification prior
+     * to beginning the actual processing (loading) of data.
+     *
+     * For example, checking if a range of bene_id(s) will cause a database key constraint
+     * violation during an INSERT operation. However, if running in idempotent
+     * mode, it will be acceptable to run 'as is' since this is probably a re-run
+     * of a previous load and does not represent a pure INSERT(ing) of data.
      */
-    Optional<DataSetManifest> secondManifestToProcess = dataSetQueue.getSecondDataSetToProcess();
-    if (secondManifestToProcess.isPresent() && dataSetIsAvailable(secondManifestToProcess.get())) {
-      Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
-      long usableFreeTempSpace;
-      try {
-        usableFreeTempSpace = Files.getFileStore(tmpdir).getUsableSpace();
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-
-      if (usableFreeTempSpace >= (50 * GIGA)) {
-        secondManifestToProcess.get().getEntries().stream()
-            .forEach(manifestEntry -> s3TaskManager.downloadAsync(manifestEntry));
-      }
+    boolean preValidationOK = true;
+    if (manifestToProcess.getPreValidationProperties().isPresent()) {
+      preValidationOK = (isIdempotentMode || checkPreValidationProperties(manifestToProcess));
     }
 
     /*
-     * Now we hand that off to the DataSetMonitorListener, to do the *real*
-     * work of actually processing that data set. It's important that we
-     * block until it's completed, in order to ensure that we don't end up
-     * processing multiple data sets in parallel (which would lead to data
-     * consistency problems).
+     * If pre-validation succeeded, then normal processing continues; however, if it has failed
+     * (currently only Synthea has pre-validation), then we'll skip over the normal processing
+     * and go directly to where the manifest and associated RIF files are (re-)moved from the
+     * incoming bucket folder.
      */
-    listener.dataAvailable(rifFilesEvent);
-    LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
+    if (preValidationOK) {
+      List<S3RifFile> rifFiles =
+          manifestToProcess.getEntries().stream()
+              .map(
+                  manifestEntry ->
+                      new S3RifFile(
+                          appMetrics, manifestEntry, s3TaskManager.downloadAsync(manifestEntry)))
+              .collect(Collectors.toList());
 
-    /*
-     * Now that the data set has been processed, we need to ensure that we
-     * don't end up processing it again. We ensure this two ways: 1) we keep
-     * a list of the data sets most recently processed, and 2) we rename the
-     * S3 objects that comprise that data set. (#1 is required as S3
-     * deletes/moves are only *eventually* consistent, so #2 may not take
-     * effect right away.)
-     */
-    rifFiles.stream().forEach(f -> f.cleanupTempFile());
+      RifFilesEvent rifFilesEvent =
+          new RifFilesEvent(
+              manifestToProcess.getTimestamp(),
+              manifestToProcess.isSyntheticData(),
+              new ArrayList<>(rifFiles));
+
+      /*
+       * To save time for the next data set, peek ahead at it. If it's available and
+       * it looks like there's enough disk space, start downloading it early in the
+       * background.
+       */
+      Optional<DataSetManifest> secondManifestToProcess = dataSetQueue.getSecondDataSetToProcess();
+      if (secondManifestToProcess.isPresent()
+          && dataSetIsAvailable(secondManifestToProcess.get())) {
+        Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
+        long usableFreeTempSpace;
+        try {
+          usableFreeTempSpace = Files.getFileStore(tmpdir).getUsableSpace();
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
+
+        if (usableFreeTempSpace >= (50 * GIGA)) {
+          secondManifestToProcess.get().getEntries().stream()
+              .forEach(manifestEntry -> s3TaskManager.downloadAsync(manifestEntry));
+        }
+      }
+
+      /*
+       * Now we hand that off to the DataSetMonitorListener, to do the *real*
+       * work of actually processing that data set. It's important that we
+       * block until it's completed, in order to ensure that we don't end up
+       * processing multiple data sets in parallel (which would lead to data
+       * consistency problems).
+       */
+      listener.dataAvailable(rifFilesEvent);
+      LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
+
+      /*
+       * Now that the data set has been processed, we need to ensure that we
+       * don't end up processing it again. We ensure this two ways: 1) we keep
+       * a list of the data sets most recently processed, and 2) we rename the
+       * S3 objects that comprise that data set. (#1 is required as S3
+       * deletes/moves are only *eventually* consistent, so #2 may not take
+       * effect right away.)
+       */
+      rifFiles.stream().forEach(f -> f.cleanupTempFile());
+    } else {
+      /*
+       * If here, Synthea pre-validation has failed; we want to move the S3 incoming files
+       * to a failed folder; so instead of moving files to a done folder we'll just replace
+       * the manifest's notion of its Done folder to a Failed folder.
+       */
+      manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
+    }
     dataSetQueue.markProcessed(manifestToProcess);
     s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
 
@@ -298,9 +351,10 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   }
 
   /**
+   * Determines if all the objects listed in the specified manifest can be found in S3.
+   *
    * @param manifest the {@link DataSetManifest} that lists the objects to verify the presence of
-   * @return <code>true</code> if all of the objects listed in the specified manifest can be found
-   *     in S3, <code>false</code> if not
+   * @return <code>true</code> if all the objects listed can be found in S3
    */
   private boolean dataSetIsAvailable(DataSetManifest manifest) {
     /*
@@ -350,7 +404,36 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         return false;
       }
     }
-
     return true;
+  }
+
+  /**
+   * Perform pre-validation for a data load if the {@link
+   * DataSetManifest#getPreValidationProperties()} has content. At this time, only Synthea-based
+   * {@link DataSetManifest} have content that can be used for pre-validation.
+   *
+   * @param manifest the {@link DataSetManifest} that lists pre-validation properties to verify
+   * @return <code>true</code> if all of the pre-validation parameters listed in the manifest do not
+   *     introduce potential data loading issues, <code>false</code> if not
+   */
+  private boolean checkPreValidationProperties(DataSetManifest manifest) throws Exception {
+    LOGGER.info(
+        "PreValidationProperties found in manifest, ID: {}; verifying efficacy...",
+        manifest.getId());
+
+    // for now only Synthea manifests will have PreValidationProperties
+    if (!manifest.isSyntheticData()) {
+      return true;
+    }
+
+    /* we are processing Synthea data...setup a pre-validation interface. */
+    CcwRifLoadPreValidateInterface preValInterface = new CcwRifLoadPreValidateSynthea();
+    // initialize the interface with the appState
+    preValInterface.init(appState);
+
+    // perform whatever vaidation is appropriate
+    LOGGER.info(
+        "Synthea pre-validation being performed by: {}...", preValInterface.getClass().getName());
+    return preValInterface.isValid(manifest);
   }
 }

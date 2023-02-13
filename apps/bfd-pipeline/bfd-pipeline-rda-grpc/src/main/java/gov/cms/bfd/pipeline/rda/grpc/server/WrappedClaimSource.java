@@ -23,14 +23,20 @@ import java.util.function.Function;
  * @param <TClaim> the type parameter for the claim
  */
 public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChange> {
-  // Cache used to select whether to return CHANGE_TYPE_UPDATE or CHANGE_TYPE_INSERT.
+  /** Cache used to select whether to return CHANGE_TYPE_UPDATE or CHANGE_TYPE_INSERT. */
   private static final int KEY_CACHE_SIZE = 20_000;
 
+  /** The original source of FISS/MCS claims. */
   private final MessageSource<TClaim> source;
+  /** Clock for writing timestamps. */
   private final Clock clock;
+  /** The current sequence number. */
   private long sequenceNumber;
+  /** Function for getting the key from a claim. */
   private final Function<TClaim, String> keyExtractor;
+  /** Factory for getting changes to a claim. */
   private final ChangeFactory<TChange, TClaim> changeFactory;
+  /** A cache of keys seen in claims. */
   private final Cache<String, String> knownKeys;
 
   /**
@@ -61,11 +67,13 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
     this.knownKeys = CacheBuilder.newBuilder().maximumSize(keyCacheSize).build();
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean hasNext() throws Exception {
     return source.hasNext();
   }
 
+  /** {@inheritDoc} */
   @Override
   public TChange next() throws Exception {
     final Timestamp timestamp =
@@ -78,11 +86,20 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
     return changeFactory.create(timestamp, changeType, sequenceNumber++, claim);
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     source.close();
   }
 
+  /**
+   * Wraps fiss claims into a {@link MessageSource}.
+   *
+   * @param source the claim to wrap
+   * @param clock the clock for timestamps
+   * @param startingSequenceNumber the starting sequence number
+   * @return the message source
+   */
   public static MessageSource<FissClaimChange> wrapFissClaims(
       MessageSource<FissClaim> source, Clock clock, long startingSequenceNumber) {
     return new WrappedClaimSource<>(
@@ -101,13 +118,21 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                     RecordSource.newBuilder()
                         .setPhase("P1")
                         .setPhaseSeqNum(1)
-                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
+                        .setExtractDate(LocalDate.now(clock).minusDays(2).toString())
                         .setTransmissionTimestamp(
-                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
+                            clock.instant().minus(1, ChronoUnit.DAYS).toString())
                         .build())
                 .build());
   }
 
+  /**
+   * Wraps MCS claims into a {@link MessageSource}.
+   *
+   * @param source the claim to wrap
+   * @param clock the clock for timestamps
+   * @param startingSequenceNumber the starting sequence number
+   * @return the message source
+   */
   public static MessageSource<McsClaimChange> wrapMcsClaims(
       MessageSource<McsClaim> source, Clock clock, long startingSequenceNumber) {
     return new WrappedClaimSource<>(
@@ -126,15 +151,30 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
                     RecordSource.newBuilder()
                         .setPhase("P1")
                         .setPhaseSeqNum(1)
-                        .setExtractDate(LocalDate.now(clock).minusDays(1).toString())
+                        .setExtractDate(LocalDate.now(clock).minusDays(2).toString())
                         .setTransmissionTimestamp(
-                            clock.instant().minus(2, ChronoUnit.DAYS).toString())
+                            clock.instant().minus(1, ChronoUnit.DAYS).toString())
                         .build())
                 .build());
   }
 
+  /**
+   * Gets changes from a claim.
+   *
+   * @param <TChange> the type for the change
+   * @param <TClaim> the type for the claim
+   */
   @FunctionalInterface
   public interface ChangeFactory<TChange, TClaim> {
+    /**
+     * Returns a change given a claim.
+     *
+     * @param timestamp the timestamp
+     * @param type the type
+     * @param sequenceNumber the sequence number
+     * @param claim the claim
+     * @return the change
+     */
     TChange create(Timestamp timestamp, ChangeType type, long sequenceNumber, TClaim claim);
   }
 }

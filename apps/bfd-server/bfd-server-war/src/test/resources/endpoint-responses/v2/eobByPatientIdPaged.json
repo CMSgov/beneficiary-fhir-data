@@ -46,9 +46,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1497758544"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -121,6 +122,13 @@
           "code" : "institutional",
           "display" : "Institutional"
         } ]
+      },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "outpatient"
+        } ],
+        "text" : "Outpatient"
       },
       "use" : "claim",
       "patient" : {
@@ -1611,9 +1619,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1811111111"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -1687,11 +1696,26 @@
           "display" : "Professional"
         } ]
       },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
+      },
       "use" : "claim",
       "patient" : {
         "reference" : "Patient/567834"
       },
       "billablePeriod" : {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+            "code" : "3",
+            "display" : "Final bill"
+          }
+        } ],
         "start" : "2015-06-23",
         "end" : "2015-06-23"
       },
@@ -2207,9 +2231,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "5555553305"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -2301,6 +2326,13 @@
           "code" : "institutional",
           "display" : "Institutional"
         } ]
+      },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
       },
       "use" : "claim",
       "patient" : {
@@ -3315,9 +3347,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "1111111111"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -3397,6 +3430,13 @@
           "code" : "institutional",
           "display" : "Institutional"
         } ]
+      },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
       },
       "use" : "claim",
       "patient" : {
@@ -4871,6 +4911,12 @@
           "value" : "CMS"
         }
       },
+      "provider" : {
+        "identifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+          "value" : "1234567890"
+        }
+      },
       "referral" : {
         "identifier" : {
           "type" : {
@@ -4981,9 +5027,9 @@
                 "display" : "National Provider Identifier"
               } ]
             },
-            "value" : "1497758544"
+            "value" : "0000000000"
           },
-          "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+          "display" : "Fake ORG Name"
         },
         "role" : {
           "coding" : [ {
@@ -5528,9 +5574,10 @@
             } ]
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
-          "value" : "999999999"
+          "value" : "0000000000"
         } ],
-        "active" : true
+        "active" : true,
+        "name" : "Fake ORG Name"
       } ],
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -5609,11 +5656,26 @@
           "display" : "Institutional"
         } ]
       },
+      "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
+      },
       "use" : "claim",
       "patient" : {
         "reference" : "Patient/567834"
       },
       "billablePeriod" : {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+            "code" : "3",
+            "display" : "Final bill"
+          }
+        } ],
         "start" : "2014-01-01",
         "end" : "2014-01-30"
       },

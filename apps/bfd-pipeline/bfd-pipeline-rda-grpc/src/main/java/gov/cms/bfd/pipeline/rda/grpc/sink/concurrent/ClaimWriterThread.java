@@ -2,9 +2,10 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.model.rda.MessageError;
+import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ReportingCallback.ProcessedBatch;
-import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -67,6 +69,13 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
   /** Used to tell the thread to stop running. */
   private final AtomicBoolean stopped;
 
+  /**
+   * Instantiates a new claim writer thread.
+   *
+   * @param sinkFactory the sink factory
+   * @param batchSize the number of claims to write to the database in a single transaction
+   * @param reportingFunction the reporting function to report results to the main thread
+   */
   public ClaimWriterThread(
       Supplier<RdaSink<TMessage, TClaim>> sinkFactory,
       int batchSize,
@@ -129,7 +138,9 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
    * has been requested the buffer is flushed and false is returned to stop the thread.
    *
    * @param sink RdaSink to use for writing to the database
+   * @param buffer the buffer
    * @return true if another iteration is called for, false otherwise
+   * @throws InterruptedException the interrupted exception
    */
   @VisibleForTesting
   boolean runOnce(RdaSink<TMessage, TClaim> sink, Buffer<TMessage, TClaim> buffer)
@@ -186,6 +197,11 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
    * Writes all unique objects from the buffer to the database and reports the results using the
    * reporting function. Any exceptions will be caught by our caller and reported as errors using
    * the reporting function.
+   *
+   * @param sink the sink
+   * @param buffer the buffer
+   * @throws Exception if the sink cannot write the claims or there is an issue reporting the
+   *     batches
    */
   private void writeBatch(RdaSink<TMessage, TClaim> sink, Buffer<TMessage, TClaim> buffer)
       throws Exception {
@@ -200,6 +216,12 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     reportSuccess(buffer.getMessages(), processed);
   }
 
+  /**
+   * Takes an entry from the input queue entry.
+   *
+   * @return the entry from the queue
+   * @throws InterruptedException if the queue is interrupted during operations
+   */
   @Nullable
   private Entry<TMessage> takeEntryFromInputQueue() throws InterruptedException {
     final Entry<TMessage> entry;
@@ -216,6 +238,13 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     return entry;
   }
 
+  /**
+   * Adds an entry to the input queue.
+   *
+   * @param entry the entry to add
+   * @throws InterruptedException if the queue is interrupted during operations
+   * @throws IOException if the item could not be added to the queue (timeout)
+   */
   private void addEntryToInputQueue(Entry<TMessage> entry)
       throws InterruptedException, IOException {
     final boolean added = inputQueue.offer(entry, AddTimeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -225,14 +254,34 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     }
   }
 
+  /**
+   * Reports a number of successful processed batches.
+   *
+   * @param batch the batch that was processed
+   * @param processed the number of processed items
+   * @throws InterruptedException if the reporting process is interrupted
+   */
   private void reportSuccess(List<TMessage> batch, int processed) throws InterruptedException {
     reportingFunction.accept(new ProcessedBatch<>(processed, ImmutableList.copyOf(batch), null));
   }
 
+  /**
+   * Reports an error while processing batches.
+   *
+   * @param batch the batch that had the error
+   * @param error the error itself
+   * @throws InterruptedException if the reporting process is interrupted
+   */
   private void reportError(List<TMessage> batch, Exception error) throws InterruptedException {
     reportingFunction.accept(new ProcessedBatch<>(0, ImmutableList.copyOf(batch), error));
   }
 
+  /**
+   * Reports an error while processing batches.
+   *
+   * @param error the error
+   * @throws InterruptedException if the reporting process is interrupted
+   */
   private void reportError(Exception error) throws InterruptedException {
     reportError(Collections.emptyList(), error);
   }
@@ -246,7 +295,9 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
   @Data
   @VisibleForTesting
   static class Entry<TMessage> {
+    /** The API version for this entry. */
     private final String apiVersion;
+    /** The message for this entry. */
     private final TMessage object;
   }
 
@@ -258,42 +309,69 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
   @NotThreadSafe
   @VisibleForTesting
   static class Buffer<TMessage, TClaim> {
+    /** Holds all the messages in this buffer. */
     private final List<TMessage> allMessages = new ArrayList<>();
+    /** A map of all the unique claims added to the buffer. */
     private final Map<String, TClaim> uniqueClaims = new LinkedHashMap<>();
 
-    void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry) {
-      try {
-        final String claimKey = sink.getDedupKeyForMessage(entry.getObject());
-        final TClaim claim = sink.transformMessage(entry.getApiVersion(), entry.getObject());
+    /**
+     * Add a claim to the buffer.
+     *
+     * @param sink used to transform message into claim
+     * @param entry holds apiVersion and message
+     * @throws IOException if there was an issue writing out a {@link MessageError}.
+     * @throws ProcessingException if there was an issue transforming the message
+     */
+    void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry)
+        throws IOException, ProcessingException {
+      final String claimKey = sink.getClaimIdForMessage(entry.getObject());
+      final Optional<TClaim> claim =
+          sink.transformMessage(entry.getApiVersion(), entry.getObject());
+
+      if (claim.isPresent()) {
         allMessages.add(entry.getObject());
-        uniqueClaims.put(claimKey, claim);
-      } catch (DataTransformer.TransformationException transformationException) {
-        try {
-          sink.writeError(entry.getApiVersion(), entry.getObject(), transformationException);
-        } catch (IOException e) {
-          transformationException.addSuppressed(e);
-        }
-        throw transformationException;
+        uniqueClaims.put(claimKey, claim.get());
       }
     }
 
+    /** Removes all items the buffer (messages and claim map). */
     void clear() {
       allMessages.clear();
       uniqueClaims.clear();
     }
 
+    /**
+     * Gets the number of messages in the buffer.
+     *
+     * @return the number of messages
+     */
     int getFullCount() {
       return allMessages.size();
     }
 
+    /**
+     * Gets the number of unique claims in the buffer.
+     *
+     * @return the unique claim count
+     */
     int getUniqueCount() {
       return uniqueClaims.size();
     }
 
+    /**
+     * Gets an immutable copy of the list of buffer messages.
+     *
+     * @return the message list
+     */
     List<TMessage> getMessages() {
       return ImmutableList.copyOf(allMessages);
     }
 
+    /**
+     * Gets an immutable copy of the map of unique claims in the buffer.
+     *
+     * @return the unique claims map
+     */
     List<TClaim> getClaims() {
       return ImmutableList.copyOf(uniqueClaims.values());
     }

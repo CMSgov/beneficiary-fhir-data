@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.Reference;
 
 /**
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -28,6 +29,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 public class CarrierClaimTransformerV2 {
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -53,6 +56,8 @@ public class CarrierClaimTransformerV2 {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param transformerContext the {@link TransformerContext} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -171,6 +176,17 @@ public class CarrierClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
+    // CARR_CLM_BLG_NPI_NUM => ExplanationOfBenefit.provider.identifier
+    claimGroup
+        .getCarrierClaimBlgNpiNumber()
+        .ifPresent(
+            value ->
+                eob.setProvider(
+                    new Reference()
+                        .setIdentifier(
+                            TransformerUtilsV2.createIdentifier(
+                                CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, value))));
+
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
@@ -197,36 +213,63 @@ public class CarrierClaimTransformerV2 {
                 line.getPerformingPhysicianUpin());
       }
 
-      // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
-
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
+      if (performing.isPresent()) {
+        // Update the responsible flag
+        performing.get().setResponsible(true);
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing
+            .get()
+            .setQualification(
                 TransformerUtilsV2.createCodeableConcept(
                     eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
+        boolean performingHasMatchingExtension =
+            TransformerUtilsV2.careTeamHasMatchingExtension(
+                performing.get(),
+                TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
+                String.valueOf(line.getProviderTypeCode()));
 
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+        if (!performingHasMatchingExtension) {
+          // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
+                      line.getProviderTypeCode()));
+        }
 
-      // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
-      TransformerUtilsV2.addCareTeamMember(
-          eob,
-          item,
-          C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
-          line.getOrganizationNpi());
+        performingHasMatchingExtension =
+            (line.getProviderParticipatingIndCode().isPresent())
+                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+                    performing.get(),
+                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
+                    String.valueOf(line.getProviderParticipatingIndCode().get()))
+                : false;
+
+        if (!performingHasMatchingExtension) {
+          // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+          performing
+              .get()
+              .addExtension(
+                  TransformerUtilsV2.createExtensionCoding(
+                      eob,
+                      CcwCodebookVariable.PRTCPTNG_IND_CD,
+                      line.getProviderParticipatingIndCode()));
+        }
+      }
+
+      if (line.getOrganizationNpi().isPresent()) {
+        // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
+        TransformerUtilsV2.addCareTeamMemberWithNpiOrg(
+            eob,
+            item,
+            C4BBPractitionerIdentifierType.NPI,
+            C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
+            line.getOrganizationNpi().get(),
+            transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(line.getOrganizationNpi()));
+      }
 
       // CARR_LINE_RDCD_PMT_PHYS_ASTN_C => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(

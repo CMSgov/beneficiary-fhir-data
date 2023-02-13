@@ -95,7 +95,7 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
    * A function compatible with the {@link gov.cms.model.dsl.codegen.library.ExternalTransformation}
    * interface that can be passed to the {@link #claimParser} constructor. This method will be
    * called for every {@link McsClaim} message object to invoke the {@link #mbiCache} with the MBI
-   * from the message and set the {@link RdaMcsClaim#mbiRecord} field appropriately.
+   * from the message and set the {@link RdaMcsClaim#getMbiRecord()} field appropriately.
    *
    * @param transformer {@link DataTransformer} used to validate/copy data
    * @param namePrefix prefix for field name used in error reporting

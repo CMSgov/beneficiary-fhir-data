@@ -52,9 +52,7 @@ def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
-def pipelineScripts
 def serverScripts
-def baseScripts
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
@@ -64,6 +62,7 @@ def gitCommitId
 def gitRepoUrl
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
+def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
@@ -159,9 +158,7 @@ try {
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
 					// terraservice deployments...
-					baseScripts = load('ops/terraform/services/base/deploy.groovy')
-					migratorScripts = load('ops/terraform/services/migrator/Jenkinsfile')
-					pipelineScripts = load('ops/terraform/services/pipeline/deploy.groovy')
+					migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
 					awsAuth.assumeRole()
@@ -242,7 +239,7 @@ try {
 					milestone(label: 'stage_deploy_test_base_start')
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
-						baseScripts.deployTerraservice(
+						terraform.deployTerraservice(
 							env: bfdEnv,
 							directory: "ops/terraform/services/base"
 						)
@@ -261,13 +258,13 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
 								error('Migrator deployment failed')
 							}
 						}
@@ -281,11 +278,10 @@ try {
 					milestone(label: 'stage_deploy_test_pipeline_start')
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
-						pipelineScripts.deployTerraservice(
+						terraform.deployTerraservice(
 							env: bfdEnv,
 							directory: "ops/terraform/services/pipeline",
 							tfVars: [
-								git_repo_version: gitCommitId,
 								ami_id_override: amiIds.bfdPipelineAmiId
 							]
 						)
@@ -303,9 +299,19 @@ try {
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 
 						awsAuth.assumeRole()
-						serverScripts.deployServerRegression(
-							bfdEnv: bfdEnv,
-							dockerImageTagOverride: params.server_regression_image_override
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server/server-regression",
+							tfVars: [
+								docker_image_tag_override: params.server_regression_image_override
+							]
+						)
+
+						// Deploy the API requests Insights Lambda
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server/insights/api-requests"
 						)
 
 						awsAuth.assumeRole()
@@ -362,7 +368,7 @@ try {
 						milestone(label: 'stage_deploy_prod_sbx_base_start')
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
-							baseScripts.deployTerraservice(
+							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/base"
 							)
@@ -384,13 +390,13 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
 								error('Migrator deployment failed')
 							}
 						}
@@ -407,11 +413,10 @@ try {
 						milestone(label: 'stage_deploy_prod_sbx_pipeline_start')
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
-							pipelineScripts.deployTerraservice(
+							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/pipeline",
 								tfVars: [
-									git_repo_version: gitCommitId,
 									ami_id_override: amiIds.bfdPipelineAmiId
 								]
 							)
@@ -432,9 +437,19 @@ try {
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
 
 							awsAuth.assumeRole()
-							serverScripts.deployServerRegression(
-								bfdEnv: bfdEnv,
-								dockerImageTagOverride: params.server_regression_image_override
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+									docker_image_tag_override: params.server_regression_image_override
+								]
+							)
+
+							// Deploy the API requests Insights Lambda
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
 							)
 
 							awsAuth.assumeRole()
@@ -469,7 +484,7 @@ try {
 						milestone(label: 'stage_deploy_prod_base_start')
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
-							baseScripts.deployTerraservice(
+							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/base"
 							)
@@ -492,13 +507,13 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								gitBranchName: gitBranchName
+								awsRegion: awsRegion
 							)
 
 							if (migratorDeploymentSuccessful) {
 								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
 							} else {
+								println "See ${migratorRunbookUrl} for troubleshooting resources."
 								error('Migrator deployment failed')
 							}
 						}
@@ -515,11 +530,10 @@ try {
 						milestone(label: 'stage_deploy_prod_pipeline_start')
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
-							pipelineScripts.deployTerraservice(
+							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/pipeline",
 								tfVars: [
-									git_repo_version: gitCommitId,
 									ami_id_override: amiIds.bfdPipelineAmiId
 								]
 							)
@@ -542,9 +556,19 @@ try {
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
 
 							awsAuth.assumeRole()
-							serverScripts.deployServerRegression(
-								bfdEnv: bfdEnv,
-								dockerImageTagOverride: params.server_regression_image_override
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+									docker_image_tag_override: params.server_regression_image_override
+								]
+							)
+
+							// Deploy the API requests Insights Lambda
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
 							)
 
 							awsAuth.assumeRole()

@@ -19,6 +19,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
+  /** Maps the mbi number to its benficiary data. */
   private final Map<String, BeneficiaryData> mbiMap;
 
   /**
    * Transforms the given {@link Parser.Data} into RDA {@link McsClaimChange} data.
    *
-   * @param data The parsed {@link Parser.Data} to transform into RDA {@link McsClaimChange} data.
-   * @return The RDA {@link McsClaimChange} object generated from the given data.
+   * @param data The parsed {@link Parser.Data} to transform into RDA {@link McsClaimChange} data
+   * @return The RDA {@link McsClaimChange} object generated from the given data
    */
   @Override
   public Optional<MessageOrBuilder> transform(
@@ -88,9 +90,10 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Adds additional line items to an existing claim.
    *
-   * @param mcsClaimChange The claim to add line items to.
-   * @param data The data to grab new line items from.
-   * @return The newly constructed claim with additional line items added.
+   * @param lineNumber The lineNumber for the claim
+   * @param mcsClaimChange The claim to add line items to
+   * @param data The data to grab new line items from
+   * @return The newly constructed claim with additional line items added
    */
   @VisibleForTesting
   McsClaimChange addToExistingClaim(
@@ -105,9 +108,12 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Creates a new claim from the given {@link Parser.Data}.
    *
-   * @param sequenceNumber The sequence number of the current claim.
-   * @param data The {@link Parser.Data} to pull claim data for building the claim.
-   * @return A new claim built from parsing the given {@link Parser.Data}.
+   * @param sequenceNumber The sequence number of the current claim
+   * @param lineNumber The line number of the current claim
+   * @param data The {@link Parser.Data} to pull claim data for building the claim
+   * @param mbiSampler The samples for the mbis
+   * @param sampleId The samples of IDs
+   * @return A new claim built from parsing the given {@link Parser.Data}
    */
   McsClaimChange transformNewClaim(
       WrappedCounter sequenceNumber,
@@ -176,8 +182,8 @@ public class McsTransformer extends AbstractTransformer {
             RecordSource.newBuilder()
                 .setPhase("P1")
                 .setPhaseSeqNum(0)
-                .setExtractDate(LocalDate.now().toString())
-                .setTransmissionTimestamp(Instant.now().toString())
+                .setExtractDate(LocalDate.now().minusDays(2).toString())
+                .setTransmissionTimestamp(Instant.now().minus(1, ChronoUnit.DAYS).toString())
                 .build())
         .build();
   }
@@ -185,8 +191,8 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Fallback method for creating a claim identifier from the CLM_ID field.
    *
-   * @param data The data to pull from for claim data.
-   * @return The generated claim identifier.
+   * @param data The data to pull from for claim data
+   * @return The generated claim identifier
    */
   @VisibleForTesting
   String convertIcn(Parser.Data<String> data) {
@@ -199,8 +205,9 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Adds diagnosis codes to the given claim, parsed from the given {@link Parser.Data}.
    *
-   * @param claimBuilder The claim to add diagnosis codes to.
-   * @param data The {@link Parser.Data} to pull diagnosis codes from.
+   * @param claimBuilder The claim to add diagnosis codes to
+   * @param data The {@link Parser.Data} to pull diagnosis codes from
+   * @param icn The icn that is being set for the diagnosis codes
    */
   @VisibleForTesting
   void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
@@ -213,6 +220,7 @@ public class McsTransformer extends AbstractTransformer {
               diagnosisCode ->
                   claimBuilder.addMcsDiagnosisCodes(
                       McsDiagnosisCode.newBuilder()
+                          .setRdaPosition(claimBuilder.getMcsDiagnosisCodesCount() + 1)
                           .setIdrClmHdIcn(icn)
                           .setIdrDiagCode(diagnosisCode)
                           .setIdrDiagIcdTypeEnum(
@@ -226,8 +234,8 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Maps the MCS raw string value to a {@link McsDiagnosisIcdType}.
    *
-   * @param code The raw MCS string value.
-   * @return The converted {@link McsDiagnosisIcdType}.
+   * @param code The raw MCS string value
+   * @return The converted {@link McsDiagnosisIcdType}
    */
   private McsDiagnosisIcdType mapVersionCode(String code) {
     McsDiagnosisIcdType icdType;
@@ -249,8 +257,9 @@ public class McsTransformer extends AbstractTransformer {
   /**
    * Builds a list of details (line items), parsed from the given {@link Parser.Data}.
    *
-   * @param data The {@link Parser.Data} to pull procedure codes from.
-   * @return The list of build {@link McsDetail}s.
+   * @param lineNumber The line number of the claim
+   * @param data The {@link Parser.Data} to pull procedure codes from
+   * @return The list of build {@link McsDetail}s
    */
   private McsDetail buildDetails(int lineNumber, Parser.Data<String> data) {
     McsDetail.Builder detailBuilder = McsDetail.newBuilder();

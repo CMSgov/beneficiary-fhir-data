@@ -68,12 +68,16 @@ public class MappingBeanTest {
     JoinBean joinA = JoinBean.builder().fieldName("a").build();
     JoinBean joinB = JoinBean.builder().fieldName("b").build();
     JoinBean joinC = JoinBean.builder().fieldName("c").build();
-    ArrayBean arrayB = ArrayBean.builder().to("b").build();
     MappingBean mapping =
         MappingBean.builder()
             .table(TableBean.builder().join(joinA).join(joinB).join(joinC).build())
-            .array(arrayB)
+            .transformation(
+                TransformationBean.builder()
+                    .to("b")
+                    .transformer(TransformationBean.ArrayTransformName)
+                    .build())
             .build();
+    assertEquals(ImmutableList.of(joinB), mapping.getArrayJoins());
     assertEquals(ImmutableList.of(joinA, joinC), mapping.getNonArrayJoins());
   }
 }

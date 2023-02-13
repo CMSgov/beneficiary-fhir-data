@@ -79,13 +79,9 @@ public class RdaClaimMessageMetaData {
   @Convert(converter = StringListConverter.class)
   private StringList locations = new StringList();
 
-  /**
-   * Timestamp when we inserted the claim from this message into our database. We might have
-   * multiple records for the same message in our database if we replay old data from the RDA API
-   * (for example after RDA fixes some data problem or we fix a bug in our data ingestion).
-   */
-  @Column(name = "received_date")
-  private Instant receivedDate;
+  /** Timestamp when we inserted the claim from this message into our database. */
+  @Column(name = "last_updated")
+  private Instant lastUpdated;
 
   /** Identifies the particular phase associated with this claim (1, 2, 3) */
   @Column(name = "phase")

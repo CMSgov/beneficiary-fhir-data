@@ -1,0 +1,56 @@
+mappings:
+  - id: VeryBad
+    messageClassName: 999
+    entityClassName: Bad-Class-Name
+    transformerClassName: Bad-Class-Name
+    table:
+      name: Bad-Table-Name
+      schema: Bad.Schema.Name
+      primaryKeyColumns:
+        - doesNotExist
+        - not-valid-name
+      additionalFieldNames:
+        - name: terrible-name
+          value: bad-name
+      compositeKeyClassName: Bad.Name
+      columns:
+        - name: not-valid-name
+          dbName: invalid.name
+          sqlType: ATOMIC_TIME
+          javaType: UnknownType
+          javaAccessorType: UnknownType
+          enumType: NoSuchEnum
+        - name: sequenceNumber
+          sqlType: bigint
+          nullable: false
+          sequence:
+            name: Bad-Sequence-Name
+            allocationSize: 0
+      joins:
+        - fieldName: mbiRecord
+          entityClass: bad.class.3name
+          joinColumnName: bad-column-name
+          mappedBy: bad-name
+          properties:
+            - name: bad-name
+              fieldName: bad-field
+              javaType: InvalidType
+        - class: array
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
+    enumTypes:
+      - name: Bad.Name
+        packageName: not.a.2package
+        values:
+          - Clinic
+          - Bad-Name
+          - SpecialFacility
+    transformations:
+      - from: not-a-valid-name
+        to: invalid-name
+        optionalComponents: None
+        transformer: NoSuchTransformer
+    externalTransformations:
+      - name: not-a-good-name

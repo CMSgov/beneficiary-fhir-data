@@ -79,15 +79,24 @@ import org.slf4j.LoggerFactory;
  * database.
  */
 public final class RifLoader {
-
+  /**
+   * How old a file can be in days before it is deleted from the loaded files table in the database.
+   */
   private static final Period MAX_FILE_AGE_DAYS = Period.ofDays(40);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
+  /**
+   * Logger to count the number of records loaded; only logs when the log level is allowing debug
+   * messages.
+   */
   private static final Logger LOGGER_RECORD_COUNTS =
       LoggerFactory.getLogger(RifLoader.class.getName() + ".recordCounts");
 
+  /** The load options. */
   private final LoadAppOptions options;
+  /** The hasher for ids. */
   private final IdHasher idHasher;
+  /** The shared application state. */
   private final PipelineApplicationState appState;
 
   /**
@@ -107,6 +116,8 @@ public final class RifLoader {
   }
 
   /**
+   * Creates the load executor.
+   *
    * @param options the {@link LoadAppOptions} to use
    * @return the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    */
@@ -146,8 +157,10 @@ public final class RifLoader {
   }
 
   /**
+   * Selects the {@link LoadStrategy} that should be used for the record being processed.
+   *
    * @param recordAction the {@link RecordAction} of the specific record being processed
-   * @return the {@link LoadStrategy} that should be used for the record being processed
+   * @return the {@link LoadStrategy} to use
    */
   private LoadStrategy selectStrategy(RecordAction recordAction) {
     if (recordAction == RecordAction.INSERT) {
@@ -159,7 +172,9 @@ public final class RifLoader {
   }
 
   /**
-   * @return <code>true</code> if {@link #entityManagerFactory} is connected to a PostgreSQL
+   * Determines if the database we're connected to is a PostgreSQL database.
+   *
+   * @return <code>true</code> if {@link EntityManagerFactory} is connected to a PostgreSQL
    *     database, <code>false</code> if it is not
    */
   private boolean isDatabasePostgreSql() {
@@ -325,9 +340,11 @@ public final class RifLoader {
   }
 
   /**
+   * Submits a file to be loaded asynchronously by the load executor.
+   *
    * @param loadExecutor the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    * @param recordsBatch the {@link RifRecordEvent}s to process
-   * @param loadedFileBuilder the builder for the {@LoadedFiled} associated with this batch
+   * @param loadedFileId the loaded file id
    * @param postgresBatch the {@link PostgreSqlCopyInserter} for the current set of {@link
    *     RifFilesEvent}s being processed
    * @param resultHandler the {@link Consumer} to notify when the batch completes successfully
@@ -353,8 +370,10 @@ public final class RifLoader {
   }
 
   /**
+   * Processes (loads) a record into the database and returns the load result.
+   *
    * @param recordsBatch the {@link RifRecordEvent}s to process
-   * @param loadedFileBuilder the builder for the {@LoadedFile} associated with this batch
+   * @param loadedFileId the loaded file id
    * @param postgresBatch the {@link PostgreSqlCopyInserter} for the current set of {@link
    *     RifFilesEvent}s being processed
    * @return the {@link RifRecordLoadResult}s that model the results of the operation
@@ -438,10 +457,10 @@ public final class RifLoader {
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
 
-          // Log if we have a non-2022 enrollment year INSERT
+          // Log if we have a non-2023 enrollment year INSERT
           if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
             LOGGER.info(
-                "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
                 ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
           }
 
@@ -457,17 +476,17 @@ public final class RifLoader {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
 
-            // Log if we have a non-2022 enrollment year INSERT
+            // Log if we have a non-2023 enrollment year INSERT
             if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               LOGGER.info(
-                  "Inserted beneficiary with non-2022 enrollment year (beneficiaryId={})",
+                  "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
                   ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
             }
             tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
-            // Skip this record if the year is not 2022 and its an update.
+            // Skip this record if the year is not 2023 and its an update.
             if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
               /*
                * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
@@ -551,13 +570,13 @@ public final class RifLoader {
   }
 
   /**
-   * Checks if the record is a beneficiary with a non-2022 year, the flag to filter items is on, and
+   * Checks if the record is a beneficiary with a non-2023 year, the flag to filter items is on, and
    * has a non-{@code null} enrollment reference year. This is to handle special filtering while CCW
    * fixes an issue and should be temporary.
    *
    * @param rifRecordEvent the {@link RifRecordEvent} to check
    * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-
-   *     <code>null</code> and not 2022, and the flag to filter such beneficiaries is set to {@code
+   *     <code>null</code> and not 2023, and the flag to filter such beneficiaries is set to {@code
    *     true}
    */
   private boolean isBackdatedBene(RifRecordEvent<?> rifRecordEvent) {
@@ -578,7 +597,7 @@ public final class RifLoader {
    */
   private boolean isBackdatedBene(Beneficiary bene) {
     // No filtering should take place unless filtering is turned on in the configuration
-    if (!options.isFilteringNonNullAndNon2022Benes()) {
+    if (!options.isFilteringNonNullAndNon2023Benes()) {
       return false;
     }
 
@@ -587,8 +606,8 @@ public final class RifLoader {
       return false;
     }
 
-    // If the reference year is 2022 we do not want to filter it
-    if (BigDecimal.valueOf(2022).equals(bene.getBeneEnrollmentReferenceYear().get())) {
+    // If the reference year is 2023 we do not want to filter it
+    if (BigDecimal.valueOf(2023).equals(bene.getBeneEnrollmentReferenceYear().get())) {
       return false;
     }
     return true;
@@ -1026,6 +1045,7 @@ public final class RifLoader {
    *
    * @param newBeneficiaryRecord the {@link Beneficiary} new record being processed
    * @param oldBeneficiaryRecord the {@link Beneficiary} old record that was processed
+   * @return {@code true} if the two beneficiary records are equal
    */
   static boolean isBeneficiaryHistoryEqual(
       Beneficiary newBeneficiaryRecord, Beneficiary oldBeneficiaryRecord) {
@@ -1057,6 +1077,28 @@ public final class RifLoader {
         && Objects.equals(newBeneficiaryRecord.getSex(), oldBeneficiaryRecord.getSex()));
   }
 
+  /**
+   * Creates a beneficiary monthly data with the supplied data.
+   *
+   * <p>TODO: Rename this method; it's really creating not getting something
+   *
+   * @param parentBeneficiary the parent beneficiary
+   * @param yearMonth the year month
+   * @param entitlementBuyInInd the entitlement buy in ind
+   * @param fipsStateCntyCode the fips state cnty code
+   * @param hmoIndicatorInd the hmo indicator ind
+   * @param medicaidDualEligibilityCode the medicaid dual eligibility code
+   * @param medicareStatusCode the medicare status code
+   * @param partCContractNumberId the part c contract number id
+   * @param partCPbpNumberId the part c pbp number id
+   * @param partCPlanTypeCode the part c plan type code
+   * @param partDContractNumberId the part d contract number id
+   * @param partDLowIncomeCostShareGroupCode the part d low income cost share group code
+   * @param partDPbpNumberId the part d pbp number id
+   * @param partDRetireeDrugSubsidyInd the part d retiree drug subsidy ind
+   * @param partDSegmentNumberId the part d segment number id
+   * @return the beneficiary monthly object, or {@code null}
+   */
   public static BeneficiaryMonthly getBeneficiaryMonthly(
       Beneficiary parentBeneficiary,
       LocalDate yearMonth,
@@ -1111,7 +1153,7 @@ public final class RifLoader {
   }
 
   /**
-   * Insert the LoadedFile into the database
+   * Insert the LoadedFile into the database.
    *
    * @param fileEvent to base this new LoadedFile
    * @param errorHandler to call if something bad happens
@@ -1157,7 +1199,7 @@ public final class RifLoader {
   }
 
   /**
-   * Trim the LoadedFiles and LoadedBatches tables if necessary
+   * Trim the LoadedFiles and LoadedBatches tables if necessary.
    *
    * @param errorHandler is called on exceptions
    */
@@ -1227,9 +1269,11 @@ public final class RifLoader {
   }
 
   /**
+   * Gets a count of the number of instances of the specified JPA {@link Entity} type that are
+   * currently in the database.
+   *
    * @param entityType the JPA {@link Entity} type to count instances of
-   * @return a count of the number of instances of the specified JPA {@link Entity} type that are
-   *     currently in the database
+   * @return the number of instances in the db
    */
   private long queryForEntityCount(Class<?> entityType) {
     EntityManager entityManager = null;
@@ -1415,8 +1459,11 @@ public final class RifLoader {
    * situations, so we'll keep it around.
    */
   private static final class PostgreSqlCopyInserter implements AutoCloseable {
+    /** The entity manager factory. */
     private final EntityManagerFactory entityManagerFactory;
+    /** The metrics registry. */
     private final MetricRegistry metrics;
+    /** The state and tracking information for a SQL table's {@link CSVPrinter}. */
     private final List<CsvPrinterBundle> csvPrinterBundles;
 
     /**
@@ -1438,6 +1485,8 @@ public final class RifLoader {
     }
 
     /**
+     * Creates a csv printer for a specified SQL table.
+     *
      * @param entityType the JPA {@link Entity} to create a {@link CSVPrinter} for
      * @return the {@link CSVPrinter} for the specified SQL table
      */
@@ -1536,6 +1585,9 @@ public final class RifLoader {
     }
 
     /**
+     * Determines if the {@link #csvPrinterBundles} is empty (if {@link #add} hasn't been called
+     * yet).
+     *
      * @return <code>true</code> if {@link #add(Object)} hasn't been called yet, <code>false</code>
      *     if it has
      */
@@ -1643,7 +1695,7 @@ public final class RifLoader {
       submitTimer.stop();
     }
 
-    /** @see java.lang.AutoCloseable#close() */
+    /** {@inheritDoc} */
     @Override
     public void close() {
       csvPrinterBundles.stream()
@@ -1663,24 +1715,35 @@ public final class RifLoader {
      * {@link CSVPrinter}.
      */
     private static final class CsvPrinterBundle {
+      /** The table name. */
       String tableName = null;
+      /** The csv printer. */
       CSVPrinter csvPrinter = null;
+      /** The backing temp file. */
       File backingTempFile = null;
+      /** The array of column names. */
       String[] columnNames = null;
+      /** The number of records printed. */
       AtomicInteger recordsPrinted = new AtomicInteger(0);
     }
   }
 
   /** Enumerates the {@link RifLoader} record handling strategies. */
   private static enum LoadStrategy {
+    /** Represents if the inserts should be treated as updates if the unique keys already exist. */
     INSERT_IDEMPOTENT,
-
+    /**
+     * Represents if the inserts and updates should be strictly treated as labelled (meaning we blow
+     * up if the unique constraints are violated).
+     */
     INSERT_UPDATE_NON_IDEMPOTENT;
   }
 
   /** Encapsulates the {@link RifLoader} record handling preferences. */
   private static final class LoadFeatures {
+    /** If idempotency mode should be enabled (inserts treated as updates if the data exists). */
     private final boolean idempotencyRequired;
+    /** If PostgreSQL's {@link CopyManager} APIs should be used to load data when possible. */
     private final boolean copyDesired;
 
     /**
@@ -1695,6 +1758,8 @@ public final class RifLoader {
     }
 
     /**
+     * Gets {@link #idempotencyRequired}.
+     *
      * @return <code>true</code> if record inserts must be idempotent, <code>false</code> if that's
      *     not required
      */
@@ -1703,6 +1768,8 @@ public final class RifLoader {
     }
 
     /**
+     * Gets {@link #copyDesired}.
+     *
      * @return <code>true</code> if PostgreSQL's {@link CopyManager} APIs should be used to load
      *     data when possible, <code>false</code> if not
      */

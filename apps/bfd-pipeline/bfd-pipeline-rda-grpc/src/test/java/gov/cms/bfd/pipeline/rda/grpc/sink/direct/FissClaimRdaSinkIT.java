@@ -30,8 +30,10 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link FissClaimRdaSink} with integrated dependencies. */
 public class FissClaimRdaSinkIT {
 
+  /** The alphabetical sorting mapper to use for testing. */
   private static final ObjectMapper mapper =
       JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
@@ -62,7 +64,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
           procCode0.setDcn(claim.getDcn());
-          procCode0.setPriority((short) 0);
+          procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
           procCode0.setProcDate(today);
@@ -70,7 +72,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
           diagCode0.setDcn(claim.getDcn());
-          diagCode0.setPriority((short) 0);
+          diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
           claim.getDiagCodes().add(diagCode0);
@@ -78,6 +80,7 @@ public class FissClaimRdaSinkIT {
           final FissProcedureCode procCodeMessage =
               FissProcedureCode.newBuilder()
                   .setProcCd("P")
+                  .setRdaPosition(1)
                   .setProcFlag("F")
                   .setProcDt("2022-01-03")
                   .build();
@@ -85,6 +88,7 @@ public class FissClaimRdaSinkIT {
           final FissDiagnosisCode diagCodeMessage =
               FissDiagnosisCode.newBuilder()
                   .setDiagCd2("cd2")
+                  .setRdaPosition(1)
                   .setDiagPoaIndUnrecognized("Q")
                   .build();
 
@@ -111,7 +115,7 @@ public class FissClaimRdaSinkIT {
           final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final FissClaimTransformer transformer =
               new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
-          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
+          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true, 0);
           final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
@@ -175,7 +179,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
           procCode0.setDcn(claim.getDcn());
-          procCode0.setPriority((short) 0);
+          procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
           procCode0.setProcDate(today);
@@ -183,7 +187,7 @@ public class FissClaimRdaSinkIT {
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
           diagCode0.setDcn(claim.getDcn());
-          diagCode0.setPriority((short) 0);
+          diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
           claim.getDiagCodes().add(diagCode0);
@@ -191,6 +195,7 @@ public class FissClaimRdaSinkIT {
           final FissProcedureCode procCodeMessage =
               FissProcedureCode.newBuilder()
                   .setProcCd("P")
+                  .setRdaPosition(1)
                   .setProcFlag("F")
                   .setProcDt(invalidDateFormat)
                   .build();
@@ -198,6 +203,7 @@ public class FissClaimRdaSinkIT {
           final FissDiagnosisCode diagCodeMessage =
               FissDiagnosisCode.newBuilder()
                   .setDiagCd2("cd2")
+                  .setRdaPosition(1)
                   .setDiagPoaIndUnrecognized("Q")
                   .build();
 
@@ -224,7 +230,7 @@ public class FissClaimRdaSinkIT {
           final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final FissClaimTransformer transformer =
               new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
-          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
+          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true, 0);
           final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
@@ -248,7 +254,7 @@ public class FissClaimRdaSinkIT {
                 List.of(
                     new DataTransformer.ErrorMessage(
                         "currLoc2", "invalid length: expected=[0,5] actual=10"),
-                    new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date"));
+                    new DataTransformer.ErrorMessage("procCodes-0-procDate", "invalid date"));
 
             assertEquals(Long.valueOf(3), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());

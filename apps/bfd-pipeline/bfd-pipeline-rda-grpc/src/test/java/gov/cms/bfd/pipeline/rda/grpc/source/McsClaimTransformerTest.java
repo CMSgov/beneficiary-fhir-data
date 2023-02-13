@@ -71,16 +71,23 @@ import org.junit.jupiter.api.Test;
  * of the verification methods.
  */
 public class McsClaimTransformerTest {
-  // using a fixed Clock ensures our timestamp is predictable
+  /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
+  /** The test hasher. */
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
+
+  /** The transformer under test. */
   private final McsClaimTransformer transformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
+  /** Creates MCS claim changes for testing changes are as expected. */
   private McsClaimChange.Builder changeBuilder;
+  /** Creates a claim for testing in changes and transformations. */
   private McsClaim.Builder claimBuilder;
+  /** A claim object used for validation (the expected value of the transformation/change). */
   private RdaMcsClaim claim;
 
+  /** Resets test objects and sets up shared resources between each test. */
   @BeforeEach
   public void setUp() {
     changeBuilder = McsClaimChange.newBuilder();
@@ -89,6 +96,10 @@ public class McsClaimTransformerTest {
     claim.setSequenceNumber(0L);
   }
 
+  /**
+   * Tests the minimum valid claim and a change built from a minimum valid claim builder result in
+   * the same final claim properties.
+   */
   @Test
   public void minimumValidClaim() {
     claim.setIdrClmHdIcn("123456789012345");
@@ -199,7 +210,7 @@ public class McsClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     final RdaMcsDetail detail = new RdaMcsDetail();
     detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    detail.setPriority((short) 0);
+    detail.setIdrDtlNumber((short) 0);
     detail.setIdrDtlStatus("F");
     detail.setIdrDtlFromDate(LocalDate.of(2020, 1, 9));
     detail.setIdrDtlToDate(LocalDate.of(2020, 1, 10));
@@ -219,7 +230,6 @@ public class McsClaimTransformerTest {
     detail.setIdrKPosCity("123456789012345678901234567890");
     detail.setIdrKPosState("12");
     detail.setIdrKPosZip("123456789012345");
-    detail.setLastUpdated(clock.instant());
     claim.getDetails().add(detail);
     claimBuilder
         .setIdrClmHdIcn("123456789012345")
@@ -251,7 +261,7 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
     RdaMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
-        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getPriority);
+        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getIdrDtlNumber);
   }
 
   /**
@@ -266,17 +276,15 @@ public class McsClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
     diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 0);
+    diagCode.setRdaPosition((short) 1);
     diagCode.setIdrDiagIcdType("9");
     diagCode.setIdrDiagCode("1234567");
-    diagCode.setLastUpdated(clock.instant());
     claim.getDiagCodes().add(diagCode);
     diagCode = new RdaMcsDiagnosisCode();
     diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 1);
+    diagCode.setRdaPosition((short) 2);
     diagCode.setIdrDiagIcdType("0");
     diagCode.setIdrDiagCode("jdsyejs");
-    diagCode.setLastUpdated(clock.instant());
     claim.getDiagCodes().add(diagCode);
     claimBuilder
         .setIdrClmHdIcn("123456789012345")
@@ -285,12 +293,14 @@ public class McsClaimTransformerTest {
         .addMcsDiagnosisCodes(
             McsDiagnosisCode.newBuilder()
                 .setIdrClmHdIcn("123456789012345")
+                .setRdaPosition(1)
                 .setIdrDiagCode("1234567")
                 .setIdrDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9)
                 .build())
         .addMcsDiagnosisCodes(
             McsDiagnosisCode.newBuilder()
                 .setIdrClmHdIcn("123456789012345")
+                .setRdaPosition(2)
                 .setIdrDiagCode("jdsyejs")
                 .setIdrDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                 .build());
@@ -298,9 +308,13 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
     RdaMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
-        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getPriority);
+        claim.getDetails(), transformed.getDetails(), RdaMcsDetail::getIdrDtlNumber);
   }
 
+  /**
+   * Validates that missing fields in a change generate the expected error messages when
+   * transforming that change via the {@link McsClaimTransformer}.
+   */
   @Test
   public void testMissingRequiredFieldsGenerateErrors() {
     final long SEQUENCE_NUM = 37;
@@ -341,6 +355,10 @@ public class McsClaimTransformerTest {
 
   // region McsClaim
 
+  /**
+   * Tests the idrClmHdIcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrClmHdIcn() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -351,6 +369,10 @@ public class McsClaimTransformerTest {
             15);
   }
 
+  /**
+   * Tests the idrContrId field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrContrId() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -361,6 +383,10 @@ public class McsClaimTransformerTest {
             5);
   }
 
+  /**
+   * Tests the idrHic field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrHic() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -368,6 +394,10 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrHic, RdaMcsClaim::getIdrHic, RdaMcsClaim.Fields.idrHic, 12);
   }
 
+  /**
+   * Tests the idrClaimType field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrClaimType() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -383,6 +413,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrBeneLast_1_6 field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBeneLast16() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -393,6 +427,10 @@ public class McsClaimTransformerTest {
             6);
   }
 
+  /**
+   * Tests the idrBeneFirstInit field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBeneFirstInit() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -403,6 +441,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrBeneMidInit field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBeneMidInit() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -413,6 +455,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrBeneSex field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrBeneSex() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -428,6 +474,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrStatusCode field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrStatusCode() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -443,6 +493,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrStatusDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrStatusDate() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -452,6 +506,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrStatusDate);
   }
 
+  /**
+   * Tests the idrBillProvNpi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBillProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -462,6 +520,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrBillProvNum field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBillProvNum() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -472,6 +534,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrBillProvEin field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBillProvEin() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -482,6 +548,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrBillProvType field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBillProvType() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -492,6 +562,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrBillProvSpec field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBillProvSpec() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -502,6 +576,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrBillProvGroupInd field is properly parsed and copied when a message object is
+   * passed through the transformer.
+   */
   @Test
   public void testClaimIdrBillProvGroupInd() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -517,6 +595,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrBillProvPriceSpec field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrBillProvPriceSpec() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -527,6 +609,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrBillProvCounty field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrBillProvCounty() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -537,6 +623,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrBillProvLoc field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBillProvLoc() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -547,6 +637,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrTotAllowed field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrTotAllowed() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -556,6 +650,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrTotAllowed);
   }
 
+  /**
+   * Tests the idrCoinsurance field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrCoinsurance() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -565,6 +663,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrCoinsurance);
   }
 
+  /**
+   * Tests the idrDeductible field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrDeductible() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -574,6 +676,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrDeductible);
   }
 
+  /**
+   * Tests the idrBillProvStatusCd field is properly parsed and copied when a message object is
+   * passed through the transformer.
+   */
   @Test
   public void testClaimIdrBillProvStatusCd() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -589,6 +695,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrTotBilledAmt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrBilledAmt() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -598,6 +708,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrTotBilledAmt);
   }
 
+  /**
+   * Tests the idrClaimReceiptDate field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrClaimReceiptDate() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -607,6 +721,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrClaimReceiptDate);
   }
 
+  /**
+   * Tests the idrClaimMbi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrClaimMbi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -619,6 +737,10 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrClaimMbi, RdaMcsClaim::getIdrClaimMbiHash, 11, idHasher);
   }
 
+  /**
+   * Tests the idrHdrFromDateOfSvc field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrHdrFromDos() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -628,6 +750,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrHdrFromDateOfSvc);
   }
 
+  /**
+   * Tests the idrHdrToDateOfSvc field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrHdrToDos() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -637,6 +763,10 @@ public class McsClaimTransformerTest {
             RdaMcsClaim.Fields.idrHdrToDateOfSvc);
   }
 
+  /**
+   * Tests the idrAssignment field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrAssignment() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -652,6 +782,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrClmLevelInd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrClmLevelInd() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -667,6 +801,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrHdrAudit field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrHdrAudit() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -674,6 +812,10 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrHdrAudit, RdaMcsClaim::getIdrHdrAudit);
   }
 
+  /**
+   * Tests the idrHdrAuditInd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrHdrAuditInd() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -689,6 +831,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrUSplitReason field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrUSplitReason() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -704,6 +850,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrJReferringProvNpi field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrJReferringProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -714,6 +864,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrJFacProvNpi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrJFacProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -724,6 +878,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrUDemoProvNpi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrUDemoProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -734,6 +892,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrUSuperNpi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrUSuperNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -744,6 +906,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrUFcadjBilNpi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrUFcadjBilNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -754,6 +920,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrAmbPickupAddresLine1 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrAmbPickupAddresLine1() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -764,6 +934,10 @@ public class McsClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the idrAmbPickupAddresLine2 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrAmbPickupAddresLine2() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -774,6 +948,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrAmbPickupCity field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testClaimIdrAmbPickupCity() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -784,6 +962,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrAmbPickupState field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrAmbPickupState() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -794,6 +976,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrAmbPickupZipcode field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrAmbPickupZipcode() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -804,6 +990,10 @@ public class McsClaimTransformerTest {
             9);
   }
 
+  /**
+   * Tests the idrAmbDropoffName field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrAmbDropoffName() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -814,6 +1004,10 @@ public class McsClaimTransformerTest {
             24);
   }
 
+  /**
+   * Tests the idrAmbDropoffAddrLine1 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrAmbDropoffAddrLine1() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -824,6 +1018,10 @@ public class McsClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the idrAmbDropoffAddrLine2 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testClaimIdrAmbDropoffAddrLine2() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -834,6 +1032,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrAmbDropoffCity field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrAmbDropoffCity() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -844,6 +1046,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrAmbDropoffState field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrAmbDropoffState() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -854,6 +1060,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrAmbDropoffZipcode field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testClaimIdrAmbDropoffZipcode() {
     new McsClaimTransformerTest.ClaimFieldTester()
@@ -868,6 +1078,10 @@ public class McsClaimTransformerTest {
 
   // region McsAdjustments
 
+  /**
+   * Tests the idrAdjDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrAdjDate() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -877,6 +1091,10 @@ public class McsClaimTransformerTest {
             RdaMcsAdjustment.Fields.idrAdjDate);
   }
 
+  /**
+   * Tests the idrXrefIcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrXrefIcn() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -887,6 +1105,10 @@ public class McsClaimTransformerTest {
             15);
   }
 
+  /**
+   * Tests the idrAdjClerk field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrAdjClerk() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -897,6 +1119,10 @@ public class McsClaimTransformerTest {
             4);
   }
 
+  /**
+   * Tests the idrInitCcn field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrInitCcn() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -907,6 +1133,10 @@ public class McsClaimTransformerTest {
             15);
   }
 
+  /**
+   * Tests the idrAdjChkWrtDt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrAdjChkWrtDt() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -916,6 +1146,10 @@ public class McsClaimTransformerTest {
             RdaMcsAdjustment.Fields.idrAdjChkWrtDt);
   }
 
+  /**
+   * Tests the idrAdjBEombAmt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrAdjBEombAmt() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -925,6 +1159,10 @@ public class McsClaimTransformerTest {
             RdaMcsAdjustment.Fields.idrAdjBEombAmt);
   }
 
+  /**
+   * Tests the idrAdjPEombAmt field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentIdrAdjPEombAmt() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
@@ -934,6 +1172,10 @@ public class McsClaimTransformerTest {
             RdaMcsAdjustment.Fields.idrAdjPEombAmt);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAdjustmentRdaPosition() {
     new AdjustmentFieldTester()
@@ -947,6 +1189,10 @@ public class McsClaimTransformerTest {
 
   // region McsAudit
 
+  /**
+   * Tests the idrJAuditNum field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAuditIdrJAuditNum() {
     new McsClaimTransformerTest.AuditFieldTester()
@@ -954,6 +1200,10 @@ public class McsClaimTransformerTest {
             McsAudit.Builder::setIdrJAuditNum, RdaMcsAudit::getIdrJAuditNum);
   }
 
+  /**
+   * Tests the idrJAuditInd field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testAuditIdrJAuditInd() {
     new McsClaimTransformerTest.AuditFieldTester()
@@ -969,6 +1219,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrJAuditDisp field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testAuditIdrJAuditDisp() {
     new McsClaimTransformerTest.AuditFieldTester()
@@ -984,6 +1238,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testAuditRdaPosition() {
     new AuditFieldTester()
@@ -997,6 +1255,10 @@ public class McsClaimTransformerTest {
 
   // region McsDiagnosisCode
 
+  /**
+   * Tests the idrDiagCode field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDiagnosisCodeIdrDiagCode() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
@@ -1007,6 +1269,10 @@ public class McsClaimTransformerTest {
             7);
   }
 
+  /**
+   * Tests the idrDiagIcdType field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDiagnosisCodeIdrDiagIcdType() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
@@ -1022,6 +1288,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDiagnosisCodeRdaPosition() {
     new DiagCodeFieldTester()
@@ -1035,7 +1305,10 @@ public class McsClaimTransformerTest {
 
   // region McsDetail
 
-  /** Verifies that {@link RdaMcsDetail#idrDtlNumber} is initialized properly. */
+  /**
+   * Tests the idrDtlNumber field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlNumber() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1045,6 +1318,10 @@ public class McsClaimTransformerTest {
             RdaMcsDetail.Fields.idrDtlNumber);
   }
 
+  /**
+   * Tests the idrDtlStatus field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlStatus() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1060,6 +1337,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrDtlFromDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlFromDate() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1069,6 +1350,10 @@ public class McsClaimTransformerTest {
             RdaMcsDetail.Fields.idrDtlFromDate);
   }
 
+  /**
+   * Tests the idrDtlToDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlToDate() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1078,6 +1363,10 @@ public class McsClaimTransformerTest {
             RdaMcsDetail.Fields.idrDtlToDate);
   }
 
+  /**
+   * Tests the idrProcCode field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrProcCode() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1088,6 +1377,10 @@ public class McsClaimTransformerTest {
             5);
   }
 
+  /**
+   * Tests the idrModOne field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrModOne() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1098,6 +1391,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrModTwo field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrModTwo() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1108,6 +1405,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrModThree field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrModThree() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1118,6 +1419,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrModFour field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrModFour() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1128,6 +1433,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrDtlDiagIcdType field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlDiagIcdType() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1143,6 +1452,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrDtlPrimaryDiagCode field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlPrimaryDiagCode() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1153,6 +1466,10 @@ public class McsClaimTransformerTest {
             7);
   }
 
+  /**
+   * Tests the idrKPosLnameOrg field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosLnameOrg() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1163,6 +1480,10 @@ public class McsClaimTransformerTest {
             60);
   }
 
+  /**
+   * Tests the idrKPosFname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosFname() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1173,6 +1494,10 @@ public class McsClaimTransformerTest {
             35);
   }
 
+  /**
+   * Tests the idrKPosMname field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosMname() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1183,6 +1508,10 @@ public class McsClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the idrKPosAddr1 field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosAddr1() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1193,6 +1522,10 @@ public class McsClaimTransformerTest {
             55);
   }
 
+  /**
+   * Tests the idrKPosAddr2_1st field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosAddr21St() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1203,6 +1536,10 @@ public class McsClaimTransformerTest {
             30);
   }
 
+  /**
+   * Tests the idrKPosAddr2_2nd field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosAddr22Nd() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1213,6 +1550,10 @@ public class McsClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the idrKPosCity field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosCity() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1223,6 +1564,10 @@ public class McsClaimTransformerTest {
             30);
   }
 
+  /**
+   * Tests the idrKPosState field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosState() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1233,6 +1578,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrKPosZip field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrKPosZip() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1243,6 +1592,10 @@ public class McsClaimTransformerTest {
             15);
   }
 
+  /**
+   * Tests the idrTos field is properly parsed and copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testDetailIdrTos() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1258,6 +1611,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the idrTwoDigitPos field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrTwoDigitPos() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1273,6 +1630,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrDtlRendType field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlRendType() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1283,6 +1644,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrDtlRendSpec field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlRendSpec() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1293,6 +1658,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrDtlRendNpi field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlRendNpi() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1303,6 +1672,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrDtlRendProv field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testDetailIdrDtlRendProv() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1313,6 +1686,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrKDtlFacProvNpi field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testDetailIdrKDtlFacProvNpi() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1323,6 +1700,10 @@ public class McsClaimTransformerTest {
             10);
   }
 
+  /**
+   * Tests the idrDtlAmbPickupAddres1 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbPickupAddres1() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1333,6 +1714,10 @@ public class McsClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the idrDtlAmbPickupAddres2 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbPickupAddres2() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1343,6 +1728,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrDtlAmbPickupCity field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbPickupCity() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1353,6 +1742,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrDtlAmbPickupState field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbPickupState() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1363,6 +1756,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrDtlAmbPickupZipcode field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbPickupZipcode() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1373,6 +1770,10 @@ public class McsClaimTransformerTest {
             9);
   }
 
+  /**
+   * Tests the idrDtlAmbDropoffName field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbDropoffName() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1383,6 +1784,10 @@ public class McsClaimTransformerTest {
             24);
   }
 
+  /**
+   * Tests the idrDtlAmbDropoffAddrL1 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbDropoffAddrL1() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1393,6 +1798,10 @@ public class McsClaimTransformerTest {
             25);
   }
 
+  /**
+   * Tests the idrDtlAmbDropoffAddrL2 field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbDropoffAddrL2() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1403,6 +1812,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrDtlAmbDropoffCity field is properly copied when a message object is passed through
+   * the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbDropoffCity() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1413,6 +1826,10 @@ public class McsClaimTransformerTest {
             20);
   }
 
+  /**
+   * Tests the idrDtlAmbDropoffState field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbDropoffState() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1423,6 +1840,10 @@ public class McsClaimTransformerTest {
             2);
   }
 
+  /**
+   * Tests the idrDtlAmbDropoffZipcode field is properly copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testDetailIdrDtlAmbDropoffZipcode() {
     new McsClaimTransformerTest.DetailFieldTester()
@@ -1437,6 +1858,10 @@ public class McsClaimTransformerTest {
 
   // region McsLocation
 
+  /**
+   * Tests the idrLocClerk field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testLocationIdrLocClerk() {
     new McsClaimTransformerTest.LocationFieldTester()
@@ -1447,6 +1872,10 @@ public class McsClaimTransformerTest {
             4);
   }
 
+  /**
+   * Tests the idrLocCode field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testLocationIdrLocCode() {
     new McsClaimTransformerTest.LocationFieldTester()
@@ -1457,6 +1886,10 @@ public class McsClaimTransformerTest {
             3);
   }
 
+  /**
+   * Tests the idrLocDate field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testLocationIdrLocDate() {
     new McsClaimTransformerTest.LocationFieldTester()
@@ -1466,6 +1899,10 @@ public class McsClaimTransformerTest {
             RdaMcsLocation.Fields.idrLocDate);
   }
 
+  /**
+   * Tests the idrLocActvCode field is properly parsed and copied when a message object is passed
+   * through the transformer.
+   */
   @Test
   public void testLocationIdrLocActvCode() {
     new McsClaimTransformerTest.LocationFieldTester()
@@ -1481,6 +1918,10 @@ public class McsClaimTransformerTest {
             1);
   }
 
+  /**
+   * Tests the rdaPosition field is properly copied when a message object is passed through the
+   * transformer.
+   */
   @Test
   public void testLocationRdaPosition() {
     new LocationFieldTester()
@@ -1492,6 +1933,12 @@ public class McsClaimTransformerTest {
 
   // endregion McsLocation
 
+  /**
+   * Asserts that a transformed change matches the change type and property values of an expected
+   * claim.
+   *
+   * @param changeType the change type to validate
+   */
   private void assertChangeMatches(RdaChange.Type changeType) {
     RdaChange<RdaMcsClaim> changed = transformer.transformClaim(changeBuilder.build());
     assertEquals(changeType, changed.getType());
@@ -1500,9 +1947,19 @@ public class McsClaimTransformerTest {
 
   // region Field Tester Classes
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsClaim.Builder} instances and to trigger a transformation of a claim. Serves as
+   * a base class for specific field tester classes that share the same implementations of {@code
+   * createClaimBuilder()} and {@code transformClaim()}.
+   *
+   * @param <TBuilder> the claim builder class created by this adaptor
+   * @param <TEntity> the entity class created by this adaptor
+   */
   private abstract class AbstractFieldTester<TBuilder, TEntity>
       extends ClaimTransformerFieldTester<
           McsClaim.Builder, McsClaim, RdaMcsClaim, TBuilder, TEntity> {
+    /** {@inheritDoc} */
     @Override
     McsClaim.Builder createClaimBuilder() {
       return McsClaim.newBuilder()
@@ -1510,7 +1967,7 @@ public class McsClaimTransformerTest {
           .setIdrContrId("contr")
           .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaChange<RdaMcsClaim> transformClaim(McsClaim claim) {
       var changeBuilder =
@@ -1520,28 +1977,40 @@ public class McsClaimTransformerTest {
               .setClaim(claim);
       return transformer.transformClaim(changeBuilder.build());
     }
-
+    /** {@inheritDoc} */
     @Override
     McsClaim buildClaim(McsClaim.Builder builder) {
       return builder.build();
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsClaim.Builder} instances and to trigger a transformation of a claim. Used for
+   * tests that operator on {@link McsClaim} and {@link RdaMcsClaim} instances.
+   */
   private class ClaimFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsClaim.Builder, RdaMcsClaim> {
+    /** {@inheritDoc} */
     @Override
     McsClaim.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       return claimBuilder;
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaMcsClaim getTestEntity(RdaMcsClaim claim) {
       return claim;
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsAdjustment.Builder} instances and to trigger a transformation of a claim. Used
+   * for tests that operate on {@link McsAdjustment} and {@link RdaMcsAdjustment} instances.
+   */
   class AdjustmentFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsAdjustment.Builder, RdaMcsAdjustment> {
+    /** {@inheritDoc} */
     @Override
     McsAdjustment.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       if (claimBuilder.getMcsAdjustmentsBuilderList().isEmpty()) {
@@ -1549,24 +2018,29 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsAdjustmentsBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaMcsAdjustment getTestEntity(RdaMcsClaim claim) {
       assertEquals(1, claim.getAdjustments().size());
       RdaMcsAdjustment answer = claim.getAdjustments().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "adjustment-0-" + basicLabel;
+      return "adjustments-0-" + basicLabel;
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsAudit.Builder} instances and to trigger a transformation of a claim. Used for
+   * tests that operator on {@link McsAudit} and {@link RdaMcsAudit} instances.
+   */
   class AuditFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsAudit.Builder, RdaMcsAudit> {
+    /** {@inheritDoc} */
     @Override
     McsAudit.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       if (claimBuilder.getMcsAuditsBuilderList().isEmpty()) {
@@ -1574,24 +2048,29 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsAuditsBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaMcsAudit getTestEntity(RdaMcsClaim claim) {
       assertEquals(1, claim.getAudits().size());
       RdaMcsAudit answer = claim.getAudits().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "audit-0-" + basicLabel;
+      return "audits-0-" + basicLabel;
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsDetail.Builder} instances and to trigger a transformation of a claim. Used for
+   * tests that operator on {@link McsDetail} and {@link RdaMcsDetail} instances.
+   */
   class DetailFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsDetail.Builder, RdaMcsDetail> {
+    /** {@inheritDoc} */
     @Override
     McsDetail.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       if (claimBuilder.getMcsDetailsBuilderList().isEmpty()) {
@@ -1599,25 +2078,31 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsDetailsBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaMcsDetail getTestEntity(RdaMcsClaim claim) {
       assertEquals(1, claim.getDetails().size());
       RdaMcsDetail answer = claim.getDetails().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "detail-0-" + basicLabel;
+      return "details-0-" + basicLabel;
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsDiagnosisCode.Builder} instances and to trigger a transformation of a claim.
+   * Used for tests that operate on {@link McsDiagnosisCode} and {@link RdaMcsDiagnosisCode}
+   * instances.
+   */
   class DiagCodeFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<
           McsDiagnosisCode.Builder, RdaMcsDiagnosisCode> {
+    /** {@inheritDoc} */
     @Override
     McsDiagnosisCode.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       if (claimBuilder.getMcsDiagnosisCodesBuilderList().isEmpty()) {
@@ -1626,24 +2111,29 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsDiagnosisCodesBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaMcsDiagnosisCode getTestEntity(RdaMcsClaim claim) {
       assertEquals(1, claim.getDiagCodes().size());
       RdaMcsDiagnosisCode answer = claim.getDiagCodes().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "diagCode-0-" + basicLabel;
+      return "diagCodes-0-" + basicLabel;
     }
   }
 
+  /**
+   * Adaptor class extending the {@link ClaimTransformerFieldTester} class that can be used to
+   * create {@link McsLocation.Builder} instances and to trigger a transformation of a claim. Used
+   * for tests that operate on {@link McsLocation} and {@link RdaMcsLocation} instances.
+   */
   class LocationFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsLocation.Builder, RdaMcsLocation> {
+    /** {@inheritDoc} */
     @Override
     McsLocation.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       if (claimBuilder.getMcsLocationsBuilderList().isEmpty()) {
@@ -1651,19 +2141,18 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsLocationsBuilder(0);
     }
-
+    /** {@inheritDoc} */
     @Override
     RdaMcsLocation getTestEntity(RdaMcsClaim claim) {
       assertEquals(1, claim.getLocations().size());
       RdaMcsLocation answer = claim.getLocations().iterator().next();
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
-      assertEquals((short) 0, answer.getPriority());
       return answer;
     }
-
+    /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
-      return "location-0-" + basicLabel;
+      return "locations-0-" + basicLabel;
     }
   }
 

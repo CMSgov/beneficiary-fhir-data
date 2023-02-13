@@ -17,7 +17,7 @@ resource "aws_security_group" "app" {
   ]
   name                   = "bfd-${local.env}-${local.legacy_service}-app"
   revoke_rules_on_delete = false
-  tags                   = merge(local.shared_tags, { "Name" = "bfd-${local.env}-${local.legacy_service}-app" })
+  tags                   = { Name = "bfd-${local.env}-${local.legacy_service}-app" }
   vpc_id                 = local.vpc_id
 }
 

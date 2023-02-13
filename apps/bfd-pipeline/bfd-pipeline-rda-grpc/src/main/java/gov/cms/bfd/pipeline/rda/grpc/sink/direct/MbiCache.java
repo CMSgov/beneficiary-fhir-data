@@ -35,9 +35,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MbiCache {
   /**
-   * Increment of time used by {@link MbiCache#waitForRetry} to compute exponential backoff delay
-   * when retrying insert of record into MBI cache table. The value is somewhat arbitrary but should
-   * be long enough to be meaningful but short enough to not impose excessive wait times.
+   * Increment of time used by {@link DatabaseBackedCache#waitForRetry} to compute exponential
+   * backoff delay when retrying insert of record into MBI cache table. The value is somewhat
+   * arbitrary but should be long enough to be meaningful but short enough to not impose excessive
+   * wait times.
    */
   private static final int RETRY_INTERVAL_MILLIS = 50;
 
@@ -55,7 +56,7 @@ public class MbiCache {
    * Constructs a new instance that computes all hash values on demand.
    *
    * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
-   * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+   * @param metrics {@link Metrics} to use for reporting metrics
    */
   @VisibleForTesting
   MbiCache(IdHasher hasher, Metrics metrics) {
@@ -164,14 +165,16 @@ public class MbiCache {
   @VisibleForTesting
   @Slf4j
   static class DatabaseBackedCache extends MbiCache {
+    /** Handles database entity management. */
     private final EntityManager entityManager;
+    /** Creates random values. */
     private final Random random;
 
     /**
      * Creates a new instance with the specified parameters.
      *
      * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
-     * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+     * @param metrics {@link Metrics} to use for reporting metrics
      * @param entityManager {@link EntityManager} used to query and create records
      */
     @VisibleForTesting
@@ -204,10 +207,12 @@ public class MbiCache {
         } catch (PersistenceException ex) {
           final Throwable rootCause = Throwables.getRootCause(ex);
           log.debug(
-              "caught exception while caching MBI: retry={} class={} causeClass={}",
+              "caught exception while caching MBI: retry={} class={} message={} causeClass={} causeMessage={}",
               retryNumber,
               ex.getClass().getSimpleName(),
-              rootCause.getClass().getSimpleName());
+              ex.getMessage(),
+              rootCause.getClass().getSimpleName(),
+              rootCause.getMessage());
           retryNumber += 1;
         }
       }
@@ -298,7 +303,7 @@ public class MbiCache {
   /** Metrics are tested in unit tests so they need to be easily accessible from tests. */
   @VisibleForTesting
   static class Metrics {
-    /** Tracks number of calls to {@link MbiCache#lookupMbi(String)} */
+    /** Tracks number of calls to {@link MbiCache#lookupMbi(String)}. */
     private final Meter lookups;
     /**
      * Tracks number of calls to {@link MbiCache#lookupMbi(String)} in which MBI was not present in
@@ -330,7 +335,11 @@ public class MbiCache {
       misses.mark();
     }
 
-    /** Add number of retries value to retries metric. */
+    /**
+     * Add number of retries value to retries metric.
+     *
+     * @param count the number of retries
+     */
     void addRetries(int count) {
       retries.update(count);
     }

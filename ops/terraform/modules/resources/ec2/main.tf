@@ -1,8 +1,8 @@
-# Build a single ec2 instance 
+# Build a single ec2 instance
 #
 
 locals {
-  tags    = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
+  tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
 }
 
 # Subnets
@@ -15,7 +15,7 @@ data "aws_subnet" "main" {
   }
 }
 
-# KMS 
+# KMS
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
@@ -56,7 +56,7 @@ resource "aws_instance" "main" {
   tenancy                     = "default"
   ebs_optimized               = true
 
-  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], var.sg_ids)
+  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.tool_sg], var.sg_ids)
   subnet_id              = data.aws_subnet.main.id
 
   root_block_device {

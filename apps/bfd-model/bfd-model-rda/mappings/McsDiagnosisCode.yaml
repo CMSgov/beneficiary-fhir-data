@@ -7,7 +7,7 @@ mappings:
     schema: rda
     primaryKeyColumns:
     - idrClmHdIcn
-    - priority
+    - rdaPosition
     columns:
     - name: idrClmHdIcn
       sqlType: varchar(15)
@@ -16,10 +16,6 @@ mappings:
       comment: 'Internal Claim Control Number: This field contains a numeric value
         that identifies a claim throughout the processing cycle and allows for a linkage
         between the claim and the beneficiary for whom it was submitted.'
-    - name: priority
-      sqlType: smallint
-      javaType: short
-      nullable: false
     - name: rdaPosition
       sqlType: smallint
       javaType: short
@@ -40,14 +36,9 @@ mappings:
         for which that line item was performed. The primary and secondary fields denote
         the ICD-9 diagnosis codes in the Diagnosis fields numbers 1 and 2 of 4 (the
         first and second Diagnosis Codes listed by the provider), at the claim level.'
-    - name: lastUpdated
-      sqlType: timestamp with time zone
-      dbName: last_updated
   transformations:
   - from: PARENT
     to: idrClmHdIcn
-  - from: INDEX
-    to: priority
   - from: idrDiagIcdType
     transformer: MessageEnum
     transformerOptions:
@@ -57,5 +48,3 @@ mappings:
     optionalComponents: None
   - from: idrDiagCode
     optionalComponents: None
-  - from: NOW
-    to: lastUpdated

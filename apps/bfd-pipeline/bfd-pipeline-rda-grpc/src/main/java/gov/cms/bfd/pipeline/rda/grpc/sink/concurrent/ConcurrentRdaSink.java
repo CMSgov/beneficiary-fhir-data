@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +19,7 @@ import javax.annotation.Nonnull;
  * @param <TClaim> JPA entity class
  */
 public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TClaim> {
+  /** Used to write claims to the database in background threads. */
   private final WriterThreadPool<TMessage, TClaim> writerPool;
 
   /**
@@ -33,6 +35,11 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     this(new WriterThreadPool<>(maxThreads, batchSize, sinkFactory));
   }
 
+  /**
+   * Special constructor used for testing to allow the {@link WriterThreadPool} to be a mock.
+   *
+   * @param writerPool externally created {@link WriterThreadPool}
+   */
   @VisibleForTesting
   ConcurrentRdaSink(WriterThreadPool<TMessage, TClaim> writerPool) {
     this.writerPool = writerPool;
@@ -62,6 +69,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return writerPool.readMaxExistingSequenceNumber();
@@ -105,20 +113,29 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     return count;
   }
 
+  /** {@inheritDoc} */
   @Override
-  public String getDedupKeyForMessage(TMessage object) {
-    return writerPool.getDedupKeyForMessage(object);
+  public String getClaimIdForMessage(TMessage object) {
+    return writerPool.getClaimIdForMessage(object);
   }
 
+  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(TMessage object) {
     return writerPool.getSequenceNumberForObject(object);
   }
 
+  /** {@inheritDoc} */
   @Nonnull
   @Override
-  public TClaim transformMessage(String apiVersion, TMessage message) {
+  public Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException {
     return writerPool.transformMessage(apiVersion, message);
+  }
+
+  @Override
+  public void checkErrorCount() throws ProcessingException {
+    writerPool.checkErrorCount();
   }
 
   /**
@@ -132,6 +149,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     throw new ProcessingException(new UnsupportedOperationException(), 0);
   }
 
+  /** {@inheritDoc} */
   @Override
   public int getProcessedCount() throws ProcessingException {
     return writerPool.getProcessedCount();

@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -16,6 +17,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -52,14 +54,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/** Unit tests for {@link InpatientClaimTransformerV2}. */
 public final class InpatientClaimTransformerV2Test {
+  /** The parsed claim used to generate the EOB and for validating with. */
   InpatientClaim claim;
+  /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+  /** The fhir context for parsing the test file. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
+
   /**
-   * Generates the Claim object to be used in multiple tests
+   * Generates the Claim object to be used in multiple tests.
    *
-   * @return
-   * @throws FHIRException
+   * @return the claim object
+   * @throws FHIRException if there was an issue creating the claim
    */
   public InpatientClaim generateClaim() throws FHIRException {
     List<Object> parsedRecords =
@@ -77,34 +85,40 @@ public final class InpatientClaimTransformerV2Test {
     return claim;
   }
 
+  /**
+   * Sets up the claim and EOB before each test.
+   *
+   * @throws IOException if there is an issue reading the test file
+   */
   @BeforeEach
-  public void before() {
+  public void before() throws IOException {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         InpatientClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
-  private static final FhirContext fhirContext = FhirContext.forR4();
-
-  /** Common top level EOB values */
+  /** Tests that the transformer sets the expected id. */
   @Test
   public void shouldSetID() {
     assertEquals("inpatient-" + claim.getClaimId(), eob.getIdElement().getIdPart());
   }
 
+  /** Tests that the transformer sets the expected last updated date in the metadata. */
   @Test
   public void shouldSetLastUpdated() {
     assertNotNull(eob.getMeta().getLastUpdated());
   }
 
+  /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
@@ -114,20 +128,35 @@ public final class InpatientClaimTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL)));
   }
 
+  /** Tests that the transformer sets the expected 'nature of request' value. */
   @Test
   public void shouldSetUse() {
     assertEquals(Use.CLAIM, eob.getUse());
   }
 
+  /** Tests that the transformer sets the expected final action status. */
   @Test
   public void shouldSetFinalAction() {
     assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
 
+  /**
+   * Tests that the transformer sets the billable period.
+   *
+   * @throws Exception should not be thrown
+   */
   @Test
   public void shouldSetBillablePeriod() throws Exception {
     // We just want to make sure it is set
     assertNotNull(eob.getBillablePeriod());
+    Extension extension =
+        eob.getBillablePeriod()
+            .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
+    assertNotNull(extension);
+    Coding valueCoding = (Coding) extension.getValue();
+    assertEquals("Final bill", valueCoding.getDisplay());
+    assertEquals("3", valueCoding.getCode());
+
     assertEquals(
         (new SimpleDateFormat("yyy-MM-dd")).parse("2016-01-15"),
         eob.getBillablePeriod().getStart());
@@ -135,17 +164,23 @@ public final class InpatientClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2016-01-27"), eob.getBillablePeriod().getEnd());
   }
 
+  /** Tests that the transformer sets the expected patient reference. */
   @Test
   public void shouldReferencePatient() {
     assertNotNull(eob.getPatient());
     assertEquals("Patient/567834", eob.getPatient().getReference());
   }
 
+  /** Tests that the transformer sets the expected creation date. */
   @Test
   public void shouldHaveCreatedDate() {
     assertNotNull(eob.getCreated());
   }
 
+  /**
+   * Tests that the transformer sets the expected number of facility type extensions and the correct
+   * values.
+   */
   @Test
   public void shouldHaveFacilityTypeExtension() {
     assertNotNull(eob.getFacility());
@@ -165,21 +200,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /**
-   * CareTeam list
-   *
-   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
-   * are added in the same order. This means we can look them up by sequence number.
-   */
+  /** Tests that the transformer sets the expected number of care team entries. */
   @Test
   public void shouldHaveCareTeamList() {
     assertEquals(4, eob.getCareTeam().size());
   }
 
-  /**
-   * Testing all of these in one test, just because there isn't a distinct identifier really for
-   * each
-   */
+  /** Tests that the transformer sets the expected values for the care team member entries. */
   @Test
   public void shouldHaveCareTeamMembers() {
     // First member
@@ -231,12 +258,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare4.equalsDeep(member4));
   }
 
-  /** SupportingInfo items */
+  /** Tests that the transformer sets the expected number of supporting info entries. */
   @Test
   public void shouldHaveSupportingInfoList() {
     assertEquals(11, eob.getSupportingInfo().size());
   }
 
+  /** Tests that the transformer sets the expected NCH patient status indicator codes. */
   @Test
   public void shouldHaveNchPtntStusIndCdSupInfo() {
     SupportingInformationComponent sic =
@@ -267,6 +295,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim HHA total visit count supporting info. */
   @Test
   public void shouldHaveAdmissionPeriodSupInfo() {
     SupportingInformationComponent sic =
@@ -291,6 +320,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim inpatient admission type codes. */
   @Test
   public void shouldHaveClmIpAdmsnTypeCdSupInfo() {
     SupportingInformationComponent sic =
@@ -323,6 +353,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected claim source admission type codes. */
   @Test
   public void shouldHaveClmSrcIpAdmsnCdSupInfo() {
     SupportingInformationComponent sic =
@@ -350,8 +381,9 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected diagnosis related group (MS-DRG) codes. */
   @Test
-  public void shouldHaveClmDrgCdInfo() {
+  public void shouldHaveClmDrgCdInfo() throws IOException {
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode(
             "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", eob.getSupportingInfo());
@@ -375,6 +407,56 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests to make sure a four digit DiagnosisRelatedGroupCd exists for inpatient claims. */
+  @Test
+  public void shouldHaveFourCharacterClmDrgCdInfo() throws IOException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_FOUR_CHARACTER_DRG_CODE.getResources()));
+
+    InpatientClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof InpatientClaim)
+            .map(r -> (InpatientClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit genEob =
+        InpatientClaimTransformerV2.transform(
+            new TransformerContext(
+                new MetricRegistry(),
+                Optional.empty(),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
+            claim);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+    SupportingInformationComponent sic =
+        TransformerTestUtilsV2.findSupportingInfoByCode(
+            "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", eob.getSupportingInfo());
+
+    SupportingInformationComponent compare =
+        TransformerTestUtilsV2.createSupportingInfo(
+            // We don't care what the sequence number is here
+            sic.getSequence(),
+            // Category
+            Arrays.asList(
+                new Coding(
+                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+                    "info",
+                    "Information"),
+                new Coding(
+                    "https://bluebutton.cms.gov/resources/codesystem/information",
+                    "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
+                    "Claim Diagnosis Related Group Code (or MS-DRG Code)")),
+            // Code
+            new Coding("https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "6955", null));
+    assertTrue(compare.equalsDeep(sic));
+  }
+
+  /** Tests that the transformer sets the expected claim PPS indicator code supporting info. */
   @Test
   public void shouldHaveClmMcoPdSwSupInfo() {
     SupportingInformationComponent sic =
@@ -405,6 +487,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected blood pints furnished supporting info. */
   @Test
   public void shouldHaveNchBloodPntsFrnshedQtyInfo() {
     SupportingInformationComponent sic =
@@ -437,6 +520,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected type of bill supporting info. */
   @Test
   public void shouldHaveTypeOfBillSupInfo() {
     SupportingInformationComponent sic =
@@ -461,6 +545,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected discharge status supporting info. */
   @Test
   public void shouldHaveDischargeStatusSupInfo() {
     SupportingInformationComponent sic =
@@ -486,6 +571,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer code supporting info. */
   @Test
   public void shouldHaveNchPrmryPyrCdSupInfo() {
     SupportingInformationComponent sic =
@@ -516,6 +602,9 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
+  /**
+   * Tests that the transformer sets the expected Supporting Information for claim received date.
+   */
   @Test
   public void shouldHaveClaimReceivedDateSupInfo() {
     SupportingInformationComponent sic =
@@ -541,19 +630,20 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
-  /** Provider Local Reference */
+  /** Tests that the transformer sets the expected local organization reference. */
   @Test
   public void shouldHaveLocalOrganizationReference() {
     assertNotNull(eob.getProvider());
     assertEquals("#provider-org", eob.getProvider().getReference());
   }
 
-  /** Top level Extensions */
+  /** Tests that the transformer sets the expected number of extensions for this claim type. */
   @Test
   public void shouldHaveKnownExtensions() {
     assertEquals(9, eob.getExtension().size());
   }
 
+  /** Tests that the transformer sets the expected "near line" extensions. */
   @Test
   public void shouldContainNchNearLineRecIdentCdExt() {
     Extension ex =
@@ -573,6 +663,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected IME claim value amount extension. */
   @Test
   public void shouldContainImeOpClmValAmtExt() {
     Extension ex =
@@ -588,6 +679,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected DSH claim value amount extension. */
   @Test
   public void shouldContainDshOpClmValAmtExt() {
     Extension ex =
@@ -603,6 +695,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected covered works compensation extension. */
   @Test
   public void shouldContainClmMdcrNonPmtRsnCdExt() {
     Extension ex =
@@ -621,6 +714,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Tests that the transformer sets the expected clm_srvc_clsfctn_type_cd extension. */
   @Test
   public void shouldContainClmSrvcClsfctnTypeCdExt() {
     Extension ex =
@@ -639,12 +733,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  /** Top level Identifiers */
+  /** Tests that the transformer sets the expected number of identifiers. */
   @Test
   public void shouldHaveKnownIdentifiers() {
     assertEquals(2, eob.getIdentifier().size());
   }
 
+  /** Tests that the transformer sets the expected claim id identifier. */
   @Test
   public void shouldIncludeClaimIdIdentifier() {
     Identifier clmId =
@@ -662,6 +757,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(clmId));
   }
 
+  /** Tests that the transformer sets the expected claim group identifier. */
   @Test
   public void shouldIncludeClaimGroupIdentifier() {
     Identifier clmGrp =
@@ -679,12 +775,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(clmGrp));
   }
 
-  /** Diagnosis elements */
+  /** Tests that the transformer sets the expected number of diagnosis. */
   @Test
   public void shouldHaveDiagnosesList() {
     assertEquals(8, eob.getDiagnosis().size());
   }
 
+  /** Tests that the transformer sets the expected diagnosis entries. */
   @Test
   public void shouldHaveDiagnosesMembers() {
     DiagnosisComponent diag1 =
@@ -843,12 +940,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp8.equalsDeep(diag8));
   }
 
-  /** Procedures */
+  /** Tests that the transformer sets the expected number of procedures. */
   @Test
   public void shouldHaveProcedureList() {
     assertEquals(6, eob.getProcedure().size());
   }
 
+  /** Tests that the transformer sets the expected procedure entries. */
   @Test
   public void shouldHaveProcedureMembers() {
     ProcedureComponent proc1 =
@@ -962,7 +1060,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
   }
 
-  /** Insurance */
+  /**
+   * Tests that the transformer sets the expected number of insurance entries with the expected
+   * values.
+   */
   @Test
   public void shouldReferenceCoverageInInsurance() {
     //     // Only one insurance object if there is more than we need to fix the focal set to point
@@ -980,12 +1081,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(insurance));
   }
 
-  /** Top level Type */
+  /** Tests that the transformer sets the expected number of codings. */
   @Test
   public void shouldHaveExpectedTypeCoding() {
     assertEquals(3, eob.getType().getCoding().size());
   }
 
+  /** Tests that the transformer sets the expected coding entities. */
   @Test
   public void shouldHaveExpectedCodingValues() {
     CodeableConcept compare =
@@ -1008,17 +1110,19 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getType()));
   }
 
-  /** Line Items */
+  /** Tests that the transformer sets the expected number of line items. */
   @Test
   public void shouldHaveLineItems() {
     assertEquals(1, eob.getItem().size());
   }
 
+  /** Tests that the transformer sets the expected number of line item sequences. */
   @Test
   public void shouldHaveLineItemSequence() {
     assertEquals(1, eob.getItemFirstRep().getSequence());
   }
 
+  /** Tests that the transformer sets the expected line item care team reference. */
   @Test
   public void shouldHaveLineItemCareTeamRef() {
     // The order isn't important but this should reference a care team member
@@ -1026,6 +1130,7 @@ public final class InpatientClaimTransformerV2Test {
     assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
   }
 
+  /** Tests that the transformer sets the expected line item revenue codes. */
   @Test
   public void shouldHaveLineItemRevenue() {
     CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
@@ -1045,6 +1150,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(revenue));
   }
 
+  /** Tests that the transformer sets the expected line item product/service. */
   @Test
   public void shouldHaveLineItemProductOrService() {
     CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
@@ -1061,6 +1167,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(pos));
   }
 
+  /**
+   * Tests that the transformer sets the expected number of line item modifiers and the entries are
+   * correct.
+   */
   @Test
   public void shouldHaveLineItemModifier() {
     assertEquals(1, eob.getItemFirstRep().getModifier().size());
@@ -1079,6 +1189,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(modifier));
   }
 
+  /** Tests that the transformer sets the expected line location (address). */
   @Test
   public void shouldHaveLineItemLocation() {
     Address address = eob.getItemFirstRep().getLocationAddress();
@@ -1088,11 +1199,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(address));
   }
 
+  /** Tests that the transformer sets the expected number of line item adjudications. */
   @Test
   public void shouldHaveLineItemAdjudications() {
     assertEquals(3, eob.getItemFirstRep().getAdjudication().size());
   }
 
+  /** Tests that the transformer sets the expected revenue center rate amount. */
   @Test
   public void shouldHaveLineItemRevCentrRateAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -1119,6 +1232,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /** Tests that the transformer sets the expected revenue center total charge amount. */
   @Test
   public void shouldHaveLineItemRevCntrTotChrgAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -1146,6 +1260,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
+  /**
+   * Tests that the transformer sets the expected adjudication revenue center non-covered charge
+   * amount.
+   */
   @Test
   public void shouldHaveLineItemRevCentrNcvrdChrgAmtAdjudication() {
     AdjudicationComponent adjudication =
@@ -1177,12 +1295,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(adjudication));
   }
 
-  /** Total */
+  /** Tests that the transformer sets the expected number of total entries. */
   @Test
   public void shouldHaveTotal() {
     assertEquals(1, eob.getTotal().size());
   }
 
+  /** Tests that the transformer sets the expected claim total charge amount entries. */
   @Test
   public void shouldHaveClmTotChrgAmtTotal() {
     // Only one so just pull it directly and compare
@@ -1208,7 +1327,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(total));
   }
 
-  /** Payment */
+  /** Tests that the transformer sets the expected payment value. */
   @Test
   public void shouldHavePayment() {
     PaymentComponent compare =
@@ -1219,7 +1338,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getPayment()));
   }
 
-  /** Benefit Balance */
+  /**
+   * Tests that the transformer sets the expected number of benefit balance entries and the correct
+   * values.
+   */
   @Test
   public void shouldHaveBenefitBalance() {
     assertEquals(1, eob.getBenefitBalance().size());
@@ -1237,11 +1359,13 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(eob.getBenefitBalanceFirstRep().getCategory()));
   }
 
+  /** Tests that the transformer sets the expected number of benefit balance financial entries. */
   @Test
   public void shouldHaveBenefitBalanceFinancial() {
     assertEquals(21, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
+  /** Tests that the transformer sets the expected pass thru per diem amount code. */
   @Test
   public void shouldHaveClmPassThruPerDiemAmtFinancial() {
     BenefitComponent benefit =
@@ -1267,6 +1391,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected professional component charge amount code. */
   @Test
   public void shouldHaveNonProfnlCmpntChrgAmtFinancial() {
     BenefitComponent benefit =
@@ -1292,6 +1417,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected claim total PPS capital amount code. */
   @Test
   public void shouldHaveClmTotPpsCptlAmtFinancial() {
     BenefitComponent benefit =
@@ -1315,6 +1441,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected beneficiary total coinsurance days count code. */
   @Test
   public void shouldHaveTotCoinsrncDaysCntFinancial() {
     BenefitComponent benefit =
@@ -1337,6 +1464,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected medicare non utilization days count code. */
   @Test
   public void shouldHaveClmNonUtlztnDaysCntFinancial() {
     BenefitComponent benefit =
@@ -1359,6 +1487,9 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary inpatient deductible amount code.
+   */
   @Test
   public void shouldHaveNchBeneIpDdctblAmtFinancial() {
     BenefitComponent benefit =
@@ -1384,6 +1515,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary part A coinsurance liability
+   * amount code.
+   */
   @Test
   public void shouldHaveNchBenePtaCoinsrncLbltyAmtFinancial() {
     BenefitComponent benefit =
@@ -1409,6 +1544,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH inpatient non-covered charge amount code. */
   @Test
   public void shouldHaveNchIpNcvrdChrgAmtFinancial() {
     BenefitComponent benefit =
@@ -1434,6 +1570,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH inpatient total deductible amount code. */
   @Test
   public void shouldHaveNchIpTotDdctnAmtFinancial() {
     BenefitComponent benefit =
@@ -1460,6 +1597,9 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected PPS capital disproportionate share amount code.
+   */
   @Test
   public void shouldHaveClmPpsCptlDsprprtntShrAmtFinancial() {
     BenefitComponent benefit =
@@ -1482,6 +1622,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS capital exception amount code. */
   @Test
   public void shouldHaveClmPpsCptlExcptnAmtFinancial() {
     BenefitComponent benefit =
@@ -1504,6 +1645,9 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected PPS capital federal specific portion amount code.
+   */
   @Test
   public void shouldHaveClmPpsCptlFspAmtFinancial() {
     BenefitComponent benefit =
@@ -1527,6 +1671,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected PPS capital indirect medical education amount
+   * code.
+   */
   @Test
   public void shouldHaveClmPpsCptlImeAmtFinancial() {
     BenefitComponent benefit =
@@ -1549,6 +1697,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS capital outlier amount code. */
   @Test
   public void shouldHaveClmPpsCptlOutlierAmtFinancial() {
     BenefitComponent benefit =
@@ -1571,6 +1720,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS old capital hold harmless amount code. */
   @Test
   public void shouldHaveClmPpsOldCptlHldHrmlsAmtFinancial() {
     BenefitComponent benefit =
@@ -1593,6 +1743,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH DRG outlier approved payment amount code. */
   @Test
   public void shouldHaveNchDrgOutlierAprvdPmtAmtFinancial() {
     BenefitComponent benefit =
@@ -1615,6 +1766,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected NCH beneficiary blood deductible liability amount
+   * code.
+   */
   @Test
   public void shouldHaveNchBeneBloodDdctlbLbltyAmtFinancial() {
     BenefitComponent benefit =
@@ -1640,6 +1795,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected NCH primary payer claim paid amount. */
   @Test
   public void shouldHavePrPayAmtFinancial() {
     BenefitComponent benefit =
@@ -1665,6 +1821,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected medicare utilization day count. */
   @Test
   public void shouldHaveClmUtlztnDayCntFinancial() {
     BenefitComponent benefit =
@@ -1687,6 +1844,7 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /** Tests that the transformer sets the expected PPS capital DRG weight number code. */
   @Test
   public void shouldHaveClmPpsCptlDrgWtNumFinancial() {
     BenefitComponent benefit =
@@ -1709,6 +1867,10 @@ public final class InpatientClaimTransformerV2Test {
     assertTrue(compare.equalsDeep(benefit));
   }
 
+  /**
+   * Tests that the transformer sets the expected beneficiary medicare lifetime reserve days (LRD)
+   * used count code.
+   */
   @Test
   public void shouldHaveBeneLrdUsedCntFinancial() {
     BenefitComponent benefit =
@@ -1733,7 +1895,9 @@ public final class InpatientClaimTransformerV2Test {
 
   /**
    * Ensures the rev_cntr_unit_cnt is correctly mapped to an eob item as an extension when the unit
-   * quantity is not zero
+   * quantity is not zero.
+   *
+   * <p>TODO: Is this correct? says non-0 but tests 0
    */
   @Test
   public void shouldHaveRevenueCenterUnit() {
@@ -1803,19 +1967,21 @@ public final class InpatientClaimTransformerV2Test {
   }
 
   /**
-   * Serializes the EOB and prints to the command line
+   * Serializes the EOB and prints to the command line.
    *
-   * @throws FHIRException
+   * @throws FHIRException if there is an issue with transforming the claim
+   * @throws IOException if there is an issue with reading the test file
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException {
+  public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
         InpatientClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting()),
+                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                NPIOrgLookup.createNpiOrgLookupForTesting()),
             generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

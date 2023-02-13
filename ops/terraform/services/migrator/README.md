@@ -31,9 +31,8 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | Provided AMI ID for the migrator. | `string` | `null` | no |
-| <a name="input_create_migrator_instance"></a> [create\_migrator\_instance](#input\_create\_migrator\_instance) | When true, create the migrator instance | `bool` | `false` | no |
-| <a name="input_git_repo_version"></a> [git\_repo\_version](#input\_git\_repo\_version) | Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version) | `string` | `"master"` | no |
+| <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Migrator override ami-id. Defaults to latest migrator AMI from `master`. | `string` | `null` | no |
+| <a name="input_create_migrator_instance"></a> [create\_migrator\_instance](#input\_create\_migrator\_instance) | When true, create the migrator instance, security group, and RDS security group rules | `bool` | `false` | no |
 | <a name="input_migrator_monitor_enabled_override"></a> [migrator\_monitor\_enabled\_override](#input\_migrator\_monitor\_enabled\_override) | When true, migrator system emits signals to SQS. Defaults to `true` via locals | `bool` | `null` | no |
 | <a name="input_migrator_monitor_heartbeat_interval_seconds_override"></a> [migrator\_monitor\_heartbeat\_interval\_seconds\_override](#input\_migrator\_monitor\_heartbeat\_interval\_seconds\_override) | Sets interval for migrator monitor heartbeat in seconds. Defaults to `300` via locals | `number` | `null` | no |
 
@@ -75,13 +74,14 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_sqs_queue.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sqs_queue) | resource |
+| [aws_ami.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_iam_policy.ansible_vault_ro](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_xray_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_key_pair.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/key_pair) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_rds_cluster.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
+| [aws_security_group.enterprise_tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |

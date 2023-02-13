@@ -1,7 +1,7 @@
 resource "aws_security_group" "this" {
   description = "${local.service} lambda security group in ${local.env}"
   name        = "bfd-${local.env}-${local.service}-lambda"
-  tags        = merge(local.shared_tags, { Name = "bfd-${local.env}-${local.service}-lambda" })
+  tags        = { Name = "bfd-${local.env}-${local.service}-lambda" }
   vpc_id      = data.aws_vpc.main.id
 
   egress {

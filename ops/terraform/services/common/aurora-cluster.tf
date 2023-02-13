@@ -1,9 +1,6 @@
 resource "aws_db_subnet_group" "aurora_cluster" {
   description = "Subnet group for aurora cluster"
   name        = "bfd-${local.env}-aurora-cluster" # NOTE: Ephemeral environment compatible.
-  tags        = local.shared_tags
-  tags_all    = local.shared_tags
-
   subnet_ids = [
     data.aws_subnet.data[0].id,
     data.aws_subnet.data[1].id,
@@ -33,7 +30,7 @@ resource "aws_security_group" "aurora_cluster" {
     },
   ]
 
-  tags = merge(local.shared_tags, { Name = "bfd-${local.env}-aurora-cluster" })
+  tags = { Name = "bfd-${local.env}-aurora-cluster" }
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
@@ -41,7 +38,8 @@ resource "aws_rds_cluster" "aurora_cluster" {
   backup_retention_period             = local.rds_backup_retention_period
   cluster_identifier                  = local.rds_cluster_identifier
   copy_tags_to_snapshot               = true
-  db_cluster_parameter_group_name     = "default.${local.rds_aurora_family}"
+  db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.aurora_cluster.name
+  db_instance_parameter_group_name    = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name                = aws_db_subnet_group.aurora_cluster.name
   deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
   engine                              = "aurora-postgresql"
@@ -55,7 +53,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   skip_final_snapshot                 = true
   storage_encrypted                   = true
   # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
-  tags = merge(local.shared_tags, { "cpm backup" = "Weekly Monthly", "Layer" = "data" })
+  tags = { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password
@@ -80,12 +78,26 @@ resource "aws_rds_cluster" "aurora_cluster" {
   ]
 }
 
+resource "aws_rds_cluster_parameter_group" "aurora_cluster" {
+  description = "Sets cluster parameters for ${local.rds_aurora_family}"
+  name_prefix = "bfd-${local.env}-aurora-cluster"
+  family      = local.rds_aurora_family
+
+  dynamic "parameter" {
+    for_each = local.db_cluster_parameters
+
+    content {
+      apply_method = parameter.value["apply_method"]
+      name         = parameter.value["name"]
+      value        = parameter.value["value"]
+    }
+  }
+}
+
 resource "aws_db_parameter_group" "aurora_cluster" {
   description = "Sets node parameters for ${local.rds_aurora_family}"
   family      = local.rds_aurora_family
   name_prefix = "bfd-${local.env}-aurora-node"
-  tags        = local.shared_tags
-  tags_all    = local.shared_tags
 
   dynamic "parameter" {
     for_each = local.db_parameters
@@ -104,7 +116,6 @@ resource "aws_rds_cluster_instance" "nodes" {
   ca_cert_identifier              = "rds-ca-2019" # NOTE: This seems like an invariant
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true
-  db_parameter_group_name         = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name
   engine                          = aws_rds_cluster.aurora_cluster.engine
   engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
@@ -116,7 +127,7 @@ resource "aws_rds_cluster_instance" "nodes" {
   performance_insights_kms_key_id = aws_rds_cluster.aurora_cluster.kms_key_id
   preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
   publicly_accessible             = false
-  tags                            = merge(local.shared_tags, { Layer = "data" })
+  tags                            = { Layer = "data" }
 }
 
 ### The following configuration is almost exlcusively for separated, custom reader endpoints

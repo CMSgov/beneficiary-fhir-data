@@ -5,6 +5,7 @@ mappings:
     table:
       name: FissProcCodes
       schema: pre_adj
+      quoteNames: true
       primaryKeyColumns:
         - dcn
         - priority

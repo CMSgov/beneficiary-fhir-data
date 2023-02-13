@@ -53,10 +53,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify that no data sets were generated.
@@ -76,7 +77,12 @@ public final class CcwRifLoadJobIT {
   @Test
   public void singleDataSetTest() throws Exception {
     validateLoadAtLocations(
-        CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
+        CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+        List.of(
+            StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
+            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
+        null);
   }
 
   /**
@@ -89,7 +95,11 @@ public final class CcwRifLoadJobIT {
   public void singleSyntheticDataSetTest() throws Exception {
     validateLoadAtLocations(
         CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
+        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+        List.of(
+            StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()),
+        null);
   }
 
   /**
@@ -156,10 +166,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       // Process both sets
       ccwJob.call();
       ccwJob.call();
@@ -311,10 +322,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -398,10 +410,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -478,10 +491,11 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
+              listener,
+              false);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -514,9 +528,15 @@ public final class CcwRifLoadJobIT {
    * @param inputLocation the input location (bucket key) where files should be placed initially
    * @param expectedOutputLocation the expected output location (bucket key) where files are
    *     expected to be moved after processing
+   * @param fileList the file list
+   * @param inManifest the in manifest
    * @throws Exception the exception
    */
-  private void validateLoadAtLocations(String inputLocation, String expectedOutputLocation)
+  private void validateLoadAtLocations(
+      String inputLocation,
+      String expectedOutputLocation,
+      List<URL> fileList,
+      DataSetManifest inManifest)
       throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
@@ -532,25 +552,21 @@ public final class CcwRifLoadJobIT {
           s3Client.getS3AccountOwner().getDisplayName(),
           bucket.getName());
 
-      DataSetManifest manifest =
-          new DataSetManifest(
-              Instant.now(),
-              0,
-              false,
-              inputLocation,
-              expectedOutputLocation,
-              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
-              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetManifest manifest = inManifest;
+      if (manifest == null) {
+        manifest =
+            new DataSetManifest(
+                Instant.now(),
+                0,
+                false,
+                inputLocation,
+                expectedOutputLocation,
+                new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+                new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      }
 
       // Add files to each location the test wants them in
-      putSampleFilesInTestBucket(
-          s3Client,
-          bucket,
-          inputLocation,
-          manifest,
-          List.of(
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      putSampleFilesInTestBucket(s3Client, bucket, inputLocation, manifest, fileList);
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -559,12 +575,13 @@ public final class CcwRifLoadJobIT {
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
-              listener);
-      ccwJob.call();
+              listener,
+              false);
 
+      ccwJob.call();
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(1, listener.getDataEvents().size());
@@ -583,7 +600,6 @@ public final class CcwRifLoadJobIT {
           expectedOutputLocation,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
-
     } finally {
       if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }

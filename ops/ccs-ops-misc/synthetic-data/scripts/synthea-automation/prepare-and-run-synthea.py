@@ -6,46 +6,41 @@
 # 1: previous end state properties file location
 # 2: file system location of synthea folder
 # 3: number of beneficiaries to be generated
-# 4: which environments to load/validate, should be a single comma separated string consisting of test,sbx,prod or any combo of the three (example "test,sbx,prod" or "test")
-# 5: (optional) boolean to skip validation if True, useful if re-generating a bad batch, True or False, defaults to False
-#
-# Example runstring (with db usernames and passwords as an env variable DB_STRING): python3 prepare-and-run-synthea.py ~/end-state.properties ~/Git/synthea/ 2000 $DB_STRING "test,sbx"
+# 4: number of months into the future that synthea should generate dates for
 #
 # The script will enact the following steps:
 #
 # 1. Validate the paths and files for synthea needed are in place within the synthea directory (as passed in arg2)
 #    - Also checks files and folders that must be written to are writable, and that some externally added files are readable
 #    - Checks if the output folder exists, and creates one if not
-# 2. Checks the supplied database has room to load the number of benes and related table data, so we dont waste time generating something that will have collisions in the target db
-#    - This validation's checks will begin at the expected generation starting point for each field, as read from the end state properties file in arg1
-#    - This is the validation that can be skipped by using optional arg5. There may be times where we are reloading a partially loaded synthea set that previously failed and are forcing a re-generation of data that will be loaded in idempotent mode (overwriting the existing db data).
-# 3. Validates the output directory is empty
+# 2. Validates the output directory is empty
 #    - If the output folder has data from a previous run, the output directory is renamed with a timestamp and a new empty output directory is created
 #    - Since this check handles a non-empty output folder, this step wont fail unless there is an IO issue
-# 4. Swaps the script's execution directory to the synthea directory supplied in arg3, since the national script is hardcoded to run other synthea code via relative paths
-# 5. Run the synthea bfd-national shell script with the number of beneficiaries supplied in arg3
+# 3. Swaps the script's execution directory to the synthea directory supplied in arg3, since the national script is hardcoded to run other synthea code via relative paths
+# 4. Run the synthea bfd-national shell script with the number of beneficiaries supplied in arg3
 #    - Output of this run will be written to a timestamped log file in the synthea directory
 #    - If this run fails (denoted by checking the output for text synthea outputs on a build failure) the synthea generation step will be considered a failure
+#    - If arg5 is greater than 0, synthea will generate claim lines that extend up to the input number of months into the future
 #
-# Example runstring: python3 prepare-and-run-synthea.py ~/Documents/end-state.properties ~/Git/synthea 100 "sbx" True
+# Example runstring: python3 prepare-and-run-synthea.py ~/Documents/end-state.properties ~/Git/synthea 100 0
 #
 # If any step of the above fails, a message describing the failure will be printed to stdout along with a standard message on a new line "Returning with exit code 1"
 # If all steps succeed, the script will print to stdout "Returning with exit code 0 (No errors)"
 #
 # Note: If running locally, you will need to be connected to the VPN in order to successfully connect to the database
 #
-# Requires psycopg2 and boto3 installed
-#
 
+import functools
 import sys
-import psycopg2
 import os
 import time
 import fileinput
 import subprocess
 import shlex
 
-import ssmutil
+# See https://stackoverflow.com/a/35467658
+# Forces prints to flush _immediately_, even if a subprocess is still executing
+print = functools.partial(print, flush=True)  # pylint: disable=redefined-builtin
 
 def validate_and_run(args):
     """
@@ -63,11 +58,15 @@ def validate_and_run(args):
     ## Script assumes trailing slash on this, so add it if not added
     if not synthea_folder_filepath.endswith('/'):
         synthea_folder_filepath = synthea_folder_filepath + "/"
+
     generated_benes = args[2]
-    envs = args[3].split(',')
-    skip_validation = True if len(args) > 4 and args[4] == "True" else False
+    future_months = int(args[3])
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
+    
+    print (f"Synthea folder file path: {synthea_folder_filepath}")
+    print (f"Synthea folder prop path: {synthea_prop_filepath}")
+    print (f"Synthea folder output   : {synthea_output_filepath}")
     
     found_all_paths = validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_output_filepath, end_state_file_path)
     
@@ -79,42 +78,6 @@ def validate_and_run(args):
         sys.exit(1)
     
     end_state_properties_file = read_file_lines(end_state_file_path)
-        
-    ## Get DB Creds from param store
-    test_db_string = ssmutil.get_ssm_db_string("test")
-    prod_sbx_db_string = ssmutil.get_ssm_db_string("prod-sbx")
-    prod_string = ssmutil.get_ssm_db_string("prod")
-    
-    #Validate the ranges - number to be generated
-    test_validation_result = True
-    prod_sbx_validation_result = True
-    prod_validation_result = True
-    num_run = 0
-    if not skip_validation:
-        if "test" in envs:
-            print("Running validations for test...")
-            test_validation_result = check_ranges(end_state_properties_file, generated_benes, test_db_string)
-            num_run = num_run + 1
-        if "prd-sbx" in envs:
-            print("Running validations for prod-sbx...")
-            prod_sbx_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_sbx_db_string)
-            num_run = num_run + 1
-        if "prod" in envs:
-            ## Note this one step takes a while (near 30 mins), due to checking for non-indexed fields on very big tables
-            print("Running validations for prod...")
-            prod_validation_result = check_ranges(end_state_properties_file, generated_benes, prod_string)
-            num_run = num_run + 1
-        
-        if not num_run == len(envs):
-            print(f"(Validation Failure) Unknown environment found in {envs}")
-            print("Returning with exit code 1")
-            sys.exit(1)
-        
-        if not (test_validation_result and prod_sbx_validation_result and prod_validation_result):
-            print("Failed validation, not updating synthea properties")
-            print("Returning with exit code 1")
-            sys.exit(1)
-    
     update_property_file(end_state_properties_file, synthea_prop_filepath)
     print("Updated synthea properties")
     
@@ -122,30 +85,110 @@ def validate_and_run(args):
     
     ## National script expects we're in the synthea directory, so swap to that before running
     os.chdir(synthea_folder_filepath)
-    run_success = run_synthea(synthea_folder_filepath, generated_benes)
+    run_success = run_synthea(synthea_folder_filepath, generated_benes, future_months)
     if not run_success:
         print("Synthea run finished with errors")
         print("Returning with exit code 1")
         sys.exit(1)
+        
+    new_end_state_properties_file = read_file_lines(synthea_output_filepath + "bfd/end_state.properties")
+    update_manifest(synthea_output_filepath, end_state_properties_file, new_end_state_properties_file)
+    print("Updated synthea manifest with end.state data")
     
     print("Returning with exit code 0 (No errors)")
     sys.exit(0)
 
-def run_synthea(synthea_folder_filepath, benes_to_generate):
+def update_manifest(synthea_output_filepath, end_state_properties_file, new_end_state_properties_file):
+    '''
+    Updates the manifest with the end state property data needed to perform validation
+    in the pipeline.
+    '''
+    
+    manifest_file = synthea_output_filepath + "bfd/manifest.xml"
+    timestamp = ''
+    week_days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    
+    ## Get the end state property data BEFORE synthea generation, the start ranges of each field
+    end_state_data_start_ranges = []
+    for line in end_state_properties_file:
+        ## Avoid any accidental blank lines in the end state file;
+        ## also, ignore any comment lines
+        s3 = line[1:4]
+        if len(line.strip()) > 0:
+            if line[0] != '#':
+                tuple = line.split("=")
+                end_state_data_start_ranges.append(tuple)
+            elif line[1:4] in week_days:
+                ## Grab the line minus the comment hash
+                timestamp = line[1:]
+                
+    ## Get select end state property data AFTER synthea generation, the end ranges of some fields
+    end_state_data_end_ranges = []
+    for line in new_end_state_properties_file:
+        ## Avoid any accidental blank lines in the end state file;
+        ## also, ignore any comment lines
+        s3 = line[1:4]
+        if len(line.strip()) > 0 and line[0] != '#':
+            tuple = line.split("=")
+            if tuple[0] == 'exporter.bfd.bene_id_start':
+                bene_id_end = tuple[1]
+            if tuple[0] == 'exporter.bfd.clm_id_start':
+                clm_id_end = tuple[1]
+            if tuple[0] == 'exporter.bfd.pde_id_start':
+                pde_id_end = tuple[1]
+    
+    lines_to_add = []
+    lines_to_add.append("<preValidationProperties>")
+    for tuple in end_state_data_start_ranges:
+        ## check tuple 1 for name, then add line in the manifest
+        property_name = tuple[0].split(".bfd.")[1]
+        property_value = tuple[1]
+        lines_to_add.append(f"<{property_name}>{property_value}</{property_name}>")
+        if property_name == "bene_id_start":
+            bene_id_start = property_value
+    lines_to_add.append(f"<bene_id_end>{bene_id_end}</bene_id_end>")
+    lines_to_add.append(f"<clm_id_end>{clm_id_end}</clm_id_end>")
+    lines_to_add.append(f"<pde_id_end>{pde_id_end}</pde_id_end>")
+    lines_to_add.append(f"<generated>{timestamp}</generated>")
+    
+    ## TODO: grab the NEW end state and list out the ends of fields in here, replace _start with _end in the prop name
+    
+    lines_to_add.append("</preValidationProperties>")
+    lines_to_add.append("</dataSetManifest>")
+    write_string = '\n'.join(lines_to_add)
+    
+    replace_line_starting_with(manifest_file, "</dataSetManifest>", write_string)
+    
+    ## Do a printout to help the user know start/end bene id for characteristics file
+    print(f"Bene id start: {bene_id_start}")
+    print(f"Bene id end: {bene_id_end}")
+
+def run_synthea(synthea_folder_filepath, benes_to_generate, future_months):
     """
     Runs synthea using the national script and pipes the output
     to a log file.
     """
-    print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes...')
+    
     logfile_path = f'{synthea_folder_filepath}synthea-' + time.strftime("%Y_%m_%d-%I_%M_%S_%p") + '.log'
-    output = subprocess.check_output(shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}'), text=True, stderr=subprocess.STDOUT)
-    with open(logfile_path, 'w') as f:
-        f.write(output)
+    synthea_failed = False
+    if future_months > 0:
+        print(f'Running synthea ({synthea_folder_filepath}national_bfd_v2.sh) with {benes_to_generate} benes and {future_months} future months...')
+        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd_v2.sh {benes_to_generate} {future_months}')
+    else:
+        print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes...')
+        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}')
+    with subprocess.Popen(process_cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1) as p, \
+        open(logfile_path, 'w') as f:
+        for line in p.stdout:
+            print(line, end='')
+            f.write(line)
+            if 'FAILURE:' in line:
+                synthea_failed = True
     
     print(f'Synthea run complete, log saved at {logfile_path}')
     
     ## Check output for synthea failure text as the success check
-    return not 'FAILURE:' in output
+    return not synthea_failed
     
 
 def validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_output_filepath, end_state_file_path):
@@ -216,150 +259,13 @@ def clean_synthea_output(synthea_folder_filepath):
         print("(Validation Warning) Synthea output had files, renamed old output directory and created fresh synthea output folder")
     else:
         print("(Validation Success) Synthea output folder empty")
-    
-def check_ranges(properties_file, number_of_benes_to_generate, db_string):
-    """
-    Checks that the synthea properties values to update to have no
-    conflicts with the target database by checking there are no conflicting 
-    existing items beyond the starting value for each field.
-    """
-    
-    ## This will be updated with each validation; if False it will stay false
-    overall_validation_result = True
-    
-    clm_id_start = get_props_value(properties_file, 'exporter.bfd.clm_id_start')
-    query = f"select count(*) from carrier_claims where clm_id <= {clm_id_start}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_id_start, "carrier_claims", "clm_id", result, overall_validation_result)
-        
-    bene_id_start = get_props_value(properties_file, "exporter.bfd.bene_id_start")
-    bene_id_end = int(bene_id_start) - int(number_of_benes_to_generate)
-    query = f"select count(*) from beneficiaries where bene_id <= {bene_id_start} and bene_id > {bene_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(bene_id_start, "beneficiaries", "bene_id", result, overall_validation_result)
-        
-    clm_grp_id_start = get_props_value(properties_file, "exporter.bfd.clm_grp_id_start")
-    ## this is the end of the batch 1 relocated ids; should be nothing between the generated start and this
-    clm_grp_id_end = '-99999831003'
-    query = f"select count(*) from carrier_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "carrier_claims", "clm_grp_id", result, overall_validation_result)
-    
-    query = f"select count(*) from inpatient_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "inpatient_claims", "clm_grp_id", result, overall_validation_result)
-
-    query = f"select count(*) from outpatient_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "outpatient_claims", "clm_grp_id", result, overall_validation_result)
-    
-    query = f"select count(*) from snf_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "snf_claims", "clm_grp_id", result, overall_validation_result)
-    
-    query = f"select count(*) from dme_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "dme_claims", "clm_grp_id", result, overall_validation_result)
-    
-    query = f"select count(*) from hha_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "hha_claims", "clm_grp_id", result, overall_validation_result)
-    
-    query = f"select count(*) from hospice_claims where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "hospice_claims", "clm_grp_id", result, overall_validation_result)
-    
-    query = f"select count(*) from partd_events where clm_grp_id <= {clm_grp_id_start} and clm_grp_id > {clm_grp_id_end}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(clm_grp_id_start, "partd_events", "clm_grp_id", result, overall_validation_result)
-    
-    
-    pde_id_start = get_props_value(properties_file, "exporter.bfd.pde_id_start")
-    query = f"select count(*) from partd_events where pde_id::bigint <= {pde_id_start}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(pde_id_start, "partd_events", "pde_id", result, overall_validation_result)
-    
-    carr_clm_ctrl_num_start = get_props_value(properties_file, "exporter.bfd.carr_clm_cntl_num_start")
-    query = f"select count(*) from carrier_claims where carr_clm_cntl_num::bigint <= {carr_clm_ctrl_num_start}"
-    result = _execute_single_count_query(db_string, query)
-    overall_validation_result = field_has_room_in_table(carr_clm_ctrl_num_start, "carrier_claims", "carr_clm_cntl_num", result, overall_validation_result)
-
-    ## Check fi_num_start doesnt exist in all the tables it exists in (cant check range due to fi_num not being convertable to int in prod)
-    fi_num_start = get_props_value(properties_file, "exporter.bfd.fi_doc_cntl_num_start")
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('outpatient_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('inpatient_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('hha_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('snf_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('hospice_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
-
-    ## Since MBI and HICN are incremented in difficult-to-query ways, just check if it exists; if it doesnt exist the range should be fine
-    hicn_start = get_props_value(properties_file, "exporter.bfd.hicn_start")
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('beneficiaries', 'hicn_unhashed', hicn_start, db_string)
-        
-    mbi_start = get_props_value(properties_file, "exporter.bfd.mbi_start")
-    overall_validation_result = overall_validation_result and check_single_doesnt_exist('beneficiaries', 'mbi_num', mbi_start, db_string)
-        
-    ## Ensure no (synthetic) mbi_num has more than one bene_id associated with it from any previous loads
-    ## this takes about 30 seconds in test as of this writing, and 2 seconds in the other envs, but this will increase as more data is added
-    ## Takes the union of beneficiaries, bene_history, and medicare_beneid_history and checks if any mbi numbers resolve to more than one bene id, then returns the count
-    query = 'select count(*) from ('\
-            '  select count(*) bene_id_count from ('\
-            '    select distinct bene_id, mbi_num '\
-            '    from public.beneficiaries '\
-            '    where bene_id < 0 and mbi_num IS NOT NULL '\
-            '   union '\
-            '    select distinct bene_id, mbi_num '\
-            '    from public.beneficiaries_history '\
-            '    where bene_id < 0 and mbi_num IS NOT NULL '\
-            '   union '\
-            '    select distinct bene_id, mbi_num '\
-            '    from public.medicare_beneficiaryid_history '\
-            '    where bene_id < 0 and mbi_num IS NOT NULL '\
-            '  ) as foo '\
-            '  group by mbi_num '\
-            '  having count(*) > 1'\
-            ') as s'
-    result = _execute_single_count_query(db_string, query)
-    ## There is one duplicate in the db for testing on purpose, so ignore that one
-    if result > 1:
-        print(f"(Validation Warning) {result} MBI(s) resolve to multiple bene_ids; a given mbi should only resolve to one bene_id (this needs cleanup to avoid errors using that data)")
-    else:
-        print("(Validation Success) No MBIs resolve to multiple bene_ids")
-        
-    return overall_validation_result
-    
-def check_single_doesnt_exist(table, field, value, db_string):
-    query = f"select count(*) from {table} where {field} = \'{value}\'"
-    result = _execute_single_count_query(db_string, query)
-    if result > 0:
-        print(f"(Validation Failure) Start {field} {value} exists in DB ({table})")
-        return False
-    else:
-        print(f"(Validation Success) Start {field} does not exist in DB ({table})")
-        return True
 
 def get_props_value(list, starts_with):
     """
     Small helper function for getting a value from the property file
     for the line that starts with the given value.
     """
-    return [x for x in list if x.startswith(starts_with)][0].split("=")[1]
-
-
-def field_has_room_in_table(starting_value, table, field, query_result, overall_validation_result):
-    """
-    Checks if for a given starting value, for a specific table and field,
-    the query that checked the range was 0 (meaning there were no rows with 
-    values beyond the starting value). If the query was successful, return
-    the overall success value for the entire validation across tables.
-    """
-    if query_result > 0:
-        print(f"(Validation Failure) {table} : {field} has conflict with data to load, {query_result} rows beyond starting value {starting_value}")
-        return False
-    else:
-        print(f"(Validation Success) {table} : {field} has clearance from starting value {starting_value}")
-        return overall_validation_result
-    
+    return [x for x in list if x.startswith(starts_with)][0].split("=")[1]    
 
 def update_property_file(end_state_file_lines, synthea_props_file_location):
     """
@@ -369,9 +275,11 @@ def update_property_file(end_state_file_lines, synthea_props_file_location):
     
     replacement_lines = []
     for line in end_state_file_lines:
-        ## Avoid any accidental blank lines in the end state file
+        ## Avoid any accidental blank lines in the end state file;
+        ## also, ignore any comment lines
         if len(line.strip()) > 0:
-            replacement_lines.append(line.split("="))
+            if line[0] != '#':
+                replacement_lines.append(line.split("="))
         
     for tuple in replacement_lines:
         replace_text = tuple[0] + "=" + tuple[1]
@@ -409,27 +317,6 @@ def replace_line_starting_with(file_path, line_starts_with, replace_with):
     with open(file_path, 'w') as file:
         file.writelines( new_lines )
     
-def _execute_single_count_query(uri: str, query: str):
-    """
-    Execute a PSQL select statement and return its results
-    """
-
-    conn = None
-    try:
-        with psycopg2.connect(uri) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query)
-                results = cursor.fetchall()
-    finally:
-        conn.close()
-
-    if len(results) <= 0 and len(results[0]) <= 0:
-        return 0
-
-    #we want just a single number; the count, so extract this from the results set
-    return results[0][0]
-    
-
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
-    validate_and_run(sys.argv[1:])
+    validate_and_run(sys.argv[1:]) #get everything (slice) after the script name

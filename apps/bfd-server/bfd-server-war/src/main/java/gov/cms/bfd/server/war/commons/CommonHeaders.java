@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.commons;
 import java.util.Arrays;
 import java.util.List;
 
+/** A collection of common headers. */
 public interface CommonHeaders {
   /**
    * The header key used to determine whether include mbi mbi and/or hicn values in response. See
@@ -30,6 +31,7 @@ public interface CommonHeaders {
    */
   public static final String HEADER_NAME_INCLUDE_ADDRESS_FIELDS = "IncludeAddressFields";
 
+  /** A list of common FHIR request headers. */
   public static final List<String> FHIR_REQUEST_HEADERS =
       Arrays.asList(
           HEADER_NAME_INCLUDE_ADDRESS_FIELDS,

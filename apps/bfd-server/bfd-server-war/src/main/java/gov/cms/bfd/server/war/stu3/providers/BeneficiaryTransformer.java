@@ -25,47 +25,10 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
-/**
- * The BFD is in the process of mapping new data fields to the BFD API. We wanted to let you know of
- * a few changes that pertain to all APIs. Currently, the following variables are sent from CCW
- * through the FHIR export and available to all APIs in the patient resource. The source for these
- * is EDB:
- *
- * <p>STATE_CODE BENE_CNTY_CD BENE_ZIP_CD
- *
- * <p>We'll be adding the following fields be added to the FHIR export, which come from the CME
- * Derived Mailing Source:
- *
- * <p>DRVD_LINE_1_ADR DRVD_LINE_2_ADR DRVD_LINE_3_ADR DRVD_LINE_4_ADR DRVD_LINE_5_ADR
- * DRVD_LINE_6_ADR CITY_NAME STATE_CD STATE_CNTY_ZIP_CD
- *
- * <p>In order to not create discrepancies in a beneficiary�s address by grabbing different
- * components of a beneficiary�s address from data sources, we will map the following variables from
- * the CME Derived Mailing source:
- *
- * <p>STATE_CD STATE_CNTY_ZIP_CD
- *
- * <p>and stop mapping the following fields from EDB:
- *
- * <p>STATE_CODE BENE_CNTY_CD BENE_ZIP_CD
- *
- * <p>This will result in all address-related fields coming from a single source. It also means
- * that, if your API was sending along this field previously, they will no longer receive
- * BENE_CNTY_CD in the payload from the BFD API. In addition, we will also be adding the following
- * fields to the FHIR export - and your customers will receive for the first time - the following
- * fields:
- *
- * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT CLM_CNTL_NUM FI_DOC_CLM_CNTL_NUM
- * FI_ORIG_CLM_CNTL_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT IME_OP_CLM_VAL_AMT
- * DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
- *
- * <p>Note that BB2.0 API will be filtering out all derived line address fields (1-6) and CITY_NAME.
- * Please announce this to your respective customer communities as you see fit. A list of which
- * fields will map to which resource is forthcoming - we'll share that with you as we complete the
- * mapping work this upcoming sprint.
- */
 final class BeneficiaryTransformer {
   /**
+   * Transforms a {@link Beneficiary} into a {@link Patient}.
+   *
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
@@ -86,6 +49,8 @@ final class BeneficiaryTransformer {
   }
 
   /**
+   * Transforms a {@link Beneficiary} into a {@link Patient}.
+   *
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
    *     request headers
@@ -99,7 +64,7 @@ final class BeneficiaryTransformer {
     /*
      * Notify end users when they receive Patient records impacted by
      * https://jira.cms.gov/browse/BFD-1566. See the documentation on
-     * LoadAppOptions.isFilteringNonNullAndNon2022Benes() for details.
+     * LoadAppOptions.isFilteringNonNullAndNon2023Benes() for details.
      */
     if (!beneficiary.getSkippedRifRecords().isEmpty()) {
       patient
@@ -280,6 +245,8 @@ final class BeneficiaryTransformer {
   }
 
   /**
+   * Adds the unhashed identifier.
+   *
    * @param patient the FHIR {@link Patient} resource to add the {@link Identifier} to
    * @param value the value for {@link Identifier#getValue()}
    * @param system the value for {@link Identifier#getSystem()}
@@ -294,6 +261,12 @@ final class BeneficiaryTransformer {
         .addExtension(identifierCurrencyExtension);
   }
 
+  /**
+   * Adds monthly Patient extensions for Medicare-Medicaid dual eligibility codes.
+   *
+   * @param patient the FHIR {@link Patient} resource to add to
+   * @param beneficiary the value for {@link Beneficiary}
+   */
   private static void addMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
@@ -384,8 +357,9 @@ final class BeneficiaryTransformer {
 
   /** Enumerates the options for the currency of an {@link Identifier}. */
   public static enum CurrencyIdentifier {
+    /** Represents a current identifier. */
     CURRENT,
-
+    /** Represents a historic identifier. */
     HISTORIC;
   }
 }

@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
 import gov.cms.bfd.server.war.r4.providers.pac.AbstractR4ResourceProvider;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -13,27 +14,47 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
 
-  /** @return a name for use when building drop wizard metric names */
-  String getNameForMetrics();
+  /**
+   * Gets a label for the resource type that uniquely identifies it.
+   *
+   * @return the label
+   */
+  String getTypeLabel();
 
   /**
-   * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     ResourceTypeV2} in the database
+   * Gets the JPA {@link Entity} {@link Class} used to store instances of this {@link
+   * ResourceTypeV2} in the database.
+   *
+   * @return the entity class
    */
   Class<TEntity> getEntityClass();
 
-  /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
+  /**
+   * Gets the JPA {@link Entity} field used as the entity's {@link Id}.
+   *
+   * @return the entity id attribute
+   */
   String getEntityIdAttribute();
 
-  /** @return The attribute name for the entity's mbiRecord attribute. */
+  /**
+   * Gets the attribute name for the entity's mbiRecord attribute.
+   *
+   * @return the mbi record attribute
+   */
   String getEntityMbiRecordAttribute();
 
-  /** @return The attribute name for the entity's service end date attribute. */
-  String getEntityEndDateAttribute();
+  /**
+   * List of attribute names for the entity's service start and/or end dates.
+   *
+   * @return the list of attribute names
+   */
+  List<String> getEntityServiceDateAttributes();
 
   /**
-   * @return the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances
-   *     into FHIR instances
+   * Gets the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances into
+   * FHIR instances.
+   *
+   * @return the transformer
    */
   ResourceTransformer<TResource> getTransformer();
 }

@@ -19,7 +19,10 @@ import java.util.function.Function;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
+/** Tests the {@link S3BucketMessageSourceFactory}. */
 public class S3BucketMessageSourceFactoryTest {
+
+  /** Verifies that the fiss and mcs factories can list the file keys from the mock S3 bucket. */
   @Test
   public void listFilesTest() {
     final String directoryPath = "/my_directory/";
@@ -82,6 +85,12 @@ public class S3BucketMessageSourceFactoryTest {
     assertEquals(Collections.emptyList(), mcsFactory.listFiles(276L));
   }
 
+  /**
+   * Validates when there are no sources passed when creating a factory then the source returned by
+   * the factory is empty.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void noSourcesToConsume() throws Exception {
     S3BucketMessageSourceFactory<Long> factory = createFactory();
@@ -89,6 +98,14 @@ public class S3BucketMessageSourceFactoryTest {
     assertFalse(source.hasNext());
   }
 
+  /**
+   * Validates when there are two sources passed when creating a factory and a certain number of
+   * messages are requested which exceeds the capacity of one source, the factory can supply the
+   * requested number of messages by consuming from both sources and then successfully close both
+   * sources when finished.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void twoMessageSourcesConsumed() throws Exception {
     MockMessageSource source1 = new MockMessageSource(83, 117);
@@ -108,6 +125,14 @@ public class S3BucketMessageSourceFactoryTest {
     assertTrue(source2.isClosed());
   }
 
+  /**
+   * Validates when there are two sources passed when creating a factory and a certain number of
+   * messages are requested which does not exceed the capacity of one source, the factory can supply
+   * the requested number of messages by consuming from the sources and then successfully close both
+   * sources when finished.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void oneOfTwoMessageSourcesConsumed() throws Exception {
     MockMessageSource source1 = new MockMessageSource(83, 117);
@@ -127,6 +152,14 @@ public class S3BucketMessageSourceFactoryTest {
     assertTrue(source2.isClosed());
   }
 
+  /**
+   * Creates a mock S3 directory that will return the specified filenames when the file key is
+   * requested.
+   *
+   * @param directoryPath the directory path to setup in the mock S3 client
+   * @param filenames the filenames to return as keys
+   * @return the mock S3 object
+   */
   private AmazonS3 createS3Client(String directoryPath, String... filenames) {
     List<S3ObjectSummary> summaries = new ArrayList<>();
     for (String filename : filenames) {
@@ -145,6 +178,12 @@ public class S3BucketMessageSourceFactoryTest {
     return s3Client;
   }
 
+  /**
+   * Creates a factory from one or more mocked message sources.
+   *
+   * @param sources the sources
+   * @return the s3 bucket message source factory
+   */
   private S3BucketMessageSourceFactory<Long> createFactory(MockMessageSource... sources) {
     List<String> filenames = new ArrayList<>();
     Map<String, MessageSource<Long>> sourceMap = new HashMap<>();
@@ -157,28 +196,46 @@ public class S3BucketMessageSourceFactoryTest {
         s3Client, "bucket", "", "fiss", "ndjson", sourceMap::get, Function.identity());
   }
 
+  /**
+   * Represents a mock implementation of a message source which implements mock functionality for
+   * some features.
+   */
   private static class MockMessageSource implements MessageSource<Long> {
+
+    /** The filename the mock message source is pretending to use. */
     @Getter private final String filename;
+    /** The max sequence value. */
     private final long maxValue;
+    /** The current sequence value. */
     private long currentValue;
+    /** Represents if the source is closed. */
     @Getter private boolean closed;
 
+    /**
+     * Instantiates a new Mock message source.
+     *
+     * @param minSeq the min sequence number
+     * @param maxSeq the max sequence number
+     */
     private MockMessageSource(long minSeq, long maxSeq) {
       filename = String.format("fiss-%d-%d.ndjson", minSeq, maxSeq);
       maxValue = maxSeq;
       currentValue = minSeq - 1;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean hasNext() throws Exception {
       return currentValue < maxValue;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Long next() throws Exception {
       return ++currentValue;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {
       closed = true;

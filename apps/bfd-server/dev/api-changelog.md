@@ -1,5 +1,283 @@
 # API Changelog
 
+## BFD-2223: Map Coverage Period start and end for A,B,D claims in V2
+
+Added mapping for Coverage Period start and end dates
+```json
+"resource" : {
+  "resourceType" : "Coverage",
+  ...
+  "beneficiary" : {
+    "reference" : "Patient/567834"
+  },
+  "relationship" : {
+    "coding" : [ {
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+      "code" : "self",
+      "display" : "Self"
+    } ]
+  },
+  "period" : {
+    "start" : "2020-03-17",
+    "end" : "2020-06-17"
+  },
+  "payor" : [ {
+    "identifier" : {
+      "value" : "Centers for Medicare and Medicaid Services"
+    }
+  } ]
+  ...
+}
+```
+
+## BFD-2222: Add Provider Billing NPI Number to Carrier in V2
+
+Add the Provider NPI Billing NPI Number to V2 Carrier claims.
+```json
+   "resource" : {
+      "resourceType" : "ExplanationOfBenefit",
+    ...
+      "provider" : {
+        "identifier" : {
+             "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num",
+              "value" : "123456789"
+       }
+      },
+    ...
+  }
+```
+
+## BFD-2221: Claim Query Code added to HHA and Hospice claims in V2
+The claim query code data is captured and presented in the HHA and Hospice V2 api responses.
+
+```json
+ "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ]
+ }
+ ```
+
+## BFD-2220: Support 3 and 4 character `CLM_DRG_CD`
+The optional string field `CLM_DRG_CD` can now be up to 4 characters in length.
+
+## BFD-2310: Add Eob.SubType for Institutional Claims in V2
+Added the subtype to the different claims types.  For  Inpatient, SNF, Hospice and HHA Claims it will be set to "Inpatient" and for Outpatient claims it will be set to "Outpatient".
+
+New EOB Subtype Mapping for Inpatient, SNF, Hospice and HHA Claims in V2:
+```json
+ "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "inpatient"
+        } ],
+        "text" : "Inpatient"
+      }
+```
+
+New EOB Subtype Mapping for Outpatient Claims in V2:
+```json
+ "subType" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+          "code" : "outpatient"
+        } ],
+        "text" : "Outpatient"
+      },
+```
+
+## BFD-1923: Add Org Name Display to Organizations in V2
+Add the display name for NPI Organizations to the contained resource for organizations.
+
+Old Organization Resource Mapping Display Name in V2:
+```json
+      "contained" : [ {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+        },
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "PRN"
+            } ]
+          },
+          "value" : "999999"
+        }, {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "0000000000"
+        } ],
+        "active" : true,
+      } ],
+```
+
+New Mapping in V2:
+```json
+      "contained" : [ {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+        },
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "PRN"
+            } ]
+          },
+          "value" : "999999"
+        }, {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "0000000000"
+        } ],
+        "active" : true,
+        "name" : "Fake ORG Name"
+      }
+```
+
+## BFD-2145: Removal of duplicated careteam member entries and their extensions.
+Corrected an issue where duplicate entries for a provider were being supplied in the Explanation of Benefit careTeam element, making it cumbersome to process and link care team members to items.
+
+Old careteam member entry:
+```json
+"careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }],{
+    "sequence" : 2,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }]} 
+    }]
+```
+
+New careteam member entry:
+```json
+"careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1497758544"
+      },
+      "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    }]}
+    }]
+```
+
 ## BFD-1895: Add CARIN conformant coding system in Procedure Coding list element in V2
 
 Add an additional coding for ICD procedure codes, using the same ICD code but with a system value that is compliant with the CARIN IG (e.g. .http://www.cms.gov/Medicare/Coding/ICD10).

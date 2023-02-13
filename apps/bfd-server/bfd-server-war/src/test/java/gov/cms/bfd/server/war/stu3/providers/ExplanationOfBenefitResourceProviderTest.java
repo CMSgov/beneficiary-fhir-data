@@ -3,20 +3,47 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.Set;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for {@link
  * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider}.
  */
+@ExtendWith(MockitoExtension.class)
 public final class ExplanationOfBenefitResourceProviderTest {
+
+  /** The class under test. */
+  ExplanationOfBenefitResourceProvider eobProvider;
+
+  /** The mocked request details. */
+  @Mock ServletRequestDetails requestDetails;
+
+  /** The mocked input id value. */
+  @Mock IdType eobId;
+
+  /** Sets up the test class. */
+  @BeforeEach
+  public void setup() {
+    eobProvider = new ExplanationOfBenefitResourceProvider();
+    lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
+  }
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)}
@@ -80,7 +107,7 @@ public final class ExplanationOfBenefitResourceProviderTest {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)}
-   * works as expected when query param modifiers are used, which are unsupported.
+   * throws an exception when query param modifiers are used, which are unsupported.
    */
   @Test
   public void parseTypeParam_modifiers() {
@@ -94,9 +121,64 @@ public final class ExplanationOfBenefitResourceProviderTest {
                                 ClaimType.CARRIER.name())
                             .setModifier(TokenParamModifier.ABOVE)));
     assertThrows(
-        IllegalArgumentException.class,
+        InvalidRequestException.class,
         () -> {
           ExplanationOfBenefitResourceProvider.parseTypeParam(typeParam);
         });
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception for an
+   * {@link IdType} that has an invalidly formatted eobId parameter.
+   */
+  @Test
+  public void testEobReadWhereInvalidIdExpectException() {
+    when(eobId.getIdPart()).thenReturn("1234");
+
+    // Parameter is invalid, should throw exception
+    InvalidRequestException exception =
+        assertThrows(InvalidRequestException.class, () -> eobProvider.read(eobId, requestDetails));
+    assertEquals(
+        "ExplanationOfBenefit ID pattern: '1234' does not match expected pattern: {alphaString}-{idNumber}",
+        exception.getLocalizedMessage());
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
+   * for an {@link IdType} that has a null eobId parameter.
+   */
+  @Test
+  public void testEobReadWhereNullIdExpectException() {
+    InvalidRequestException exception =
+        assertThrows(InvalidRequestException.class, () -> eobProvider.read(eobId, requestDetails));
+    assertEquals("Missing required ExplanationOfBenefit ID", exception.getLocalizedMessage());
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
+   * for an {@link IdType} that has a missing eobId parameter.
+   */
+  @Test
+  public void testEobReadWhereEmptyIdExpectException() {
+    when(eobId.getIdPart()).thenReturn("");
+
+    InvalidRequestException exception =
+        assertThrows(InvalidRequestException.class, () -> eobProvider.read(eobId, requestDetails));
+    assertEquals("Missing required ExplanationOfBenefit ID", exception.getLocalizedMessage());
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
+   * for an {@link IdType} that has a version supplied with the eobId parameter, as our read
+   * requests do not support versioned requests.
+   */
+  @Test
+  public void testEobReadWhereVersionedIdExpectException() {
+    when(eobId.getVersionIdPartAsLong()).thenReturn(1234L);
+
+    InvalidRequestException exception =
+        assertThrows(InvalidRequestException.class, () -> eobProvider.read(eobId, requestDetails));
+    assertEquals(
+        "ExplanationOfBenefit ID must not define a version", exception.getLocalizedMessage());
   }
 }

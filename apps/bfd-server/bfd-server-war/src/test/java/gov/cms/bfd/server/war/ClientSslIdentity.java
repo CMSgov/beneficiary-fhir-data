@@ -8,10 +8,11 @@ import java.nio.file.Path;
  * development/test application.
  */
 public enum ClientSslIdentity {
+  /** The trusted keystore. */
   TRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-trusted-keystore.jks")),
-
+  /** The untrusted keystore. */
   UNTRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-untrusted-keystore.jks"));
-
+  /** The identity keystore. */
   private final Path identityKeyStore;
 
   /**
@@ -23,18 +24,30 @@ public enum ClientSslIdentity {
     this.identityKeyStore = identityKeyStore;
   }
 
-  /** @return the {@link File} path to the client SSL identity key store to use */
+  /**
+   * Gets the {@link #identityKeyStore} as a {@link File}.
+   *
+   * @return the {@link File} path to the client SSL identity key store to use
+   */
   public File getKeyStore() {
     return identityKeyStore.toFile();
   }
 
-  /** @return the password to use for the key store in {@link #getKeyStore()} */
+  /**
+   * Get the keystore password.
+   *
+   * @return the password to use for the key store in {@link #getKeyStore}
+   */
   public char[] getStorePassword() {
     // Note: hard-coded for now, as all key stores use the same one.
     return "changeit".toCharArray();
   }
 
-  /** @return the password to use for the private key in {@link #getKeyPass()} */
+  /**
+   * Get private key password.
+   *
+   * @return the password to use for the private key in {@link #getKeyPass}
+   */
   public char[] getKeyPass() {
     // Note: hard-coded for now, as all key stores use the same one.
     return "changeit".toCharArray();

@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 
 /** An interceptor class to save endpoint responses from requests to a fhirClient. */
 public class JsonInterceptor implements IClientInterceptor {
+  /** The Json response. */
   private String response;
 
   /** {@inheritDoc} */
@@ -42,6 +43,11 @@ public class JsonInterceptor implements IClientInterceptor {
     }
   }
 
+  /**
+   * Gets the response.
+   *
+   * @return the response
+   */
   public String getResponse() {
     return response;
   }

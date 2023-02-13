@@ -1,0 +1,1 @@
+alter table rda.message_errors add column status varchar(20) default 'UNRESOLVED' not null;

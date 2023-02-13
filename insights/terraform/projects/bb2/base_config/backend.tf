@@ -1,5 +1,4 @@
 terraform {
-  required_version = "~> 0.12"
   # Use the common terraform bucket for all of BFD's state
   backend "s3" {
     bucket         = "bfd-tf-state"
@@ -9,9 +8,15 @@ terraform {
     encrypt        = "1"
     kms_key_id     = "alias/bfd-tf-state"
   }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.38"
+    }
+  }
+  required_version = ">= 0.13"
 }
 
 provider "aws" {
-  version = "~> 2.61"
   region = "us-east-1"
 }

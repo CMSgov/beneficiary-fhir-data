@@ -22,9 +22,21 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_coasting_time"></a> [coasting\_time](#input\_coasting\_time) | The amount of time, in seconds, the load test should continue for after receiving a scaling notification. Ignored if stop\_on\_scaling is false. Ends immediately on operator stop signal | `number` | `0` | no |
 | <a name="input_container_image_tag_node_override"></a> [container\_image\_tag\_node\_override](#input\_container\_image\_tag\_node\_override) | Overrides the Container image URI used by the built load suite worker node lambda | `string` | `null` | no |
 | <a name="input_create_locust_instance"></a> [create\_locust\_instance](#input\_create\_locust\_instance) | When true, create the locust instance | `bool` | `false` | no |
-| <a name="input_git_repo_version"></a> [git\_repo\_version](#input\_git\_repo\_version) | Branch, tag, or hash. [Details on ansible's `git` module parameter version](https://docs.ansible.com/ansible/2.9/modules/git_module.html#parameter-version) | `string` | `"master"` | no |
+| <a name="input_initial_worker_nodes"></a> [initial\_worker\_nodes](#input\_initial\_worker\_nodes) | The number of initial Locust worker nodes to spawn before checking for stop signals. Useful for static load tests | `number` | `0` | no |
+| <a name="input_max_spawned_nodes"></a> [max\_spawned\_nodes](#input\_max\_spawned\_nodes) | The maximum number of Lambda worker nodes to spawn over the lifetime of a given test run. Does not account for failed nodes or nodes that reach their Lambda timeout | `number` | `0` | no |
+| <a name="input_max_spawned_users"></a> [max\_spawned\_users](#input\_max\_spawned\_users) | The maximum number of simulated Locust users (not worker nodes) to spawn. Use this and spawn rate to constrain the load during a test run | `number` | `0` | no |
+| <a name="input_node_lambda_name"></a> [node\_lambda\_name](#input\_node\_lambda\_name) | The name of the Locust worker node Lambda function that will be executed to spawn a Locust worker instance | `string` | `"bfd-test-server-load-node"` | no |
+| <a name="input_node_spawn_time"></a> [node\_spawn\_time](#input\_node\_spawn\_time) | The amount of time to wait between spawning more Lambda Locust worker nodes. Does not affect initial spawned nodes | `number` | `10` | no |
+| <a name="input_sqs_queue_name"></a> [sqs\_queue\_name](#input\_sqs\_queue\_name) | The name of the SQS queue that will be polled for scaling notifications or stop signals | `string` | `"bfd-test-server-load"` | no |
+| <a name="input_stop_on_node_limit"></a> [stop\_on\_node\_limit](#input\_stop\_on\_node\_limit) | Whether the load test run should end once the maximum Lambda worker node limit is reached. Set to false for scenarios where a static load test is desired | `bool` | `true` | no |
+| <a name="input_stop_on_scaling"></a> [stop\_on\_scaling](#input\_stop\_on\_scaling) | Whether the load test run should end, if coasting\_time is zero, or start coasting once receiving a scaling notification. Set to false for scenarios where a static load test is desired | `bool` | `true` | no |
+| <a name="input_test_host"></a> [test\_host](#input\_test\_host) | The URL under test -- should match the given environment | `string` | `"https://test.bfd.cms.gov"` | no |
+| <a name="input_test_runtime_limit"></a> [test\_runtime\_limit](#input\_test\_runtime\_limit) | Runtime limit in seconds. If stop\_on\_scaling is false, this limit is the total amount of time the load test has to run. If stop\_on\_scaling is true, this limit indicates the amount of time to check for scaling notifications during a test run before stopping | `number` | `0` | no |
+| <a name="input_user_spawn_rate"></a> [user\_spawn\_rate](#input\_user\_spawn\_rate) | The rate at which simulated Locust users (not worker nodes) will spawn. Set this equal to max\_spawned\_users if all users should be spawned immediately | `number` | `1` | no |
+| <a name="input_warm_instance_target"></a> [warm\_instance\_target](#input\_warm\_instance\_target) | The number of BFD Server instances to target before scaling causes the load test to stop | `number` | `0` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
@@ -61,6 +73,8 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_ecr_image.image_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
 | [aws_ecr_repository.ecr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
+| [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
+| [aws_iam_policy.cloudwatch_agent_xray_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_launch_template.template](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/launch_template) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |

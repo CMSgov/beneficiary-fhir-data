@@ -56,12 +56,10 @@ public class TableBeanTest {
         TableBean.builder().column(columnA).column(columnB).column(columnC).column(columnD).build();
 
     assertThrows(IllegalArgumentException.class, () -> bean.findColumnByName("x"));
-    assertThrows(IllegalArgumentException.class, () -> bean.findColumnByNameOrDbName("x"));
 
     assertSame(columnA, bean.findColumnByName("a"));
     assertSame(columnD, bean.findColumnByName("d"));
     assertThrows(IllegalArgumentException.class, () -> bean.findColumnByName("dbd"));
-    assertSame(columnD, bean.findColumnByNameOrDbName("dbd"));
   }
 
   /** Test method for getting lookup {@link Set} of equals method column names. */

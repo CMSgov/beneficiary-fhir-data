@@ -7,7 +7,7 @@ mappings:
     schema: rda
     primaryKeyColumns:
     - idrClmHdIcn
-    - priority
+    - idrDtlNumber
     columns:
     - name: idrClmHdIcn
       sqlType: varchar(15)
@@ -16,10 +16,12 @@ mappings:
       comment: 'Internal Claim Control Number: This field contains a numeric value
         that identifies a claim throughout the processing cycle and allows for a linkage
         between the claim and the beneficiary for whom it was submitted.'
-    - name: priority
+    - name: idrDtlNumber
       sqlType: smallint
       javaType: short
+      dbName: idr_dtl_number
       nullable: false
+      comment: 'This field contains the sequence number of the detail record. Up to 50 detail records can be included.'
     - name: idrDtlStatus
       sqlType: varchar(1)
       dbName: idr_dtl_status
@@ -181,7 +183,7 @@ mappings:
       dbName: idr_k_pos_zip
       comment: 'POS Zip Code: This field carries the zip code portion of the POS address.'
     - name: idrTos
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_tos
       comment: 'Procedure Code - Type of Service: TOS: This is a one-character code
         that identifies the type of service designated to a particular procedure code
@@ -272,20 +274,9 @@ mappings:
       dbName: idr_dtl_amb_dropoff_zipcode
       comment: 'Ambulance Drop-off Location ZIP Code: This field contains the ambulance
         drop-off location''s zip code.'
-    - name: idrDtlNumber
-      sqlType: smallint
-      javaType: short
-      dbName: idr_dtl_number
-      nullable: false
-      comment: 'This field contains the sequence number of the detail record. Up to 50 detail records can be included.'
-    - name: lastUpdated
-      sqlType: timestamp with time zone
-      dbName: last_updated
   transformations:
   - from: PARENT
     to: idrClmHdIcn
-  - from: INDEX
-    to: priority
   - from: idrDtlNumber
     transformer: UintToShort
     optionalComponents: None
@@ -342,5 +333,3 @@ mappings:
   - from: idrDtlAmbDropoffCity
   - from: idrDtlAmbDropoffState
   - from: idrDtlAmbDropoffZipcode
-  - from: NOW
-    to: lastUpdated

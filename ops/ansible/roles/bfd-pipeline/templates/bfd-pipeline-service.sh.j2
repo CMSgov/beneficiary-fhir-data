@@ -9,7 +9,19 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
-export FILTERING_NON_NULL_AND_NON_2022_BENES='{{ data_pipeline_filtering_non_null_and_non_2022_benes }}'
+export FILTERING_NON_NULL_AND_NON_2023_BENES='{{ data_pipeline_filtering_non_null_and_non_2023_benes }}'
+
+# Observability
+{% if data_pipeline_micrometer_cw_enabled is defined and data_pipeline_micrometer_cw_namespace is defined %}
+export MICROMETER_CW_ENABLED={{ data_pipeline_micrometer_cw_enabled }}
+export MICROMETER_CW_NAMESPACE={{ data_pipeline_micrometer_cw_namespace }}
+export MICROMETER_CW_INTERVAL={{ data_pipeline_micrometer_cw_interval | default('PT1M') }}
+{% else %}
+# export MICROMETER_CW_ENABLED=
+# export MICROMETER_CW_NAMESPACE=
+# export MICROMETER_CW_INTERVAL=
+{% endif %}
+
 export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
 export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
 {% if data_pipeline_new_relic_app_name is defined %}
@@ -22,10 +34,14 @@ export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
 {% else %}
 #export NEW_RELIC_METRIC_KEY=
 {% endif %}
+
 export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
 export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
 export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
 export RDA_JOB_WRITE_THREADS='{{ data_pipeline_rda_job_write_threads }}'
+{% if data_pipeline_rda_process_dlq is defined %}
+export RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
+{% endif %}
 {% if data_pipeline_rda_job_starting_fiss_seq_num is defined %}
 export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'
 {% endif %}
@@ -45,9 +61,14 @@ export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ data_pipeline_rda_grpc_inproc_ser
 # Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
 export BFD_ENV_NAME='{{ env_name_std }}'
 
+
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
+# Set some additional variables.
+JVM_ARGS='{{ data_pipeline_jvm_args }}'
+
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
-	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
+	${JVM_ARGS} \
+	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"

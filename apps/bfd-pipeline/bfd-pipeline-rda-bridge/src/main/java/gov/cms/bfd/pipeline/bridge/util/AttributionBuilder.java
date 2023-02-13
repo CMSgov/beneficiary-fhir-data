@@ -1,48 +1,31 @@
 package gov.cms.bfd.pipeline.bridge.util;
 
-import java.io.BufferedReader;
+import com.google.common.collect.Lists;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Helper class for building the attribution sql script.
  *
- * <p>The design utilizes a simple template with the syntax '%%formatstring%%iterations%%.
- *
- * <h3>Example script</h3>
- *
- * <p>[%%"%s",%%3%%]
- *
- * <p>This would print
- *
- * <p>["value1","value2","value3",]
+ * <p>See [FreeMarker](https://freemarker.apache.org/docs/ for templating information)
  */
 @Slf4j
 @RequiredArgsConstructor
 public class AttributionBuilder {
 
-  private static final String TEMPLATE_GROUP = "TemplateGroup";
-  private static final String FORMAT_GROUP = "FormatString";
-  private static final String COUNT_GROUP = "Iterations";
-
-  private static final Pattern attributionMarker =
-      Pattern.compile(
-          "(?<"
-              + TEMPLATE_GROUP
-              + ">%%(?<"
-              + FORMAT_GROUP
-              + ">.+)%%(?<"
-              + COUNT_GROUP
-              + ">\\d+)%%)");
-
+  /** Attribution template is the file path of the file. */
   private final String attributionTemplate;
+  /** Attribution Script is the file name for the script. */
   private final String attributionScript;
 
   /**
@@ -52,37 +35,20 @@ public class AttributionBuilder {
    * @param dataSampler The {@link DataSampler} set to pull data from.
    */
   public void run(DataSampler<String> dataSampler) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(attributionTemplate));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
-      String line;
+    try {
+      Path templatePath = Path.of(attributionTemplate);
+      Path baseDir = templatePath.getParent();
+      String templateFile = templatePath.getFileName().toString();
+      Configuration config = new Configuration(Configuration.VERSION_2_3_31);
+      config.setDirectoryForTemplateLoading(baseDir.toFile());
+      config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+      config.setLogTemplateExceptions(false);
 
-      while ((line = reader.readLine()) != null) {
-        Matcher matcher = attributionMarker.matcher(line);
-
-        if (matcher.find()) {
-          String stringFormat = matcher.group(FORMAT_GROUP);
-          long count = Long.parseLong(matcher.group(COUNT_GROUP));
-          int startMatch = matcher.start(TEMPLATE_GROUP);
-          int endMatch = matcher.end(TEMPLATE_GROUP);
-
-          writer.write(line.substring(0, startMatch));
-
-          Iterator<String> attribution = dataSampler.iterator();
-
-          long i = -1;
-
-          while (attribution.hasNext() && ++i < count) {
-            writer.write(String.format(stringFormat, attribution.next()));
-          }
-
-          writer.write(line.substring(endMatch));
-        } else {
-          writer.write(line);
-        }
-
-        writer.newLine();
-      }
-    } catch (IOException e) {
+      Template t = config.getTemplate(templateFile);
+      BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript));
+      List<String> values = Lists.newArrayList(dataSampler);
+      t.process(Map.of("value", values), writer);
+    } catch (IOException | TemplateException e) {
       log.error("Unable to create attribution sql script", e);
     }
   }

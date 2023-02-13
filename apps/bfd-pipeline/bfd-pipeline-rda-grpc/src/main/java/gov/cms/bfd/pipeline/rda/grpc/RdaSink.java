@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.time.Duration;
@@ -46,6 +47,19 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   void updateLastSequenceNumber(long lastSequenceNumber);
 
   /**
+   * Hook to allow the {@link RdaSource} to avoid processing messages that are invalid and should
+   * not be stored. Specifically this is to filter out FISS claims with specific invalid DCN values.
+   * Adding the detection logic here allows it to be applied generically. Defaults to true so that
+   * no specific implementation is necessary for MCS claims.
+   *
+   * @param message Message received from the RDA API
+   * @return true if the message is valid and should be processed, false otherwise
+   */
+  default boolean isValidMessage(TMessage message) {
+    return true;
+  }
+
+  /**
    * Write the object to the data store and return the number of objects successfully written. The
    * count returned is just the most recent unreported processed count and for asynchronous sinks
    * can reflect values from previously submitted batches.
@@ -70,16 +84,24 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @param apiVersion The version of the api used to get the message.
    * @param message The message that was being transformed when the error occurred.
    * @param exception The exception that was thrown while transforming the message.
-   * @throws IOException If there was an issue writing out the error.
+   * @throws IOException If there was an issue writing the error out
+   * @throws ProcessingException If there was a problem processing the claim
    */
   default void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
-      throws IOException {
+      throws IOException, ProcessingException {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * Write all of the objects to the data store and return the number of objects actually written.
+   * Checks if the error limit has been exceeded.
+   *
+   * @throws ProcessingException If the error limit was reached.
+   */
+  void checkErrorCount() throws ProcessingException;
+
+  /**
+   * Write all the objects to the data store and return the number of objects actually written.
    * Objects must be processed in the same order as they appear within the Iterable. Some Sinks can
    * support transactional batch processing (all or none) but others might default to processing one
    * object at a time and can successfully process some portion of the batch before an exception is
@@ -112,15 +134,14 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   }
 
   /**
-   * Used by callers to remove duplicates from a collection of objects prior to calling
-   * writeMessages. This key can be any unique string value but generally corresponds to a claim's
-   * primary key value. Callers should not depend on the exact value having any meaning outside of
-   * being unique.
+   * The primary key for the claim contained in the message. Used by callers to remove duplicates
+   * from a collection of objects prior to calling writeMessages. Callers may log this value so it
+   * must not contain any PII or PHI.
    *
    * @param object object to get a key from
    * @return a unique key to dedup objects of this type
    */
-  String getDedupKeyForMessage(TMessage object);
+  String getClaimIdForMessage(TMessage object);
 
   /**
    * Extract the sequence number from the message object and return it.
@@ -138,12 +159,14 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    *
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param message an RDA API message object of the correct type for this sync
-   * @return an appropriate entity object containing the data from the message
-   * @throws DataTransformer.TransformationException if the message is invalid
+   * @return an optional containing the appropriate entity object containing the data from the
+   *     message if successfully converted, {@link Optional#empty()} otherwise
+   * @throws IOException if there was an issue writing out a {@link MessageError}
+   * @throws ProcessingException if there was an issue transforming the message
    */
   @Nonnull
-  TClaim transformMessage(String apiVersion, TMessage message)
-      throws DataTransformer.TransformationException;
+  Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException;
 
   /**
    * Write the specified collection of entity objects to the database. This write could happen in

@@ -5,6 +5,7 @@ mappings:
     table:
       name: FissPayers
       schema: pre_adj
+      quoteNames: true
       primaryKeyColumns:
         - dcn
         - priority

@@ -1,6 +1,10 @@
 package gov.cms.model.dsl.codegen.plugin;
 
+import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
+import gov.cms.model.dsl.codegen.plugin.model.RootBean;
+import gov.cms.model.dsl.codegen.plugin.model.validation.ValidationUtil;
 import java.io.File;
+import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /** Utility methods for use in all {@link org.apache.maven.plugin.Mojo} implementations. */
@@ -32,5 +36,28 @@ public class MojoUtil {
   public static MojoExecutionException createException(String formatString, Object... args) {
     String message = String.format(formatString, args);
     return new MojoExecutionException(message);
+  }
+
+  /**
+   * Validate the data model and throw a {@link MojoExecutionException} if any of its {@link
+   * MappingBean}s contain any validation errors.
+   *
+   * @param root {@link RootBean} containing all known mappings
+   * @throws MojoExecutionException thrown if one or more mappings contain validation errors
+   */
+  public static void validateModel(RootBean root) throws MojoExecutionException {
+    final var message = new StringBuilder();
+    final List<ValidationUtil.ValidationResult> results = ValidationUtil.validateModel(root);
+    for (ValidationUtil.ValidationResult result : results) {
+      if (result.hasErrors()) {
+        message.append(String.format("Mapping %s has errors:\n", result.getMapping().getId()));
+        for (String error : result.getErrors()) {
+          message.append(String.format("    %s\n", error));
+        }
+      }
+    }
+    if (message.length() > 0) {
+      throw new MojoExecutionException(message.toString());
+    }
   }
 }

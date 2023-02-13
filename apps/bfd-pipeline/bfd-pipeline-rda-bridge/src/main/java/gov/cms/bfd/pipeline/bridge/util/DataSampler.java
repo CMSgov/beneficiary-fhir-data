@@ -19,11 +19,23 @@ import java.util.Set;
  * @param <T> The type of data being stored.
  */
 public class DataSampler<T> implements Iterable<T> {
+  /**
+   * Dataset is a hashmap that corresponds to the Sample Id of mbis for the key and the associate
+   * benficiary data.
+   */
   private final Map<Integer, Set<T>> dataSet = new HashMap<>();
 
+  /** Sample proportions are sets of ids and a normalized proportion of the data. */
   private final Map<Integer, Float> sampleProportions;
+  /** The maximum value allowed allowed for the sampler id. */
   private final int maxValues;
 
+  /**
+   * Contructor to initialize all the properties of the DataSampler class.
+   *
+   * @param maxValues is for the maxvalues
+   * @param sampleProportions is the sample proportion of the dataset
+   */
   private DataSampler(int maxValues, Map<Integer, Float> sampleProportions) {
     this.maxValues = maxValues;
 
@@ -47,9 +59,9 @@ public class DataSampler<T> implements Iterable<T> {
    * <p>If the total dataset size is greater than the configured maxValues size, {@link
    * #rebalance()} is called and data will be dropped based on it's configured proportion threshold.
    *
-   * @param sampleSetId The id of the sample set that was previously configured.
-   * @param value The value to add that is associated with the given sample set id.
-   * @throws IllegalArgumentException If the given sampleSetId was never registered.
+   * @param sampleSetId The id of the sample set that was previously configured
+   * @param value The value to add that is associated with the given sample set id
+   * @throws IllegalArgumentException If the given sampleSetId was never registered
    */
   public void add(int sampleSetId, T value) {
     if (dataSet.containsKey(sampleSetId)) {
@@ -104,8 +116,8 @@ public class DataSampler<T> implements Iterable<T> {
   /**
    * Simple builder method for {@link DataSampler} objects.
    *
-   * @param <T> The type of data that will be stored.
-   * @return A new {@link Builder} for configuring a new {@link DataSampler}.
+   * @param <T> The type of data that will be stored
+   * @return A new {@link Builder} for configuring a new {@link DataSampler}
    */
   public static <T> Builder<T> builder() {
     return new Builder<>();
@@ -114,7 +126,7 @@ public class DataSampler<T> implements Iterable<T> {
   /**
    * Simple iterator implementation.
    *
-   * @return A {@link DataSamplerIterator} for iterating over the sample data.
+   * @return A {@link DataSamplerIterator} for iterating over the sample data
    */
   @Override
   public Iterator<T> iterator() {
@@ -124,18 +136,23 @@ public class DataSampler<T> implements Iterable<T> {
   /**
    * Simple builder class for building {@link DataSampler} object instances.
    *
-   * @param <T> The type of data to store in the created {@link DataSampler} instance.
+   * @param <T> The type of data to store in the created {@link DataSampler} instance
    */
   public static class Builder<T> {
+    /**
+     * Defines the maximum number of data values the {@link DataSampler} will be configured to
+     * store.
+     */
     private int maxValues = Integer.MAX_VALUE;
+    /** Defines the sample data values the {@link DataSampler} will be configured to store. */
     private final Map<Integer, Float> sampleProportions = new HashMap<>();
 
     /**
      * Define the maximum number of data values the created {@link DataSampler} will be configured
      * to store.
      *
-     * @param maxValues The maximum number of data values to configure.
-     * @return The current {@link Builder} instance.
+     * @param maxValues The maximum number of data values to configure
+     * @return The current {@link Builder} instance
      */
     public Builder<T> maxValues(int maxValues) {
       this.maxValues = maxValues;
@@ -152,9 +169,9 @@ public class DataSampler<T> implements Iterable<T> {
      * data to meet these desired levels, one or more sets could fall over/under their configured
      * proportion.
      *
-     * @param id The id for the sample set to start tracking.
-     * @param proportion The preferred maximum proportion of values to store for this sample set id.
-     * @return The current {@link Builder} instance.
+     * @param id The id for the sample set to start tracking
+     * @param proportion The preferred maximum proportion of values to store for this sample set id
+     * @return The current {@link Builder} instance
      */
     public Builder<T> registerSampleSet(int id, float proportion) {
       sampleProportions.put(id, proportion);
@@ -164,7 +181,7 @@ public class DataSampler<T> implements Iterable<T> {
     /**
      * Builds a {@link DataSampler} instance based on the current {@link Builder} configurations.
      *
-     * @return A new {@link DataSampler} object instance.
+     * @return A new {@link DataSampler} object instance
      */
     public DataSampler<T> build() {
       return new DataSampler<>(maxValues, sampleProportions);
@@ -180,9 +197,14 @@ public class DataSampler<T> implements Iterable<T> {
    */
   public class DataSamplerIterator implements Iterator<T> {
 
+    /** Map of iterators used during the Data Sampler for FISS and MCS data. */
     private final Iterator<Set<T>> mapIterator;
+    /** The Curret Iterator for the mapIterator for FISS and MCS data. */
     private Iterator<T> currentSetIterator;
 
+    /**
+     * Constructor for the DataSamplerIterator that sets the mapIterator and the currentSetIterator.
+     */
     private DataSamplerIterator() {
       mapIterator = dataSet.values().iterator();
       currentSetIterator = mapIterator.next().iterator();

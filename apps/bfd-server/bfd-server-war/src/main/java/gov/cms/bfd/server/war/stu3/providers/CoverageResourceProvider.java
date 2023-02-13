@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -60,23 +61,38 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProvider.class);
 
+  /** The entity manager. */
   private EntityManager entityManager;
+  /** The Metric registry. */
   private MetricRegistry metricRegistry;
+  /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
-  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
+  /**
+   * Sets the {@link #entityManager}.
+   *
+   * @param entityManager a JPA {@link EntityManager} connected to the application's database
+   */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /** @param metricRegistry the {@link MetricRegistry} to use */
+  /**
+   * Sets the {@link #metricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
+  /**
+   * Sets the {@link #loadedFilterManager}.
+   *
+   * @param loadedFilterManager the {@link LoadedFilterManager} to use
+   */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
@@ -103,20 +119,29 @@ public final class CoverageResourceProvider implements IResourceProvider {
   @Read(version = false)
   @Trace
   public Coverage read(@IdParam IdType coverageId) {
-    if (coverageId == null) throw new IllegalArgumentException();
-    if (coverageId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (coverageId == null) {
+      throw new InvalidRequestException("Missing required coverage ID");
+    }
+    if (coverageId.getVersionIdPartAsLong() != null) {
+      throw new InvalidRequestException("Coverage ID must not define a version");
+    }
 
     String coverageIdText = coverageId.getIdPart();
-    if (coverageIdText == null || coverageIdText.trim().isEmpty())
-      throw new IllegalArgumentException();
+    if (coverageIdText == null || coverageIdText.trim().isEmpty()) {
+      throw new InvalidRequestException("Missing required coverage ID");
+    }
 
     Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    if (!coverageIdMatcher.matches())
-      throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+    if (!coverageIdMatcher.matches()) {
+      throw new InvalidRequestException(
+          "Coverage ID pattern: '"
+              + coverageIdText
+              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}}");
+    }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
@@ -131,7 +156,12 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
       // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
     }
@@ -199,8 +229,11 @@ public final class CoverageResourceProvider implements IResourceProvider {
   }
 
   /**
-   * @param beneIdStr the {@link Beneficiary#getBeneficiaryId()} value to find a matching {@link
+   * Finds beneficiary by id.
+   *
+   * @param beneId the {@link Beneficiary#getBeneficiaryId()} value to find a matching {@link
    *     Beneficiary} for
+   * @param lastUpdatedRange the last updated range
    * @return the {@link Beneficiary} that matches the specified {@link
    *     Beneficiary#getBeneficiaryId()} value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -213,6 +246,8 @@ public final class CoverageResourceProvider implements IResourceProvider {
     if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdatedRange)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
       LoggingUtils.logBeneIdToMdc(beneId);
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
 
       throw new NoResultException();
     }

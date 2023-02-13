@@ -7,16 +7,26 @@ import javax.annotation.Nullable;
  * that were successfully processed before the exception was thrown.
  */
 public class ProcessingException extends Exception {
+
+  /**
+   * The number of objects that had been successfully processed within the batch prior to the
+   * exception being thrown.
+   */
   private final int processedCount;
 
+  /**
+   * Instantiates a new processing exception.
+   *
+   * @param cause the cause of the exception
+   * @param processedCount the successfully processed batch items prior to this exception
+   */
   public ProcessingException(Exception cause, int processedCount) {
     super(cause);
     this.processedCount = processedCount;
   }
 
   /**
-   * The number of objects that had been successfully processed within the batch prior to the
-   * exception being thrown.
+   * Gets the {@link #processedCount}.
    *
    * @return number of objects successfully processed within the batch
    */

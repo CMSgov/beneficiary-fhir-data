@@ -32,7 +32,7 @@ mappings:
         by the Centers for Medicare and Medicaid Services (CMS), and may be used to
         access data for the record depending on the copybook it is used in.'
     - name: currStatus
-      sqlType: varchar(1)
+      sqlType: char(1)
       javaType: char
       nullable: false
       dbName: curr_status
@@ -40,7 +40,7 @@ mappings:
         claim (paid, reject, deny, etc.); for the record depending on the copybook
         it is used in.'
     - name: currLoc1
-      sqlType: varchar(1)
+      sqlType: char(1)
       javaType: char
       nullable: false
       dbName: curr_loc1
@@ -156,9 +156,17 @@ mappings:
     - name: stmtCovFromDate
       sqlType: date
       dbName: stmt_cov_from_date
+    - name: stmtCovFromDateText
+      sqlType: varchar(10)
+      comment: Coverage From Date Raw Text
+      dbName: stmt_cov_from_date_text
     - name: stmtCovToDate
       sqlType: date
       dbName: stmt_cov_to_date
+    - name: stmtCovToDateText
+      sqlType: varchar(10)
+      comment: Coverage To Date Raw Text
+      dbName: stmt_cov_to_date_text
     - name: lobCd
       sqlType: varchar(1)
       dbName: lob_cd
@@ -217,7 +225,7 @@ mappings:
         This is a unique field created by the system.'
       dbName: xref_dcn_nbr
     - name: adjReqCd
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Adjustment Requestor Identification: This field identifies the entity
         responsible for the origin of the claim adjustment'
       dbName: adj_req_cd
@@ -242,7 +250,7 @@ mappings:
       comment: Cancel Date
       dbName: cancel_date
     - name: cancAdjCd
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Cancel Adjustment Code: This field identifies the reason for a cancel
         without a corresponding repayment.'
       dbName: canc_adj_cd
@@ -259,13 +267,17 @@ mappings:
       sqlType: date
       comment: Admission Date
       dbName: adm_date
+    - name: admDateText
+      sqlType: varchar(10)
+      comment: Admission Date Raw Text
+      dbName: adm_date_text
     - name: admSource
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Source of Admission: This field identifies the way a patient was referred
         to the hospital for admission.'
       dbName: adm_source
     - name: primaryPayerCode
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Primary Payer Code: This field identifies the primary payer as qualified
         by the payer. For example: When a ''Z'' is entered as the primary payer code
         identifying Medicare as a payer, and the payer name Medicare must be entered
@@ -291,7 +303,7 @@ mappings:
         initial of the attending physician.'
       dbName: attend_phys_mint
     - name: attendPhysFlag
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Attending Physician Flag: This field identifies whether an attending
         physician identification number is present.'
       dbName: attend_phys_flag
@@ -315,7 +327,7 @@ mappings:
         initial of the operating physician.'
       dbName: oper_phys_mint
     - name: operPhysFlag
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Operating Physician Flag: This field identifies whether an operating
         physician identification number is present.'
       dbName: oper_phys_flag
@@ -339,7 +351,7 @@ mappings:
         of the assisting licensed physician.'
       dbName: oth_phys_mint
     - name: othPhysFlag
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Other Physician Flag: This field identifies whether an assisting licensed
         physician identification number is present.'
       dbName: oth_phys_flag
@@ -350,7 +362,7 @@ mappings:
         HIC is utilized.'
       dbName: xref_hic_nbr
     - name: procNewHicInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Process new Health Insurance Claim Number: This field identifies that
         an entry is required in this field when the HIC number is incorrect on the
         claim that is being entered.'
@@ -363,7 +375,7 @@ mappings:
         entered and establishes a Beneficiary File for this new HIC number.'
       dbName: new_hic
     - name: reposInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Repository Indicator: If the claim is submitted electronically and
         the submitted subscriber primary identifier has been moved to the repository
         HIC field, this field indicates this move was made.'
@@ -375,12 +387,12 @@ mappings:
         may not be the beneficiary''s valid HIC number.'
       dbName: repos_hic
     - name: mbiSubmBeneInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Health Insurance Claim (HIC) Number or Medicare Beneficiary Identify
         (MBI): This field describes the HIC or MBI Beneficiary indicator.'
       dbName: mbi_subm_bene_ind
     - name: adjMbiInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       comment: 'Adjustment Medicare Beneficiary Identifier (MBI) Indicator: This field
         identifies the adjustment/cancel claim that was submitted with a Health Insurance
         Claim (HIC) Number or MBI number.'
@@ -395,10 +407,14 @@ mappings:
       comment: 'Medical Record Number: This field identifies the number assigned to
         the patient''s medical/health record by the provider.'
       dbName: medical_record_no
+    - name: mbiId
+      dbName: mbi_id
+      sqlType: bigint
+      dbOnly: true
     joins:
     - fieldName: mbiRecord
       entityClass: gov.cms.bfd.model.rda.Mbi
-      joinColumnName: mbi_id
+      joinColumnName: mbiId
       joinType: ManyToOne
       fetchType: EAGER
       properties:
@@ -408,6 +424,22 @@ mappings:
       - name: mbiHash
         fieldName: hash
         javaType: String
+    - class: array
+      fieldName: procCodes
+      entityMapping: FissProcCode
+      mappedBy: dcn
+    - class: array
+      fieldName: diagCodes
+      entityMapping: FissDiagnosisCode
+      mappedBy: dcn
+    - class: array
+      fieldName: payers
+      entityMapping: FissPayer
+      mappedBy: dcn
+    - class: array
+      fieldName: auditTrail
+      entityMapping: FissAuditTrail
+      mappedBy: dcn
     comment: FISS (Fiscal Intermediary Shared Systems) Claim
   enumTypes:
   - name: ServTypeCdMapping
@@ -461,8 +493,12 @@ mappings:
   - from: pracLocZip
   - from: stmtCovFromCymd
     to: stmtCovFromDate
+  - from: stmtCovFromCymdText
+    to: stmtCovFromDateText
   - from: stmtCovToCymd
     to: stmtCovToDate
+  - from: stmtCovToCymdText
+    to: stmtCovToDateText
   - from: lobCd
     transformer: MessageEnum
     transformerOptions:
@@ -536,6 +572,8 @@ mappings:
     to: paidDt
   - from: admDateCymd
     to: admDate
+  - from: admDateCymdText
+    to: admDateText
   - from: admSource
     transformer: MessageEnum
     transformerOptions:
@@ -591,22 +629,17 @@ mappings:
   - from: medicalRecordNo
   - from: NOW
     to: lastUpdated
-  arrays:
   - from: fissProcCodes
     to: procCodes
-    mapping: FissProcCode
-    namePrefix: procCode
+    transformer: Array
   - from: fissDiagCodes
     to: diagCodes
-    mapping: FissDiagnosisCode
-    namePrefix: diagCode
+    transformer: Array
   - from: fissPayers
     to: payers
-    mapping: FissPayer
-    namePrefix: payer
+    transformer: Array
   - from: fissAuditTrail
     to: auditTrail
-    mapping: FissAuditTrail
-    namePrefix: auditTrail
+    transformer: Array
   externalTransformations:
   - applyMbiCache

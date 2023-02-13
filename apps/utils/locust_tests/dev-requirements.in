@@ -1,3 +1,4 @@
 black
 isort
 pylint
+setuptools>=65.5.1

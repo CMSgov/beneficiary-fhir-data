@@ -210,7 +210,7 @@ mappings:
         the mode the server was running in.
       dbName: api_source
     - name: idrAssignment
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_assignment
       comment: 'Claim Assignment Code: This code identifies the assignment code, as
         indicated on the submitted claim. For online claim entry, this value may be
@@ -218,7 +218,7 @@ mappings:
         range of ICN codes via the Entry Screen. However, the value can be manually
         generated, as necessary.'
     - name: idrClmLevelInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_clm_level_ind
       comment: 'Claim Level Indicator: This field carries the claim level indicator;
         indicating the claim is either adjusted, original or voided.'
@@ -228,12 +228,12 @@ mappings:
       comment: 'Non-covered Audit Number: This field carries the primary SCC audit
         number encounter as the claim was processed.'
     - name: idrHdrAuditInd
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_hdr_audit_ind
       comment: 'Audit Indicator: The value in this field indicates if the number displayed
         in the INT-HDR-AUDIT field is a header edit, detail edit, or an audit.'
     - name: idrUSplitReason
-      sqlType: char(1)
+      sqlType: varchar(1)
       dbName: idr_u_split_reason
       comment: 'Split Reason Code: The split reason code is used to indicate that
         the claim has been separated for processing either for a mandated split situation
@@ -324,10 +324,14 @@ mappings:
       dbName: idr_amb_dropoff_zipcode
       comment: 'Ambulance Drop-off Location ZIP Code: This field contains the ambulance
         drop-off location''s zip code.'
+    - name: mbiId
+      dbName: mbi_id
+      sqlType: bigint
+      dbOnly: true
     joins:
     - fieldName: mbiRecord
       entityClass: gov.cms.bfd.model.rda.Mbi
-      joinColumnName: mbi_id
+      joinColumnName: mbiId
       joinType: ManyToOne
       fetchType: EAGER
       properties:
@@ -337,6 +341,26 @@ mappings:
       - name: idrClaimMbiHash
         fieldName: hash
         javaType: String
+    - class: array
+      fieldName: details
+      entityMapping: McsDetail
+      mappedBy: idrClmHdIcn
+    - class: array
+      fieldName: diagCodes
+      entityMapping: McsDiagnosisCode
+      mappedBy: idrClmHdIcn
+    - class: array
+      fieldName: adjustments
+      entityMapping: McsAdjustment
+      mappedBy: idrClmHdIcn
+    - class: array
+      fieldName: audits
+      entityMapping: McsAudit
+      mappedBy: idrClmHdIcn
+    - class: array
+      fieldName: locations
+      entityMapping: McsLocation
+      mappedBy: idrClmHdIcn
   transformations:
   - from: idrClmHdIcn
     optionalComponents: None
@@ -421,26 +445,20 @@ mappings:
   - from: idrAmbDropoffZipcode
   - from: NOW
     to: lastUpdated
-  arrays:
   - from: mcsDetails
     to: details
-    mapping: McsDetail
-    namePrefix: detail
+    transformer: Array
   - from: mcsDiagnosisCodes
     to: diagCodes
-    mapping: McsDiagnosisCode
-    namePrefix: diagCode
+    transformer: Array
   - from: mcsAdjustments
     to: adjustments
-    mapping: McsAdjustment
-    namePrefix: adjustment
+    transformer: Array
   - from: mcsAudits
     to: audits
-    mapping: McsAudit
-    namePrefix: audit
+    transformer: Array
   - from: mcsLocations
     to: locations
-    mapping: McsLocation
-    namePrefix: location
+    transformer: Array
   externalTransformations:
   - applyMbiCache

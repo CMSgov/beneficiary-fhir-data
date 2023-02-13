@@ -18,7 +18,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -36,6 +39,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerContext;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -80,9 +85,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * CarrierClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -111,35 +115,32 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * throws an exception as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit}
-   * that provides an non-numeric claim identifer.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception as expected
+   * for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that provides an non-numeric
+   * claim identifier.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
   public void readEobForNonNumericClaimId() throws FHIRException {
-    ca.uhn.fhir.rest.server.exceptions.InternalErrorException thrown =
-        assertThrows(
-            ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
-            () -> {
-              IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
-              ExplanationOfBenefit eob =
-                  fhirClient
-                      .read()
-                      .resource(ExplanationOfBenefit.class)
-                      .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
-                      .execute();
-            },
-            "Unsupported ID pattern: junk");
+          ExplanationOfBenefit eob =
+              fhirClient
+                  .read()
+                  .resource(ExplanationOfBenefit.class)
+                  .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "junk"))
+                  .execute();
+        },
+        "ExplanationOfBenefit ID pattern: 'junk' does not match expected pattern: characterString-idNumber");
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist
-   * in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingCarrierClaim() {
@@ -158,9 +159,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -189,9 +189,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * DMEClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingDMEClaim() {
@@ -210,18 +209,24 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * HHAClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingHHAClaim() throws FHIRException {
+  public void readEobForExistingHHAClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     HHAClaim claim =
         loadedRecords.stream()
@@ -237,13 +242,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    HHAClaimTransformerTest.assertMatches(claim, eob);
+    HHAClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingHHAClaim() {
@@ -262,18 +266,24 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
-   * as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingHospiceClaim() throws FHIRException {
+  public void readEobForExistingHospiceClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     HospiceClaim claim =
         loadedRecords.stream()
@@ -289,13 +299,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    HospiceClaimTransformerTest.assertMatches(claim, eob);
+    HospiceClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingHospiceClaim() {
@@ -314,18 +323,24 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingInpatientClaim() throws FHIRException {
+  public void readEobForExistingInpatientClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     InpatientClaim claim =
         loadedRecords.stream()
@@ -341,13 +356,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    InpatientClaimTransformerTest.assertMatches(claim, eob);
+    InpatientClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist
-   * in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingInpatientClaim() {
@@ -366,18 +380,24 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * OutpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingOutpatientClaim() throws FHIRException {
+  public void readEobForExistingOutpatientClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     OutpatientClaim claim =
         loadedRecords.stream()
@@ -393,13 +413,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    OutpatientClaimTransformerTest.assertMatches(claim, eob);
+    OutpatientClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingOutpatientClaim() {
@@ -418,9 +437,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -449,9 +467,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingPartDEvent() {
@@ -470,9 +487,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB using a negative ID.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in the DB using a negative
+   * ID.
    */
   @Test
   public void readEobForMissingNegativePartDEvent() {
@@ -491,9 +508,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid
-   * {@link ExplanationOfBenefitResourceProvider#IdParam} parameter.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
+   * PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid id parameter.
    */
   @Test
   public void readEobForInvalidIdParamPartDEvent() {
@@ -512,18 +528,24 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the
-   * DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void readEobForExistingSNFClaim() throws FHIRException {
+  public void readEobForExistingSNFClaim() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     SNFClaim claim =
         loadedRecords.stream()
@@ -539,13 +561,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     assertNotNull(eob);
-    SNFClaimTransformerTest.assertMatches(claim, eob);
+    SNFClaimTransformerTest.assertMatches(claim, eob, transformerContext);
   }
 
   /**
-   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
-   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in
-   * the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
+   * SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
    */
   @Test
   public void readEobForMissingSNFClaim() {
@@ -570,7 +591,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatient() throws FHIRException {
+  public void searchForEobsByExistingPatient() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -617,6 +638,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
      * and looks correct.
      */
 
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+
     CarrierClaim carrierClaim =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
@@ -643,7 +671,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0), transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -652,7 +680,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimType(searchResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -661,7 +691,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimType(searchResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -670,7 +702,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -688,7 +722,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0), transformerContext);
   }
 
   /**
@@ -699,7 +733,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException {
+  public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -721,6 +755,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .count(2)
             .returnBundle(Bundle.class)
             .execute();
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 
@@ -811,7 +852,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimTypeFromList(combinedResults, ClaimType.HHA).get(0));
+        hhaClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.HHA).get(0),
+        transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -820,7 +863,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimTypeFromList(combinedResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -829,7 +874,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimTypeFromList(combinedResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -838,7 +885,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimTypeFromList(combinedResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -856,7 +905,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimTypeFromList(combinedResults, ClaimType.SNF).get(0));
+        snfClaim,
+        filterToClaimTypeFromList(combinedResults, ClaimType.SNF).get(0),
+        transformerContext);
   }
 
   /**
@@ -979,7 +1030,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
+  public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1030,6 +1081,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
     assertNull(searchResults.getLink(Constants.LINK_FIRST));
     assertNull(searchResults.getLink(Constants.LINK_LAST));
 
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+
     /*
      * Verify that each of the expected claims (one for every claim type) is present
      * and looks correct.
@@ -1061,7 +1119,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0), transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -1070,7 +1128,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimType(searchResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -1079,7 +1139,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimType(searchResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -1088,7 +1150,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -1106,7 +1170,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0), transformerContext);
   }
 
   /**
@@ -1116,7 +1180,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
+  public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException, IOException {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -1151,6 +1215,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
+
+    TransformerContext transformerContext =
+        new TransformerContext(
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
 
     /*
      * Verify that only the first and last links exist as there are no previous or
@@ -1192,7 +1263,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HHAClaimTransformerTest.assertMatches(
-        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+        hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0), transformerContext);
 
     HospiceClaim hospiceClaim =
         loadedRecords.stream()
@@ -1201,7 +1272,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     HospiceClaimTransformerTest.assertMatches(
-        hospiceClaim, filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+        hospiceClaim,
+        filterToClaimType(searchResults, ClaimType.HOSPICE).get(0),
+        transformerContext);
 
     InpatientClaim inpatientClaim =
         loadedRecords.stream()
@@ -1210,7 +1283,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     InpatientClaimTransformerTest.assertMatches(
-        inpatientClaim, filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+        inpatientClaim,
+        filterToClaimType(searchResults, ClaimType.INPATIENT).get(0),
+        transformerContext);
 
     OutpatientClaim outpatientClaim =
         loadedRecords.stream()
@@ -1219,7 +1294,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     OutpatientClaimTransformerTest.assertMatches(
-        outpatientClaim, filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+        outpatientClaim,
+        filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0),
+        transformerContext);
 
     PartDEvent partDEvent =
         loadedRecords.stream()
@@ -1237,7 +1314,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
     SNFClaimTransformerTest.assertMatches(
-        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+        snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0), transformerContext);
   }
 
   /**
@@ -1871,6 +1948,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
         "Expected number resources return to be equal to count");
   }
 
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works a {@code null}
+   * lastUpdated parameter.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
   @Test
   public void searchEobWithNullLastUpdated() throws FHIRException {
     // Load a records and clear the lastUpdated field for one
@@ -1930,6 +2013,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
         "Expected the search for lastUpdated >= now()-100 to not include null lastUpdated resources");
   }
 
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works when searching
+   * by service date.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
   @Test
   public void searchEobWithServiceDate() {
     Beneficiary beneficiary = loadSampleA();
@@ -1976,10 +2065,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
+   * Filters a {@link List} of the {@link ExplanationOfBenefit}s from the specified {@link Bundle}
+   * that match the specified {@link ClaimType}.
+   *
    * @param bundle the {@link Bundle} to filter
-   * @param claimType the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} to use as a filter
-   * @return a filtered {@link List} of the {@link ExplanationOfBenefit}s from the specified {@link
-   *     Bundle} that match the specified {@link gov.cms.bfd.server.war.stu3.providers.ClaimType}
+   * @param claimType the {@link ClaimType} to use as a filter
+   * @return the filtered list
    */
   private static List<ExplanationOfBenefit> filterToClaimType(Bundle bundle, ClaimType claimType) {
     List<ExplanationOfBenefit> results =
@@ -1997,6 +2088,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
     return results;
   }
 
+  /**
+   * Filters a {@link List} of the {@link ExplanationOfBenefit}s from the specified resources that
+   * match the specified {@link ClaimType}.
+   *
+   * @param resources the resources
+   * @param claimType the {@link ClaimType} to use as a filter
+   * @return the filtered list
+   */
   private static List<ExplanationOfBenefit> filterToClaimTypeFromList(
       List<IBaseResource> resources, ClaimType claimType) {
     List<ExplanationOfBenefit> results =
@@ -2015,7 +2114,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Test the set of lastUpdated values
+   * Test the set of lastUpdated values.
    *
    * @param fhirClient to use
    * @param id the bene id to use
@@ -2036,7 +2135,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Load Sample A into the test database
+   * Load Sample A into the test database.
    *
    * @return the beneficary record loaded by Sample A
    */
@@ -2050,7 +2149,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Find the first Beneficiary from a record list returned by {@link ServerTestUtils#loadData(List}
+   * Find the first Beneficiary from a record list returned by {@link ServerTestUtils#loadData}.
    *
    * @param loadedRecords to use
    * @return the first Beneficiary
@@ -2064,8 +2163,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Find the first CarrierClaim from a record list returned by {@link
-   * ServerTestUtils#loadData(List}
+   * Find the first CarrierClaim from a record list returned by {@link ServerTestUtils#loadData}.
    *
    * @param loadedRecords to use
    * @return the first CarrierClaim in the records
@@ -2079,11 +2177,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Fetch a bundle
+   * Does a FHIR search by last updated, returning the results as a bundle.
    *
    * @param fhirClient to use
    * @param id the bene id to use
    * @param lastUpdatedParam to added to the fetch
+   * @return the search result
    */
   private Bundle fetchWithLastUpdated(IGenericClient fhirClient, Long id, String lastUpdatedParam) {
     String url =
@@ -2095,7 +2194,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * To setup a database, clear the lastUpdated of passed in claim
+   * To setup a database, clear the lastUpdated of passed in claim.
    *
    * @param claimId to use
    */
@@ -2109,6 +2208,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
             });
   }
 
+  /**
+   * Does a FHIR search by service date, returning the results as a bundle.
+   *
+   * @param fhirClient the fhir client
+   * @param id the id
+   * @param serviceEndParam the service end param
+   * @return the search results
+   */
   private Bundle fetchWithServiceDate(IGenericClient fhirClient, Long id, String serviceEndParam) {
     String url =
         "ExplanationOfBenefit?patient=Patient%2F"

@@ -26,6 +26,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
  */
 final class InpatientClaimTransformer {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -41,18 +43,22 @@ final class InpatientClaimTransformer {
             .time();
 
     if (!(claim instanceof InpatientClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim, transformerContext);
 
     timer.stop();
     return eob;
   }
 
   /**
+   * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      InpatientClaim claimGroup, TransformerContext transformerContext) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -193,6 +199,7 @@ final class InpatientClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
+        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -213,7 +220,7 @@ final class InpatientClaimTransformer {
         claimGroup.getBeneficiaryDischargeDate(),
         Optional.of(claimGroup.getUtilizationDayCount()));
 
-    for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
+    for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses(claimGroup))
       TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
     for (CCWProcedure procedure :
@@ -325,6 +332,8 @@ final class InpatientClaimTransformer {
   }
 
   /**
+   * Extracts a diagnoses list from the {@link InpatientClaim}.
+   *
    * @param claim the {@link InpatientClaim} to extract the {@link Diagnosis}es from
    * @return the {@link Diagnosis}es that can be extracted from the specified {@link InpatientClaim}
    */

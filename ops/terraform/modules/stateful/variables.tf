@@ -1,16 +1,6 @@
-variable "aurora_config" {
-  description = "Aurora sizing and version config"
-  type        = object({ instance_class = string, cluster_nodes = number, engine_version = string, param_version = string })
-}
-
-variable "aurora_node_params" {
-  description = "Aurora node parameter group config"
-  type        = list(object({ name = string, value = string, apply_on_reboot = bool }))
-}
-
-variable "env_config" {
-  description = "All high-level info for the whole vpc"
-  type        = object({ env = string, tags = map(string) })
+variable "env" {
+  description = "Specific path-to-production environment"
+  type        = string
 }
 
 variable "victor_ops_url" {
@@ -21,9 +11,4 @@ variable "victor_ops_url" {
 variable "medicare_opt_out_config" {
   description = "Config for medicare opt out S3 bucket"
   type        = object({ read_roles = list(string), write_accts = list(string), admin_users = list(string) })
-}
-
-# add module feature toggles here
-variable "module_features" {
-  type = map(bool)
 }

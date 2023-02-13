@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -17,8 +18,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     implements ResourceTypeV2<TResource, TEntity> {
   /** Name used when parsing parameter string to find appropriate instance. */
   protected final String nameForParsing;
-  /** Value returned by {@link ResourceTypeV2#getNameForMetrics} */
-  protected final String nameForMetrics;
+  /** Value returned by {@link ResourceTypeV2#getTypeLabel()}. */
+  protected final String typeLabel;
   /** The JPA entity class. */
   protected final Class<TEntity> entityClass;
   /** The attribute holding the MBI in the entity class. */
@@ -26,41 +27,43 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   /** The attribute holding the claim ID in the entity class. */
   protected final String entityIdAttribute;
   /** The attribute holding the end date for range queries in the entity class. */
-  protected final String entityEndDateAttribute;
+  protected final List<String> entityServiceDateAttributes;
   /** The {@link ResourceTransformer} to convert an entity into a response object. */
   protected final ResourceTransformer<TResource> transformer;
 
   /**
    * Constructor intended for use by derived classes to set values in common fields.
    *
-   * @param nameForMetrics value returned by {@link ResourceTypeV2#getNameForMetrics}
+   * @param nameForParsing the name for parsing
+   * @param typeLabel value returned by {@link ResourceTypeV2#getTypeLabel()}
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
-   * @param entityEndDateAttribute the attribute name for the service end date on the entity class
+   * @param entityServiceDateAttributes the attribute name for the service end date on the entity
+   *     class
    * @param transformer the transformer used to convert from the given entity to the associated
    *     resource type
    */
   protected AbstractResourceTypeV2(
       String nameForParsing,
-      String nameForMetrics,
+      String typeLabel,
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      String entityEndDateAttribute,
+      List<String> entityServiceDateAttributes,
       ResourceTransformer<TResource> transformer) {
     this.nameForParsing = nameForParsing;
-    this.nameForMetrics = nameForMetrics;
+    this.typeLabel = typeLabel;
     this.entityClass = entityClass;
     this.entityMbiRecordAttribute = entityMbiRecordAttribute;
     this.entityIdAttribute = entityIdAttribute;
-    this.entityEndDateAttribute = entityEndDateAttribute;
+    this.entityServiceDateAttributes = entityServiceDateAttributes;
     this.transformer = transformer;
   }
 
   @Override
-  public String getNameForMetrics() {
-    return nameForMetrics;
+  public String getTypeLabel() {
+    return typeLabel;
   }
 
   @Override
@@ -79,8 +82,8 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   }
 
   @Override
-  public String getEntityEndDateAttribute() {
-    return entityEndDateAttribute;
+  public List<String> getEntityServiceDateAttributes() {
+    return entityServiceDateAttributes;
   }
 
   @Override
@@ -90,8 +93,10 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
 
   /**
    * Scans the provided instances to find the first one whose {@link
-   * AbstractResourceTypeV2#nameForParsing} is equal to the provided string.
+   * AbstractResourceTypeV2#nameForParsing}* is equal to the provided string.
    *
+   * @param <TResource> the type parameter for the resource
+   * @param <TSubclass> the type parameter for the resource subclass
    * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#nameForParsing} value to parse
    *     search for
    * @param values The specific instances to search
