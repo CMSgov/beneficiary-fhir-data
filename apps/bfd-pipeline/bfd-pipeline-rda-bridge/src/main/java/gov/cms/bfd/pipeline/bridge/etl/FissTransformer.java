@@ -31,16 +31,16 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
-  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id */
+  /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id. */
   private final Map<String, BeneficiaryData> mbiMap;
-  /** Constant value used within the code */
+  /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
 
   /**
    * Transforms the given {@link Parser.Data} into RDA {@link FissClaimChange} data.
    *
-   * @param data The parsed {@link Parser.Data} to transform into RDA {@link FissClaimChange} data.
-   * @return The RDA {@link FissClaimChange} object generated from the given data.
+   * @param data The parsed {@link Parser.Data} to transform into RDA {@link FissClaimChange} data
+   * @return The RDA {@link FissClaimChange} object generated from the given data
    */
   @Override
   public Optional<MessageOrBuilder> transform(
@@ -94,9 +94,9 @@ public class FissTransformer extends AbstractTransformer {
    *
    * <p>Not currently implemented for FISS claims.
    *
-   * @param fissClaimChange The claim to add line items to.
-   * @param data The data to grab new line items from.
-   * @return The newly constructed claim with additional line items added.
+   * @param fissClaimChange The claim to add line items to
+   * @param data The data to grab new line items from
+   * @return The newly constructed claim with additional line items added
    */
   @VisibleForTesting
   FissClaimChange addToExistingClaim(FissClaimChange fissClaimChange, Parser.Data<String> data) {
@@ -110,9 +110,11 @@ public class FissTransformer extends AbstractTransformer {
   /**
    * Creates a new claim from the given {@link Parser.Data}.
    *
-   * @param sequenceNumber The sequence number of the current claim.
-   * @param data The {@link Parser.Data} to pull claim data for building the claim.
-   * @return A new claim built from parsing the given {@link Parser.Data}.
+   * @param sequenceNumber The sequence number of the current claim
+   * @param data The {@link Parser.Data} to pull claim data for building the claim
+   * @param mbiSampler The {@link DataSampler} of the mbis
+   * @param sampleId The sample of ids
+   * @return A new claim built from parsing the given {@link Parser.Data}
    */
   @VisibleForTesting
   FissClaimChange transformNewClaim(
@@ -214,8 +216,8 @@ public class FissTransformer extends AbstractTransformer {
   /**
    * Fallback method for creating a claim identifier from the CLM_ID field.
    *
-   * @param data The data to pull from for claim data.
-   * @return The generated claim identifier.
+   * @param data The data to pull from for claim data
+   * @return The generated claim identifier
    */
   @VisibleForTesting
   String convertDcn(Parser.Data<String> data) {
@@ -228,8 +230,8 @@ public class FissTransformer extends AbstractTransformer {
   /**
    * Adds diagnosis codes to the given claim, parsed from the given {@link Parser.Data}.
    *
-   * @param claimBuilder The claim to add diagnosis codes to.
-   * @param data The {@link Parser.Data} to pull diagnosis codes from.
+   * @param claimBuilder The claim to add diagnosis codes to
+   * @param data The {@link Parser.Data} to pull diagnosis codes from
    */
   @VisibleForTesting
   void addDiagCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {
@@ -259,8 +261,8 @@ public class FissTransformer extends AbstractTransformer {
   /**
    * Adds procedure codes to the given claim, parsed from the given {@link Parser.Data}.
    *
-   * @param claimBuilder The claim to add procedure codes to.
-   * @param data The {@link Parser.Data} to pull procedure codes from.
+   * @param claimBuilder The claim to add procedure codes to
+   * @param data The {@link Parser.Data} to pull procedure codes from
    */
   @VisibleForTesting
   void addProcCodes(FissClaim.Builder claimBuilder, Parser.Data<String> data) {

@@ -180,7 +180,19 @@ public class MappingBean implements ModelBean {
    * @return filled optional containing the {@link JoinBean} if one matches, otherwise empty
    */
   public Optional<JoinBean> findJoinByFieldName(String name) {
-    return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findAny();
+    return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findFirst();
+  }
+
+  /**
+   * Searches for a {@link TransformationBean} in this entity with the {@link
+   * TransformationBean#getTo()} name.
+   *
+   * @param toName name of the transformed field
+   * @return filled optional containing the {@link TransformationBean} if one matches, otherwise
+   *     empty
+   */
+  public Optional<TransformationBean> findTransformationByToName(String toName) {
+    return transformations.stream().filter(t -> t.getTo().equals(toName)).findFirst();
   }
 
   /**

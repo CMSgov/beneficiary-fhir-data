@@ -156,6 +156,8 @@ public class RdaLoadOptions implements Serializable {
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
         sink = new FissClaimRdaSink(appState, transformer, true, errorLimit);
+      } else if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR) {
+        sink = new FissClaimRdaSink(appState, transformer, false, errorLimit);
       } else {
         sink =
             ConcurrentRdaSink.createSink(
@@ -226,6 +228,8 @@ public class RdaLoadOptions implements Serializable {
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
         sink = new McsClaimRdaSink(appState, transformer, true, errorLimit);
+      } else if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR) {
+        sink = new McsClaimRdaSink(appState, transformer, false, errorLimit);
       } else {
         sink =
             ConcurrentRdaSink.createSink(

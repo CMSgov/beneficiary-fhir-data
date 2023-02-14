@@ -269,6 +269,56 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /** Tests the {@link DataTransformer#copyShortString} method. */
+  @Test
+  public void testCopyShortString() {
+    transformer
+        .copyShortString("valid-1", false, "123", copied::add)
+        .copyShortString("invalid-1", true, "not a number", copied::add)
+        .copyShortString("invalid-2", true, "123a", copied::add)
+        .copyShortString(
+            "invalid-3", true, String.valueOf(((int) Short.MAX_VALUE) + 1), copied::add)
+        .copyShortString(
+            "invalid-4", true, String.valueOf(((int) Short.MIN_VALUE) - 1), copied::add)
+        .copyShortString("valid-2", true, "-456", copied::add)
+        .copyShortString("null-ok", true, null, copied::add)
+        .copyShortString("null-bad", false, null, copied::add);
+    assertEquals(ImmutableList.of((short) 123, (short) -456), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("invalid-1", "invalid short"),
+            new DataTransformer.ErrorMessage("invalid-2", "invalid short"),
+            new DataTransformer.ErrorMessage("invalid-3", "invalid short"),
+            new DataTransformer.ErrorMessage("invalid-4", "invalid short"),
+            new DataTransformer.ErrorMessage("null-bad", "is null")),
+        transformer.getErrors());
+  }
+
+  /** Tests the {@link DataTransformer#copyOptionalShortString} method. */
+  @Test
+  public void testCopyOptionalShortString() {
+    transformer
+        .copyOptionalShortString("not-present", () -> false, () -> "99", copied::add)
+        .copyOptionalShortString("valid-1", () -> true, () -> "123", copied::add)
+        .copyOptionalShortString("invalid-1", () -> true, () -> "not a number", copied::add)
+        .copyOptionalShortString("invalid-2", () -> true, () -> "123a", copied::add)
+        .copyOptionalShortString(
+            "invalid-3", () -> true, () -> String.valueOf(((int) Short.MAX_VALUE) + 1), copied::add)
+        .copyOptionalShortString(
+            "invalid-4", () -> true, () -> String.valueOf(((int) Short.MIN_VALUE) - 1), copied::add)
+        .copyOptionalShortString("valid-2", () -> true, () -> "-456", copied::add)
+        .copyOptionalShortString("null-bad", () -> true, () -> null, copied::add);
+    assertEquals(ImmutableList.of((short) 123, (short) -456), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("invalid-1", "invalid short"),
+            new DataTransformer.ErrorMessage("invalid-2", "invalid short"),
+            new DataTransformer.ErrorMessage("invalid-3", "invalid short"),
+            new DataTransformer.ErrorMessage("invalid-4", "invalid short"),
+            new DataTransformer.ErrorMessage("null-bad", "is null")),
+        transformer.getErrors());
+  }
+
   /** Tests the {@link DataTransformer#copyLongString} method. */
   @Test
   public void testCopyLongString() {

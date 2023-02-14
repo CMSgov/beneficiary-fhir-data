@@ -46,12 +46,14 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
    * execution may be desired.
    */
   public enum SinkTypePreference {
-    /** Represents no type preference. */
+    /** No preference. Accept the default based on app configuration. */
     NONE,
-    /** Represents a synchronous type preference. */
+    /** Synchronous sink with automatic progress updates. */
     SYNCHRONOUS,
-    /** Represents an asynchronous type preference. */
-    ASYNCHRONOUS
+    /** Asynchronous sink without automatic progress updates. */
+    ASYNCHRONOUS,
+    /** Synchronous sink without automatic progress updates. */
+    PRE_PROCESSOR
   }
 
   /** The job configuration. */
@@ -115,7 +117,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     }
     try {
       try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.SYNCHRONOUS)) {
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.PRE_PROCESSOR)) {
         source.retrieveAndProcessObjects(1, sink);
       }
 

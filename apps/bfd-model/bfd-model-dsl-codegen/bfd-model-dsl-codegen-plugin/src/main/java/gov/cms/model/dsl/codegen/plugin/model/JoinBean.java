@@ -316,7 +316,7 @@ public class JoinBean implements ModelBean {
     public Parent() {
       setJoinType(JoinType.OneToMany);
       setCollectionType(CollectionType.List);
-      setFetchType(FetchType.EAGER);
+      setFetchType(FetchType.LAZY);
       setReadOnly(true);
       setOrphanRemoval(true);
       getCascadeTypes().add(CascadeType.ALL);

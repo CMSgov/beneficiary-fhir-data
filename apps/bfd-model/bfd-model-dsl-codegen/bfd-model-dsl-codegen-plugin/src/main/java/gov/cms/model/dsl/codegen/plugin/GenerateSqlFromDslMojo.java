@@ -38,9 +38,9 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
 
   /** Path to a single file to hold all of the generated template SQL code. */
   @Parameter(
-      property = "outputFile",
+      property = "sqlFile",
       defaultValue = "${project.build.directory}/generated-sources/entities-schema.sql")
-  private String outputFile;
+  private String sqlFile;
 
   /**
    * Executed by maven to execute the mojo. Reads all mapping files and generates template SQL code
@@ -50,7 +50,7 @@ public class GenerateSqlFromDslMojo extends AbstractMojo {
    */
   public void execute() throws MojoExecutionException {
     try {
-      File outputFile = new File(this.outputFile);
+      File outputFile = new File(this.sqlFile);
       outputFile.getParentFile().mkdirs();
       try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)))) {
         RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);

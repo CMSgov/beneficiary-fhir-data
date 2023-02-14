@@ -1,0 +1,402 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.PartDEvent
+  entityInterfaces:
+  - gov.cms.bfd.model.rif.RifRecordBase
+  id: PartDEvent
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: 723 PDE ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt)
+      dbName: pde_id
+      name: eventId
+      nullable: false
+      sqlType: bigint
+      javaType: long
+    - comment: Claim Group ID
+      dbName: clm_grp_id
+      name: claimGroupId
+      nullable: false
+      sqlType: bigint
+      javaType: long
+    - comment: Final Action (F/N) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt)
+      dbName: final_action
+      javaType: char
+      name: finalAction
+      nullable: false
+      sqlType: char
+    - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
+      dbName: bene_id
+      name: beneficiaryId
+      nullable: false
+      sqlType: bigint
+      javaType: long
+    - comment: RX Service Date (DOS) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_dt.txt)
+      dbName: srvc_dt
+      name: prescriptionFillDate
+      nullable: false
+      sqlType: date
+    - comment: Paid Date (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pd_dt.txt)
+      dbName: pd_dt
+      name: paymentDate
+      sqlType: date
+    - comment: Service Provider ID Qualifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id_qlfyr_cd.txt)
+      dbName: srvc_prvdr_id_qlfyr_cd
+      name: serviceProviderIdQualiferCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: Service Provider ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id.txt)
+      dbName: srvc_prvdr_id
+      name: serviceProviderId
+      nullable: false
+      sqlType: varchar(15)
+    - comment: Prescriber ID Qualifier Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id_qlfyr_cd.txt)
+      dbName: prscrbr_id_qlfyr_cd
+      name: prescriberIdQualifierCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: Prescriber ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id.txt)
+      dbName: prscrbr_id
+      name: prescriberId
+      nullable: false
+      sqlType: varchar(15)
+    - comment: RX Service Reference Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_srvc_rfrnc_num.txt)
+      dbName: rx_srvc_rfrnc_num
+      name: prescriptionReferenceNumber
+      nullable: false
+      sqlType: numeric(12)
+    - comment: Product Service ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prod_srvc_id.txt)
+      dbName: prod_srvc_id
+      name: nationalDrugCode
+      nullable: false
+      sqlType: varchar(19)
+    - comment: Plan Contract Record ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt)
+      dbName: plan_cntrct_rec_id
+      name: planContractId
+      nullable: false
+      sqlType: varchar(5)
+    - comment: Plan PBP Record Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt)
+      dbName: plan_pbp_rec_num
+      name: planBenefitPackageId
+      nullable: false
+      sqlType: varchar(3)
+    - comment: Compound Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cmpnd_cd.txt)
+      dbName: cmpnd_cd
+      javaType: int
+      name: compoundCode
+      nullable: false
+      sqlType: integer
+    - comment: Dispense as Written (DAW) Product Selection Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt)
+      dbName: daw_prod_slctn_cd
+      javaType: char
+      name: dispenseAsWrittenProductSelectionCode
+      nullable: false
+      sqlType: char
+    - comment: Quantity Dispensed (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qty_dspnsd_num.txt)
+      dbName: qty_dspnsd_num
+      name: quantityDispensed
+      nullable: false
+      sqlType: numeric(10,3)
+    - comment: Days Supply (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt)
+      dbName: days_suply_num
+      name: daysSupply
+      nullable: false
+      sqlType: numeric
+    - comment: Fill Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fill_num.txt)
+      dbName: fill_num
+      name: fillNumber
+      nullable: false
+      sqlType: numeric
+    - comment: Dispensing Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt)
+      dbName: dspnsng_stus_cd
+      javaType: Character
+      name: dispensingStatusCode
+      sqlType: char
+    - comment: Drug Coverage Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt)
+      dbName: drug_cvrg_stus_cd
+      javaType: char
+      name: drugCoverageStatusCode
+      nullable: false
+      sqlType: char
+    - comment: Adjustment Deletion Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt)
+      dbName: adjstmt_dltn_cd
+      javaType: Character
+      name: adjustmentDeletionCode
+      sqlType: char
+    - comment: Non-Standard Format Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt)
+      dbName: nstd_frmt_cd
+      javaType: Character
+      name: nonstandardFormatCode
+      sqlType: char
+    - comment: Pricing Exception Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt)
+      dbName: prcng_excptn_cd
+      javaType: Character
+      name: pricingExceptionCode
+      sqlType: char
+    - comment: Catastrophic Coverage Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt)
+      dbName: ctstrphc_cvrg_cd
+      javaType: Character
+      name: catastrophicCoverageCode
+      sqlType: char
+    - comment: Gross Drug Cost Below Out-of-Pocket Threshold (GDCB) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_blw_oopt_amt.txt)
+      dbName: gdc_blw_oopt_amt
+      name: grossCostBelowOutOfPocketThreshold
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Gross Drug Cost Above Out-of-Pocket Threshold (GDCA) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_abv_oopt_amt.txt)
+      dbName: gdc_abv_oopt_amt
+      name: grossCostAboveOutOfPocketThreshold
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Patient Pay Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt)
+      dbName: ptnt_pay_amt
+      name: patientPaidAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Other TrOOP Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt)
+      dbName: othr_troop_amt
+      name: otherTrueOutOfPocketPaidAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Low Income Cost Sharing Subsidy Amount (LICS) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt)
+      dbName: lics_amt
+      name: lowIncomeSubsidyPaidAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Patient Liability Reduction Due to Other Payer Amount (PLRO) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt)
+      dbName: plro_amt
+      name: patientLiabilityReductionOtherPaidAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Covered D Plan Paid Amount (CPP) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cvrd_d_plan_pd_amt.txt)
+      dbName: cvrd_d_plan_pd_amt
+      name: partDPlanCoveredPaidAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Non-Covered Plan Paid Amount (NPP) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncvrd_plan_pd_amt.txt)
+      dbName: ncvrd_plan_pd_amt
+      name: partDPlanNonCoveredPaidAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Gross Drug Cost (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt)
+      dbName: tot_rx_cst_amt
+      name: totalPrescriptionCost
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: Prescription Origin Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt)
+      dbName: rx_orgn_cd
+      javaType: Character
+      name: prescriptionOriginationCode
+      sqlType: char
+    - comment: Gap Discount Amount reported by the Submitting Plan (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt)
+      dbName: rptd_gap_dscnt_num
+      name: gapDiscountAmount
+      nullable: false
+      sqlType: numeric(8,2)
+    - comment: The Brand-Generic Code reported by the submitting plan (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt)
+      dbName: brnd_gnrc_cd
+      javaType: Character
+      name: brandGenericCode
+      sqlType: char
+    - comment: Pharmacy Service Type Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt)
+      dbName: phrmcy_srvc_type_cd
+      name: pharmacyTypeCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: Patient Residence Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt)
+      dbName: ptnt_rsdnc_cd
+      name: patientResidenceCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: Submission Clarification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt)
+      dbName: submsn_clr_cd
+      name: submissionClarificationCode
+      sqlType: varchar(2)
+    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+      dbName: last_updated
+      name: lastUpdated
+      sqlType: timestamp with time zone
+    equalsNeeded: false
+    name: partd_events
+    primaryKeyColumns:
+    - eventId
+    quoteNames: false
+  enumTypes:
+  - name: PartDEventColumn
+    packageName: gov.cms.bfd.model.rif
+    values:
+    - PDE_ID
+    - CLM_GRP_ID
+    - FINAL_ACTION
+    - BENE_ID
+    - SRVC_DT
+    - PD_DT
+    - SRVC_PRVDR_ID_QLFYR_CD
+    - SRVC_PRVDR_ID
+    - PRSCRBR_ID_QLFYR_CD
+    - PRSCRBR_ID
+    - RX_SRVC_RFRNC_NUM
+    - PROD_SRVC_ID
+    - PLAN_CNTRCT_REC_ID
+    - PLAN_PBP_REC_NUM
+    - CMPND_CD
+    - DAW_PROD_SLCTN_CD
+    - QTY_DSPNSD_NUM
+    - DAYS_SUPLY_NUM
+    - FILL_NUM
+    - DSPNSNG_STUS_CD
+    - DRUG_CVRG_STUS_CD
+    - ADJSTMT_DLTN_CD
+    - NSTD_FRMT_CD
+    - PRCNG_EXCPTN_CD
+    - CTSTRPHC_CVRG_CD
+    - GDC_BLW_OOPT_AMT
+    - GDC_ABV_OOPT_AMT
+    - PTNT_PAY_AMT
+    - OTHR_TROOP_AMT
+    - LICS_AMT
+    - PLRO_AMT
+    - CVRD_D_PLAN_PD_AMT
+    - NCVRD_PLAN_PD_AMT
+    - TOT_RX_CST_AMT
+    - RX_ORGN_CD
+    - RPTD_GAP_DSCNT_NUM
+    - BRND_GNRC_CD
+    - PHRMCY_SRVC_TYPE_CD
+    - PTNT_RSDNC_CD
+    - SUBMSN_CLR_CD
+  transformations:
+  - from: PDE_ID
+    optionalComponents: None
+    to: eventId
+    transformer: LongString
+  - defaultValue: '0'
+    from: CLM_GRP_ID
+    optionalComponents: None
+    to: claimGroupId
+    transformer: LongString
+  - from: FINAL_ACTION
+    optionalComponents: None
+    to: finalAction
+  - from: BENE_ID
+    optionalComponents: None
+    to: beneficiaryId
+    transformer: LongString
+  - from: SRVC_DT
+    optionalComponents: None
+    to: prescriptionFillDate
+  - from: PD_DT
+    to: paymentDate
+  - from: SRVC_PRVDR_ID_QLFYR_CD
+    optionalComponents: None
+    to: serviceProviderIdQualiferCode
+  - from: SRVC_PRVDR_ID
+    optionalComponents: None
+    to: serviceProviderId
+  - from: PRSCRBR_ID_QLFYR_CD
+    optionalComponents: None
+    to: prescriberIdQualifierCode
+  - from: PRSCRBR_ID
+    optionalComponents: None
+    to: prescriberId
+  - defaultValue: '0'
+    from: RX_SRVC_RFRNC_NUM
+    optionalComponents: None
+    to: prescriptionReferenceNumber
+  - from: PROD_SRVC_ID
+    optionalComponents: None
+    to: nationalDrugCode
+  - from: PLAN_CNTRCT_REC_ID
+    optionalComponents: None
+    to: planContractId
+  - from: PLAN_PBP_REC_NUM
+    optionalComponents: None
+    to: planBenefitPackageId
+  - defaultValue: '0'
+    from: CMPND_CD
+    optionalComponents: None
+    to: compoundCode
+    transformer: IntString
+  - from: DAW_PROD_SLCTN_CD
+    optionalComponents: None
+    to: dispenseAsWrittenProductSelectionCode
+  - defaultValue: '0'
+    from: QTY_DSPNSD_NUM
+    optionalComponents: None
+    to: quantityDispensed
+  - defaultValue: '0'
+    from: DAYS_SUPLY_NUM
+    optionalComponents: None
+    to: daysSupply
+  - defaultValue: '0'
+    from: FILL_NUM
+    optionalComponents: None
+    to: fillNumber
+  - from: DSPNSNG_STUS_CD
+    to: dispensingStatusCode
+  - from: DRUG_CVRG_STUS_CD
+    optionalComponents: None
+    to: drugCoverageStatusCode
+  - from: ADJSTMT_DLTN_CD
+    to: adjustmentDeletionCode
+  - from: NSTD_FRMT_CD
+    to: nonstandardFormatCode
+  - from: PRCNG_EXCPTN_CD
+    to: pricingExceptionCode
+  - from: CTSTRPHC_CVRG_CD
+    to: catastrophicCoverageCode
+  - defaultValue: '0'
+    from: GDC_BLW_OOPT_AMT
+    optionalComponents: None
+    to: grossCostBelowOutOfPocketThreshold
+  - defaultValue: '0'
+    from: GDC_ABV_OOPT_AMT
+    optionalComponents: None
+    to: grossCostAboveOutOfPocketThreshold
+  - defaultValue: '0'
+    from: PTNT_PAY_AMT
+    optionalComponents: None
+    to: patientPaidAmount
+  - defaultValue: '0'
+    from: OTHR_TROOP_AMT
+    optionalComponents: None
+    to: otherTrueOutOfPocketPaidAmount
+  - defaultValue: '0'
+    from: LICS_AMT
+    optionalComponents: None
+    to: lowIncomeSubsidyPaidAmount
+  - defaultValue: '0'
+    from: PLRO_AMT
+    optionalComponents: None
+    to: patientLiabilityReductionOtherPaidAmount
+  - defaultValue: '0'
+    from: CVRD_D_PLAN_PD_AMT
+    optionalComponents: None
+    to: partDPlanCoveredPaidAmount
+  - defaultValue: '0'
+    from: NCVRD_PLAN_PD_AMT
+    optionalComponents: None
+    to: partDPlanNonCoveredPaidAmount
+  - defaultValue: '0'
+    from: TOT_RX_CST_AMT
+    optionalComponents: None
+    to: totalPrescriptionCost
+  - from: RX_ORGN_CD
+    to: prescriptionOriginationCode
+  - defaultValue: '0'
+    from: RPTD_GAP_DSCNT_NUM
+    optionalComponents: None
+    to: gapDiscountAmount
+  - from: BRND_GNRC_CD
+    to: brandGenericCode
+  - from: PHRMCY_SRVC_TYPE_CD
+    optionalComponents: None
+    to: pharmacyTypeCode
+  - from: PTNT_RSDNC_CD
+    optionalComponents: None
+    to: patientResidenceCode
+  - from: SUBMSN_CLR_CD
+    to: submissionClarificationCode
+  transformerClassName: gov.cms.bfd.model.rif.PartDEventParser

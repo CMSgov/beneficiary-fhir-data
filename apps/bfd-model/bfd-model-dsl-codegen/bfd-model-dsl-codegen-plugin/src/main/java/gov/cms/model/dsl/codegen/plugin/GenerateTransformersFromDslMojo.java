@@ -98,9 +98,9 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
 
   /** Path to directory to contain generated code. */
   @Parameter(
-      property = "outputDirectory",
+      property = "transformersDirectory",
       defaultValue = "${project.build.directory}/generated-sources/transformers")
-  private String outputDirectory;
+  private String transformersDirectory;
 
   /**
    * Instance of {@link MavenProject} used to call {@link MavenProject#addCompileSourceRoot(String)}
@@ -116,14 +116,14 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
    * All fields constructor for use in unit tests.
    *
    * @param mappingPath path to file or directory containing mappings
-   * @param outputDirectory path to directory to contain generated code
+   * @param transformersDirectory path to directory to contain generated code
    * @param project instance of {@link MavenProject}
    */
   @VisibleForTesting
   GenerateTransformersFromDslMojo(
-      String mappingPath, String outputDirectory, MavenProject project) {
+      String mappingPath, String transformersDirectory, MavenProject project) {
     this.mappingPath = mappingPath;
-    this.outputDirectory = outputDirectory;
+    this.transformersDirectory = transformersDirectory;
     this.project = project;
   }
 
@@ -136,7 +136,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
    */
   public void execute() throws MojoExecutionException {
     try {
-      final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
+      final File outputDir = MojoUtil.initializeOutputDirectory(transformersDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
       MojoUtil.validateModel(root);
       for (MappingBean mapping : root.getMappings()) {
@@ -146,7 +146,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
           javaFile.writeTo(outputDir);
         }
       }
-      project.addCompileSourceRoot(outputDirectory);
+      project.addCompileSourceRoot(transformersDirectory);
     } catch (IOException ex) {
       throw new MojoExecutionException("I/O error during code generation", ex);
     }
@@ -355,7 +355,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
             .addModifiers(Modifier.PUBLIC)
             .addParameter(messageClassType, FieldTransformer.SOURCE_VAR);
     builder.addStatement(
-        "final $T $L = new $T();",
+        "final $T $L = new $T()",
         DataTransformer.class,
         FieldTransformer.TRANSFORMER_VAR,
         DataTransformer.class);
