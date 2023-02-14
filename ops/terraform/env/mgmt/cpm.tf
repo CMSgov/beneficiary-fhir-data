@@ -74,7 +74,10 @@ resource "aws_sns_topic_policy" "cpm_daily_report" {
       "Sid": "SubscribePermissions",
       "Effect": "Allow",
       "Principal": {
-        "AWS": "*"
+        "AWS": [
+          "${data.aws_ssm_parameter.cpm_aws_account_arn.value}",
+          "arn:aws:iam::${local.account_id}:root"
+        ]
       },
       "Action": [
         "SNS:Subscribe",
@@ -157,7 +160,10 @@ resource "aws_sns_topic_policy" "cpm_failure_alerts" {
       "Sid": "SubscribePermissions",
       "Effect": "Allow",
       "Principal": {
-        "AWS": "*"
+        "AWS": [
+          "${data.aws_ssm_parameter.cpm_aws_account_arn.value}",
+          "arn:aws:iam::${local.account_id}:root"
+        ]
       },
       "Action": [
         "SNS:Subscribe",
