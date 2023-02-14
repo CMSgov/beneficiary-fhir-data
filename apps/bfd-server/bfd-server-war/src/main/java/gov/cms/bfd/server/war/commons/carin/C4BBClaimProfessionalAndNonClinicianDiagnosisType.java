@@ -8,12 +8,12 @@ package gov.cms.bfd.server.war.commons.carin;
 public enum C4BBClaimProfessionalAndNonClinicianDiagnosisType {
   /**
    * The single medical diagnosis that is most relevant to the patient's chief complaint or need for
-   * treatment.*
+   * treatment.
    */
   PRINCIPAL,
   /**
    * Required when necessary to report additional diagnoses on professional and non-clinician
-   * claims. *
+   * claims.
    */
   SECONDARY;
 

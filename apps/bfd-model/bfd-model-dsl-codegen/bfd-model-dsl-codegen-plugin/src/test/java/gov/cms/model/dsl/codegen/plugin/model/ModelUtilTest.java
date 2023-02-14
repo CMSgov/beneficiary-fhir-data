@@ -1,15 +1,21 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
 import static gov.cms.model.dsl.codegen.plugin.model.ModelUtil.mapJavaTypeToTypeName;
+import static gov.cms.model.dsl.codegen.plugin.model.ModelUtil.mapSqlTypeToTypeName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.io.Files;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,6 +25,10 @@ public class ModelUtilTest {
   /** Test methods that parse class and package names from strings. */
   @Test
   public void testClassNameParsing() {
+    assertFalse(ModelUtil.isValidFullClassName(null));
+    assertFalse(ModelUtil.isValidFullClassName(""));
+    assertFalse(ModelUtil.isValidFullClassName("String"));
+    assertTrue(ModelUtil.isValidFullClassName("java.lang.String"));
     assertEquals("java.lang", ModelUtil.packageName("java.lang.String"));
     assertEquals("String", ModelUtil.className("java.lang.String"));
     assertEquals(ClassName.get(String.class), ModelUtil.classType("java.lang.String"));
@@ -70,5 +80,32 @@ public class ModelUtilTest {
         Optional.of(ClassName.get(ColumnBean.class)),
         mapJavaTypeToTypeName(ColumnBean.class.getName()));
     assertEquals(Optional.empty(), mapJavaTypeToTypeName("undefined"));
+  }
+
+  /** Validates that {@link ModelUtil#mapSqlTypeToTypeName} returns the correct type. */
+  @Test
+  public void testMapSqlTypeToTypeName() {
+    assertEquals(Optional.of(ClassName.get(String.class)), mapSqlTypeToTypeName("char"));
+    assertEquals(Optional.of(ClassName.get(String.class)), mapSqlTypeToTypeName("char(2)"));
+    assertEquals(Optional.of(ClassName.get(String.class)), mapSqlTypeToTypeName("varchar"));
+    assertEquals(Optional.of(ClassName.get(String.class)), mapSqlTypeToTypeName("varchar(10)"));
+    assertEquals(Optional.of(ClassName.get(String.class)), mapSqlTypeToTypeName("varchar(max)"));
+    assertEquals(Optional.of(ClassName.get(Short.class)), mapSqlTypeToTypeName("smallint"));
+    assertEquals(Optional.of(ClassName.get(Long.class)), mapSqlTypeToTypeName("bigint"));
+    assertEquals(Optional.of(ClassName.get(Integer.class)), mapSqlTypeToTypeName("int"));
+    assertEquals(Optional.of(ClassName.get(Integer.class)), mapSqlTypeToTypeName("integer"));
+    assertEquals(Optional.of(ClassName.get(BigDecimal.class)), mapSqlTypeToTypeName("numeric"));
+    assertEquals(Optional.of(ClassName.get(BigDecimal.class)), mapSqlTypeToTypeName("numeric(10)"));
+    assertEquals(
+        Optional.of(ClassName.get(BigDecimal.class)), mapSqlTypeToTypeName("numeric(12,2)"));
+    assertEquals(Optional.of(ClassName.get(BigDecimal.class)), mapSqlTypeToTypeName("decimal"));
+    assertEquals(Optional.of(ClassName.get(BigDecimal.class)), mapSqlTypeToTypeName("decimal(10)"));
+    assertEquals(
+        Optional.of(ClassName.get(BigDecimal.class)), mapSqlTypeToTypeName("decimal(12,2)"));
+    assertEquals(Optional.of(ClassName.get(LocalDate.class)), mapSqlTypeToTypeName("date"));
+    assertEquals(Optional.of(ClassName.get(Instant.class)), mapSqlTypeToTypeName("timestamp"));
+    assertEquals(
+        Optional.of(ClassName.get(Instant.class)), mapSqlTypeToTypeName("timestamp with timezone"));
+    assertEquals(Optional.empty(), mapSqlTypeToTypeName("undefined"));
   }
 }

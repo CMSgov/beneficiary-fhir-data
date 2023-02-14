@@ -39,6 +39,7 @@ public final class PipelineJobRecordStore {
   /** The number of milliseconds to wait between polling job dependencies' status. */
   private static final int JOB_DEPENDENCY_POLL_MILLIS = 100;
 
+  /** The metrics registry. */
   private final MetricRegistry appMetrics;
 
   /**
@@ -72,6 +73,8 @@ public final class PipelineJobRecordStore {
   }
 
   /**
+   * Gets a collection of pending jobs.
+   *
    * @param maxJobRecords the maximum number of matching {@link PipelineJobRecord}s to return
    * @return up to the specified number of {@link PipelineJobRecord}s where {@link
    *     PipelineJobRecord#isStarted()} is <code>false</code>

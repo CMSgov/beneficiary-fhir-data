@@ -11,7 +11,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import gov.cms.model.dsl.codegen.plugin.model.ArrayBean;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.EnumTypeBean;
 import gov.cms.model.dsl.codegen.plugin.model.JoinBean;
@@ -83,9 +82,9 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
 
   /** Path to directory to contain generated code. */
   @Parameter(
-      property = "outputDirectory",
+      property = "entitiesDirectory",
       defaultValue = "${project.build.directory}/generated-sources/entities")
-  private String outputDirectory;
+  private String entitiesDirectory;
 
   /**
    * Instance of {@link MavenProject} used to call {@link MavenProject#addCompileSourceRoot(String)}
@@ -101,13 +100,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    * All fields constructor for use in unit tests.
    *
    * @param mappingPath path to file or directory containing mappings
-   * @param outputDirectory path to directory to contain generated code
+   * @param entitiesDirectory path to directory to contain generated code
    * @param project instance of {@link MavenProject}
    */
   @VisibleForTesting
-  GenerateEntitiesFromDslMojo(String mappingPath, String outputDirectory, MavenProject project) {
+  GenerateEntitiesFromDslMojo(String mappingPath, String entitiesDirectory, MavenProject project) {
     this.mappingPath = mappingPath;
-    this.outputDirectory = outputDirectory;
+    this.entitiesDirectory = entitiesDirectory;
     this.project = project;
   }
 
@@ -119,13 +118,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    */
   public void execute() throws MojoExecutionException {
     try {
-      final File outputDir = MojoUtil.initializeOutputDirectory(outputDirectory);
+      final File outputDir = MojoUtil.initializeOutputDirectory(entitiesDirectory);
       final RootBean root = ModelUtil.loadModelFromYamlFileOrDirectory(mappingPath);
       MojoUtil.validateModel(root);
       generateEnumClasses(outputDir, root);
       generateEntityClasses(outputDir, root);
       if (project != null) {
-        project.addCompileSourceRoot(outputDirectory);
+        project.addCompileSourceRoot(entitiesDirectory);
       }
     } catch (IOException ex) {
       throw new MojoExecutionException("I/O error during code generation", ex);
@@ -331,7 +330,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     fields.addAll(createFieldDefinitionsForColumns(mapping, primaryKeyFieldNames));
     fields.addAll(createFieldDefinitionsForArrays(root, mapping, primaryKeyFieldNames.size()));
     fields.addAll(
-        createFieldDefinitionsForOrdinaryJoins(mapping, nonArrayJoins, primaryKeyFieldNames));
+        createFieldDefinitionsForOrdinaryJoins(root, mapping, nonArrayJoins, primaryKeyFieldNames));
     return fields;
   }
 
@@ -356,7 +355,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     List<FieldDefinition> fieldSpecs = new ArrayList<>();
     for (JoinBean join : joins) {
       if (primaryKeyFieldNames.contains(join.getFieldName())) {
-        var fieldDef = createFieldDefinitionForJoin(mapping, join);
+        var fieldDef = createFieldDefinitionForJoin(root, mapping, join);
         var primaryKeyFieldDef = createPrimaryKeyFieldSpecForJoin(root, mapping, join);
         fieldSpecs.add(fieldDef.withPrimaryKeyFieldSpec(primaryKeyFieldDef));
       }
@@ -367,6 +366,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   /**
    * Creates a list containing one {@link FieldDefinition} for each join that is not a primary key.
    *
+   * @param root {@link RootBean} containing all known {@link MappingBean}s
    * @param mapping {@link MappingBean} containing the joins
    * @param joins list of all of the {@link JoinBean}s to process
    * @param primaryKeyFieldNames collection containing the field name for all of the entity's
@@ -375,12 +375,15 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    */
   @VisibleForTesting
   List<FieldDefinition> createFieldDefinitionsForOrdinaryJoins(
-      MappingBean mapping, List<JoinBean> joins, Collection<String> primaryKeyFieldNames)
+      RootBean root,
+      MappingBean mapping,
+      List<JoinBean> joins,
+      Collection<String> primaryKeyFieldNames)
       throws MojoExecutionException {
     List<FieldDefinition> fieldSpecs = new ArrayList<>();
     for (JoinBean join : joins) {
       if (!primaryKeyFieldNames.contains(join.getFieldName())) {
-        fieldSpecs.add(createFieldDefinitionForJoin(mapping, join));
+        fieldSpecs.add(createFieldDefinitionForJoin(root, mapping, join));
       }
     }
     return fieldSpecs;
@@ -389,20 +392,22 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   /**
    * Creates a {@link FieldDefinition} for a {@link JoinBean} defined in the mapping.
    *
+   * @param root {@link RootBean} containing all known {@link MappingBean}s
    * @param mapping {@link MappingBean} containing the join
    * @param join {@link JoinBean} the join
    * @return the {@link FieldDefinition}
    * @throws MojoExecutionException if the join does not contain a package name
    */
   @VisibleForTesting
-  FieldDefinition createFieldDefinitionForJoin(MappingBean mapping, JoinBean join)
+  FieldDefinition createFieldDefinitionForJoin(RootBean root, MappingBean mapping, JoinBean join)
       throws MojoExecutionException {
-    if (!join.isValidEntityClass()) {
+    var entityClass = root.getEntityClassForJoin(join);
+    if (entityClass.isEmpty() || !ModelUtil.isValidFullClassName(entityClass.get())) {
       throw MojoUtil.createException(
           "entityClass for join must include package: mapping=%s join=%s entityClass=%s",
-          mapping.getId(), join.getFieldName(), join.getEntityClass());
+          mapping.getId(), join.getFieldName(), entityClass);
     }
-    var fieldType = join.getEntityClassType();
+    TypeName fieldType = ModelUtil.classType(entityClass.get());
     if (join.getJoinType().isMultiValue()) {
       fieldType = ParameterizedTypeName.get(join.getCollectionType().getInterfaceName(), fieldType);
     }
@@ -410,7 +415,9 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
         FieldSpec.builder(fieldType, join.getFieldName()).addModifiers(Modifier.PRIVATE);
     if (mapping.getTable().isPrimaryKey(join)) {
       fieldSpec.addAnnotation(Id.class);
-      fieldSpec.addAnnotation(EqualsAndHashCode.Include.class);
+      if (mapping.getTable().isEqualsNeeded()) {
+        fieldSpec.addAnnotation(EqualsAndHashCode.Include.class);
+      }
     }
     if (join.hasComment()) {
       fieldSpec.addJavadoc(join.getComment());
@@ -453,6 +460,10 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
       MappingBean mapping, Collection<String> primaryKeyFieldNames) throws MojoExecutionException {
     List<FieldDefinition> fieldSpecs = new ArrayList<>();
     for (ColumnBean column : mapping.getTable().getColumns()) {
+      // Do not generate fields for database only columns.
+      if (column.isDbOnly()) {
+        continue;
+      }
       var fieldDefinition = createFieldDefinitionForColumn(mapping, column);
       if (primaryKeyFieldNames.contains(column.getName())) {
         var primaryKeyFieldSpec =
@@ -508,24 +519,19 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   List<FieldDefinition> createFieldDefinitionsForArrays(
       RootBean root, MappingBean mapping, int primaryKeyFieldCount) throws MojoExecutionException {
     List<FieldDefinition> fieldSpecs = new ArrayList<>();
-    if (mapping.getArrays().size() > 0 && primaryKeyFieldCount != 1) {
+    var arrays = mapping.getArrayJoins();
+    if (arrays.size() > 0 && primaryKeyFieldCount != 1) {
       throw MojoUtil.createException(
           "classes with arrays must have a single primary key column but this one has %d: mapping=%s",
           primaryKeyFieldCount, mapping.getId());
     }
-    for (ArrayBean arrayBean : mapping.getArrays()) {
-      Optional<MappingBean> arrayMapping = root.findMappingWithId(arrayBean.getMapping());
-      if (arrayMapping.isEmpty()) {
+    for (JoinBean arrayBean : arrays) {
+      if (root.findMappingWithId(arrayBean.getEntityMapping()).isEmpty()) {
         throw MojoUtil.createException(
             "array references unknown mapping: mapping=%s array=%s missing=%s",
-            mapping.getId(), arrayBean.getTo(), arrayBean.getMapping());
+            mapping.getId(), arrayBean.getFieldName(), arrayBean.getEntityMapping());
       }
-      fieldSpecs.add(
-          createFieldDefinitionForArray(
-              mapping,
-              mapping.getTable().getPrimaryKeyColumns().get(0),
-              arrayBean,
-              arrayMapping.get()));
+      fieldSpecs.add(createFieldDefinitionForArray(root, mapping, arrayBean));
     }
     return fieldSpecs;
   }
@@ -534,27 +540,21 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    * Creates a {@link FieldDefinition} for the field that holds the values for a multi-value
    * (one-to-many or many-to-many) join corresponding to an array in the {@link MappingBean}.
    *
+   * @param root {@link RootBean} containing all known {@link MappingBean}s
    * @param mapping {@link MappingBean} containing the array
-   * @param primaryKeyFieldName field name of field holding the joined objects
-   * @param arrayBean {@link ArrayBean} containing the spec for elements of the array
-   * @param arrayMapping {@link MappingBean} for the entity of the array elements
+   * @param join {@link JoinBean} containing the spec for elements of the array
    * @return {@link FieldDefinition} for the field
    * @throws MojoExecutionException if the join is single value
    */
   @VisibleForTesting
-  FieldDefinition createFieldDefinitionForArray(
-      MappingBean mapping,
-      String primaryKeyFieldName,
-      ArrayBean arrayBean,
-      MappingBean arrayMapping)
+  FieldDefinition createFieldDefinitionForArray(RootBean root, MappingBean mapping, JoinBean join)
       throws MojoExecutionException {
-    final var join = getJoinForArray(mapping, primaryKeyFieldName, arrayBean, arrayMapping);
     if (join.getJoinType().isSingleValue()) {
       throw MojoUtil.createException(
           "array mappings must have multi-value joins: array=%s joinType=%s",
-          arrayBean.getTo(), join.getJoinType());
+          join.getFieldName(), join.getJoinType());
     }
-    return createFieldDefinitionForJoin(mapping, join);
+    return createFieldDefinitionForJoin(root, mapping, join);
   }
 
   /**
@@ -570,14 +570,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   @VisibleForTesting
   FieldSpec createPrimaryKeyFieldSpecForJoin(RootBean root, MappingBean mapping, JoinBean join)
       throws MojoExecutionException {
-    var parentMapping = root.findMappingWithEntityClassName(join.getEntityClass());
+    var parentMapping = root.findMappingForJoinBean(join);
     if (parentMapping.isEmpty()) {
       throw MojoUtil.createException(
-          "no mapping found for primary key join class: mapping=%s join=%s entityClass=%s",
-          mapping.getId(), join.getFieldName(), join.getEntityClass());
+          "no mapping found for primary key join class: mapping=%s join=%s entityClass=%s entityMapping=%s",
+          mapping.getId(), join.getFieldName(), join.getEntityClass(), join.getEntityMapping());
     }
-    var keyColumn =
-        parentMapping.get().getTable().findColumnByNameOrDbName(join.getJoinColumnName());
+    var keyColumn = parentMapping.get().getTable().findColumnByName(join.getJoinColumnName());
     return createPrimaryKeyFieldSpecForColumn(parentMapping.get(), join.getFieldName(), keyColumn);
   }
 
@@ -819,9 +818,18 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
       throw MojoUtil.createException(
           "missing joinColumnName: mapping=%s join=%s", mapping.getId(), join.getFieldName());
     }
+    final ColumnBean joinColumn =
+        mapping
+            .getTable()
+            .getColumnByName(join.getJoinColumnName())
+            .orElseThrow(
+                () ->
+                    MojoUtil.createException(
+                        "joinColumnName must match a column in the same mapping: mapping=%s joinColumnName=%s",
+                        mapping.getId(), join.getJoinColumnName()));
     AnnotationSpec.Builder builder =
         AnnotationSpec.builder(JoinColumn.class)
-            .addMember("name", "$S", mapping.getTable().quoteName(join.getJoinColumnName()));
+            .addMember("name", "$S", mapping.getTable().quoteName(joinColumn.getColumnName()));
     if (join.hasForeignKey()) {
       builder.addMember(
           "foreignKey",
@@ -831,38 +839,6 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
               .build());
     }
     return builder.build();
-  }
-
-  /**
-   * Creates or finds an appropriate {@link JoinBean} with meta data for the given {@link
-   * MappingBean#arrays} element. If there is an explicitly defined {@link JoinBean} for the given
-   * field name defined in the mapping it is returned. Otherwise a default {@link JoinBean} is
-   * created and returned.
-   *
-   * @param mapping {@link MappingBean} containing the array
-   * @param primaryKeyFieldName field name of the primary key in the entity that contains the array
-   * @param array {@link ArrayBean} containing the spec for elements of the array
-   * @param arrayMapping {@link MappingBean} for the entity of the array elements
-   * @return {@link JoinBean} containing the necessary info to create the join field
-   */
-  @VisibleForTesting
-  JoinBean getJoinForArray(
-      MappingBean mapping, String primaryKeyFieldName, ArrayBean array, MappingBean arrayMapping) {
-    for (JoinBean join : mapping.getTable().getJoins()) {
-      if (join.getFieldName().equals(array.getTo())) {
-        return join;
-      }
-    }
-    return JoinBean.builder()
-        .joinType(JoinBean.JoinType.OneToMany)
-        .collectionType(JoinBean.CollectionType.Set)
-        .fieldName(array.getTo())
-        .entityClass(arrayMapping.getEntityClassName())
-        .fetchType(FetchType.EAGER)
-        .orphanRemoval(true)
-        .cascadeTypes(List.of(CascadeType.ALL))
-        .mappedBy(primaryKeyFieldName)
-        .build();
   }
 
   /**

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.newrelic.relocated.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -31,8 +32,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.ClaimTypeV2;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
-import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -88,13 +87,39 @@ import org.junit.jupiter.params.provider.MethodSource;
  * that tests work reliably.
  *
  * <p>To re-generate the recorded responses, re-enable the {@link
- * EndpointJsonResponseComparatorIT#generateApprovedResponseFiles()} "test case" and run it. It will
+ * EndpointJsonResponseComparatorIT#generateApprovedResponseFiles} "test case" and run it. It will
  * regenerate ALL operation recordings. It's then your responsibility to ensure that only MEANINGFUL
  * differences to those responses are included in your PR, by clearing out any incidental noise,
  * e.g. timestamps.
  */
 public final class EndpointJsonResponseComparatorV2IT {
 
+  /** Test to use for an ignored field. */
+  private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
+
+  /** A set of ignored paths for testing. */
+  private static final Set<String> IGNORED_PATHS =
+      ImmutableSet.of(
+          "\"/id\"",
+          "\"/date\"",
+          "\"/created\"",
+          "\"/link/[0-9]/url\"",
+          "\"/implementation/url\"",
+          "\"/entry/[0-9]/fullUrl\"",
+          "\"/meta\"",
+          "\"/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta\"",
+          "\"/entry/[0-9]/resource/created\"",
+          "\"/procedure/[0-9]/date\"",
+          "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
+          "\"/software/version\"");
+
+  /**
+   * Returns data for parameterized tests.
+   *
+   * @return the data
+   */
   public static Stream<Arguments> data() {
     return Stream.of(
         arguments("metadata", (Supplier<String>) EndpointJsonResponseComparatorV2IT::metadata),
@@ -164,25 +189,6 @@ public final class EndpointJsonResponseComparatorV2IT {
         arguments("eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadSnf));
   }
 
-  private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
-
-  private static final Set<String> IGNORED_PATHS =
-      ImmutableSet.of(
-          "\"/id\"",
-          "\"/date\"",
-          "\"/created\"",
-          "\"/link/[0-9]/url\"",
-          "\"/implementation/url\"",
-          "\"/entry/[0-9]/fullUrl\"",
-          "\"/meta\"",
-          "\"/meta/lastUpdated\"",
-          "\"/entry/[0-9]/resource/meta/lastUpdated\"",
-          "\"/entry/[0-9]/resource/meta\"",
-          "\"/entry/[0-9]/resource/created\"",
-          "\"/procedure/[0-9]/date\"",
-          "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
-          "\"/software/version\"");
-
   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
    * that any existing data is deleted from the tables before running the test suite.
@@ -204,6 +210,9 @@ public final class EndpointJsonResponseComparatorV2IT {
   /**
    * Generates current endpoint response files, comparing them to the corresponding approved
    * responses.
+   *
+   * @param endpointId the endpoint id
+   * @param endpointOperation the endpoint operation
    */
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
@@ -221,6 +230,9 @@ public final class EndpointJsonResponseComparatorV2IT {
   /**
    * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
    * the <code>@Ignore</code> annotation and running this method as JUnit.
+   *
+   * @param endpointId the endpoint id
+   * @param endpointOperation the endpoint operation
    */
   @Disabled
   @ParameterizedTest(name = "endpointId = {0}")
@@ -266,6 +278,8 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
+   * Replaces ignored fields with filler text.
+   *
    * @param parent the {@link JsonNode} on which to perform the replacement
    * @param fieldName the {@link String} name of the field that is being replaced
    * @param pattern an optional {@link Pattern} pattern to correctly identify fields needing to be
@@ -293,7 +307,11 @@ public final class EndpointJsonResponseComparatorV2IT {
     }
   }
 
-  /** @return the results of the {@link IGenericClient#fetchConformance()} operation */
+  /**
+   * Gets the results of the {@link IGenericClient#fetchConformance()} operation.
+   *
+   * @return the metadata
+   */
   public static String metadata() {
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -344,6 +362,11 @@ public final class EndpointJsonResponseComparatorV2IT {
     return jsonResponse;
   }
 
+  /**
+   * Sorts the metadata resources.
+   *
+   * @param resources the resources
+   */
   static void sortMetaDataResources(JsonNode resources) {
     for (JsonNode resource : resources) {
       sortMetaDataSearchParamArray(resource);
@@ -357,6 +380,11 @@ public final class EndpointJsonResponseComparatorV2IT {
     resourceList.forEach(((ArrayNode) resources)::add);
   }
 
+  /**
+   * Sort the metadata search param array.
+   *
+   * @param resource the resource
+   */
   static void sortMetaDataSearchParamArray(JsonNode resource) {
     if (resource.has("searchParam")) {
       JsonNode searchParamsArray = resource.at("/searchParam");
@@ -444,8 +472,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   * Executes a search against the Patient endpoint using the sample A bene id and returns the
+   * sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientRead() {
     List<Object> loadedRecords =
@@ -466,9 +496,11 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation when {@link
-   *     ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to "hicn,mbi"
+   * Executes a search against the Patient endpoint using the sample A bene id and {@link
+   * R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} set to "hicn,mbi", then returns the
+   * sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientReadWithIncludeIdentifiers() {
     List<Object> loadedRecords =
@@ -497,8 +529,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
+   * Executes a search against the Patient endpoint (search by logical id) using the sample A bene
+   * id and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientSearchById() {
     List<Object> loadedRecords =
@@ -527,10 +561,12 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
-   *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
-   *     "hicn, mbi"
+   * Executes a search against the Patient endpoint (search by logical id) using the sample A bene
+   * id, {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} set to "hicn,mbi", {@link
+   * R4PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} set to true, and then returns the
+   * sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientSearchByIdWithIncludeIdentifiers() {
     List<Object> loadedRecords =
@@ -567,8 +603,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   * Executes a search against the Patient endpoint (search by identifier) using the sample A bene
+   * hicn and then returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientByIdentifier() {
     List<Object> loadedRecords =
@@ -598,8 +636,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   * Executes a search against the Patient endpoint (search by identifier) using the sample A bene
+   * hicn hash and then returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientByIdentifierWithoutReferenceYear() {
     List<Object> loadedRecords =
@@ -630,10 +670,12 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
-   *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
-   *     "hicn,mbi"
+   * Executes a search against the Patient endpoint (search by identifier) using the sample A bene
+   * hicn hash, {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} set to "hicn,mbi",
+   * {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} set to true, and then
+   * returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String patientByIdentifierWithIncludeIdentifiers() {
     List<Object> loadedRecords =
@@ -671,6 +713,8 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
+   * Sorts the patient identifiers for testing consistency.
+   *
    * @param unsortedResponse the JSON to fix up
    * @return the same JSON, but with the contents of <code>Patient.identifiers</code> sorted
    */
@@ -736,8 +780,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   * Executes a search against the Coverage endpoint using the sample A bene coverage id and returns
+   * the sorted results.
+   *
+   * @return the sorted results
    */
   public static String coverageRead() {
     List<Object> loadedRecords =
@@ -762,8 +808,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   * Executes a search against the Coverage endpoint using the sample A bene coverage id (with null
+   * ref year) and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String coverageReadWithNullReferenceYear() {
     List<Object> loadedRecords =
@@ -786,10 +834,12 @@ public final class EndpointJsonResponseComparatorV2IT {
         .execute();
     return jsonInterceptor.getResponse();
   }
+
   /**
-   * @return the results of the {@link
-   *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   *     operation
+   * Executes a search against the Coverage endpoint using the sample A bene id and returns the
+   * sorted results.
+   *
+   * @return the sorted results
    */
   public static String coverageSearchByPatientId() {
     List<Object> loadedRecords =
@@ -817,9 +867,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
-   *     operation
+   * Executes a search against the Coverage endpoint using the sample A (with no ref year) bene id
+   * and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String coverageSearchByPatientIdWithoutReferenceYear() {
     List<Object> loadedRecords =
@@ -848,9 +899,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam,
-   *     String, ca.uhn.fhir.rest.method.RequestDetails)} operation
+   * Executes a search against the EOB endpoint using the sample A bene id and returns the sorted
+   * results.
+   *
+   * @return the sorted results
    */
   public static String eobByPatientIdAll() {
     List<Object> loadedRecords =
@@ -876,9 +928,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the paged {@link
-   *     ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam,
-   *     String, ca.uhn.fhir.rest.method.RequestDetails)} operation
+   * Executes a search against the EOB endpoint using the sample A bene id and returns the sorted
+   * results with paging.
+   *
+   * @return the sorted results
    */
   public static String eobByPatientIdPaged() {
     List<Object> loadedRecords =
@@ -905,11 +958,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     Carrier claims, with the {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>true
-   *     </code>
+   * Executes a search against the EOB endpoint using a carrier claim id (based on the sample a
+   * data) and returns the sorted results with tax numbers included.
+   *
+   * @return the sorted results
    */
   public static String eobReadCarrierWithTaxNumbers() {
     List<Object> loadedRecords =
@@ -940,14 +992,13 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * This is a integration tests to make sure CareTeamComponent entries and their extensions are not
-   * duplicated when there are multiple carrier claim lines present
+   * Executes a search against the EOB endpoint using a carrier claim id (based on the sample a
+   * data) and returns the sorted results with tax numbers not included and multiple lines.
    *
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     multiple Carrier claim lines, with the {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>false
-   *     </code>
+   * <p>This is a integration test to make sure CareTeamComponent entries and their extensions are
+   * not duplicated when there are multiple carrier claim lines present
+   *
+   * @return the sorted results
    */
   public static String eobReadCarrierWithMultipleLines() {
     List<Object> loadedRecords =
@@ -980,9 +1031,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     Carrier claims
+   * Executes a search against the EOB endpoint using a carrier claim id (based on the sample a
+   * data) and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadCarrier() {
     List<Object> loadedRecords =
@@ -1007,11 +1059,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     DME claims, with the {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>true
-   *     </code>
+   * Executes a search against the EOB endpoint using a dme claim id (based on the sample a data)
+   * and returns the sorted results with tax numbers included.
+   *
+   * @return the sorted results
    */
   public static String eobReadDmeWithTaxNumbers() {
     List<Object> loadedRecords =
@@ -1042,9 +1093,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     DME claims
+   * Executes a search against the EOB endpoint using a dme claim id (based on the sample a data)
+   * and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadDme() {
     List<Object> loadedRecords =
@@ -1069,9 +1121,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     HHA claims
+   * Executes a search against the EOB endpoint using an HHA claim id (based on the sample a data)
+   * and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadHha() {
     List<Object> loadedRecords =
@@ -1096,9 +1149,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     Hospice claims
+   * Executes a search against the EOB endpoint using a hospice claim id (based on the sample a
+   * data) and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadHospice() {
     List<Object> loadedRecords =
@@ -1123,9 +1177,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     Inpatient claims
+   * Executes a search against the EOB endpoint using an inpatient claim id (based on the sample a
+   * data) and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadInpatient() {
     List<Object> loadedRecords =
@@ -1150,9 +1205,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     Outpatient claims
+   * Executes a search against the EOB endpoint using an outpatient claim id (based on the sample a
+   * data) and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadOutpatient() {
     List<Object> loadedRecords =
@@ -1177,9 +1233,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     PDE claims
+   * Executes a search against the EOB endpoint using a PDE claim id (based on the sample a data)
+   * and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadPde() {
     List<Object> loadedRecords =
@@ -1204,9 +1261,10 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @return the results of the {@link
-   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
-   *     SNF claims
+   * Executes a search against the EOB endpoint using an SNF claim id (based on the sample a data)
+   * and returns the sorted results.
+   *
+   * @return the sorted results
    */
   public static String eobReadSnf() {
     List<Object> loadedRecords =
@@ -1242,11 +1300,14 @@ public final class EndpointJsonResponseComparatorV2IT {
 
     String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
-
     AssertUtils.assertJsonEquals(approvedJson, newJson, IGNORED_PATHS);
   }
 
-  /** @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON */
+  /**
+   * Creates a fhir client and sets JSON encoding.
+   *
+   * @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON
+   */
   private static IGenericClient createFhirClientAndSetEncoding() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     fhirClient.setEncoding(EncodingEnum.JSON);
@@ -1255,6 +1316,8 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
+   * Create and register json interceptor.
+   *
    * @param fhirClient the {@link IGenericClient} to register the interceptor to.
    * @return a new {@link JsonInterceptor} after registering it with the fhirClient
    */
@@ -1265,7 +1328,11 @@ public final class EndpointJsonResponseComparatorV2IT {
     return jsonInterceptor;
   }
 
-  /** @return the path to the approved endpoint response directory */
+  /**
+   * Gets the approved response directory.
+   *
+   * @return the path to the approved endpoint response directory
+   */
   private static Path getApprovedResponseDir() {
     Path approvedResponseDir =
         Paths.get("..", "src", "test", "resources", "endpoint-responses", "v2");
@@ -1278,7 +1345,11 @@ public final class EndpointJsonResponseComparatorV2IT {
     return approvedResponseDir;
   }
 
-  /** @return the path to the target endpoint response directory */
+  /**
+   * Gets the target response directory.
+   *
+   * @return the path to the target endpoint response directory
+   */
   private static Path getTargetResponseDir() {
     Path targetDir = Paths.get("..", "target");
     if (!Files.isDirectory(targetDir)) {
@@ -1295,7 +1366,9 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
-   * @param directory the path to where the file should should be written
+   * Generates a path to use as a filename.
+   *
+   * @param directory the path to where the file should be written
    * @param endpoint the string to identify which endpoint's response the file contents contain
    * @return a path to use as a filename
    */
@@ -1304,6 +1377,8 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
+   * Writes a file to the specified path.
+   *
    * @param contents the string to be written to a file
    * @param fileName the path to name the file
    */
@@ -1318,6 +1393,8 @@ public final class EndpointJsonResponseComparatorV2IT {
   }
 
   /**
+   * Reads a file at the specified location.
+   *
    * @param path the path to the file
    * @return the contents of the file as a string.
    */
@@ -1336,6 +1413,12 @@ public final class EndpointJsonResponseComparatorV2IT {
    * JsonNode}, and returns true if the JsonNode satisfies the filter.
    */
   private static interface NodeFilter {
+    /**
+     * Applies the filter to the node.
+     *
+     * @param node the node
+     * @return {@code true} if the node satisfies the filter
+     */
     boolean apply(JsonNode node);
   }
 
@@ -1345,8 +1428,14 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   private static class NodeFilteringConsumer implements Consumer<JsonNode> {
 
+    /** The filter. */
     private NodeFilter f;
 
+    /**
+     * Instantiates a new Node filtering consumer.
+     *
+     * @param f the filter
+     */
     public NodeFilteringConsumer(NodeFilter f) {
       this.f = f;
     }

@@ -39,21 +39,33 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
  * ExplanationOfBenefitResourceProvider} is covered by {@link
- * ExplanationOfBenefitResourceProviderIT#searchForEobsWithSamhsaFiltering()} and related
+ * ExplanationOfBenefitResourceProviderIT#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
  * integration tests.
  */
 public final class Stu3EobSamhsaMatcherTest {
   // TODO complete and verify that these exactly match real values in our DB
+  /** The SAMHSA CPT code. */
   public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
+  /** The SAMHSA ICD9 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
+  /** The SAMHSA ICD9 procedure code. */
   public static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
+  /** The SAMHSA ICD10 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
+  /** The SAMHSA ICD10 procedure code. */
   public static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
+  /** The SAMHSA DRG code. */
   public static final String SAMPLE_SAMHSA_DRG_CODE = "522";
 
+  /** The DRG reference url. */
   private static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
+  /**
+   * Sets the data for use in the parameterized tests.
+   *
+   * @return the stream fed into the test
+   */
   public static Stream<Arguments> data() {
     final String HCPCS = TransformerConstants.CODING_SYSTEM_HCPCS;
     final String OTHER = "other system";
@@ -80,6 +92,15 @@ public final class Stu3EobSamhsaMatcherTest {
             "should NOT return true (all known systems), but DID."));
   }
 
+  /**
+   * Tests that for each data set {@link Stu3EobSamhsaMatcher#containsOnlyKnownSystems} returns the
+   * expected value.
+   *
+   * @param name the test description for reporting
+   * @param systems the systems to test
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if the test fails
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource("data")
   public void containsOnlyKnownSystemsTest(
@@ -105,13 +126,12 @@ public final class Stu3EobSamhsaMatcherTest {
         expectedResult, matcher.containsOnlyKnownSystems(mockConcept), name + " " + errorMessage);
   }
 
+  /** Nested class for holding the non-parameterized tests. */
   @Nested
   public class NonParameterizedTests {
     /**
-     * Verifies that {@link
-     * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
-     * returns <code>
-     * false</code> for claims that have no SAMHSA-related codes.
+     * Verifies that {@link Stu3EobSamhsaMatcher#test} returns {@code false} for claims that have no
+     * SAMHSA-related codes.
      */
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
@@ -797,11 +817,14 @@ public final class Stu3EobSamhsaMatcherTest {
     }
 
     /**
+     * Gets the sample A claim from a file resource.
+     *
      * @param claimType the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} to get a sample
      *     {@link ExplanationOfBenefit} for
      * @return a sample {@link ExplanationOfBenefit} of the specified {@link
      *     gov.cms.bfd.server.war.stu3.providers.ClaimType} (derived from the {@link
      *     StaticRifResourceGroup#SAMPLE_A} sample RIF records)
+     * @throws IOException the io exception
      */
     private ExplanationOfBenefit getSampleAClaim(ClaimType claimType) throws IOException {
       List<Object> sampleRifRecords =

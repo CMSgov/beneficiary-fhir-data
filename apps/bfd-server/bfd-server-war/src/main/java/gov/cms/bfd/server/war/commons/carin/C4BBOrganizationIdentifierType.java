@@ -6,30 +6,30 @@ package gov.cms.bfd.server.war.commons.carin;
  * C4BB Organization Identifier Type</a>.
  */
 public enum C4BBOrganizationIdentifierType {
-  /** See {@link C4BBIdentifierType#NPI}. * */
+  /** See {@link C4BBIdentifierType#NPI}. */
   NPI,
-  /** See {@link C4BBIdentifierType#PAYERID}.* */
+  /** See {@link C4BBIdentifierType#PAYERID}. */
   PAYERID,
-  /** See {@link C4BBIdentifierType#NAICCODE}.* */
+  /** See {@link C4BBIdentifierType#NAICCODE}. */
   NAICCODE,
   // Note: This is *not* a valid C4BBOrganizationIdentifierType but PDE uses it
-  /** National Council for Prescription Drug Programs. * */
+  /** National Council for Prescription Drug Programs. */
   NCPDP,
   // All codes under http://terminology.hl7.org/CodeSystem/v2-0203
   // Only adding what we explicitly use
   /**
    * A number that is unique to an individual provider, a provider group or an organization within
-   * an Assigning Authority.*
+   * an Assigning Authority.
    */
   PRN,
   /**
    * An identifier for a provider within the CMS/Medicare program. A globally unique identifier for
-   * the provider in the Medicare program. *
+   * the provider in the Medicare program.
    */
   UPIN,
-  /** State license. * */
+  /** State license. */
   SL,
-  /** Tax ID number. * */
+  /** Tax ID number. */
   TAX;
 
   /**

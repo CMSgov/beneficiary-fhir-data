@@ -8,7 +8,7 @@ package gov.cms.bfd.server.war.commons.carin;
 public enum C4BBClaimOutpatientInstitutionalDiagnosisType {
   /**
    * The single medical diagnosis that is most relevant to the patient's chief complaint or need for
-   * treatment.*
+   * treatment.
    */
   PRINCIPAL,
   /** Required when other conditions coexist or develop subsequently during the treatment. * */

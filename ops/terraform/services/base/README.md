@@ -38,10 +38,13 @@ However between writing a JSON string to yaml here and being fetched from AWS SS
 
 ### Formatting and Validation
 
-As of early September 2022, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
-- hierarchies or paths conform to a 4-tuple prefix and leaf `/bfd/${env}/${group}/${sensitivity}/${leaf}` format
+As of mid-January 2023, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
+- hierarchies or paths generally conform to a 4 or 5 tuple prefix and leaf format, e.g.
+  - `/bfd/${env}/${group}/${sensitivity}/${leaf}`
+  - `/bfd/${env}/${group}/${subgroup}/${sensitivity}/${leaf}`
 - `${env}` is typically one of `test`, `prod-sbx`, or `prod` but limited support for ephemeral environments exists. Guidance on ephemeral environment naming conventions is forthcoming.
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
+- `${subgroup}` is optional, as of January 2023, examples include `ccw`, `rda`, `shared`
 - `${sensitivity}` must be one of `sensitive` when encrypted or `nonsensitive` when in plain text
 - `${leaf}` _should_ be lower_snake_case formatted
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)
@@ -97,7 +100,7 @@ In addition to the [Requirements (below)](#requirements), you (or the automation
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | = 4.17 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.30 |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
@@ -138,20 +141,20 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Type |
 |------|------|
-| [aws_ssm_parameter.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.ephemeral_common](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.ephemeral_migrator](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.ephemeral_pipeline](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.migrator_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.migrator_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.pipeline_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.pipeline_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.server_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_ssm_parameter.server_sensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/resources/ssm_parameter) | resource |
-| [aws_db_cluster_snapshot.seed](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/data-sources/db_cluster_snapshot) | data source |
-| [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/data-sources/kms_key) | data source |
-| [aws_ssm_parameters_by_path.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/data-sources/ssm_parameters_by_path) | data source |
-| [aws_ssm_parameters_by_path.seed](https://registry.terraform.io/providers/hashicorp/aws/4.17/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_ssm_parameter.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.ephemeral_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.ephemeral_migrator](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.ephemeral_pipeline](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.migrator_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.migrator_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.pipeline_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.pipeline_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.server_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.server_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_db_cluster_snapshot.seed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_cluster_snapshot) | data source |
+| [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_ssm_parameters_by_path.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_ssm_parameters_by_path.seed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [external_external.eyaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 <!-- END_TF_DOCS -->

@@ -1,12 +1,16 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
+import gov.cms.model.dsl.codegen.plugin.model.validation.MappingExists;
+import gov.cms.model.dsl.codegen.plugin.model.validation.ValidationUtil;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,23 +22,46 @@ import javax.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 
-/** Model object for defining JPA compatible join relationships between entities. */
+/**
+ * Model object for defining JPA compatible join relationships between entities. Several sub-types
+ * exist that set default values based on the type of relationship the join represents. The sub-type
+ * is specified in the {@code class} property within the YAML. Jackson selects the concrete class
+ * based on the values defined in the {@link JsonTypeInfo} and {@link JsonSubTypes} annotations.
+ * Using the {@code class} property simplifies the model by defaulting property values and adding
+ * specific validity checks appropriately for the join's intended use.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder(toBuilder = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "class", defaultImpl = JoinBean.class)
+@JsonSubTypes({
+  @JsonSubTypes.Type(name = "array", value = JoinBean.Array.class),
+  @JsonSubTypes.Type(name = "parent", value = JoinBean.Parent.class),
+  @JsonSubTypes.Type(name = "child", value = JoinBean.Child.class),
+})
 public class JoinBean implements ModelBean {
   /** Name of the field in this entity object that holds the joined entity. */
   @NotNull @JavaName private String fieldName;
 
-  /** Full class name of the joined entity. Must include the package as well as the class name. */
-  @NotNull
+  /**
+   * Used when joining to an entity that exists outside of the model. Full class name of the joined
+   * entity. Must include the package as well as the class name.
+   */
   @JavaName(type = JavaNameType.Compound)
   private String entityClass;
+
+  /**
+   * Used when joining to an entity that exists inside of the model. {@link MappingBean#id} of the
+   * joined entity mapping within the model.
+   */
+  @JavaName @MappingExists private String entityMapping;
 
   /** Name of the column in this entity that will hold the joined table's primary key. */
   @JavaName(type = JavaNameType.Compound)
@@ -83,21 +110,14 @@ public class JoinBean implements ModelBean {
   @Singular private List<@Valid Property> properties = new ArrayList<>();
 
   /**
-   * Determine if the entity class name is valid.
+   * Called by validator to confirm that either {@link #entityClass} or {@link #entityMapping} was
+   * provided but not both.
    *
-   * @return true if the {@link JoinBean#entityClass} property has a valid value
+   * @return true if exactly one is not null
    */
-  public boolean isValidEntityClass() {
-    return entityClass != null && entityClass.indexOf('.') > 0;
-  }
-
-  /**
-   * Create a {@link TypeName} for the entity class.
-   *
-   * @return a valid {@link TypeName}
-   */
-  public TypeName getEntityClassType() {
-    return ModelUtil.classType(entityClass);
+  @AssertTrue
+  public boolean isEntityClassOrMappingDefined() {
+    return ValidationUtil.isExactlyOneNotNull(entityClass, entityMapping);
   }
 
   /**
@@ -167,7 +187,7 @@ public class JoinBean implements ModelBean {
 
   @Override
   public String getDescription() {
-    return "join " + fieldName + " to " + entityClass;
+    return "join " + fieldName + " to " + entityClass + "/" + entityMapping;
   }
 
   /**
@@ -237,5 +257,137 @@ public class JoinBean implements ModelBean {
      * by {@link ModelUtil#mapJavaTypeToTypeName}.
      */
     @JavaType private String javaType;
+  }
+
+  /**
+   * Model class for array mappings in DSL. Instances default to {@link JoinType#OneToMany}, {@link
+   * CollectionType#Set}, and require the definition of the {@link JoinBean#entityMapping} property.
+   */
+  @Data
+  @EqualsAndHashCode(callSuper = true)
+  @SuperBuilder(toBuilder = true)
+  public static class Array extends JoinBean {
+    /** Constructs the bean with default settings appropriate to an array join. */
+    public Array() {
+      setJoinType(JoinBean.JoinType.OneToMany);
+      setCollectionType(CollectionType.Set);
+      setFetchType(FetchType.EAGER);
+      setOrphanRemoval(true);
+      getCascadeTypes().add(CascadeType.ALL);
+    }
+
+    /**
+     * Tests whether or not the array element objects have a field to hold a reference to the parent
+     * object.
+     *
+     * @return true if the {@link JoinBean#mappedBy} has a non-empty value
+     */
+    public boolean hasMappedBy() {
+      return !Strings.isNullOrEmpty(getMappedBy());
+    }
+
+    @Override
+    public String getDescription() {
+      return "array " + super.getDescription();
+    }
+
+    /**
+     * {@inheritDoc} Overrides the superclass method to ensure that the entityMapping is always
+     * present.
+     *
+     * @return the entityMapping
+     */
+    @Override
+    public @NotNull @JavaName String getEntityMapping() {
+      return super.getEntityMapping();
+    }
+  }
+
+  /**
+   * Model class for parent side of one-to-many relationship in DSL. Instances default to {@link
+   * JoinType#OneToMany}, {@link CollectionType#List}, and require the definition of the {@link
+   * JoinBean#mappedBy} and {@link JoinBean#entityMapping} properties.
+   */
+  @Data
+  @EqualsAndHashCode(callSuper = true)
+  @SuperBuilder(toBuilder = true)
+  public static class Parent extends JoinBean {
+    /** Constructs the bean with default settings appropriate to a parent join. */
+    public Parent() {
+      setJoinType(JoinType.OneToMany);
+      setCollectionType(CollectionType.List);
+      setFetchType(FetchType.LAZY);
+      setReadOnly(true);
+      setOrphanRemoval(true);
+      getCascadeTypes().add(CascadeType.ALL);
+    }
+
+    /**
+     * {@inheritDoc} Overrides the superclass method to ensure that the entityMapping is always
+     * present.
+     *
+     * @return the entityMapping
+     */
+    @Override
+    public @NotNull @JavaName String getEntityMapping() {
+      return super.getEntityMapping();
+    }
+
+    /**
+     * {@inheritDoc} Overrides the superclass method to ensure that the mappedBy is always present.
+     *
+     * @return the mappedBy value
+     */
+    @Override
+    public @NotNull @JavaName String getMappedBy() {
+      return super.getMappedBy();
+    }
+
+    @Override
+    public String getDescription() {
+      return "parent " + super.getDescription();
+    }
+  }
+
+  /**
+   * Model class for child side of one-to-many relationship in DSL. Instances default to {@link
+   * JoinType#ManyToOne} and require the definition of the {@link JoinBean#joinColumnName} and
+   * {@link JoinBean#entityMapping} properties.
+   */
+  @Data
+  @EqualsAndHashCode(callSuper = true)
+  @SuperBuilder(toBuilder = true)
+  public static class Child extends JoinBean {
+    /** Constructs the bean with default settings appropriate to a child join. */
+    public Child() {
+      setJoinType(JoinType.ManyToOne);
+    }
+
+    /**
+     * {@inheritDoc} Overrides the superclass method to ensure that the entityMapping is always
+     * present.
+     *
+     * @return the entityMapping
+     */
+    @Override
+    public @NotNull @JavaName String getEntityMapping() {
+      return super.getEntityMapping();
+    }
+
+    /**
+     * {@inheritDoc} Overrides the superclass method to ensure that the joinColumnName is always
+     * present.
+     *
+     * @return the joinColumnName
+     */
+    @Override
+    public @NotNull @JavaName String getJoinColumnName() {
+      return super.getJoinColumnName();
+    }
+
+    @Override
+    public String getDescription() {
+      return "child " + super.getDescription();
+    }
   }
 }

@@ -14,13 +14,11 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
-/*
- * Unit tests for {@link diagnosis}.
- */
+/** Unit tests for {@link Diagnosis}. */
 public class DiagnosisTest {
 
   /**
-   * Verifies that {@link diagnosis(Object)} works as expected. {@link diagnosis}.
+   * Verifies that {@link Diagnosis} works as expected.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -43,6 +41,13 @@ public class DiagnosisTest {
     assertDiagnosisLabelsMatch();
   }
 
+  /**
+   * Assert the version code matches the specified system value when the version is passed to a
+   * {@link Diagnosis}.
+   *
+   * @param version the version code
+   * @param system the expected system value
+   */
   static void assertMatches(Character version, String system) {
 
     Optional<String> code = Optional.of("code");
@@ -63,6 +68,7 @@ public class DiagnosisTest {
     assertTrue(diagnosis.get().isContainedIn(codeableConcept));
   }
 
+  /** Assert diagnosis labels match for a static code and version. */
   static void assertDiagnosisLabelsMatch() {
 
     Optional<String> code = Optional.of("code");

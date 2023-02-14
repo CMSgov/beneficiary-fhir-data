@@ -11,7 +11,7 @@ data "aws_security_group" "vpn" {
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = [local.nonsensitive_common_config["vpn_security_group"]]
+    values = [local.vpn_security_group]
   }
 }
 
@@ -19,7 +19,7 @@ data "aws_security_group" "enterprise_tools" {
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-enterprise-tools"]
+    values = [local.enterprise_tools_security_group]
   }
 }
 
@@ -55,7 +55,7 @@ data "aws_kms_key" "cmk" {
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
-    values = [local.nonsensitive_common_config["vpc_name"]]
+    values = [local.vpc_name]
   }
 }
 
@@ -84,8 +84,16 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
   path = "/bfd/${local.env}/common/nonsensitive"
 }
 
-data "aws_ssm_parameters_by_path" "nonsensitive" {
-  path = "/bfd/${local.env}/${local.service}/nonsensitive"
+data "aws_ssm_parameters_by_path" "nonsensitive_shared" {
+  path = "/bfd/${local.env}/${local.service}/shared/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive_ccw" {
+  path = "/bfd/${local.env}/${local.service}/ccw/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive_rda" {
+  path = "/bfd/${local.env}/${local.service}/rda/nonsensitive"
 }
 
 # TODO: this needs to be defined in common
@@ -103,10 +111,12 @@ data "aws_sns_topic" "ok" {
 # TODO: this needs to be defined in common
 # TODO: this will be replaced in BFD-2244
 data "aws_sns_topic" "bfd_test_slack_alarm" {
+  count = local.is_ephemeral_env ? 0 : 1
   name  = "bfd-${local.env}-cloudwatch-alarms-alert-testing"
 }
 
 # TODO: this needs to be defined in common
 data "aws_sns_topic" "bfd_notices_slack_alarm" {
+  count = local.is_ephemeral_env ? 0 : 1
   name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
 }

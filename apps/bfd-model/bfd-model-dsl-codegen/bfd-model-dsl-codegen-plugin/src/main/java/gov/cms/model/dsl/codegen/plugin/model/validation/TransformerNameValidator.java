@@ -1,5 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin.model.validation;
 
+import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import gov.cms.model.dsl.codegen.plugin.transformer.FieldTransformer;
 import gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil;
 import jakarta.validation.ConstraintValidator;
@@ -21,6 +22,8 @@ public class TransformerNameValidator implements ConstraintValidator<Transformer
    */
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
-    return value == null || TransformerUtil.getFieldTransformer(value).isPresent();
+    return value == null
+        || TransformationBean.ArrayTransformName.equals(value)
+        || TransformerUtil.getFieldTransformer(value).isPresent();
   }
 }

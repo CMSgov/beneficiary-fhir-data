@@ -75,20 +75,31 @@ import org.slf4j.LoggerFactory;
 /** Integration tests for {@link RifLoader}. */
 public final class RifLoaderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIT.class);
+  /** Represents using an idempotent strategy for the test. */
   private static final boolean USE_INSERT_IDEMPOTENT_STRATEGY = true;
+  /** Represents using a non-idempotent strategy for the test. */
   private static final boolean USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY = false;
 
-  /** Ensures that each test case here starts with a clean/empty database, with the right schema. */
+  /**
+   * Ensures that each test case here starts with a clean/empty database, with the right schema.
+   *
+   * @param testInfo the test info
+   */
   @BeforeEach
   public void prepareTestDatabase(TestInfo testInfo) {
     LOGGER.info("{}: starting.", testInfo.getDisplayName());
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
+  /**
+   * Cleans up the test.
+   *
+   * @param testInfo the test info
+   */
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
-  };
+  }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
@@ -148,7 +159,9 @@ public final class RifLoaderIT {
           "Beneficiary has incorrect mbiHash");
       assertEquals(expectedHicn, beneficiaryFromDb.getHicn(), "Beneficiary has incorrect HICN");
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
@@ -202,13 +215,15 @@ public final class RifLoaderIT {
           "Beneficiary has incorrect mbiHash");
       assertEquals(expectedHicn, beneficiaryFromDb.getHicn(), "Beneficiary has incorrect HICN");
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data for an <code>
-   * UPDATE</code> {@link Beneficiary} record that there hasn't been a previous <code>INSERT</code>
+   *  UPDATE</code> {@link Beneficiary} record that there hasn't been a previous <code>INSERT</code>
    * on, to verify that this fails as expected.
    */
   @Test
@@ -243,6 +258,7 @@ public final class RifLoaderIT {
     assertTrue(thrown.getMessage().contains("Load errors encountered"));
   }
 
+  /** Ensures that loading a single file results in a loaded file in the loaded batches. */
   @Test
   public void singleFileLoad() {
     PipelineTestUtils.get()
@@ -268,6 +284,12 @@ public final class RifLoaderIT {
             });
   }
 
+  /**
+   * Tests that loading a file and then loading more files results in the number of loaded files
+   * increasing, and the oldest file remains the first file.
+   *
+   * <p>TODO: Why is this disabled?
+   */
   @Test
   @Disabled
   public void multipleFileLoads() {
@@ -303,6 +325,10 @@ public final class RifLoaderIT {
             });
   }
 
+  /**
+   * Tests that when a file gets loaded which would trim a new file, the old file is properly
+   * trimmed (removed).
+   */
   @Test
   public void trimLoadedFiles() {
     PipelineTestUtils.get()
@@ -338,6 +364,11 @@ public final class RifLoaderIT {
             });
   }
 
+  /**
+   * Tests that synthetic data can be loaded.
+   *
+   * <p>TODO: Why is this disabled?
+   */
   @Disabled
   @Test
   public void buildSyntheticLoadedFiles() {
@@ -440,7 +471,9 @@ public final class RifLoaderIT {
       // CliaLabNumber inserted with value BB889999AA
       assertEquals("GG443333HH", carrierLineRecordFromDb.getCliaLabNumber().get());
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
@@ -498,11 +531,13 @@ public final class RifLoaderIT {
       assertEquals(4, beneficiaryHistoryEntries.size());
 
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
-  /*
+  /**
    * This test checks that all enrollment data for the year has been loaded into the beneficiary
    * monthly table and checks each month to make sure the correct values are there.
    */
@@ -529,11 +564,13 @@ public final class RifLoaderIT {
       assertBeneficiaryMonthly(beneficiaryFromDb);
 
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
-  /*
+  /**
    * This test checks that all enrollment data for 2 years has been loaded into the beneficiary
    * monthly table.
    */
@@ -554,13 +591,15 @@ public final class RifLoaderIT {
       // Checks to make sure we have 2 years or 24 months of data
       assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
-  /*
+  /**
    * This test checks that all enrollment data for 2 years has been loaded into the beneficiary
-   * monthly table and than does an update of 8 years without the 4 other months for the year
+   * monthly table and than does an update of 8 years without the 4 other months for the year.
    */
   @Test
   public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
@@ -582,13 +621,15 @@ public final class RifLoaderIT {
       // Checks to make sure we only have 20 months of data
       assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
-  /*
-   * This test checks that all enrollment data for month july in its 2 year is updated when there is data
-   * for august that comes in.
+  /**
+   * This test checks that all enrollment data for month july in its 2 year is updated when there is
+   * data for august that comes in.
    */
   @Test
   public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
@@ -624,7 +665,9 @@ public final class RifLoaderIT {
       assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
 
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
     // Load 9 months of data in year two with some data updated in july
     loadSample(
@@ -669,7 +712,9 @@ public final class RifLoaderIT {
       assertEquals("C", septMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
       assertFalse(septMonthly.getPartDSegmentNumberId().isPresent());
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
@@ -708,59 +753,59 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   * 2023 enrollment date and filter on expect the data is loaded to the regular database tables.
    */
   @Test
-  public void loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2022",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        "2023",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * non-2022 enrollment date and filter on expect the record is successfully loaded. A log message
+   * non-2023 enrollment date and filter on expect the record is successfully loaded. A log message
    * will be printed in this case.
    */
   @Test
-  public void loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used and 2022 enrollment date and filter on expect the data
+   * LoadStrategy.INSERT_IDEMPOTENT is used and 2023 enrollment date and filter on expect the data
    * is loaded to the regular database tables.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAnd2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+      loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2022",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        "2023",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2022 enrollment date and filter on expect the
+   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2023 enrollment date and filter on expect the
    * data is loaded to the regular database tables. A log message will be printed.
    */
   @Test
   public void
-      loadBeneficiaryWhenInsertAndNon2022EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
+      loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY));
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -777,7 +822,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY),
         false);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -785,17 +830,17 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
-   * 2022 enrollment date and filter on expect the data is loaded to the regular database tables.
+   * 2023 enrollment date and filter on expect the data is loaded to the regular database tables.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenUpdateAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
 
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
     loadSampleABeneWithEnrollmentRefYear(
-        "2022",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        "2023",
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -803,11 +848,11 @@ public final class RifLoaderIT {
 
   /**
    * Verifies that {@link RifLoader} skips {@link Beneficiary} records, as expected, for <code>
-   * UPDATE</code>s of a non-2022 {@link Beneficiary}, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is enabled.
+   *  UPDATE</code>s of a non-2023 {@link Beneficiary}, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is enabled.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAndNon2022EnrollmentDateAndFilterOnExpectRecordSkipped() {
+  public void loadBeneficiaryWhenUpdateAndNon2023EnrollmentDateAndFilterOnExpectRecordSkipped() {
 
     /* First, load a bene that SHOULD be filtered out (when filtering is turned on) normally. */
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
@@ -815,7 +860,7 @@ public final class RifLoaderIT {
 
     /* Re-load that bene again as an UPDATE with filtering turned on, and verify that it was skipped. */
     loadDefaultSampleABeneData(
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 1);
@@ -823,8 +868,8 @@ public final class RifLoaderIT {
 
   /**
    * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
-   * UPDATE</code>s of a {@code null} {@link Beneficiary} enrollment year, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is enabled.
+   *  UPDATE</code>s of a {@code null} {@link Beneficiary} enrollment year, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is enabled.
    */
   @Test
   public void loadBeneficiaryWhenUpdateAndNullEnrollmentDateAndFilterOnExpectRecordLoaded() {
@@ -836,7 +881,7 @@ public final class RifLoaderIT {
     /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
     loadSampleABeneWithEnrollmentRefYear(
         null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -844,17 +889,17 @@ public final class RifLoaderIT {
 
   /**
    * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
-   * UPDATE</code>s of a 2022 {@link Beneficiary}, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2022Benes()} is disabled.
+   *  UPDATE</code>s of a 2023 {@link Beneficiary}, when {@link
+   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is disabled.
    *
    * <p>If the filter is off, we take no special action to filter records.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAnd2022EnrollmentDateAndFilterOffExpectRecordLoaded() {
+  public void loadBeneficiaryWhenUpdateAnd2023EnrollmentDateAndFilterOffExpectRecordLoaded() {
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
-    loadSampleABeneWithEnrollmentRefYear("2022", CcwRifLoadTestUtils.getLoadOptions(), true);
+    loadSampleABeneWithEnrollmentRefYear("2023", CcwRifLoadTestUtils.getLoadOptions(), true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -874,7 +919,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -894,7 +939,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -940,7 +985,7 @@ public final class RifLoaderIT {
         editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
     loadSample(
         "non-Bene sample update",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringofNon2022BenesEnabled(
+        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
@@ -986,7 +1031,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertTrue(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, but use a bene_id_start that we know exists; corresponds to
      * CHECK_BENE_RANGE query in {@link CcwRifLoadPreValidateSynthea}
      */
@@ -994,7 +1039,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertFalse(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, but use a bene_id_start that we know does not exist, but a
      * CARRIER_CLAIMS clm_id_start that we know does exist. corresponds to CHECK_CARR_CLAIM_CNTL_NUM
      * query in {@link CcwRifLoadPreValidateSynthea}
@@ -1006,7 +1051,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertTrue(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, using a CLM_GRP_ID value that we know exists; corresponds to
      * CHECK_CLAIMS_GROUP_ID query in {@link CcwRifLoadPreValidateSynthea}
      */
@@ -1014,7 +1059,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertFalse(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, using a CLM_GRP_ID value that we know doesn't exists but a PDE_ID value
      * that we know exists. corresponds to CHECK_PDE_CLAIMS_GROUP_ID query in {@link
      * CcwRifLoadPreValidateSynthea}
@@ -1032,7 +1077,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertFalse(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, trapping on HICN_UNHASHED or MBI_NUM collisions in BENEFICIARIES
      * tables; test will vett MBI_NUM collision. Corresponds to CHECK_HICN_MBI_HASH query in {@link
      * CcwRifLoadPreValidateSynthea}
@@ -1044,7 +1089,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertFalse(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, trapping on HFI_DOC_CLM_CNTL_NUM collision in various claims
      * Corresponds to CHECK_FI_DOC_CNTL query in {@link CcwRifLoadPreValidateSynthea}
      */
@@ -1053,7 +1098,7 @@ public final class RifLoaderIT {
     manifest.setPreValidationProperties(endStateProps);
     assertFalse(preVal.isValid(manifest));
 
-    /**
+    /*
      * re-run the same test, trapping on MBI_NUM collision in various Beneficiary tables.
      * Corresponds to CHECK_MBI_DUPES query in {@link CcwRifLoadPreValidateSynthea}
      */
@@ -1146,7 +1191,7 @@ public final class RifLoaderIT {
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
     Stream<RifFile> updatedSampleAStream = editSamples(samplesStream, fileEditor);
 
-    loadSample("SAMPLE_A, updates to 2022 ref year", loadAppOptions, updatedSampleAStream);
+    loadSample("SAMPLE_A, updates to 2023 ref year", loadAppOptions, updatedSampleAStream);
   }
 
   /**
@@ -1217,6 +1262,8 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Applies the given filter to the provided samples.
+   *
    * @param filter a {@link Predicate} that should return <code>true</code> for only those {@link
    *     StaticRifResource}s that should be included in the result
    * @param samples the {@link StaticRifResource}s to be filtered
@@ -1228,6 +1275,8 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Applies a function to a list of samples, and returns the edited list.
+   *
    * @param samples the {@link Stream} of {@link RifFile}s to return an edited copy of (note that
    *     this input {@link Stream} will be consumed)
    * @param editor a {@link Function} that, given an input {@link RifFile}, produces an
@@ -1240,6 +1289,8 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Applies a function to a record, and returns the edited record.
+   *
    * @param inputFile the {@link RifFile} to return an edited copy of
    * @param editor a {@link Function} that, given an input {@link RifRecordEvent}, produces an
    *     edited/output copy of it, represented as a nested {@link List} of {@link List}s of {@link
@@ -1449,7 +1500,7 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Load the batches associated with a particular file
+   * Load the batches associated with a particular file.
    *
    * @param entityManager to use
    * @param loadedFileId to use
@@ -1525,7 +1576,9 @@ public final class RifLoaderIT {
         }
       }
     } finally {
-      if (entityManager != null) entityManager.close();
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
   }
 
@@ -1779,6 +1832,26 @@ public final class RifLoaderIT {
         beneficiaryFromDb.getPartDSegmentNumberDecId());
   }
 
+  /**
+   * Check that an enrollment matches the specified values.
+   *
+   * @param referenceYear the reference year
+   * @param month the month
+   * @param enrollment the enrollment to check
+   * @param entitlementBuyInInd the entitlement buy in ind
+   * @param fipsStateCntyCode the fips state cnty code
+   * @param hmoIndicatorInd the hmo indicator ind
+   * @param medicaidDualEligibilityCode the medicaid dual eligibility code
+   * @param medicareStatusCode the medicare status code
+   * @param partCContractNumberId the part c contract number id
+   * @param partCPbpNumberId the part c pbp number id
+   * @param partCPlanTypeCode the part c plan type code
+   * @param partDContractNumberId the part d contract number id
+   * @param partDLowIncomeCostShareGroupCode the part d low income cost share group code
+   * @param partDPbpNumberId the part d pbp number id
+   * @param partDRetireeDrugSubsidyInd the part d retiree drug subsidy ind
+   * @param partDSegmentNumberId the part d segment number id
+   */
   public static void checkEnrollments(
       int referenceYear,
       int month,

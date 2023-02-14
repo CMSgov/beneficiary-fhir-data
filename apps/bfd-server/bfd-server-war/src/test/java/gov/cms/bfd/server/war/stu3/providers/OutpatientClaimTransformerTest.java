@@ -38,9 +38,8 @@ public final class OutpatientClaimTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_OUTPATIENT} {@link
-   * OutpatientClaim}.
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
+   * when run against the {@link StaticRifResource#SAMPLE_A_OUTPATIENT} {@link OutpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -68,8 +67,8 @@ public final class OutpatientClaimTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SYNTHETIC_OUTPATIENT_1999_1999} {@link
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
+   * when run against the {@link StaticRifResource#SYNTHETIC_OUTPATIENT_1999_1999} {@link
    * OutpatientClaim}.
    *
    * <p>Note: This test is normally disabled like other synthetic data tests
@@ -101,8 +100,8 @@ public final class OutpatientClaimTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
-   * expected when run against all synthetic data outpatient claims
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
+   * when run against all synthetic data outpatient claims
    *
    * <p>Note: This test is normally disabled like other synthetic data tests. It will take 20
    * minutes or more to run.
@@ -351,6 +350,12 @@ public final class OutpatientClaimTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 
+  /**
+   * Counts the diagnosis code method names in the specified claim.
+   *
+   * @param claim the claim to count diagnosis codes from
+   * @return the number of diagnosis codes
+   */
   public static long countDiagnosisCodes(OutpatientClaim claim) {
     Stream<String> methodNames =
         Stream.concat(

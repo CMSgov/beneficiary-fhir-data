@@ -141,14 +141,25 @@ public final class DataSetSubsetter {
     LOGGER.info("Subsetted all RIF files.");
   }
 
+  /** Interface for the writing data. */
   interface IDataSetWriter extends AutoCloseable {
+    /**
+     * Gets the printer.
+     *
+     * @param fileType the rif file type to write
+     * @return the printer
+     * @throws IOException if there is an error writing the data
+     */
     CSVPrinter getPrinter(RifFileType fileType) throws IOException;
   }
 
   /** This {@link IDataSetWriter} outputs data sets to a directory on the local system. */
   private static final class LocalDataSetWriter implements IDataSetWriter {
+    /** The output directory to write files to. */
     private final Path outputDirectory;
+    /** The timestamp to mark the file's write time with. */
     private final Instant timestamp;
+    /** The map of file types and their csv writers. */
     private final Map<RifFileType, CSVPrinter> printers;
 
     /**
@@ -166,7 +177,7 @@ public final class DataSetSubsetter {
       this.printers = new HashMap<>();
     }
 
-    /** @see IDataSetWriter#getPrinter(RifFileType) */
+    /** {@inheritDoc} */
     @Override
     public CSVPrinter getPrinter(RifFileType fileType) throws IOException {
       if (!printers.containsKey(fileType)) {
@@ -187,7 +198,7 @@ public final class DataSetSubsetter {
       return printers.get(fileType);
     }
 
-    /** @see java.lang.AutoCloseable#close() */
+    /** {@inheritDoc} */
     @Override
     public void close() throws IOException, JAXBException {
       List<DataSetManifestEntry> entries = new ArrayList<>(printers.size());
@@ -209,6 +220,8 @@ public final class DataSetSubsetter {
     }
 
     /**
+     * Computes the rif file name.
+     *
      * @param fileType the {@link RifFileType} to compute a name for
      * @return the name to use for RIF files of the specified {@link RifFileType}
      */
@@ -271,6 +284,8 @@ public final class DataSetSubsetter {
   }
 
   /**
+   * Downloads a data set.
+   *
    * @param options the {@link ExtractionOptions} to use
    * @param dataSetS3KeyPrefix the S3 key prefix (i.e. directory) of the data set to download
    * @param downloadDirectory the Path to the directory to download the RIF files locally to

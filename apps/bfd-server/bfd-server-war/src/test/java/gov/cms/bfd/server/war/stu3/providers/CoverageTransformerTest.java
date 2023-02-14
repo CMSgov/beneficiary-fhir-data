@@ -23,10 +23,9 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer}. */
 public final class CoverageTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformer#transform(MedicareSegment,
-   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER}
-   * {@link Beneficiary}.
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer#transform} works
+   * as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
+   * Beneficiary}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -66,10 +65,9 @@ public final class CoverageTransformerTest {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformer#transform(MedicareSegment,
-   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER}
-   * {@link Beneficiary} with a null reference year.
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer#transform} works
+   * as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link Beneficiary}
+   * with a null reference year.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -110,8 +108,7 @@ public final class CoverageTransformerTest {
   }
 
   /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_A} {@link Coverage} "looks like" it
+   * Verifies that the specified {@link MedicareSegment#PART_A} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    *
    * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
@@ -167,8 +164,7 @@ public final class CoverageTransformerTest {
   }
 
   /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_B} {@link Coverage} "looks like" it
+   * Verifies that the specified {@link MedicareSegment#PART_B} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    *
    * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
@@ -213,8 +209,7 @@ public final class CoverageTransformerTest {
   }
 
   /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_C} {@link Coverage} "looks like" it
+   * Verifies that the specified {@link MedicareSegment#PART_C} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    *
    * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
@@ -262,8 +257,7 @@ public final class CoverageTransformerTest {
   }
 
   /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_D} {@link Coverage} "looks like" it
+   * Verifies that the specified {@link MedicareSegment#PART_D} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    *
    * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
@@ -291,6 +285,12 @@ public final class CoverageTransformerTest {
     }
   }
 
+  /**
+   * Checks for no yearly data codings in the specified coverage object.
+   *
+   * @param beneficiary the beneficiary to get the ref year from for each month
+   * @param coverage the coverage object to check
+   */
   static void checkForNoYearlyData(Beneficiary beneficiary, Coverage coverage) {
     TransformerTestUtils.assertExtensionCodingDoesNotExist(
         CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);

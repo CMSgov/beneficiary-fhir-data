@@ -65,7 +65,8 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             "iam:Upload*",
             "ssm:*",
             "lambda:*",
-            "glue:*"
+            "glue:*",
+            "firehose:*"
           ],
           "Effect" : "Allow",
           "Resource" : "*",

@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 data "external" "client_ssls_by_partner" {
   for_each = local.metrics
 

@@ -98,7 +98,6 @@
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<!-- HSQL is used in this project's integration tests, which means it

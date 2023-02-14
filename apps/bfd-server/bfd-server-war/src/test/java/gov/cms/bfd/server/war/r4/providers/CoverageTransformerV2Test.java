@@ -7,11 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -30,14 +33,32 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2}. */
+/** Unit tests for {@link CoverageTransformerV2}. */
 public final class CoverageTransformerV2Test {
 
+  /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The beneficiary parsed from SAMPLE_A data. */
   private static Beneficiary beneficiary = null;
+  /**
+   * The current medicare segment. TODO: Should likely be moved to a local var and passed around as
+   * needed.
+   */
   private static MedicareSegment currSegment = null;
+  /**
+   * Coverage being tested. TODO: Should likely be moved to a local var and passed around as needed
+   * to avoid cross-pollution between tests.
+   */
   private static Coverage coverage = null;
 
+  /** Date formatter that complies with std RIF date string. */
+  private static final DateTimeFormatter RIF_DATE_FORMATTER =
+      new DateTimeFormatterBuilder()
+          .parseCaseInsensitive()
+          .appendPattern("dd-MMM-yyyy")
+          .toFormatter();
+
+  /** Sets up the test dependencies shared across each test. */
   @BeforeEach
   public void setup() {
     List<Object> parsedRecords =
@@ -56,7 +77,7 @@ public final class CoverageTransformerV2Test {
     beneficiary.setLastUpdated(calen.getTime().toInstant());
   }
 
-  /** Standalone wrapper to output PART_A */
+  /** Standalone wrapper to output PART_A. */
   @Disabled
   @Test
   public void outputTransformCoveragePartA() throws FHIRException {
@@ -64,7 +85,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
   }
 
-  /** Standalone wrapper to output PART_B */
+  /** Standalone wrapper to output PART_B. */
   @Disabled
   @Test
   public void outputTransformCoveragePartB() throws FHIRException {
@@ -72,7 +93,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
   }
 
-  /** Standalone wrapper to output PART_C */
+  /** Standalone wrapper to output PART_C. */
   @Disabled
   @Test
   public void outputTransformCoveragePartC() throws FHIRException {
@@ -80,7 +101,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
   }
 
-  /** Standalone wrapper to output PART_D */
+  /** Standalone wrapper to output PART_D. */
   @Disabled
   @Test
   public void outputTransformCoveragePartD() throws FHIRException {
@@ -91,24 +112,29 @@ public final class CoverageTransformerV2Test {
   // ==================
   // Begin PART A Tests
   // ==================
+
+  /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyID("part-a-567834");
   }
 
+  /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyMeta();
   }
 
+  /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyExtensionsPartA();
   }
 
+  /** Tests that the expected extensions exist. */
   private static void verifyExtensionsPartA() {
     assertEquals(30, coverage.getExtension().size());
 
@@ -143,42 +169,49 @@ public final class CoverageTransformerV2Test {
     }
   }
 
+  /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyCoverageStatus("cancelled");
   }
 
+  /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyType();
   }
 
+  /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifySubscriber();
   }
 
+  /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyRelationship();
   }
 
+  /** Tests that the transformer sets the expected period date. */
   @Test
   public void verifyPeriodPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-Mar-2020"), Optional.of("17-JUN-2020"));
   }
 
+  /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     verifyPayor();
   }
 
+  /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
@@ -186,10 +219,9 @@ public final class CoverageTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.CoverageTransformerV2#transform(Coverage)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Coverage} with a
-   * reference year field not found.
+   * Verifies that {@link CoverageTransformerV2#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_BENES} {@link Coverage} with a reference year field not
+   * found.
    */
   @Test
   public void verifyPartAWithoutReferenceYear() {
@@ -212,30 +244,35 @@ public final class CoverageTransformerV2Test {
     Coverage newCoverage =
         CoverageTransformerV2.transform(
             new MetricRegistry(), MedicareSegment.PART_A, newBeneficiary);
-    checkForNoYearlyDate(newBeneficiary, newCoverage);
+    checkForNoYearlyDate(newCoverage);
   }
 
   // ==================
   // Begin PART B Tests
   // ==================
+
+  /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyID("part-b-567834");
   }
 
+  /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyMeta();
   }
 
+  /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyExtensionsPartB();
   }
 
+  /** Tests that the expected extensions exist. */
   private static void verifyExtensionsPartB() {
     assertEquals(27, coverage.getExtension().size());
 
@@ -255,42 +292,49 @@ public final class CoverageTransformerV2Test {
     }
   }
 
+  /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyCoverageStatus("active");
   }
 
+  /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyType();
   }
 
+  /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifySubscriber();
   }
 
+  /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyRelationship();
   }
 
+  /** Tests that the transformer sets the expected period date. */
   @Test
   public void verifyPeriodPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-JUL-2021"), Optional.of("17-AUG-2022"));
   }
 
+  /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     verifyPayor();
   }
 
+  /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
@@ -300,24 +344,29 @@ public final class CoverageTransformerV2Test {
   // ==================
   // Begin PART C Tests
   // ==================
+
+  /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyID("part-c-567834");
   }
 
+  /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyMeta();
   }
 
+  /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyExtensionsPartC();
   }
 
+  /** Tests that the expected extensions exist. */
   private static void verifyExtensionsPartC() {
     assertEquals(57, coverage.getExtension().size());
 
@@ -362,36 +411,42 @@ public final class CoverageTransformerV2Test {
     }
   }
 
+  /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyCoverageStatus("active");
   }
 
+  /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyType();
   }
 
+  /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifySubscriber();
   }
 
+  /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyRelationship();
   }
 
+  /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     verifyPayor();
   }
 
+  /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
@@ -401,24 +456,40 @@ public final class CoverageTransformerV2Test {
   // ==================
   // Begin PART D Tests
   // ==================
+
+  /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyID("part-d-567834");
   }
 
+  /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyMeta();
   }
 
+  /** Tests that the transformer sets the expected period date. */
+  @Test
+  public void verifyPeriodPartD() {
+    transformCoverage(MedicareSegment.PART_D, false);
+    verifyPeriod(Optional.of("17-FEB-2021"), Optional.of("17-NOV-2022"));
+  }
+
+  /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyExtensionsPartD(72);
   }
 
+  /**
+   * Tests that the expected extensions exist.
+   *
+   * @param expectedSize the expected number of extensions expected
+   */
   private static void verifyExtensionsPartD(int expectedSize) {
     assertTrue(coverage.getExtension().size() == expectedSize);
 
@@ -488,36 +559,42 @@ public final class CoverageTransformerV2Test {
     }
   }
 
+  /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyCoverageStatus("active");
   }
 
+  /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyType();
   }
 
+  /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifySubscriber();
   }
 
+  /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyRelationship();
   }
 
+  /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     verifyPayor();
   }
 
+  /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
@@ -527,11 +604,21 @@ public final class CoverageTransformerV2Test {
   // ==================
   // Begin Common tests
   // ==================
+
+  /**
+   * Verifies the coverage id.
+   *
+   * @param idRef the expected id
+   */
   private static void verifyID(String idRef) {
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals("Coverage/" + idRef, coverage.getIdElement().toString());
   }
 
+  /**
+   * Verifies the metadata has some last updated value and the profile contains {@link
+   * ProfileConstants#C4BB_COVERAGE_URL}.
+   */
   private static void verifyMeta() {
     assertNotNull(coverage.getMeta().getLastUpdated());
 
@@ -542,6 +629,7 @@ public final class CoverageTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_COVERAGE_URL)));
   }
 
+  /** Verify that various expected extensions exist. */
   private static void verifyCommonExtensions() {
     // ms_cd
     verifyCodedExtension(
@@ -568,6 +656,13 @@ public final class CoverageTransformerV2Test {
     }
   }
 
+  /**
+   * Verify that a coded extension exists with the given values.
+   *
+   * @param url the url to look up the extension by
+   * @param code the code the extension should have
+   * @param display the display the extension should have
+   */
   private static void verifyCodedExtension(String url, String code, String display) {
     Extension ex = TransformerTestUtilsV2.findExtensionByUrl(url, coverage.getExtension());
 
@@ -576,10 +671,16 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /**
+   * Verifies coverage status.
+   *
+   * @param status the expected status
+   */
   private static void verifyCoverageStatus(String status) {
     assertEquals(status, coverage.getStatus().toCode());
   }
 
+  /** Verifies the type has the expected coding. */
   private static void verifyType() {
     // Test Category here
     CodeableConcept typ = coverage.getType();
@@ -593,6 +694,7 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(typ));
   }
 
+  /** Verifies the subscriber has the expected patient reference information and id. */
   private static void verifySubscriber() {
     assertEquals("3456789", coverage.getSubscriberId());
     Reference ex = coverage.getBeneficiary();
@@ -600,6 +702,7 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
+  /** Verifies the relationship coding is as expected. */
   private static void verifyRelationship() {
     CodeableConcept typ = coverage.getRelationship();
     CodeableConcept compare =
@@ -613,13 +716,21 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(typ));
   }
 
-  private static void verifyPeriod() {
+  /**
+   * Verifies the period date is as expected.
+   *
+   * @param startDate option {@link String} denoting FHIR {@link Period} start date
+   * @param endDate option {@link String} denoting FHIR {@link Period} end date
+   */
+  private static void verifyPeriod(Optional<String> startDate, Optional<String> endDate) {
     Period per = coverage.getPeriod();
     Period compare = new Period();
-    TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("1963-10-03"));
+    startDate.ifPresent(value -> TransformerUtilsV2.setPeriodStart(compare, parseDate(value)));
+    endDate.ifPresent(value -> TransformerUtilsV2.setPeriodEnd(compare, parseDate(value)));
     assertTrue(compare.equalsDeep(per));
   }
 
+  /** Verifies the number of payers and the identifier for the payor is as expected. */
   private static void verifyPayor() {
     List<Reference> payers = coverage.getPayor();
     assertNotNull(payers);
@@ -631,6 +742,11 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.getPayor().get(0).equalsDeep(coverage.getPayor().get(0)));
   }
 
+  /**
+   * Verifies the correct number of coverage class entries and the entries have the correct data.
+   *
+   * @param className the class name expected for the second coverage entry
+   */
   private static void verifyCoverageClass(String className) {
     assertEquals(2, coverage.getClass_().size());
 
@@ -656,7 +772,13 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.getClass_().get(1).equalsDeep(coverage.getClass_().get(1)));
   }
 
-  /** Standalone wrapper to create and optionall printout a MedicareSegment coverage */
+  /**
+   * Standalone wrapper to create and optionally print out a MedicareSegment coverage.
+   *
+   * @param medSeg the medicare segment
+   * @param showJson {@code true} if the json should be printed to stdout
+   * @throws FHIRException if there is an issue transforming the coverage
+   */
   public static void transformCoverage(MedicareSegment medSeg, boolean showJson)
       throws FHIRException {
     if (currSegment == null || currSegment != medSeg) {
@@ -669,8 +791,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_A} {@link Coverage} "looks like" it
+   * Verifies that the specified {@link MedicareSegment#PART_A} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    */
   @Disabled // test only used to verify support for IT (intgration Test)
@@ -680,6 +801,10 @@ public final class CoverageTransformerV2Test {
     assertPartAMatches(beneficiary, coverage);
   }
 
+  /**
+   * Verifies that the specified {@link MedicareSegment#PART_B} {@link Coverage} "looks like" it
+   * should, if it were produced from the specified {@link Beneficiary}.
+   */
   @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartB() {
@@ -687,6 +812,10 @@ public final class CoverageTransformerV2Test {
     assertPartBMatches(beneficiary, coverage);
   }
 
+  /**
+   * Verifies that the specified {@link MedicareSegment#PART_C} {@link Coverage} "looks like" it
+   * should, if it were produced from the specified {@link Beneficiary}.
+   */
   @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartC() {
@@ -694,6 +823,10 @@ public final class CoverageTransformerV2Test {
     assertPartCMatches(beneficiary, coverage);
   }
 
+  /**
+   * Verifies that the specified {@link MedicareSegment#PART_D} {@link Coverage} "looks like" it
+   * should, if it were produced from the specified {@link Beneficiary}.
+   */
   @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartD() {
@@ -702,9 +835,14 @@ public final class CoverageTransformerV2Test {
   }
 
   /**
-   * The following 4 aggregated tests will be called from the R4CoverageResourceProviderIT
-   * (integration tests); as such they may have different results from the standalone *
+   * Asserts that the data for a part A beneficiary matches the expected values.
+   *
+   * <p>The following 4 aggregated tests will be called from the R4CoverageResourceProviderIT
+   * (integration tests); as such they may have different results from the standalone
    * CoverageTransformerV2.
+   *
+   * <p>TODO: Move the shared items to a base test or util instead of having a test call another
+   * test
    *
    * @param inBeneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
    * @param inCoverage the {@link Coverage} to verify
@@ -723,10 +861,16 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-Mar-2020"), Optional.of("17-JUN-2020"));
     verifyPayor();
   }
 
+  /**
+   * Asserts that the data for a part B beneficiary matches the expected values.
+   *
+   * @param inBeneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
+   * @param inCoverage the {@link Coverage} to verify
+   */
   static void assertPartBMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
@@ -741,10 +885,16 @@ public final class CoverageTransformerV2Test {
     verifyType();
     verifySubscriber();
     verifyRelationship();
-    verifyPeriod();
+    verifyPeriod(Optional.of("17-JUL-2021"), Optional.of("17-AUG-2022"));
     verifyPayor();
   }
 
+  /**
+   * Asserts that the data for a part C beneficiary matches the expected values.
+   *
+   * @param inBeneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
+   * @param inCoverage the {@link Coverage} to verify
+   */
   static void assertPartCMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
@@ -760,6 +910,12 @@ public final class CoverageTransformerV2Test {
     verifyPayor();
   }
 
+  /**
+   * Asserts that the data for a part D beneficiary matches the expected values.
+   *
+   * @param inBeneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
+   * @param inCoverage the {@link Coverage} to verify
+   */
   static void assertPartDMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
@@ -775,54 +931,83 @@ public final class CoverageTransformerV2Test {
     verifyPayor();
   }
 
-  private static void verifyCodedExtensionDoestNotExist(Coverage inCoverage, String url) {
+  /**
+   * Verifies the specified extension does not exist for the specified coverage object.
+   *
+   * @param inCoverage the coverage to check the extensions of
+   * @param url the extension url (to identify it) that should not exist
+   */
+  private static void verifyCodedExtensionDoesNotExist(Coverage inCoverage, String url) {
     Optional<Extension> ex =
         inCoverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
 
     assertEquals(true, ex.isEmpty());
   }
 
-  private static void checkForNoYearlyDate(Beneficiary inBeneficiary, Coverage inCoverage) {
+  /**
+   * Verifies that a number of yearly extensions do not exist for the specified coverage object.
+   *
+   * @param inCoverage the coverage object to check
+   */
+  private static void checkForNoYearlyDate(Coverage inCoverage) {
     // dual_01 thru dual_12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/dual_%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
     }
 
     // buyin01 thru buyin12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/buyin%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
     }
 
     // ptdcntrct01 thru ptdcntrct12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdcntrct%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
     }
 
     // ptdpbpid01 thru ptdpbpid11
     for (int i = 1; i < 12; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdpbpid%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
     }
 
     // sgmtid01 thru sgmtid11
     for (int i = 1; i < 12; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/sgmtid%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
     }
 
     // cstshr01 thru cstshr12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/cstshr%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
     }
 
     // rdsind01 thru rdsind12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/rdsind%02d", i);
-      verifyCodedExtensionDoestNotExist(inCoverage, url);
+      verifyCodedExtensionDoesNotExist(inCoverage, url);
+    }
+  }
+
+  /**
+   * Parse an {@link Optional} {@link LocalDate} from a {@link String}.
+   *
+   * @param dateText the date string to parse
+   * @return an {@link Optional} populated with a {@link LocalDate} if the input has data, or an
+   *     empty Optional if not
+   */
+  public static Optional<LocalDate> parseDate(String dateText) {
+    if (dateText.isEmpty()) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(LocalDate.parse(dateText, RIF_DATE_FORMATTER));
+    } catch (Exception e) {
+      return Optional.empty();
     }
   }
 }

@@ -19,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /** Unit tests for {@link QueryUtils}. */
 @ExtendWith(MockitoExtension.class)
 public class QueryUtilsTest {
+  /** The lower date for the test. * */
   private static final String LOWER_DATE = "2019-08-25";
+  /** The upper date for the test. * */
   private static final String UPPER_DATE = "2022-08-25";
 
   /** Used when mocking query construction. */

@@ -19,7 +19,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
+import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsLocation;
 import gov.cms.bfd.model.rda.StringList;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,24 +55,38 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+/** Tests the {@link McsClaimRdaSink}. */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class McsClaimRdaSinkTest {
+  /** Test value for version. */
   private static final String VERSION = "version";
 
+  /** The clock used for creating fixed timestamps. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+  /** Configuration for the object used for hashing values. */
   private final IdHasher.Config hasherConfig = new IdHasher.Config(1, "notarealpepper");
 
+  /** The mock datasource. */
   @Mock private HikariDataSource dataSource;
+  /** The mock entity manager factory. */
   @Mock private EntityManagerFactory entityManagerFactory;
+  /** The mock entity manager. */
   @Mock private EntityManager entityManager;
+  /** The mock entity transaction. */
   @Mock private EntityTransaction transaction;
+  /** The mock claim transformer. */
   @Mock private McsClaimTransformer transformer;
+  /** The test meter object. */
   private MeterRegistry meters;
+  /** The test metric object. */
   private MetricRegistry appMetrics;
+  /** The sink under test. */
   private McsClaimRdaSink sink;
+  /** Keeps track of the sequence number in the test. */
   private long nextSeq = 0L;
 
+  /** Sets up the test mocks and dependencies before each test. */
   @BeforeEach
   public void setUp() {
     meters = new SimpleMeterRegistry();
@@ -81,11 +98,12 @@ public class McsClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(meters, appMetrics, dataSource, entityManagerFactory, clock);
-    sink = new McsClaimRdaSink(appState, transformer, true);
+    sink = new McsClaimRdaSink(appState, transformer, true, 0);
     sink.getMetrics().setLatestSequenceNumber(0);
     nextSeq = 0L;
   }
 
+  /** Verifies the metric names for the claim sink are set as expected. */
   @Test
   public void metricNames() {
     assertEquals(
@@ -110,6 +128,12 @@ public class McsClaimRdaSinkTest {
             .collect(Collectors.toList()));
   }
 
+  /**
+   * Verifies that when a successful entity merge occurs, the transaction is committed and the
+   * correct metering occurs.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void mergeSuccessful() throws Exception {
     final List<RdaChange<RdaMcsClaim>> batch =
@@ -141,6 +165,10 @@ public class McsClaimRdaSinkTest {
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
+  /**
+   * Verifies that when an error occurs while entity merging, the transaction is rolled back and the
+   * correct metering occurs.
+   */
   @Test
   public void mergeFatalError() {
     final List<RdaChange<RdaMcsClaim>> batch =
@@ -179,14 +207,23 @@ public class McsClaimRdaSinkTest {
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
+  /**
+   * Verifies that when the sink is closed, the entity manager is also closed.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void closeMethodsAreCalled() throws Exception {
     sink.close();
     verify(entityManager).close();
   }
 
+  /**
+   * Verifies that when a transformation error occurs when writing messages from the sink partway
+   * in, the messages that did not error are written, metering occurs, and nothing is rolled back.
+   */
   @Test
-  public void transformClaimFailure() throws Exception {
+  public void transformClaimFailure() {
     final var claims = ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     final var messages = messagesForBatch(claims);
     doThrow(
@@ -195,13 +232,28 @@ public class McsClaimRdaSinkTest {
         .when(transformer)
         .transformClaim(messages.get(1));
 
+    // unchecked - This is fine for a mock
+    //noinspection unchecked
+    TypedQuery<MessageError> mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(1L).when(mockTypedQuery).getSingleResult();
+
+    doReturn(mockTypedQuery)
+        .when(mockTypedQuery)
+        .setParameter("status", MessageError.Status.UNRESOLVED);
+
+    doReturn(mockTypedQuery)
+        .when(entityManager)
+        .createQuery(
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
+
     try {
       sink.writeMessages(VERSION, messages);
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
-      assertThat(
-          error.getCause(), CoreMatchers.instanceOf(DataTransformer.TransformationException.class));
+      assertThat(error.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
     }
 
     verify(transaction, times(1)).begin();
@@ -270,6 +322,12 @@ public class McsClaimRdaSinkTest {
     assertEquals(transactionDate, metaData.getTransactionDate());
   }
 
+  /**
+   * Gets the Fiss claim changes for a given batch of claims.
+   *
+   * @param batch the batch of claims
+   * @return the list of changes
+   */
   private List<McsClaimChange> messagesForBatch(List<RdaChange<RdaMcsClaim>> batch) {
     final var messages = ImmutableList.<McsClaimChange>builder();
     for (RdaChange<RdaMcsClaim> change : batch) {
@@ -284,6 +342,12 @@ public class McsClaimRdaSinkTest {
     return messages.build();
   }
 
+  /**
+   * Creates an {@link RdaFissClaim} {@link RdaChange} for testing.
+   *
+   * @param dcn the dcn for the claim
+   * @return the rda fiss change
+   */
   private RdaChange<RdaMcsClaim> createClaim(String dcn) {
     RdaMcsClaim claim = new RdaMcsClaim();
     claim.setIdrClmHdIcn(dcn);

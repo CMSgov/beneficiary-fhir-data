@@ -38,16 +38,52 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+/** Tests the abstract samhsa matcher. */
 public class AbstractSamhsaMatcherTest {
 
+  /** Constant for an expected {@link IllegalStateException}. */
   private static final IllegalStateException INVOCATION_EXCEPTION =
       new IllegalStateException("Method was not called with expected arguments for test");
 
+  /** A mock Coding to be used as a HCPCS code. */
+  private static final Coding HCPCS_CODING = mock(Coding.class);
+  /** A mock Coding to be used as a SAMHSA code. */
+  private static final Coding SAMHSA_CODING = mock(Coding.class);
+  /** A mock Coding to be used as a non-hcpcs, non-samhsa code. */
+  private static final Coding OTHER_CODING = mock(Coding.class);
+
+  /** A list of that contains a HCPCs coding. */
+  private static final List<Coding> CODINGS_WITH_HCPCS =
+      List.of(OTHER_CODING, HCPCS_CODING, SAMHSA_CODING, OTHER_CODING);
+  /** A list of that does not contain a HCPCs coding. */
+  private static final List<Coding> CODINGS_WITHOUT_HCPCS =
+      List.of(OTHER_CODING, SAMHSA_CODING, OTHER_CODING);
+
+  /** A mock Coding to be used as a non-DRG code. */
+  private static final Coding NON_DRG_CODING = mock(Coding.class);
+  /** A mock Coding to be used as a DRG non-SAMHSA code. */
+  private static final Coding DRG_NON_SAMHSA_CODING = mock(Coding.class);
+  /** A mock Coding to be used as a DRG + SAMHSA code. */
+  private static final Coding DRG_SAMHSA_CODING = mock(Coding.class);
+
+  /** A mock Coding to be used as a non-DRG code. */
+  private static final CodeableConcept PACKAGING_CONCEPT = mock(CodeableConcept.class);
+
+  /** Interface for the samhsa filter method. */
   @FunctionalInterface
   public interface SamhsaFilterMethod<T> {
+
+    /**
+     * Method to apply a matcher to a coding to check if it's SAMHSA.
+     *
+     * @param matcher the matcher to use
+     * @param coding the coding to pass to the matcher
+     * @return {@code true} if the matcher matches for the given coding
+     */
     boolean apply(AbstractSamhsaMatcher<IBaseResource> matcher, T coding);
   }
 
+  /** The non parameterized tests. */
   @Nested
   public class NonParameterizedTests {
 
@@ -417,6 +453,10 @@ public class AbstractSamhsaMatcherTest {
       verify(matcherSpy, times(1)).isSamhsaIcd10CmDiagnosis(mockCoding);
     }
 
+    /**
+     * Tests that the SAMHSA matcher methods are invoked as expected when {@link
+     * AbstractSamhsaMatcher#isSamhsaIcdProcedure} is called.
+     */
     @Test
     public void shouldCorrectlyInvokeIsSamhsaCodingForProcedure() {
       CodeableConcept mockConcept = mock(CodeableConcept.class);
@@ -510,15 +550,20 @@ public class AbstractSamhsaMatcherTest {
   }
 
   /**
-   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaDiagnosis(DiagnosisComponent)}
+   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaDiagnosis(DiagnosisComponent)}.
    *
    * <p>The parameterized tests check to see if either/both the Diagnosis Codeable Concept and/or
    * Packaging Code contains SAMHSA data
    *
    * <p>Two different calls are made to {@link
-   * AbstractSamhsaMatcher#isSamhsaDiagnosis(CodeableConcept)} and {@link
-   * AbstractSamhsaMatcher#isSamhsaPackageCode(CodeableConcept)} from the primary method, which are
+   * AbstractSamhsaMatcher#isSamhsaDiagnosis(CodeableConcept)}* and {@link
+   * AbstractSamhsaMatcher#isSamhsaPackageCode(CodeableConcept)}* from the primary method, which are
    * both mocked within the test
+   *
+   * @param expectedIsSamhsaDiagnosis the expected is samhsa diagnosis
+   * @param expectedIsSamhsaPackage the expected is samhsa package
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if there is not a match
    */
   @ParameterizedTest(
       name = "{index}: IsSamhsaDiagnosis(\"{0}\"), IsSamhsaPackage(\"{1}\"), Expected(\"{2}\")")
@@ -634,11 +679,18 @@ public class AbstractSamhsaMatcherTest {
 
   /**
    * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCoding(CodeableConcept, Predicate,
-   * Predicate, Predicate, Predicate, Predicate)}
+   * Predicate, Predicate, Predicate, Predicate)}.
    *
    * <p>The target method takes a {@link CodeableConcept} and two {@link Predicate}s (one for ICD9
    * checks and one for ICD10 checks). The test checks each combination of coding system/predicate
    * result.
+   *
+   * @param system the system to return in the mock coding
+   * @param concept the codable concept with codings to test
+   * @param isIcd9Code the value to set for the icd9 code predicate test
+   * @param isIcd10Code the value to set for the icd10 code predicate test
+   * @param expectedResult the expected result
+   * @param errorMessage the error message in the event of a test failure
    */
   @ParameterizedTest(
       name =
@@ -743,13 +795,22 @@ public class AbstractSamhsaMatcherTest {
 
   /**
    * Parameterized tests for {@link
-   * AbstractSamhsaMatcher#containsSamhsaProcedureCode(CodeableConcept)}
+   * AbstractSamhsaMatcher#containsSamhsaProcedureCode(CodeableConcept)}.
    *
    * <p>Tests to see if every combination of coding list size, hcpcs result and known system check
    * returns the expected result.
    *
    * <p>If the codings list is empty, it should return false. If the concept contains a HCPCS samhsa
    * code or any unknown systems, it should return true.
+   *
+   * @param name the test name, for reporting
+   * @param codingsListEmpty if the codings list should report as empty
+   * @param hasHcpcsSystemAndSmahsaCptCode the value to return from {@link
+   *     AbstractSamhsaMatcher#hasHcpcsSystemAndSamhsaCptCode}
+   * @param containsOnlyKnownSystems the value to return from {@link
+   *     AbstractSamhsaMatcher#containsOnlyKnownSystems}
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if a test fails
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -791,15 +852,6 @@ public class AbstractSamhsaMatcherTest {
         matcherSpy.containsSamhsaProcedureCode(mockConcept),
         name + " " + errorMessage);
   }
-
-  private static final Coding HCPCS_CODING = mock(Coding.class);
-  private static final Coding SAMHSA_CODING = mock(Coding.class);
-  private static final Coding OTHER_CODING = mock(Coding.class);
-
-  private static final List<Coding> CODINGS_WITH_HCPCS =
-      List.of(OTHER_CODING, HCPCS_CODING, SAMHSA_CODING, OTHER_CODING);
-  private static final List<Coding> CODINGS_WITHOUT_HCPCS =
-      List.of(OTHER_CODING, SAMHSA_CODING, OTHER_CODING);
 
   /**
    * Data method for the samhsaCodingTest. Used automatically via the MethodSource annotation.
@@ -848,13 +900,19 @@ public class AbstractSamhsaMatcherTest {
 
   /**
    * Parameterized tests for {@link
-   * AbstractSamhsaMatcher#hasHcpcsSystemAndSamhsaCptCode(CodeableConcept)}
+   * AbstractSamhsaMatcher#hasHcpcsSystemAndSamhsaCptCode(CodeableConcept)}*
    *
    * <p>Tests to see if every combination of coding list size, HCPCS system existence, and CPT
    * SAMHSA codes generates the expected result.
    *
    * <p>Empty coding lists and ones without a HCPCS system are not considered SAMHSA by the tested
    * method.
+   *
+   * @param name the test name for reporting
+   * @param codings the codings to test
+   * @param isSamhsaCptCode the value to return for {@link AbstractSamhsaMatcher#isSamhsaCptCode}
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if a test fails
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -886,12 +944,6 @@ public class AbstractSamhsaMatcherTest {
         matcherSpy.hasHcpcsSystemAndSamhsaCptCode(mockConcept),
         name + " " + errorMessage);
   }
-
-  private static final Coding NON_DRG_CODING = mock(Coding.class);
-  private static final Coding DRG_NON_SAMHSA_CODING = mock(Coding.class);
-  private static final Coding DRG_SAMHSA_CODING = mock(Coding.class);
-
-  private static final CodeableConcept PACKAGING_CONCEPT = mock(CodeableConcept.class);
 
   /**
    * Data method for the isSamhsaPackageCodeTest. Used automatically via the MethodSource
@@ -955,6 +1007,12 @@ public class AbstractSamhsaMatcherTest {
    *
    * <p>If the concept's coding list has any non-DRG codes, or DRG SAMHSA codes, the coding is
    * SAMHSA
+   *
+   * @param name the test name for reporting
+   * @param codings the codings to test
+   * @param concept the codable concept to test
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if a test fails
    */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
@@ -996,7 +1054,13 @@ public class AbstractSamhsaMatcherTest {
         arguments("123", false, "Non-samhsa code incorrectly filtered"));
   }
 
-  /** Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCptCode(Coding)} */
+  /**
+   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCptCode(Coding)}.
+   *
+   * @param code the code to test
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if a test fails
+   */
   @ParameterizedTest(name = "{index}: List(\"{0}\"), System(\"{1}\")")
   @MethodSource
   public void cptCodingTest(String code, boolean expectedResult, String errorMessage) {
@@ -1032,7 +1096,13 @@ public class AbstractSamhsaMatcherTest {
 
   /**
    * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCodingForSystem(Coding, Set,
-   * String)}
+   * String)}.
+   *
+   * @param code the code to test
+   * @param system the system to test
+   * @param shouldThrow if the test should expect an exception to be thrown
+   * @param expectedResult the expected result (if not an exception)
+   * @param errorMessage the error message if a test fails
    */
   @ParameterizedTest(name = "{index}: Code(\"{0}\"), System(\"{1}\")")
   @MethodSource
@@ -1112,7 +1182,14 @@ public class AbstractSamhsaMatcherTest {
             "Samhsa ICD 10 procedure code evaluated incorrectly"));
   }
 
-  /** Parameterized tests for various isSamhsaX() methods. */
+  /**
+   * Parameterized tests for various isSamhsaX() methods.
+   *
+   * @param codePropertyName a string identifier to determine which codes to test
+   * @param system the {@link Coding#getSystem()} to test
+   * @param method the filter method to test
+   * @param errorMessage the error message if a test fails
+   */
   @ParameterizedTest(name = "{index}: List(\"{0}\"), System(\"{1}\")")
   @MethodSource
   public void codingTest(

@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<datasource-proxy.version>1.8</datasource-proxy.version>
+		<datasource-proxy.version>1.8.1</datasource-proxy.version>
 		<jersey.version>2.25.1</jersey.version>
 
 		<!-- Configure the BFD Server, as it will be run via the exec
@@ -28,7 +28,6 @@
 			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
 			for details. -->
 		<bash.exe>bash</bash.exe>
-		<checkstyle.skip>true</checkstyle.skip>
 	</properties>
 
 	<dependencyManagement>

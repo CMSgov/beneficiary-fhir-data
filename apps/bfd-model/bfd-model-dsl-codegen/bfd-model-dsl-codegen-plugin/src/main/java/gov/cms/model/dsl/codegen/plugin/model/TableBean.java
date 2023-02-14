@@ -3,8 +3,10 @@ package gov.cms.model.dsl.codegen.plugin.model;
 import com.google.common.base.Strings;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,47 +77,15 @@ public class TableBean implements ModelBean {
   }
 
   /**
-   * Finds the column with the specified {@link ColumnBean#name} or {@link ColumnBean#dbName}. If no
-   * matching column is found this method throws an {@link IllegalArgumentException}.
-   *
-   * @param columnName name value to search for
-   * @return the {@link ColumnBean} with the given name
-   * @throws IllegalArgumentException if no match is found
-   */
-  @Nonnull
-  public ColumnBean findColumnByNameOrDbName(String columnName) throws IllegalArgumentException {
-    return getColumnByNameOrDbName(columnName)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    String.format(
-                        "reference to non-existent column %s in table %s", columnName, name)));
-  }
-
-  /**
-   * Finds the column with the specified {@link ColumnBean#name} or {@link ColumnBean#dbName}.
+   * Finds the column with the specified {@link ColumnBean#name}.
    *
    * @param columnName name value to search for
    * @return a (possibly empty) {@link Optional} containing the the {@link ColumnBean} with the
    *     given name
    */
   @Nonnull
-  public Optional<ColumnBean> getColumnByNameOrDbName(String columnName) {
-    return columns.stream()
-        .filter(c -> columnName.equals(c.getName()) || columnName.equals(c.getDbName()))
-        .findAny();
-  }
-
-  /**
-   * Finds the column with the specified {@link ColumnBean#getColumnName()}.
-   *
-   * @param columnName name value to search for
-   * @return a (possibly empty) {@link Optional} containing the the {@link ColumnBean} with the
-   *     given name
-   */
-  @Nonnull
-  public Optional<ColumnBean> getColumnByColumnName(String columnName) {
-    return columns.stream().filter(c -> columnName.equals(c.getColumnName())).findAny();
+  public Optional<ColumnBean> getColumnByName(String columnName) {
+    return columns.stream().filter(c -> columnName.equals(c.getName())).findAny();
   }
 
   /**
@@ -175,15 +145,6 @@ public class TableBean implements ModelBean {
   }
 
   /**
-   * Returns a list of all {@link JoinBean} objects that are part of the primary key.
-   *
-   * @return a {@link List} of {@link JoinBean}
-   */
-  public List<JoinBean> getPrimaryKeyJoinBeans() {
-    return joins.stream().filter(this::isPrimaryKey).collect(Collectors.toList());
-  }
-
-  /**
    * Creates a temporary {@link Set} containing the names of all of the columns that should be
    * included in the generated {@link Object#equals} method.
    *
@@ -213,6 +174,20 @@ public class TableBean implements ModelBean {
   @Override
   public String getDescription() {
     return "table " + name;
+  }
+
+  /**
+   * Used by validator to verify that every primary key name matches either a column name or a join
+   * field name in this table.
+   *
+   * @return true if all names were matched
+   */
+  @AssertTrue(message = "primaryKey")
+  public boolean isEveryPrimaryKeyColumnValid() {
+    final var unmatched = new HashSet<>(primaryKeyColumns);
+    columns.forEach(c -> unmatched.remove(c.getName()));
+    joins.forEach(j -> unmatched.remove(j.getFieldName()));
+    return unmatched.isEmpty();
   }
 
   /**

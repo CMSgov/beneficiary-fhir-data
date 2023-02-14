@@ -57,6 +57,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.jpa.QueryHints;
@@ -73,6 +74,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class PatientResourceProvider implements IResourceProvider, CommonHeaders {
+
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    */
@@ -82,23 +84,41 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
+  /** The Entity manager. */
   private EntityManager entityManager;
+  /** The Metric registry. */
   private MetricRegistry metricRegistry;
+  /** The Loaded filter manager. */
   private LoadedFilterManager loadedFilterManager;
 
-  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
+  /** The expected coverage id length. */
+  private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
+
+  /**
+   * Sets the {@link #entityManager}.
+   *
+   * @param entityManager a JPA {@link EntityManager} connected to the application's database
+   */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /** @param metricRegistry the {@link MetricRegistry} to use */
+  /**
+   * Sets the {@link #metricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
+  /**
+   * Sets the {@link #loadedFilterManager}.
+   *
+   * @param loadedFilterManager the {@link LoadedFilterManager} to use
+   */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
@@ -127,13 +147,18 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   @Read(version = false)
   @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
-    if (patientId == null) {
-      throw new IllegalArgumentException();
+    if (patientId == null || patientId.getIdPart() == null) {
+      throw new InvalidRequestException("Missing required patient ID");
     }
     if (patientId.getVersionIdPartAsLong() != null) {
-      throw new IllegalArgumentException();
+      throw new InvalidRequestException("Patient ID must not define a version");
     }
-    Long beneficiaryId = patientId.getIdPartAsLong();
+    Long beneficiaryId;
+    try {
+      beneficiaryId = patientId.getIdPartAsLong();
+    } catch (NumberFormatException e) {
+      throw new InvalidRequestException("Patient ID must be a number");
+    }
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
@@ -200,6 +225,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return patient;
   }
 
+  /**
+   * Search by coverage contract.
+   *
+   * @param coverageId the coverage id
+   * @param referenceYear the reference year
+   * @param cursor the cursor for paging
+   * @param requestDetails the request details
+   * @return the bundle representing the results
+   */
   @Search
   @Trace
   public Bundle searchByCoverageContract(
@@ -231,7 +265,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       try {
         year = Integer.parseInt(referenceYear.getValueNotNull());
       } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Invalid contract year specified", e);
+        throw new InvalidRequestException("Contract year must be a number.", e);
       }
     }
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
@@ -276,10 +310,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
     if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty())
       throw new InvalidRequestException(
-          "Unsupported query parameter system: " + logicalId.getSystem());
+          "System is unsupported here and should not be set (" + logicalId.getSystem() + ")");
     if (logicalId.getValueNotNull().isEmpty())
-      throw new InvalidRequestException(
-          "Unsupported query parameter value: " + logicalId.getValue());
+      throw new InvalidRequestException("Missing required id value");
 
     List<IBaseResource> patients;
     if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
@@ -327,6 +360,14 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
+  /**
+   * Search by coverage contract and year month.
+   *
+   * @param coverageId the coverage id
+   * @param yearMonth the year month
+   * @param requestDetails the request details
+   * @return the search results
+   */
   @Trace
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
@@ -374,6 +415,16 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
+  /**
+   * Get the {@link CcwCodebookVariable} value for the specified system string.
+   *
+   * <p>TODO: Move this out of here into a shared/generic location and rename method
+   *
+   * @param system the system to find the {@link CcwCodebookVariable} for
+   * @return the ccw codebook variable
+   * @throws InvalidRequestException (http 400 error) if the system did not match a known {@link
+   *     CcwCodebookVariable}
+   */
   private CcwCodebookVariable partDCwVariableFor(String system) {
     try {
       return CcwCodebookVariable.valueOf(system.toUpperCase());
@@ -382,6 +433,17 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
   }
 
+  /**
+   * Gets the part D contract month field from the given {@link CcwCodebookVariable}.
+   *
+   * <p>TODO: This could be moved somewhere else; also should this hardcoded map exist in a more
+   * central location?
+   *
+   * @param month the part d contract variable to look for as a {@link CcwCodebookVariable}
+   * @return the string representing the part d contract month
+   * @throws InvalidRequestException if the {@link CcwCodebookVariable} is not one of the supported
+   *     part d contract values
+   */
   private String partDFieldByMonth(CcwCodebookVariable month) {
 
     Map<CcwCodebookVariable, String> mapOfMonth =
@@ -410,6 +472,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Fetch beneficiaries by contract and year-month.
+   *
    * @param coverageId a {@link TokenParam} specifying the Part D contract ID and the month to match
    *     against (yeah, the combo is weird)
    * @param yearMonth the enrollment month and year to match against
@@ -431,9 +495,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * reason to even run the next query.
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
-      long matchingBeneCount =
-          queryBeneCountByPartDContractCodeAndYearMonth(yearMonth, contractCode);
-      if (matchingBeneCount <= 0) {
+      boolean matchingBeneExists =
+          queryBeneExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+      if (!matchingBeneExists) {
         return Collections.emptyList();
       }
     }
@@ -458,48 +522,65 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Query bene exists by part d contract code and year-month.
+   *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
-   * @return the count of matching {@link Beneficiary#getBeneficiaryId()} values
+   * @return true if the {@link BeneficiaryMonthly} exists
    */
   @Trace
-  private long queryBeneCountByPartDContractCodeAndYearMonth(
+  private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Long> beneCountCriteria = builder.createQuery(Long.class);
-    Root<BeneficiaryMonthly> beneMonthlyRoot = beneCountCriteria.from(BeneficiaryMonthly.class);
-    beneCountCriteria.select(builder.count(beneMonthlyRoot));
-    beneCountCriteria.where(
-        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
-        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+    CriteriaQuery<BeneficiaryMonthly> beneExistsCriteria =
+        builder.createQuery(BeneficiaryMonthly.class);
+    Root<BeneficiaryMonthly> beneMonthlyRoot = beneExistsCriteria.from(BeneficiaryMonthly.class);
+
+    Subquery<Integer> beneExistsSubquery = beneExistsCriteria.subquery(Integer.class);
+    Root<BeneficiaryMonthly> beneMonthlyRootSubquery =
+        beneExistsSubquery.from(BeneficiaryMonthly.class);
+
+    beneExistsSubquery
+        .select(builder.literal(1))
+        .where(
+            builder.equal(beneMonthlyRootSubquery.get(BeneficiaryMonthly_.yearMonth), yearMonth),
+            builder.equal(
+                beneMonthlyRootSubquery.get(BeneficiaryMonthly_.partDContractNumberId),
+                contractId));
+
+    beneExistsCriteria.select(beneMonthlyRoot).where(builder.exists(beneExistsSubquery));
 
     // Run the query and return the results.
-    Optional<Long> matchingBeneCount = Optional.empty();
+    boolean matchingBeneExists = false;
     Long beneHistoryMatchesTimerQueryNanoSeconds = null;
-    Timer.Context matchingBeneCountTimer =
+    Timer.Context matchingBeneExistsTimer =
         metricRegistry
             .timer(
                 MetricRegistry.name(
                     getClass().getSimpleName(),
                     "query",
-                    "bene_count_by_year_month_part_d_contract_id"))
+                    "bene_exists_by_year_month_part_d_contract_id"))
             .time();
     try {
-      matchingBeneCount =
-          Optional.of(entityManager.createQuery(beneCountCriteria).getSingleResult());
-      return matchingBeneCount.get();
+      matchingBeneExists =
+          entityManager.createQuery(beneExistsCriteria).setMaxResults(1).getResultList().stream()
+              .findFirst()
+              .isPresent();
+      return matchingBeneExists;
     } finally {
-      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneCountTimer.stop();
+      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
       TransformerUtils.recordQueryInMdc(
-          "bene_count_by_year_month_part_d_contract_id",
+          "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
-          matchingBeneCount.isPresent() ? 1 : 0);
+          matchingBeneExists ? 1 : 0);
     }
   }
 
   /**
+   * Query beneficiary ids by part d contract code and year-month.
+   *
    * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
    * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
    *     against
@@ -562,7 +643,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Query the DB for and return the matching {@link Beneficiary}s
+   * Query the DB for and return the matching {@link Beneficiary}s.
    *
    * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
    * @return the matching {@link Beneficiary}s
@@ -693,9 +774,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Queries the database by hicn hash.
+   *
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -708,9 +790,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Queries the database by mbi hash.
+   *
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -723,10 +806,11 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
+   * Queries the database by the specified hash type.
+   *
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
+   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
@@ -742,7 +826,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
       RequestHeaders requestHeader) {
     if (hash == null || hash.trim().isEmpty()) {
-      throw new IllegalArgumentException();
+      throw new InvalidRequestException("Hash value cannot be null/empty");
     }
     /*
      * Beneficiaries' HICN/MBIs can change over time and those past HICN/MBIs may land in
@@ -885,8 +969,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Following method will bring back the Beneficiary that has the most recent rfrnc_yr since the
-   * hicn points to more than one bene id in the Beneficiaries table
+   * Returns the Beneficiary that has the most recent rfrnc_yr since the hicn points to more than
+   * one bene id in the Beneficiaries table.
    *
    * @param duplicateBenes of matching Beneficiary records the {@link
    *     Beneficiary#getBeneficiaryId()} value to match
@@ -928,7 +1012,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       Arrays.asList("true", "false", "hicn", "mbi");
 
   /**
-   * Return a valid List of values for the IncludeIdenfifiers header
+   * Return a valid List of values for the IncludeIdenfifiers header.
    *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out include identifiers values
@@ -973,13 +1057,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
   }
 
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
-
   /**
-   * Check that coverageId value is valid
+   * Check that coverageId value is valid.
    *
    * @param coverageId the coverage id
    * @throws InvalidRequestException if invalid coverageId
@@ -988,8 +1067,11 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (coverageId.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
-    if (coverageId.getValueNotNull().length() != 5)
+    if (coverageId.getValueNotNull().length() != EXPECTED_COVERAGE_ID_LENGTH) {
       throw new InvalidRequestException(
-          "Unsupported query parameter value: " + coverageId.getValueNotNull());
+          String.format(
+              "Coverage id is not expected length; value %s is not expected length %s",
+              coverageId.getValueNotNull(), EXPECTED_COVERAGE_ID_LENGTH));
+    }
   }
 }

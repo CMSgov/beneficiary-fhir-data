@@ -6,9 +6,9 @@ package gov.cms.bfd.server.war.commons.carin;
  * C4BB Claim Pharmacy CareTeam Roles</a>.
  */
 public enum C4BBClaimPharmacyTeamRole {
-  /** The primary care provider. * */
+  /** The primary care provider. */
   PRIMARY,
-  /** The prescribing provider. * */
+  /** The prescribing provider. */
   PRESCRIBING;
 
   /**

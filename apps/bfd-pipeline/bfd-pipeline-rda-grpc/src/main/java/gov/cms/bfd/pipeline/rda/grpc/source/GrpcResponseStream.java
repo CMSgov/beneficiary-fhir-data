@@ -24,7 +24,9 @@ public class GrpcResponseStream<TResponse> {
   public static final String STREAM_RESET_ERROR_MESSAGE =
       "RST_STREAM closed stream. HTTP/2 error code: PROTOCOL_ERROR";
 
+  /** The ClientCall used to invoke the RPC associated with the iterator. */
   private final ClientCall<?, ?> clientCall;
+  /** An Iterator over the response stream. */
   private final Iterator<TResponse> resultsIterator;
 
   /**
@@ -118,10 +120,16 @@ public class GrpcResponseStream<TResponse> {
    * detect when an InterruptedException was thrown down stream.
    */
   public static class StreamInterruptedException extends Exception {
+    /**
+     * Instantiates a new stream interrupted exception.
+     *
+     * @param cause the cause for the exception
+     */
     public StreamInterruptedException(StatusRuntimeException cause) {
       super(cause);
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized StatusRuntimeException getCause() {
       return (StatusRuntimeException) super.getCause();
@@ -133,10 +141,16 @@ public class GrpcResponseStream<TResponse> {
    * caused by the server dropping its HTTP connection unexpectedly.
    */
   public static class DroppedConnectionException extends Exception {
+    /**
+     * Instantiates a new dropped connection exception.
+     *
+     * @param cause the cause for the exception
+     */
     public DroppedConnectionException(StatusRuntimeException cause) {
       super(cause);
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized StatusRuntimeException getCause() {
       return (StatusRuntimeException) super.getCause();

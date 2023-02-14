@@ -407,10 +407,14 @@ mappings:
       comment: 'Medical Record Number: This field identifies the number assigned to
         the patient''s medical/health record by the provider.'
       dbName: medical_record_no
+    - name: mbiId
+      dbName: mbi_id
+      sqlType: bigint
+      dbOnly: true
     joins:
     - fieldName: mbiRecord
       entityClass: gov.cms.bfd.model.rda.Mbi
-      joinColumnName: mbi_id
+      joinColumnName: mbiId
       joinType: ManyToOne
       fetchType: EAGER
       properties:
@@ -420,6 +424,22 @@ mappings:
       - name: mbiHash
         fieldName: hash
         javaType: String
+    - class: array
+      fieldName: procCodes
+      entityMapping: FissProcCode
+      mappedBy: dcn
+    - class: array
+      fieldName: diagCodes
+      entityMapping: FissDiagnosisCode
+      mappedBy: dcn
+    - class: array
+      fieldName: payers
+      entityMapping: FissPayer
+      mappedBy: dcn
+    - class: array
+      fieldName: auditTrail
+      entityMapping: FissAuditTrail
+      mappedBy: dcn
     comment: FISS (Fiscal Intermediary Shared Systems) Claim
   enumTypes:
   - name: ServTypeCdMapping
@@ -609,22 +629,17 @@ mappings:
   - from: medicalRecordNo
   - from: NOW
     to: lastUpdated
-  arrays:
   - from: fissProcCodes
     to: procCodes
-    mapping: FissProcCode
-    namePrefix: procCode
+    transformer: Array
   - from: fissDiagCodes
     to: diagCodes
-    mapping: FissDiagnosisCode
-    namePrefix: diagCode
+    transformer: Array
   - from: fissPayers
     to: payers
-    mapping: FissPayer
-    namePrefix: payer
+    transformer: Array
   - from: fissAuditTrail
     to: auditTrail
-    mapping: FissAuditTrail
-    namePrefix: auditTrail
+    transformer: Array
   externalTransformations:
   - applyMbiCache

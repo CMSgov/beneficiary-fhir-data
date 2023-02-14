@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -66,9 +66,6 @@ public class MappingBean implements ModelBean {
   /** Meta data for transformations used to copy data from message to entity. */
   @NotNull @Singular private List<@Valid TransformationBean> transformations = new ArrayList<>();
 
-  /** Meta data for arrays. */
-  @NotNull @Singular private List<@Valid ArrayBean> arrays = new ArrayList<>();
-
   /** Meta data for any external transformations used in transformer. */
   @NotNull @Singular
   private List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();
@@ -114,12 +111,12 @@ public class MappingBean implements ModelBean {
   }
 
   /**
-   * Determines if any {@code arrays} have been defined.
+   * Determines if any array transformations have been defined.
    *
-   * @return true if one or more {code arrays} have been defined
+   * @return true if one or more array transformations have been defined
    */
-  public boolean hasArrayElements() {
-    return arrays.size() > 0;
+  public boolean hasArrayTransformations() {
+    return transformations.stream().anyMatch(TransformationBean::isArray);
   }
 
   /**
@@ -183,76 +180,59 @@ public class MappingBean implements ModelBean {
    * @return filled optional containing the {@link JoinBean} if one matches, otherwise empty
    */
   public Optional<JoinBean> findJoinByFieldName(String name) {
-    return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findAny();
+    return table.getJoins().stream().filter(c -> name.equals(c.getFieldName())).findFirst();
   }
 
   /**
-   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are not related
-   * to one of the {@link ArrayBean} fields in this {@link MappingBean}.
+   * Searches for a {@link TransformationBean} in this entity with the {@link
+   * TransformationBean#getTo()} name.
    *
-   * @return filtered list of {@link JoinBean}
+   * @param toName name of the transformed field
+   * @return filled optional containing the {@link TransformationBean} if one matches, otherwise
+   *     empty
    */
-  public List<JoinBean> getNonArrayJoins() {
-    var arrayFieldNames = arrays.stream().map(ArrayBean::getTo).collect(Collectors.toSet());
+  public Optional<TransformationBean> findTransformationByToName(String toName) {
+    return transformations.stream().filter(t -> t.getTo().equals(toName)).findFirst();
+  }
+
+  /**
+   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are associated
+   * with an array transformer.
+   *
+   * @return list of {@link JoinBean}
+   */
+  public List<JoinBean> getArrayJoins() {
+    final Set<String> arrayFields = getArrayFieldNames();
     return table.getJoins().stream()
-        .filter(j -> !arrayFieldNames.contains(j.getFieldName()))
+        .filter(j -> arrayFields.contains(j.getFieldName()))
         .collect(ImmutableList.toImmutableList());
   }
 
   /**
-   * Attempts to produce a {@link ColumnBean} suitable for use in defining a database column
-   * associated with either a {@link ColumnBean} or a {@link JoinBean} in this mapping.
+   * Returns an immutable list of all {@link JoinBean} in our {@link TableBean} that are not
+   * associated with an array transformer.
    *
-   * @param root {@link RootBean} containing all known {@link MappingBean} objects
-   * @param columnName used to find a suitable {@link ColumnBean} or {@link JoinBean} in this
-   *     mapping
-   * @return possibly empty {@link Optional} to hold the resulting {@link ColumnBean}
+   * @return filtered list of {@link JoinBean}
    */
-  @Nonnull
-  public Optional<ColumnBean> getRealOrJoinedColumnByColumnName(RootBean root, String columnName) {
-    return getTable()
-        .getColumnByColumnName(columnName)
-        .or(() -> getJoinedColumnByColumnName(root, columnName));
+  public List<JoinBean> getNonArrayJoins() {
+    final Set<String> arrayFields = getArrayFieldNames();
+    return table.getJoins().stream()
+        .filter(j -> !arrayFields.contains(j.getFieldName()))
+        .collect(ImmutableList.toImmutableList());
   }
 
   /**
-   * Attempts to produce a {@link ColumnBean} suitable for use in defining a database column
-   * associated with a {@link JoinBean} in this mapping. This is done by searching for a {@link
-   * JoinBean} whose {@link JoinBean#joinColumnName} matches the provided name and then invoking
-   * {@link MappingBean#mapJoinToParentColumnBean} for that {@link JoinBean}.
+   * Builds a set of all field names that are referenced by a {@link TransformationBean} whose
+   * {@link TransformationBean#isArray()} method returns true. Intended for use by {@link
+   * #getArrayJoins()} and {@link #getNonArrayJoins()}.
    *
-   * @param root {@link RootBean} containing all known {@link MappingBean} objects
-   * @param columnName used to find a suitable {@link JoinBean} in this mapping
-   * @return possibly empty {@link Optional} to hold the resulting {@link ColumnBean}
+   * @return {@link Set} containing all array field names
    */
-  @Nonnull
-  public Optional<ColumnBean> getJoinedColumnByColumnName(RootBean root, String columnName) {
-    return getNonArrayJoins().stream()
-        .filter(join -> join.hasColumnName() && columnName.equals(join.getJoinColumnName()))
-        .findAny()
-        .flatMap(join -> mapJoinToParentColumnBean(root, join));
-  }
-
-  /**
-   * Attempts to produce a {@link ColumnBean} suitable for use in defining a database column
-   * associated with the specified {@link JoinBean}. This is done by searching for the {@link
-   * ColumnBean} with the given joins {@link JoinBean#joinColumnName} in the joins parent mapping.
-   * The returned value is {@link Optional} and will be empty if no such column exists for any
-   * reason.
-   *
-   * @param root {@link RootBean} containing all known {@link MappingBean} objects
-   * @param join {@link JoinBean} to be mapped
-   * @return possibly empty {@link Optional} to hold the resulting {@link ColumnBean}
-   */
-  public Optional<ColumnBean> mapJoinToParentColumnBean(RootBean root, JoinBean join) {
-    var filteredJoin = join.hasColumnName() ? Optional.of(join) : Optional.<JoinBean>empty();
-    var parentMapping =
-        filteredJoin.flatMap(j -> root.findMappingWithEntityClassName(j.getEntityClass()));
-    var parentColumn =
-        parentMapping.flatMap(
-            pm -> pm.getRealOrJoinedColumnByColumnName(root, join.getJoinColumnName()));
-    var noSequenceColumn = parentColumn.map(c -> c.toBuilder().sequence(null).build());
-    return noSequenceColumn;
+  private Set<String> getArrayFieldNames() {
+    return transformations.stream()
+        .filter(TransformationBean::isArray)
+        .map(TransformationBean::getTo)
+        .collect(Collectors.toSet());
   }
 
   @Override

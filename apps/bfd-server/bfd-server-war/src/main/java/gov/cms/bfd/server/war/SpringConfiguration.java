@@ -14,6 +14,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -58,10 +59,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
 public class SpringConfiguration {
+  /** The database url that BFD will use for all database calls. */
   public static final String PROP_DB_URL = "bfdServer.db.url";
+  /** The database username. */
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
+  /** The database password. */
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
+  /** The max number of database connections to be used. */
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
+  /** The schema apply text. */
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
   /**
    * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
@@ -72,9 +78,12 @@ public class SpringConfiguration {
    * should only be set to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
-
+  /**
+   * The {@link String } Boolean property that is used to enable the fake org name that is used for
+   * integration testing.
+   */
   public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
-
+  /** The database transaction timeout value (seconds). */
   public static final int TRANSACTION_TIMEOUT = 30;
 
   /**
@@ -97,6 +106,8 @@ public class SpringConfiguration {
   private static final boolean HIBERNATE_DETAILED_LOGGING = false;
 
   /**
+   * Sets up the application's database connection.
+   *
    * @param url the JDBC URL of the database for the application
    * @param username the database username to use
    * @param password the database password to use
@@ -141,6 +152,8 @@ public class SpringConfiguration {
   }
 
   /**
+   * Creates the transaction manager for the application from a factory.
+   *
    * @param entityManagerFactory the {@link EntityManagerFactory} to use
    * @return the {@link JpaTransactionManager} for the application
    */
@@ -152,6 +165,8 @@ public class SpringConfiguration {
   }
 
   /**
+   * Creates the entity manager factory from a datasource.
+   *
    * @param dataSource the {@link DataSource} for the application
    * @return the {@link LocalContainerEntityManagerFactoryBean}, which ensures that other beans can
    *     safely request injection of {@link EntityManager} instances
@@ -168,7 +183,11 @@ public class SpringConfiguration {
     return containerEmfBean;
   }
 
-  /** @return the {@link Properties} to configure Hibernate and JPA with */
+  /**
+   * Creates the {@link Properties} to configure Hibernate and JPA with.
+   *
+   * @return the jpa properties
+   */
   private Properties jpaProperties() {
     Properties extraProperties = new Properties();
     /*
@@ -211,9 +230,11 @@ public class SpringConfiguration {
   }
 
   /**
-   * @return a Spring {@link BeanPostProcessor} that enables the use of the JPA {@link
-   *     PersistenceUnit} and {@link PersistenceContext} annotations for injection of {@link
-   *     EntityManagerFactory} and {@link EntityManager} instances, respectively, into beans
+   * Creates a Spring {@link BeanPostProcessor} that enables the use of the JPA {@link
+   * PersistenceUnit} and {@link PersistenceContext} annotations for injection of {@link
+   * EntityManagerFactory} and {@link EntityManager} instances, respectively, into beans.
+   *
+   * @return the post processor
    */
   @Bean
   public PersistenceAnnotationBeanPostProcessor persistenceAnnotationProcessor() {
@@ -221,10 +242,12 @@ public class SpringConfiguration {
   }
 
   /**
+   * Gets a {@link List} of STU3 {@link IResourceProvider} beans for the application.
+   *
    * @param patientResourceProvider the application's {@link PatientResourceProvider} bean
    * @param coverageResourceProvider the application's {@link CoverageResourceProvider} bean
    * @param eobResourceProvider the application's {@link ExplanationOfBenefitResourceProvider} bean
-   * @return the {@link List} of STU3 {@link IResourceProvider} beans for the application
+   * @return the {@link List} of STU3 {@link IResourceProvider} beans
    */
   @Bean(name = BLUEBUTTON_STU3_RESOURCE_PROVIDERS)
   public List<IResourceProvider> stu3ResourceProviders(
@@ -252,8 +275,8 @@ public class SpringConfiguration {
 
   /**
    * Determines if the fhir resources related to partially adjudicated claims data will accept
-   * {@link gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when
-   * enabled will simplify rotation of hash values.
+   * {@link Mbi#getOldHash()} values for queries. This is off by default but when enabled will
+   * simplify rotation of hash values.
    *
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
@@ -314,8 +337,10 @@ public class SpringConfiguration {
   }
 
   /**
-   * @return the {@link MetricRegistry} for the application, which can be used to collect statistics
-   *     on the application's performance
+   * Creates a {@link MetricRegistry} for the application, which can be used to collect statistics
+   * on the application's performance.
+   *
+   * @return the metric registry
    */
   @Bean
   public MetricRegistry metricRegistry() {
@@ -368,8 +393,10 @@ public class SpringConfiguration {
   }
 
   /**
-   * @return the {@link HealthCheckRegistry} for the application, which collects any/all health
-   *     checks that it provides
+   * Creates the {@link HealthCheckRegistry} for the application, which collects any/all health
+   * checks that it provides.
+   *
+   * @return the {@link HealthCheckRegistry}
    */
   @Bean
   public HealthCheckRegistry healthCheckRegistry() {

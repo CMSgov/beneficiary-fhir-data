@@ -76,6 +76,10 @@ mappings:
           sequence:
             name: beneficiaryhistory_beneficiaryhistoryid_seq
             allocationSize: 50
+        - name: mbiId
+          dbName: mbi_id
+          sqlType: bigint
+          dbOnly: true
       joins:
         - fieldName: mbiRecord
           entityClass: gov.cms.bfd.model.rda.Mbi
@@ -89,18 +93,15 @@ mappings:
             - name: directMbiHash
               fieldName: hash
               javaType: String
-        - fieldName: payers
-          entityClass: gov.cms.test.FissPayer
-          comment: "List of FissPayers for this claim."
-          collectionType: List
-          readOnly: true
-          joinType: OneToMany
+        - class: array
+          fieldName: procCodes
+          entityMapping: FissProcCode
+        - class: array
+          fieldName: payers
+          entityMapping: FissPayer
           mappedBy: parentClaim
-          orphanRemoval: true
-          fetchType: LAZY
-          cascadeTypes:
-          - ALL
           orderBy: PRIORITY ASC
+          comment: "List of FissPayers for this claim."
     enumTypes:
       - name: ServTypeCdMapping
         values:
@@ -169,15 +170,11 @@ mappings:
           enumClass: gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission
       - from: NOW
         to: lastUpdated
-    arrays:
       - from: fissProcCodes
         to: procCodes
-        mapping: FissProcCode
-        namePrefix: "procCode"
+        transformer: Array
       - from: fissPayers
         to: payers
-        mapping: FissPayer
-        namePrefix: "payer"
-        parentField: parentClaim
+        transformer: Array
     externalTransformations:
       - applyMbiCache

@@ -1,11 +1,12 @@
 package gov.cms.bfd.model.codegen;
 
+import gov.cms.bfd.model.codegen.codebook.CodebookVariablesEnumProcessor;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 
 /**
  * This unchecked exception type indicates that an unrecoverable error was encountered while running
- * {@link RifLayoutsProcessor}.
+ * {@link CodebookVariablesEnumProcessor}.
  */
 public final class RifLayoutProcessingException extends RuntimeException {
   private static final long serialVersionUID = -7030975478260105688L;

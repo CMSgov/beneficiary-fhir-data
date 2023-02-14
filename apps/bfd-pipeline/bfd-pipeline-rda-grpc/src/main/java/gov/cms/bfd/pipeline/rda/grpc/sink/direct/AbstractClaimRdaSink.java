@@ -44,17 +44,26 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractClaimRdaSink<TMessage, TClaim>
     implements RdaSink<TMessage, RdaChange<TClaim>> {
+  /** The database entity manager. */
   protected final EntityManager entityManager;
+  /** The metric reporter. */
   protected final Metrics metrics;
+  /** Clock for creating timestamps. */
   protected final Clock clock;
+  /** The log manager. */
   protected final Logger logger;
+  /** Represents the claim type for this sink. */
   protected final RdaApiProgress.ClaimType claimType;
+  /** Whether to automatically update the sequence number. */
   protected final boolean autoUpdateLastSeq;
+
+  /** The number of claim errors that can exist before the job will stop processing. */
+  private final int errorLimit;
 
   /** Holds the underlying value of our sequence number gauges. */
   private static final NumericGauges GAUGES = new NumericGauges();
 
-  /** Used to write out RDA messages to json strings */
+  /** Used to write out RDA messages to json strings. */
   protected static final JsonFormat.Printer protobufObjectWriter =
       JsonFormat.printer().omittingInsignificantWhitespace();
 
@@ -68,19 +77,23 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param claimType used to write claim type when recording sequence number updates
    * @param autoUpdateLastSeq controls whether sequence numbers are automatically written to the
    *     database
+   * @param errorLimit the number of claim errors that can exist before the job will stop processing
    */
   protected AbstractClaimRdaSink(
       PipelineApplicationState appState,
       RdaApiProgress.ClaimType claimType,
-      boolean autoUpdateLastSeq) {
+      boolean autoUpdateLastSeq,
+      int errorLimit) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     metrics = new Metrics(getClass(), appState.getMeters());
     clock = appState.getClock();
     logger = LoggerFactory.getLogger(getClass());
     this.claimType = claimType;
     this.autoUpdateLastSeq = autoUpdateLastSeq;
+    this.errorLimit = errorLimit;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     if (entityManager != null && entityManager.isOpen()) {
@@ -142,15 +155,38 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param apiVersion The version of the api used to get the message.
    * @param message The message that was being transformed when the error occurred.
    * @param exception The exception that was thrown while transforming the message.
-   * @throws IOException If there was an issue writing to the database.
+   * @throws IOException if there was an issue writing to the database.
+   * @throws ProcessingException If the error limit was reached.
    */
   @Override
   public void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
-      throws IOException {
+      throws IOException, ProcessingException {
     entityManager.getTransaction().begin();
     entityManager.merge(createMessageError(apiVersion, message, exception.getErrors()));
     entityManager.getTransaction().commit();
+
+    checkErrorCount();
+  }
+
+  /**
+   * Checks if the allowed number of unresolved {@link MessageError}s in the database was exceeded.
+   *
+   * @throws ProcessingException If the error limit was reached.
+   */
+  @Override
+  public void checkErrorCount() throws ProcessingException {
+    var query =
+        entityManager.createQuery(
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
+    query.setParameter("status", MessageError.Status.UNRESOLVED);
+    query.setParameter("claimType", MessageError.ClaimType.valueOf(claimType.name()));
+    long errorCount = query.getSingleResult();
+
+    if (errorCount > errorLimit) {
+      throw new ProcessingException(new IllegalStateException("Error limit reached"), 0);
+    }
   }
 
   /**
@@ -222,6 +258,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {}
 
+  /**
+   * Gets the {@link #metrics}.
+   *
+   * @return the metrics
+   */
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
@@ -231,7 +272,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * Apply implementation specific logic to produce a populated {@link RdaClaimMessageMetaData}
    * object suitable for insertion into the database to track this update.
    *
-   * @param change an incoming RdaChange object from which to extract meta data
+   * @param change an incoming RdaChange object from which to extract metadata
    * @return an object ready for insertion into the database
    */
   abstract RdaClaimMessageMetaData createMetaData(RdaChange<TClaim> change);
@@ -271,20 +312,24 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   }
 
   /**
-   * Transforms all of the messages in the collection into {@link RdaChange} objects and returns a
+   * Transforms all the messages in the collection into {@link RdaChange} objects and returns a
    * {@link List} of the converted changes.
    *
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param messages collection of RDA API message objects of the correct type for this sync
    * @return the converted claims
-   * @throws DataTransformer.TransformationException if any message in the collection is invalid
+   * @throws ProcessingException if any message in the collection triggered an error
    */
   @VisibleForTesting
   List<RdaChange<TClaim>> transformMessages(String apiVersion, Collection<TMessage> messages)
-      throws DataTransformer.TransformationException {
+      throws ProcessingException {
     var claims = new ArrayList<RdaChange<TClaim>>();
-    for (TMessage message : messages) {
-      claims.add(transformMessage(apiVersion, message));
+    try {
+      for (TMessage message : messages) {
+        transformMessage(apiVersion, message).ifPresent(claims::add);
+      }
+    } catch (IOException e) {
+      throw new ProcessingException(e, 0);
     }
     return claims;
   }
@@ -298,26 +343,29 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    *
    * @param apiVersion appropriate string for the apiSource column of the claim table
    * @param message an RDA API message object of the correct type for this sync
-   * @return the converted claim
-   * @throws DataTransformer.TransformationException if the message is invalid
+   * @return an optional containing the converted claim if successful, {@link Optional#empty()}
+   *     otherwise
+   * @throws IOException if there was an issue writing out a {@link MessageError}
+   * @throws ProcessingException if there was an issue transforming the message
    */
   @Nonnull
   @Override
-  public RdaChange<TClaim> transformMessage(String apiVersion, TMessage message)
-      throws DataTransformer.TransformationException {
+  public Optional<RdaChange<TClaim>> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException {
+    Optional<RdaChange<TClaim>> result;
+
     try {
       var change = transformMessageImpl(apiVersion, message);
       metrics.transformSuccesses.increment();
-      return change;
+      result = Optional.of(change);
     } catch (DataTransformer.TransformationException transformationException) {
       metrics.transformFailures.increment();
-      try {
-        writeError(apiVersion, message, transformationException);
-      } catch (IOException e) {
-        transformationException.addSuppressed(e);
-      }
-      throw transformationException;
+      logger.error("Claim transformation error", transformationException);
+      writeError(apiVersion, message, transformationException);
+      result = Optional.empty();
     }
+
+    return result;
   }
 
   /**
@@ -450,7 +498,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Counter objectsWritten;
     /** Number of objects stored using <code>persist()</code>. */
     private final Counter objectsPersisted;
-    /** Number of objects stored using <code>merge()</code> */
+    /** Number of objects stored using <code>merge()</code>. */
     private final Counter objectsMerged;
     /** Number of objects successfully transformed. */
     private final Counter transformSuccesses;
@@ -474,7 +522,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final AtomicLong latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
-    /** The number of insert statements executed */
+    /** The number of insert statements executed. */
     private final DistributionSummary insertCount;
 
     /**
@@ -506,7 +554,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
 
     /**
-     * Sets the {@link #latestSequenceNumber}
+     * Sets the {@link #latestSequenceNumber}.
      *
      * @param value value to set
      */

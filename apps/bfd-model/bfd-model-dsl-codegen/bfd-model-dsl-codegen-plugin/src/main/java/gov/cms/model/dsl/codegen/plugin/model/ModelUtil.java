@@ -84,6 +84,16 @@ public class ModelUtil {
   }
 
   /**
+   * Determine if the given class name is a valid full name including package as well as class.
+   *
+   * @param fullClassName class name to test
+   * @return true if the class name is a valid full name including package as well as class
+   */
+  public static boolean isValidFullClassName(String fullClassName) {
+    return fullClassName != null && fullClassName.indexOf('.') > 0;
+  }
+
+  /**
    * Load mappings from the given path.
    *
    * @param mappingPath path to a file or directory
@@ -165,7 +175,7 @@ public class ModelUtil {
     if (sqlType.equals("bigint")) {
       return Optional.of(ClassName.get(Long.class));
     }
-    if (sqlType.equals("int")) {
+    if (sqlType.equals("int") || sqlType.equals("integer")) {
       return Optional.of(ClassName.get(Integer.class));
     }
     if (sqlType.contains("decimal") || sqlType.contains("numeric")) {

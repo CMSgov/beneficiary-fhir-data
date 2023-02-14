@@ -9,7 +9,6 @@ import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.SqlType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.GenerationType;
 import lombok.AllArgsConstructor;
@@ -25,23 +24,23 @@ import lombok.NoArgsConstructor;
 public class ColumnBean implements ModelBean {
   /** Regex used to recognize numeric columns by their SQL type. */
   private static final Pattern NumericTypeRegex =
-      Pattern.compile("(numeric|decimal)\\((\\d+)(,(\\d+))?\\)", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("(numeric|decimal)(\\((\\d+)( *, *(\\d+))?\\))?", Pattern.CASE_INSENSITIVE);
   /**
    * Group number in {@link ColumnBean#NumericTypeRegex} that contains the numeric precision value.
    */
-  private static final int NumericPrecisionGroup = 2;
+  private static final int NumericPrecisionGroup = 3;
   /** Group number in {@link ColumnBean#NumericTypeRegex} that contains the numeric scale value. */
-  private static final int NumericScaleGroup = 4;
+  private static final int NumericScaleGroup = 5;
   /**
    * Regex to extract the length from a SQL type if it is character type with a defined integer
    * length.
    */
   private static final Pattern CharacterLengthRegex =
-      Pattern.compile("char\\((\\d+)\\)", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("(var)?char(\\((\\d+|max)\\))?", Pattern.CASE_INSENSITIVE);
   /**
    * Group number in {@link ColumnBean#CharacterLengthRegex} that contains the numeric length value.
    */
-  private static final int CharacterLengthGroup = 1;
+  private static final int CharacterLengthGroup = 3;
   /** Regex used to recognize date columns by their SQL type. */
   private static final Pattern DateTypeRegex = Pattern.compile("date", Pattern.CASE_INSENSITIVE);
 
@@ -84,6 +83,11 @@ public class ColumnBean implements ModelBean {
    * number has been set.
    */
   @Builder.Default private int minLength = -1;
+  /**
+   * When true this column exists in the database table but is not exposed as a field in the entity
+   * class. Intended for use as the target of {@link JoinBean#joinColumnName}.
+   */
+  @Builder.Default private boolean dbOnly = false;
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
   @Valid private SequenceBean sequence;
 
@@ -126,17 +130,19 @@ public class ColumnBean implements ModelBean {
    * @return zero if no length is needed, otherwise a valid length
    */
   public int computeLength() {
-    if (Strings.isNullOrEmpty(sqlType)) {
-      return 0;
+    var length = 0;
+    final var matcher = CharacterLengthRegex.matcher(Strings.nullToEmpty(sqlType));
+    if (matcher.matches()) {
+      final var lengthString = matcher.group(CharacterLengthGroup);
+      if (Strings.isNullOrEmpty(lengthString)) {
+        length = 1;
+      } else if ("max".equalsIgnoreCase(lengthString)) {
+        length = Integer.MAX_VALUE;
+      } else {
+        length = Integer.parseInt(lengthString);
+      }
     }
-    Matcher matcher = CharacterLengthRegex.matcher(sqlType);
-    if (matcher.find()) {
-      return Integer.parseInt(matcher.group(CharacterLengthGroup));
-    } else if (sqlType.equalsIgnoreCase("varchar(max)")) {
-      return Integer.MAX_VALUE;
-    } else {
-      return 0;
-    }
+    return length;
   }
 
   /**
@@ -196,7 +202,10 @@ public class ColumnBean implements ModelBean {
   public int computePrecision() {
     var matcher = NumericTypeRegex.matcher(sqlType);
     if (matcher.find()) {
-      return Integer.parseInt(matcher.group(NumericPrecisionGroup));
+      var value = matcher.group(NumericPrecisionGroup);
+      if (!Strings.isNullOrEmpty(value)) {
+        return Integer.parseInt(value);
+      }
     }
     return 0;
   }

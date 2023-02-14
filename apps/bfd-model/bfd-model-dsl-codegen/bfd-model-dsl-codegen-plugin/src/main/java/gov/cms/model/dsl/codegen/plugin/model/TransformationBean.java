@@ -25,6 +25,12 @@ import lombok.Singular;
 @AllArgsConstructor
 @Builder
 public class TransformationBean implements ModelBean {
+  /**
+   * Special value for {@link TransformationBean#transformer} to signify that the transformation is
+   * to copy an array rather than a column.
+   */
+  public static final String ArrayTransformName = "Array";
+
   /** Name of the field/property in the source object to transform. */
   @NotNull
   @JavaName(type = JavaNameType.Property)
@@ -49,13 +55,22 @@ public class TransformationBean implements ModelBean {
    * transformer instances.
    */
   @TransformerName private String transformer;
-  /** Default value to use if a field is optional and has no value in the source object. */
+  /** Default value to use if a field has empty string value in the source object. */
   private String defaultValue;
   /**
    * Map of configuration option key/value pairs that can modify the default behavior of the
    * transformer. Which key/value pairs are appropriate depend on the transformer.
    */
   @Singular Map<String, String> transformerOptions = new HashMap<>();
+
+  /**
+   * Used to quickly determine if a transformation is used to indicate an array transformation.
+   *
+   * @return true if this is an array transformation
+   */
+  public boolean isArray() {
+    return ArrayTransformName.equals(transformer);
+  }
 
   /**
    * Determines the appropriate destination object field name to use. This will be the value of the
@@ -131,7 +146,7 @@ public class TransformationBean implements ModelBean {
   }
 
   /**
-   * Looks up a transformer option by name. The value is expetced to be a comma separated list of
+   * Looks up a transformer option by name. The value is expected to be a comma separated list of
    * values. Creates a list containing each of the individual values.
    *
    * @param optionName name of the option

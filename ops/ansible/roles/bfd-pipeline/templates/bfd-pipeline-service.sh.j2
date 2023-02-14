@@ -9,7 +9,7 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
-export FILTERING_NON_NULL_AND_NON_2022_BENES='{{ data_pipeline_filtering_non_null_and_non_2022_benes }}'
+export FILTERING_NON_NULL_AND_NON_2023_BENES='{{ data_pipeline_filtering_non_null_and_non_2023_benes }}'
 
 # Observability
 {% if data_pipeline_micrometer_cw_enabled is defined and data_pipeline_micrometer_cw_namespace is defined %}
@@ -65,6 +65,10 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
+# Set some additional variables.
+JVM_ARGS='{{ data_pipeline_jvm_args }}'
+
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
-	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
+	${JVM_ARGS} \
+	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"

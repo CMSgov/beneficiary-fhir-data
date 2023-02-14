@@ -1,7 +1,7 @@
-variable "ami_id" {
-  description = "Provided AMI ID for the migrator."
-  type        = string
+variable "ami_id_override" {
   default     = null
+  description = "BFD Migrator override ami-id. Defaults to latest migrator AMI from `master`."
+  type        = string
 }
 
 variable "create_migrator_instance" {

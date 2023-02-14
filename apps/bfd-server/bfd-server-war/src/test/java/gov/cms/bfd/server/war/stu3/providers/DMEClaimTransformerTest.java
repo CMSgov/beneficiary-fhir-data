@@ -30,9 +30,8 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
 public final class DMEClaimTransformerTest {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
+   * Verifies that {@link DMEClaimTransformer#transform} works as expected when run against the
+   * {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -67,7 +66,9 @@ public final class DMEClaimTransformerTest {
    *     DMEClaim}@param includedTaxNumbers whether or not to include tax numbers are expected to be
    *     included in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   * false</code>)
+   * @param includedTaxNumbers the value for IncludeTaxNumbers in the request to inform the expected
+   *     result
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(

@@ -109,11 +109,26 @@
       "display" : "Institutional"
     } ]
   },
+  "subType" : {
+    "coding" : [ {
+      "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType",
+      "code" : "inpatient"
+    } ],
+    "text" : "Inpatient"
+  },
   "use" : "claim",
   "patient" : {
     "reference" : "Patient/567834"
   },
   "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ],
     "start" : "2014-01-01",
     "end" : "2014-01-30"
   },

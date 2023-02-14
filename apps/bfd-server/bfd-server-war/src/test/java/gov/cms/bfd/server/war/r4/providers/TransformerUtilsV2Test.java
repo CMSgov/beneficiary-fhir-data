@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -173,6 +174,8 @@ public class TransformerUtilsV2Test {
         Optional.of(fiNum),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -210,6 +213,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
         Optional.empty());
 
     Optional<Resource> organization =
@@ -252,6 +257,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -266,9 +273,8 @@ public class TransformerUtilsV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies if an
-   * extension is found
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension} verifies
+   * if an extension is found.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsTrueWhenFound() {
@@ -289,9 +295,8 @@ public class TransformerUtilsV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a reference url is null.
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension} verifies
+   * it returns false when a reference url is null.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithNullReferenceUrl() {
@@ -312,9 +317,8 @@ public class TransformerUtilsV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a reference url is empty.
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension} verifies
+   * it returns false when a reference url is empty.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithEmptyReferenceUrl() {
@@ -335,9 +339,8 @@ public class TransformerUtilsV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a code value is null.
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension} verifies
+   * it returns false when a code value is null.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithNullOrEmptyCodeValue() {
@@ -358,9 +361,8 @@ public class TransformerUtilsV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension(
-   * (org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent, String, String)} verifies it
-   * returns false when a code value is empty.
+   * gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#careTeamHasMatchingExtension} verifies
+   * it returns false when a code value is empty.
    */
   @Test
   public void careTeamHasMatchingExtensionReturnsFalseWithEmptyCodeValue() {
@@ -473,7 +475,9 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
-        Optional.of(fiClmProcDt));
+        Optional.of(fiClmProcDt),
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        Optional.empty());
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -516,6 +520,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
         Optional.empty());
 
     assertNotNull(eob.getExtension());
@@ -526,6 +532,41 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNull(fiClmProcDtExtension);
+  }
+
+  /**
+   * Ensures the Fi_Clm_Proc_Dt is not mapped to an eob as an extension when the input
+   * fiscalIntermediaryClaimProcessDate is not present.
+   */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenClaimQueryCodeExists() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+
+    // TODO: Is this really the expectedDiscriminator? Should this be used, i.e. asserted?
+    String expectedDiscriminator = "https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt";
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.empty(),
+        Optional.empty(),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        Optional.of('3'));
+
+    assertNotNull(eob.getBillablePeriod());
+    assertFalse(eob.getBillablePeriod().isEmpty());
   }
 
   /** Verifies that createCoding can take a Character type value and create a Coding from it. */
@@ -641,9 +682,7 @@ public class TransformerUtilsV2Test {
     assertEquals(inputStatus.getSystem(), total.getCategory().getCoding().get(0).getSystem());
   }
 
-  /*
-   * Tests should have a care team entry with a npi org associated with it.
-   */
+  /** Tests should have a care team entry with a npi org associated with it. */
   @Test
   public void addCareTeamMemberWithNpiOrgShouldCreateCareTeamEntry() {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
@@ -668,11 +707,7 @@ public class TransformerUtilsV2Test {
         careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
   }
 
-  /**
-   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#createBundle
-   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * size of 2 correctly.
-   */
+  /** Verifies that {@link TransformerUtilsV2#createBundle} sets bundle size of 2 correctly. */
   @Test
   public void createBundleWithoutPagingWithASizeOf2() throws IOException {
 
@@ -785,11 +820,7 @@ public class TransformerUtilsV2Test {
     assertEquals(2, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
 
-  /**
-   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#createBundle
-   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * size correctly.
-   */
+  /** Verifies that {@link TransformerUtilsV2#createBundle} sets bundle size correctly. */
   @Test
   public void createBundleWithoutPagingWithZeroEobs() throws IOException {
 
@@ -803,9 +834,7 @@ public class TransformerUtilsV2Test {
     assertEquals(0, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2#createBundle
-   * (OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime)} sets bundle
-   * with paging size correctly.
+   * Verifies that {@link TransformerUtilsV2#createBundle} sets bundle with paging size correctly.
    */
   @Test
   public void createBundleWithoutPaging() throws IOException {

@@ -1,3 +1,5 @@
+# How to Resolve SNYK-bot PRs
+
 Follow this runbook to resolve a Java Maven dependency upgrade PR that is created by SNYK-bot.
 
 1. Determine whether the PR may be merged as-is by answering these questions (all must be YES to merge as-is)

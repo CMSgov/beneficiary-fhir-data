@@ -31,35 +31,67 @@ import java.util.concurrent.Callable;
 public class RdaLoadOptions implements Serializable {
   private static final long serialVersionUID = 7635897362336183L;
 
+  /** The job configuration. */
   private final AbstractRdaLoadJob.Config jobConfig;
+  /** The RDA source configuration. */
   private final RdaSourceConfig rdaSourceConfig;
+  /** The mock server configuration. */
   private final RdaServerJob.Config mockServerConfig;
+  /** The number of transformation errors that can exist before a job will exit. */
+  private final int errorLimit;
+
+  /** The id hasher configuration. */
   private final IdHasher.Config idHasherConfig;
 
+  /**
+   * Instantiates a new rda load options.
+   *
+   * @param jobConfig the job config
+   * @param rdaSourceConfig the rda source config
+   * @param mockServerConfig the mock server config
+   * @param errorLimit the number of transformation errors that can exist before a job will exit
+   * @param idHasherConfig the id hasher config
+   */
   public RdaLoadOptions(
       AbstractRdaLoadJob.Config jobConfig,
       RdaSourceConfig rdaSourceConfig,
       RdaServerJob.Config mockServerConfig,
+      int errorLimit,
       IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
     this.rdaSourceConfig =
         Preconditions.checkNotNull(rdaSourceConfig, "rdaSourceConfig is a required parameter");
     this.mockServerConfig =
         Preconditions.checkNotNull(mockServerConfig, "mockServerConfig is a required parameter");
+    this.errorLimit = errorLimit;
     this.idHasherConfig =
         Preconditions.checkNotNull(idHasherConfig, "idHasherConfig is a required parameter");
   }
 
-  /** @return settings for the overall job. */
+  /**
+   * Gets the {@link #jobConfig}.
+   *
+   * @return settings for the overall job.
+   */
   public AbstractRdaLoadJob.Config getJobConfig() {
     return jobConfig;
   }
 
-  /** @return settings for the gRPC service caller. */
+  /**
+   * Gets the {@link #rdaSourceConfig}.
+   *
+   * @return settings for the gRPC service caller.
+   */
   public RdaSourceConfig getRdaSourceConfig() {
     return rdaSourceConfig;
   }
 
+  /**
+   * Creates an RDA server job.
+   *
+   * @return the job, or an empty {@link Optional} if the server type is not configured as a mock
+   *     server
+   */
   public Optional<RdaServerJob> createRdaServerJob() {
     if (rdaSourceConfig.getServerType() == RdaSourceConfig.ServerType.InProcess) {
       return Optional.of(new RdaServerJob(mockServerConfig));
@@ -106,7 +138,7 @@ public class RdaLoadOptions implements Serializable {
   }
 
   /**
-   * Helper method to define a FISS sink factory
+   * Helper method to define a FISS sink factory.
    *
    * @param appState the shared {@link PipelineApplicationState}
    * @return A FISS sink factory that creates {@link RdaSink} objects.
@@ -123,16 +155,17 @@ public class RdaLoadOptions implements Serializable {
               appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
-        sink = new FissClaimRdaSink(appState, transformer, true);
+        sink = new FissClaimRdaSink(appState, transformer, true, errorLimit);
       } else if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR) {
-        sink = new FissClaimRdaSink(appState, transformer, false);
+        sink = new FissClaimRdaSink(appState, transformer, false, errorLimit);
       } else {
         sink =
             ConcurrentRdaSink.createSink(
                 jobConfig.getWriteThreads(),
                 jobConfig.getBatchSize(),
                 autoUpdateSequenceNumbers ->
-                    new FissClaimRdaSink(appState, transformer, autoUpdateSequenceNumbers));
+                    new FissClaimRdaSink(
+                        appState, transformer, autoUpdateSequenceNumbers, errorLimit));
       }
 
       return sink;
@@ -177,7 +210,7 @@ public class RdaLoadOptions implements Serializable {
   }
 
   /**
-   * Helper method to define an MCS sink factory
+   * Helper method to define an MCS sink factory.
    *
    * @param appState the shared {@link PipelineApplicationState}
    * @return An MCS sink factory that creates {@link RdaSink} objects.
@@ -194,22 +227,24 @@ public class RdaLoadOptions implements Serializable {
               appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
-        sink = new McsClaimRdaSink(appState, transformer, true);
+        sink = new McsClaimRdaSink(appState, transformer, true, errorLimit);
       } else if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR) {
-        sink = new McsClaimRdaSink(appState, transformer, false);
+        sink = new McsClaimRdaSink(appState, transformer, false, errorLimit);
       } else {
         sink =
             ConcurrentRdaSink.createSink(
                 jobConfig.getWriteThreads(),
                 jobConfig.getBatchSize(),
                 autoUpdateSequenceNumbers ->
-                    new McsClaimRdaSink(appState, transformer, autoUpdateSequenceNumbers));
+                    new McsClaimRdaSink(
+                        appState, transformer, autoUpdateSequenceNumbers, errorLimit));
       }
 
       return sink;
     };
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -223,13 +258,14 @@ public class RdaLoadOptions implements Serializable {
         && Objects.equals(rdaSourceConfig, that.rdaSourceConfig);
   }
 
+  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     return Objects.hash(jobConfig, rdaSourceConfig);
   }
 
   /**
-   * Empty source for stubbing
+   * Empty source for stubbing.
    *
    * @param <TMessage> The message type for received source messages
    * @param <TClaim> The object type for transformed claims
@@ -242,6 +278,7 @@ public class RdaLoadOptions implements Serializable {
       return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {}
   }

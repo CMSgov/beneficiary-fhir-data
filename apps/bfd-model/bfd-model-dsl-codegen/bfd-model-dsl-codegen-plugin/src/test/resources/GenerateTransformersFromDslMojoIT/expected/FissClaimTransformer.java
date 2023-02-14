@@ -68,7 +68,7 @@ public class FissClaimTransformer {
   }
 
   public FissClaim transformMessage(gov.cms.mpsm.rda.v1.fiss.FissClaim from) {
-    final DataTransformer transformer = new DataTransformer();;
+    final DataTransformer transformer = new DataTransformer();
     final FissClaim to = transformMessage(from, transformer, Instant.now());
     if (transformer.getErrors().size() > 0) {
       throw new DataTransformer.TransformationException("data transformation failed", transformer.getErrors());
@@ -111,7 +111,7 @@ public class FissClaimTransformer {
   public void transformMessageArraysToFissClaim(gov.cms.mpsm.rda.v1.fiss.FissClaim from,
       FissClaim to, DataTransformer transformer, Instant now, String namePrefix) {
     for (short index = 0; index < from.getFissProcCodesCount(); ++index) {
-      final String itemNamePrefix = namePrefix + "procCode" + "-" + index + "-";
+      final String itemNamePrefix = namePrefix + "procCodes" + "-" + index + "-";
       final FissProcedureCode itemFrom = from.getFissProcCodes(index);
       final FissProcCode itemTo = transformMessageToFissProcCode(itemFrom,transformer,now,itemNamePrefix);
       itemTo.setDcn(from.getDcn());
@@ -119,7 +119,7 @@ public class FissClaimTransformer {
       to.getProcCodes().add(itemTo);
     }
     for (short index = 0; index < from.getFissPayersCount(); ++index) {
-      final String itemNamePrefix = namePrefix + "payer" + "-" + index + "-";
+      final String itemNamePrefix = namePrefix + "payers" + "-" + index + "-";
       final gov.cms.mpsm.rda.v1.fiss.FissPayer itemFrom = from.getFissPayers(index);
       final FissPayer itemTo = transformMessageToFissPayer(itemFrom,transformer,now,itemNamePrefix);
       itemTo.setPriority(index);

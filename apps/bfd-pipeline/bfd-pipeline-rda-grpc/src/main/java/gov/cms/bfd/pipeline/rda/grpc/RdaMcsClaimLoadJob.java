@@ -16,6 +16,15 @@ import org.slf4j.LoggerFactory;
 public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaChange<RdaMcsClaim>> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaMcsClaimLoadJob.class);
 
+  /**
+   * Instantiates a new RDA MCS claim load job.
+   *
+   * @param config the configuration for this job
+   * @param preJobTaskFactory the pre job task factory
+   * @param sourceFactory the source factory
+   * @param sinkFactory the sink factory
+   * @param appMetrics the app metrics
+   */
   public RdaMcsClaimLoadJob(
       Config config,
       Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTaskFactory,

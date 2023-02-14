@@ -5,7 +5,6 @@ import static gov.cms.model.dsl.codegen.plugin.GenerateEntitiesFromDslMojo.BATCH
 import static gov.cms.model.dsl.codegen.plugin.GenerateEntitiesFromDslMojo.FieldDefinition;
 import static gov.cms.model.dsl.codegen.plugin.GenerateEntitiesFromDslMojo.SerialVersionUIDField;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -17,7 +16,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import gov.cms.model.dsl.codegen.plugin.model.ArrayBean;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.EnumTypeBean;
 import gov.cms.model.dsl.codegen.plugin.model.JoinBean;
@@ -25,6 +23,7 @@ import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
 import gov.cms.model.dsl.codegen.plugin.model.SequenceBean;
 import gov.cms.model.dsl.codegen.plugin.model.TableBean;
+import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,7 +91,6 @@ public class GenerateEntitiesFromDslMojoTest {
    */
   @Test
   public void testCreateFieldDefinitionsForPrimaryKeyJoins() throws MojoExecutionException {
-    RootBean root = RootBean.builder().build();
     MappingBean mapping = MappingBean.builder().build();
     JoinBean primary = JoinBean.builder().fieldName("primary").build();
     JoinBean nonPrimary = JoinBean.builder().fieldName("non").build();
@@ -101,8 +99,9 @@ public class GenerateEntitiesFromDslMojoTest {
     FieldDefinition fieldDef = mock(FieldDefinition.class);
     FieldDefinition fieldDefWithPrimaryKeySpec = mock(FieldDefinition.class);
     FieldSpec primaryKeyFieldSpec = mock(FieldSpec.class);
+    RootBean root = RootBean.builder().mapping(mapping).build();
 
-    doReturn(fieldDef).when(mojo).createFieldDefinitionForJoin(mapping, primary);
+    doReturn(fieldDef).when(mojo).createFieldDefinitionForJoin(root, mapping, primary);
     doReturn(primaryKeyFieldSpec)
         .when(mojo)
         .createPrimaryKeyFieldSpecForJoin(root, mapping, primary);
@@ -126,11 +125,12 @@ public class GenerateEntitiesFromDslMojoTest {
     JoinBean primary2 = JoinBean.builder().fieldName("p2").build();
     JoinBean nonPrimary = JoinBean.builder().fieldName("non").build();
     List<JoinBean> joins = List.of(primary1, nonPrimary, primary2);
+    RootBean root = RootBean.builder().mapping(mapping).build();
     Set<String> primaryKeyFieldNames = Set.of("p1", "p2");
     FieldDefinition def1 = mock(FieldDefinition.class);
-    doReturn(def1).when(mojo).createFieldDefinitionForJoin(mapping, nonPrimary);
+    doReturn(def1).when(mojo).createFieldDefinitionForJoin(root, mapping, nonPrimary);
     List<FieldDefinition> result =
-        mojo.createFieldDefinitionsForOrdinaryJoins(mapping, joins, primaryKeyFieldNames);
+        mojo.createFieldDefinitionsForOrdinaryJoins(root, mapping, joins, primaryKeyFieldNames);
     assertEquals(List.of(def1), result);
   }
 
@@ -157,6 +157,7 @@ public class GenerateEntitiesFromDslMojoTest {
             .build();
     MappingBean mapping =
         MappingBean.builder().id("m").entityClassName("gov.cms.test.A").table(table).build();
+    RootBean root = RootBean.builder().mapping(mapping).build();
 
     TypeName fieldType = ClassName.get("gov.cms.test", "B");
     assertEquals(
@@ -167,7 +168,7 @@ public class GenerateEntitiesFromDslMojoTest {
                 .addAnnotation(OneToOne.class)
                 .build(),
             new AccessorSpec("af", fieldType, fieldType, false, false)),
-        mojo.createFieldDefinitionForJoin(mapping, join));
+        mojo.createFieldDefinitionForJoin(root, mapping, join));
   }
 
   /**
@@ -190,6 +191,7 @@ public class GenerateEntitiesFromDslMojoTest {
         TableBean.builder().quoteNames(false).name("records").join(join).column(column).build();
     MappingBean mapping =
         MappingBean.builder().id("m").entityClassName("gov.cms.test.A").table(table).build();
+    RootBean root = RootBean.builder().mapping(mapping).build();
 
     TypeName fieldType =
         ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get("gov.cms.test", "B"));
@@ -213,15 +215,16 @@ public class GenerateEntitiesFromDslMojoTest {
                 .addAnnotation(Builder.Default.class)
                 .build(),
             new AccessorSpec("af", fieldType, fieldType, false, false)),
-        mojo.createFieldDefinitionForJoin(mapping, join));
+        mojo.createFieldDefinitionForJoin(root, mapping, join));
 
     // missing package name throws
     join.setEntityClass("NoPackage");
     var exception =
         assertThrows(
-            MojoExecutionException.class, () -> mojo.createFieldDefinitionForJoin(mapping, join));
+            MojoExecutionException.class,
+            () -> mojo.createFieldDefinitionForJoin(root, mapping, join));
     assertEquals(
-        "entityClass for join must include package: mapping=m join=af entityClass=NoPackage",
+        "entityClass for join must include package: mapping=m join=af entityClass=Optional[NoPackage]",
         exception.getMessage());
   }
 
@@ -288,28 +291,38 @@ public class GenerateEntitiesFromDslMojoTest {
         mojo.createFieldDefinitionForColumn(mapping, column));
   }
 
-  /** Tests for {@link GenerateEntitiesFromDslMojo#createFieldDefinitionForArrays}. */
+  /** Tests for {@link GenerateEntitiesFromDslMojo#createFieldDefinitionsForArrays}. */
   @Test
   public void testCreateFieldDefinitionForArrays() throws MojoExecutionException {
-    JoinBean arrayJoin =
-        JoinBean.builder()
-            .fieldName("a")
-            .joinType(JoinBean.JoinType.OneToMany)
-            .entityClass("gov.cms.test.A")
-            .build();
+    JoinBean.Array array1 =
+        new JoinBean.Array().toBuilder().fieldName("a").entityMapping("ma").build();
+    JoinBean.Array array2 =
+        new JoinBean.Array().toBuilder().fieldName("b").entityMapping("mb").build();
     MappingBean array1Mapping =
         MappingBean.builder().id("ma").entityClassName("gov.cms.test.A").build();
-    ArrayBean array1 = ArrayBean.builder().to("a").mapping("ma").build();
-    ArrayBean array2 = ArrayBean.builder().to("b").mapping("mb").build();
     TableBean table =
         TableBean.builder()
             .quoteNames(false)
             .name("records")
-            .join(arrayJoin)
+            .join(array1)
+            .join(array2)
             .primaryKeyColumn("x")
             .build();
     MappingBean mapping =
-        MappingBean.builder().id("m").table(table).array(array1).array(array2).build();
+        MappingBean.builder()
+            .id("m")
+            .table(table)
+            .transformation(
+                TransformationBean.builder()
+                    .to("a")
+                    .transformer(TransformationBean.ArrayTransformName)
+                    .build())
+            .transformation(
+                TransformationBean.builder()
+                    .to("b")
+                    .transformer(TransformationBean.ArrayTransformName)
+                    .build())
+            .build();
     RootBean root = RootBean.builder().mapping(mapping).mapping(array1Mapping).build();
 
     var exception =
@@ -328,41 +341,51 @@ public class GenerateEntitiesFromDslMojoTest {
         "array references unknown mapping: mapping=m array=b missing=mb", exception.getMessage());
 
     // removed the bad array so it should generate a field
-    mapping.setArrays(List.of(array1));
+    table.setJoins(List.of(array1));
     assertEquals(
-        List.of(mojo.createFieldDefinitionForArray(mapping, "x", array1, array1Mapping)),
+        mojo.createFieldDefinitionForJoin(root, mapping, array1),
+        mojo.createFieldDefinitionForArray(root, mapping, array1));
+    assertEquals(
+        List.of(mojo.createFieldDefinitionForArray(root, mapping, array1)),
         mojo.createFieldDefinitionsForArrays(root, mapping, 1));
   }
 
   /** Tests for {@link GenerateEntitiesFromDslMojo#createFieldDefinitionForArray}. */
   @Test
   public void testCreateFieldDefinitionForArray() throws MojoExecutionException {
-    JoinBean arrayJoin =
-        JoinBean.builder()
+    JoinBean.Array array =
+        new JoinBean.Array()
+            .toBuilder()
             .fieldName("a")
             .joinType(JoinBean.JoinType.OneToOne)
-            .entityClass("gov.cms.test.A")
+            .entityMapping("ma")
             .build();
-    MappingBean arrayMapping = MappingBean.builder().entityClassName("gov.cms.test.A").build();
-    ArrayBean array = ArrayBean.builder().to("a").build();
-    TableBean table = TableBean.builder().quoteNames(false).name("records").join(arrayJoin).build();
-    MappingBean mapping = MappingBean.builder().table(table).array(array).build();
-    String primaryKeyFieldName = "c";
+    MappingBean arrayMapping =
+        MappingBean.builder().id("ma").entityClassName("gov.cms.test.A").build();
+    TableBean table = TableBean.builder().quoteNames(false).name("records").join(array).build();
+    MappingBean mapping =
+        MappingBean.builder()
+            .table(table)
+            .transformation(
+                TransformationBean.builder()
+                    .to("a")
+                    .transformer(TransformationBean.ArrayTransformName)
+                    .build())
+            .build();
+    RootBean root = RootBean.builder().mapping(mapping).mapping(arrayMapping).build();
 
     var exception =
         assertThrows(
             MojoExecutionException.class,
-            () ->
-                mojo.createFieldDefinitionForArray(
-                    mapping, primaryKeyFieldName, array, arrayMapping));
+            () -> mojo.createFieldDefinitionForArray(root, mapping, array));
     assertEquals(
         "array mappings must have multi-value joins: array=a joinType=OneToOne",
         exception.getMessage());
 
-    arrayJoin.setJoinType(JoinBean.JoinType.OneToMany);
+    array.setJoinType(JoinBean.JoinType.OneToMany);
     assertEquals(
-        mojo.createFieldDefinitionForJoin(mapping, arrayJoin),
-        mojo.createFieldDefinitionForArray(mapping, primaryKeyFieldName, array, arrayMapping));
+        mojo.createFieldDefinitionForJoin(root, mapping, array),
+        mojo.createFieldDefinitionForArray(root, mapping, array));
   }
 
   /** Tests for {@link GenerateEntitiesFromDslMojo#createPrimaryKeyFieldSpecForJoin}. */
@@ -394,7 +417,7 @@ public class GenerateEntitiesFromDslMojoTest {
             MojoExecutionException.class,
             () -> mojo.createPrimaryKeyFieldSpecForJoin(root, mapping, join));
     assertEquals(
-        "no mapping found for primary key join class: mapping=m join=af entityClass=gov.cms.test.NotThere",
+        "no mapping found for primary key join class: mapping=m join=af entityClass=gov.cms.test.NotThere entityMapping=null",
         exception.getMessage());
   }
 
@@ -603,7 +626,13 @@ public class GenerateEntitiesFromDslMojoTest {
   @Test
   public void testCreateJoinColumnAnnotation() throws MojoExecutionException {
     JoinBean join = JoinBean.builder().fieldName("af").build();
-    TableBean table = TableBean.builder().quoteNames(false).name("records").join(join).build();
+    TableBean table =
+        TableBean.builder()
+            .quoteNames(false)
+            .name("records")
+            .column(ColumnBean.builder().name("ac").build())
+            .join(join)
+            .build();
     MappingBean mapping = MappingBean.builder().id("m").table(table).build();
 
     var exception =
@@ -631,35 +660,6 @@ public class GenerateEntitiesFromDslMojoTest {
                 AnnotationSpec.builder(ForeignKey.class).addMember("name", "$S", "fk").build())
             .build(),
         mojo.createJoinColumnAnnotation(mapping, join));
-  }
-
-  /** Tests for {@link GenerateEntitiesFromDslMojo#getJoinForArray}. */
-  @Test
-  public void testGetJoinForArray() {
-    JoinBean arrayJoin = JoinBean.builder().fieldName("a").build();
-    MappingBean arrayMapping = MappingBean.builder().entityClassName("gov.cms.test.A").build();
-    ArrayBean arrayA = ArrayBean.builder().to("a").build();
-    ArrayBean arrayB = ArrayBean.builder().to("b").build();
-    TableBean table = TableBean.builder().quoteNames(false).name("records").join(arrayJoin).build();
-    MappingBean mapping = MappingBean.builder().table(table).array(arrayA).build();
-    String primaryKeyFieldName = "c";
-
-    // a join for the array exists so it is returned
-    assertSame(arrayJoin, mojo.getJoinForArray(mapping, primaryKeyFieldName, arrayA, arrayMapping));
-
-    // no join matches the array so a default one is created and returned
-    assertEquals(
-        JoinBean.builder()
-            .joinType(JoinBean.JoinType.OneToMany)
-            .collectionType(JoinBean.CollectionType.Set)
-            .fieldName("b")
-            .entityClass(arrayMapping.getEntityClassName())
-            .fetchType(FetchType.EAGER)
-            .orphanRemoval(true)
-            .cascadeTypes(List.of(CascadeType.ALL))
-            .mappedBy(primaryKeyFieldName)
-            .build(),
-        mojo.getJoinForArray(mapping, primaryKeyFieldName, arrayB, arrayMapping));
   }
 
   /** Tests for {@link GenerateEntitiesFromDslMojo#createTypeSpecForCompositePrimaryKeyClass}. */

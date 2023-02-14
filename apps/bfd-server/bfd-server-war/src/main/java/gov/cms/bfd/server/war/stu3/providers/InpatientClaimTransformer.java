@@ -26,6 +26,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
  */
 final class InpatientClaimTransformer {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -48,7 +50,10 @@ final class InpatientClaimTransformer {
   }
 
   /**
+   * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
@@ -215,7 +220,7 @@ final class InpatientClaimTransformer {
         claimGroup.getBeneficiaryDischargeDate(),
         Optional.of(claimGroup.getUtilizationDayCount()));
 
-    for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
+    for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses(claimGroup))
       TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
     for (CCWProcedure procedure :
@@ -327,6 +332,8 @@ final class InpatientClaimTransformer {
   }
 
   /**
+   * Extracts a diagnoses list from the {@link InpatientClaim}.
+   *
    * @param claim the {@link InpatientClaim} to extract the {@link Diagnosis}es from
    * @return the {@link Diagnosis}es that can be extracted from the specified {@link InpatientClaim}
    */

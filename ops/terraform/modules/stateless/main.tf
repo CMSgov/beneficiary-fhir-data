@@ -306,3 +306,8 @@ module "cw_alarms_slack_notifier" {
   source = "../resources/cw_alarms_slack_notifier"
   env    = var.env_config.env
 }
+
+module "disk_usage_alarms" {
+  source = "../resources/disk_usage_alarms"
+  env    = var.env_config.env
+}

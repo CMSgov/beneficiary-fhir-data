@@ -12,7 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
+/** Tests related to the {@link RdaLoadOptions} class. */
 public class RdaLoadOptionsTest {
+
+  /** Tests that the {@link RdaLoadOptions} can be serialized without issue. */
   @Test
   public void configIsSerializable() throws Exception {
     final RdaLoadOptions original =
@@ -29,6 +32,7 @@ public class RdaLoadOptionsTest {
                 .authenticationToken("my-secret")
                 .build(),
             new RdaServerJob.Config(),
+            0,
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {

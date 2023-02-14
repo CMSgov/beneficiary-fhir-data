@@ -24,7 +24,6 @@ import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.io.DataOutput;
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.Clock;
@@ -53,9 +52,17 @@ import org.slf4j.LoggerFactory;
  */
 public class LoadRdaJsonApp {
 
-  private static final Logger logger = LoggerFactory.getLogger(LoadRdaJsonApp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoadRdaJsonApp.class);
+  /** The protocol for S3, used for checking file location in logic. */
   private static final String AMAZON_S3_PROTOCOL = "s3://";
 
+  /**
+   * Main method to load the System Properties for the Config, start the log4jReporter, start the
+   * metrics, and start the RDA pipeline.
+   *
+   * @param args to be passed in by the command line
+   * @throws Exception if the RDA builder doesnt close or open
+   */
   public static void main(String[] args) throws Exception {
     final ConfigLoader.Builder options = ConfigLoader.builder();
     if (args.length == 1) {
@@ -75,7 +82,7 @@ public class LoadRdaJsonApp {
             .build();
     reporter.start(5, TimeUnit.SECONDS);
     try {
-      logger.info("starting RDA API local server");
+      LOGGER.info("starting RDA API local server");
 
       MessageSource.Factory<FissClaimChange> fissFactory;
       MessageSource.Factory<McsClaimChange> mcsFactory;
@@ -108,7 +115,7 @@ public class LoadRdaJsonApp {
                 final HikariDataSource pooledDataSource =
                     PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
                 if (config.runSchemaMigration) {
-                  logger.info("running database migration");
+                  LOGGER.info("running database migration");
                   DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
                 }
                 try (PipelineApplicationState appState =
@@ -120,7 +127,7 @@ public class LoadRdaJsonApp {
                         Clock.systemUTC())) {
                   final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
                   for (PipelineJob<?> job : jobs) {
-                    logger.info("starting job {}", job.getClass().getSimpleName());
+                    LOGGER.info("starting job {}", job.getClass().getSimpleName());
                     job.call();
                   }
                 }
@@ -132,7 +139,7 @@ public class LoadRdaJsonApp {
   }
 
   /**
-   * Checks that we can make a viable connection to the source
+   * Checks that we can make a viable connection to the source.
    *
    * @param claimType The type of claims the tested source serves
    * @param factory A {@link MessageSource.Factory} for creating message sources.
@@ -141,44 +148,52 @@ public class LoadRdaJsonApp {
   private static void checkConnectivity(String claimType, MessageSource.Factory<?> factory)
       throws Exception {
     try (MessageSource<?> source = factory.apply(0)) {
-      logger.info("checking for {} claims: {}", claimType, source.hasNext());
+      LOGGER.info("checking for {} claims: {}", claimType, source.hasNext());
     }
   }
 
-  /** Helper class for reading and storing the needed application configurations */
+  /**
+   * Private singleton class to load the config for values for hashing, database options, batch
+   * sizes, fissFile, and mcsFile.
+   */
   private static class Config {
-    /** The pepper used for hashing MBIs */
+    /** The hash pepper. */
     private final String hashPepper;
-    /** The number of hashing iterations to use when hashing MBIs */
+    /** The hash iterations. */
     private final int hashIterations;
-    /** The URL for the database */
+    /** The database url. */
     private final String dbUrl;
-    /** The username for the database */
+    /** The database user. */
     private final String dbUser;
-    /** The password for the database */
+    /** The database password. */
     private final String dbPassword;
     /**
      * Indicates the type of {@link AbstractRdaLoadJob.SinkTypePreference} to use when building
-     * sinks
+     * sinks.
      */
     private final AbstractRdaLoadJob.SinkTypePreference sinkTypePreference;
-    /** The number of write threads to use when igesting data */
+    /** The number of write threads. */
     private final int writeThreads;
-    /** The number of records to write to the database in each batch */
+    /** The batch size. */
     private final int batchSize;
-    /** Dictates if the migration logic should be run if needed */
+    /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
     /** The location where the files are. This could be a local directory or S3 path */
     private final Optional<String> fileLocation;
-    /** The name of the FISS file to read from at the source */
+    /** The name of the FISS file to read from at the source. */
     private final Optional<String> fissFile;
-    /** The name of the MCS file to read from at the source */
+    /** The name of the MCS file to read from at the source. */
     private final Optional<String> mcsFile;
-    /** The S3 region to use if the source is an S3 connection */
+    /** The S3 region to use if the source is an S3 connection. */
     private final Regions s3Region;
-    /** The S3 bucket to use if the source is an S3 connection */
+    /** The S3 bucket to use if the source is an S3 connection. */
     private final String s3Bucket;
 
+    /**
+     * Constructor to load the Configuration options for the private fields above.
+     *
+     * @param options to load for the RDA pipeline
+     */
     private Config(ConfigLoader options) {
       hashPepper = options.stringValue("hash.pepper", "notarealpepper");
       hashIterations = options.intValue("hash.iterations", 2);
@@ -204,19 +219,19 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * Creates the {@link DatabaseOptions} for creating a DB connection
+     * Creates the {@link DatabaseOptions} from this configuration.
      *
-     * @return The {@link DataOutput} for creating a database connection
+     * @return the database options to be used
      */
     private DatabaseOptions createDatabaseOptions() {
       return new DatabaseOptions(dbUrl, dbUser, dbPassword, 10);
     }
 
     /**
-     * Creates the {@link RdaLoadOptions} that configure our RDA connection and ingestion specs
+     * Creates and returns the options to load for the RDA app.
      *
-     * @param port The port to connect on for the connection.
-     * @return An {@link RdaLoadOptions} with the needed configurations and options.
+     * @param port the port to be used for the RDA pipeline
+     * @return the options used for the RDA pipeline
      */
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
@@ -234,7 +249,8 @@ public class LoadRdaJsonApp {
               .port(port)
               .maxIdle(Duration.ofDays(1))
               .build();
-      return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
+      return new RdaLoadOptions(
+          jobConfig, grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
     }
 
     /**
@@ -282,34 +298,32 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * Creates a local file connection source for reading FISS claims.
+     * Creates the FissClaims from the fissFile.
      *
-     * @param sequenceNumber The sequence number to start at when pulling claims (ignored for this
-     *     implementation)
-     * @return The {@link MessageSource} for reading local files.
+     * @param sequenceNumber for each FissClaim
+     * @return objects that produce FissClaim objects
      */
     private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {
       return createClaimsSourceForFile(fissFile, JsonMessageSource::parseFissClaimChange);
     }
 
     /**
-     * Creates a local file connection source for reading MCS claims.
+     * Creates the McsClaims from the mcsFile.
      *
-     * @param sequenceNumber The sequence number to start at when pulling claims (ignored for this
-     *     implementation)
-     * @return The {@link MessageSource} for reading local files.
+     * @param sequenceNumber for each McsClaim
+     * @return objects that produce McsClaim objects
      */
     private MessageSource<McsClaimChange> createMcsClaimsSource(long sequenceNumber) {
       return createClaimsSourceForFile(mcsFile, JsonMessageSource::parseMcsClaimChange);
     }
 
     /**
-     * Creates a local file connection source for reading claims of an inferred type.
+     * Creates the claims for the RDA app.
      *
-     * @param jsonFile The file to read from as the source.
-     * @param parser The parser to use for parsing the file.
-     * @return The created {@link MessageSource} for reading from the local file.
-     * @param <T> The claim type that this source is associated with.
+     * @param <T> generic message source to be used by both Fiss and Mcs claims
+     * @param jsonFile the claim source json file
+     * @param parser the claim parser
+     * @return objects that produce claim objects
      */
     private <T> MessageSource<T> createClaimsSourceForFile(
         Optional<String> jsonFile, JsonMessageSource.Parser<T> parser) {
@@ -330,11 +344,11 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * Creates the jobs needed for the pipeline.
+     * This function creates the pipeline jobs for Fiss and Mcs claims from the app state.
      *
-     * @param jobConfig The {@link RdaLoadOptions} to use when creating the jobs.
-     * @param appState The {@link PipelineApplicationState} to use when configuring the jobs.
-     * @return A list of configured {@link PipelineJob}s to run.
+     * @param jobConfig the RDA options to load
+     * @param appState the pipeline application state
+     * @return the pipeline jobs to execute
      */
     private List<PipelineJob<?>> createPipelineJobs(
         RdaLoadOptions jobConfig, PipelineApplicationState appState) {

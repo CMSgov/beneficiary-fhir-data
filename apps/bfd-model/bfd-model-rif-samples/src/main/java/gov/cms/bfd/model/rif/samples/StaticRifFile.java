@@ -10,6 +10,10 @@ import java.nio.charset.StandardCharsets;
 
 /** This {@link RifFile} implementation operates on local files. */
 final class StaticRifFile implements RifFile {
+  /**
+   * {@link StaticRifResource} that identifies a static RIF file, its type, and expected record
+   * count.
+   */
   private final StaticRifResource staticRifResource;
 
   /**
@@ -22,25 +26,25 @@ final class StaticRifFile implements RifFile {
     this.staticRifResource = staticRifResource;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getFileType() */
+  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return staticRifResource.getRifFileType();
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getDisplayName() */
+  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return staticRifResource.name();
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#getCharset() */
+  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** @see gov.cms.bfd.model.rif.RifFile#open() */
+  /** {@inheritDoc} */
   @Override
   public InputStream open() {
     try {
@@ -50,7 +54,7 @@ final class StaticRifFile implements RifFile {
     }
   }
 
-  /** @see java.lang.Object#toString() */
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

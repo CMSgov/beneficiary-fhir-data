@@ -53,6 +53,9 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard_slos" {
   dashboard_name = "${var.dashboard_name}-slos"
   dashboard_body = templatefile(
     "${path.module}/templates/bfd-dashboard-slos.tftpl",
-    merge({ namespace = local.namespace }, local.client_ssls)
+    merge({
+      namespace = local.namespace
+      env       = var.env
+    }, local.client_ssls)
   )
 }

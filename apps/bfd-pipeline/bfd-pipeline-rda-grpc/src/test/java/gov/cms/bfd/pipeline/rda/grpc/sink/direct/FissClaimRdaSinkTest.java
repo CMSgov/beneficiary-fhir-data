@@ -19,6 +19,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.StringList;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,24 +53,38 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+/** Tests the {@link FissClaimRdaSink}. */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class FissClaimRdaSinkTest {
+  /** Test value for version. */
   private static final String VERSION = "version";
 
+  /** The clock used for creating fixed timestamps. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+  /** Configuration for the object used for hashing values. */
   private final IdHasher.Config hasherConfig = new IdHasher.Config(1, "notarealpepper");
 
+  /** The mock datasource. */
   @Mock private HikariDataSource dataSource;
+  /** The mock entity manager factory. */
   @Mock private EntityManagerFactory entityManagerFactory;
+  /** The mock entity manager. */
   @Mock private EntityManager entityManager;
+  /** The mock entity transaction. */
   @Mock private EntityTransaction transaction;
+  /** The mock claim transformer. */
   @Mock private FissClaimTransformer transformer;
+  /** The test meter object. */
   private MeterRegistry meters;
+  /** The test metric object. */
   private MetricRegistry appMetrics;
+  /** The sink under test. */
   private FissClaimRdaSink sink;
+  /** Keeps track of the sequence number in the test. */
   private long nextSeq = 0L;
 
+  /** Sets up the test mocks and dependencies before each test. */
   @BeforeEach
   public void setUp() {
     meters = new SimpleMeterRegistry();
@@ -80,11 +96,12 @@ public class FissClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(meters, appMetrics, dataSource, entityManagerFactory, clock);
-    sink = new FissClaimRdaSink(appState, transformer, true);
+    sink = new FissClaimRdaSink(appState, transformer, true, 0);
     sink.getMetrics().setLatestSequenceNumber(0);
     nextSeq = 0L;
   }
 
+  /** Tests the names of the metrics. */
   @Test
   public void metricNames() {
     assertEquals(
@@ -144,6 +161,7 @@ public class FissClaimRdaSinkTest {
     }
   }
 
+  /** Tests the outcome of a successful batch merge. */
   @Test
   public void mergeSuccessful() throws Exception {
     final List<RdaChange<RdaFissClaim>> batch =
@@ -174,6 +192,7 @@ public class FissClaimRdaSinkTest {
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
+  /** Tests the outcome of when a batch merge throws an exception. */
   @Test
   public void mergeFatalError() {
     final List<RdaChange<RdaFissClaim>> batch =
@@ -212,14 +231,23 @@ public class FissClaimRdaSinkTest {
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
 
+  /**
+   * Verifies that when the sink is closed, the entity manager is also closed.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void closeMethodsAreCalled() throws Exception {
     sink.close();
     verify(entityManager).close();
   }
 
+  /**
+   * Verifies that when a transformation error occurs when writing messages from the sink partway
+   * in, the messages that did not error are written, metering occurs, and nothing is rolled back.
+   */
   @Test
-  public void transformClaimFailure() throws Exception {
+  public void transformClaimFailure() {
     final var claims = ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     final var messages = messagesForBatch(claims);
     doThrow(
@@ -228,13 +256,28 @@ public class FissClaimRdaSinkTest {
         .when(transformer)
         .transformClaim(messages.get(2));
 
+    // unchecked - This is fine for a mock
+    //noinspection unchecked
+    TypedQuery<MessageError> mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(1L).when(mockTypedQuery).getSingleResult();
+
+    doReturn(mockTypedQuery)
+        .when(mockTypedQuery)
+        .setParameter("status", MessageError.Status.UNRESOLVED);
+
+    doReturn(mockTypedQuery)
+        .when(entityManager)
+        .createQuery(
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
+
     try {
       sink.writeMessages(VERSION, messages);
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
-      assertThat(
-          error.getCause(), CoreMatchers.instanceOf(DataTransformer.TransformationException.class));
+      assertThat(error.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
     }
 
     verify(transaction, times(1)).begin();
@@ -293,6 +336,12 @@ public class FissClaimRdaSinkTest {
     assertEquals(transactionDate, metaData.getTransactionDate());
   }
 
+  /**
+   * Gets the Fiss claim changes for a given batch of claims.
+   *
+   * @param batch the batch of claims
+   * @return the list of changes
+   */
   private List<FissClaimChange> messagesForBatch(List<RdaChange<RdaFissClaim>> batch) {
     final var messages = ImmutableList.<FissClaimChange>builder();
     for (RdaChange<RdaFissClaim> change : batch) {
@@ -307,6 +356,12 @@ public class FissClaimRdaSinkTest {
     return messages.build();
   }
 
+  /**
+   * Creates an {@link RdaFissClaim} {@link RdaChange} for testing.
+   *
+   * @param dcn the dcn for the claim
+   * @return the rda fiss change
+   */
   private RdaChange<RdaFissClaim> createClaim(String dcn) {
     RdaFissClaim claim = new RdaFissClaim();
     claim.setDcn(dcn);

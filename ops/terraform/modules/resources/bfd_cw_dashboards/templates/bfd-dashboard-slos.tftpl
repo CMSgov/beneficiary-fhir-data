@@ -2,8 +2,64 @@
     "widgets": [
         {
             "height": 6,
-            "width": 7,
+            "width": 12,
             "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "id": "e2" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "us-east-1",
+                "stat": "Maximum",
+                "period": 300,
+                "title": "Instance Count in Auto Scaling Groups with 1 Minute Period",
+                "yAxis": {
+                    "left": {
+                        "showUnits": false,
+                        "label": "Instances"
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 12,
+            "y": 0,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Average', 60)", "label": "", "id": "e1", "period": 300 } ],
+                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Minimum', 60)", "label": "", "id": "e2", "period": 300 } ],
+                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Maximum', 60)", "label": "", "id": "e3", "period": 300 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "us-east-1",
+                "stat": "Maximum",
+                "period": 300,
+                "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period",
+                "yAxis": {
+                    "left": {
+                        "label": "Percent",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 7,
+            "y": 6,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -33,7 +89,7 @@
         {
             "height": 6,
             "width": 9,
-            "y": 0,
+            "y": 6,
             "x": 7,
             "type": "metric",
             "properties": {
@@ -76,7 +132,7 @@
         {
             "height": 6,
             "width": 8,
-            "y": 0,
+            "y": 6,
             "x": 16,
             "type": "metric",
             "properties": {
@@ -107,7 +163,7 @@
         {
             "height": 6,
             "width": 5,
-            "y": 6,
+            "y": 12,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -137,7 +193,7 @@
         {
             "height": 6,
             "width": 5,
-            "y": 6,
+            "y": 12,
             "x": 5,
             "type": "metric",
             "properties": {
@@ -176,7 +232,7 @@
         {
             "height": 6,
             "width": 5,
-            "y": 6,
+            "y": 12,
             "x": 10,
             "type": "metric",
             "properties": {
@@ -214,7 +270,7 @@
         {
             "height": 6,
             "width": 5,
-            "y": 6,
+            "y": 12,
             "x": 15,
             "type": "metric",
             "properties": {
@@ -252,7 +308,7 @@
         {
             "height": 6,
             "width": 4,
-            "y": 6,
+            "y": 12,
             "x": 20,
             "type": "metric",
             "properties": {
@@ -291,7 +347,7 @@
         {
             "height": 6,
             "width": 7,
-            "y": 12,
+            "y": 18,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -321,7 +377,7 @@
         {
             "height": 6,
             "width": 9,
-            "y": 12,
+            "y": 18,
             "x": 7,
             "type": "metric",
             "properties": {
@@ -355,7 +411,7 @@
                         {
                             "color": "#ff7f0e",
                             "label": "Warning Threshold",
-                            "value": 110
+                            "value": 585
                         }
                     ]
                 }
@@ -364,7 +420,7 @@
         {
             "height": 6,
             "width": 8,
-            "y": 12,
+            "y": 18,
             "x": 16,
             "type": "metric",
             "properties": {
@@ -381,11 +437,11 @@
                     "horizontal": [
                         {
                             "label": "Alerting Threshold",
-                            "value": 160
+                            "value": 740
                         },
                         {
                             "label": "Warning Threshold",
-                            "value": 110
+                            "value": 520
                         }
                     ]
                 }
@@ -393,8 +449,8 @@
         },
         {
             "height": 6,
-            "width": 11,
-            "y": 18,
+            "width": 12,
+            "y": 24,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -423,9 +479,9 @@
         },
         {
             "height": 6,
-            "width": 13,
-            "y": 18,
-            "x": 11,
+            "width": 12,
+            "y": 24,
+            "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -473,8 +529,8 @@
         {
             "type": "metric",
             "x": 0,
-            "y": 24,
-            "width": 11,
+            "y": 30,
+            "width": 12,
             "height": 6,
             "properties": {
                 "metrics": [
@@ -513,9 +569,9 @@
         },
         {
             "type": "metric",
-            "x": 11,
-            "y": 24,
-            "width": 13,
+            "x": 12,
+            "y": 30,
+            "width": 12,
             "height": 6,
             "properties": {
                 "metrics": [
@@ -550,6 +606,131 @@
                     }
                 },
                 "title": "/v*/fhir/* 24-hour Error rate (HTTP 5XX)"
+            }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 8,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1", "period": 86400 } ],
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "timeSeries",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 86400,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "% Uptime over 24-Hour Period",
+                "stacked": false,
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "label": "Alert threshold",
+                            "value": 99
+                        },
+                        {
+                            "label": "Warning threshold",
+                            "value": 99.8
+                        }
+                    ]
+                },
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "label": "% Uptime",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 16,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "FILL(METRICS(), 0)", "label": "", "id": "e1" } ],
+                    [ "${namespace}", "availability/failure", { "id": "m2", "label": "Sum of Failed Checks over 5 Minutes", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "timeSeries",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 300,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "Failed Uptime Checks over 5 Minute Period",
+                "stacked": false,
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "label": "Alert Threshold",
+                            "value": 3
+                        },
+                        {
+                            "label": "Warning Threshold",
+                            "value": 1
+                        }
+                    ]
+                },
+                "yAxis": {
+                    "left": {
+                        "label": "Count",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 8,
+            "y": 36,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
+                ],
+                "sparkline": false,
+                "view": "gauge",
+                "region": "us-east-1",
+                "stat": "Sum",
+                "period": 2592000,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "% Uptime over 30-day Period",
+                "stacked": false,
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "label": "% Uptime",
+                        "showUnits": false,
+                        "min": 99.8
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
             }
         }
     ]

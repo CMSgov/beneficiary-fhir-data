@@ -28,76 +28,109 @@ import org.apache.commons.csv.CSVRecord;
 
 /** Enumerates the sample RIF resources available on the classpath. */
 public enum StaticRifResource {
+  /** Sample A Beneficiary static rif. */
   SAMPLE_A_BENES(
       resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+  /** Sample A Beneficiary without a reference year static rif. */
   SAMPLE_A_BENES_WITHOUT_REFERENCE_YEAR(
       resourceUrl("rif-static-samples/sample-a-beneficiaries-without-reference-year.txt"),
       RifFileType.BENEFICIARY,
       1),
 
+  /** Sample A Beneficiary with a backslash in the data static rif. */
   SAMPLE_A_BENES_WITH_BACKSLASH(
       resourceUrl("rif-static-samples/sample-a-beneficiaries-with-backslash.txt"),
       RifFileType.BENEFICIARY,
       1),
 
+  /** Sample A Beneficiary History static rif. */
   SAMPLE_A_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-a-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
       3),
 
+  /** Sample A Beneficiary Medicare ID History static rif. */
   SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY(
       resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory.txt"),
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
       1),
 
+  /** Sample A Beneficiary Medicare ID History static rif. */
   SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA(
       resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory-extra.txt"),
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
       1),
 
+  /** Sample A Carrier static rif. */
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
+  /** Sample A Carrier static rif. */
   SAMPLE_A_CARRIER_MULTIPLE_LINES(
       resourceUrl("rif-static-samples/sample-a-bcarrier-multiple-lines.txt"),
       RifFileType.CARRIER,
       7),
 
+  /** Sample A Inpatient static rif. */
   SAMPLE_A_INPATIENT(
       resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
+  /** Sample A Inpatient four character drg code static rif. */
+  SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE(
+      resourceUrl("rif-static-samples/sample-a-inpatient-with-four-character-drg-code.txt"),
+      RifFileType.INPATIENT,
+      1),
+
+  /** Sample A Outpatient static rif. */
   SAMPLE_A_OUTPATIENT(
       resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
+  /** Sample A SNF static rif. */
   SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
 
+  /** Sample A SNF Four Character DRG Code static rif. */
+  SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE(
+      resourceUrl("rif-static-samples/sample-a-snf-with-four-character-drg-code.txt"),
+      RifFileType.SNF,
+      1),
+
+  /** Sample A Hospice static rif. */
   SAMPLE_A_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 
+  /** Sample A HHA static rif. */
   SAMPLE_A_HHA(resourceUrl("rif-static-samples/sample-a-hha.txt"), RifFileType.HHA, 1),
 
+  /** Sample A DME static rif. */
   SAMPLE_A_DME(resourceUrl("rif-static-samples/sample-a-dme.txt"), RifFileType.DME, 1),
 
+  /** Sample A PDE static rif. */
   SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
+  /** Sample A Multiple Rows Same Beneficiary static rif. */
   SAMPLE_A_MULTIPLE_ROWS_SAME_BENE(
       resourceUrl("rif-static-samples/sample-a-multiple-entries-same-bene.txt"),
       RifFileType.BENEFICIARY,
       6),
 
+  /** Sample U Benficiary static rif. */
   SAMPLE_U_BENES(
       resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+  /** Sample U Benficiary Changed With 8 months of history static rif. */
   SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS(
       resourceUrl("rif-static-samples/sample-u-with-8-months.txt"), RifFileType.BENEFICIARY, 1),
 
+  /** Sample U Benficiary Changed With 9 months of history static rif. */
   SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS(
       resourceUrl("rif-static-samples/sample-u-with-9-months.txt"), RifFileType.BENEFICIARY, 1),
 
+  /** Sample U Benficiary Unchanged static rif. */
   SAMPLE_U_BENES_UNCHANGED(
       resourceUrl("rif-static-samples/sample-u-unchanged-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
       1),
 
+  /** Sample U Carrier static rif. */
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   /**
@@ -117,206 +150,229 @@ public enum StaticRifResource {
    */
   SAMPLE_SYNTHEA_BENES2011(
       resourceUrl("rif-synthea/beneficiary_2011.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2012 Resource. */
   SAMPLE_SYNTHEA_BENES2012(
       resourceUrl("rif-synthea/beneficiary_2012.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2013 Resource. */
   SAMPLE_SYNTHEA_BENES2013(
       resourceUrl("rif-synthea/beneficiary_2013.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2014 Resource. */
   SAMPLE_SYNTHEA_BENES2014(
       resourceUrl("rif-synthea/beneficiary_2014.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2015 Resource. */
   SAMPLE_SYNTHEA_BENES2015(
       resourceUrl("rif-synthea/beneficiary_2015.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2016 Resource. */
   SAMPLE_SYNTHEA_BENES2016(
       resourceUrl("rif-synthea/beneficiary_2016.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2017 Resource. */
   SAMPLE_SYNTHEA_BENES2017(
       resourceUrl("rif-synthea/beneficiary_2017.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2018 Resource. */
   SAMPLE_SYNTHEA_BENES2018(
       resourceUrl("rif-synthea/beneficiary_2018.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2019 Resource. */
   SAMPLE_SYNTHEA_BENES2019(
       resourceUrl("rif-synthea/beneficiary_2019.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2020 Resource. */
   SAMPLE_SYNTHEA_BENES2020(
       resourceUrl("rif-synthea/beneficiary_2020.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Benes 2021 Resource. */
   SAMPLE_SYNTHEA_BENES2021(
       resourceUrl("rif-synthea/beneficiary_2021.csv"), RifFileType.BENEFICIARY, -1),
+  /** Sample Synthea Carrier Resource. */
   SAMPLE_SYNTHEA_CARRIER(resourceUrl("rif-synthea/carrier.csv"), RifFileType.CARRIER, -1),
+  /** Sample Synthea Inpatient Resource. */
   SAMPLE_SYNTHEA_INPATIENT(resourceUrl("rif-synthea/inpatient.csv"), RifFileType.INPATIENT, -1),
+  /** Sample Synthea Outpatient Resource. */
   SAMPLE_SYNTHEA_OUTPATIENT(resourceUrl("rif-synthea/outpatient.csv"), RifFileType.OUTPATIENT, -1),
+  /** Sample Synthea SNF Resource. */
   SAMPLE_SYNTHEA_SNF(resourceUrl("rif-synthea/snf.csv"), RifFileType.SNF, -1),
+  /** Sample Synthea Hospice Resource. */
   SAMPLE_SYNTHEA_HOSPICE(resourceUrl("rif-synthea/hospice.csv"), RifFileType.HOSPICE, -1),
+  /** Sample Synthea HHAt Resource. */
   SAMPLE_SYNTHEA_HHA(resourceUrl("rif-synthea/hha.csv"), RifFileType.HHA, -1),
+  /** Sample Synthea DME Resource. */
   SAMPLE_SYNTHEA_DME(resourceUrl("rif-synthea/dme.csv"), RifFileType.DME, -1),
+  /** Sample Synthea PDE Resource. */
   SAMPLE_SYNTHEA_PDE(resourceUrl("rif-synthea/pde.csv"), RifFileType.PDE, -1),
+  /** Sample Synthea Benehistory Resource. */
   SAMPLE_SYNTHEA_BENEHISTORY(
       resourceUrl("rif-synthea/beneficiary_history.csv"), RifFileType.BENEFICIARY_HISTORY, -1),
 
+  /** Synthetic Benficiary 1999 Remote S3 data. */
   SYNTHETIC_BENEFICIARY_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
       RifFileType.BENEFICIARY,
       10000),
-
+  /** Synthetic Benficiary 2000 Remote S3 data. */
   SYNTHETIC_BENEFICIARY_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2000.rif"),
       RifFileType.BENEFICIARY,
       10000),
-
+  /** Synthetic Benficiary 2014 Remote S3 data. */
   SYNTHETIC_BENEFICIARY_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2014.rif"),
       RifFileType.BENEFICIARY,
       10000),
-
+  /** Synthetic Carrier 1999_1999 Remote S3 data. */
   SYNTHETIC_CARRIER_1999_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-1999.rif"),
       RifFileType.CARRIER,
       102617),
-
+  /** Synthetic Carrier1999_2000 Remote S3 data. */
   SYNTHETIC_CARRIER_1999_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2000.rif"),
       RifFileType.CARRIER,
       107665),
-
+  /** Synthetic Carrier 1999_2001 Remote S3 data. */
   SYNTHETIC_CARRIER_1999_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2001.rif"),
       RifFileType.CARRIER,
       113604),
-
+  /** Synthetic Carrier 2000_2000 Remote S3 data. */
   SYNTHETIC_CARRIER_2000_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2000.rif"),
       RifFileType.CARRIER,
       102178),
-
+  /** Synthetic Carrier 2000_2001 Remote S3 data. */
   SYNTHETIC_CARRIER_2000_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2001.rif"),
       RifFileType.CARRIER,
       108801),
-
+  /** Synthetic Carrier 2000_2002 Remote S3 data. */
   SYNTHETIC_CARRIER_2000_2002(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2002.rif"),
       RifFileType.CARRIER,
       113806),
-
+  /** Synthetic Carrier 2014_2014 Remote S3 data. */
   SYNTHETIC_CARRIER_2014_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2014.rif"),
       RifFileType.CARRIER,
       108172),
-
+  /** Synthetic Carrier 2014_2015 Remote S3 data. */
   SYNTHETIC_CARRIER_2014_2015(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2015.rif"),
       RifFileType.CARRIER,
       106577),
-
+  /** Synthetic Carrier 2014_2016 Remote S3 data. */
   SYNTHETIC_CARRIER_2014_2016(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2016.rif"),
       RifFileType.CARRIER,
       86736),
-
+  /** Synthetic Inpatient 1999_1999 Remote S3 data. */
   SYNTHETIC_INPATIENT_1999_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-1999.rif"),
       RifFileType.INPATIENT,
       650),
-
+  /** Synthetic Inpatient 1999_2000 Remote S3 data. */
   SYNTHETIC_INPATIENT_1999_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2000.rif"),
       RifFileType.INPATIENT,
       646),
-
+  /** Synthetic Inpatient 1999_2001 Remote S3 data. */
   SYNTHETIC_INPATIENT_1999_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2001.rif"),
       RifFileType.INPATIENT,
       700),
-
+  /** Synthetic Inpatient 2000_2000 Remote S3 data. */
   SYNTHETIC_INPATIENT_2000_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2000.rif"),
       RifFileType.INPATIENT,
       706),
-
+  /** Synthetic Inpatient 2000_2001 Remote S3 data. */
   SYNTHETIC_INPATIENT_2000_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2001.rif"),
       RifFileType.INPATIENT,
       641),
-
+  /** Synthetic Inpatient 2000_2002 Remote S3 data. */
   SYNTHETIC_INPATIENT_2000_2002(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2002.rif"),
       RifFileType.INPATIENT,
       680),
-
+  /** Synthetic Inpatient 2014_2014 Remote S3 data. */
   SYNTHETIC_INPATIENT_2014_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2014.rif"),
       RifFileType.INPATIENT,
       352),
-
+  /** Synthetic Inpatient 2014_2015 Remote S3 data. */
   SYNTHETIC_INPATIENT_2014_2015(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2015.rif"),
       RifFileType.INPATIENT,
       309),
-
+  /** Synthetic Inpatient 2014_2016 Remote S3 data. */
   SYNTHETIC_INPATIENT_2014_2016(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2016.rif"),
       RifFileType.INPATIENT,
       387),
-
+  /** Synthetic PDE 2014 Remote S3 data. */
   SYNTHETIC_PDE_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2014.rif"),
       RifFileType.PDE,
       127643),
-
+  /** Synthetic PDE 2015 Remote S3 data. */
   SYNTHETIC_PDE_2015(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2015.rif"),
       RifFileType.PDE,
       140176),
-
+  /** Synthetic PDE 2016 Remote S3 data. */
   SYNTHETIC_PDE_2016(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2016.rif"),
       RifFileType.PDE,
       145526),
-
+  /** Synthetic Outpatient 1999_1999 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_1999_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-1999-1999.rif"),
       RifFileType.OUTPATIENT,
       20744),
-
+  /** Synthetic Outpatient 2000_1999 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_2000_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2000-1999.rif"),
       RifFileType.OUTPATIENT,
       22439),
-
+  /** Synthetic Outpatient 2001_1999 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_2001_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2001-1999.rif"),
       RifFileType.OUTPATIENT,
       23241),
-
+  /** Synthetic Outpatient 2002_2000 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_2002_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2002-2000.rif"),
       RifFileType.OUTPATIENT,
       24575),
-
+  /** Synthetic Outpatient 2014_2014 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_2014_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2014-2014.rif"),
       RifFileType.OUTPATIENT,
       25194),
-
+  /** Synthetic Outpatient 2015_2014 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_2015_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2015-2014.rif"),
       RifFileType.OUTPATIENT,
       26996),
-
+  /** Synthetic Outpatient 2016_2014 Remote S3 data. */
   SYNTHETIC_OUTPATIENT_2016_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2016-2014.rif"),
       RifFileType.OUTPATIENT,
       27955),
-
+  /** Synthetic Hicn Multiple Benes S3 data. */
   SAMPLE_HICN_MULT_BENES(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
       10),
-
+  /** Synthetic Hicn Multiple Beneficiary History S3 data. */
   SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
       7);
 
+  /** The Resource URL Supplier for the different RIF files. */
   private final Supplier<URL> resourceUrlSupplier;
+  /** The Rif File Type of the beneficiary files (EX: Beneficiary, Carrier, etc). */
   private final RifFileType rifFileType;
+  /** The Record Count of the beneficiaries/claims/drug events in the RIF file. */
   private final int recordCount;
-
+  /** The Resource URL of the resource's contents. */
   private URL resourceUrl;
 
   /**
@@ -338,19 +394,31 @@ public enum StaticRifResource {
     }
   }
 
-  /** @return the {@link URL} to the resource's contents */
+  /**
+   * Gets the {@link #resourceUrl}.
+   *
+   * @return the {@link URL} to the resource's contents
+   */
   public synchronized URL getResourceUrl() {
     if (resourceUrl == null) resourceUrl = resourceUrlSupplier.get();
 
     return resourceUrl;
   }
 
-  /** @return the {@link RifFileType} of the RIF file */
+  /**
+   * Gets the {@link #rifFileType}.
+   *
+   * @return the {@link RifFileType} of the RIF file
+   */
   public RifFileType getRifFileType() {
     return rifFileType;
   }
 
-  /** @return the number of beneficiaries/claims/drug events in the RIF file excluding line items */
+  /**
+   * Gets the {@link #recordCount}.
+   *
+   * @return the number of beneficiaries/claims/drug events in the RIF file excluding line items
+   */
   public int getRecordCount() {
     return recordCount;
   }
@@ -390,15 +458,21 @@ public enum StaticRifResource {
     }
   }
 
-  /** @return a {@link RifFile} based on this {@link StaticRifResource} */
+  /**
+   * Returns the Static Rif file as a {@link RifFile}.
+   *
+   * @return a {@link RifFile} based on this {@link StaticRifResource}
+   */
   public RifFile toRifFile() {
     return new StaticRifFile(this);
   }
 
   /**
+   * Gets the {@link Supplier} for the {@link URL} to the resource's contents.
+   *
    * @param resourceName the name of the resource on the classpath (as might be passed to {@link
    *     ClassLoader#getResource(String)})
-   * @return a {@link Supplier} for the {@link URL} to the resource's contents
+   * @return the resource url
    */
   private static Supplier<URL> resourceUrl(String resourceName) {
     return () -> {
@@ -411,6 +485,8 @@ public enum StaticRifResource {
   }
 
   /**
+   * Get local copy of S3 data.
+   *
    * @param dataSetLocation the {@link TestDataSetLocation} of the file to get a local copy of
    * @param fileName the name of the specific file in the specified {@link TestDataSetLocation} to
    *     get a local copy of, e.g. "beneficiaries.rif"
@@ -511,6 +587,8 @@ public enum StaticRifResource {
   }
 
   /**
+   * Get Remote S3 data.
+   *
    * @param dataSetLocation the {@link TestDataSetLocation} of the file to get a local copy of
    * @param fileName the name of the specific file in the specified {@link TestDataSetLocation} to
    *     get a local copy of, e.g. "beneficiaries.rif"

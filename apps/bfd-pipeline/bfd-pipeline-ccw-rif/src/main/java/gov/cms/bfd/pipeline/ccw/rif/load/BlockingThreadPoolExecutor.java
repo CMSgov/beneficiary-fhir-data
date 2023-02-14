@@ -154,10 +154,20 @@ public final class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
    * implementation of the {@link ThreadPoolExecutor} - see the opened Java 6 source code).
    */
   private static class BlockThenRunPolicy implements RejectedExecutionHandler {
+    /** The max blocking time. */
     private long maxBlockingTime;
+    /** The max blocking time {@link TimeUnit}. */
     private TimeUnit maxBlockingTimeUnit;
+    /** The blocking time callback. */
     private Callable<Boolean> blockingTimeCallback;
 
+    /**
+     * Instantiates a new block then run policy.
+     *
+     * @param maxBlockingTime the max blocking time
+     * @param maxBlockingTimeUnit the max blocking time unit
+     * @param blockingTimeCallback the blocking time callback
+     */
     public BlockThenRunPolicy(
         long maxBlockingTime,
         TimeUnit maxBlockingTimeUnit,
@@ -167,6 +177,7 @@ public final class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
       this.blockingTimeCallback = blockingTimeCallback;
     }
 
+    /** Instantiates a new Block then run policy with everything set null / 0. */
     public BlockThenRunPolicy() {
       // just keep the maxBlocking gang all null / 0
     }

@@ -7,6 +7,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -26,6 +27,8 @@ import org.hl7.fhir.r4.model.Period;
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 public class SNFClaimTransformerV2 {
   /**
+   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
@@ -48,7 +51,10 @@ public class SNFClaimTransformerV2 {
   }
 
   /**
+   * Transforms a specified {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
+   *
    * @param claimGroup the CCW {@link SNFClaim} to transform
+   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
@@ -241,10 +247,7 @@ public class SNFClaimTransformerV2 {
     // CLAIM_QUERY_CODE                 => ExplanationOfBenefit.billablePeriod.extension
     // CLM_MCO_PD_SW                    => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
-        eob,
-        claimGroup.getBloodDeductibleLiabilityAmount(),
-        claimGroup.getClaimQueryCode(),
-        claimGroup.getMcoPaidSw());
+        eob, claimGroup.getBloodDeductibleLiabilityAmount(), claimGroup.getMcoPaidSw());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
@@ -258,6 +261,8 @@ public class SNFClaimTransformerV2 {
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
     // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
+    // C4BBInstutionalClaimSubtypes.Inpatient for SNF Claims
+    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -273,7 +278,9 @@ public class SNFClaimTransformerV2 {
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated(),
         claimGroup.getFiDocumentClaimControlNumber(),
-        claimGroup.getFiscalIntermediaryClaimProcessDate());
+        claimGroup.getFiscalIntermediaryClaimProcessDate(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        Optional.of(claimGroup.getClaimQueryCode()));
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept

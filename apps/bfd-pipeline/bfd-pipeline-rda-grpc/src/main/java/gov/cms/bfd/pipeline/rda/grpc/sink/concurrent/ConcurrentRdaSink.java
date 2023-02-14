@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -68,6 +69,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return writerPool.readMaxExistingSequenceNumber();
@@ -111,20 +113,29 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     return count;
   }
 
+  /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(TMessage object) {
     return writerPool.getClaimIdForMessage(object);
   }
 
+  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(TMessage object) {
     return writerPool.getSequenceNumberForObject(object);
   }
 
+  /** {@inheritDoc} */
   @Nonnull
   @Override
-  public TClaim transformMessage(String apiVersion, TMessage message) {
+  public Optional<TClaim> transformMessage(String apiVersion, TMessage message)
+      throws IOException, ProcessingException {
     return writerPool.transformMessage(apiVersion, message);
+  }
+
+  @Override
+  public void checkErrorCount() throws ProcessingException {
+    writerPool.checkErrorCount();
   }
 
   /**
@@ -138,6 +149,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     throw new ProcessingException(new UnsupportedOperationException(), 0);
   }
 
+  /** {@inheritDoc} */
   @Override
   public int getProcessedCount() throws ProcessingException {
     return writerPool.getProcessedCount();

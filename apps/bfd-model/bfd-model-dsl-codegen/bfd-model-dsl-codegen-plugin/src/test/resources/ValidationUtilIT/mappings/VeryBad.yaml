@@ -35,6 +35,11 @@ mappings:
             - name: bad-name
               fieldName: bad-field
               javaType: InvalidType
+        - class: array
+          fieldName:
+          entityClass:
+          joinColumnName:
+          mappedBy:
     enumTypes:
       - name: Bad.Name
         packageName: not.a.2package
@@ -47,15 +52,5 @@ mappings:
         to: invalid-name
         optionalComponents: None
         transformer: NoSuchTransformer
-    arrays:
-      - from: bad-name
-        to: another-bad-name
-        mapping: bad-mapping-name
-        namePrefix: 
-      - from: fissPayers
-        to: payers
-        mapping: NoSuchMapping
-        namePrefix: "payer"
-        parentField: bad-name
     externalTransformations:
       - name: not-a-good-name

@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+/** Tests the {@link R4EobSamhsaMatcher}. */
 public class R4EobSamhsaMatcherTest {
 
   /**
@@ -64,6 +65,14 @@ public class R4EobSamhsaMatcherTest {
             "should NOT return true (all known systems), but DID."));
   }
 
+  /**
+   * Parameterized tests for {@link R4EobSamhsaMatcher#containsOnlyKnownSystems}.
+   *
+   * @param name the tests description for reporting
+   * @param systems the systems to use for this test
+   * @param expectedResult the expected result
+   * @param errorMessage the error message if test fails
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
   public void abstractR4SamhsaMatcherTest(

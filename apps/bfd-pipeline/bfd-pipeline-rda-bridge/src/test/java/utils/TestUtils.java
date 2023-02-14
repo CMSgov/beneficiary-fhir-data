@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/** Testing utility for making more succinct tests */
+/** Testing utility for making more succinct tests. */
 public class TestUtils {
 
   /**
-   * Compares two lists of json objects (ndjson) for equality
+   * Compares two lists of json objects (ndjson) for equality.
    *
    * @param expectedJson The expected json values
    * @param actualJson The actual json values
@@ -60,12 +60,12 @@ public class TestUtils {
   }
 
   /**
-   * Creates a single diff string of the differences fond between the json strings
+   * Creates a single diff string of the differences fond between the json strings.
    *
    * @param expectedJson The expected json string
    * @param actualJson The actual json string
    * @param ignorePaths Paths to ignore during comparison
-   * @return A string containing all the diff messages when comparing the json strings.
+   * @return A string containing all the diff messages when comparing the json strings
    */
   private static String createDiff(
       String expectedJson, String actualJson, Set<String> ignorePaths) {
@@ -87,7 +87,7 @@ public class TestUtils {
    * @param expectedJson The expected JSON string value
    * @param actualJson The actual JSON string value
    * @param ignorePaths The paths to ignore while comparing the JSON string values
-   * @return A list of diff strings showing each difference between the two JSON string values.
+   * @return A list of diff strings showing each difference between the two JSON string values
    * @throws IOException If there was an issue reading the JSON strings
    */
   private static List<String> diffJson(
@@ -116,7 +116,7 @@ public class TestUtils {
    *
    * @param expected The expected {@link MessageOrBuilder}
    * @param actual The actual {@link MessageOrBuilder}
-   * @param ignorePaths The paths to ignore during comparison.
+   * @param ignorePaths The paths to ignore during comparison
    */
   public static void assertMessagesEqual(
       MessageOrBuilder expected, MessageOrBuilder actual, Set<String> ignorePaths) {

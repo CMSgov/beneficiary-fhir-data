@@ -254,6 +254,11 @@ public final class PipelineApplicationIT {
     }
   }
 
+  /**
+   * Verifies the RDA pipeline can be configured, started, and shut down successfully.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void rdaPipeline() throws Exception {
     skipOnUnsupportedOs();
@@ -304,6 +309,12 @@ public final class PipelineApplicationIT {
     }
   }
 
+  /**
+   * Verifies that when there is an exception starting the server, the correct error is output and
+   * the process can exit successfully.
+   *
+   * @throws Exception indicates a test failure
+   */
   @Test
   public void rdaPipelineServerFailure() throws Exception {
     skipOnUnsupportedOs();
@@ -383,6 +394,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Checks if the CCW RIF load job has completed by checking the job records.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
@@ -395,6 +408,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Checks if the RDA Fiss load job has completed by checking the job records.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
@@ -407,6 +422,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Checks if the RDA MCS load job has completed by checking the job records.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
@@ -419,6 +436,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Checks if the CCW RIF load job has failed by checking the job records.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that the {@link CcwRifLoadJob}
    *     failed, <code>false</code> if not
@@ -429,6 +448,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Checks if the RDA Fiss load job has failed by checking the job records.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
@@ -441,6 +462,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Checks if the RDA MCS load job has failed by checking the job records.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
@@ -452,6 +475,14 @@ public final class PipelineApplicationIT {
         RdaMcsClaimLoadJob.class);
   }
 
+  /**
+   * Checks if a job has a job record matching a specified value.
+   *
+   * @param appRunConsumer the job to check
+   * @param prefix the record prefix type to check for
+   * @param klass the class of the job to check
+   * @return {@code true} if the job had a record matching the specified prefix type
+   */
   private static boolean hasJobRecordMatching(
       ProcessOutputConsumer appRunConsumer, String prefix, Class<?> klass) {
     return appRunConsumer.matches(
@@ -459,6 +490,9 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Verifies a data set has been processed by the specified job by checking for a specific log
+   * message.
+   *
    * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
    * @return <code>true</code> if the application output indicates that a data set has been
    *     processed, <code>false</code> if not
@@ -592,7 +626,7 @@ public final class PipelineApplicationIT {
     appRunBuilder
         .environment()
         .put(
-            AppConfiguration.ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2022_BENES,
+            AppConfiguration.ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES,
             Boolean.FALSE.toString());
 
     return appRunBuilder;
@@ -618,6 +652,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
+   * Creates a command to run the pipeline application.
+   *
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
    *     the application via its <code>.x</code> assembly executable script
    */

@@ -30,12 +30,17 @@
 # Note: If running locally, you will need to be connected to the VPN in order to successfully connect to the database
 #
 
+import functools
 import sys
 import os
 import time
 import fileinput
 import subprocess
 import shlex
+
+# See https://stackoverflow.com/a/35467658
+# Forces prints to flush _immediately_, even if a subprocess is still executing
+print = functools.partial(print, flush=True)  # pylint: disable=redefined-builtin
 
 def validate_and_run(args):
     """
@@ -165,19 +170,25 @@ def run_synthea(synthea_folder_filepath, benes_to_generate, future_months):
     """
     
     logfile_path = f'{synthea_folder_filepath}synthea-' + time.strftime("%Y_%m_%d-%I_%M_%S_%p") + '.log'
+    synthea_failed = False
     if future_months > 0:
         print(f'Running synthea ({synthea_folder_filepath}national_bfd_v2.sh) with {benes_to_generate} benes and {future_months} future months...')
-        output = subprocess.check_output(shlex.split(f'{synthea_folder_filepath}national_bfd_v2.sh {benes_to_generate} {future_months}'), text=True, stderr=subprocess.STDOUT)
+        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd_v2.sh {benes_to_generate} {future_months}')
     else:
         print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes...')
-        output = subprocess.check_output(shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}'), text=True, stderr=subprocess.STDOUT)
-    with open(logfile_path, 'w') as f:
-        f.write(output)
+        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}')
+    with subprocess.Popen(process_cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1) as p, \
+        open(logfile_path, 'w') as f:
+        for line in p.stdout:
+            print(line, end='')
+            f.write(line)
+            if 'FAILURE:' in line:
+                synthea_failed = True
     
     print(f'Synthea run complete, log saved at {logfile_path}')
     
     ## Check output for synthea failure text as the success check
-    return not 'FAILURE:' in output
+    return not synthea_failed
     
 
 def validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_output_filepath, end_state_file_path):

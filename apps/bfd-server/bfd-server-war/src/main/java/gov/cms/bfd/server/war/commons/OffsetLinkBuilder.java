@@ -15,22 +15,37 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
- * PagingArguments encapsulates the arguments related to paging for the {@link
- * ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
+/**
+ * PagingArguments encapsulates the arguments related to paging for the ExplanationOfBenefit,
+ * Patient, and Coverage requests.
  */
 public final class OffsetLinkBuilder implements LinkBuilder {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 
+  /** The page size for paging. */
   private final Optional<Integer> pageSize;
+  /** The start index for paging. */
   private final Optional<Integer> startIndex;
+  /** The server url base. */
   private final String serverBase;
+  /** The resource to use with the base url. */
   private final String resource;
+  /** The request details. */
   private final RequestDetails requestDetails;
+  /**
+   * The number of results to return during paging; the default of -1 returns the bundle size by
+   * default.
+   */
   private int numTotalResults = -1;
 
+  /**
+   * Instantiates a new Offset link builder.
+   *
+   * @param requestDetails the request details
+   * @param resource the resource
+   */
   public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
     this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
@@ -40,10 +55,13 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   }
 
   /**
+   * Returns the parsed parameter as an Integer.
+   *
    * @param requestDetails the {@link RequestDetails} containing additional parameters for the URL
    *     in need of parsing out
    * @param parameterToParse the parameter to parse from requestDetails
-   * @return Returns the parsed parameter as an Integer, empty if the parameter is not found.
+   * @return the parsed parameter as an Integer, empty {@link Optional} if the parameter is not
+   *     found
    */
   private Optional<Integer> parseIntegerParameters(
       RequestDetails requestDetails, String parameterToParse) {
@@ -57,7 +75,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
             "Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.",
             e);
         throw new InvalidRequestException(
-            "Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.");
+            "Invalid argument in request URL: " + parameterToParse + " must be a number.");
       }
     }
     return Optional.empty();
@@ -76,9 +94,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     if (!pageSize.isPresent()) return 10;
     if (pageSize.get() < 0) {
       throw new InvalidRequestException(
-          String.format(
-              "HTTP 400 Bad Request: Value for startIndex cannot be negative: pageSize %s",
-              pageSize.get()));
+          String.format("Value for pageSize cannot be negative: %s", pageSize.get()));
     }
     return pageSize.get();
   }
@@ -90,7 +106,9 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   }
 
   /**
-   * @return Returns the startIndex as an integer. If the startIndex is not set, return 0.
+   * Gets the start index.
+   *
+   * @return the startIndex, if not set, returns 0
    * @throws InvalidRequestException HTTP 400: indicates a startIndex less than 0 was provided
    */
   public int getStartIndex() {
@@ -98,22 +116,26 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     if (startIndex.isPresent()) {
       if (startIndex.get() < 0) {
         throw new InvalidRequestException(
-            String.format(
-                "HTTP 400 Bad Request: Value for startIndex cannot be negative: startIndex %s",
-                startIndex.get()));
+            String.format("Value for startIndex cannot be negative: %s", startIndex.get()));
       }
       return startIndex.get();
     }
     return 0;
   }
 
+  /**
+   * Sets the {@link #numTotalResults}.
+   *
+   * @param numTotalResults the num total results
+   * @return the total
+   */
   public LinkBuilder setTotal(int numTotalResults) {
     this.numTotalResults = numTotalResults;
     return this;
   }
 
   /**
-   * Add next, first, last, and previous links to a bundle
+   * Add next, first, last, and previous links to a bundle.
    *
    * @param toBundle to add the links
    */
@@ -157,7 +179,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   }
 
   /**
-   * Add next, first, last, and previous links to a bundle
+   * Add next, first, last, and previous links to a bundle.
    *
    * @param toBundle to add the links
    */
@@ -201,7 +223,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   }
 
   /**
-   * Build the link string
+   * Build the link string.
    *
    * @param startIndex start index
    * @return the link requested
@@ -229,7 +251,8 @@ public final class OffsetLinkBuilder implements LinkBuilder {
       }
       return uri.build().toString();
     } catch (URISyntaxException e) {
-      throw new InvalidRequestException("Invalid URI:" + e);
+      throw new InvalidRequestException(
+          "Issue creating URI link for paging due to query parameters or values.", e);
     }
   }
 }

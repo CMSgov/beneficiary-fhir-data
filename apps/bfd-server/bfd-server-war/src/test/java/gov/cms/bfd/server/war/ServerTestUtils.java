@@ -62,7 +62,7 @@ public final class ServerTestUtils {
 
   /** The singleton {@link ServerTestUtils} instance to use everywhere. */
   private static ServerTestUtils SINGLETON;
-
+  /** The server's base url. */
   private final String serverBaseUrl;
 
   /**
@@ -73,14 +73,16 @@ public final class ServerTestUtils {
     this.serverBaseUrl = initServerBaseUrl();
   }
 
-  /** @return the singleton {@link ServerTestUtils} instance to use everywhere */
+  /**
+   * Get server test utils.
+   *
+   * <p>We use a singleton and cache all the fields because creating some of the fields stored in
+   * the PipelineApplicationState is EXPENSIVE (it maintains a DB connection pool), so we don't want
+   * to have to re-create it for every test.
+   *
+   * @return the singleton {@link ServerTestUtils} instance to use everywhere
+   */
   public static synchronized ServerTestUtils get() {
-    /*
-     * Why are we using a singleton and caching all of these fields? Because creating some of the
-     * fields stored in the PipelineApplicationState is EXPENSIVE (it maintains a DB connection
-     * pool), so we don't want to have to re-create it for every test.
-     */
-
     if (SINGLETON == null) {
       SINGLETON = new ServerTestUtils();
     }
@@ -88,7 +90,11 @@ public final class ServerTestUtils {
     return SINGLETON;
   }
 
-  /** @return the value to use for {@link #getServerBaseUrl()} */
+  /**
+   * Init server base url string.
+   *
+   * @return the value to use for {@link #getServerBaseUrl()}
+   */
   private static String initServerBaseUrl() {
     Properties testServerPorts = initTestServerPortsProperties();
     int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
@@ -97,8 +103,10 @@ public final class ServerTestUtils {
   }
 
   /**
-   * @return the {@link Properties} from the <code>server-ports.properties</code> that should have
-   *     been written out by the integration tests' <code>server-start.sh</code> script
+   * Returns the {@link Properties} from the <code>server-ports.properties</code> that should have
+   * been written out by the integration tests' <code>server-start.sh</code> script.
+   *
+   * @return the properties
    */
   private static Properties initTestServerPortsProperties() {
     /*
@@ -124,14 +132,18 @@ public final class ServerTestUtils {
   }
 
   /**
-   * @return a new FHIR {@link IGenericClient} for use, configured to use the {@link
-   *     ClientSslIdentity#TRUSTED} login
+   * Creates a new FHIR {@link IGenericClient} for use, configured to use the {@link
+   * ClientSslIdentity#TRUSTED} login.
+   *
+   * @return a FHIR client
    */
   public IGenericClient createFhirClient() {
     return createFhirClient(Optional.of(ClientSslIdentity.TRUSTED));
   }
 
   /**
+   * Create fhir client with the specified ssl identity.
+   *
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
    * @return a new FHIR {@link IGenericClient} for use
    */
@@ -140,14 +152,18 @@ public final class ServerTestUtils {
   }
 
   /**
-   * @return a new FHIR {@link IGenericClient} for use, configured to use the {@link
-   *     ClientSslIdentity#TRUSTED} login for FIHR v2 server
+   * Creates a new FHIR {@link IGenericClient} for use, configured to use the {@link
+   * ClientSslIdentity#TRUSTED} login for FIHR v2 server.
+   *
+   * @return a FHIR client
    */
   public IGenericClient createFhirClientV2() {
     return createFhirClientV2(Optional.of(ClientSslIdentity.TRUSTED));
   }
 
   /**
+   * Create V2 fhir client with the specified ssl identity.
+   *
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FV2 HIR server
    * @return a new FHIR {@link IGenericClient} for use
    */
@@ -156,7 +172,9 @@ public final class ServerTestUtils {
   }
 
   /**
-   * @param versionId the {@link v1 or v2 identifier to use as a part of the URL for the FHIR server
+   * Creates a FHIR client.
+   *
+   * @param versionId the v1 or v2 identifier to use as a part of the URL for the FHIR server
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
    * @return a new FHIR {@link IGenericClient} for use
    */
@@ -167,8 +185,11 @@ public final class ServerTestUtils {
   }
 
   /**
-   * @param versionId the {@link v1 or v2 identifier to use as a part of the URL for the FHIR server
+   * Creates a FHIR client.
+   *
+   * @param versionId the v1 or v2 identifier to use as a part of the URL for the FHIR server
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
+   * @param ctx the fhir context
    * @return a new FHIR {@link IGenericClient} for use
    */
   private IGenericClient createFhirClient(
@@ -238,6 +259,8 @@ public final class ServerTestUtils {
   }
 
   /**
+   * Creates the ssl context.
+   *
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the server
    * @return a new {@link SSLContext} for HTTP clients connecting to the server to use
    */
@@ -270,12 +293,40 @@ public final class ServerTestUtils {
     return sslContext;
   }
 
-  /** @return the base URL for the server (not for the FHIR servlet, but just the server itself) */
+  /**
+   * Gets the {@link #serverBaseUrl}.
+   *
+   * @return the base URL for the server (not for the FHIR servlet, but just the server itself)
+   */
   public String getServerBaseUrl() {
     return serverBaseUrl;
   }
 
-  /** @return the local {@link Path} that development/test key and trust stores can be found in */
+  /**
+   * Gets the local {@link Path} that the project can be found in.
+   *
+   * @return the local {@link Path}
+   */
+  public static Path getWarProjectDirectory() {
+    try {
+      /*
+       * The working directory for tests will either be the module directory or their parent
+       * directory. With that knowledge, we're searching for the project directory.
+       */
+      Path projectDir = Paths.get(".");
+      if (!Files.isDirectory(projectDir) && projectDir.toRealPath().endsWith("bfd-server-war"))
+        throw new IllegalStateException();
+      return projectDir;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  /**
+   * Gets the local {@link Path} that development/test key and trust stores can be found in.
+   *
+   * @return the ssl stores directory
+   */
   static Path getSslStoresDirectory() {
     /*
      * The working directory for tests will either be the module directory
@@ -288,13 +339,19 @@ public final class ServerTestUtils {
     return sslStoresDir;
   }
 
-  /** @return the local {@link Path} to the trust store that FHIR clients should use */
+  /**
+   * Gets the client trust store path.
+   *
+   * @return the local {@link Path} to the trust store that FHIR clients should use
+   */
   private static Path getClientTrustStorePath() {
     Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
     return trustStorePath;
   }
 
   /**
+   * Parses a list of sample sources.
+   *
    * @param sampleResources the sample RIF resources to parse
    * @return the {@link List} of RIF records that were parsed (e.g. {@link Beneficiary}s, etc.)
    */
@@ -315,6 +372,8 @@ public final class ServerTestUtils {
   }
 
   /**
+   * Loads a list of sample resources.
+   *
    * @param sampleResources the sample RIF resources to load
    * @return the {@link List} of RIF records that were loaded (e.g. {@link Beneficiary}s, etc.)
    */
@@ -416,8 +475,9 @@ public final class ServerTestUtils {
   }
 
   /**
-   * helper
+   * Creates a FHIR client with the specified header.
    *
+   * @param requestHeader the request header
    * @return the client with extra params registered
    */
   public IGenericClient createFhirClientWithHeaders(RequestHeaders requestHeader) {
@@ -431,8 +491,9 @@ public final class ServerTestUtils {
   }
 
   /**
-   * helper
+   * Creates a v2 FHIR client with the specified header.
    *
+   * @param requestHeader the request header
    * @return the client with extra params registered
    */
   public IGenericClient createFhirClientWithHeadersV2(RequestHeaders requestHeader) {
