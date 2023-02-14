@@ -211,7 +211,8 @@ public class AbstractClaimRdaSinkTest {
     doReturn(mockQuery)
         .when(entityManager)
         .createQuery(
-            "select count(error) from MessageError error where status = :status", Long.class);
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
 
     assertDoesNotThrow(() -> sink.checkErrorCount());
   }
@@ -234,7 +235,8 @@ public class AbstractClaimRdaSinkTest {
     doReturn(mockQuery)
         .when(entityManager)
         .createQuery(
-            "select count(error) from MessageError error where status = :status", Long.class);
+            "select count(error) from MessageError error where status = :status and claimType = :claimType",
+            Long.class);
 
     assertThrows(ProcessingException.class, () -> sink.checkErrorCount());
   }
