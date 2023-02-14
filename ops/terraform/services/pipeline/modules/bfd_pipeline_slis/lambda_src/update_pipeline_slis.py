@@ -184,16 +184,16 @@ def handler(event, context):
         ccw_timestamp = match.group(2)
         rif_file_type = RifFileType(match.group(3).lower())
 
-        metric_name = f"data-{pipeline_data_status.name.lower()}"
         rif_type_dimension = {"data_type": rif_file_type.name.lower()}
         group_timestamp_dimension = {"group_timestamp": ccw_timestamp}
 
+        count_metric_name = f"count/data-{pipeline_data_status.name.lower()}"
         # An inline function is defined here to pass to backoff_retry() as Python does not support
         # multiple line lambdas, so this is the next-best option
-        def put_metrics():
+        def put_count_metrics():
             print(
-                f'Putting data counts metrics with name "{metric_name}" up to CloudWatch with'
-                f" timestamp {datetime.isoformat(event_timestamp)}"
+                f'Putting data counts metrics "{METRICS_NAMESPACE}/{count_metric_name}" up to'
+                f" CloudWatch with timestamp {datetime.isoformat(event_timestamp)}"
             )
             # Store three metrics:
             put_metric_data(
@@ -202,14 +202,14 @@ def handler(event, context):
                     # One undimensioned metric that can be used to get metrics aggregated across all
                     # data types and groups of data loads
                     MetricData(
-                        metric_name=metric_name,
+                        metric_name=count_metric_name,
                         timestamp=event_timestamp,
                         value=1,
                         unit="Count",
                     ),
                     # One dimensioned metric that aggregates across RIF file types
                     MetricData(
-                        metric_name=metric_name,
+                        metric_name=count_metric_name,
                         dimensions=[rif_type_dimension],
                         timestamp=event_timestamp,
                         value=1,
@@ -218,7 +218,7 @@ def handler(event, context):
                     # And one dimensioned metric that aggregates across both the file type and the
                     # file's "group" (timestamped parent directory)
                     MetricData(
-                        metric_name=metric_name,
+                        metric_name=count_metric_name,
                         dimensions=[rif_type_dimension, group_timestamp_dimension],
                         timestamp=event_timestamp,
                         value=1,
@@ -226,11 +226,13 @@ def handler(event, context):
                     ),
                 ],
             )
-            print(f"Successfully uploaded metrics to CloudWatch")
+            print(
+                f'Successfully put metrics to "{METRICS_NAMESPACE}/{count_metric_name}"'
+            )
 
         try:
             backoff_retry(
-                func=put_metrics,
+                func=put_count_metrics,
                 ignored_exceptions=[
                     cw_client.exceptions.InvalidParameterValueException,
                     cw_client.exceptions.MissingRequiredParameterException,
@@ -241,7 +243,7 @@ def handler(event, context):
         except Exception as exc:
             print(
                 "An unrecoverable error occurred when trying to call PutMetricData for metric"
-                f" {METRICS_NAMESPACE}/{metric_name}: {exc}"
+                f" {METRICS_NAMESPACE}/{count_metric_name}: {exc}"
             )
     else:
         print(f"ETL file or path does not match expected format, skipping: {decoded_file_key}")
