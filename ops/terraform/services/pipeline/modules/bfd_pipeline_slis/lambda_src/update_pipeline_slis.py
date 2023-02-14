@@ -34,8 +34,8 @@ class PipelineDataStatus(str, Enum):
     by the ETL pipeline. The value of each enum is the parent directory of the incoming file,
     indicating status"""
 
-    AVAILABLE = "Incoming"
-    LOADED = "Done"
+    AVAILABLE = "incoming"
+    LOADED = "done"
 
 
 class RifFileType(str, Enum):
