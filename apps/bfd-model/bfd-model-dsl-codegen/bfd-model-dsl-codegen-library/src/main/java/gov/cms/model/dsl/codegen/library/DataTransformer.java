@@ -557,7 +557,7 @@ public class DataTransformer {
   }
 
   /**
-   * Parses the string into an Short and delivers it to the Consumer. The string value must be a
+   * Parses the string into a Short and delivers it to the Consumer. The string value must be a
    * valid short. Valid null values are silently accepted without calling the Consumer.
    *
    * @param fieldName name of the field from which the value originates
