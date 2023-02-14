@@ -163,6 +163,33 @@
 				utilities in that scope. -->
 			<scope>compile</scope>
 		</dependency>
+		<!-- Compile Time -->
+		<dependency>
+		       <groupId>org.projectlombok</groupId>
+		       <artifactId>lombok</artifactId>
+		       <scope>provided</scope>
+		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>gov.cms.bfd</groupId>
+				<artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+				<version>${project.version}</version>
+				<configuration>
+					<mappingPath>${project.basedir}/mappings</mappingPath>
+					<outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>entities</goal>
+							<goal>sql</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
