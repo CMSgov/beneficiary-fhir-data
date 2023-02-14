@@ -128,7 +128,8 @@ def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
                     "Name": dim_name,
                     "Value": dim_value,
                 }
-                for dim_name, dim_value in m.dimensions.items()
+                for d in m.dimensions
+                for dim_name, dim_value in d.items()
             ],
         }
         for m in metrics
