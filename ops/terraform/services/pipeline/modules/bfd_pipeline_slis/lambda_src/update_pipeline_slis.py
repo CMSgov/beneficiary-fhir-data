@@ -91,7 +91,7 @@ def backoff_retry(
             # Raise the exception if it is any of the explicitly ignored exceptions or if this
             # was the last try
             if (
-                any([exc is ignored_exc for ignored_exc in ignored_exceptions])
+                any([type(exc) is ignored_exc for ignored_exc in ignored_exceptions])
                 or try_number == retries - 1
             ):
                 raise exc
