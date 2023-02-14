@@ -7,6 +7,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,9 +66,9 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
 
   /** SQL used to check potential collision of CLM_GRP_ID in PARTD_EVENTS tables. */
   private static final String CHECK_PDE_CLAIMS_GROUP_ID =
-      "select pde_id from partd_events "
+      "select count (pde_id) from partd_events "
           + "where pde_id <= ? "
-          + "and clm_grp_id <= ? and clm_grp_id > ? limit 1";
+          + "or (clm_grp_id <= ? and clm_grp_id > ?) limit 1";
 
   /**
    * SQL used to check for potential collision of HICN_UNHASHED or MBI_NUM in BENEFICIARIES tables.
@@ -157,14 +158,14 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         // Range check BENEFICIARIES for value constraints on BENE_ID.
         //
         if (props.getBeneIdStart() != 0 && props.getBeneIdEnd() != 0) {
-          LOGGER.debug("pre-validation starting for CHECK_PDE_CLAIMS_GROUP_ID");
+          LOGGER.debug("pre-validation starting for CHECK_BENE_RANGE");
           ps = dbConn.prepareStatement(CHECK_BENE_RANGE);
           ps.setLong(1, props.getBeneIdStart());
           ps.setLong(2, props.getBeneIdEnd());
           rs = ps.executeQuery();
           // we only have one possible column in the result set so we
           // can cheat using an index value of 1! True for all queries!
-          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+          isValid = hasNoResultsForQuery(rs);
           ps.close();
           ps = null;
           rs = null;
@@ -182,7 +183,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
           ps.setLong(1, props.getClmIdStart());
           ps.setString(2, carr_claim_cntl_num);
           rs = ps.executeQuery();
-          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+          isValid = hasNoResultsForQuery(rs);
           ps.close();
           ps = null;
           rs = null;
@@ -203,7 +204,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
             ps.setLong(1, props.getClmGrpIdStart());
             ps.setLong(2, CLM_GRP_ID_END);
             rs = ps.executeQuery();
-            isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+            isValid = hasNoResultsForQuery(rs);
             ps.close();
             ps = null;
             rs = null;
@@ -223,7 +224,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
           ps.setLong(2, props.getClmGrpIdStart());
           ps.setLong(3, CLM_GRP_ID_END);
           rs = ps.executeQuery();
-          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+          isValid = hasNoResultsForQuery(rs);
           ps.close();
           ps = null;
           rs = null;
@@ -240,7 +241,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
           ps.setString(1, props.getHicnStart());
           ps.setString(2, props.getMbiStart());
           rs = ps.executeQuery();
-          isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+          isValid = hasNoResultsForQuery(rs);
           ps.close();
           ps = null;
           rs = null;
@@ -260,7 +261,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
             ps = dbConn.prepareStatement(sql);
             ps.setString(1, props.getFiDocCntlNumStart());
             rs = ps.executeQuery();
-            isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+            isValid = hasNoResultsForQuery(rs);
             ps.close();
             ps = null;
             rs = null;
@@ -276,12 +277,13 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
         LOGGER.debug("pre-validation starting for CHECK_MBI_DUPES");
         ps = dbConn.prepareStatement(CHECK_MBI_DUPES);
         rs = ps.executeQuery();
-        isValid = (rs != null && rs.next() && (rs.getInt(1) < 1));
+        // There is one result intentionally duplicated in test/prod-sbx, so expect that one
+        isValid = rs.next() && rs.getInt(1) < 2;
         ps.close();
         ps = null;
         rs = null;
         if (!isValid) {
-          LOGGER.warn("pre-validation failed for CHECK_HICN_MBI_HASH");
+          LOGGER.warn("pre-validation failed for CHECK_MBI_DUPES");
         }
         break;
       }
@@ -307,5 +309,32 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
     }
     preValidationFailed = !isValid;
     return isValid;
+  }
+
+  /**
+   * Checks if a given query's result set has more than one result. If it's a count query, checks if
+   * the count is < 1.
+   *
+   * @param resultSet the result set
+   * @return {@link true} if the result set has no results or count query has 0 count
+   */
+  private boolean hasNoResultsForQuery(ResultSet resultSet) {
+
+    try {
+      boolean hasNext = resultSet.next();
+      boolean hasResultCountHigherThanOne = true;
+      if (hasNext) {
+        /*
+         * For count queries, we will get a result with the count, so if we have a result, assume its a count
+         * query and check if the count is < 1.
+         */
+        int queryCount = resultSet.getInt(1);
+        hasResultCountHigherThanOne = queryCount < 1;
+      }
+      return !hasNext || hasResultCountHigherThanOne;
+    } catch (SQLException ex) {
+      LOGGER.warn("SQL Exception while checking pre-validation results.");
+    }
+    return false;
   }
 }
