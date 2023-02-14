@@ -365,12 +365,21 @@ def handler(event, context):
             )
             return
 
-        # Get the latest timestamp
+        # Get the the unix time (in UTC) of the most recent point in time when the now-loaded file
+        # that invoked this Lambda was made available in order to calculate the time it took to load
+        # said file in the ETL pipeline. We take the value (unix timestamp) instead of the point's
+        # timestamp as it will be a higher resolution and more accurate since CloudWatch truncates
+        # and reduces the precision of data timestamps over time
         try:
-            last_available = sorted(data_available_metric_data.timestamps, reverse=True)[0]
-        except IndexError as exc:
+            latest_value_index = data_available_metric_data.timestamps.index(
+                max(data_available_metric_data.timestamps)
+            )
+            last_available = datetime.utcfromtimestamp(
+                data_available_metric_data.values[latest_value_index]
+            )
+        except ValueError as exc:
             print(
-                "No timestamps were returned for metric"
+                "No values were returned for metric"
                 f" {METRICS_NAMESPACE}/{data_available_metric_name}, no time delta can be computed."
                 " Stopping..."
             )
