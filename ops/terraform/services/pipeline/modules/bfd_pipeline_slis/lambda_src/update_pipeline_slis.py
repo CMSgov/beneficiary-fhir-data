@@ -142,7 +142,7 @@ def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
 
 
 def handler(event, context):
-    if not all([REGION]):
+    if not all([REGION, METRICS_NAMESPACE]):
         print("Not all necessary environment variables were defined, exiting...")
         return
 
