@@ -62,6 +62,18 @@ public class MappingBeanTest {
     assertFalse(mapping.findJoinByFieldName("x").isPresent());
   }
 
+  /** Verify finding a transformation by to name works correctly. */
+  @Test
+  public void testFindTransformationByToName() {
+    MappingBean mapping =
+        MappingBean.builder()
+            .table(TableBean.builder().join(JoinBean.builder().fieldName("a").build()).build())
+            .transformation(TransformationBean.builder().to("a").build())
+            .build();
+    assertTrue(mapping.findTransformationByToName("a").isPresent());
+    assertFalse(mapping.findTransformationByToName("x").isPresent());
+  }
+
   /** Verify that joins associated with array fields are properly filtered. */
   @Test
   public void testGetNonArrayJoins() {

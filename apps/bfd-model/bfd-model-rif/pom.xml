@@ -18,6 +18,12 @@
 
 	<dependencies>
 		<dependency>
+			<!-- contains the data transformation library classes needed to transform incoming data -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-dsl-codegen-library</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Provides an enum of all the CCW variables. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-codebook-data</artifactId>
@@ -179,13 +185,14 @@
 				<version>${project.version}</version>
 				<configuration>
 					<mappingPath>${project.basedir}/mappings</mappingPath>
-					<outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
 						<goals>
 							<goal>entities</goal>
 							<goal>sql</goal>
+							<goal>csv-writers</goal>
+							<goal>transformers</goal>
 						</goals>
 					</execution>
 				</executions>

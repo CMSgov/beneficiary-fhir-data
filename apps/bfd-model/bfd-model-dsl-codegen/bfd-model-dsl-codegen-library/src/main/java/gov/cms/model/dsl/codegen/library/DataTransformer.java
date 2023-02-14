@@ -325,7 +325,7 @@ public class DataTransformer {
   }
 
   /**
-   * Checks to see if a value is present and, if it is, calls {@link copyUIntToShort} to copy the
+   * Checks to see if a value is present and, if it is, calls {@link #copyUIntToShort} to copy the
    * value.
    *
    * @param fieldName The name of the field from which the value originates.
@@ -552,6 +552,51 @@ public class DataTransformer {
       String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Integer> copier) {
     if (exists.getAsBoolean()) {
       return copyIntString(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Parses the string into a Short and delivers it to the Consumer. The string value must be a
+   * valid short. Valid null values are silently accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value short string
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyShortString(
+      String fieldName, boolean nullable, String value, Consumer<Short> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      try {
+        short shortValue = Short.parseShort(value);
+        copier.accept(shortValue);
+      } catch (NumberFormatException ex) {
+        addError(fieldName, "invalid short");
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into a Short. Valid null values are silently accepted without calling the
+   * Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyOptionalShortString(
+      String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Short> copier) {
+    if (exists.getAsBoolean()) {
+      return copyShortString(fieldName, false, value.get(), copier);
     }
     return this;
   }
