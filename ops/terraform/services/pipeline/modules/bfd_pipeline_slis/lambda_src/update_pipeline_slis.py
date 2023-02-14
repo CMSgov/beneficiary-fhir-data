@@ -157,6 +157,16 @@ def handler(event, context):
         return
 
     try:
+        event_time_iso: str = record["eventTime"]
+        event_timestamp = datetime.fromisoformat(event_time_iso.removesuffix("Z"))
+    except KeyError as exc:
+        print(f'Record did not contain any key with "eventTime": {exc}')
+        return
+    except ValueError as exc:
+        print(f"Event timestamp was not in valid ISO format: {exc}")
+        return
+
+    try:
         file_key = record["s3"]["object"]["key"]
     except KeyError as exc:
         print(f"No bucket file found in event notification: {exc}")
@@ -174,8 +184,6 @@ def handler(event, context):
         ccw_timestamp = match.group(2)
         rif_file_type = RifFileType(match.group(3).lower())
 
-        event_timestamp = datetime.now()  # TODO: Get this timestamp from S3 event
-
         metric_name = f"data-{pipeline_data_status.name.lower()}"
         rif_type_dimension = {"data_type": rif_file_type.name.lower()}
         group_timestamp_dimension = {"group_timestamp": ccw_timestamp}
@@ -183,6 +191,10 @@ def handler(event, context):
         # An inline function is defined here to pass to backoff_retry() as Python does not support
         # multiple line lambdas, so this is the next-best option
         def put_metrics():
+            print(
+                f'Putting data counts metrics "{metric_name}" up to CloudWatch with timestamp'
+                f" {event_timestamp}"
+            )
             # Store three metrics:
             put_metric_data(
                 metric_namespace=METRICS_NAMESPACE,
