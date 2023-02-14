@@ -224,7 +224,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             // If our thread is interrupted we cancel the stream so the server knows we're done
             // and then shut down normally.
             flushBatch = false;
-            responseStream.cancelStream("shutting down due to InterruptedException");
             processResult.setInterrupted(true);
           } catch (GrpcResponseStream.DroppedConnectionException ex) {
             log.info("shutting down due to dropped stream");
@@ -243,6 +242,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
           }
 
           MultiCloser closer = new MultiCloser();
+
+          closer.close(() -> responseStream.cancelStream("shutting down"));
 
           if (batch.size() > 0 && flushBatch) {
             closer.close(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));

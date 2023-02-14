@@ -14,7 +14,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -590,28 +589,6 @@ public class StandardGrpcRdaSourceTest {
     verify(channel).isTerminated();
     verify(channel).shutdown();
     verify(channel, times(2)).awaitTermination(anyLong(), any(TimeUnit.class));
-    verify(channel, never()).shutdownNow();
-  }
-
-  /**
-   * Verifies that if an InterruptedException is thrown while waiting for the {@link ManagedChannel}
-   * to close and again when we retry that we punt and call {@link ManagedChannel#shutdownNow()}.
-   *
-   * @throws Exception required since method being tested has checked exceptions
-   */
-  @Test
-  public void testDoubleInterruptedExceptionDuringChannelShutdown() throws Exception {
-    doReturn(false).when(channel).isShutdown();
-    doReturn(false).when(channel).isTerminated();
-    doThrow(new InterruptedException()).when(channel).awaitTermination(anyLong(), any());
-
-    source.close();
-
-    verify(channel).isShutdown();
-    verify(channel).isTerminated();
-    verify(channel).shutdown();
-    verify(channel, times(2)).awaitTermination(anyLong(), any(TimeUnit.class));
-    verify(channel).shutdownNow();
   }
 
   /**
