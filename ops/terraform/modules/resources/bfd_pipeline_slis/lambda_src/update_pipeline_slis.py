@@ -1,7 +1,9 @@
-from enum import Enum
 import os
 import re
 import time
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
 from urllib.parse import unquote
 
 import boto3
@@ -48,6 +50,80 @@ class RifFileType(str, Enum):
     SNF = "snf"
 
 
+@dataclass
+class MetricData:
+    metric_name: str
+    timestamp: datetime
+    value: float
+    unit: str
+    dimensions: dict[str, str] = {}
+
+
+def try_put_metric_data(
+    metric_namespace: str,
+    metrics: list[MetricData],
+    retries: int = PUT_METRIC_DATA_MAX_RETRIES,
+):
+    """Wrapper function for the boto3 CloudWatch PutMetricData API operation. Will automatically
+    retry on errors that are possible to retry on, and otherwise will raise errors that are not
+    able to be retried (such as invalid or missing argument exceptions)
+
+    Args:
+        metric_namespace (str): The namespace of the metric(s) to store
+        metrics (list[MetricData]): A list of upto 1000 metrics to store to CloudWatch
+        retries (int, optional): The number of times to retry the PutMetricData operation.
+        Defaults to PUT_METRIC_DATA_MAX_RETRIES.
+
+    Raises:
+        exc: Any of CloudWatch.exceptions.InvalidParameterValueException,
+        CloudWatch.exceptions.MissingRequiredParameterException,
+        CloudWatch.exceptions.InvalidParameterCombinationException
+    """
+
+    # Convert from a list of the MetricData class to a list of dicts that boto3 understands for this
+    # API. See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data
+    metrics_dict_list = [
+        {
+            "MetricName": m.metric_name,
+            "Timestamp": m.timestamp,
+            "Value": m.value,
+            "Unit": m.unit,
+            "Dimensions": [
+                {
+                    "Name": dim_name,
+                    "Value": dim_value,
+                }
+                for dim_name, dim_value in m.dimensions.items()
+            ],
+        }
+        for m in metrics
+    ]
+
+    for try_number in range(0, retries - 1):
+        try:
+            cw_client.put_metric_data(
+                Namespace=metric_namespace,
+                MetricData=metrics_dict_list,
+            )
+
+            return
+        except (
+            cw_client.exceptions.InvalidParameterValueException,
+            cw_client.exceptions.MissingRequiredParameterException,
+            cw_client.exceptions.InvalidParameterCombinationException,
+        ) as exc:
+            raise exc
+        except Exception as exc:
+            # Exponentially back-off from hitting the API to ensure we don't hit the API limit.
+            # See https://docs.aws.amazon.com/general/latest/gr/api-retries.html
+            sleep_time = (2**try_number * 100.0) / 1000.0
+            time.sleep(sleep_time)
+            print(
+                "Unhandled error occurred when trying to call PutMetricData, retrying in"
+                f" {sleep_time} seconds; attempt #{try_number + 1} of {retries}, err: {exc}"
+            )
+
+
 def handler(event, context):
     if not all([REGION]):
         print("Not all necessary environment variables were defined, exiting...")
@@ -80,11 +156,49 @@ def handler(event, context):
         ccw_timestamp = match.group(2)
         rif_file_type = RifFileType(match.group(3))
 
-        for try_number in range(0, PUT_METRIC_DATA_MAX_RETRIES - 1):
-            # Exponentially back-off from hitting the API to ensure we don't hit the API limit. The
-            # first iteration will not sleep, but subsequent iterations will sleep at progressively
-            # longer intervals. See https://docs.aws.amazon.com/general/latest/gr/api-retries.html
-            if try_number != 0:
-                time.sleep((2**try_number * 100.0) / 1000.0)
+        event_timestamp = datetime.now()  # TODO: Get this timestamp from S3 event
+
+        metric_name = f"data-{pipeline_data_status.name.lower()}"
+        rif_type_dimension = {"data_type": rif_file_type.name.lower()}
+        group_timestamp_dimension = {"group_timestamp": ccw_timestamp}
+
+        try:
+            # Store three metrics; one undimensioned metric that can be used to get metrics
+            # aggregated across all data types and groups of data loads, one dimensioned metric that
+            # aggregates across RIF file types, and one dimensioned metric that aggregates across
+            # both the file type and the file's "group" (timestamped parent directory). It is
+            # unlikely that the remaining combination, a metric aggregated against only the group's
+            # timestamp, is necessary and so has been omitted.
+            try_put_metric_data(
+                metric_namespace=METRICS_NAMESPACE,
+                metrics=[
+                    MetricData(
+                        metric_name=metric_name,
+                        timestamp=event_timestamp,
+                        value=1,
+                        unit="Count",
+                    ),
+                    MetricData(
+                        metric_name=metric_name,
+                        dimensions=[rif_type_dimension],
+                        timestamp=event_timestamp,
+                        value=1,
+                        unit="Count",
+                    ),
+                    MetricData(
+                        metric_name=metric_name,
+                        dimensions=[rif_type_dimension, group_timestamp_dimension],
+                        timestamp=event_timestamp,
+                        value=1,
+                        unit="Count",
+                    ),
+                ],
+            )
+        except Exception as exc:
+            print(
+                "An unretriable error occurred when trying to call PutMetricData for metric"
+                f" {METRICS_NAMESPACE}/{metric_name}: {exc}"
+            )
+            return
     else:
         print(f"ETL file or path does not match expected format, skipping: {decoded_file_key}")
