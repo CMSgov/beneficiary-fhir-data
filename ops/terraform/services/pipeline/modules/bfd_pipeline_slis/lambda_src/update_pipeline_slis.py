@@ -8,6 +8,7 @@ from typing import Callable, TypeVar
 from urllib.parse import unquote
 
 import boto3
+from botocore import exceptions as boto3_exceptions
 from botocore.config import Config
 
 T = TypeVar("T")
@@ -221,6 +222,7 @@ def handler(event, context):
                     cw_client.exceptions.InvalidParameterValueException,
                     cw_client.exceptions.MissingRequiredParameterException,
                     cw_client.exceptions.InvalidParameterCombinationException,
+                    boto3_exceptions.ParamValidationError,
                 ],
             )
         except Exception as exc:
