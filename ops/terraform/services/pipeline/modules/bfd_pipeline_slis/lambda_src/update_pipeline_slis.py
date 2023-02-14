@@ -1,7 +1,7 @@
 import os
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Callable, TypeVar
@@ -59,7 +59,7 @@ class MetricData:
     timestamp: datetime
     value: float
     unit: str
-    dimensions: dict[str, str] = {}
+    dimensions: dict[str, str] = field(default_factory=dict)
 
 
 def backoff_retry(
