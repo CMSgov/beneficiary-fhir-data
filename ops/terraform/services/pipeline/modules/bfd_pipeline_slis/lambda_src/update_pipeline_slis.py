@@ -150,8 +150,7 @@ def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
                     "Name": dim_name,
                     "Value": dim_value,
                 }
-                for d in m.dimensions
-                for dim_name, dim_value in d.items()
+                for dim_name, dim_value in m.dimensions.items()
             ],
         }
         for m in metrics
@@ -182,8 +181,7 @@ def get_metric_data(
                             "Name": dim_name,
                             "Value": dim_value,
                         }
-                        for d in m.dimensions
-                        for dim_name, dim_value in d.items()
+                        for dim_name, dim_value in m.dimensions.items()
                     ],
                 },
                 "Period": period,
@@ -259,10 +257,6 @@ def handler(event, context):
         # An inline function is defined here to pass to backoff_retry() as Python does not support
         # multiple line lambdas, so this is the next-best option
         def put_timestamp_metrics():
-            print(
-                f'Putting data timestamp metrics "{METRICS_NAMESPACE}/{timestamp_metric_name}" up'
-                f" to CloudWatch with timestamp {datetime.isoformat(event_timestamp)}"
-            )
             # Store four metrics:
             put_metric_data(
                 metric_namespace=METRICS_NAMESPACE,
@@ -278,36 +272,40 @@ def handler(event, context):
                     # One dimensioned metric that aggregates across RIF file types
                     MetricData(
                         metric_name=timestamp_metric_name,
-                        dimensions=[rif_type_dimension],
-                        timestamp=event_timestamp.timestamp(),
-                        value=1,
+                        dimensions=rif_type_dimension,
+                        timestamp=event_timestamp,
+                        value=event_timestamp.timestamp(),
                         unit="Seconds",
                     ),
                     # One dimensioned metric that aggregates across the entire group of RIFs
                     MetricData(
                         metric_name=timestamp_metric_name,
-                        dimensions=[group_timestamp_dimension],
-                        timestamp=event_timestamp.timestamp(),
-                        value=1,
+                        dimensions=group_timestamp_dimension,
+                        timestamp=event_timestamp,
+                        value=event_timestamp.timestamp(),
                         unit="Seconds",
                     ),
                     # And one dimensioned metric that aggregates across both the file type and the
                     # file's "group" (timestamped parent directory)
                     MetricData(
                         metric_name=timestamp_metric_name,
-                        dimensions=[rif_type_dimension, group_timestamp_dimension],
-                        timestamp=event_timestamp.timestamp(),
-                        value=1,
+                        dimensions=rif_type_dimension | group_timestamp_dimension,
+                        timestamp=event_timestamp,
+                        value=event_timestamp.timestamp(),
                         unit="Seconds",
                     ),
                 ],
             )
-            print(f'Successfully put metrics to "{METRICS_NAMESPACE}/{timestamp_metric_name}"')
 
         try:
+            print(
+                f'Putting data timestamp metrics "{METRICS_NAMESPACE}/{timestamp_metric_name}" up'
+                f" to CloudWatch with timestamp {datetime.isoformat(event_timestamp)}"
+            )
             backoff_retry(
                 func=put_timestamp_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
             )
+            print(f'Successfully put metrics to "{METRICS_NAMESPACE}/{timestamp_metric_name}"')
         except Exception as exc:
             print(
                 "An unrecoverable error occurred when trying to call PutMetricData for metric"
@@ -330,16 +328,25 @@ def handler(event, context):
                     MetricDataQuery(
                         metric_namespace=METRICS_NAMESPACE,
                         metric_name=data_available_metric_name,
-                        dimensions=[rif_type_dimension, group_timestamp_dimension],
+                        dimensions=rif_type_dimension | group_timestamp_dimension,
                     ),
                 ],
                 statistic="Maximum",
             )
 
         try:
+            print(
+                f'Getting corresponding "{METRICS_NAMESPACE}/{data_available_metric_name}" time'
+                f' metric for the current RIF file type "{rif_file_type.name}" in group'
+                f' "{ccw_timestamp}"...'
+            )
             result = backoff_retry(
                 func=get_data_available_metric,
                 ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
+            )
+            print(
+                f'Metric "{METRICS_NAMESPACE}/{data_available_metric_name}" with dimensions'
+                f" {rif_type_dimension | group_timestamp_dimension} retrieved successfully"
             )
         except Exception as exc:
             print(f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}")
@@ -376,9 +383,46 @@ def handler(event, context):
                 metrics=[
                     MetricData(
                         metric_name=time_delta_metric_name,
-                        timestamp=
-                    )
-                ]
+                        value=load_time_delta.seconds,
+                        timestamp=event_timestamp,
+                        unit="Seconds",
+                    ),
+                    MetricData(
+                        metric_name=time_delta_metric_name,
+                        dimensions=rif_type_dimension,
+                        value=load_time_delta.seconds,
+                        timestamp=event_timestamp,
+                        unit="Seconds",
+                    ),
+                    MetricData(
+                        metric_name=time_delta_metric_name,
+                        dimensions=group_timestamp_dimension,
+                        value=load_time_delta.seconds,
+                        timestamp=event_timestamp,
+                        unit="Seconds",
+                    ),
+                    MetricData(
+                        metric_name=time_delta_metric_name,
+                        dimensions=rif_type_dimension | group_timestamp_dimension,
+                        value=load_time_delta.seconds,
+                        timestamp=event_timestamp,
+                        unit="Seconds",
+                    ),
+                ],
+            )
+
+        try:
+            print(
+                f'Putting time delta metrics to "{METRICS_NAMESPACE}/{time_delta_metric_name}"...'
+            )
+            backoff_retry(
+                func=put_time_delta_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
+            )
+            print(f'Metrics put to "{METRICS_NAMESPACE}/{time_delta_metric_name}" successfully')
+        except Exception as exc:
+            print(
+                "An unrecoverable error occurred when trying to call PutMetricData for metric"
+                f" {METRICS_NAMESPACE}/{timestamp_metric_name}: {exc}"
             )
 
     else:
