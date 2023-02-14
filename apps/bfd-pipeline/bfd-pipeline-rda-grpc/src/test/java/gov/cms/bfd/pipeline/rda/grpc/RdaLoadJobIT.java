@@ -37,17 +37,29 @@ import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** The integration test for the full RDA load job. */
 public class RdaLoadJobIT {
+  /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+  /** The test fiss claim source. */
   private static final CharSource fissClaimsSource =
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
+  /** The test MCS claim source. */
   private static final CharSource mcsClaimsSource =
       Resources.asCharSource(Resources.getResource("MCS.ndjson"), StandardCharsets.UTF_8);
+  /** The batch size to use for testing. */
   private static final int BATCH_SIZE = 17;
 
+  /** List of json fiss claims to load. */
   private ImmutableList<String> fissClaimJson;
+  /** List of json MCS claims to load. */
   private ImmutableList<String> mcsClaimJson;
 
+  /**
+   * Sets up the test resources.
+   *
+   * @throws Exception if there is an issue setting the test up
+   */
   @BeforeEach
   public void setUp() throws Exception {
     if (fissClaimJson == null) {
@@ -78,6 +90,11 @@ public class RdaLoadJobIT {
     }
   }
 
+  /**
+   * Verifies that Fiss JSON files can be parsed and the claims have the expected values.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void fissClaimsTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -169,6 +186,11 @@ public class RdaLoadJobIT {
     }
   }
 
+  /**
+   * Verifies that MCS JSON files can be parsed and the claims have the expected values.
+   *
+   * @throws Exception indicates test failure
+   */
   @Test
   public void mcsClaimsTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
@@ -243,6 +265,14 @@ public class RdaLoadJobIT {
         });
   }
 
+  /**
+   * Finds a matching Fiss claim from the list of expected claims. If not found, returns {@code
+   * null}.
+   *
+   * @param expectedClaims the expected claims to search through
+   * @param resultClaim the result claim to search for
+   * @return the fiss claim if found, else {@code null}
+   */
   @Nullable
   private FissClaim findMatchingFissClaim(
       ImmutableList<FissClaimChange> expectedClaims, RdaFissClaim resultClaim) {
@@ -253,6 +283,14 @@ public class RdaLoadJobIT {
         .orElse(null);
   }
 
+  /**
+   * Finds a matching MCS claim from the list of expected claims. If not found, returns {@code
+   * null}.
+   *
+   * @param expectedClaims the expected claims to search through
+   * @param resultClaim the result claim to search for
+   * @return the fiss claim if found, else {@code null}
+   */
   @Nullable
   private McsClaim findMatchingMcsClaim(
       ImmutableList<McsClaimChange> expectedClaims, RdaMcsClaim resultClaim) {
@@ -263,23 +301,46 @@ public class RdaLoadJobIT {
         .orElse(null);
   }
 
-  private void assertTablesAreEmpty(EntityManager entityManager) throws Exception {
+  /**
+   * Asserts that the Fiss and MCS tables are empty.
+   *
+   * @param entityManager the entity manager
+   */
+  private void assertTablesAreEmpty(EntityManager entityManager) {
     assertEquals(0, getRdaFissClaims(entityManager).size());
     assertEquals(0, getRdaMcsClaims(entityManager).size());
   }
 
+  /**
+   * Gets the MCS claims from the database using a query.
+   *
+   * @param entityManager the entity manager to connect to the database
+   * @return the rda mcs claims
+   */
   private List<RdaMcsClaim> getRdaMcsClaims(EntityManager entityManager) {
     return entityManager
         .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
         .getResultList();
   }
 
+  /**
+   * Gets the Fiss claims from the database using a query.
+   *
+   * @param entityManager the entity manager to connect to the database
+   * @return the rda fiss claims
+   */
   private List<RdaFissClaim> getRdaFissClaims(EntityManager entityManager) {
     return entityManager
         .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
         .getResultList();
   }
 
+  /**
+   * Creates the RDA load options.
+   *
+   * @param serverPort the server port to use
+   * @return the rda load options
+   */
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
     final RdaSourceConfig.RdaSourceConfigBuilder rdaSourceConfig = RdaSourceConfig.builder();
     if (serverPort > 0) {
@@ -305,6 +366,12 @@ public class RdaLoadJobIT {
         new IdHasher.Config(100, "thisisjustatest"));
   }
 
+  /**
+   * Creates a Fiss source factory for the claim json data.
+   *
+   * @param claimJson the claim json
+   * @return the source factory
+   */
   private MessageSource.Factory<FissClaimChange> fissJsonSource(List<String> claimJson) {
     // resource - This is a factory method, resource handling is done later
     //noinspection resource
@@ -313,6 +380,12 @@ public class RdaLoadJobIT {
             .skip(sequenceNumber - 1);
   }
 
+  /**
+   * Creates a MCS source factory for the claim json data.
+   *
+   * @param claimJson the claim json
+   * @return the source factory
+   */
   private MessageSource.Factory<McsClaimChange> mcsJsonSource(List<String> claimJson) {
     // resource - This is a factory method, resource handling is done later
     //noinspection resource

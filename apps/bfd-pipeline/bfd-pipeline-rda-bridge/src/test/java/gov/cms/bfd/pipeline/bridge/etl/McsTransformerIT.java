@@ -34,24 +34,50 @@ import utils.TestUtils;
 /** Test to check the functionality of the {@link McsTransformer} class. */
 public class McsTransformerIT {
 
+  /** Sets the data for the McsTransformer arguments. */
   @Data
   private static class TransformerArguments {
+    /** Map of the mbis from the beneficiary data. */
     private final Map<String, BeneficiaryData> mbiMap;
+    /**
+     * Helper class for carrying claims between processing iterations so additional line items can
+     * be added to the claim if any are found.
+     */
     private final WrappedMessage wrappedMessage;
+    /** Wrapped long value used for keeping a counter between method scopes. */
     private final WrappedCounter wrappedCounter;
+    /** Abstract classes for predefined methods. */
     private final Parser.Data<String> data;
+    /**
+     * Used to create a sample of data from various sources, enforcing sampling proportions per
+     * source.
+     */
     private final DataSampler<String> mbiSampler;
+    /** The sample id for the data. */
     private final int sampleId;
   }
 
+  /** This static class is for the expected values of the test. */
   @Data
   private static class ExpectedValues {
+    /**
+     * Helper class for carrying claims between processing iterations so additional line items can
+     * be added to the claim if any are found.
+     */
     private final WrappedMessage wrappedMessage;
+    /** Wrapped long value used for keeping a counter between method scopes. */
     private final WrappedCounter wrappedCounter;
+    /** Used to for the expected response. */
     private final Optional<MessageOrBuilder> response;
+    /** Used to store a set of expected sample mbis. */
     private final Set<String> sampledMbis;
   }
 
+  /**
+   * Produces expected claims and their data samples.
+   *
+   * @return {@link Stream} of arguments
+   */
   private static Stream<Arguments> shouldProduceExpectedClaimsAndDataSamples() {
     return Stream.of(
         newFirstClaimTestCase(),
@@ -61,6 +87,14 @@ public class McsTransformerIT {
         newNonFirstClaimCase());
   }
 
+  /**
+   * Test helper function to produced expected claims and their data samples.
+   *
+   * @param testName the name of the test
+   * @param arguments the arguments for the test
+   * @param expectedValues the expected values for the test
+   * @param expectedException the expected exception
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
   void shouldProduceExpectedClaimsAndDataSamples(
@@ -122,6 +156,12 @@ public class McsTransformerIT {
     }
   }
 
+  /**
+   * New first claim tests. This function provides that the first claim is processed and the
+   * expected values are set and the same as the Test Data class.
+   *
+   * @return {@link Arguments}
+   */
   private static Arguments newFirstClaimTestCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Parser.Data<String> data = TestData.createDataParser(TestData.createDefaultDataMap());
@@ -152,6 +192,11 @@ public class McsTransformerIT {
         expectedException);
   }
 
+  /**
+   * New first claim invalid line number tests.
+   *
+   * @return {@link Arguments}
+   */
   private static Arguments newFirstClaimInvalidLineNumberCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
@@ -185,6 +230,11 @@ public class McsTransformerIT {
         expectedException);
   }
 
+  /**
+   * Recurring claims function.
+   *
+   * @return {@link Arguments}
+   */
   private static Arguments recurringClaimCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
@@ -235,6 +285,11 @@ public class McsTransformerIT {
         expectedException);
   }
 
+  /**
+   * Recurring claim invalid line number test case.
+   *
+   * @return {@link Arguments}
+   */
   private static Arguments recurringClaimInvalidLineNumberCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
@@ -286,6 +341,11 @@ public class McsTransformerIT {
         expectedException);
   }
 
+  /**
+   * New non first claim case.
+   *
+   * @return {@link Arguments}
+   */
   private static Arguments newNonFirstClaimCase() {
     final String NEW_CLAIM_ICN = "icn87654321";
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
@@ -344,8 +404,8 @@ public class McsTransformerIT {
   /**
    * Helper method to create {@link McsClaimChange} objects.
    *
-   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object.
-   * @return The created {@link McsClaimChange} object.
+   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object
+   * @return The created {@link McsClaimChange} object
    */
   private static McsClaimChange createMcsClaimChange(McsClaim claim) {
     return createMcsClaimChange(claim, TestData.CARR_CLM_CNTL_NUM, 1);
@@ -354,10 +414,10 @@ public class McsTransformerIT {
   /**
    * Helper method to create {@link McsClaimChange} objects.
    *
-   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object.
-   * @param icn The ICN to use.
-   * @param sequenceNumber THe sequence number to use.
-   * @return The created {@link McsClaimChange} object.
+   * @param claim The {@link McsClaim} to wrap in the created {@link McsClaimChange} object
+   * @param icn The ICN to use
+   * @param sequenceNumber THe sequence number to use
+   * @return The created {@link McsClaimChange} object
    */
   private static McsClaimChange createMcsClaimChange(
       McsClaim claim, String icn, int sequenceNumber) {
@@ -376,41 +436,76 @@ public class McsTransformerIT {
         .build();
   }
 
+  /** Test Data class set. */
   private static class TestData {
+    /** Line Number. */
     private static final String LINE_NUM = "1";
+    /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
+    /** Beneficiary First Name. */
     private static final String BENE_FIRST_NAME = "F";
+    /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastna";
+    /** Beneficiary Middle Initial. */
     private static final String BENE_MID_INIT = "M";
+    /** Beneficiary DOB. */
     private static final String BENE_DOB = "2020-01-01";
+    /** Beneficiary gender. */
     private static final int BENE_GENDER = 1;
+    /** Carrier Claim Control Number.. */
     private static final String CARR_CLM_CNTL_NUM = "icn12345678";
+    /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
+    /** Claim Thru Date. */
     private static final String CLM_THRU_DT = "03-Mar-2001";
+    /** NCH Carrier Claim Submitted Charge Amount. */
     private static final String NCH_CARR_CLM_SBMTD_CHRG_AMT = "832.12";
+    /** Original NPI Number. */
     private static final String ORG_NPI_NUM = "8888888888";
+    /** Claim Id. */
     private static final String CLM_ID = "-999999999";
+    /** Diagnosis Code. */
     private static final String ICD_DGNS_CD1 = "JJJJ";
+    /** Diagnosis Version Code. */
     private static final String ICD_DGNS_VRSN_CD1 = "0";
+    /** Line Diagnosis Code. */
     private static final String LINE_ICD_DGNS_CD = "12";
+    /** Line Diagnosis Version Code. */
     private static final String LINE_ICD_DGNS_VRSN_CD = "0";
+    /** HCPCS Code. */
     private static final String HCPCS_CD = "123";
+    /** HCPCS first code. */
     private static final String HCPCS_1ST_MDFR_CD = "abc";
+    /** HCPCS second code. */
     private static final String HCPCS_2ND_MDFR_CD = "cba";
+    /** Line Expns Date. */
     private static final String LINE_1ST_EXPNS_DT = "20-Feb-2008";
+    /** Line Last Expns Date. */
     private static final String LINE_LAST_EXPNS_DT = "30-Jun-2008";
+    /** MBI number. */
     private static final String MBI = "mbimbimbimbi";
-
+    /** Hardcoded Bill EIN. */
     private static final String HARDCODED_BILL_PROV_EIN = "XX-XXXXXXX";
+    /** Hardcoded Bill Spec. */
     private static final String HARDCODED_BILL_PROV_SPEC = "01";
+    /** Hardcoded Bill Type. */
     private static final String HARDCODED_BILL_PROV_TYPE = "20";
+    /** Hardcoded Bill Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
+    /** Hardcoded Control ID. */
     private static final String HARDCODED_CONTROL_ID = "00000";
+    /** Hardcoded Status Date. */
     private static final String HARDCODED_STATUS_DATE = "1970-01-01";
-
+    /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
+    /** Mcs Sample ID. */
     private static final int MCS_SAMPLE_ID = 1;
 
+    /**
+     * Returns the default claim builder.
+     *
+     * @return {@link McsClaim#Builder}
+     */
     public static McsClaim.Builder createDefaultClaimBuilder() {
       return McsClaim.newBuilder()
           .setIdrClmHdIcn(CARR_CLM_CNTL_NUM)
@@ -452,15 +547,28 @@ public class McsTransformerIT {
           .setIdrHdrToDos(CLM_THRU_DT);
     }
 
+    /**
+     * Static function creates a data parser.
+     *
+     * @param parserData the data to be parsed
+     * @return {@link Parser}
+     */
     public static Parser.Data<String> createDataParser(Map<String, String> parserData) {
       return new Parser.Data<>() {
         private final Map<String, String> dataMap = parserData;
 
+        /** {@inheritDoc} */
         @Override
         public long getEntryNumber() {
           return 1;
         }
 
+        /**
+         * Gets the {@link fieldName} from the dataMap.
+         *
+         * @param fieldName of the data map
+         * @return {@link Optional}
+         */
         @Override
         public Optional<String> get(String fieldName) {
           Optional<String> result;
@@ -476,6 +584,11 @@ public class McsTransformerIT {
       };
     }
 
+    /**
+     * Creates a map for the default data.
+     *
+     * @return {@link Map}
+     */
     public static Map<String, String> createDefaultDataMap() {
       return Map.ofEntries(
           Map.entry("LINE_NUM", LINE_NUM),
@@ -497,6 +610,11 @@ public class McsTransformerIT {
           Map.entry("LINE_LAST_EXPNS_DT", LINE_LAST_EXPNS_DT));
     }
 
+    /**
+     * Creates a map for the default mbis.
+     *
+     * @return {@link Map}
+     */
     public static Map<String, BeneficiaryData> createDefaultMbiMap() {
       return Map.of(
           BENE_ID,
@@ -511,6 +629,11 @@ public class McsTransformerIT {
               String.valueOf(BENE_GENDER)));
     }
 
+    /**
+     * Created the default for the dataSampler class.
+     *
+     * @return {@link DataSampler}
+     */
     public static DataSampler<String> createDefaultDataSampler() {
       return new DataSampler.Builder<String>()
           .registerSampleSet(FISS_SAMPLE_ID, 0.5F)

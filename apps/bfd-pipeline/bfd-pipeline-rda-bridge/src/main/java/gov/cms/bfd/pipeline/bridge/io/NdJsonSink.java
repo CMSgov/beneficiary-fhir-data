@@ -13,12 +13,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NdJsonSink implements Sink<MessageOrBuilder> {
 
+  /** Buffered writer for json printer. */
   private final BufferedWriter writer;
 
+  /** Output path for file. */
   private final Path outputPath;
+  /** Sequence Counter. */
   private final WrappedCounter sequenceCounter;
+  /** The Seqeunce Start Number. */
   private final long startSequenceNumber;
 
+  /**
+   * Constructor for NdJsonSink.
+   *
+   * @param args the sink arguments being passed in.
+   * @throws IOException throws an IOException if the outputPath file exists but its a directory
+   *     rather than a regular file, does not exist but cannot be created, or cannot be opened for
+   *     any other reason.
+   */
   public NdJsonSink(SinkArguments args) throws IOException {
     outputPath = args.getOutputPath();
     sequenceCounter = args.getSequenceCounter();
@@ -26,6 +38,7 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     writer = new BufferedWriter(new FileWriter(outputPath.toString()));
   }
 
+  /** {@inheritDoc} */
   @Override
   public void write(MessageOrBuilder messageOrBuilder) {
     try {
@@ -36,6 +49,7 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public void close() throws IOException {
     writer.close();

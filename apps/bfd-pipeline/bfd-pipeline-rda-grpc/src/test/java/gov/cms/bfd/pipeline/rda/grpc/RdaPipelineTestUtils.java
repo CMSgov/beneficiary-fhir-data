@@ -22,6 +22,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+/** Tests the {@link RdaPipelineTestUtils}. */
 public class RdaPipelineTestUtils {
   /**
    * Verifies the expected value of a {@link Counter} with a meaningful message in case of a
@@ -129,8 +130,16 @@ public class RdaPipelineTestUtils {
     return records.isEmpty() ? null : records.get(0);
   }
 
+  /** An interface for a test database. */
   @FunctionalInterface
   public interface DatabaseConsumer {
+    /**
+     * Accepts parameters for the consumer.
+     *
+     * @param appState the app state
+     * @param entityManager the entity manager
+     * @throws Exception any exception setting up the consumer
+     */
     void accept(PipelineApplicationState appState, EntityManager entityManager) throws Exception;
   }
 }

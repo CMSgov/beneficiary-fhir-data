@@ -22,14 +22,22 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
+  /** The RDA server version. */
   public static final String RDA_PROTO_VERSION = "0.10";
 
+  /** The configuration for the server. */
   private final Config config;
 
+  /**
+   * Instantiates a new Rda service.
+   *
+   * @param config the config
+   */
   public RdaService(Config config) {
     this.config = config;
   }
 
+  /** {@inheritDoc} */
   @Override
   public void getVersion(Empty request, StreamObserver<ApiVersion> responseObserver) {
     try {
@@ -41,6 +49,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public void getFissClaims(
       ClaimRequest request, StreamObserver<FissClaimChange> responseObserver) {
@@ -56,13 +65,20 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     LOGGER.info("end getFissClaims call");
   }
 
-  /** Helper method to make mocking in tests easier. */
+  /**
+   * Helper method to make mocking in tests easier.
+   *
+   * @param observer the observer
+   * @param source the source
+   * @return the responder
+   */
   @VisibleForTesting
   Responder<FissClaimChange> createFissResponder(
       StreamObserver<FissClaimChange> observer, MessageSource<FissClaimChange> source) {
     return new Responder<>(observer, source);
   }
 
+  /** {@inheritDoc} */
   @Override
   public void getMcsClaims(ClaimRequest request, StreamObserver<McsClaimChange> responseObserver) {
     LOGGER.info("start getMcsClaims call with since={}", request.getSince());
@@ -77,20 +93,41 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     LOGGER.info("end getMcsClaims call");
   }
 
-  /** Helper method to make mocking in tests easier. */
+  /**
+   * Helper method to make mocking in tests easier.
+   *
+   * @param observer the observer
+   * @param source the source
+   * @return the responder
+   */
   @VisibleForTesting
   Responder<McsClaimChange> createMcsResponder(
       StreamObserver<McsClaimChange> observer, MessageSource<McsClaimChange> source) {
     return new Responder<>(observer, source);
   }
 
+  /**
+   * Class for returning responses to requests.
+   *
+   * @param <TChange> the type parameter
+   */
   @VisibleForTesting
   static class Responder<TChange> {
+    /** Observer for responses. */
     private final ServerCallStreamObserver<TChange> responseObserver;
+    /** The message generator. */
     private final MessageSource<TChange> generator;
+    /** If the responder is cancelled. */
     private final AtomicBoolean cancelled;
+    /** If the responder if running. */
     private final AtomicBoolean running;
 
+    /**
+     * Instantiates a new Responder.
+     *
+     * @param responseObserver the response observer
+     * @param generator the message generator
+     */
     private Responder(StreamObserver<TChange> responseObserver, MessageSource<TChange> generator) {
       this.generator = generator;
       this.cancelled = new AtomicBoolean(false);
@@ -100,6 +137,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
       this.responseObserver.setOnCancelHandler(() -> cancelled.set(true));
     }
 
+    /** Sends responses from the {@link #generator}. */
     @VisibleForTesting
     void sendResponses() {
       if (running.get()) {
@@ -131,13 +169,22 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     }
   }
 
+  /** Class for the RDA version information. */
   @Value
   @Builder
   public static class Version {
+    /** The RDA version. */
     @Builder.Default String version = RDA_PROTO_VERSION;
+    /** The commit id. */
     @Builder.Default String commitId = "";
+    /** The build time. */
     @Builder.Default String buildTime = "";
 
+    /**
+     * Converts this {@link Version} to an {@link ApiVersion}.
+     *
+     * @return the api version
+     */
     public ApiVersion toApiVersion() {
       return ApiVersion.newBuilder()
           .setVersion(version)
@@ -147,17 +194,24 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     }
   }
 
+  /** Configuration class for the service. */
   @Value
   @Builder
   public static class Config {
+    /** The fiss stream source factory. */
     @Builder.Default
     MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
-
+    /** The MCS stream source factory. */
     @Builder.Default
     MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
-
+    /** The version information. */
     @Builder.Default Version version = Version.builder().build();
 
+    /**
+     * Creates a new RDA service with this configuration.
+     *
+     * @return the rda service
+     */
     public RdaService createService() {
       return new RdaService(this);
     }

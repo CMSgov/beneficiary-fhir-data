@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /** GrpcStreamCaller implementation that calls the RDA McsClaim service. */
 public class McsClaimStreamCaller extends GrpcStreamCaller<McsClaimChange> {
+  /** Instantiates a new Mcs claim stream caller. */
   public McsClaimStreamCaller() {
     super(LoggerFactory.getLogger(McsClaimStreamCaller.class));
   }

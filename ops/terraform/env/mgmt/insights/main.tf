@@ -10,8 +10,7 @@ locals {
   s3_bucket_name = "bfd-insights-${local.project}-app-logs"
 
   # TODO: Replace when/if this is merged into main Terraform
-  # Used for generating S3 event notifications for server-regression-glue-trigger
-  # lambda in s3.tf/data-sources.tf
+  # Used for generating S3 event notifications for several lambdas defined in s3.tf/data-sources.tf
   envs = toset(["test", "prod-sbx", "prod"])
 }
 
