@@ -258,6 +258,7 @@ def handler(event, context):
         # multiple line lambdas, so this is the next-best option
         def put_timestamp_metrics():
             # Store four metrics:
+            utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
             put_metric_data(
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=[
@@ -266,7 +267,7 @@ def handler(event, context):
                     MetricData(
                         metric_name=timestamp_metric_name,
                         timestamp=event_timestamp,
-                        value=event_timestamp.timestamp(),
+                        value=utc_timestamp,
                         unit="Seconds",
                     ),
                     # One dimensioned metric that aggregates across RIF file types
@@ -274,7 +275,7 @@ def handler(event, context):
                         metric_name=timestamp_metric_name,
                         dimensions=rif_type_dimension,
                         timestamp=event_timestamp,
-                        value=event_timestamp.timestamp(),
+                        value=utc_timestamp,
                         unit="Seconds",
                     ),
                     # One dimensioned metric that aggregates across the entire group of RIFs
@@ -282,7 +283,7 @@ def handler(event, context):
                         metric_name=timestamp_metric_name,
                         dimensions=group_timestamp_dimension,
                         timestamp=event_timestamp,
-                        value=event_timestamp.timestamp(),
+                        value=utc_timestamp,
                         unit="Seconds",
                     ),
                     # And one dimensioned metric that aggregates across both the file type and the
@@ -291,7 +292,7 @@ def handler(event, context):
                         metric_name=timestamp_metric_name,
                         dimensions=rif_type_dimension | group_timestamp_dimension,
                         timestamp=event_timestamp,
-                        value=event_timestamp.timestamp(),
+                        value=utc_timestamp,
                         unit="Seconds",
                     ),
                 ],
