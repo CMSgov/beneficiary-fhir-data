@@ -152,9 +152,9 @@ def handler(event, context):
         decoded_file_key,
         re.IGNORECASE,
     ):
-        pipeline_data_status = PipelineDataStatus(match.group(1))
+        pipeline_data_status = PipelineDataStatus(match.group(1).lower())
         ccw_timestamp = match.group(2)
-        rif_file_type = RifFileType(match.group(3))
+        rif_file_type = RifFileType(match.group(3).lower())
 
         event_timestamp = datetime.now()  # TODO: Get this timestamp from S3 event
 
