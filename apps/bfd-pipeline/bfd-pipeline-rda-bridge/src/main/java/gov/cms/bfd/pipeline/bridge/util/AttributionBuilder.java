@@ -23,7 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AttributionBuilder {
 
+  /** Attribution template is the file path of the file. */
   private final String attributionTemplate;
+  /** Attribution Script is the file name for the script. */
   private final String attributionScript;
 
   /**

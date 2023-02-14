@@ -36,24 +36,50 @@ import utils.TestUtils;
 /** Test to check the functionality of the {@link FissTransformer} class. */
 public class FissTransformerIT {
 
+  /** Transformer Arguments data class. */
   @Data
   private static class TransformerArguments {
+    /** Map of mbis. */
     private final Map<String, BeneficiaryData> mbiMap;
+    /**
+     * Helper class for carrying claims between processing iterations so additional line items can
+     * be added to the claim if any are found.
+     */
     private final WrappedMessage wrappedMessage;
+    /** Wrapped long value used for keeping a counter between method scopes. */
     private final WrappedCounter wrappedCounter;
+    /**
+     * The {@link Parser} creates {@link Data} objects that are then used to retrieve the data in a
+     * common manner.
+     */
     private final Parser.Data<String> data;
+    /**
+     * Used to create a sample of data from various sources, enforcing sampling proportions per
+     * source.
+     */
     private final DataSampler<String> mbiSampler;
+    /** Sample Id. */
     private final int sampleId;
   }
 
+  /** Expected values class. */
   @Data
   private static class ExpectedValues {
+    /** Expected wrapped message. */
     private final WrappedMessage wrappedMessage;
+    /** Expected wrapped counter. */
     private final WrappedCounter wrappedCounter;
+    /** Expected response. */
     private final Optional<MessageOrBuilder> response;
+    /** Expected sample mbis. */
     private final Set<String> sampledMbis;
   }
 
+  /**
+   * Happy path testing to produce expected claims and data samples.
+   *
+   * @return the expected data samples
+   */
   private static Stream<Arguments> shouldProduceExpectedClaimsAndDataSamples() {
     return Stream.of(
         newFirstClaimTestCase(),
@@ -63,6 +89,15 @@ public class FissTransformerIT {
         newNonFirstClaimCase());
   }
 
+  /**
+   * Happy path test to ensure for various scenarios, claim responses are generated as expected and
+   * certain pieces of data are set correctly when passed through the {@link FissTransformer}.
+   *
+   * @param testName for the test name
+   * @param arguments for the arguments of the test
+   * @param expectedValues for the expected values of the test
+   * @param expectedException if there is a expected exception
+   */
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource
   void shouldProduceExpectedClaimsAndDataSamples(
@@ -124,6 +159,12 @@ public class FissTransformerIT {
     }
   }
 
+  /**
+   * This function sets the {@link Arguments} with the expected data for the default/first claim for
+   * the FissClaim, the default data map, and the default MBI to compare against the actual results.
+   *
+   * @return {@link Arguments} the expected claim lines and their associated numbers
+   */
   private static Arguments newFirstClaimTestCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Parser.Data<String> data = TestData.createDataParser(TestData.createDefaultDataMap());
@@ -154,6 +195,12 @@ public class FissTransformerIT {
         expectedException);
   }
 
+  /**
+   * This function returns {@link Arguments} for expected results for a test case where an invalid
+   * line number will throw an expected IllegalStateException.
+   *
+   * @return {@link Arguments} the expected claim lines and their associated numbers
+   */
   private static Arguments newFirstClaimInvalidLineNumberCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
@@ -187,6 +234,12 @@ public class FissTransformerIT {
         expectedException);
   }
 
+  /**
+   * Returns the {@link Arguments} where the data is set for the second claim to use the same data
+   * as the first claim to test recurring claims.
+   *
+   * @return {@link Arguments} the expected claim lines and their associated numbers
+   */
   private static Arguments recurringClaimCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
@@ -224,6 +277,12 @@ public class FissTransformerIT {
         expectedException);
   }
 
+  /**
+   * Sets {@link Arguments} to return the same claim in Line Number 1 and Line Number 3 to test
+   * recurring claims with different line numbers.
+   *
+   * @return {@link Arguments} the expected claim lines and their associated numbers
+   */
   private static Arguments recurringClaimInvalidLineNumberCase() {
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
     Map<String, String> dataMap = new HashMap<>(TestData.createDefaultDataMap());
@@ -263,6 +322,11 @@ public class FissTransformerIT {
         expectedException);
   }
 
+  /**
+   * Sets {@link Arguments} the claim to a new claim that has been previously processed.
+   *
+   * @return {@link Arugments} the expected claim lines and their associated numbers
+   */
   private static Arguments newNonFirstClaimCase() {
     final String NEW_CLAIM_DCN = "dcn87654321";
     Map<String, BeneficiaryData> mbiMap = TestData.createDefaultMbiMap();
@@ -311,8 +375,8 @@ public class FissTransformerIT {
   /**
    * Helper method to generate {@link FissClaimChange} objects.
    *
-   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object.
-   * @return The created wrapping {@link FissClaimChange} object.
+   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object
+   * @return The created wrapping {@link FissClaimChange} object
    */
   private static FissClaimChange createFissClaimChange(FissClaim claim) {
     return createFissClaimChange(claim, TestData.FI_DOC_CLM_CNTL_NUM, 1);
@@ -321,10 +385,10 @@ public class FissTransformerIT {
   /**
    * Helper method to generate {@link FissClaimChange} objects.
    *
-   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object.
-   * @param dcn The dcn to use.
-   * @param sequenceNumber The sequence number to use.
-   * @return The created wrapping {@link FissClaimChange} object.
+   * @param claim The {@link FissClaim} to wrap in the generated {@link FissClaimChange} object
+   * @param dcn The dcn to use
+   * @param sequenceNumber The sequence number to use
+   * @return The created wrapping {@link FissClaimChange} object
    */
   private static FissClaimChange createFissClaimChange(
       FissClaim claim, String dcn, int sequenceNumber) {
@@ -343,42 +407,80 @@ public class FissTransformerIT {
         .build();
   }
 
+  /** TestData return class. */
   private static class TestData {
+    /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
+    /** Beneficiary First Name. */
     private static final String BENE_FIRST_NAME = "Firstname";
+    /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastname";
+    /** Beneficiary Middle Initial. */
     private static final String BENE_MID_INIT = "M";
+    /** Beneficiary Date of Birth. */
     private static final String BENE_DOB = "2020-01-01";
+    /** Beneficiary Gender. */
     private static final String BENE_GENDER = "1";
+    /** Fi Document Claim Control Number. */
     private static final String FI_DOC_CLM_CNTL_NUM = "dcn12345678";
+    /** HICN Number. */
     private static final String HIC_NO = "hicno123";
+    /** MBI Number. */
     private static final String MBI = "mbimbimbimbi";
+    /** Admitting Diagnosis Code. */
     private static final String ADMTG_DGNS_CD = "admitcd";
+    /** Claim Frequency Code. */
     private static final String CLM_FREQ_CD = "freqCode";
+    /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
+
+    /** Claim Type Code. */
     private static final int CLM_SRVC_CLSFCTN_TYPE_CD = 1;
+    /** Claim Thru Date. */
     private static final String CLM_THRU_DT = "03-Mar-2001";
+    /** Claim Tot Charge Amount. */
     private static final String CLM_TOT_CHRG_AMT = "3218.33";
+    /** Claim Fac Type Code. */
     private static final int CLM_FAC_TYPE_CD = 8;
+    /** Orginial NPI Number. */
     private static final String ORG_NPI_NUM = "8888888888";
+    /** Principal Diagnosis Code. */
     private static final String PRNCPAL_DGNS_CD = "princode";
+    /** Provider Number. */
     private static final String PRVDR_NUM = "222222";
+    /** Claim ID. */
     private static final String CLM_ID = "-999999999";
+    /** ICD Diagnosis Code. */
     private static final String ICD_DGNS_CD1 = "JJJJ";
+    /** Claim POA. */
     private static final int CLM_POA_IND_SW1 = 1;
+    /** Icd Procedure code. */
     private static final String ICD_PRCDR_CD1 = "pc1";
+    /** Procedure Date. */
     private static final String PRCDR_DT1 = "10-Jan-2011";
+    /** Claim Line Number. */
     private static final String CLM_LINE_NUM = "1";
 
+    /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
+    /** Hardcoded Location2. */
     private static final String HARDCODED_LOC2 = "?";
+    /** Hardcoded Transaction Date. */
     private static final String HARDCODED_TRAN_DATE_CYMD = "1970-01-01";
+    /** Hardcoded Federal Tax Number. */
     private static final String HARDCODED_FED_TAX_NUMBER = "XX-XXXXXXX";
+    /** Hardcoded Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
-
+    /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
+    /** Mcs Sample ID. */
     private static final int MCS_SAMPLE_ID = 1;
 
+    /**
+     * Function creates a default claim builder.
+     *
+     * @return {@link FissClaim}
+     */
     public static FissClaim.Builder createDefaultClaimBuilder() {
       return FissClaim.newBuilder()
           .setDcn(FI_DOC_CLM_CNTL_NUM)
@@ -427,15 +529,23 @@ public class FissTransformerIT {
           .setServTypeCdEnumValue(CLM_SRVC_CLSFCTN_TYPE_CD);
     }
 
+    /**
+     * Creates a default data parser.
+     *
+     * @param parserData the data that needs to be parsed
+     * @return {@link Parser} data parser
+     */
     public static Parser.Data<String> createDataParser(Map<String, String> parserData) {
       return new Parser.Data<>() {
         private final Map<String, String> dataMap = parserData;
 
+        /** {@inheritDoc} */
         @Override
         public long getEntryNumber() {
           return 1;
         }
 
+        /** {@inheritDoc} */
         @Override
         public Optional<String> get(String fieldName) {
           Optional<String> result;
@@ -451,6 +561,11 @@ public class FissTransformerIT {
       };
     }
 
+    /**
+     * Creates a default data map.
+     *
+     * @return {@link Map}
+     */
     public static Map<String, String> createDefaultDataMap() {
       return Map.ofEntries(
           Map.entry("BENE_ID", BENE_ID),
@@ -473,6 +588,11 @@ public class FissTransformerIT {
           Map.entry("CLM_LINE_NUM", CLM_LINE_NUM));
     }
 
+    /**
+     * Creates a default mbi map.
+     *
+     * @return {@link Map}
+     */
     public static Map<String, BeneficiaryData> createDefaultMbiMap() {
       return Map.of(
           BENE_ID,
@@ -487,6 +607,11 @@ public class FissTransformerIT {
               BENE_GENDER));
     }
 
+    /**
+     * Creates a default data sampler.
+     *
+     * @return {@link DataSampler}
+     */
     public static DataSampler<String> createDefaultDataSampler() {
       return new DataSampler.Builder<String>()
           .registerSampleSet(FISS_SAMPLE_ID, 0.5F)

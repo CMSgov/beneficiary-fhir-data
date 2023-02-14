@@ -45,35 +45,57 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
 
+/** RDA Bridge Data Class. */
 @Slf4j
 public class RDABridge {
 
+  /** Default output file. */
   private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
+  /** Default input file. */
   private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
 
+  /** Enumeration for the source types. */
   enum SourceType {
+    /** FISS enum value. */
     FISS,
+    /** MCS enum value. */
     MCS
   }
 
+  /** Output flag is the directory where the output files will be written to. */
   private static final String OUTPUT_FLAG = "o";
+  /** Mbi flag is the Benefit History file to read from. */
   private static final String MBI_FLAG = "b";
+  /** Fiss flag is the FISS file to read from. */
   private static final String FISS_FLAG = "f";
+  /** Mcs flagis the MCS file to read from. */
   private static final String MCS_FLAG = "m";
+  /** Fiss output flag is the FISS RDA output file. */
   private static final String FISS_OUTPUT_FLAG = "g";
+  /** Mcs output flag is the MCS RDA output file. */
   private static final String MCS_OUTPUT_FLAG = "n";
+  /** Fiss sequence start is the starting point for FISS sequence values. */
   private static final String FISS_SEQ_START = "s";
+  /** Mcs sequence start is the starting point for MCS sequence values. */
   private static final String MCS_SEQ_START = "z";
+  /** External config flag is the path to the yaml file containing run configs. */
   private static final String EXTERNAL_CONFIG_FLAG = "e";
+  /** Build attribution file indicates if the attribution sql script should be generated". */
   private static final String BUILD_ATTRIBUTION_FILE = "a";
+  /** Attribution size is the number of MBIs to pull for building the attribution file. */
   private static final String ATTRIBUTION_SIZE = "x";
+  /** Attribution script file is the attribution script file to write to. */
   private static final String ATTRIBUTION_SCRIPT_FILE = "q";
+  /** Attribution template file is the template file to use for building the attribution script. */
   private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
+  /** Attribution fiss ratio is the ratio of fiss to mcs MBIs to use in attribution. */
   private static final String ATTRIBUTION_FISS_RATIO = "u";
 
+  /** Maps of file extensions and parsers for turning various file types into RIF files. */
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
 
+  /** Maps the file output type. */
   private static final Map<
           String, ThrowingFunction<Sink<MessageOrBuilder>, SinkArguments, IOException>>
       sinkMap = Map.of("ndjson", NdJsonSink::new);
@@ -82,7 +104,7 @@ public class RDABridge {
    * Handles translation of a CLI execution, validating and pulling arguments to then invoke the
    * underlying application code with.
    *
-   * @param args Array of the command line arguments.
+   * @param args Array of the command line arguments
    */
   public static void main(String[] args) {
     try {
@@ -139,8 +161,8 @@ public class RDABridge {
   /**
    * Reads all relevant source files, executing task logic for each claim found.
    *
-   * @param config The configurations to use when generating the RDA data.
-   * @throws IOException If there was an issue accessing any of the files.
+   * @param config The configurations to use when generating the RDA data
+   * @throws IOException If there was an issue accessing any of the files
    */
   public void run(ConfigLoader config) throws IOException {
     WrappedCounter fissSequence =
@@ -265,12 +287,15 @@ public class RDABridge {
   /**
    * Executes the transformation logic of one source file.
    *
-   * @param sourceType The type of claim in the source file.
-   * @param path The path to the root directory of the RIF files.
-   * @param sourceName The name of the source file to read from.
-   * @param mbiMap The generated MBI map to read MBIs values from.
-   * @param sink The {@link Sink} used to write out the associated transformed RDA data.
-   * @throws IOException If there was a problem accessing any of the files.
+   * @param sourceType The type of claim in the source file
+   * @param path The path to the root directory of the RIF files
+   * @param sourceName The name of the source file to read from
+   * @param sequenceCounter The counter for the sequence
+   * @param mbiMap The generated MBI map to read MBIs values from
+   * @param sink The {@link Sink} used to write out the associated transformed RDA data
+   * @param mbiSampler The samples for the mbi
+   * @param sampleId the sample id associated with the execution
+   * @throws IOException If there was a problem accessing any of the files
    */
   @VisibleForTesting
   void executeTransformation(
@@ -334,10 +359,10 @@ public class RDABridge {
    * Creates an {@link AbstractTransformer} for the specific {@link SourceType} of the data being
    * transformed.
    *
-   * @param sourceType The {@link SourceType} of the data being transformed. data.
-   * @param mbiMap A complete MBI map for looking up MBI values.
+   * @param sourceType The {@link SourceType} of the data being transformed. data
+   * @param mbiMap A complete MBI map for looking up MBI values
    * @return The appropraite {@link AbstractTransformer} implementation for the given {@link
-   *     SourceType} of the source file.
+   *     SourceType} of the source file
    */
   @VisibleForTesting
   AbstractTransformer createTransformer(
@@ -352,8 +377,8 @@ public class RDABridge {
   /**
    * Generates a map of MBI numbers from the given location.
    *
-   * @param filePath Path to the root directory containing the RIF files.
-   * @return The completed MBI map.
+   * @param filePath Path to the root directory containing the RIF files
+   * @return The completed MBI map
    */
   @VisibleForTesting
   Map<String, BeneficiaryData> parseMbiNumbers(Path filePath) throws IOException {
@@ -382,9 +407,9 @@ public class RDABridge {
   /**
    * Creates a {@link ConfigLoader} from a given yaml configuration file.
    *
-   * @param yamlFilePath Path to the yaml configuration file.
-   * @return The {@link ConfigLoader} generated from the yaml configuration file.
-   * @throws FileNotFoundException If the yaml configuration file was not found.
+   * @param yamlFilePath Path to the yaml configuration file
+   * @return The {@link ConfigLoader} generated from the yaml configuration file
+   * @throws FileNotFoundException If the yaml configuration file was not found
    */
   @VisibleForTesting
   static ConfigLoader createYamlConfig(String yamlFilePath) throws IOException {
@@ -435,8 +460,8 @@ public class RDABridge {
   /**
    * Creates a {@link ConfigLoader} from the given command line arguments.
    *
-   * @param cmd {@link CommandLine} containing the arguments/options used with the CLI.
-   * @return The {@link ConfigLoader} generated from the CLI arguments/options.
+   * @param cmd {@link CommandLine} containing the arguments/options used with the CLI
+   * @return The {@link ConfigLoader} generated from the CLI arguments/options
    */
   @VisibleForTesting
   static ConfigLoader createCliConfig(CommandLine cmd) {
@@ -471,6 +496,13 @@ public class RDABridge {
     return new ConfigLoader(mapConfig::get);
   }
 
+  /**
+   * Helper method to put the key if its not null.
+   *
+   * @param builder the collection class
+   * @param key the key to put in the collection
+   * @param value the value to check if there is a null
+   */
   @VisibleForTesting
   static void putIfNotNull(
       ImmutableMap.Builder<String, Collection<String>> builder, String key, String value) {
@@ -479,6 +511,13 @@ public class RDABridge {
     }
   }
 
+  /**
+   * Helper method to put the key if its not null.
+   *
+   * @param builder the collection class
+   * @param key the key to put in the collection
+   * @param values the value to check if there is a null
+   */
   @VisibleForTesting
   static void putIfNotNull(
       ImmutableMap.Builder<String, Collection<String>> builder, String key, String[] values) {
@@ -490,7 +529,7 @@ public class RDABridge {
   /**
    * Helper method to print the usage message for the CLI tool.
    *
-   * @param options The {@link Options} to generate the usage message from.
+   * @param options The {@link Options} to generate the usage message from
    */
   @VisibleForTesting
   static void printUsage(Options options) {

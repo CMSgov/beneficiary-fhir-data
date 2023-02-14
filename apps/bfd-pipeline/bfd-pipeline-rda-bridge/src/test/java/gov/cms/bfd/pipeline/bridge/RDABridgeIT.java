@@ -28,18 +28,29 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 
+/** RDABridgeIT class is used for integration tests of the RDABridge. */
 class RDABridgeIT {
 
+  /** Sets the filename for the Bene History CSV. */
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
-
+  /** Sets the filename for the expected fiss file. */
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
+  /** Sets the filename for the expected mcs file. */
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
+  /** Sets the filename for the expected attribution file. */
   private static final String EXPECTED_ATTRIBUTION = "expected-attribution.json";
-
+  /** Sets the filename for the actual fiss file. */
   private static final String ACTUAL_FISS = "rda-fiss-test-5-18.ndjson";
+  /** Sets the filename for the actual mcs file. */
   private static final String ACTUAL_MCS = "rda-mcs-test-1-4.ndjson";
+  /** Sets the filename for the actual attribution file. */
   private static final String ACTUAL_ATTRIBUTION = "attribution.json";
 
+  /**
+   * Ensures that no exceptions are thrown while generating output.
+   *
+   * @throws IOException if there is a setup issue loading the test data
+   */
   @Test
   void shouldGenerateCorrectOutput() throws IOException {
     Path resourcesDir = getResourcePath();
@@ -183,6 +194,11 @@ class RDABridgeIT {
     }
   }
 
+  /**
+   * Returns the path of the Bene_History_Csv file.
+   *
+   * @return returns the {@link Path} of the bene history file
+   */
   private Path getResourcePath() {
     // ConstantConditions - It'll be there, don't worry.
     //noinspection ConstantConditions
