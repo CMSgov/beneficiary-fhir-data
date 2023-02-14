@@ -188,6 +188,7 @@ def handler(event, context):
         group_timestamp_dimension = {"group_timestamp": ccw_timestamp}
 
         count_metric_name = f"count/data-{pipeline_data_status.name.lower()}"
+
         # An inline function is defined here to pass to backoff_retry() as Python does not support
         # multiple line lambdas, so this is the next-best option
         def put_count_metrics():
@@ -226,9 +227,7 @@ def handler(event, context):
                     ),
                 ],
             )
-            print(
-                f'Successfully put metrics to "{METRICS_NAMESPACE}/{count_metric_name}"'
-            )
+            print(f'Successfully put metrics to "{METRICS_NAMESPACE}/{count_metric_name}"')
 
         try:
             backoff_retry(
