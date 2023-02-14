@@ -42,19 +42,18 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
 
   /**
    * Interval used to update the sequence number in the {@link gov.cms.bfd.model.rda.RdaApiProgress}
-   * table. More frequent updates reduce memory consumption by the {@link
-   * gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker} but increase I/O overhead.
-   * This value is a good compromise.
+   * table. More frequent updates reduce memory consumption by the {@link SequenceNumberTracker} but
+   * increase I/O overhead. This value is a good compromise.
    */
   private static final Duration SequenceNumberUpdateInterval = Duration.ofMillis(100);
 
   /** Message used to tell a claim writer to flush its buffer immediately. */
-  final ApiMessage<TMessage> FlushMessage = ApiMessage.createFlushMessage();
+  private final ApiMessage<TMessage> FlushMessage = ApiMessage.createFlushMessage();
 
   /**
    * Message used to allow a claim writer to flush its buffer when it has been idle for too long.
    */
-  final ApiMessage<TMessage> IdleMessage = ApiMessage.createIdleMessage();
+  private final ApiMessage<TMessage> IdleMessage = ApiMessage.createIdleMessage();
 
   /** Used to track sequence numbers to update progress table in database. */
   private final SequenceNumberTracker sequenceNumbers;
@@ -75,13 +74,13 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
    * be thrown by the various threads. The first exception enough to stop processing so we just
    * capture that one to avoid storing or logging hundreds of identical exceptions.
    */
-  private final AtomicReference<Exception> errors;
+  private final AtomicReference<Exception> error;
 
   /**
    * Used to synchronize shutdown by waiting for both claim and sequence number processing to
    * complete.
    */
-  private final CountDownLatch latch;
+  private final CountDownLatch shutdownSynchronizationLatch;
 
   /**
    * Used to push messages to the claim and sequence number writers as well as to signal when there
@@ -105,14 +104,13 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
 
   /**
    * Used to periodically update the progress table with the our highest known to be complete
-   * sequence number. Refer to {@link
-   * gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker} for details on sequence
-   * number tracking.
+   * sequence number. Refer to {@link SequenceNumberTracker} for details on sequence number
+   * tracking.
    */
   private final SequenceNumberWriter<TMessage, TClaim> sequenceNumberWriter;
 
   /**
-   * Constructs an instance with the specified configuration. Actual writes are delegated to
+   * Constructs a ConcurrentRdaSink with the specified configuration. Actual writes are delegated to
    * single-threaded sink objects produced using the provided factory method.
    *
    * @param maxThreads number of writer threads used to write claims
@@ -130,8 +128,9 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     sequenceNumberWriter = new SequenceNumberWriter<>(sinkFactory.get(), sequenceNumbers);
     running = new AtomicBoolean(true);
     unreportedProcessedCount = new AtomicInteger(0);
-    errors = new AtomicReference<>();
-    latch = new CountDownLatch(2); // one each for claim and sequence number fluxes
+    error = new AtomicReference<>();
+    // Latch count is one each for claim and sequence number fluxes.
+    shutdownSynchronizationLatch = new CountDownLatch(2);
     final var claimWriterScheduler =
         Schedulers.newBoundedElastic(
             maxThreads, maxThreads, sink.getClass().getSimpleName() + "ClaimWriter");
@@ -160,14 +159,14 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
                         .concatMap(message -> group.key().processMessage(message)),
                 maxThreads)
             .publishOn(otherScheduler)
-            .doFinally(o -> latch.countDown())
+            .doFinally(o -> shutdownSynchronizationLatch.countDown())
             .subscribe(this::processBatchResult);
     var sequenceNumberProcessing =
         Flux.interval(SequenceNumberUpdateInterval, sequenceNumberWriterScheduler)
             .takeWhile(o -> isRunning())
             .onBackpressureLatest()
             .flatMap(o -> sequenceNumberWriter.updateDb())
-            .doFinally(o -> latch.countDown())
+            .doFinally(o -> shutdownSynchronizationLatch.countDown())
             .subscribe(seq -> {}, ex -> processBatchResult(new BatchResult<>((Exception) ex)));
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
   }
@@ -226,17 +225,18 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   @Override
   public int writeMessages(String apiVersion, List<TMessage> objects) throws ProcessingException {
     throwIfErrorPresent();
-    for (TMessage object : objects) {
-      String claimId = getClaimIdForMessage(object);
-      long sequenceNumber = getSequenceNumberForObject(object);
-      sequenceNumbers.addActiveSequenceNumber(sequenceNumber);
-      try {
-        publisher.emit(new ApiMessage<>(claimId, sequenceNumber, apiVersion, object));
-      } catch (InterruptedException ex) {
-        throw new ProcessingException(ex, 0);
+    try {
+      for (TMessage object : objects) {
+        final var claimId = getClaimIdForMessage(object);
+        final var sequenceNumber = getSequenceNumberForObject(object);
+        final var apiMessage = new ApiMessage<>(claimId, sequenceNumber, apiVersion, object);
+        sequenceNumbers.addActiveSequenceNumber(sequenceNumber);
+        publisher.emit(apiMessage);
       }
+      return getProcessedCount();
+    } catch (Exception ex) {
+      throw new ProcessingException(ex, getProcessedCount());
     }
-    return getProcessedCount();
   }
 
   /** {@inheritDoc} */
@@ -281,41 +281,45 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     return unreportedProcessedCount.getAndSet(0);
   }
 
-  /** Shuts down the thread pool. Any unwritten data is flushed to the database. */
+  /**
+   * Shuts down the publisher and all associated writers. Any unwritten data is flushed to the
+   * database. Can safely be called multiple times.
+   */
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
     log.info("shutdown called");
     if (running.getAndSet(false)) {
       publisher.complete();
       log.info("shutdown emit complete");
-    }
-    try {
-      final var closer = new MultiCloser();
-      log.info("shutdown wait for latch");
-      closer.close(() -> waitForLatch(waitTime));
-      for (ClaimWriter<TMessage, TClaim> claimWriter : claimWriters) {
-        log.info("shutdown close claimWriter {}", claimWriter.getId());
-        closer.close(claimWriter::close);
+      try {
+        final var closer = new MultiCloser();
+        log.info("shutdown wait for latch");
+        closer.close(() -> waitForLatch(waitTime));
+        for (ClaimWriter<TMessage, TClaim> claimWriter : claimWriters) {
+          log.info("shutdown close claimWriter {}", claimWriter.getId());
+          closer.close(claimWriter::close);
+        }
+        log.info("shutdown close sequenceWriter");
+        closer.close(sequenceNumberWriter::close);
+        log.info("shutdown close sink");
+        closer.close(sink::close);
+        log.info("shutdown check for errors");
+        closer.close(this::throwIfErrorPresent);
+        log.info("shutdown finish");
+        closer.finish();
+      } catch (ProcessingException ex) {
+        log.error("shutdown failed: ex={}", ex.getMessage(), ex);
+        throw ex;
+      } catch (Exception ex) {
+        log.error("shutdown failed: ex={}", ex.getMessage(), ex);
+        throw new ProcessingException(ex, 0);
       }
-      log.info("shutdown close sequenceWriter");
-      closer.close(sequenceNumberWriter::close);
-      log.info("shutdown close sink");
-      closer.close(sink::close);
-      log.info("shutdown check for errors");
-      closer.close(this::throwIfErrorPresent);
-      log.info("shutdown finish");
-      closer.finish();
-    } catch (ProcessingException ex) {
-      log.error("shutdown failed: ex={}", ex.getMessage(), ex);
-      throw ex;
-    } catch (Exception ex) {
-      log.error("shutdown failed: ex={}", ex.getMessage(), ex);
-      throw new ProcessingException(ex, 0);
     }
   }
 
   /**
-   * Shuts down the thread pool and closes all sinks. Any unwritten data is flushed to the database.
+   * Shuts down the publisher and all associated writers. Any unwritten data is flushed to the
+   * database. Internally just calls {@link #shutdown}. Can safely be called multiple times.
    */
   @Override
   public void close() throws Exception {
@@ -324,8 +328,14 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     log.info("close complete");
   }
 
+  /**
+   * Check to see if any exception has been reported by the writers. If one has this method will
+   * throw that exception wrapped in a {@link ProcessingException}. Otherwise it will simply return.
+   *
+   * @throws ProcessingException wrapper around an exception reported by a writer
+   */
   private void throwIfErrorPresent() throws ProcessingException {
-    final var error = errors.getAndSet(null);
+    final var error = this.error.getAndSet(null);
     if (error != null) {
       throw new ProcessingException(error, 0);
     }
@@ -341,7 +351,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   private void processBatchResult(BatchResult<TMessage> result) {
     unreportedProcessedCount.addAndGet(result.getProcessedCount());
     if (result.getError() != null) {
-      errors.compareAndSet(null, result.getError());
+      error.compareAndSet(null, result.getError());
     } else {
       for (ApiMessage<TMessage> message : result.getMessages()) {
         sequenceNumbers.removeWrittenSequenceNumber(message.getSequenceNumber());
@@ -380,7 +390,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
         if (waitMillis <= 0) {
           break;
         }
-        if (latch.await(waitMillis, TimeUnit.MILLISECONDS)) {
+        if (shutdownSynchronizationLatch.await(waitMillis, TimeUnit.MILLISECONDS)) {
           error = null;
           successful = true;
           break;

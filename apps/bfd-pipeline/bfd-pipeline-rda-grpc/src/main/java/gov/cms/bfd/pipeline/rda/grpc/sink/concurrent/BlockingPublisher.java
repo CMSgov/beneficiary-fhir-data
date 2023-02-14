@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.Semaphore;
 import javax.annotation.Nonnull;
 import reactor.core.publisher.Flux;
@@ -67,5 +68,15 @@ public class BlockingPublisher<T> {
   @Nonnull
   public Flux<T> flux() {
     return flux;
+  }
+
+  /**
+   * Used to allow tests to verify permits change as expected.
+   *
+   * @return current number of available permits
+   */
+  @VisibleForTesting
+  int getAvailablePermits() {
+    return available.availablePermits();
   }
 }

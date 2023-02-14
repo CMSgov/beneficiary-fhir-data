@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
-/** Tests the {@link ConcurrentRdaSink}. */
+/** Tests for the {@link ConcurrentRdaSink} class. */
 public class ConcurrentRdaSinkIT {
   /** Test value for version. */
   private static final String VERSION = "Version";
@@ -33,7 +33,7 @@ public class ConcurrentRdaSinkIT {
     final List<TestDatabase.Message> messages = createTestMessages();
     try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
         new ConcurrentRdaSink<>(17, 11, database::createSink)) {
-      for (List<TestDatabase.Message> messageList : createBatches(messages, 9)) {
+      for (List<TestDatabase.Message> messageList : createBatchesOfMessages(messages, 11)) {
         pool.writeMessages(VERSION, messageList);
       }
     }
@@ -56,7 +56,7 @@ public class ConcurrentRdaSinkIT {
     Exception error = null;
     try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
         new ConcurrentRdaSink<>(5, 9, database::createSink)) {
-      for (List<TestDatabase.Message> messageList : createBatches(messages, 9)) {
+      for (List<TestDatabase.Message> messageList : createBatchesOfMessages(messages, 9)) {
         pool.writeMessages(VERSION, messageList);
       }
     } catch (Exception ex) {
@@ -84,7 +84,7 @@ public class ConcurrentRdaSinkIT {
     Exception error = null;
     try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
         new ConcurrentRdaSink<>(5, 9, database::createSink)) {
-      for (List<TestDatabase.Message> messageList : createBatches(messages, 9)) {
+      for (List<TestDatabase.Message> messageList : createBatchesOfMessages(messages, 9)) {
         pool.writeMessages(VERSION, messageList);
       }
     } catch (Exception ex) {
@@ -98,9 +98,9 @@ public class ConcurrentRdaSinkIT {
   }
 
   /**
-   * Creates some messages for the test to queue and write.
+   * Creates 10,000 test messages containing 10 versions each of 1,000 claims.
    *
-   * @return the list of messages
+   * @return the test messages
    */
   private List<TestDatabase.Message> createTestMessages() {
     List<String> claimIds =
@@ -122,10 +122,10 @@ public class ConcurrentRdaSinkIT {
   }
 
   /**
-   * Gets the lists of claims expected to be written.
+   * Filter the list of all test messages to extract the last version of each claim within them.
    *
-   * @param messages the messages to be turned into claims
-   * @return the list of expected claims
+   * @param messages all of the test messages (including multiple messages per claim)
+   * @return list of final version of every claim
    */
   private List<TestDatabase.Claim> expectedClaims(List<TestDatabase.Message> messages) {
     Map<String, TestDatabase.Claim> uniqueClaims = new TreeMap<>();
@@ -135,7 +135,14 @@ public class ConcurrentRdaSinkIT {
     return List.copyOf(uniqueClaims.values());
   }
 
-  private List<List<TestDatabase.Message>> createBatches(
+  /**
+   * Split the list of messages into smaller lists containing batchSize messages each.
+   *
+   * @param messages all messages in a single list
+   * @param batchSize number of messages per batch
+   * @return list of batches
+   */
+  private List<List<TestDatabase.Message>> createBatchesOfMessages(
       List<TestDatabase.Message> messages, int batchSize) {
     List<List<TestDatabase.Message>> batches = new ArrayList<>();
     List<TestDatabase.Message> batch = new ArrayList<>();
