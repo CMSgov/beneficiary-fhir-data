@@ -192,8 +192,8 @@ def handler(event, context):
         # multiple line lambdas, so this is the next-best option
         def put_metrics():
             print(
-                f'Putting data counts metrics "{metric_name}" up to CloudWatch with timestamp'
-                f" {event_timestamp}"
+                f'Putting data counts metrics with name "{metric_name}" up to CloudWatch with'
+                f" timestamp {datetime.isoformat(event_timestamp)}"
             )
             # Store three metrics:
             put_metric_data(
@@ -226,6 +226,7 @@ def handler(event, context):
                     ),
                 ],
             )
+            print(f"Successfully uploaded metrics to CloudWatch")
 
         try:
             backoff_retry(
