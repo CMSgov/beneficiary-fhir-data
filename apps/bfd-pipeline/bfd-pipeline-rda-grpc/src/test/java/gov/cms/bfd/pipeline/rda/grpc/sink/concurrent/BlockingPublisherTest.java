@@ -7,6 +7,11 @@ import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link BlockingPublisher}. */
 public class BlockingPublisherTest {
+  /**
+   * Verifies that all values submitted to be published are actually published.
+   *
+   * @throws InterruptedException pass through if thrown during test
+   */
   @Test
   void shouldPublishAllValues() throws InterruptedException {
     var publisher = new BlockingPublisher<Integer>(100);
@@ -24,6 +29,12 @@ public class BlockingPublisherTest {
     assertEquals(expected, published);
   }
 
+  /**
+   * Verifies that calling {@link BlockingPublisher#allow} increases the number of permits available
+   * and calling {@link BlockingPublisher#emit} decreases them.
+   *
+   * @throws InterruptedException pass through if thrown during test
+   */
   @Test
   void shouldAdjustPermitsAsExpected() throws InterruptedException {
     var publisher = new BlockingPublisher<Integer>(100);

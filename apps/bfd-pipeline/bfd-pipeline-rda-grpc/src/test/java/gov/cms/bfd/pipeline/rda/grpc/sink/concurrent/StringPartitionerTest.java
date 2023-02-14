@@ -131,7 +131,11 @@ public class StringPartitionerTest {
     /** Max number of assignments for any single partition. */
     private int max;
 
-    /** Percentage difference between min and max as a ratio. */
+    /**
+     * Percentage difference between min and max as a ratio.
+     *
+     * @return the computed divergence
+     */
     private double divergence() {
       return ((double) (max - min)) / (double) total;
     }

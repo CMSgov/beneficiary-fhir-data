@@ -63,7 +63,7 @@ public class BlockingPublisher<T> {
   /**
    * Provides access to the {@link Flux} so that it can be subscribed to.
    *
-   * @return
+   * @return the {@link Flux}
    */
   @Nonnull
   public Flux<T> flux() {
