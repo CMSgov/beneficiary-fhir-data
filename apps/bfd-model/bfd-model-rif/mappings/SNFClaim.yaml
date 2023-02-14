@@ -3,7 +3,7 @@ mappings:
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: SNFClaim
-  messageClassName: gov.cms.model.rda.codegen.library.RifObjectWrapper
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
@@ -1283,13 +1283,16 @@ mappings:
   - from: BENE_ID
     optionalComponents: None
     to: beneficiaryId
+    transformer: LongString
   - from: CLM_ID
     optionalComponents: None
     to: claimId
+    transformer: LongString
   - defaultValue: '0'
     from: CLM_GRP_ID
     optionalComponents: None
     to: claimGroupId
+    transformer: LongString
   - from: FINAL_ACTION
     optionalComponents: None
     to: finalAction

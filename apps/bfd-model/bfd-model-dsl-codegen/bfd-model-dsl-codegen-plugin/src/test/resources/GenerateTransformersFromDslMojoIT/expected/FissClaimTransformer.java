@@ -68,7 +68,7 @@ public class FissClaimTransformer {
   }
 
   public FissClaim transformMessage(gov.cms.mpsm.rda.v1.fiss.FissClaim from) {
-    final DataTransformer transformer = new DataTransformer();;
+    final DataTransformer transformer = new DataTransformer();
     final FissClaim to = transformMessage(from, transformer, Instant.now());
     if (transformer.getErrors().size() > 0) {
       throw new DataTransformer.TransformationException("data transformation failed", transformer.getErrors());

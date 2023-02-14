@@ -55,7 +55,7 @@ public class TransformationBean implements ModelBean {
    * transformer instances.
    */
   @TransformerName private String transformer;
-  /** Default value to use if a field is optional and has no value in the source object. */
+  /** Default value to use if a field has empty string value in the source object. */
   private String defaultValue;
   /**
    * Map of configuration option key/value pairs that can modify the default behavior of the

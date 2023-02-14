@@ -1,0 +1,82 @@
+mappings:
+- entityClassName: gov.cms.test.Beneficiary
+  entityInterfaces:
+  - gov.cms.bfd.model.rif.RifRecordBase
+  id: Beneficiary
+  messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
+  minStringLength: 0
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
+      dbName: bene_id
+      name: beneficiaryId
+      nullable: false
+      sqlType: bigint
+      javaType: long
+    - comment: State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/state_cd.txt)
+      dbName: state_code
+      name: stateCode
+      nullable: false
+      sqlType: varchar(2)
+    - comment: Sex (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sex.txt)
+      dbName: bene_sex_ident_cd
+      javaType: char
+      name: sex
+      nullable: false
+      sqlType: char
+    - comment: Original Reason for Entitlement Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt)
+      dbName: bene_entlmt_rsn_orig
+      javaType: Character
+      name: entitlementCodeOriginal
+      sqlType: char
+    - comment: Medicare Status Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt)
+      dbName: bene_mdcr_status_cd
+      name: medicareEnrollmentStatusCode
+      sqlType: varchar(2)
+    - comment: MBI Obsolete Date
+      dbName: efctv_end_dt
+      name: mbiObsoleteDate
+      sqlType: date
+    - comment: Beneficiary Link Key
+      dbName: bene_link_key
+      name: beneLinkKey
+      sqlType: numeric(38)
+    - comment: HICN_UNHASHED (https://bluebutton.cms.gov/resources/variables/hicnUnhashed)
+      dbName: hicn_unhashed
+      name: hicnUnhashed
+      sqlType: varchar(11)
+    - comment: MBI_HASH (https://bluebutton.cms.gov/resources/variables/mbiHash)
+      dbName: mbi_hash
+      name: mbiHash
+      sqlType: varchar(64)
+    - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
+      dbName: last_updated
+      name: lastUpdated
+      sqlType: timestamp with time zone
+    equalsNeeded: false
+    name: beneficiaries
+    primaryKeyColumns:
+    - beneficiaryId
+    quoteNames: false
+  transformations:
+  - from: BENE_ID
+    optionalComponents: None
+    to: beneficiaryId
+    transformer: LongString
+  - from: STATE_CODE
+    optionalComponents: None
+    to: stateCode
+  - from: BENE_SEX_IDENT_CD
+    optionalComponents: None
+    to: sex
+  - from: BENE_RACE_CD
+    to: race
+  - from: BENE_ENTLMT_RSN_ORIG
+    to: entitlementCodeOriginal
+  - from: BENE_MDCR_STATUS_CD
+    to: medicareEnrollmentStatusCode
+  - from: EFCTV_END_DT
+    to: mbiObsoleteDate
+  transformerClassName: gov.cms.test.BeneficiaryParser
