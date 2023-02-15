@@ -8,6 +8,16 @@ event notification. These metrics allow for the calculation of various SLIs, suc
 takes to load a certain RIF file type, the time it takes to fully load incoming data, the time at
 which data was first made available and when it was finally loaded, and more.
 
+The metrics that are put to CloudWatch Metrics, and their dimensions, are as follows:
+
+| Metric | Dimensions (Aggregations) | Data Type | Description
+| --- | --- | --- | --- |
+| `time/data-available` | - None<br>- `rif_type`<br>- `group_timestamp`<br>- `rif_type`, `group_timestamp` | UTC Timestamp in seconds | Indicates when data was first made available, in `Incoming`, to the pipeline |
+| `time/data-loaded` | - None<br>- `rif_type`<br>- `group_timestamp`<br>- `rif_type`, `group_timestamp` | UTC Timestamp in seconds | Indicates when data was loaded by the pipeline |
+| `time/data-first-available` | - None<br>- `group_timestamp` | UTC Timestamp in seconds | Indicates the time of the first data file, in its group, being made available to the pipeline |
+| `time/data-fully-loaded` | - None<br>- `group_timestamp` | UTC Timestamp in seconds | Indicates the time when the final data file, in its group, was loaded by the pipeline |
+| `time-delta/data-load-time` | - None<br>- `rif_type`<br>- `group_timestamp`<br>- `rif_type`, `group_timestamp` | A time delta in seconds | Indicates the amount of time, in seconds, that the pipeline took to load a particular RIF file in a particular group took |
+
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
