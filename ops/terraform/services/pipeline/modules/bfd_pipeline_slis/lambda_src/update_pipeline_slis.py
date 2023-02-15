@@ -138,11 +138,11 @@ def backoff_retry(
             # Exponentially back-off from hitting the API to ensure we don't hit the API limit.
             # See https://docs.aws.amazon.com/general/latest/gr/api-retries.html
             sleep_time = (2**try_number * 100.0) / 1000.0
-            time.sleep(sleep_time)
             print(
                 f"Unhandled error occurred, retrying in {sleep_time} seconds; attempt"
                 f" #{try_number} of {retries}, err: {exc}"
             )
+            time.sleep(sleep_time)
 
     return None
 
