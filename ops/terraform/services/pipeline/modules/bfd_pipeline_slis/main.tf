@@ -1,13 +1,13 @@
 locals {
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
+  env    = terraform.workspace
+  region = data.aws_region.current.name
 
   kms_key_arn = data.aws_kms_key.cmk.arn
   kms_key_id  = data.aws_kms_key.cmk.key_id
 
-  lambda_full_name = "bfd-${var.env}-update-pipeline-slis"
+  lambda_full_name = "bfd-${local.env}-update-pipeline-slis"
 
-  metrics_namespace = "bfd-${var.env}/bfd-pipeline"
+  metrics_namespace = "bfd-${local.env}/bfd-pipeline"
 }
 
 resource "aws_lambda_permission" "this" {
@@ -24,8 +24,8 @@ resource "aws_lambda_function" "this" {
 
   description = join("", [
     "Puts new CloudWatch Metric Data related to BFD Pipline SLIs whenever a new file is uploaded ",
-    "to corresponding Done/Incoming paths in the ${var.env} BFD ETL S3 Bucket ",
-    "(${data.aws_s3_bucket.id})"
+    "to corresponding Done/Incoming paths in the ${local.env} BFD ETL S3 Bucket ",
+    "(${data.aws_s3_bucket.etl.id})"
   ])
 
   tags = {
