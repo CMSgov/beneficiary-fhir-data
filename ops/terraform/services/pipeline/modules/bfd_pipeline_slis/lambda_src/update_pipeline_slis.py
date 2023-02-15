@@ -96,8 +96,8 @@ def backoff_retry(
 
     Args:
         func (Callable[[], T]): The function to retry
-        retries (int, optional): The number of times to retry before raising the error causing the failure.
-        Defaults to PUT_METRIC_DATA_MAX_RETRIES.
+        retries (int, optional): The number of times to retry before raising the error causing the
+        failure. Defaults to PUT_METRIC_DATA_MAX_RETRIES.
         ignored_exceptions (list[Exception], optional): A list of exceptions to skip retrying and
         instead immediately raise to the calling function. Defaults to [].
 
@@ -255,11 +255,12 @@ def handler(event, context):
 
         timestamp_metric_name = f"time/data-{pipeline_data_status.name.lower()}"
 
+        utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
+
         # An inline function is defined here to pass to backoff_retry() as Python does not support
         # multiple line lambdas, so this is the next-best option
         def put_timestamp_metrics():
             # Store four metrics:
-            utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
             put_metric_data(
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=[
@@ -316,125 +317,219 @@ def handler(event, context):
 
         if pipeline_data_status == PipelineDataStatus.AVAILABLE:
             print(
-                f"Incoming file does not indicate data has been loaded, no time delta can be"
-                f" calculated. Stopping..."
-            )
-            return
-
-        time_delta_metric_name = "time-delta/data-load-time"
-        data_available_metric_name = f"time/data-{PipelineDataStatus.AVAILABLE.name.lower()}"
-
-        def get_data_available_metric():
-            return get_metric_data(
-                metric_data_queries=[
-                    MetricDataQuery(
-                        metric_namespace=METRICS_NAMESPACE,
-                        metric_name=data_available_metric_name,
-                        dimensions=rif_type_dimension | group_timestamp_dimension,
-                    ),
-                ],
-                statistic="Maximum",
+                "Incoming file indicates data has been made available to load to the ETL pipeline."
+                f' Checking if this is the first time data is available for group "{ccw_timestamp}"'
             )
 
-        try:
-            print(
-                f'Getting corresponding "{METRICS_NAMESPACE}/{data_available_metric_name}" time'
-                f' metric for the current RIF file type "{rif_file_type.name}" in group'
-                f' "{ccw_timestamp}"...'
-            )
-            result = backoff_retry(
-                func=get_data_available_metric,
-                ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
-            )
-            print(
-                f'Metric "{METRICS_NAMESPACE}/{data_available_metric_name}" with dimensions'
-                f" {rif_type_dimension | group_timestamp_dimension} retrieved successfully"
-            )
-        except Exception as exc:
-            print(f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}")
-            return
+            data_first_available_name = f"time/data-first-{pipeline_data_status.name.lower()}"
 
-        try:
-            data_available_metric_data = [
-                x for x in result if x.label == f"{METRICS_NAMESPACE}/{data_available_metric_name}"
-            ][0]
-        except IndexError as exc:
+            def get_data_first_available_for_group():
+                return get_metric_data(
+                    metric_data_queries=[
+                        MetricDataQuery(
+                            metric_namespace=METRICS_NAMESPACE,
+                            metric_name=data_first_available_name,
+                            dimensions=group_timestamp_dimension,
+                        )
+                    ],
+                    statistic="Maximum",
+                )
+
+            try:
+                print(
+                    f'Retrieving metric data from "{METRICS_NAMESPACE}/{data_first_available_name}"'
+                    f" with dimensions {group_timestamp_dimension}..."
+                )
+                result = backoff_retry(
+                    func=get_data_first_available_for_group,
+                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
+                )
+                print(
+                    f'Metric "{METRICS_NAMESPACE}/{data_first_available_name}" with dimensions'
+                    f" {group_timestamp_dimension} retrieved successfully"
+                )
+            except Exception as exc:
+                print(
+                    f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}"
+                )
+                return
+
+            if [
+                x
+                for x in result
+                if x.label == f"{METRICS_NAMESPACE}/{data_first_available_name}" and x.values
+            ]:
+                print(
+                    f'Metric data exists for "{METRICS_NAMESPACE}/{data_first_available_name}" with'
+                    f" dimensions {group_timestamp_dimension}. Incoming file is part of an ongoing,"
+                    " existing data load, and therefore does not indicate the time of the first"
+                    " data load for its group. Stopping..."
+                )
+                return
+
             print(
                 "No metric data result was found for metric"
-                f" {METRICS_NAMESPACE}/{data_available_metric_name}, no time delta can be computed."
-                " Stopping..."
-            )
-            return
-
-        # Get the the unix time (in UTC) of the most recent point in time when the now-loaded file
-        # that invoked this Lambda was made available in order to calculate the time it took to load
-        # said file in the ETL pipeline. We take the value (unix timestamp) instead of the point's
-        # timestamp as it will be a higher resolution and more accurate since CloudWatch truncates
-        # and reduces the precision of data timestamps over time
-        try:
-            latest_value_index = data_available_metric_data.timestamps.index(
-                max(data_available_metric_data.timestamps)
-            )
-            last_available = datetime.utcfromtimestamp(
-                data_available_metric_data.values[latest_value_index]
-            )
-        except ValueError as exc:
-            print(
-                "No values were returned for metric"
-                f" {METRICS_NAMESPACE}/{data_available_metric_name}, no time delta can be computed."
-                " Stopping..."
-            )
-            return
-
-        load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
-
-        def put_time_delta_metrics():
-            put_metric_data(
-                metric_namespace=METRICS_NAMESPACE,
-                metrics=[
-                    MetricData(
-                        metric_name=time_delta_metric_name,
-                        value=load_time_delta.seconds,
-                        timestamp=event_timestamp,
-                        unit="Seconds",
-                    ),
-                    MetricData(
-                        metric_name=time_delta_metric_name,
-                        dimensions=rif_type_dimension,
-                        value=load_time_delta.seconds,
-                        timestamp=event_timestamp,
-                        unit="Seconds",
-                    ),
-                    MetricData(
-                        metric_name=time_delta_metric_name,
-                        dimensions=group_timestamp_dimension,
-                        value=load_time_delta.seconds,
-                        timestamp=event_timestamp,
-                        unit="Seconds",
-                    ),
-                    MetricData(
-                        metric_name=time_delta_metric_name,
-                        dimensions=rif_type_dimension | group_timestamp_dimension,
-                        value=load_time_delta.seconds,
-                        timestamp=event_timestamp,
-                        unit="Seconds",
-                    ),
-                ],
+                f" {METRICS_NAMESPACE}/{data_first_available_name}, this indicates that the"
+                " incoming file is the start of a new data load. Putting data to metric"
+                f' "{METRICS_NAMESPACE}/{data_first_available_name}"'
             )
 
-        try:
-            print(
-                f'Putting time delta metrics to "{METRICS_NAMESPACE}/{time_delta_metric_name}"...'
-            )
-            backoff_retry(
-                func=put_time_delta_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
-            )
-            print(f'Metrics put to "{METRICS_NAMESPACE}/{time_delta_metric_name}" successfully')
-        except Exception as exc:
-            print(
-                "An unrecoverable error occurred when trying to call PutMetricData for metric"
-                f" {METRICS_NAMESPACE}/{timestamp_metric_name}: {exc}"
-            )
+            def put_data_first_available_metrics():
+                return put_metric_data(
+                    metric_namespace=METRICS_NAMESPACE,
+                    metrics=[
+                        MetricData(
+                            metric_name=data_first_available_name,
+                            timestamp=event_timestamp,
+                            value=utc_timestamp,
+                            unit="Seconds",
+                        ),
+                        MetricData(
+                            metric_name=data_first_available_name,
+                            dimensions=group_timestamp_dimension,
+                            timestamp=event_timestamp,
+                            value=utc_timestamp,
+                            unit="Seconds",
+                        ),
+                    ],
+                )
+
+            try:
+                print(
+                    "Putting time metric data to"
+                    f' "{METRICS_NAMESPACE}/{data_first_available_name}"...'
+                )
+                backoff_retry(
+                    func=put_data_first_available_metrics,
+                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                )
+                print("Data put successfully")
+            except Exception as exc:
+                print(
+                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
+                )
+        elif pipeline_data_status == PipelineDataStatus.LOADED:
+            print("Incoming file indicates data has been loaded. Calculating time deltas...")
+
+            time_delta_metric_name = "time-delta/data-load-time"
+            data_available_metric_name = f"time/data-{PipelineDataStatus.AVAILABLE.name.lower()}"
+
+            def get_data_available_metric():
+                return get_metric_data(
+                    metric_data_queries=[
+                        MetricDataQuery(
+                            metric_namespace=METRICS_NAMESPACE,
+                            metric_name=data_available_metric_name,
+                            dimensions=rif_type_dimension | group_timestamp_dimension,
+                        ),
+                    ],
+                    statistic="Maximum",
+                )
+
+            try:
+                print(
+                    f'Getting corresponding "{METRICS_NAMESPACE}/{data_available_metric_name}" time'
+                    f' metric for the current RIF file type "{rif_file_type.name}" in group'
+                    f' "{ccw_timestamp}"...'
+                )
+                result = backoff_retry(
+                    func=get_data_available_metric,
+                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
+                )
+                print(
+                    f'Metric "{METRICS_NAMESPACE}/{data_available_metric_name}" with dimensions'
+                    f" {rif_type_dimension | group_timestamp_dimension} retrieved successfully"
+                )
+            except Exception as exc:
+                print(
+                    f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}"
+                )
+                return
+
+            try:
+                data_available_metric_data = [
+                    x
+                    for x in result
+                    if x.label == f"{METRICS_NAMESPACE}/{data_available_metric_name}" and x.values
+                ][0]
+            except IndexError as exc:
+                print(
+                    "No metric data result was found for metric"
+                    f" {METRICS_NAMESPACE}/{data_available_metric_name}, no time delta can be"
+                    " computed. Stopping..."
+                )
+                return
+
+            # Get the the unix time (in UTC) of the most recent point in time when the now-loaded
+            # file that invoked this Lambda was made available in order to calculate the time it
+            # took to load said file in the ETL pipeline. We take the value (unix timestamp) instead
+            # of the point's timestamp as it will be a higher resolution and more accurate since
+            # CloudWatch truncates and reduces the precision of data timestamps over time
+            try:
+                latest_value_index = data_available_metric_data.timestamps.index(
+                    max(data_available_metric_data.timestamps)
+                )
+                last_available = datetime.utcfromtimestamp(
+                    data_available_metric_data.values[latest_value_index]
+                )
+            except ValueError as exc:
+                print(
+                    "No values were returned for metric"
+                    f" {METRICS_NAMESPACE}/{data_available_metric_name}, no time delta can be"
+                    " computed. Stopping..."
+                )
+                return
+
+            load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
+
+            def put_time_delta_metrics():
+                put_metric_data(
+                    metric_namespace=METRICS_NAMESPACE,
+                    metrics=[
+                        MetricData(
+                            metric_name=time_delta_metric_name,
+                            value=load_time_delta.seconds,
+                            timestamp=event_timestamp,
+                            unit="Seconds",
+                        ),
+                        MetricData(
+                            metric_name=time_delta_metric_name,
+                            dimensions=rif_type_dimension,
+                            value=load_time_delta.seconds,
+                            timestamp=event_timestamp,
+                            unit="Seconds",
+                        ),
+                        MetricData(
+                            metric_name=time_delta_metric_name,
+                            dimensions=group_timestamp_dimension,
+                            value=load_time_delta.seconds,
+                            timestamp=event_timestamp,
+                            unit="Seconds",
+                        ),
+                        MetricData(
+                            metric_name=time_delta_metric_name,
+                            dimensions=rif_type_dimension | group_timestamp_dimension,
+                            value=load_time_delta.seconds,
+                            timestamp=event_timestamp,
+                            unit="Seconds",
+                        ),
+                    ],
+                )
+
+            try:
+                print(
+                    "Putting time delta metrics to"
+                    f' "{METRICS_NAMESPACE}/{time_delta_metric_name}"...'
+                )
+                backoff_retry(
+                    func=put_time_delta_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
+                )
+                print(f'Metrics put to "{METRICS_NAMESPACE}/{time_delta_metric_name}" successfully')
+            except Exception as exc:
+                print(
+                    "An unrecoverable error occurred when trying to call PutMetricData for metric"
+                    f" {METRICS_NAMESPACE}/{timestamp_metric_name}: {exc}"
+                )
 
     else:
         print(f"ETL file or path does not match expected format, skipping: {decoded_file_key}")
