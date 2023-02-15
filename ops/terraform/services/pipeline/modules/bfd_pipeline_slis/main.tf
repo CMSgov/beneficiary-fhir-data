@@ -45,6 +45,7 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = {
       METRICS_NAMESPACE = local.metrics_namespace
+      ETL_BUCKET_ID = data.aws_s3_bucket.etl.id
     }
   }
 
