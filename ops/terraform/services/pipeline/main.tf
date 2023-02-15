@@ -204,5 +204,5 @@ resource "aws_instance" "pipeline" {
 module "bfd_pipeline_slis" {
   source        = "./modules/bfd_pipeline_slis"
   account_id    = local.account_id
-  etl_bucket_id = local.pipeline_bucket
+  etl_bucket_id = aws_s3_bucket.this.id
 }
