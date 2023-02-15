@@ -1,4 +1,7 @@
 import calendar
+from functools import reduce
+from itertools import chain, combinations
+import operator
 import os
 import re
 import time
@@ -96,6 +99,53 @@ class MetricDataResult:
     label: str
     timestamps: list[datetime]
     values: list[float]
+
+
+def powerset(items: list[T]) -> chain[T]:
+    """This function computes the powerset (the set of all subsets including the set itself and the
+    null set) of the incoming list. Used to automatically generate all possible
+    dimensioned metrics for a given metric. Implementation adapted from Python's official
+    itertools-recipes documenation
+
+    Args:
+        items (list[T]): A list of items to compute the powerset from
+
+    Returns:
+        _type_: _description_
+    """
+    return chain.from_iterable(combinations(items, r) for r in range(len(items) + 1))
+
+
+def gen_all_dimensioned_metrics(
+    metric_name: str, timestamp: datetime, value: float, unit: str, dimensions: list[dict[str, str]]
+) -> list[MetricData]:
+    """Generates all of the possible dimensioned (and single undimensioned) metrics from the
+    powerset of the list of dimensions passed-in. Useful as all metrics created by this Lambda
+    have the same value, timestamp, and name and only differ on their aggregations
+
+    Args:
+        metric_name (str): Name of the metric
+        timestamp (datetime): Timestamp to store with the metrics
+        value (float): Value to store with the metrics in each dimension
+        unit (str): The Unit of the metric
+        dimensions (list[dict[str, str]]): The list of dimensions to compute the powerset; this
+        determines the number of metrics that will be stored (2**dimensions.count)
+
+    Returns:
+        list[MetricData]: A list of metrics with each being a set in the powerset of dimensions
+    """
+
+    return [
+        MetricData(
+            metric_name=metric_name,
+            timestamp=timestamp,
+            value=value,
+            # Merge the chain/generator of dimensions of arbitrary size using the "|" operator
+            dimensions=reduce(operator.ior, x, {}),
+            unit=unit,
+        )
+        for x in powerset(dimensions)
+    ]
 
 
 def backoff_retry(
@@ -305,44 +355,17 @@ def handler(event, context):
         # An inline function is defined here to pass to backoff_retry() as Python does not support
         # multiple line lambdas, so this is the next-best option
         def put_timestamp_metrics():
-            # Store four metrics:
+            # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
+            # dimensions of the given metric based upon the powerset of the dimensions):
             put_metric_data(
                 metric_namespace=METRICS_NAMESPACE,
-                metrics=[
-                    # One undimensioned metric that can be used to get metrics aggregated across all
-                    # data types and groups of data loads
-                    MetricData(
-                        metric_name=timestamp_metric_name,
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit="Seconds",
-                    ),
-                    # One dimensioned metric that aggregates across RIF file types
-                    MetricData(
-                        metric_name=timestamp_metric_name,
-                        dimensions=rif_type_dimension,
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit="Seconds",
-                    ),
-                    # One dimensioned metric that aggregates across the entire group of RIFs
-                    MetricData(
-                        metric_name=timestamp_metric_name,
-                        dimensions=group_timestamp_dimension,
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit="Seconds",
-                    ),
-                    # And one dimensioned metric that aggregates across both the file type and the
-                    # file's "group" (timestamped parent directory)
-                    MetricData(
-                        metric_name=timestamp_metric_name,
-                        dimensions=rif_type_dimension | group_timestamp_dimension,
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit="Seconds",
-                    ),
-                ],
+                metrics=gen_all_dimensioned_metrics(
+                    metric_name=timestamp_metric_name,
+                    timestamp=event_timestamp,
+                    value=utc_timestamp,
+                    unit="Seconds",
+                    dimensions=[rif_type_dimension, group_timestamp_dimension],
+                ),
             )
 
         try:
@@ -422,21 +445,13 @@ def handler(event, context):
             def put_data_first_available_metrics():
                 return put_metric_data(
                     metric_namespace=METRICS_NAMESPACE,
-                    metrics=[
-                        MetricData(
-                            metric_name=data_first_available_name,
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit="Seconds",
-                        ),
-                        MetricData(
-                            metric_name=data_first_available_name,
-                            dimensions=group_timestamp_dimension,
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit="Seconds",
-                        ),
-                    ],
+                    metrics=gen_all_dimensioned_metrics(
+                        metric_name=data_first_available_name,
+                        dimensions=[group_timestamp_dimension],
+                        timestamp=event_timestamp,
+                        value=utc_timestamp,
+                        unit="Seconds",
+                    ),
                 )
 
             try:
@@ -538,35 +553,13 @@ def handler(event, context):
             def put_time_delta_metrics():
                 put_metric_data(
                     metric_namespace=METRICS_NAMESPACE,
-                    metrics=[
-                        MetricData(
-                            metric_name=time_delta_metric_name,
-                            value=load_time_delta.seconds,
-                            timestamp=event_timestamp,
-                            unit="Seconds",
-                        ),
-                        MetricData(
-                            metric_name=time_delta_metric_name,
-                            dimensions=rif_type_dimension,
-                            value=load_time_delta.seconds,
-                            timestamp=event_timestamp,
-                            unit="Seconds",
-                        ),
-                        MetricData(
-                            metric_name=time_delta_metric_name,
-                            dimensions=group_timestamp_dimension,
-                            value=load_time_delta.seconds,
-                            timestamp=event_timestamp,
-                            unit="Seconds",
-                        ),
-                        MetricData(
-                            metric_name=time_delta_metric_name,
-                            dimensions=rif_type_dimension | group_timestamp_dimension,
-                            value=load_time_delta.seconds,
-                            timestamp=event_timestamp,
-                            unit="Seconds",
-                        ),
-                    ],
+                    metrics=gen_all_dimensioned_metrics(
+                        metric_name=time_delta_metric_name,
+                        dimensions=[rif_type_dimension, group_timestamp_dimension],
+                        value=load_time_delta.seconds,
+                        timestamp=event_timestamp,
+                        unit="Seconds",
+                    ),
                 )
 
             try:
@@ -604,21 +597,13 @@ def handler(event, context):
             def put_data_fully_loaded():
                 return put_metric_data(
                     metric_namespace=METRICS_NAMESPACE,
-                    metrics=[
-                        MetricData(
-                            metric_name=data_finished_load_metric_name,
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit="Seconds",
-                        ),
-                        MetricData(
-                            metric_name=data_finished_load_metric_name,
-                            dimensions=group_timestamp_dimension,
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit="Seconds",
-                        ),
-                    ],
+                    metrics=gen_all_dimensioned_metrics(
+                        metric_name=data_finished_load_metric_name,
+                        dimensions=[group_timestamp_dimension],
+                        timestamp=event_timestamp,
+                        value=utc_timestamp,
+                        unit="Seconds",
+                    ),
                 )
 
             try:
