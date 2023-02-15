@@ -164,30 +164,6 @@ resource "aws_sns_topic_subscription" "ok" {
   endpoint_auto_confirms = true
 }
 
-# Temporary CloudWatch Alarms SNS
-# TODO: Remove in BFD-1773
-resource "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
-  name              = "bfd-${local.env}-cloudwatch-alarms-alert-testing"
-  display_name      = "BFD Cloudwatch Alarm. Created by Terraform."
-  kms_master_key_id = data.aws_kms_key.master_key.id
-}
-
-resource "aws_sns_topic_policy" "cloudwatch_alarms_alert_testing" {
-  arn    = aws_sns_topic.cloudwatch_alarms_alert_testing.arn
-  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_alert_testing.arn, aws_sns_topic.cloudwatch_alarms_alert_testing.arn)
-}
-
-resource "aws_sns_topic" "cloudwatch_alarms_ok_testing" {
-  name              = "bfd-${local.env}-cloudwatch-alarms-ok-testing"
-  display_name      = "BFD Cloudwatch OK notifications. Created by Terraform."
-  kms_master_key_id = data.aws_kms_key.master_key.id
-}
-
-resource "aws_sns_topic_policy" "cloudwatch_alarms_ok_testing" {
-  arn    = aws_sns_topic.cloudwatch_alarms_ok_testing.arn
-  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_ok_testing.arn, aws_sns_topic.cloudwatch_alarms_ok_testing.arn)
-}
-
 resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {
   name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
   display_name      = "BFD Cloudwatch Alarms notices to #bfd-notices. Created by Terraform."
