@@ -106,12 +106,15 @@ def powerset(items: list[T]) -> chain[T]:
     null set) of the incoming list. Used to automatically generate all possible
     dimensioned metrics for a given metric. Implementation adapted from Python's official
     itertools-recipes documenation
+    
+    Example:
+        powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 
     Args:
         items (list[T]): A list of items to compute the powerset from
 
     Returns:
-        _type_: _description_
+        chain[T]: A generator that will yield subsets starting with the null set upto the set itself
     """
     return chain.from_iterable(combinations(items, r) for r in range(len(items) + 1))
 
