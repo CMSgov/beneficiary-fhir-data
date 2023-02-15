@@ -12,11 +12,11 @@ The metrics that are put to CloudWatch Metrics, and their dimensions, are as fol
 
 | Metric | Dimensions (Aggregations) | Data Type | Description
 | --- | --- | --- | --- |
-| `time/data-available` | - None<br>- `rif_type`<br>- `group_timestamp`<br>- `rif_type`, `group_timestamp` | UTC Timestamp in seconds | Indicates when data was first made available, in `Incoming`, to the pipeline |
-| `time/data-loaded` | - None<br>- `rif_type`<br>- `group_timestamp`<br>- `rif_type`, `group_timestamp` | UTC Timestamp in seconds | Indicates when data was loaded by the pipeline |
+| `time/data-available` | - None<br>- `data_type`<br>- `group_timestamp`<br>- `data_type`, `group_timestamp` | UTC Timestamp in seconds | Indicates when data was first made available, in `Incoming`, to the pipeline |
+| `time/data-loaded` | - None<br>- `data_type`<br>- `group_timestamp`<br>- `data_type`, `group_timestamp` | UTC Timestamp in seconds | Indicates when data was loaded by the pipeline |
 | `time/data-first-available` | - None<br>- `group_timestamp` | UTC Timestamp in seconds | Indicates the time of the first data file, in its group, being made available to the pipeline |
 | `time/data-fully-loaded` | - None<br>- `group_timestamp` | UTC Timestamp in seconds | Indicates the time when the final data file, in its group, was loaded by the pipeline |
-| `time-delta/data-load-time` | - None<br>- `rif_type`<br>- `group_timestamp`<br>- `rif_type`, `group_timestamp` | A time delta in seconds | Indicates the amount of time, in seconds, that the pipeline took to load a particular RIF file in a particular group |
+| `time-delta/data-load-time` | - None<br>- `data_type`<br>- `group_timestamp`<br>- `data_type`, `group_timestamp` | A time delta in seconds | Indicates the amount of time, in seconds, that the pipeline took to load a particular RIF file in a particular group |
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
