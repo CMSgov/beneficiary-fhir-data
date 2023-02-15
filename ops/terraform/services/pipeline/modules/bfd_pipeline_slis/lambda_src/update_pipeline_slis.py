@@ -19,6 +19,7 @@ PUT_METRIC_DATA_MAX_RETRIES = 10
 PutMetricData API"""
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE")
+ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -29,6 +30,7 @@ BOTO_CONFIG = Config(
 )
 
 cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)
+s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
 
 COMMON_UNRECOVERABLE_EXCEPTIONS = [
     cw_client.exceptions.InvalidParameterValueException,
@@ -88,7 +90,7 @@ class MetricDataResult:
 def backoff_retry(
     func: Callable[[], T],
     retries: int = PUT_METRIC_DATA_MAX_RETRIES,
-    ignored_exceptions: list[Exception] = [],
+    ignored_exceptions: list[Exception] = None,
 ) -> T:
     """Generic function for wrapping another callable (function) that may raise errors and require
     some form of retry mechanism. Supports passing a list of exceptions/errors for the retry logic
@@ -107,6 +109,9 @@ def backoff_retry(
     Returns:
         T: The return type of func
     """
+    if ignored_exceptions is None:
+        ignored_exceptions = []
+
     for try_number in range(1, retries):
         try:
             return func()
@@ -114,7 +119,7 @@ def backoff_retry(
             # Raise the exception if it is any of the explicitly ignored exceptions or if this
             # was the last try
             if (
-                any([type(exc) is ignored_exc for ignored_exc in ignored_exceptions])
+                any(isinstance(exc) is ignored_exc for ignored_exc in ignored_exceptions)
                 or try_number == retries
             ):
                 raise exc
@@ -209,7 +214,7 @@ def get_metric_data(
 
 
 def handler(event, context):
-    if not all([REGION, METRICS_NAMESPACE]):
+    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID]):
         print("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -242,7 +247,7 @@ def handler(event, context):
     status_group_str = "|".join([e.value for e in PipelineDataStatus])
     rif_types_group_str = "|".join([e.value for e in RifFileType])
     if match := re.search(
-        f"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$",
+        rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$",
         decoded_file_key,
         re.IGNORECASE,
     ):
@@ -303,7 +308,7 @@ def handler(event, context):
         try:
             print(
                 f'Putting data timestamp metrics "{METRICS_NAMESPACE}/{timestamp_metric_name}" up'
-                f" to CloudWatch with timestamp {datetime.isoformat(event_timestamp)}"
+                f" to CloudWatch with unix timestamp value {utc_timestamp}"
             )
             backoff_retry(
                 func=put_timestamp_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
@@ -371,7 +376,7 @@ def handler(event, context):
                 "No metric data result was found for metric"
                 f" {METRICS_NAMESPACE}/{data_first_available_name}, this indicates that the"
                 " incoming file is the start of a new data load. Putting data to metric"
-                f' "{METRICS_NAMESPACE}/{data_first_available_name}"'
+                f' "{METRICS_NAMESPACE}/{data_first_available_name}" with value {utc_timestamp}'
             )
 
             def put_data_first_available_metrics():
@@ -396,8 +401,8 @@ def handler(event, context):
 
             try:
                 print(
-                    "Putting time metric data to"
-                    f' "{METRICS_NAMESPACE}/{data_first_available_name}"...'
+                    f'Putting time metric data to "{METRICS_NAMESPACE}/{data_first_available_name}"'
+                    f" with value {utc_timestamp}..."
                 )
                 backoff_retry(
                     func=put_data_first_available_metrics,
@@ -409,8 +414,16 @@ def handler(event, context):
                     f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
                 )
         elif pipeline_data_status == PipelineDataStatus.LOADED:
-            print("Incoming file indicates data has been loaded. Calculating time deltas...")
+            print(
+                "Incoming file indicates data has been loaded. Calculating time deltas and checking"
+                " if the incoming file was the last loaded file..."
+            )
 
+            print(
+                "Putting time delta metrics for the time taken between the current"
+                f" {rif_file_type.name} RIF file being made available and now (when it has been"
+                " loaded)..."
+            )
             time_delta_metric_name = "time-delta/data-load-time"
             data_available_metric_name = f"time/data-{PipelineDataStatus.AVAILABLE.name.lower()}"
 
@@ -518,8 +531,8 @@ def handler(event, context):
 
             try:
                 print(
-                    "Putting time delta metrics to"
-                    f' "{METRICS_NAMESPACE}/{time_delta_metric_name}"...'
+                    f'Putting time delta metrics to "{METRICS_NAMESPACE}/{time_delta_metric_name}"'
+                    f" with value {load_time_delta.seconds}..."
                 )
                 backoff_retry(
                     func=put_time_delta_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
@@ -531,5 +544,57 @@ def handler(event, context):
                     f" {METRICS_NAMESPACE}/{timestamp_metric_name}: {exc}"
                 )
 
+            print("Checking if the incoming file is the last file to be loaded...")
+            etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
+            incoming_path_prefix = f"{PipelineDataStatus.AVAILABLE.capitalize()}/{ccw_timestamp}/"
+            if list(etl_bucket.objects.filter(Prefix=incoming_path_prefix)):
+                print(
+                    f"Objects still exist in {incoming_path_prefix}. Incoming file is likely not"
+                    " the last to be loaded, stopping..."
+                )
+                return
+
+            data_finished_load_metric_name = f"time/data-fully-{pipeline_data_status.name.lower()}"
+            print(
+                f"No objects found in {incoming_path_prefix}, incoming file is likely last to"
+                " be loaded. Putting data to"
+                f' "{METRICS_NAMESPACE}/{data_finished_load_metric_name}"...'
+            )
+
+            def put_data_fully_loaded():
+                return put_metric_data(
+                    metric_namespace=METRICS_NAMESPACE,
+                    metrics=[
+                        MetricData(
+                            metric_name=data_finished_load_metric_name,
+                            timestamp=event_timestamp,
+                            value=utc_timestamp,
+                            unit="Seconds",
+                        ),
+                        MetricData(
+                            metric_name=data_finished_load_metric_name,
+                            dimensions=group_timestamp_dimension,
+                            timestamp=event_timestamp,
+                            value=utc_timestamp,
+                            unit="Seconds",
+                        ),
+                    ],
+                )
+
+            try:
+                print(
+                    "Putting time metric data to"
+                    f' "{METRICS_NAMESPACE}/{data_finished_load_metric_name}" with value'
+                    f" {utc_timestamp}..."
+                )
+                backoff_retry(
+                    func=put_data_fully_loaded,
+                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                )
+                print("Data put successfully")
+            except Exception as exc:
+                print(
+                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
+                )
     else:
         print(f"ETL file or path does not match expected format, skipping: {decoded_file_key}")
