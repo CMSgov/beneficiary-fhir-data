@@ -1,4 +1,12 @@
-# `bfd_pipeline_slis` Module
+# `bfd_pipeline_slis` Sub-module
+
+This sub-module contains the Terraform IaC and Lambda source code for the per-environment
+`bfd-ENV-update-pipeline-slis` Lambda. This Lambda is invoked whenever a new file is uploaded to the
+environment's corresponding pipeline/ETL S3 Bucket in either the `Done` or `Incoming` "folders". The
+Lambda then puts various metrics up to CloudWatch Metrics based upon the timestamp of the incoming
+event notification. These metrics allow for the calculation of various SLIs, such as the time it
+takes to load a certain RIF file type, the time it takes to fully load incoming data, the time at
+which data was first made available and when it was finally loaded, and more.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
