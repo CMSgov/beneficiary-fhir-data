@@ -107,7 +107,7 @@ def backoff_retry(
     Returns:
         T: The return type of func
     """
-    for try_number in range(0, retries - 1):
+    for try_number in range(1, retries):
         try:
             return func()
         except Exception as exc:
@@ -115,7 +115,7 @@ def backoff_retry(
             # was the last try
             if (
                 any([type(exc) is ignored_exc for ignored_exc in ignored_exceptions])
-                or try_number == retries - 1
+                or try_number == retries
             ):
                 raise exc
 
@@ -125,7 +125,7 @@ def backoff_retry(
             time.sleep(sleep_time)
             print(
                 f"Unhandled error occurred, retrying in {sleep_time} seconds; attempt"
-                f" #{try_number + 1} of {retries}, err: {exc}"
+                f" #{try_number} of {retries}, err: {exc}"
             )
 
 
