@@ -38,6 +38,8 @@ COMMON_UNRECOVERABLE_EXCEPTIONS = [
     cw_client.exceptions.InvalidParameterCombinationException,
     boto3_exceptions.ParamValidationError,
 ]
+"""Exceptions common to CloudWatch Metrics operations that cannot be retried upon, and so should be
+immediately raised to the calling function (in this case, the handler)"""
 
 
 class PipelineDataStatus(str, Enum):
@@ -66,6 +68,10 @@ class RifFileType(str, Enum):
 
 @dataclass
 class MetricData:
+    """Dataclass representing the data needed to "put" a metric up to CloudWatch Metrics. Represents
+    both the metric itself (name, dimensions, unit) and the value that is put to said metric
+    (timestamp, value)"""
+
     metric_name: str
     timestamp: datetime
     value: float
@@ -75,6 +81,9 @@ class MetricData:
 
 @dataclass
 class MetricDataQuery:
+    """Dataclass representing the data needed to get a metric from CloudWatch Metrics. Metrics are
+    identified by their namespace, name, and dimensions"""
+
     metric_namespace: str
     metric_name: str
     dimensions: dict[str, str] = field(default_factory=dict)
@@ -82,6 +91,8 @@ class MetricDataQuery:
 
 @dataclass
 class MetricDataResult:
+    """Dataclass representing the result of a successful GetMetridData operation"""
+
     label: str
     timestamps: list[datetime]
     values: list[float]
@@ -175,6 +186,31 @@ def get_metric_data(
     start_time: datetime = datetime.utcnow() - timedelta(days=15),
     end_time: datetime = datetime.utcnow(),
 ) -> list[MetricDataResult]:
+    """Wraps the GetMetricData CloudWatch Metrics API operation to allow for easier usage. By
+    default, standard resolution metrics from the current time to 15 days in the past are retrieved
+    from CloudWatch Metrics.
+
+    Args:
+        metric_data_queries (list[MetricDataQuery]): A list of data queries to return metric data for
+        statistic (str): The statistic for the queried metric(s) to return
+        period (int, optional): The period of the metric, correlates to its storage resolution.
+        Defaults to 60.
+        start_time (datetime, optional): The start of the time period to search. Defaults to
+        datetime.utcnow()-timedelta(days=15).
+        end_time (datetime, optional): The end of the time period to search. Defaults to
+        datetime.utcnow().
+
+    Returns:
+        list[MetricDataResult]: A list of results for each data query with each label matching the
+        namespace and metric name of its corresponding metric
+
+    Raises:
+        KeyError: Raised if the inner GetMetricData query fails for an unknown reason that is 
+        unhandled or its return value does not conform to its expected definition 
+    """
+
+    # Transform the list of MetricDataQuery into a list of dicts that the boto3 GetMetricData
+    # function understands
     data_queries_dict_list = [
         {
             "Id": "m1",
