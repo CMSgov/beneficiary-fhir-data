@@ -322,16 +322,16 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
 
     try {
       boolean hasNext = resultSet.next();
-      boolean hasResultCountHigherThanOne = true;
+      boolean hasZeroQueryCount = true;
       if (hasNext) {
         /*
          * For count queries, we will get a result with the count, so if we have a result, assume its a count
-         * query and check if the count is < 1.
+         * query and check if the count is 0.
          */
         int queryCount = resultSet.getInt(1);
-        hasResultCountHigherThanOne = queryCount < 1;
+        hasZeroQueryCount = queryCount == 0;
       }
-      return !hasNext || hasResultCountHigherThanOne;
+      return !hasNext || hasZeroQueryCount;
     } catch (SQLException ex) {
       LOGGER.warn("SQL Exception while checking pre-validation results.");
     }
