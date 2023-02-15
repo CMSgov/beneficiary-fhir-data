@@ -200,3 +200,9 @@ resource "aws_instance" "pipeline" {
     volume_type           = "gp2"
   }
 }
+
+module "bfd_pipeline_slis" {
+  source        = "./modules/bfd_pipeline_slis"
+  account_id    = local.account_id
+  etl_bucket_id = local.pipeline_bucket
+}
