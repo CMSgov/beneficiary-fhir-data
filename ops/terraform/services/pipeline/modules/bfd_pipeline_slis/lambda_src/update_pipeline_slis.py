@@ -1,6 +1,4 @@
 import calendar
-from functools import reduce
-from itertools import chain, combinations
 import operator
 import os
 import re
@@ -8,6 +6,8 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from functools import reduce
+from itertools import chain, combinations
 from typing import Callable, Optional, TypeVar
 from urllib.parse import unquote
 
@@ -243,7 +243,8 @@ def get_metric_data(
     from CloudWatch Metrics.
 
     Args:
-        metric_data_queries (list[MetricDataQuery]): A list of data queries to return metric data for
+        metric_data_queries (list[MetricDataQuery]): A list of data queries to return metric data 
+        for
         statistic (str): The statistic for the queried metric(s) to return
         period (int, optional): The period of the metric, correlates to its storage resolution.
         Defaults to 60.
