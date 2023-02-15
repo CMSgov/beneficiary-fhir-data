@@ -5,7 +5,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Callable, TypeVar
+from typing import Callable, Optional, TypeVar
 from urllib.parse import unquote
 
 import boto3
@@ -102,7 +102,7 @@ def backoff_retry(
     func: Callable[[], T],
     retries: int = PUT_METRIC_DATA_MAX_RETRIES,
     ignored_exceptions: list[Exception] = None,
-) -> T:
+) -> Optional[T]:
     """Generic function for wrapping another callable (function) that may raise errors and require
     some form of retry mechanism. Supports passing a list of exceptions/errors for the retry logic
     to ignore and instead raise to the calling function to handle
@@ -144,6 +144,7 @@ def backoff_retry(
                 f" #{try_number} of {retries}, err: {exc}"
             )
 
+    return None
 
 def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
     """Wraps the boto3 CloudWatch PutMetricData API operation to allow for usage of the MetricData
