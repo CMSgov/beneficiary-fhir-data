@@ -30,7 +30,7 @@ EOF
 }
 
 resource "aws_iam_policy" "s3" {
-  name        = "${local.lambda_full_name}-s3"
+  name = "${local.lambda_full_name}-s3"
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to list and get objects in the ",
     "${data.aws_s3_bucket.etl.id} S3 bucket in the Done/ and Incoming/ folders"
