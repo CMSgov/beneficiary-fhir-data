@@ -175,6 +175,39 @@ resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_notices" {
   policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn)
 }
 
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_test" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-test. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_test" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_test.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_test.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_test.arn)
+}
+
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_warnings" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-warnings"
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-warnings. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_warnings" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings.arn)
+}
+
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_alerts" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-alerts"
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-alerts. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_alerts" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts.arn)
+}
+
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
 # provision these resources for all environments since the mechanism
