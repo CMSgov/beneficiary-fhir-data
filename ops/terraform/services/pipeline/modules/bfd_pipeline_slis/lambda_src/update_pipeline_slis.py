@@ -146,6 +146,7 @@ def backoff_retry(
 
     return None
 
+
 def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
     """Wraps the boto3 CloudWatch PutMetricData API operation to allow for usage of the MetricData
     dataclass
@@ -206,8 +207,8 @@ def get_metric_data(
         namespace and metric name of its corresponding metric
 
     Raises:
-        KeyError: Raised if the inner GetMetricData query fails for an unknown reason that is 
-        unhandled or its return value does not conform to its expected definition 
+        KeyError: Raised if the inner GetMetricData query fails for an unknown reason that is
+        unhandled or its return value does not conform to its expected definition
     """
 
     # Transform the list of MetricDataQuery into a list of dicts that the boto3 GetMetricData
@@ -283,6 +284,8 @@ def handler(event, context):
     decoded_file_key = unquote(file_key)
     status_group_str = "|".join([e.value for e in PipelineDataStatus])
     rif_types_group_str = "|".join([e.value for e in RifFileType])
+    # The incoming file's key should match an expected format, as follows:
+    # "<Incoming/Done>/<ISO date format>/<file name>".
     if match := re.search(
         rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$",
         decoded_file_key,
