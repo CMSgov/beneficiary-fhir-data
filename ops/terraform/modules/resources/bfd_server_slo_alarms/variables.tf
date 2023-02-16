@@ -1,17 +1,17 @@
-variable "alert_notification_arn" {
-  description = "The ARN for an SNS Topic to send notifications about SLOs exceeding ALERT thresholds to"
+variable "alert_sns_override" {
+  description = "Overrides the default, per-environment SNS topic used for Alert SLO alarms"
   type        = string
   default     = null
 }
 
-variable "warning_notification_arn" {
-  description = "The ARN for an SNS Topic to send notifications about SLOs exceeding WARNING thresholds to"
+variable "warning_sns_override" {
+  description = "Overrides the default, per-environment SNS topic used for Warning SLO alarms"
   type        = string
   default     = null
 }
 
-variable "ok_notification_arn" {
-  description = "The ARN for an SNS Topic to send notifications about SLOs that have recovered"
+variable "ok_sns_override" {
+  description = "Overrides the default, per-environment SNS topic used for Alarms that transition from ALARM to OK"
   type        = string
   default     = null
 }

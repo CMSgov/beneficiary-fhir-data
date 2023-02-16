@@ -3,9 +3,38 @@ locals {
 
   app = "bfd-server"
 
-  alert_arn   = var.alert_notification_arn == null ? [] : [var.alert_notification_arn]
-  warning_arn = var.warning_notification_arn == null ? [] : [var.warning_notification_arn]
-  ok_arn      = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
+  victor_ops_sns = "bfd-${var.env}-cloudwatch-alarms"
+  bfd_test_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
+  bfd_warnings_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-warnings"
+  default_ok_sns = "bfd-${var.env}-cloudwatch-ok"
+  slo_alarms_topic_names_by_env = {
+    prod = {
+      alert = local.victor_ops_sns
+      warning = local.bfd_warnings_slack_sns
+      ok = local.default_ok_sns
+    }
+    prod-sbx = {
+      alarm = local.bfd_test_slack_sns
+      warning = local.bfd_test_slack_sns
+      ok = null
+    }
+    test = {
+      alarm = local.bfd_test_slack_sns
+      warning = local.bfd_test_slack_sns
+      ok = null
+    }
+  }
+  env_sns = lookup(local.slo_alarms_topic_names_by_env, var.env, {
+    alert = null
+    warning = null
+    ok = null
+  })
+  alert_sns_name = try(coalesce(var.alert_sns_override, local.env_sns.alert), null)
+  warning_sns_name = try(coalesce(var.warning_sns_override, local.env_sns.warning), null)
+  ok_sns_name = try(coalesce(var.ok_sns_override, local.env_sns.ok), null)
+  alert_arn   = try(data.aws_sns_topic.alert_sns[0].arn, [])
+  warning_arn = try(data.aws_sns_topic.warning_sns[0].arn, [])
+  ok_arn      = try(data.aws_sns_topic.ok_sns[0].arn, [])
 
   namespace = "bfd-${var.env}/${local.app}"
   metrics = {
