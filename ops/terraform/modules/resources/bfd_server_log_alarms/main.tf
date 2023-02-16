@@ -1,7 +1,7 @@
 locals {
   victor_ops_sns         = "bfd-${var.env}-cloudwatch-alarms"
-  bfd_test_slack_sns     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-notices"
-  bfd_warnings_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-notices"
+  bfd_test_slack_sns     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
+  bfd_warnings_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-warnings"
   default_ok_sns         = "bfd-${var.env}-cloudwatch-ok"
   topic_names_by_env = {
     prod = {
