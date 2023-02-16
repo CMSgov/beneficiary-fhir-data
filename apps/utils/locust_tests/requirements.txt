@@ -589,7 +589,7 @@ urllib3==1.26.12 \
     # via
     #   botocore
     #   requests
-werkzeug==2.2.2 \
+werkzeug==2.2.3 \
     --hash=sha256:7ea2d48322cc7c0f8b3a215ed73eabd7b5d75d0b50e31ab006286ccff9e00b8f \
     --hash=sha256:f979ab81f58d7318e064e99c4506445d60135ac5cd2e177a2de0089bfd4c9bd5
     # via
