@@ -15,8 +15,13 @@ locals {
   alarm_action_sns_by_env = {
     test = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
     prod_sbx = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
-    prod = "bfd-${var.env}-cloudwatch-alarms"
+    prod     = "bfd-${var.env}-cloudwatch-alarms"
   }
+  alarm_action_sns = try(coalesce(
+    var.alarm_action_sns_override,
+    lookup(local.alarm_action_sns_by_env, local.env_underscores, null)
+  ), null)
+  alarms_ok_sns = var.alarm_ok_sns_override
 }
 
 # TODO: This SNS topic (and related resources below) mostly duplicates a similar topic used for
@@ -187,7 +192,8 @@ resource "aws_lambda_function" "this" {
       ENV              = var.env
       ALARM_THRESHOLD  = "95.0"
       ALARM_PERIOD     = "60"
-      ALARM_ACTION_ARN = data.aws_sns_topic.alarms_action_sns.arn
+      ALARM_ACTION_ARN = try(data.aws_sns_topic.alarms_action_sns[0].arn, null)
+      OK_ACTION_ARN    = try(data.aws_sns_topic.alarms_ok_sns[0].arn, null)
       METRIC_NAMESPACE = "bfd-${var.env}/bfd-server/CWAgent"
       METRIC_NAME      = "disk_used_percent"
       ALARMS_PREFIX    = local.alarms_prefix

@@ -15,14 +15,13 @@ data "aws_autoscaling_group" "asg" {
 }
 
 data "aws_sns_topic" "alarms_action_sns" {
-  name = coalesce(
-    var.alarm_action_sns_override,
-    lookup(
-      local.alarm_action_sns_by_env, 
-      local.env_underscores, 
-      "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
-    )
-  )
+  count = local.alarm_action_sns != null ? 1 : 0
+  name  = local.alarm_action_sns
+}
+
+data "aws_sns_topic" "alarms_ok_sns" {
+  count = local.alarms_ok_sns != null ? 1 : 0
+  name  = local.alarms_ok_sns
 }
 
 data "archive_file" "this" {
