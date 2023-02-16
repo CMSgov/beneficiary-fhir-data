@@ -14,12 +14,12 @@ locals {
       ok      = local.default_ok_sns
     }
     prod-sbx = {
-      alarm   = local.bfd_test_slack_sns
+      alert   = local.bfd_test_slack_sns
       warning = local.bfd_test_slack_sns
       ok      = null
     }
     test = {
-      alarm   = local.bfd_test_slack_sns
+      alert   = local.bfd_test_slack_sns
       warning = local.bfd_test_slack_sns
       ok      = null
     }
@@ -32,9 +32,9 @@ locals {
   alert_sns_name   = try(coalesce(var.alert_sns_override, local.env_sns.alert), null)
   warning_sns_name = try(coalesce(var.warning_sns_override, local.env_sns.warning), null)
   ok_sns_name      = try(coalesce(var.ok_sns_override, local.env_sns.ok), null)
-  alert_arn        = try(data.aws_sns_topic.alert_sns[0].arn, [])
-  warning_arn      = try(data.aws_sns_topic.warning_sns[0].arn, [])
-  ok_arn           = try(data.aws_sns_topic.ok_sns[0].arn, [])
+  alert_arn        = try([data.aws_sns_topic.alert_sns[0].arn], [])
+  warning_arn      = try([data.aws_sns_topic.warning_sns[0].arn], [])
+  ok_arn           = try([data.aws_sns_topic.ok_sns[0].arn], [])
 
   namespace = "bfd-${var.env}/${local.app}"
   metrics = {
