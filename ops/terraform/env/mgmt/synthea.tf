@@ -78,7 +78,7 @@ resource "aws_iam_policy" "synthea" {
 }
 
 resource "aws_iam_group_membership" "synthea" {
-  name = "bfd-${local.env}-synthea"
+  name  = "bfd-${local.env}-synthea"
   group = aws_iam_group.synthea.name
   users = local.synthea_developers
 }

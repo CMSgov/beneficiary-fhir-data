@@ -192,6 +192,13 @@ public final class QueryLoggingListener implements QueryExecutionListener {
             s.contains(" from beneficiary_monthly ")
                 && s.contains("year_month=")
                 && s.contains("partd_contract_number_id="))),
+    /**
+     * Represents Hibernate PostgreSQL dialect's probing for sequences in the associated database.
+     * This query is automatically executed at least once when establishing a database connection.
+     */
+    HIBERNATE_INFORMATION_SCHEMA_SEQUENCES(
+        "hibernate_information_schema_sequences",
+        (s -> s.contains(" from information_schema.sequences"))),
     /** Represents an unknown query (one not explicitly defined in this list). */
     UNKNOWN("unknown", null);
 

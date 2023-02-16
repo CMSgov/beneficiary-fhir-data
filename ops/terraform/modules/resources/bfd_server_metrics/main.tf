@@ -1,6 +1,7 @@
 locals {
   log_groups = {
-    access = "/bfd/${var.env}/bfd-server/access.json"
+    access   = "/bfd/${var.env}/bfd-server/access.json"
+    messages = "/bfd/${var.env}/bfd-server/messages.json"
   }
   namespace = "bfd-${var.env}/bfd-server"
   endpoints = {
@@ -411,5 +412,19 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
     value      = "$.mdc.http_access_response_duration_milliseconds"
     dimensions = each.value.dimensions
     unit       = "Milliseconds"
+  }
+}
+
+# Count of WARNING messages from the QueryLoggingListener indicates an unknown query type
+resource "aws_cloudwatch_log_metric_filter" "query_logging_listener_count_warning_messages" {
+  name           = "bfd-${var.env}/bfd-server/query-logging-listener/count/warning"
+  log_group_name = local.log_groups.messages
+  pattern        = "{$.logger = \"gov.cms.bfd.server.war.QueryLoggingListener\"}"
+
+  metric_transformation {
+    name      = "query-logging-listener/count/warning"
+    namespace = local.namespace
+    value     = "1"
+    unit      = "Count"
   }
 }
