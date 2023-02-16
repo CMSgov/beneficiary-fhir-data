@@ -10,6 +10,13 @@ locals {
   lambda_name            = "manage-disk-usage-alarms"
 
   alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
+
+  env_underscores = replace(var.env, "-", "_")
+  alarm_action_sns_by_env = {
+    test = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
+    prod_sbx = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
+    prod = "bfd-${var.env}-cloudwatch-alarms"
+  }
 }
 
 # TODO: This SNS topic (and related resources below) mostly duplicates a similar topic used for
@@ -180,8 +187,7 @@ resource "aws_lambda_function" "this" {
       ENV              = var.env
       ALARM_THRESHOLD  = "95.0"
       ALARM_PERIOD     = "60"
-      ALARM_ACTION_ARN = data.aws_sns_topic.cloudwatch_alarms_alert.arn
-      OK_ACTION_ARN    = data.aws_sns_topic.cloudwatch_alarms_ok.arn
+      ALARM_ACTION_ARN = data.aws_sns_topic.alarms_action_sns.arn
       METRIC_NAMESPACE = "bfd-${var.env}/bfd-server/CWAgent"
       METRIC_NAME      = "disk_used_percent"
       ALARMS_PREFIX    = local.alarms_prefix

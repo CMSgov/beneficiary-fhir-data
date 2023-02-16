@@ -11,7 +11,7 @@ ALARMS_PREFIX = os.environ.get("ALARMS_PREFIX", "")
 ALARM_THRESHOLD = float(os.environ.get("ALARM_THRESHOLD", "95.0"))
 ALARM_PERIOD = int(os.environ.get("ALARM_PERIOD", "60"))
 ALARM_ACTION_ARN = os.environ.get("ALARM_ACTION_ARN", "")
-OK_ACTION_ARN = os.environ.get("OK_ACTION_ARN", "")
+OK_ACTION_ARN = os.environ.get("OK_ACTION_ARN", "") # The OK action is optional
 METRIC_NAMESPACE = os.environ.get("METRIC_NAMESPACE", "")
 METRIC_NAME = os.environ.get("METRIC_NAME", "")
 
@@ -51,7 +51,6 @@ def handler(event, context):
             ALARM_THRESHOLD,
             ALARM_PERIOD,
             ALARM_ACTION_ARN,
-            OK_ACTION_ARN,
             METRIC_NAMESPACE,
             METRIC_NAME,
         ]
@@ -158,7 +157,7 @@ def handler(event, context):
                 TreatMissingData="notBreaching",
                 ActionsEnabled=True,
                 AlarmActions=[ALARM_ACTION_ARN],
-                OKActions=[OK_ACTION_ARN],
+                OKActions=[OK_ACTION_ARN] if OK_ACTION_ARN else [],
             )
 
             print(f"Alarm {alarm_name} successfully created")
