@@ -13,7 +13,7 @@ locals {
 
   env_underscores = replace(var.env, "-", "_")
   alarm_action_sns_by_env = {
-    test = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
+    test     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
     prod_sbx = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
     prod     = "bfd-${var.env}-cloudwatch-alarms"
   }
