@@ -7,7 +7,7 @@ locals {
   bfd_test_slack_sns     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
   bfd_warnings_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-warnings"
   default_ok_sns         = "bfd-${var.env}-cloudwatch-ok"
-  slo_alarms_topic_names_by_env = {
+  topic_names_by_env = {
     prod = {
       alert   = local.victor_ops_sns
       warning = local.bfd_warnings_slack_sns
@@ -24,7 +24,7 @@ locals {
       ok      = null
     }
   }
-  env_sns = lookup(local.slo_alarms_topic_names_by_env, var.env, {
+  env_sns = lookup(local.topic_names_by_env, var.env, {
     alert   = null
     warning = null
     ok      = null
