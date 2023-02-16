@@ -11,15 +11,14 @@ locals {
 
   alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
 
-  env_underscores = replace(var.env, "-", "_")
   alarm_action_sns_by_env = {
     test     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
-    prod_sbx = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
+    prod-sbx = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
     prod     = "bfd-${var.env}-cloudwatch-alarms"
   }
   alarm_action_sns = try(coalesce(
     var.alarm_action_sns_override,
-    lookup(local.alarm_action_sns_by_env, local.env_underscores, null)
+    lookup(local.alarm_action_sns_by_env, var.env, null)
   ), null)
   alarms_ok_sns = var.alarm_ok_sns_override
 }
