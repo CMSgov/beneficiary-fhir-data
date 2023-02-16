@@ -87,7 +87,7 @@
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.1</junit.version>
-		<javadoc.version>3.4.1</javadoc.version>
+		<javadoc.version>3.5.0</javadoc.version>
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
@@ -488,7 +488,7 @@ checkJavaFormat() {
   cd apps
 
   set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&amp;1
+  mvn com.coveo:fmt-maven-plugin:check &gt;/dev/null 2&gt;&amp;1
   checkResult=$?
   set -e
 
@@ -511,7 +511,7 @@ checkSecretFilesForPlainText() {
   # separated list of files staged for commit to a temporary file
   # and reading it as an array
   tmpfile=$(mktemp)
-  git diff --cached --name-only --diff-filter=ACM > $tmpfile
+  git diff --cached --name-only --diff-filter=ACM &gt; $tmpfile
   IFS=$'\n' read -d '' -r -a commits &lt; $tmpfile
 
   # for all files to be committed which are a secret file,
