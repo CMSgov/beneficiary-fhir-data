@@ -4,6 +4,7 @@ import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 /**
@@ -61,7 +63,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   /** Used to perform database i/o. */
   private final RdaSink<TMessage, TClaim> sink;
 
-  /** Used to signal when a shutdown is in progress. */
+  /** Used to signal when a shutdown is in progress. Remains true until shutdown is triggered. */
   private final AtomicBoolean running;
 
   /**
@@ -83,8 +85,8 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   private final CountDownLatch shutdownSynchronizationLatch;
 
   /**
-   * Used to push messages to the claim and sequence number writers as well as to signal when there
-   * are no more messages.
+   * Instance of {@link BlockingPublisher} used to push messages to the claim and sequence number
+   * writers as well as to signal when there are no more messages.
    */
   private final BlockingPublisher<ApiMessage<TMessage>> publisher;
 
@@ -110,6 +112,22 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   private final SequenceNumberWriter<TMessage, TClaim> sequenceNumberWriter;
 
   /**
+   * {@link Scheduler} used to run {@link ClaimWriter#processMessage} calls. Using a custom
+   * scheduler to ensure thread pool size matches our configuration and also to provide meaningful
+   * names for worker threads when logging. Schedulers are {@link Closeable} so this is closed in
+   * {@link #close}.
+   */
+  private final Scheduler claimWriterScheduler;
+
+  /**
+   * {@link Scheduler} used to run {@link SequenceNumberWriter#updateDb} calls. Using a custom
+   * scheduler to ensure thread pool size matches our configuration and also to provide meaningful
+   * names for worker threads when logging. Schedulers are {@link Closeable} so this is closed in
+   * {@link #close}.
+   */
+  private final Scheduler sequenceNumberWriterScheduler;
+
+  /**
    * Constructs a ConcurrentRdaSink with the specified configuration. Actual writes are delegated to
    * single-threaded sink objects produced using the provided factory method.
    *
@@ -131,41 +149,19 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     error = new AtomicReference<>();
     // Latch count is one each for claim and sequence number fluxes.
     shutdownSynchronizationLatch = new CountDownLatch(2);
-    final var claimWriterScheduler =
+    claimWriterScheduler =
         Schedulers.newBoundedElastic(
             maxThreads, maxThreads, sink.getClass().getSimpleName() + "ClaimWriter");
-    final var sequenceNumberWriterScheduler =
+    sequenceNumberWriterScheduler =
         Schedulers.newBoundedElastic(
             1, 1, sink.getClass().getSimpleName() + "-SequenceNumberWriter");
-    final var otherScheduler = Schedulers.boundedElastic();
-    final var claimPartitioner = new StringPartitioner<>(claimWriters);
     publisher = new BlockingPublisher<>(4 * maxThreads * batchSize);
-    final var idleTimerFlux =
-        Flux.interval(IdleCheckInterval, claimWriterScheduler)
-            .takeWhile(o -> isRunning())
-            .onBackpressureLatest()
-            .map(o -> IdleMessage);
     var claimProcessing =
-        publisher
-            .flux()
-            .publishOn(otherScheduler)
-            .groupBy(message -> claimPartitioner.partitionFor(message.getClaimId()))
-            .flatMap(
-                group ->
-                    group
-                        .concatWithValues(FlushMessage)
-                        .mergeWith(idleTimerFlux)
-                        .publishOn(claimWriterScheduler)
-                        .concatMap(message -> group.key().processMessage(message)),
-                maxThreads)
-            .publishOn(otherScheduler)
+        createClaimWriterFlux()
             .doFinally(o -> shutdownSynchronizationLatch.countDown())
             .subscribe(this::processBatchResult);
     var sequenceNumberProcessing =
-        Flux.interval(SequenceNumberUpdateInterval, sequenceNumberWriterScheduler)
-            .takeWhile(o -> isRunning())
-            .onBackpressureLatest()
-            .flatMap(o -> sequenceNumberWriter.updateDb())
+        createSequenceNumberWriterFlux()
             .doFinally(o -> shutdownSynchronizationLatch.countDown())
             .subscribe(seq -> {}, ex -> processBatchResult(new BatchResult<>((Exception) ex)));
     referenceToProcessors = Disposables.composite(claimProcessing, sequenceNumberProcessing);
@@ -193,6 +189,79 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     } else {
       return new ConcurrentRdaSink<>(maxThreads, batchSize, () -> sinkFactory.apply(false));
     }
+  }
+
+  /**
+   * Creates a {@link Flux} that uses a pool of {@link ClaimWriter} objects to transform, batch, and
+   * write claims to the database. An idle timer is used to periodically flush any incomplete
+   * batches during extended idle time. Such idle time can happen with RDA API calls when we are
+   * storing claims faster than the API can send them to us.
+   *
+   * <p>The database updates take place using a worker from the {@link #claimWriterScheduler}.
+   *
+   * @return {@link Flux} that emits a {@link BatchResult} each time a batch is processed
+   */
+  private Flux<BatchResult<TMessage>> createClaimWriterFlux() {
+    // Used to assign messages to a specific worker based on claim id.
+    final var claimPartitioner = new StringPartitioner<>(claimWriters);
+
+    // Flux used to trigger idle checks.
+    // The interval flux will emit a time in milliseconds every time it fires.
+    final var idleTimerFlux =
+        Flux.interval(IdleCheckInterval, claimWriterScheduler)
+            // Stop sending messages when shutdown sets the running flag to false.
+            .takeWhile(o -> isRunning())
+            // Drop any extra messages if the writer is currently busy.
+            .onBackpressureLatest()
+            // Replaces the time value with an idle message.
+            .map(time -> IdleMessage);
+
+    // Creates the flux.  Each operator call in the chain decorates the original with some desired
+    // behavior.  See https://projectreactor.io/docs for details on how these work.
+    return publisher
+        .flux()
+        // Ensures main thread is never tied down doing any processing.
+        .publishOn(Schedulers.boundedElastic())
+        // Assigns the message to its claim writer based on claim id.
+        .groupBy(message -> claimPartitioner.partitionFor(message.getClaimId()))
+        // Processes claims in each writer's flux using a separate thread for each.
+        .flatMap(
+            claimWriterFlux ->
+                claimWriterFlux
+                    // When all messages have been received this sends a flush message to finish up
+                    .concatWithValues(FlushMessage)
+                    // Inserts idle messages when the timer fires
+                    .mergeWith(idleTimerFlux)
+                    // Ensures we process everything on writer's own thread
+                    .publishOn(claimWriterScheduler)
+                    // Makes the call and passes its result down stream.  The key is our
+                    // ClaimWriter object.
+                    .concatMap(message -> claimWriterFlux.key().processMessage(message)))
+        // Ensures downstream processing happens on some other thread so writer is free to keep
+        // working on incoming messages.
+        .publishOn(Schedulers.boundedElastic());
+  }
+
+  /**
+   * Creates a {@link Flux} that periodically calls {@link SequenceNumberWriter#updateDb} to ensure
+   * that the progress table has the latest known good sequence number value. Since database writes
+   * can sometimes be slow the interval timer skips any updates that are triggered while one is
+   * already in progress. An interval is used because it's not vital that the progress table be
+   * constantly up to date and excessive writes would just slow progress. The database updates take
+   * place using a worker from the {@link #sequenceNumberWriterScheduler}.
+   *
+   * @return {@link Flux} that emits a sequence number every time the progress table is updated
+   */
+  private Flux<Long> createSequenceNumberWriterFlux() {
+    // Flux used to trigger idle checks.
+    // The interval flux will emit a time in milliseconds every time it fires.
+    return Flux.interval(SequenceNumberUpdateInterval, sequenceNumberWriterScheduler)
+        // Stop sending messages when shutdown sets the running flag to false.
+        .takeWhile(o -> isRunning())
+        // Drop any extra messages if the writer is currently busy.
+        .onBackpressureLatest()
+        // Calls updateDb each time the timer fires.
+        .flatMap(o -> sequenceNumberWriter.updateDb());
   }
 
   /** {@inheritDoc} */
@@ -289,10 +358,12 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   public void shutdown(Duration waitTime) throws ProcessingException {
     log.info("shutdown called");
     if (running.getAndSet(false)) {
+      // Tells the claim writer flux there will be no more data to process.
       publisher.complete();
       log.info("shutdown emit complete");
       try {
         final var closer = new MultiCloser();
+        // Waits until threads have stopped before closing other resoruces.
         log.info("shutdown wait for latch");
         closer.close(() -> waitForLatch(waitTime));
         for (ClaimWriter<TMessage, TClaim> claimWriter : claimWriters) {
@@ -303,6 +374,9 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
         closer.close(sequenceNumberWriter::close);
         log.info("shutdown close sink");
         closer.close(sink::close);
+        log.info("shutdown close schedulers");
+        closer.close(claimWriterScheduler::dispose);
+        closer.close(sequenceNumberWriterScheduler::dispose);
         log.info("shutdown check for errors");
         closer.close(this::throwIfErrorPresent);
         log.info("shutdown finish");
@@ -371,40 +445,45 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
 
   /**
    * Waits for countdown latch to reach zero so that rest of shutdown can proceed. The claim and
-   * sequence number writers decrement the latch as they complete so once it reach zero we know they
-   * are finished. We retry a few times in case of interrupts to resolve problems with spurious
-   * interrupts during cancellation. We can't stop the shutdown process completely so we return even
-   * if the latch doesn't reach zero before the timeout elapses.
+   * sequence number writers decrement the latch as they complete so once it reaches zero we know
+   * they are finished. We retry until {@code waitTime} is exceeded in case of interrupts to resolve
+   * problems with spurious interrupts during cancellation. We can't stop the shutdown process
+   * completely so we return even if the latch doesn't reach zero before the timeout elapses.
    *
    * @param waitTime how long to wait for the latch
    * @throws Exception if any exception caused the wait to fail
    */
   private void waitForLatch(Duration waitTime) throws Exception {
-    final long startMillis = System.currentTimeMillis();
+    final long endMillis = System.currentTimeMillis() + waitTime.toMillis();
     InterruptedException error = null;
-    boolean successful = false;
-    for (int i = 1; i <= 10; ++i) {
+    boolean countdownInProgress = true;
+    while (countdownInProgress) {
+      // Update the maximum wait time on each iteration to stay within allowed time.
+      // Stop the loop if the time has been exceeded.
+      final long remainingMillis = endMillis - System.currentTimeMillis();
+      if (remainingMillis <= 0) {
+        break;
+      }
+
+      // Check for countdown completion.  Remember if we encountered any interrupts along the way.
       try {
-        long elapsedMillis = System.currentTimeMillis() - startMillis;
-        long waitMillis = waitTime.toMillis() - elapsedMillis;
-        if (waitMillis <= 0) {
-          break;
-        }
-        if (shutdownSynchronizationLatch.await(waitMillis, TimeUnit.MILLISECONDS)) {
-          error = null;
-          successful = true;
-          break;
+        log.info("waitForLatch: waiting at most {} millis for latch", remainingMillis);
+        if (shutdownSynchronizationLatch.await(remainingMillis, TimeUnit.MILLISECONDS)) {
+          countdownInProgress = false;
         }
       } catch (InterruptedException ex) {
+        // We'll pass this through to our caller if the countdown never completes.
         if (error == null) {
           error = ex;
         }
       }
     }
-    if (error != null) {
-      throw error;
-    }
-    if (!successful) {
+
+    // Pass on any interrupt or log the timeout if the countdown never finished.
+    if (countdownInProgress) {
+      if (error != null) {
+        throw error;
+      }
       log.warn("waitForLatch: wait time exceeded without reaching zero");
     }
   }
