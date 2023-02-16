@@ -3,6 +3,8 @@ locals {
   bfd_test_slack_sns     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
   bfd_warnings_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-warnings"
   default_ok_sns         = "bfd-${var.env}-cloudwatch-ok"
+  # Each established environment has a different destination for which alarm notifications should
+  # route to. The below map maps each particular SNS (destination) to a particular alarm severity.
   topic_names_by_env = {
     prod = {
       alert  = local.victor_ops_sns
@@ -20,11 +22,17 @@ locals {
       ok     = null
     }
   }
+  # In the event this module is being applied in a non-established environment (i.e. an ephemeral
+  # environment) this lookup will ensure that an empty configuration will be returned
   env_sns = lookup(local.topic_names_by_env, var.env, {
     alert  = null
     notify = null
     ok     = null
   })
+  # The following trys and coalesces ensure two things: the operator is able to override the
+  # SNS topic/destination of each alarm type, and that if no destination is specified (either
+  # explicitly such as with the OK SNS topics in prod-sbx/test or through the environment being
+  # ephemeral) that Terraform does not raise an error and instead the SNS topic is empty
   alert_sns_name  = try(coalesce(var.alert_sns_override, local.env_sns.alert), null)
   notify_sns_name = try(coalesce(var.notify_sns_override, local.env_sns.notify), null)
   ok_sns_name     = try(coalesce(var.ok_sns_override, local.env_sns.ok), null)
