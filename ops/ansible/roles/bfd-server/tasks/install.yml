@@ -5,6 +5,8 @@
       - java-11-openjdk-devel
       - iptables
   become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python
 
 - name: Create Server User
   user:

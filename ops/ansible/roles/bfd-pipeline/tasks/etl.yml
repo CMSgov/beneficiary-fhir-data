@@ -7,6 +7,8 @@
   with_items:
     # Needed to run the ETL service.
     - java-11-openjdk
+  vars:
+    ansible_python_interpreter: /usr/bin/python
   become: true
   tags:
     - pre-ami

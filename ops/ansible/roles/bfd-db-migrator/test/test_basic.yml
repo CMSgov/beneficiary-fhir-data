@@ -7,6 +7,8 @@
 - hosts: bfd-db-migrator
   tasks:
     - name: Install Prerequisites
+      vars:
+        ansible_python_interpreter: /usr/bin/python
       package:
         name:
           - procps
