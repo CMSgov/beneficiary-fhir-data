@@ -14,7 +14,7 @@ locals {
     prod-sbx = {
       alert  = local.victor_ops_sns
       notify = local.bfd_warnings_slack_sns
-      ok     = null
+      ok     = local.default_ok_sns
     }
     test = {
       alert  = null # test is expected to not always be running, so alerts could be false positives
