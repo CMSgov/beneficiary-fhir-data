@@ -1,0 +1,22 @@
+---
+##
+# Applies and verifies the role on the container being used for the test case.
+##
+
+# Apply the role.
+- hosts: platinum
+  gather_facts: false
+  tasks:
+    - name: Install Prerequisites
+      vars:
+        ansible_python_interpreter: /usr/bin/python
+      yum:
+        name:
+          - python3
+
+    - name: Apply Role
+      import_role:
+        name: platinum
+      vars:
+        python3_tar_source: https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz
+        python3_version: '3.9.9'

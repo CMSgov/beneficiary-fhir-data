@@ -1,0 +1,27 @@
+---
+##
+# Builds a 'Platinum' AMI (updates) and installs program specific dependencies
+# from a base Gold Image in the CCS AWS Environment
+##
+- name: Enable java11 repository
+  command: amazon-linux-extras enable java-openjdk11
+- name: Enable ansible2 repository
+  command: amazon-linux-extras enable ansible2
+- name: Install dependencies
+  yum:
+    name:
+      - "@Development Tools" # equivalent to `yum groupinstall "Development Tools"`
+      - amazon-cloudwatch-agent
+      - ansible
+      - gcc
+      - git
+      - java-11-openjdk-devel
+      - libffi-devel
+      - openssl11
+      - selinux-policy
+      - sudo
+      - systemd
+      - tar
+      - unzip
+  vars:
+    ansible_python_interpreter: /usr/bin/python

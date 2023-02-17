@@ -1,0 +1,40 @@
+- name: Download python3 tar
+  get_url:
+    url: "{{ python3_tar_source }}"
+    dest: /python3.tgz
+
+- name: Extract python3.tgz
+  unarchive:
+    src: /python3.tgz
+    dest: /
+    creates: /Python-{{ python3_version }}
+    remote_src: yes
+
+- name: Configure, make, make altinstall python3
+  shell:
+    cmd: |
+      ./configure && \
+      make && \
+      make altinstall
+    chdir: /Python-{{ python3_version }}
+    creates: /usr/local/bin/python3.{{ python3_version.split('.')[1] }}
+
+- name: Create symbolic links
+  file:
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+    force: true
+  loop:
+    - src: /usr/local/bin/python3.{{ python3_version.split('.')[1] }}
+      path: /usr/bin/python3
+    - src: /usr/local/bin/pip3.{{ python3_version.split('.')[1] }}
+      path: /usr/bin/pip3
+
+- name: Remove python3 installation files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop:
+    - path: /Python-{{ python3_version }}
+    - path: /python3.tgz
