@@ -17,7 +17,7 @@
       - git
       - java-11-openjdk-devel
       - libffi-devel
-      - openssl11
+      - openssl-devel
       - selinux-policy
       - sudo
       - systemd

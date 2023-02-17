@@ -35,11 +35,27 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 # * <https://hub.docker.com/_/centos/>: Good start, but badly broken.
 # * <https://github.com/solita/docker-systemd>: For Ubuntu, but works!
 # * <https://github.com/moby/moby/issues/28614>: Also some useful info.
+#
+# NOTE: Packages sepecified below should generally be kept up-to-date
+#       with the dependencies encoded in the BFD platinum image
+#       instructions.
 RUN yum update -y --security && \
     amazon-linux-extras enable java-openjdk11 && \
     yum clean metadata && \
     yum -y groupinstall "Development Tools" && \
-    yum install -y tar sudo unzip selinux-policy systemd java-11-openjdk-devel gcc devel libffi-devel openssl11 openssl-devel && \
+    yum install -y \
+    amazon-cloudwatch-agent \
+    ansible \
+    gcc \
+    git \
+    java-11-openjdk-devel \
+    libffi-devel \
+    openssl-devel \
+    selinux-policy \
+    sudo \
+    systemd \
+    tar \
+    unzip && \
     find /etc/systemd/system \
          /lib/systemd/system \
          -path '*.wants/*' \
