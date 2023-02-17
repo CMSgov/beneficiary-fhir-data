@@ -23,7 +23,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.user=bfd >> /flyway/conf/flyway.conf
 
 FROM amazonlinux:2 as al2
-ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz"
+ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz"
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
 # Getting systemd to run correctly inside Docker is very tricky. Need to

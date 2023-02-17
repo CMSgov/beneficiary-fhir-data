@@ -10,7 +10,7 @@
   gather_facts: false
   vars:
     ansible_ssh_pipelining: false
-    python3_version: '3.9.9'
+    python3_version: '3.9.16'
 
   tasks:
     - name: Apply latest host security patches
