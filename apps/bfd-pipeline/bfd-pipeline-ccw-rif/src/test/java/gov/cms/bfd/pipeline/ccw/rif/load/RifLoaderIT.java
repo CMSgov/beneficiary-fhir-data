@@ -1055,7 +1055,7 @@ public final class RifLoaderIT {
      * re-run the same test, using a CLM_GRP_ID value that we know exists; corresponds to
      * CHECK_CLAIMS_GROUP_ID query in {@link CcwRifLoadPreValidateSynthea}
      */
-    endStateProps.setClmGrpIdStart(-100000793);
+    endStateProps.setClmGrpIdStart(-100002508);
     manifest.setPreValidationProperties(endStateProps);
     assertFalse(preVal.isValid(manifest));
 

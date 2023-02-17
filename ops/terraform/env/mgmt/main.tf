@@ -47,3 +47,10 @@ data "aws_ssm_parameter" "cbc_aws_account_arn" {
   name            = "/bfd/mgmt/jenkins/sensitive/cbc_aws_account_arn"
   with_decryption = true
 }
+
+# The root ARN of the AWS account that manages the CPM service
+# TODO: As of 02/2023 this parameter is manually managed
+data "aws_ssm_parameter" "cpm_aws_account_arn" {
+  name            = "/bfd/mgmt/jenkins/sensitive/cpm_aws_account_arn"
+  with_decryption = true
+}

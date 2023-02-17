@@ -204,15 +204,15 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
                     startingSequenceNumber);
               }
             }
-
-            responseStream.cancelStream("No further messages need to be ingested.");
           }
+          responseStream.cancelStream("No further messages need to be ingested.");
         } catch (GrpcResponseStream.StreamInterruptedException ex) {
           // If our thread is interrupted we cancel the stream so the server knows we're done
           // and then shut down normally.
           responseStream.cancelStream("shutting down due to InterruptedException");
           processResult.setInterrupted(true);
         } catch (Exception e) {
+          responseStream.cancelStream("shutting down due to Exception");
           // If we failed to process the claim, it stays in the DLQ, nothing to do.
           log.error(
               "Failed to process "
