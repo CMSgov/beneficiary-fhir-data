@@ -94,7 +94,7 @@ class MetricDataQuery:
 
 @dataclass
 class MetricDataResult:
-    """Dataclass representing the result of a successful GetMetridData operation"""
+    """Dataclass representing the result of a successful GetMetricData operation"""
 
     label: str
     timestamps: list[datetime]
