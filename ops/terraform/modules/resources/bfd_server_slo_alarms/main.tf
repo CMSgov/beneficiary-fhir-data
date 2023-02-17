@@ -41,9 +41,12 @@ locals {
   alert_sns_name   = try(coalesce(var.alert_sns_override, local.env_sns.alert), null)
   warning_sns_name = try(coalesce(var.warning_sns_override, local.env_sns.warning), null)
   ok_sns_name      = try(coalesce(var.ok_sns_override, local.env_sns.ok), null)
-  alert_arn        = try([data.aws_sns_topic.alert_sns[0].arn], [])
-  warning_arn      = try([data.aws_sns_topic.warning_sns[0].arn], [])
-  ok_arn           = try([data.aws_sns_topic.ok_sns[0].arn], [])
+  # Use Terraform's "splat" operator to automatically return either an empty list, if no
+  # SNS topic was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that
+  # is the ARN of the SNS topic. Functionally equivalent to [for o in data.aws_sns_topic.sns : o.arn]
+  alert_arn        = data.aws_sns_topic.alert_sns[*].arn
+  warning_arn      = data.aws_sns_topic.warning_sns[*].arn
+  ok_arn           = data.aws_sns_topic.ok_sns[*].arn
 
   namespace = "bfd-${var.env}/${local.app}"
   metrics = {

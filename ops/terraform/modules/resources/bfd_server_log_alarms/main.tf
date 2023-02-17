@@ -36,9 +36,12 @@ locals {
   alert_sns_name  = try(coalesce(var.alert_sns_override, local.env_sns.alert), null)
   notify_sns_name = try(coalesce(var.notify_sns_override, local.env_sns.notify), null)
   ok_sns_name     = try(coalesce(var.ok_sns_override, local.env_sns.ok), null)
-  alert_arn       = try([data.aws_sns_topic.alert_sns[0].arn], [])
-  notify_arn      = try([data.aws_sns_topic.notify_sns[0].arn], [])
-  ok_arn          = try([data.aws_sns_topic.ok_sns[0].arn], [])
+  # Use Terraform's "splat" operator to automatically return either an empty list, if no
+  # SNS topic was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that
+  # is the ARN of the SNS topic. Functionally equivalent to [for o in data.aws_sns_topic.sns : o.arn]
+  alert_arn       = data.aws_sns_topic.alert_sns[*].arn
+  notify_arn      = data.aws_sns_topic.notify_sns[*].arn
+  ok_arn          = data.aws_sns_topic.ok_sns[*].arn
 
   server_log_availability = {
     period       = 1 * 60 * 60 # 1 hour 
