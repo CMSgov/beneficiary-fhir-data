@@ -58,6 +58,7 @@ class RifFileType(str, Enum):
     """Represents all of the possible RIF file types that can be loaded by the BFD ETL Pipeline. The
     value of each enum is a specific substring that is used to match on each type of file"""
 
+    BENEFICIARY_HISTORY = "beneficiary_history"
     BENEFICIARY = "bene"
     CARRIER = "carrier"
     DME = "dme"
