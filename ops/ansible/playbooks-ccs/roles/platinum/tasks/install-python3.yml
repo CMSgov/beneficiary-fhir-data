@@ -1,6 +1,6 @@
 - name: Download python3 tar
   get_url:
-    url: "{{ python3_tar_source }}"
+    url: https://www.python.org/ftp/python/{{ python3_version }}/Python-{{ python3_version }}.tgz
     dest: /python3.tgz
 
 - name: Extract python3.tgz
@@ -10,6 +10,10 @@
     creates: /Python-{{ python3_version }}
     remote_src: yes
 
+# NOTE: python is primarily used for infrastructure and operational support to BFD.
+#       Optimizations via `--enable-optimizations` in the `configure` step below are
+#       not enabled to avoid lengthy build times.
+#       https://docs.python.org/3/using/configure.html#performance-options
 - name: Configure, make, make altinstall python3
   shell:
     cmd: |
@@ -24,7 +28,6 @@
     src: "{{ item.src }}"
     path: "{{ item.path }}"
     state: link
-    force: true
   loop:
     - src: /usr/local/bin/python3.{{ python3_version.split('.')[1] }}
       path: /usr/bin/python3

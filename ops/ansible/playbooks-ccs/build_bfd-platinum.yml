@@ -10,7 +10,6 @@
   gather_facts: false
   vars:
     ansible_ssh_pipelining: false
-    python3_tar_source: https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz
     python3_version: '3.9.9'
 
   tasks:
