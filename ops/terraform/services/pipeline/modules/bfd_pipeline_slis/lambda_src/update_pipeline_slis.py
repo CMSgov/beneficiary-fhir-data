@@ -386,6 +386,7 @@ def handler(event, context):
                 "An unrecoverable error occurred when trying to call PutMetricData for metric"
                 f" {METRICS_NAMESPACE}/{timestamp_metric_name}: {exc}"
             )
+            return
 
         if pipeline_data_status == PipelineDataStatus.AVAILABLE:
             print(
@@ -580,6 +581,7 @@ def handler(event, context):
                     "An unrecoverable error occurred when trying to call PutMetricData for metric"
                     f" {METRICS_NAMESPACE}/{timestamp_metric_name}: {exc}"
                 )
+                return
 
             print("Checking if the incoming file is the last file to be loaded...")
             etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
