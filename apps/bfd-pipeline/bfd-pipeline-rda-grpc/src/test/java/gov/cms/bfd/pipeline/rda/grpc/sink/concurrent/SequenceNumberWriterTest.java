@@ -47,12 +47,12 @@ public class SequenceNumberWriterTest {
   @Test
   void shouldWriteUpdatesOnlyWhenSequenceNumberChanges() {
     tracker.removeWrittenSequenceNumber(1);
-    assertEquals(Optional.of(2L), writer.updateDb().blockOptional());
-    assertEquals(Optional.empty(), writer.updateDb().blockOptional());
+    assertEquals(Optional.of(2L), writer.updateSequenceNumberInDatabase().blockOptional());
+    assertEquals(Optional.empty(), writer.updateSequenceNumberInDatabase().blockOptional());
 
     tracker.removeWrittenSequenceNumber(3);
-    assertEquals(Optional.of(4L), writer.updateDb().blockOptional());
-    assertEquals(Optional.empty(), writer.updateDb().blockOptional());
+    assertEquals(Optional.of(4L), writer.updateSequenceNumberInDatabase().blockOptional());
+    assertEquals(Optional.empty(), writer.updateSequenceNumberInDatabase().blockOptional());
 
     verify(sink).updateLastSequenceNumber(2L);
     verify(sink).updateLastSequenceNumber(4L);
@@ -65,7 +65,7 @@ public class SequenceNumberWriterTest {
     doThrow(new RuntimeException()).when(sink).updateLastSequenceNumber(anyLong());
 
     tracker.removeWrittenSequenceNumber(1);
-    assertThrows(RuntimeException.class, () -> writer.updateDb().block());
+    assertThrows(RuntimeException.class, () -> writer.updateSequenceNumberInDatabase().block());
   }
 
   /**

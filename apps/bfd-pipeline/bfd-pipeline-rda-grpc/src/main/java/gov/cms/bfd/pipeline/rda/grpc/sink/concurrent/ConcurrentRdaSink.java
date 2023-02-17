@@ -120,10 +120,10 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   private final Scheduler claimWriterScheduler;
 
   /**
-   * {@link Scheduler} used to run {@link SequenceNumberWriter#updateDb} calls. Using a custom
-   * scheduler to ensure thread pool size matches our configuration and also to provide meaningful
-   * names for worker threads when logging. Schedulers are {@link Closeable} so this is closed in
-   * {@link #close}.
+   * {@link Scheduler} used to run {@link SequenceNumberWriter#updateSequenceNumberInDatabase}
+   * calls. Using a custom scheduler to ensure thread pool size matches our configuration and also
+   * to provide meaningful names for worker threads when logging. Schedulers are {@link Closeable}
+   * so this is closed in {@link #close}.
    */
   private final Scheduler sequenceNumberWriterScheduler;
 
@@ -243,12 +243,13 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   }
 
   /**
-   * Creates a {@link Flux} that periodically calls {@link SequenceNumberWriter#updateDb} to ensure
-   * that the progress table has the latest known good sequence number value. Since database writes
-   * can sometimes be slow the interval timer skips any updates that are triggered while one is
-   * already in progress. An interval is used because it's not vital that the progress table be
-   * constantly up to date and excessive writes would just slow progress. The database updates take
-   * place using a worker from the {@link #sequenceNumberWriterScheduler}.
+   * Creates a {@link Flux} that periodically calls {@link
+   * SequenceNumberWriter#updateSequenceNumberInDatabase} to ensure that the progress table has the
+   * latest known good sequence number value. Since database writes can sometimes be slow the
+   * interval timer skips any updates that are triggered while one is already in progress. An
+   * interval is used because it's not vital that the progress table be constantly up to date and
+   * excessive writes would just slow progress. The database updates take place using a worker from
+   * the {@link #sequenceNumberWriterScheduler}.
    *
    * @return {@link Flux} that emits a sequence number every time the progress table is updated
    */
@@ -261,7 +262,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
         // Drop any extra messages if the writer is currently busy.
         .onBackpressureLatest()
         // Calls updateDb each time the timer fires.
-        .flatMap(o -> sequenceNumberWriter.updateDb());
+        .flatMap(o -> sequenceNumberWriter.updateSequenceNumberInDatabase());
   }
 
   /** {@inheritDoc} */

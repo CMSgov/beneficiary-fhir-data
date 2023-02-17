@@ -53,7 +53,7 @@ class SequenceNumberWriter<TMessage, TClaim> {
    *
    * @return {@link Mono} describing the result of the update
    */
-  synchronized Mono<Long> updateDb() {
+  synchronized Mono<Long> updateSequenceNumberInDatabase() {
     long newSequenceNumber = sequenceNumbers.getSafeResumeSequenceNumber();
     if (newSequenceNumber != previousSequenceNumber) {
       try {
@@ -81,7 +81,7 @@ class SequenceNumberWriter<TMessage, TClaim> {
   synchronized void close() throws Exception {
     log.debug("SequenceNumberWriter closing");
     final var closer = new MultiCloser();
-    closer.close(() -> updateDb().block());
+    closer.close(() -> updateSequenceNumberInDatabase().block());
     closer.close(sink::close);
     closer.finish();
     log.info("SequenceNumberWriter closed");
