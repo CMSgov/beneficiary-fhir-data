@@ -78,6 +78,7 @@ public class AbstractRdaLoadJobTest {
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(10))
             .batchSize(3)
+            .sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE)
             .build();
     appMetrics = new SimpleMeterRegistry();
     job = new TestingLoadJob(config, preJobTask, sourceFactory, sinkFactory, appMetrics);

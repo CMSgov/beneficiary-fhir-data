@@ -165,7 +165,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     try {
       metrics.calls.increment();
       try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(config.sinkTypePreference)) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {
@@ -256,6 +256,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     /** Determines if the DLQ should be processed for subsequent job runs. */
     private final boolean processDLQ;
 
+    /** Indicates the preferred sink type to create for created jobs. */
+    private final SinkTypePreference sinkTypePreference;
+
     /**
      * Instantiates a new config.
      *
@@ -265,6 +268,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      * @param startingFissSeqNum the starting fiss seq num
      * @param startingMcsSeqNum the starting MCS seq num
      * @param processDLQ if the job should process the DLQ
+     * @param sinkTypePreference The {@link SinkTypePreference} to use for created jobs.
      */
     @Builder
     private Config(
@@ -273,13 +277,15 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
         int writeThreads,
         @Nullable Long startingFissSeqNum,
         @Nullable Long startingMcsSeqNum,
-        boolean processDLQ) {
+        boolean processDLQ,
+        SinkTypePreference sinkTypePreference) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
       this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
       this.startingFissSeqNum = startingFissSeqNum;
       this.startingMcsSeqNum = startingMcsSeqNum;
       this.processDLQ = processDLQ;
+      this.sinkTypePreference = sinkTypePreference;
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
