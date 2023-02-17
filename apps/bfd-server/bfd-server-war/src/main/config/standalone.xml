@@ -146,7 +146,7 @@
             </job-repository>
             <thread-pool>
                 <max-threads count="10"/>
-                <keepalive-time time="30" unit="seconds"/>
+                <keepalive-time time="300" unit="seconds"/>
             </thread-pool>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:datasources:2.0">

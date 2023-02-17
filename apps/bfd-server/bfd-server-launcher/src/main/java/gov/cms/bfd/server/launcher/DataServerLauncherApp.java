@@ -180,6 +180,7 @@ public final class DataServerLauncherApp {
             new HttpConnectionFactory(httpsConfig));
     serverConnector.setHost(appConfig.getHost().orElse("0.0.0.0"));
     serverConnector.setPort(appConfig.getPort());
+    serverConnector.setIdleTimeout(300000);
     server.setConnectors(new Connector[] {serverConnector});
 
     // Jetty will be used to run a WAR, via this WebAppContext.
