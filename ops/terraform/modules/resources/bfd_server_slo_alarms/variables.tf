@@ -10,8 +10,14 @@ variable "warning_sns_override" {
   default     = null
 }
 
-variable "ok_sns_override" {
-  description = "Overrides the default, per-environment SNS topic used for Alarms that transition from ALARM to OK"
+variable "alert_ok_sns_override" {
+  description = "Overrides the default, per-environment SNS topic used for Alert Alarms that transition from ALARM to OK"
+  type        = string
+  default     = null
+}
+
+variable "warning_ok_sns_override" {
+  description = "Overrides the default, per-environment SNS topic used for Warning Alarms that transition from ALARM to OK"
   type        = string
   default     = null
 }
