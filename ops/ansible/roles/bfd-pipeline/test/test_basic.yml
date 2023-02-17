@@ -16,6 +16,7 @@
         data_pipeline_db_url: jdbc:postgresql://db:5432/fhirdb
         data_pipeline_db_username: bfd
         data_pipeline_db_password: bfd
+        data_pipeline_dir: /usr/local/bluebutton-data-pipeline
 
     - name: Ensure Service Is Running
       service:
@@ -25,16 +26,10 @@
       changed_when: false
       become: true
 
-    - name: Grab Log Contents
-      command: cat /usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log
+    - name: Check bluebutton-data-pipeline.log
+      shell: grep 'Application starting up!' {{ data_pipeline_dir }}/bluebutton-data-pipeline.log
       changed_when: false
-      register: command_cat_pipeline_log
-
-    - name: Log Failed Application Launches
-      ansible.builtin.debug:
-        var: command_cat_pipeline_log
-      when: "'Application starting up!' not in command_cat_pipeline_log.stdout"
-
-    - name: Verify Log Contents
-      action: fail
-      when: "'Application starting up!' not in command_cat_pipeline_log.stdout"
+      register: check_result
+      until: "check_result is not failed"
+      retries: 20
+      delay: 5
