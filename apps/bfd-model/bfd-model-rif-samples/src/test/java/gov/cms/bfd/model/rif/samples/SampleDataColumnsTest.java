@@ -7,7 +7,6 @@ import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -103,8 +102,8 @@ public final class SampleDataColumnsTest {
                   toHeaderFormat(columnsInEnum, c -> c.name())));
         }
       }
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
+    } catch (UncheckedIOException e) {
+      throw e;
     }
   }
 
