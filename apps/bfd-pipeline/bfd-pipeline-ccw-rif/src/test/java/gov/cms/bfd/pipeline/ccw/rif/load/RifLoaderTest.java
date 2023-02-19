@@ -42,10 +42,10 @@ public final class RifLoaderTest {
      */
     assertEquals(
         "d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a",
-        RifLoader.computeHicnHash(hasher, "123456789A"));
+        RifLoader.computeHicnHash(hasher::computeIdentifierHash, "123456789A"));
     assertEquals(
         "6357f16ebd305103cf9f2864c56435ad0de5e50f73631159772f4a4fcdfe39a5",
-        RifLoader.computeHicnHash(hasher, "987654321E"));
+        RifLoader.computeHicnHash(hasher::computeIdentifierHash, "987654321E"));
   }
 
   /**
@@ -72,10 +72,10 @@ public final class RifLoaderTest {
      */
     assertEquals(
         "ec49dc08f8dd8b4e189f623ab666cfc8b81f201cc94fe6aef860a4c3bd57f278",
-        RifLoader.computeMbiHash(hasher, "3456789"));
+        RifLoader.computeMbiHash(hasher::computeIdentifierHash, "3456789"));
     assertEquals(
         "742086db6bf338dedda6175ea3af8ca5e85b81fda9cc7078004a4d3e4792494b",
-        RifLoader.computeMbiHash(hasher, "2456689"));
+        RifLoader.computeMbiHash(hasher::computeIdentifierHash, "2456689"));
   }
 
   /**

@@ -149,9 +149,11 @@ public final class RifLoaderIT {
 
       // Validate HICN and MBI
       String expectedMbiHash =
-          RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
+          RifLoader.computeMbiHash(
+              new IdHasher(options.getIdHasherConfig())::computeIdentifierHash, "3456789");
       String expectedHicn =
-          RifLoader.computeHicnHash(new IdHasher(options.getIdHasherConfig()), "543217066U");
+          RifLoader.computeHicnHash(
+              new IdHasher(options.getIdHasherConfig())::computeIdentifierHash, "543217066U");
       assertEquals(
           expectedMbiHash,
           beneficiaryFromDb.getMbiHash().orElse(null),
@@ -205,9 +207,11 @@ public final class RifLoaderIT {
 
       // Validate HICN and MBI
       String expectedMbiHash =
-          RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
+          RifLoader.computeMbiHash(
+              new IdHasher(options.getIdHasherConfig())::computeIdentifierHash, "3456789");
       String expectedHicn =
-          RifLoader.computeHicnHash(new IdHasher(options.getIdHasherConfig()), "543217066U");
+          RifLoader.computeHicnHash(
+              new IdHasher(options.getIdHasherConfig())::computeIdentifierHash, "543217066U");
       assertEquals(
           expectedMbiHash,
           beneficiaryFromDb.getMbiHash().orElse(null),
@@ -1534,12 +1538,13 @@ public final class RifLoaderIT {
           BeneficiaryHistory beneficiaryHistoryToFind = (BeneficiaryHistory) record;
           beneficiaryHistoryToFind.setHicn(
               RifLoader.computeHicnHash(
-                  new IdHasher(options.getIdHasherConfig()), beneficiaryHistoryToFind.getHicn()));
+                  new IdHasher(options.getIdHasherConfig())::computeIdentifierHash,
+                  beneficiaryHistoryToFind.getHicn()));
           beneficiaryHistoryToFind.setMbiHash(
               beneficiaryHistoryToFind.getMedicareBeneficiaryId().isPresent()
                   ? Optional.of(
                       RifLoader.computeMbiHash(
-                          new IdHasher(options.getIdHasherConfig()),
+                          new IdHasher(options.getIdHasherConfig())::computeIdentifierHash,
                           beneficiaryHistoryToFind.getMedicareBeneficiaryId().get()))
                   : Optional.empty());
 
