@@ -457,6 +457,7 @@ public final class PipelineApplication {
    *
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
+   * @param mbiCacheAppState the {@link PipelineApplicationState} to use for creating mbi cache
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private static PipelineJob<?> createCcwRifLoadJob(
