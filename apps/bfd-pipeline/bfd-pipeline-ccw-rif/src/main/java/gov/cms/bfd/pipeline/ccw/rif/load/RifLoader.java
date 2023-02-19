@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.Entity;
@@ -92,10 +93,14 @@ public final class RifLoader {
   private static final Logger LOGGER_RECORD_COUNTS =
       LoggerFactory.getLogger(RifLoader.class.getName() + ".recordCounts");
 
+  /** Multiple of threads for max jobs in executor service. */
+  private static final int EXECUTOR_THREAD_MULTIPLE =
+      Integer.parseInt(Optional.ofNullable(System.getenv("EXECUTOR_THREAD_MULTIPLE")).orElse("10"));
+
   /** The load options. */
   private final LoadAppOptions options;
-  /** The hasher for ids. */
-  private final IdHasher idHasher;
+  /** Factory to create hasher for ids. */
+  private final Supplier<Hasher> hasherFactory;
   /** The shared application state. */
   private final PipelineApplicationState appState;
 
@@ -112,7 +117,25 @@ public final class RifLoader {
     /*
      * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
      */
-    this.idHasher = new IdHasher(options.getIdHasherConfig());
+    this.hasherFactory = () -> new IdHasher(options.getIdHasherConfig())::computeIdentifierHash;
+  }
+
+  /**
+   * Constructs a new {@link RifLoader} instance using the provided hasher factory.
+   *
+   * @param options the {@link LoadAppOptions} to use
+   * @param appState the {@link PipelineApplicationState} to use
+   * @param hasherFactory the hasher factory to use
+   */
+  public RifLoader(
+      LoadAppOptions options, PipelineApplicationState appState, Supplier<Hasher> hasherFactory) {
+    this.options = options;
+    this.appState = appState;
+
+    /*
+     * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
+     */
+    this.hasherFactory = hasherFactory;
   }
 
   /**
@@ -136,7 +159,7 @@ public final class RifLoader {
      * unnecessarily eating up a bunch of RAM when the ETL happens to be
      * running more slowly (for whatever reason).
      */
-    int taskQueueSize = 10 * threadPoolSize;
+    int taskQueueSize = EXECUTOR_THREAD_MULTIPLE * threadPoolSize;
 
     LOGGER.info(
         "Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
@@ -395,13 +418,6 @@ public final class RifLoader {
     // keep track if we are processing synthetic data
     boolean isSyntheticData = fileEvent.getParentFilesEvent().isSyntheticData();
 
-    if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
-        hashBeneficiaryHistoryHicn(rifRecordEvent);
-        hashBeneficiaryHistoryMbi(rifRecordEvent);
-      }
-    }
-
     // Only one of each failure/success Timer.Contexts will be applied.
     Timer.Context timerBatchSuccess =
         appState
@@ -422,13 +438,22 @@ public final class RifLoader {
 
     EntityManager entityManager = null;
     EntityTransaction txn = null;
+    Hasher idHasher = null;
 
     // TODO: refactor the following to be less of an indented mess
     try {
       entityManager = appState.getEntityManagerFactory().createEntityManager();
+      idHasher = hasherFactory.get();
       txn = entityManager.getTransaction();
       txn.begin();
       List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
+
+      if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
+        for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
+          hashBeneficiaryHistoryHicn(idHasher, rifRecordEvent);
+          hashBeneficiaryHistoryMbi(idHasher, rifRecordEvent);
+        }
+      }
 
       /*
        * Dev Note: All timestamps of records in the batch and the LoadedBatch must be the same for data consistency.
@@ -473,7 +498,7 @@ public final class RifLoader {
 
           if (recordInDb == null) {
             loadAction = LoadAction.INSERTED;
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+            tweakIfBeneficiary(idHasher, entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
             // FIXME Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
           } else {
@@ -489,7 +514,7 @@ public final class RifLoader {
                   "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
                   ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
             }
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+            tweakIfBeneficiary(idHasher, entityManager, loadedBatchBuilder, rifRecordEvent);
             entityManager.persist(record);
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
@@ -518,7 +543,7 @@ public final class RifLoader {
               entityManager.persist(skippedRifRecord);
               LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
             } else {
-              tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+              tweakIfBeneficiary(idHasher, entityManager, loadedBatchBuilder, rifRecordEvent);
               entityManager.merge(record);
             }
           } else {
@@ -573,6 +598,7 @@ public final class RifLoader {
       }
 
       if (entityManager != null) entityManager.close();
+      if (idHasher != null) idHasher.close();
     }
   }
 
@@ -630,11 +656,13 @@ public final class RifLoader {
    *   <li>Adds a {@link BeneficiaryHistory} record for previous the {@link Beneficiary}, as needed.
    * </ul>
    *
+   * @param idHasher the {@link Hasher} to use
    * @param entityManager the {@link EntityManager} to use
    * @param loadedBatchBuilder the {@link LoadedBatchBuilder} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to handle the {@link Beneficiary} (if any) for
    */
   private void tweakIfBeneficiary(
+      Hasher idHasher,
       EntityManager entityManager,
       LoadedBatchBuilder loadedBatchBuilder,
       RifRecordEvent<?> rifRecordEvent) {
@@ -682,7 +710,7 @@ public final class RifLoader {
             newBeneficiaryRecord.getHicnUnhashed(), oldBeneficiaryRecord.get().getHicnUnhashed())) {
       newBeneficiaryRecord.setHicn(oldBeneficiaryRecord.get().getHicn());
     } else {
-      hashBeneficiaryHicn(rifRecordEvent);
+      hashBeneficiaryHicn(idHasher, rifRecordEvent);
     }
     if (oldBeneficiaryRecord.isPresent()
         && Objects.equals(
@@ -690,7 +718,7 @@ public final class RifLoader {
             oldBeneficiaryRecord.get().getMedicareBeneficiaryId())) {
       newBeneficiaryRecord.setMbiHash(oldBeneficiaryRecord.get().getMbiHash());
     } else {
-      hashBeneficiaryMbi(rifRecordEvent);
+      hashBeneficiaryMbi(idHasher, rifRecordEvent);
     }
 
     if (rifRecordEvent.getRecordAction() == RecordAction.UPDATE) {
@@ -1306,9 +1334,10 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
+   * @param idHasher the {@link Hasher} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHicn(RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHicn(Hasher idHasher, RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
 
     Timer.Context timerHashing =
@@ -1338,9 +1367,10 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
+   * @param idHasher the {@link Hasher} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryMbi(RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryMbi(Hasher idHasher, RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
 
     Timer.Context timerHashing =
@@ -1370,9 +1400,10 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
+   * @param idHasher the {@link Hasher} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHistoryHicn(RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHistoryHicn(Hasher idHasher, RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
       return;
 
@@ -1403,9 +1434,10 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
+   * @param idHasher the {@link Hasher} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHistoryMbi(RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHistoryMbi(Hasher idHasher, RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
       return;
 
@@ -1439,7 +1471,7 @@ public final class RifLoader {
    * @param hicn the Medicare beneficiary HICN to be hashed
    * @return a one-way cryptographic hash of the specified HICN value, exactly 64 characters long
    */
-  static String computeHicnHash(IdHasher idHasher, String hicn) {
+  static String computeHicnHash(Hasher idHasher, String hicn) {
     return idHasher.computeIdentifierHash(hicn);
   }
 
@@ -1450,7 +1482,7 @@ public final class RifLoader {
    * @param mbi the Medicare beneficiary id to be hashed
    * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
    */
-  static String computeMbiHash(IdHasher idHasher, String mbi) {
+  static String computeMbiHash(Hasher idHasher, String mbi) {
     return idHasher.computeIdentifierHash(mbi);
   }
 
@@ -1783,5 +1815,19 @@ public final class RifLoader {
     public boolean isCopyDesired() {
       return copyDesired;
     }
+  }
+
+  /** Quick and dirty hash function with built in cache. */
+  public interface Hasher {
+    /**
+     * Compute a hash from the key.
+     *
+     * @param key the key
+     * @return the hash
+     */
+    String computeIdentifierHash(String key);
+
+    /** Close any resources. */
+    default void close() {}
   }
 }

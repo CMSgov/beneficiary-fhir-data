@@ -23,6 +23,8 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
@@ -49,6 +51,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import org.postgresql.core.BaseConnection;
 import org.postgresql.jdbc.PgConnection;
 import org.slf4j.Logger;
@@ -351,7 +355,16 @@ public final class PipelineApplication {
               PipelineApplicationState.PERSISTENCE_UNIT_NAME,
               Clock.systemUTC());
 
-      jobs.add(createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
+      final PipelineApplicationState mbiCacheAppState =
+          new PipelineApplicationState(
+              appMeters,
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+              Clock.systemUTC());
+
+      jobs.add(
+          createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState, mbiCacheAppState));
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
       LOGGER.warn("CcwRifLoadJob is disabled in app configuration.");
@@ -390,6 +403,54 @@ public final class PipelineApplication {
     return jobs;
   }
 
+  /** Shim to use an RDA MbiCache for the RIF pipeline. */
+  private static class RifHasherShim implements RifLoader.Hasher {
+    /** An entity manager. */
+    private final EntityManager entityManager;
+    /** An MbiCache. */
+    private final MbiCache mbiCache;
+
+    /**
+     * A constructor.
+     *
+     * @param idHasherConfig a hasher config
+     * @param entityManager an entity manager
+     */
+    private RifHasherShim(IdHasher.Config idHasherConfig, EntityManager entityManager) {
+      this.entityManager = entityManager;
+      this.mbiCache = MbiCache.computedCache(idHasherConfig).withDatabaseLookup(entityManager);
+    }
+
+    /**
+     * Look up or compute the hash.
+     *
+     * @param key the key
+     * @return the hash
+     */
+    @Override
+    public String computeIdentifierHash(String key) {
+      return mbiCache.lookupMbi(key).getHash();
+    }
+
+    /** Close the entity manager. */
+    @Override
+    public void close() {
+      entityManager.close();
+    }
+  }
+
+  /**
+   * Factory to create the hasher.
+   *
+   * @param idHasherConfig hasher config
+   * @param entityManagerFactory entity manager factory
+   * @return hasher
+   */
+  private static RifLoader.Hasher createRifHasherShim(
+      IdHasher.Config idHasherConfig, EntityManagerFactory entityManagerFactory) {
+    return new RifHasherShim(idHasherConfig, entityManagerFactory.createEntityManager());
+  }
+
   /**
    * Creates the CCW RIF loader job and returns it.
    *
@@ -398,14 +459,23 @@ public final class PipelineApplication {
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private static PipelineJob<?> createCcwRifLoadJob(
-      CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
+      CcwRifLoadOptions loadOptions,
+      PipelineApplicationState appState,
+      PipelineApplicationState mbiCacheAppState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
     s3TaskManager = new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
-    RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
+    RifLoader rifLoader =
+        new RifLoader(
+            loadOptions.getLoadOptions(),
+            appState,
+            () ->
+                new RifHasherShim(
+                    loadOptions.getLoadOptions().getIdHasherConfig(),
+                    mbiCacheAppState.getEntityManagerFactory().createEntityManager()));
 
     /*
      * Create the DataSetMonitorListener that will glue those stages together and run them all for

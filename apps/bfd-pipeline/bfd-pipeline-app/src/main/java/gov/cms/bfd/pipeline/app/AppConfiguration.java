@@ -437,6 +437,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     boolean filteringNonNullAndNon2023Benes =
         readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES)
             .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
+    int rifRecordBatchSize = readEnvIntOptional("RIF_JOB_BATCH_SIZE").orElse(RECORD_BATCH_SIZE);
 
     MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
     DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(loaderThreads);
@@ -451,7 +452,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             loaderThreads,
             idempotencyRequired,
             filteringNonNullAndNon2023Benes,
-            RECORD_BATCH_SIZE);
+            rifRecordBatchSize);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
