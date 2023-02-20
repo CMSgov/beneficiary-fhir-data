@@ -1,0 +1,149 @@
+mappings:
+- id: FissRevenueLine
+  messageClassName: gov.cms.mpsm.rda.v1.fiss.FissRevenueLine
+  entityClassName: gov.cms.bfd.model.rda.RdaFissRevenueLine
+  table:
+    name: fiss_revenue_lines
+    schema: rda
+    primaryKeyColumns:
+    - dcn
+    - rdaPosition
+    columns:
+    - name: dcn
+      sqlType: varchar(23)
+      nullable: false
+      comment: 'Document Control Number: This field is the identification number for
+        a claim. It provides a reference number for the control and monitoring of
+        specific claims, and to differentiate between claims for the beneficiary;
+        it may be used to access data for the record depending on the copybook it
+        used for. This is a unique field created by the system.'
+    - name: rdaPosition
+      sqlType: smallint
+      javaType: short
+      nullable: false
+      dbName: rda_position
+    - name: nonBillRevCode
+      sqlType: varchar(1)
+      nullable: false
+      comment: 'Identifies whether the revenue code and / or the HCPCS code are valid.'
+      dbName: non_bill_rev_code
+    - name: revCd
+      sqlType: varchar(4)
+      dbName: rev_cd
+      comment: 'Identifies the payment code used for the specific service or item
+       billed on a claim, and may be used to access data for the record, depending
+        on the copybook it is used in.'
+    - name: revUnitsBilled
+      sqlType: integer
+      dbName: rev_units_billed
+      comment: 'Identifies the total of units / number of services billed for each
+       Healthcare Common Procedure Coding System (HCPCS) code and / or revenue code.'
+    - name: revServUnitCnt
+      sqlType: integer
+      dbName: rev_serv_unit_cnt
+      comment: 'Identifies the total of units / number of services billed for each HCPCS
+       code and / or revenue code.'
+    - name: serviceDate
+      sqlType: date
+      dbName: serv_dt_cymd
+      comment: 'Group level field comprised of the service date for each line item.'
+    - name: serviceDateText
+      sqlType: varchar(10)
+      dbName: serv_dt_cymd_text
+      comment: 'Raw FISS value that was sent to RDA for the service date'
+    - name: hcpcCd
+      sqlType: varchar(5)
+      dbName: hcpc_cd
+      comment: 'Contains the code assigned by the Centers for Medicare and Medicaid Services
+       (CMS) to identify the specific medical procedures, medications, supplies, or equipment
+        being provided; for the record depending on the copybooks it is used in.'
+    - name: hcpcInd
+      sqlType: varchar(1)
+      dbName: hcpc_ind
+      comment: 'Identifies the HCPC indicator.'
+    - name: hcpcModifier
+      sqlType: varchar(2)
+      dbName: hcpc_modifier
+      comment: 'Carries a qualifier of the HCPCS procedure code that enables more specific
+       procedure identification, first occurrence.'
+    - name: hcpcModifier2
+      sqlType: varchar(2)
+      dbName: hcpc_modifier2
+      comment: 'Carries a qualifier of the HCPCS procedure code that enables more specific
+       procedure identification, second occurrence.'
+    - name: hcpcModifier3
+      sqlType: varchar(2)
+      dbName: hcpc_modifier3
+      comment: 'Carries a qualifier of the HCPCS procedure code that enables more specific
+       procedure identification, third occurrence.'
+    - name: hcpcModifier4
+      sqlType: varchar(2)
+      dbName: hcpc_modifier4
+      comment: 'Carries a qualifier of the HCPCS procedure code that enables more specific
+       procedure identification, fourth occurrence.'
+    - name: hcpcModifier5
+      sqlType: varchar(2)
+      dbName: hcpc_modifier5
+      comment: 'Carries a qualifier of the HCPCS procedure code that enables more specific
+       procedure identification, fifth occurrence.'
+    - name: apcHcpcsApc
+      sqlType: varchar(5)
+      dbName: apc_hcpcs_apc
+      comment: 'Ambulatory Payment Classification (APC) Healthcare Common Procedure Coding
+       System (HCPCS) APC - Identifies the HCPC APC group code, which is assigned to the
+        billed HCPCS code in the Outpatient Code Editor (OCE) module.'
+    - name: acoRedRarc
+      sqlType: varchar(5)
+      dbName: aco_red_rarc
+      comment: 'If the claim has a demonstration code equal to “59” (Pioneer ACO
+       Demonstration) or “68” (Pioneer ACO SNF), and provided service is from an outpatient
+        provider (TOB equal to 12, 13, 14, 22, 23, 34, 71, 72, 74, 75, 76, 77, 81, 82, 85)
+         or the service is for home health Part B; this field will identify the Remittance
+          Advice Remark Code (RARC) returned to the provider advising this decision and
+           possible appeal rights.'
+    - name: acoRedCarc
+      sqlType: varchar(3)
+      dbName: aco_red_carc
+      comment: 'If the claim has a demonstration code equal to “59” (Pioneer ACO
+       Demonstration) or “68” (Pioneer ACO SNF), and provided service is from an outpatient
+        provider (TOB equal to 12, 13, 14, 22, 23, 34, 71, 72, 74, 75, 76, 77, 81, 82, 85)
+         or the service is for home health Part B; this field will identify the applicable
+          Claim Adjustment Reason Code (CARC) that defines why the service was paid
+           differently than billed.'
+    - name: acoRedCagc
+      sqlType: varchar(2)
+      dbName: aco_red_cagc
+      comment: 'If the claim has a demonstration code equal to “59” (Pioneer ACO
+       Demonstration) or “68” (Pioneer ACO SNF), and provided service is from an outpatient
+        provider (TOB equal to 12, 13, 14, 22, 23, 34, 71, 72, 74, 75, 76, 77, 81, 82, 85)
+         or the service is for home health Part B; this field will identify the applicable 
+         adjustment group code that defines the liability for adjustments in charges
+          occurring from this payment reduction.'
+  transformations:
+  - from: PARENT
+    to: dcn
+  - from: rdaPosition
+    transformer: UintToShort
+    optionalComponents: None
+  - from: nonBillRevCode
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode
+  - from: revCd
+  - from: revUnitsBilled
+  - from: revServUnitCnt
+  - from: servDtCymd
+    to: serviceDate
+  - from: servDtCymdText
+    to: serviceDateText
+  - from: hcpcCd
+  - from: hcpcInd
+  - from: hcpcModifier
+  - from: hcpcModifier2
+  - from: hcpcModifier3
+  - from: hcpcModifier4
+  - from: hcpcModifier5
+  - from: apcHcpcsApc
+  - from: acoRedRarc
+  - from: acoRedCarc
+  - from: acoRedCagc

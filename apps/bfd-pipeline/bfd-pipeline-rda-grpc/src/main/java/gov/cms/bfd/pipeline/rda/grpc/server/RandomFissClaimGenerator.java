@@ -15,11 +15,13 @@ import gov.cms.mpsm.rda.v1.fiss.FissBillFrequency;
 import gov.cms.mpsm.rda.v1.fiss.FissCancelAdjustmentCode;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier;
 import gov.cms.mpsm.rda.v1.fiss.FissInsuredPayer;
+import gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
@@ -29,6 +31,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissProcessNewHealthInsuranceClaimNumberIndicato
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation;
 import gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissRevenueLine;
 import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
 import java.time.Clock;
 import java.util.List;
@@ -50,6 +53,8 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   private static final int MAX_PAYERS = 5;
   /** The max audits to generate. */
   private static final int MAX_AUDITS = 20;
+  /** The max revenue lines to generate. */
+  private static final int MAX_REVENUE_LINES = 10;
   /** A list of the enums for the fiss claim statuses. */
   private static final List<FissClaimStatus> FissClaimStatusEnums =
       enumValues(FissClaimStatus.values());
@@ -111,6 +116,9 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   private static final List<FissProcessNewHealthInsuranceClaimNumberIndicator>
       FissProcessNewHealthInsuranceClaimNumberIndicatorEnums =
           enumValues(FissProcessNewHealthInsuranceClaimNumberIndicator.values());
+  /** A list of the enums for the fiss claim type indicators. */
+  private static final List<FissClaimTypeIndicator> FissClaimTypeIndicatorEnums =
+      enumValues(FissClaimTypeIndicator.values());
   /** A list of the enums for the fiss repository indicators. */
   private static final List<FissRepositoryIndicator> FissRepositoryIndicatorEnums =
       enumValues(FissRepositoryIndicator.values());
@@ -122,6 +130,9 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   private static final List<FissAdjustmentMedicareBeneficiaryIdentifierIndicator>
       FissAdjustmentMedicareBeneficiaryIdentifierIndicatorEnums =
           enumValues(FissAdjustmentMedicareBeneficiaryIdentifierIndicator.values());
+  /** A list of the enums for the fiss non bill rev codes. */
+  private static final List<FissNonBillRevCode> FissNonBillRevCodeEnums =
+      enumValues(FissNonBillRevCode.values());
 
   /**
    * Creates an instance with the specified seed.
@@ -157,6 +168,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
           addRandomDiagnosisCodes(claim);
           addRandomPayers(claim);
           addRandomAudits(claim);
+          addRandomRevenueLines(claim);
         });
     return claim.build();
   }
@@ -190,8 +202,20 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
           claim.setMedaProv6(medaProvId.substring(0, 6));
         });
     optional("totalChargeAmount", () -> claim.setTotalChargeAmount(randomAmount()));
-    optional("recdDtCymd", () -> claim.setRecdDtCymd(randomDate()));
-    optional("currTranDtCymd", () -> claim.setCurrTranDtCymd(randomDate()));
+    optional(
+        "recdDtCymd",
+        () -> {
+          String date = randomDate();
+          claim.setRecdDtCymd(date);
+          claim.setRecdDtCymdText(date);
+        });
+    optional(
+        "currTranDtCymd",
+        () -> {
+          String date = randomDate();
+          claim.setCurrTranDtCymd(date);
+          claim.setCurrTranDtCymdText(date);
+        });
     optional("admDiagCode", () -> claim.setAdmDiagCode(randomLetter(1, 7)));
     optional("npiNumber", () -> claim.setNpiNumber(randomDigit(10, 10)));
     optional("mbi", () -> claim.setMbi(randomAlphaNumeric(11, 11)));
@@ -296,6 +320,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
                 randomEnum(FissProcessNewHealthInsuranceClaimNumberIndicatorEnums)),
         () -> claim.setProcNewHicIndUnrecognized(randomAlphaNumeric(1, 1)));
     optional("newHic", () -> claim.setNewHic(randomAlphaNumeric(1, 12)));
+    optional("drgCd", () -> claim.setDrgCd(randomAlphaNumeric(1, 4)));
+    optional("groupCode", () -> claim.setGroupCode(randomAlphaNumeric(1, 2)));
+    oneOf(
+        "clmTypInd",
+        () -> claim.setClmTypIndEnum(randomEnum(FissClaimTypeIndicatorEnums)),
+        () -> claim.setClmTypIndUnrecognized(randomAlphaNumeric(1, 1)));
     oneOf(
         "reposInd",
         () -> claim.setReposIndEnum(randomEnum(FissRepositoryIndicatorEnums)),
@@ -550,6 +580,67 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
             audit.setRdaPosition(i);
 
             claim.addFissAuditTrail(audit.build());
+          }
+        });
+  }
+
+  /**
+   * Adds randomly generated revenue lines to the claim.
+   *
+   * @param claim The claim object isntance to add random revenue lines to.
+   */
+  private void addRandomRevenueLines(FissClaim.Builder claim) {
+    final int MAX_UNITS_BILLED = 50;
+    final int MAX_SERV_UNIT_COUNT = 50;
+
+    always(
+        "revenue",
+        () -> {
+          final int count = 1 + randomInt(MAX_REVENUE_LINES);
+
+          for (int i = 1; i <= count; ++i) {
+            FissRevenueLine.Builder revenue = FissRevenueLine.newBuilder();
+
+            always(
+                String.format("[%d]", i),
+                () -> {
+                  oneOf(
+                      "nonBillRevCode",
+                      () -> revenue.setNonBillRevCodeEnum(randomEnum(FissNonBillRevCodeEnums)),
+                      () -> revenue.setNonBillRevCodeUnrecognized(randomAlphaNumeric(1, 1)));
+                  optional("revCd", () -> revenue.setRevCd(randomAlphaNumeric(1, 4)));
+                  optional(
+                      "revUnitsBilled",
+                      () -> revenue.setRevUnitsBilled(randomInt(MAX_UNITS_BILLED)));
+                  optional(
+                      "revServUnitCnt",
+                      () -> revenue.setRevServUnitCnt(randomInt(MAX_SERV_UNIT_COUNT)));
+                  optional(
+                      "serviceDate",
+                      () -> {
+                        String date = randomDate();
+                        revenue.setServDtCymd(date);
+                        revenue.setServDtCymdText(date);
+                      });
+                  optional("hcpcCd", () -> revenue.setHcpcCd(randomAlphaNumeric(1, 5)));
+                  optional("hcpcInd", () -> revenue.setHcpcInd(randomAlphaNumeric(1, 1)));
+                  optional("hcpcModifier", () -> revenue.setHcpcModifier(randomAlphaNumeric(1, 2)));
+                  optional(
+                      "hcpcModifier2", () -> revenue.setHcpcModifier2(randomAlphaNumeric(1, 2)));
+                  optional(
+                      "hcpcModifier3", () -> revenue.setHcpcModifier3(randomAlphaNumeric(1, 2)));
+                  optional(
+                      "hcpcModifier4", () -> revenue.setHcpcModifier4(randomAlphaNumeric(1, 2)));
+                  optional(
+                      "hcpcModifier5", () -> revenue.setHcpcModifier5(randomAlphaNumeric(1, 2)));
+                  optional("acoRedRarc", () -> revenue.setAcoRedRarc(randomAlphaNumeric(1, 5)));
+                  optional("acoRedCarc", () -> revenue.setAcoRedCarc(randomAlphaNumeric(1, 3)));
+                  optional("acoRedCagc", () -> revenue.setAcoRedCagc(randomAlphaNumeric(1, 2)));
+                });
+
+            revenue.setRdaPosition(i);
+
+            claim.addFissRevenueLines(revenue.build());
           }
         });
   }

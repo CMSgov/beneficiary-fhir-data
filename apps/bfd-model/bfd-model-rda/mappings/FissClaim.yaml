@@ -90,9 +90,15 @@ mappings:
     - name: receivedDate
       sqlType: date
       dbName: received_date
+    - name: receivedDateText
+      sqlType: varchar(10)
+      dbName: received_date_text
     - name: currTranDate
       sqlType: date
       dbName: curr_tran_date
+    - name: currTranDateText
+      sqlType: varchar(10)
+      dbName: curr_tran_date_text
     - name: admitDiagCode
       sqlType: varchar(7)
       dbName: admit_diag_code
@@ -374,6 +380,22 @@ mappings:
         Insurance Claim field. The system processes the claim based on this HIC number
         entered and establishes a Beneficiary File for this new HIC number.'
       dbName: new_hic
+    - name: drgCd
+      sqlType: varchar(4)
+      comment: 'Identifies the diagnosis related group code assigned by the grouper
+       program using the length of stay; covered days, sex age, diagnosis, procedure
+        codes, discharge date and total charges.'
+      dbName: drg_cd
+    - name: groupCode
+      sqlType: varchar(2)
+      comment: 'Identifies the American National Standards Institute (ANSI) group code
+       at the claim level.'
+      dbName: group_code
+    - name: clmTypInd
+      sqlType: varchar(1)
+      nullable: false
+      comment: 'Identifies the type of claim, which is system generated.'
+      dbName: clm_typ_ind
     - name: reposInd
       sqlType: varchar(1)
       comment: 'Repository Indicator: If the claim is submitted electronically and
@@ -440,6 +462,10 @@ mappings:
       fieldName: auditTrail
       entityMapping: FissAuditTrail
       mappedBy: dcn
+    - class: array
+      fieldName: revenueLines
+      entityMapping: FissRevenueLine
+      mappedBy: dcn
     comment: FISS (Fiscal Intermediary Shared Systems) Claim
   enumTypes:
   - name: ServTypeCdMapping
@@ -478,8 +504,12 @@ mappings:
   - from: totalChargeAmount
   - from: recdDtCymd
     to: receivedDate
+  - from: recdDtCymdText
+    to: receivedDateText
   - from: currTranDtCymd
     to: currTranDate
+  - from: currTranDtCymdText
+    to: currTranDateText
   - from: admDiagCode
     to: admitDiagCode
   - from: principleDiag
@@ -612,6 +642,12 @@ mappings:
     transformerOptions:
       enumClass: gov.cms.mpsm.rda.v1.fiss.FissProcessNewHealthInsuranceClaimNumberIndicator
   - from: newHic
+  - from: drgCd
+  - from: groupCode
+  - from: clmTypInd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator
   - from: reposInd
     transformer: MessageEnum
     transformerOptions:
@@ -640,6 +676,9 @@ mappings:
     transformer: Array
   - from: fissAuditTrail
     to: auditTrail
+    transformer: Array
+  - from: fissRevenueLines
+    to: revenueLines
     transformer: Array
   externalTransformations:
   - applyMbiCache
