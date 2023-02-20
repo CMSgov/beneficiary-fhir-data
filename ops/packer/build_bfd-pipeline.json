@@ -34,7 +34,6 @@
       "type": "ansible",
       "playbook_file": "./build_bfd-pipeline.yml",
       "extra_arguments": [
-        "-e ansible_python_interpreter=/usr/bin/python",
         "-e git_commit={{ user `git_commit` }}",
         "-e git_branch={{ user `git_branch` }}",
         "--extra-vars",
