@@ -1,9 +1,5 @@
 data "aws_region" "current" {}
 
-data "aws_kms_key" "cmk" {
-  key_id = "alias/bfd-${local.env}-cmk"
-}
-
 data "aws_s3_bucket" "etl" {
   bucket = var.etl_bucket_id
 }

@@ -2,8 +2,7 @@ locals {
   env    = terraform.workspace
   region = data.aws_region.current.name
 
-  kms_key_arn = data.aws_kms_key.cmk.arn
-  kms_key_id  = data.aws_kms_key.cmk.key_id
+  kms_key_arn = var.aws_kms_key_arn
 
   lambda_full_name = "bfd-${local.env}-update-pipeline-slis"
 
