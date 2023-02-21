@@ -142,10 +142,19 @@
 
 		<!-- The source types to enable for PAC resources -->
 		<local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
+
+		<!-- Functional-reactive programming api for concurrent claim ingestion. -->
+		<reactor.version>3.5.1</reactor.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<!-- Functional-reactive programming api for concurrent claim ingestion. -->
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-core</artifactId>
+				<version>${reactor.version}</version>
+			</dependency>
 			<dependency>
 				<!-- The newrelic.jar javaagent dependency -->
 				<groupId>com.newrelic.agent.java</groupId>
