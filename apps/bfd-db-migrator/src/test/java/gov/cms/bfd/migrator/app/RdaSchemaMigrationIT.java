@@ -173,7 +173,8 @@ public class RdaSchemaMigrationIT {
   public void fissClaimEntities() {
     final RdaFissClaim claim =
         RdaFissClaim.builder()
-            .dcn("1")
+            .claimId("1")
+            .dcn("d1")
             .hicNo("h1")
             .currStatus('1')
             .currLoc1('A')
@@ -184,7 +185,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissProcCode procCode0 =
         RdaFissProcCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 1)
             .procCode("P")
             .procFlag("F")
@@ -194,7 +195,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissProcCode procCode1 =
         RdaFissProcCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 2)
             .procCode("P")
             .procFlag("G")
@@ -204,7 +205,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissDiagnosisCode diagCode0 =
         RdaFissDiagnosisCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 1)
             .diagCd2("cd2")
             .diagPoaInd("Q")
@@ -213,7 +214,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissDiagnosisCode diagCode1 =
         RdaFissDiagnosisCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 2)
             .diagCd2("cd2")
             .diagPoaInd("R")
@@ -222,7 +223,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissPayer payer0 =
         RdaFissPayer.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 1)
             .payerType(RdaFissPayer.PayerType.BeneZ)
             .estAmtDue(new BigDecimal("1.23"))
@@ -231,7 +232,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissPayer payer1 =
         RdaFissPayer.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 2)
             .payerType(RdaFissPayer.PayerType.Insured)
             .estAmtDue(new BigDecimal("4.56"))
@@ -246,7 +247,7 @@ public class RdaSchemaMigrationIT {
 
     List<RdaFissClaim> claims =
         entityManager
-            .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
+            .createQuery("select c from RdaFissClaim c where c.claimId = '1'", RdaFissClaim.class)
             .getResultList();
     assertEquals(1, claims.size());
 
@@ -272,7 +273,7 @@ public class RdaSchemaMigrationIT {
     entityManager.getTransaction().commit();
     resultClaim =
         entityManager
-            .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
+            .createQuery("select c from RdaFissClaim c where c.claimId = '1'", RdaFissClaim.class)
             .getResultList()
             .get(0);
     assertEquals("1:H", summarizeFissProcCodes(resultClaim));
@@ -355,6 +356,7 @@ public class RdaSchemaMigrationIT {
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final RdaFissClaim claim =
             RdaFissClaim.builder()
+                .claimId(mbi + "id" + claimNumber)
                 .dcn(mbi + "d" + claimNumber)
                 .hicNo(mbi + "h" + claimNumber)
                 .currStatus('1')

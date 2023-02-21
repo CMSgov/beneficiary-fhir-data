@@ -90,7 +90,7 @@
         ]
       },
       "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
-      "value": "123456"
+      "value": "123456d"
     }
   ],
   "status": "active",
