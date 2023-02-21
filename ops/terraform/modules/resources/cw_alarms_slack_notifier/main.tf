@@ -8,13 +8,21 @@ locals {
   kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
 
   lambda_configs_by_channel = {
-    bfd_test = {
-      sns_topic        = data.aws_sns_topic.cloudwatch_alarms_alert
-      webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test"
-    }
     bfd_notices = {
       sns_topic        = data.aws_sns_topic.cloudwatch_alarms_slack_bfd_notices
       webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_notices"
+    }
+    bfd_test = {
+      sns_topic        = data.aws_sns_topic.cloudwatch_alarms_slack_bfd_test
+      webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_test"
+    }
+    bfd_warnings = {
+      sns_topic        = data.aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings
+      webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_warnings"
+    }
+    bfd_alerts = {
+      sns_topic        = data.aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts
+      webhook_ssm_path = "/bfd/mgmt/common/sensitive/slack_webhook_bfd_alerts"
     }
   }
 
