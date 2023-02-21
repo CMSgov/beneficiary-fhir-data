@@ -15,11 +15,13 @@ resource "null_resource" "athena_views" {
     # External references from destroy provisioners are not allowed -
     # they may only reference attributes of the related resource.
     database_name = var.database_name
+    region        = var.region
   }
 
   provisioner "local-exec" {
     command = <<-EOF
 aws athena start-query-execution \
+  --region "${var.region}" \
   --output json \
   --query-string file://${each.value} \
   --query-execution-context "Database=${var.database_name}" \
@@ -31,6 +33,7 @@ EOF
     when    = destroy
     command = <<-EOF
 aws athena start-query-execution \
+  --region "${self.triggers.region}" \
   --output json \
   --query-string 'DROP VIEW IF EXISTS ${each.key}' \
   --query-execution-context "Database=${self.triggers.database_name}" \
