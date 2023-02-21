@@ -34,6 +34,15 @@ public class FdaDrugCodeDisplayLookup {
   /** Tracks the national drug codes that have already had code lookup failures. */
   private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
+  /** Keeps track of the PRODUCTNDC column index in the fda_products_utf8.tsv file. */
+  private static int PRODUCT_NDC_COLUMN_INDEX = 1;
+
+  /** Keeps track of the PROPRIETARYNAME column index in the fda_products_utf8.tsv file. */
+  private static int PROPRIETARY_NAME_COLUMN_INDEX = 3;
+
+  /** Keeps track of the SUBSTANCENAME column index in the fda_products_utf8.tsv file. */
+  private static int SUBSTANCE_NAME_COLUMN_INDEX = 13;
+
   /**
    * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't
    * have to construct it over and over in the unit tests.
@@ -171,26 +180,26 @@ public class FdaDrugCodeDisplayLookup {
       ndcProductsIn.readLine();
       while ((line = ndcProductsIn.readLine()) != null) {
         String ndcProductColumns[] = line.split("\t");
-        try {
-          String nationalDrugCodeManufacturer =
-              StringUtils.leftPad(
-                  ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-          String nationalDrugCodeIngredient =
-              StringUtils.leftPad(
-                  ndcProductColumns[1].substring(
-                      ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                  4,
-                  '0');
-          // ndcProductColumns[3] - Proprietary Name
-          // ndcProductColumns[13] - Substance Name
-          ndcProcessedData.put(
-              String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-              ndcProductColumns[3].replace("\"", "")
-                  + " - "
-                  + ndcProductColumns[13].replace("\"", ""));
-        } catch (StringIndexOutOfBoundsException e) {
-          continue;
-        }
+        String nationalDrugCodeManufacturer =
+            StringUtils.leftPad(
+                ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].substring(
+                    0, ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].indexOf("-")),
+                5,
+                '0');
+        String nationalDrugCodeIngredient =
+            StringUtils.leftPad(
+                ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].substring(
+                    ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].indexOf("-") + 1,
+                    ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].length()),
+                4,
+                '0');
+        // ndcProductColumns[3] - Proprietary Name
+        // ndcProductColumns[13] - Substance Name
+        ndcProcessedData.put(
+            String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+            ndcProductColumns[PROPRIETARY_NAME_COLUMN_INDEX].replace("\"", "")
+                + " - "
+                + ndcProductColumns[SUBSTANCE_NAME_COLUMN_INDEX].replace("\"", ""));
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
