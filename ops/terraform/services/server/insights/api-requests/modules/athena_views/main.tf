@@ -1,4 +1,9 @@
 locals {
+  manage_views_command = <<-EOF
+chmod +x ${path.module}/manage_athena_view.sh
+${path.module}/manage_athena_view.sh
+EOF
+
   sql_views_dir = "${path.module}/sql_views"
   view_to_filepath = {
     for filename in fileset("${local.sql_views_dir}/", "**/*.sql.tfpl") :
@@ -22,16 +27,13 @@ resource "null_resource" "athena_view_api_requests" {
 
     # External references from destroy provisioners are not allowed -
     # they may only reference attributes of the related resource.
+    command       = local.manage_views_command
     database_name = var.database_name
     region        = var.region
   }
 
   provisioner "local-exec" {
-    command = <<-EOF
-chmod +x ${path.module}/manage_athena_view.sh
-${path.module}/manage_athena_view.sh
-EOF
-
+    command = self.triggers.command
     environment = {
       REGION         = var.region
       DATABASE_NAME  = var.database_name
@@ -43,10 +45,7 @@ EOF
 
   provisioner "local-exec" {
     when    = destroy
-    command = <<-EOF
-chmod +x ${path.module}/manage_athena_view.sh
-${path.module}/manage_athena_view.sh
-EOF
+    command = self.triggers.command
 
     environment = {
       REGION         = self.triggers.region
@@ -66,15 +65,13 @@ resource "null_resource" "athena_view_api_requests_by_bene" {
 
     # External references from destroy provisioners are not allowed -
     # they may only reference attributes of the related resource.
+    command       = local.manage_views_command
     database_name = var.database_name
     region        = var.region
   }
 
   provisioner "local-exec" {
-    command = <<-EOF
-chmod +x ${path.module}/manage_athena_view.sh
-${path.module}/manage_athena_view.sh
-EOF
+    command = self.triggers.command
 
     environment = {
       REGION         = var.region
@@ -87,10 +84,7 @@ EOF
 
   provisioner "local-exec" {
     when    = destroy
-    command = <<-EOF
-chmod +x ${path.module}/manage_athena_view.sh
-${path.module}/manage_athena_view.sh
-EOF
+    command = self.triggers.command
 
     environment = {
       REGION         = self.triggers.region
@@ -113,15 +107,13 @@ resource "null_resource" "athena_view_new_benes_by_day" {
 
     # External references from destroy provisioners are not allowed -
     # they may only reference attributes of the related resource.
+    command       = local.manage_views_command
     database_name = var.database_name
     region        = var.region
   }
 
   provisioner "local-exec" {
-    command = <<-EOF
-chmod +x ${path.module}/manage_athena_view.sh
-${path.module}/manage_athena_view.sh
-EOF
+    command = self.triggers.command
 
     environment = {
       REGION         = var.region
@@ -134,10 +126,7 @@ EOF
 
   provisioner "local-exec" {
     when    = destroy
-    command = <<-EOF
-chmod +x ${path.module}/manage_athena_view.sh
-${path.module}/manage_athena_view.sh
-EOF
+    command = self.triggers.command
 
     environment = {
       REGION         = self.triggers.region
