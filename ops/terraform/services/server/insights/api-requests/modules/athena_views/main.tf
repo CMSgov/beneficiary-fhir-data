@@ -24,8 +24,10 @@ EOF
       view = view
       md5  = md5(local.view_to_templated_sql[view])
 
-      # External references from destroy provisioners are not allowed -
-      # they may only reference attributes of the related resource.
+      # External references from destroy provisioners are not allowed - they may only reference
+      # attributes of the related resource. This means that in order for destroy local-exec
+      # provisioners to reference external data that data needs to be encoded within its resource's
+      # triggers, hence why "command", "database_name", and "region" are all included in triggers
       command       = local.manage_views_command
       database_name = var.database_name
       region        = var.region
