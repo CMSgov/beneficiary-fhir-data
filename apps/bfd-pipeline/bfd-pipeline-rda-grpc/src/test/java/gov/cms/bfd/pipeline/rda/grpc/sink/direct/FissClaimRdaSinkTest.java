@@ -309,7 +309,7 @@ public class FissClaimRdaSinkTest {
     Instant now = Instant.ofEpochSecond(3);
     RdaFissClaim claim =
         RdaFissClaim.builder()
-            .dcn("dcn")
+            .claimId("dcn")
             .mbiRecord(mbiRecord)
             .currStatus('A')
             .lastUpdated(now)
@@ -364,6 +364,7 @@ public class FissClaimRdaSinkTest {
    */
   private RdaChange<RdaFissClaim> createClaim(String dcn) {
     RdaFissClaim claim = new RdaFissClaim();
+    claim.setClaimId(dcn);
     claim.setDcn(dcn);
     claim.setApiSource(VERSION);
     return new RdaChange<>(
