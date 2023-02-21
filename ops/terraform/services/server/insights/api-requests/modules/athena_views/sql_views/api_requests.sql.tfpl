@@ -1,8 +1,11 @@
 --
--- This view makes working with the 'bfd_insights_bfd_prod_api_requests' table more convenient
+-- This view makes working with the 'bfd_insights_bfd_${env}_api_requests' table more convenient
 -- by exposing new columns that have more intuitive names or values. There is a one to one
 -- correspondence of rows from the underlying table to this view (there is no filtering
 -- of data). This view can be enhanced as needed by adding new convenience columns.
+-- 
+-- Note that this view is built only with the prod environment in-mind. It can be applied to other
+-- environments, but some columns may not be correct.
 --
 create or replace view api_requests as
 select
@@ -22,4 +25,4 @@ select
         else 'unknown'
     end AS partner,
     *
-from bfd_insights_bfd_prod_api_requests;
+from bfd_insights_bfd_${env}_api_requests;
