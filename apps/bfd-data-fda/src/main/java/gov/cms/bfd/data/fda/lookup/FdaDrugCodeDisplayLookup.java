@@ -123,8 +123,8 @@ public class FdaDrugCodeDisplayLookup {
   }
 
   /**
-   * Gets the processed FDA data and checks whether the fake drug code needs to be inserted into
-   * the map.
+   * Gets the processed FDA data and checks whether the fake drug code needs to be inserted into the
+   * map.
    *
    * <p>See {@link gov.cms.bfd.data.fda.utility.App} for details.
    *
