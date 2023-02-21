@@ -70,8 +70,8 @@ resource "null_resource" "athena_view_api_requests_by_bene" {
     command = self.triggers.command
 
     environment = {
-      REGION         = var.region
-      DATABASE_NAME  = var.database_name
+      REGION         = self.triggers.region
+      DATABASE_NAME  = self.triggers.database_name
       VIEW_NAME      = self.triggers.view
       VIEW_SQL       = local.view_to_templated_sql[self.triggers.view]
       OPERATION_TYPE = "CREATE_VIEW"
@@ -102,8 +102,8 @@ resource "null_resource" "athena_view_new_benes_by_day" {
     command = self.triggers.command
 
     environment = {
-      REGION         = var.region
-      DATABASE_NAME  = var.database_name
+      REGION         = self.triggers.region
+      DATABASE_NAME  = self.triggers.database_name
       VIEW_NAME      = self.triggers.view
       VIEW_SQL       = local.view_to_templated_sql[self.triggers.view]
       OPERATION_TYPE = "CREATE_VIEW"
