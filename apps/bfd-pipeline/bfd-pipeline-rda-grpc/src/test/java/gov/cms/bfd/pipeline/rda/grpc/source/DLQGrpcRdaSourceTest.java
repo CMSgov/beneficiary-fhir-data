@@ -3,9 +3,11 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -36,6 +38,9 @@ import utils.TestUtils;
 @ExtendWith(MockitoExtension.class)
 public class DLQGrpcRdaSourceTest {
 
+  /** Arbitrary rda api version being used for tests */
+  private static final String TEST_RDA_VERSION = "0.0.1";
+
   /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Long, Long> mockSink;
 
@@ -54,6 +59,9 @@ public class DLQGrpcRdaSourceTest {
   /** Mock {@link DLQGrpcRdaSource.DLQDao} to use in testing. */
   @Mock private DLQGrpcRdaSource.DLQDao mockDao;
 
+  /** Mock {@link RdaVersion} to use in testing. */
+  @Mock private RdaVersion rdaVersion;
+
   /** {@link MetricRegistry} to use in testing. */
   private MeterRegistry meters;
 
@@ -61,6 +69,8 @@ public class DLQGrpcRdaSourceTest {
   @BeforeEach
   public void setUp() {
     meters = new SimpleMeterRegistry();
+    lenient().doReturn(false).when(rdaVersion).allows(anyString());
+    lenient().doReturn(true).when(rdaVersion).allows(TEST_RDA_VERSION);
     doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
@@ -112,7 +122,13 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
+                mockManager,
+                Objects::equals,
+                mockConfig,
+                mockCaller,
+                meters,
+                claimType,
+                rdaVersion));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -146,7 +162,13 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
+                mockManager,
+                Objects::equals,
+                mockConfig,
+                mockCaller,
+                meters,
+                claimType,
+                rdaVersion));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -190,16 +212,24 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
+                mockManager,
+                Objects::equals,
+                mockConfig,
+                mockCaller,
+                meters,
+                claimType,
+                rdaVersion));
 
     doNothing().when(sourceSpy).setUptimeToReceiving();
 
     // unchecked - This is fine for a mock.
     //noinspection unchecked
-    doReturn(1).when(sourceSpy).submitBatchToSink(eq("v1"), eq(mockSink), any(Map.class));
+    doReturn(1)
+        .when(sourceSpy)
+        .submitBatchToSink(eq(TEST_RDA_VERSION), eq(mockSink), any(Map.class));
 
     // Always return fake version for caller's version call
-    doReturn("v1").when(mockCaller).callVersionService(mockChannel, mockCallOptions);
+    doReturn(TEST_RDA_VERSION).when(mockCaller).callVersionService(mockChannel, mockCallOptions);
 
     // Create a stream that returns a sequence in the DLQ (5)
     // unchecked - This is fine for a mock.

@@ -56,13 +56,15 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType the claim type
    * @param startingSequenceNumber optional hard coded sequence number
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
    */
   public StandardGrpcRdaSource(
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
       MeterRegistry appMetrics,
       String claimType,
-      Optional<Long> startingSequenceNumber) {
+      Optional<Long> startingSequenceNumber,
+      RdaVersion rdaVersion) {
     this(
         Clock.systemUTC(),
         config.createChannel(),
@@ -72,7 +74,8 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         claimType,
         startingSequenceNumber,
         config.getMinIdleMillisBeforeConnectionDrop(),
-        config.getServerType());
+        config.getServerType(),
+        rdaVersion);
   }
 
   /**
@@ -90,6 +93,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    * @param minIdleMillisBeforeConnectionDrop the amount of time before a connection drop is
    *     expected
    * @param serverType the server type
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
    */
   @VisibleForTesting
   StandardGrpcRdaSource(
@@ -101,13 +105,15 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       String claimType,
       Optional<Long> startingSequenceNumber,
       long minIdleMillisBeforeConnectionDrop,
-      RdaSourceConfig.ServerType serverType) {
+      RdaSourceConfig.ServerType serverType,
+      RdaVersion rdaVersion) {
     super(
         Preconditions.checkNotNull(channel),
         Preconditions.checkNotNull(caller),
         Preconditions.checkNotNull(claimType),
         callOptionsFactory,
-        appMetrics);
+        appMetrics,
+        rdaVersion);
     this.clock = clock;
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
@@ -196,6 +202,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               claimType,
               startingSequenceNumber);
           final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+          checkApiVersion(apiVersion);
 
           final GrpcResponseStream<TMessage> responseStream =
               caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);

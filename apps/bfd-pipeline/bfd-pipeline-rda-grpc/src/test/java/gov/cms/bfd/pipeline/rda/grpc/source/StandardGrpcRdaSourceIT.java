@@ -114,7 +114,7 @@ public class StandardGrpcRdaSourceIT {
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"apiSource\" : \"0.10\",\n"
+          + "  \"apiSource\" : \"0.12\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
@@ -161,7 +161,7 @@ public class StandardGrpcRdaSourceIT {
   /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"apiSource\" : \"0.10\",\n"
+          + "  \"apiSource\" : \"0.12\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
@@ -215,6 +215,8 @@ public class StandardGrpcRdaSourceIT {
   private MeterRegistry appMetrics;
   /** The json sink. */
   private JsonCaptureSink sink;
+  /** The RdaVersion to require. */
+  private RdaVersion rdaVersion;
 
   /**
    * Sets the test dependencies up.
@@ -225,6 +227,7 @@ public class StandardGrpcRdaSourceIT {
   public void setUp() throws Exception {
     appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
+    rdaVersion = RdaVersion.builder().versionString("~0.12.0").build();
   }
 
   /**
@@ -377,7 +380,8 @@ public class StandardGrpcRdaSourceIT {
   @Nonnull
   private StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
       RdaSourceConfig config) {
-    return new StandardGrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
+    return new StandardGrpcRdaSource<>(
+        config, streamCaller, appMetrics, "fiss", Optional.empty(), rdaVersion);
   }
 
   /** The sink for json data. */

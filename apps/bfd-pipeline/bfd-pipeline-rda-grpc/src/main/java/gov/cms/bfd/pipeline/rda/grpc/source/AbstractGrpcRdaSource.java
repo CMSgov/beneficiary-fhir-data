@@ -44,6 +44,8 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   protected final Supplier<CallOptions> callOptionsFactory;
   /** Metrics for doing later application and processing analysis. */
   @Getter protected final DLQGrpcRdaSource.Metrics metrics;
+  /** The RDA API Version we are allowed to ingest from. */
+  private final RdaVersion rdaVersion;
 
   /**
    * Instantiates a new abstract grpc rda source.
@@ -53,18 +55,21 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
    * @param claimType the claim type
    * @param callOptionsFactory the call options factory
    * @param appMetrics the app metrics
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
    */
   protected AbstractGrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       String claimType,
       Supplier<CallOptions> callOptionsFactory,
-      MeterRegistry appMetrics) {
+      MeterRegistry appMetrics,
+      RdaVersion rdaVersion) {
     this.channel = channel;
     this.caller = caller;
     this.claimType = claimType;
     this.callOptionsFactory = callOptionsFactory;
     this.metrics = new Metrics(getClass(), appMetrics, claimType);
+    this.rdaVersion = rdaVersion;
   }
 
   /**
@@ -214,6 +219,21 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     metrics.objectsStored.increment(processed);
     setUptimeToRunning();
     return processed;
+  }
+
+  /**
+   * Checks if the given api version string represents an RDA Version that this job is allowed to
+   * ingest data from.
+   *
+   * @param apiVersionString A string representing the RDA API version being checked.
+   * @throws IllegalStateException If the apiVersionString represents an API version that can't be
+   *     ingested.
+   */
+  protected void checkApiVersion(String apiVersionString) {
+    if (!rdaVersion.allows(apiVersionString)) {
+      throw new IllegalStateException(
+          String.format("Can not ingest data from API running version '%s'", apiVersionString));
+    }
   }
 
   /**

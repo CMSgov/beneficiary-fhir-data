@@ -16,6 +16,7 @@ import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
@@ -359,6 +360,7 @@ public class RdaLoadJobIT {
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(1))
             .batchSize(BATCH_SIZE)
+            .rdaVersion(RdaVersion.builder().versionString("~0.12.0").build())
             .build(),
         rdaSourceConfig.build(),
         new RdaServerJob.Config(),
