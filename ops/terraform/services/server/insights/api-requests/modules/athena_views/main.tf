@@ -18,25 +18,29 @@ EOF
       }
     )
   }
+  view_to_triggers = {
+    for view in keys(local.view_to_filepath) :
+    view => {
+      view = view
+      md5  = md5(local.view_to_templated_sql[view])
+
+      # External references from destroy provisioners are not allowed -
+      # they may only reference attributes of the related resource.
+      command       = local.manage_views_command
+      database_name = var.database_name
+      region        = var.region
+    }
+  }
 }
 
 resource "null_resource" "athena_view_api_requests" {
-  triggers = {
-    view = "api_requests"
-    md5  = md5(local.view_to_templated_sql.api_requests)
-
-    # External references from destroy provisioners are not allowed -
-    # they may only reference attributes of the related resource.
-    command       = local.manage_views_command
-    database_name = var.database_name
-    region        = var.region
-  }
+  triggers = local.view_to_triggers.api_requests
 
   provisioner "local-exec" {
     command = self.triggers.command
     environment = {
-      REGION         = var.region
-      DATABASE_NAME  = var.database_name
+      REGION         = self.triggers.region
+      DATABASE_NAME  = self.triggers.database_name
       VIEW_NAME      = self.triggers.view
       VIEW_SQL       = local.view_to_templated_sql[self.triggers.view]
       OPERATION_TYPE = "CREATE_VIEW"
@@ -58,17 +62,7 @@ resource "null_resource" "athena_view_api_requests" {
 
 resource "null_resource" "athena_view_api_requests_by_bene" {
   depends_on = [null_resource.athena_view_api_requests]
-
-  triggers = {
-    view = "api_requests_by_bene"
-    md5  = md5(local.view_to_templated_sql.api_requests_by_bene)
-
-    # External references from destroy provisioners are not allowed -
-    # they may only reference attributes of the related resource.
-    command       = local.manage_views_command
-    database_name = var.database_name
-    region        = var.region
-  }
+  triggers   = local.view_to_triggers.api_requests_by_bene
 
   provisioner "local-exec" {
     command = self.triggers.command
@@ -100,17 +94,7 @@ resource "null_resource" "athena_view_new_benes_by_day" {
     null_resource.athena_view_api_requests,
     null_resource.athena_view_api_requests_by_bene
   ]
-
-  triggers = {
-    view = "new_benes_by_day"
-    md5  = md5(local.view_to_templated_sql.new_benes_by_day)
-
-    # External references from destroy provisioners are not allowed -
-    # they may only reference attributes of the related resource.
-    command       = local.manage_views_command
-    database_name = var.database_name
-    region        = var.region
-  }
+  triggers = local.view_to_triggers.new_benes_by_day
 
   provisioner "local-exec" {
     command = self.triggers.command
