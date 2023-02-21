@@ -4,13 +4,20 @@ data "aws_kms_key" "mgmt_cmk" {
   key_id = "alias/bfd-mgmt-cmk"
 }
 
-data "aws_sns_topic" "cloudwatch_alarms_alert" {
-  # TODO: Replace this with the non-temporary variant of the CloudWatch alarms SNS topic in BFD-2244
-  name = "bfd-${var.env}-cloudwatch-alarms-alert-testing"
-}
-
 data "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {
   name = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-notices"
+}
+
+data "aws_sns_topic" "cloudwatch_alarms_slack_bfd_test" {
+  name = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
+}
+
+data "aws_sns_topic" "cloudwatch_alarms_slack_bfd_warnings" {
+  name = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-warnings"
+}
+
+data "aws_sns_topic" "cloudwatch_alarms_slack_bfd_alerts" {
+  name = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
 }
 
 data "archive_file" "this" {

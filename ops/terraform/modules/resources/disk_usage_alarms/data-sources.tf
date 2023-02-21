@@ -14,14 +14,14 @@ data "aws_autoscaling_group" "asg" {
   name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
 }
 
-data "aws_sns_topic" "cloudwatch_alarms_alert" {
-  # TODO: Replace this with the non-temporary variant of the CloudWatch alarms SNS topic in BFD-2244
-  name = "bfd-${var.env}-cloudwatch-alarms-alert-testing"
+data "aws_sns_topic" "alarms_action_sns" {
+  count = local.alarm_action_sns != null ? 1 : 0
+  name  = local.alarm_action_sns
 }
 
-data "aws_sns_topic" "cloudwatch_alarms_ok" {
-  # TODO: Replace this with the non-temporary variant of the CloudWatch alarms SNS topic in BFD-2244
-  name = "bfd-${var.env}-cloudwatch-alarms-ok-testing"
+data "aws_sns_topic" "alarms_ok_sns" {
+  count = local.alarms_ok_sns != null ? 1 : 0
+  name  = local.alarms_ok_sns
 }
 
 data "archive_file" "this" {
