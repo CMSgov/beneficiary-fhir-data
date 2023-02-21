@@ -1,5 +1,7 @@
 ---
 - name: Install Pre-requisites
+  vars:
+    ansible_python_interpreter: /usr/bin/python
   yum:
     pkg:
       - java-11-openjdk
