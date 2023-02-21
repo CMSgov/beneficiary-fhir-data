@@ -13,7 +13,7 @@ locals {
 
   alarm_action_sns_by_env = {
     test     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
-    prod-sbx = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-alerts"
+    prod-sbx = "bfd-${var.env}-cloudwatch-alarms"
     prod     = "bfd-${var.env}-cloudwatch-alarms"
   }
   alarm_action_sns = try(coalesce(
