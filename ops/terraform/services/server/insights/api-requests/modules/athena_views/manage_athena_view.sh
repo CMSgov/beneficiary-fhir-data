@@ -56,9 +56,7 @@ while true; do
       --output text
   )
 
-  if [[ $status != "RUNNING" && $status != "QUEUED" ]]; then
-    break
-  elif [[ $status == "FAILED" ]]; then
+  if [[ $status == "FAILED" ]]; then
     # We need to double-check failures due to a quirk of Athena where it "automatically retries
     # your queries in cases of certain transient errors". We wait 10 seconds to give Athena
     # enough time to try, and only if the status is still FAILED do we exit the loop
@@ -79,6 +77,8 @@ while true; do
     if [[ $status == "FAILED" ]]; then
       break
     fi
+  elif [[ $status != "RUNNING" && $status != "QUEUED" ]]; then
+    break
   fi
 done
 
