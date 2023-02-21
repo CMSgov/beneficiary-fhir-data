@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Provides tests for FDA Drug Test Utils. */
@@ -36,41 +37,48 @@ public class FdaDrugCodeDisplayLookupTest {
           + "00000-0001_b02ed630-6947-431a-a8c8-227571403941\t00000-0001\tHUMAN OTC DRUG\t\"Sterile Diluent\"\t\tdiluent\tINJECTION, SOLUTION\t"
           + "SUBCUTANEOUS\t19870710\t\tBLA\tBLA018781\tEli Lilly and Company\t\"WATER\"\t1\tmL/mL\t\t\tN\t20231231\n";
 
+  /** fdaDrugCodeDisplays to be used during testing. */
+  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplay;
+
+  /** Clears fdaDrugCodeDisplay before each test. */
+  @BeforeEach
+  void setup() {
+    fdaDrugCodeDisplay = null;
+  }
+
   /** Return Fake Drug Code when parameter is true. */
   @Test
   public void shouldReturnFakeDrugCodeWhenConstructorSetToTrue() {
-    FdaDrugCodeDisplayLookup drugUtils = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     String drugCodeDisplay =
-        drugUtils.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
+        fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertNotEquals(null, drugCodeDisplay);
   }
 
   /** Do Not Return Fake Drug Code when parameter is false. */
   @Test
   public void shouldNotReturnFakeDrugCodeWhenConstructorSetToFalse() {
-    FdaDrugCodeDisplayLookup drugUtils =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
     String drugCodeDisplay =
-        drugUtils.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
+        fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertEquals(null, drugCodeDisplay);
   }
 
   /** Return Fake Drug Code Display when parameter is true. */
   @Test
   public void shouldReturnFakeDrugCodeDisplayWhenConstructorSetToTrue() {
-    FdaDrugCodeDisplayLookup drugUtils = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     String drugCodeDisplay =
-        drugUtils.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
+        fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 
   /** Do not Return Fake Drug Code Display when parameter is false. */
   @Test
   public void shouldNotReturnFakeDrugCodeDisplayWhenConstructorSetToFalse() {
-    FdaDrugCodeDisplayLookup drugUtils =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
     String drugCodeDisplay =
-        drugUtils.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
+        fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertNotEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 
@@ -81,8 +89,7 @@ public class FdaDrugCodeDisplayLookupTest {
     InputStream targetStream =
         new ByteArrayInputStream(INPUT_FILE_STRING_WITH_DOUBLE_QUOTES.getBytes());
 
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplay =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
 
     Map<String, String> results = fdaDrugCodeDisplay.getFdaProcessedData(true, targetStream);
     assertEquals("Sterile Diluent - WATER", results.get("00000-0001"));
@@ -94,8 +101,7 @@ public class FdaDrugCodeDisplayLookupTest {
 
     InputStream targetStream = new ByteArrayInputStream(INPUT_FILE_STRING.getBytes());
 
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplay =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
 
     Map<String, String> results = fdaDrugCodeDisplay.getFdaProcessedData(true, targetStream);
     assertEquals("Sterile Diluent - WATER", results.get("00000-0001"));
@@ -110,8 +116,7 @@ public class FdaDrugCodeDisplayLookupTest {
 
     InputStream targetStream = new ByteArrayInputStream(INPUT_FILE_STRING.getBytes());
 
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplay =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
 
     Map<String, String> results = fdaDrugCodeDisplay.readFDADrugCodeFile(true, targetStream);
     assertEquals(
@@ -128,8 +133,7 @@ public class FdaDrugCodeDisplayLookupTest {
 
     InputStream targetStream = new ByteArrayInputStream(INPUT_FILE_STRING.getBytes());
 
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplay =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
 
     Map<String, String> results = fdaDrugCodeDisplay.readFDADrugCodeFile(false, targetStream);
     assertEquals(null, results.get(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE));
