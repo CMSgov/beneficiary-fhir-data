@@ -6,7 +6,7 @@ import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
-import software.amazon.awssdk.regions.Regions;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 /** Models the user-configurable options for extraction of RIF data from S3. */
@@ -61,7 +61,7 @@ public final class ExtractionOptions implements Serializable {
    *
    * @return the AWS {@link Regions} that should be used when interacting with S3
    */
-  public Regions getS3Region() {
+  public Region getS3Region() {
     /*
      * NOTE: This is hardcoded for now, unless/until we have a need to
      * support other regions. If that happens, just make the region a field
