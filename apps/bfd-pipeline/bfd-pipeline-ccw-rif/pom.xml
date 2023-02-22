@@ -35,7 +35,7 @@
 		<dependency>
 			<!-- Used to interact with AWS' S3 service -->
 			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>dynamodb</artifactId>
+			<artifactId>s3</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
