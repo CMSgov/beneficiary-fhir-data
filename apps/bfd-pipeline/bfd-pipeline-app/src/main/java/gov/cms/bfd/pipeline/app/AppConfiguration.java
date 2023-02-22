@@ -17,7 +17,7 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import io.micrometer.cloudwatch.CloudWatchConfig;
+import io.micrometer.cloudwatch2.CloudWatchConfig;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;

@@ -31,8 +31,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.regions.Regions;
-import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * PipelineJob implementation that runs a mock RDA API server using the gRPC in-process mode. Since
@@ -197,7 +197,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         Duration runInterval,
         Long randomSeed,
         Integer randomMaxClaims,
-        Regions s3Region,
+        Region s3Region,
         String s3Bucket,
         String s3Directory) {
       Preconditions.checkNotNull(serverMode, "serverMode is required");
@@ -215,8 +215,8 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       if (Strings.isNullOrEmpty(s3Bucket)) {
         s3Sources = null;
       } else {
-        final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
-        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
+        final Region region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
+        final S3Client s3Client = SharedS3Utilities.createS3Client(region);
         final String directory = s3Directory == null ? "" : s3Directory;
         s3Sources = new S3JsonMessageSources(s3Client, s3Bucket, directory);
       }
