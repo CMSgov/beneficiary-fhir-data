@@ -26,18 +26,17 @@ import software.amazon.awssdk.services.s3.model.HeadBucketResponse;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
 import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
 import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionConfiguration;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
 /** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
@@ -205,16 +204,17 @@ public final class SharedS3Utilities {
 
     ListObjectsV2Request listObjectsV2Request =
         ListObjectsV2Request.builder().bucket(bucketName).build();
-    ListObjectsV2Response listObjectsV2Response;
+    ListObjectsV2Iterable listObjectsV2Paginator =
+        s3Client.listObjectsV2Paginator(listObjectsV2Request);
 
-    do {
-      listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
-      for (S3Object s3Object : listObjectsV2Response.contents()) {
-        DeleteObjectRequest request =
-            DeleteObjectRequest.builder().bucket(bucketName).key(s3Object.key()).build();
-        s3Client.deleteObject(request);
-      }
-    } while (listObjectsV2Response.isTruncated());
+    listObjectsV2Paginator.stream()
+        .flatMap(s -> s.contents().stream())
+        .forEach(
+            k -> {
+              DeleteObjectRequest request =
+                  DeleteObjectRequest.builder().bucket(bucketName).key(k.key()).build();
+              s3Client.deleteObject(request);
+            });
 
     DeleteBucketRequest deleteBucketRequest =
         DeleteBucketRequest.builder().bucket(bucketName).build();
