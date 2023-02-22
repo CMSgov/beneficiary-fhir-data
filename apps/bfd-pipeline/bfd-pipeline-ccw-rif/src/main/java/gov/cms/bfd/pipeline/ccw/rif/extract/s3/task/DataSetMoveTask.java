@@ -1,12 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
-import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
-import com.amazonaws.services.s3.transfer.Copy;
-import com.amazonaws.waiters.WaiterParameters;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -15,6 +8,13 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectMetadataRequest;
+import software.amazon.awssdk.services.s3.model.ObjectMetadata;
+import software.amazon.awssdk.services.s3.model.SSEAwsKeyManagementParams;
+import software.amazon.awssdk.services.s3.transfer.Copy;
+import software.amazon.awssdk.waiters.WaiterParameters;
 
 /** Represents an asynchronous operation to move/rename a data set in S3. */
 public final class DataSetMoveTask implements Callable<Void> {

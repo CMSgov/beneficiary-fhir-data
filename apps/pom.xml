@@ -79,7 +79,7 @@
 		<metrics.version>4.2.15</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.375</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>2.16.1</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.5</spring-data-jpa.version>
 		<spring-framework.version>5.3.23</spring-framework.version>
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
@@ -253,8 +253,8 @@
 					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
 				<!-- When checking for dependencies to upgrade, java-sdk-swf-libraries will show up, however
 				the AWS SDK Bom contains an older version for unknown reasons, so it can be ignored. -->
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-bom</artifactId>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
 				<version>${aws-java-sdk-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>

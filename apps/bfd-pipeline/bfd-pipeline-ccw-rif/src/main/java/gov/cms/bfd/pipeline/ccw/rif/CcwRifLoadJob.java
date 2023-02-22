@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -33,6 +31,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Result;
 
 /**
  * This {@link PipelineJob} checks for and, if found, processes data that has been pushed from CMS'

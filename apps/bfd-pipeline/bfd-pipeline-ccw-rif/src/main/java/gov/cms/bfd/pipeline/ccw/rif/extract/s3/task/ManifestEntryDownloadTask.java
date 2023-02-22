@@ -1,8 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.transfer.Download;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -23,6 +20,9 @@ import java.util.Base64;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.AmazonClientException;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.transfer.Download;
 
 /**
  * Represents an asynchronous operation to download the contents of a specific {@link

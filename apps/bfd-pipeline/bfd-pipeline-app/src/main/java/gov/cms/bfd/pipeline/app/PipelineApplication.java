@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.app;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.MICROMETER_CW_ALLOWED_METRIC_NAMES;
 
 import ch.qos.logback.classic.LoggerContext;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
@@ -53,6 +52,7 @@ import org.postgresql.core.BaseConnection;
 import org.postgresql.jdbc.PgConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.cloudwatch.AmazonCloudWatchAsyncClient;
 
 /**
  * The main application/driver/entry point for the ETL system, which will pull any data stored in

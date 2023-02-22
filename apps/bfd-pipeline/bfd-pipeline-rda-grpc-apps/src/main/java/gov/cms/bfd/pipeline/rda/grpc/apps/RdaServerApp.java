@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
@@ -18,6 +16,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Regions;
+import software.amazon.awssdk.services.s3.AmazonS3;
 
 /**
  * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The server is intended for

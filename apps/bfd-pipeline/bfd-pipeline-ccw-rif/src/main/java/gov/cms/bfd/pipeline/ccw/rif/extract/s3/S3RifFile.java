@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.RifFile;
@@ -26,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
  * This {@link RifFile} implementation can be used for files that are backed by {@link S3Object}s.

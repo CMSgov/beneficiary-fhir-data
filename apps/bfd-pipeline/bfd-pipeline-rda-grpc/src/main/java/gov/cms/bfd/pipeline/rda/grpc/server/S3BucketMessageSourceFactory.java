@@ -1,8 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -15,6 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.services.s3.model.ObjectListing;
+import software.amazon.awssdk.services.s3.model.S3ObjectSummary;
 
 /**
  * To save on the number of unnecessary calls to S3 to retrieve files and to allow the incremental

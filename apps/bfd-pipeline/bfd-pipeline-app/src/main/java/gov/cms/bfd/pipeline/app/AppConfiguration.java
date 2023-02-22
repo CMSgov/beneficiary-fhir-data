@@ -1,8 +1,5 @@
 package gov.cms.bfd.pipeline.app;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.regions.Regions;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
@@ -29,6 +26,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import software.amazon.awssdk.AmazonClientException;
+import software.amazon.awssdk.auth.DefaultAWSCredentialsProviderChain;
+import software.amazon.awssdk.regions.Regions;
 
 /**
  * Models the configuration options for the application.

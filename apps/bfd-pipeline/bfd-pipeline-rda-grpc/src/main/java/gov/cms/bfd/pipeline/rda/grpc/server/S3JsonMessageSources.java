@@ -1,12 +1,12 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.base.Strings;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.AmazonS3;
 
 /**
  * Uses an {@link AmazonS3} client and a bucket name to simplify creation of {@link MessageSource}s

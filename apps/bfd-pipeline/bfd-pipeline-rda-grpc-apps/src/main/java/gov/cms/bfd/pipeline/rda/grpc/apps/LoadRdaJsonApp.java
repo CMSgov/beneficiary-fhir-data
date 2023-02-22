@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.zaxxer.hikari.HikariDataSource;
@@ -34,6 +32,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Regions;
+import software.amazon.awssdk.services.s3.AmazonS3;
 
 /**
  * Program to load RDA API NDJSON data files into a database from either a local file or from an S3

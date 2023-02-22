@@ -3,8 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
 import static java.lang.String.format;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -33,6 +31,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Regions;
+import software.amazon.awssdk.services.s3.AmazonS3;
 
 /**
  * PipelineJob implementation that runs a mock RDA API server using the gRPC in-process mode. Since

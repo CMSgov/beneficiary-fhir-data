@@ -1,8 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -19,6 +16,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.services.s3.transfer.TransferManager;
+import software.amazon.awssdk.services.s3.transfer.TransferManagerBuilder;
 
 /** Handles the execution and management of S3-related tasks. */
 public final class S3TaskManager {

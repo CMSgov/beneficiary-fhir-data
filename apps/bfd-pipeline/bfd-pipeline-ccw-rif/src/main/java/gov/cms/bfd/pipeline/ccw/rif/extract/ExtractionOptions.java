@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
+import software.amazon.awssdk.regions.Regions;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 /** Models the user-configurable options for extraction of RIF data from S3. */
 public final class ExtractionOptions implements Serializable {
