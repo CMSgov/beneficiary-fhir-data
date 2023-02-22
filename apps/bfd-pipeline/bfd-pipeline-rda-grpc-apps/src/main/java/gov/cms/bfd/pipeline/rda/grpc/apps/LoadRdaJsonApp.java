@@ -179,9 +179,9 @@ public class LoadRdaJsonApp {
     private final int batchSize;
     /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
-    /** The RDA Version for the data to load */
+    /** The RDA Version for the data to load. */
     private final RdaVersion rdaVersion;
-    /** The location where the files are. This could be a local directory or S3 path */
+    /** The location where the files are, this could be a local directory or S3 path. */
     private final Optional<String> fileLocation;
     /** The name of the FISS file to read from at the source. */
     private final Optional<String> fissFile;
