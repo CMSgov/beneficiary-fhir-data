@@ -15,6 +15,10 @@
 		Framework and utility code shared across the BFD Pipeline application.
 	</description>
 
+	<properties>
+		<aws.core.version>2.20.9</aws.core.version>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
@@ -29,13 +33,19 @@
 			<!-- Used to interact with AWS' S3 service, which is where RIF files
 				from the CCW will arrive, when an ETL pipeline is running in production. -->
 			<groupId>software.amazon.awssdk</groupId>
-      		<artifactId>dynamodb</artifactId>
+      		<artifactId>s3</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+      		<artifactId>aws-core</artifactId>
+			<version>${aws.core.version}</version>
 		</dependency>
 
 		<dependency>
