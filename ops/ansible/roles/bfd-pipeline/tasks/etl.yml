@@ -1,12 +1,10 @@
 ---
-
 - name: Install Pre-requisites
+  vars:
+    ansible_python_interpreter: /usr/bin/python
   yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    # Needed to run the ETL service.
-    - java-11-openjdk
+    pkg:
+      - java-11-openjdk
   become: true
   tags:
     - pre-ami
