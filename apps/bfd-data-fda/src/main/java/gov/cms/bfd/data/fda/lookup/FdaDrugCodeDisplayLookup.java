@@ -193,8 +193,6 @@ public class FdaDrugCodeDisplayLookup {
                     ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].length()),
                 4,
                 '0');
-        // ndcProductColumns[3] - Proprietary Name
-        // ndcProductColumns[13] - Substance Name
         ndcProcessedData.put(
             String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
             ndcProductColumns[PROPRIETARY_NAME_COLUMN_INDEX].replace("\"", "")
