@@ -38,7 +38,7 @@ import utils.TestUtils;
 @ExtendWith(MockitoExtension.class)
 public class DLQGrpcRdaSourceTest {
 
-  /** Arbitrary rda api version being used for tests */
+  /** Arbitrary rda api version being used for tests. */
   private static final String TEST_RDA_VERSION = "0.0.1";
 
   /** Mock {@link RdaSink} to use in testing. */
