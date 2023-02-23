@@ -4,7 +4,7 @@ alter table rda.fiss_claims add received_date_text varchar(10);
 alter table rda.fiss_claims add curr_tran_date_text varchar(10);
 alter table rda.fiss_claims add drg_cd varchar(4);
 alter table rda.fiss_claims add group_code varchar(2);
-alter table rda.fiss_claims add clm_typ_ind varchar(1) not null;
+alter table rda.fiss_claims add clm_typ_ind varchar(1);
 
 /*
  * fiss_revenue_lines
