@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -32,6 +33,7 @@ import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
 import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionConfiguration;
@@ -204,21 +206,38 @@ public final class SharedS3Utilities {
 
     ListObjectsV2Request listObjectsV2Request =
         ListObjectsV2Request.builder().bucket(bucketName).build();
+    Consumer<S3Object> deleteObject =
+        s3Object -> {
+          DeleteObjectRequest request =
+              DeleteObjectRequest.builder().bucket(bucketName).key(s3Object.key()).build();
+          s3Client.deleteObject(request);
+        };
+    onListObjectsV2Stream(s3Client, listObjectsV2Request, deleteObject);
+
+    DeleteBucketRequest deleteBucketRequest =
+        DeleteBucketRequest.builder().bucket(bucketName).build();
+    s3Client.deleteBucket(deleteBucketRequest);
+  }
+
+  /**
+   * Auto-paginates through the S3Objects returned from the given {@link ListObjectsV2Request} and
+   * consumes them via a {@link Consumer}.
+   *
+   * @param s3Client the {@link AmazonS3} client to use
+   * @param listObjectsV2Request the {@link ListObjectsV2Request} request to retrieve the s3 objects
+   *     over which to paginate and consume
+   * @param s3ObjectConsumer the {@link Consumer} to consume the s3Objects
+   */
+  public static void onListObjectsV2Stream(
+      S3Client s3Client,
+      ListObjectsV2Request listObjectsV2Request,
+      Consumer<S3Object> s3ObjectConsumer) {
     ListObjectsV2Iterable listObjectsV2Paginator =
         s3Client.listObjectsV2Paginator(listObjectsV2Request);
 
     listObjectsV2Paginator.stream()
         .flatMap(s -> s.contents().stream())
-        .forEach(
-            k -> {
-              DeleteObjectRequest request =
-                  DeleteObjectRequest.builder().bucket(bucketName).key(k.key()).build();
-              s3Client.deleteObject(request);
-            });
-
-    DeleteBucketRequest deleteBucketRequest =
-        DeleteBucketRequest.builder().bucket(bucketName).build();
-    s3Client.deleteBucket(deleteBucketRequest);
+        .forEach(k -> s3ObjectConsumer.accept(k));
   }
 
   /**

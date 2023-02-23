@@ -7,26 +7,31 @@ import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-import software.amazon.awssdk.AmazonClientException;
-import software.amazon.awssdk.AmazonServiceException;
-import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.exception.SdkServiceException;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Result;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.S3ObjectSummary;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
 public final class DataSetQueue {
@@ -140,7 +145,11 @@ public final class DataSetQueue {
     DataSetManifest manifest;
 
     // If the keyspace we're scanning doesnt exist, bail early
-    if (!s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), manifestS3Key)) {
+    HeadObjectRequest headObjectRequest =
+        HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(manifestS3Key).build();
+    try {
+      s3TaskManager.getS3Client().headObject(headObjectRequest);
+    } catch (NoSuchBucketException e) {
       LOGGER.warn(
           "Unable to find keyspace {} in bucket {} while scanning for manifests.",
           manifestS3Key,
@@ -196,41 +205,38 @@ public final class DataSetQueue {
      * (In the results, we'll be looking for the oldest manifest file, if
      * any.)
      */
-    ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
-    s3BucketListRequest.setBucketName(options.getS3BucketName());
-    if (options.getS3ListMaxKeys().isPresent())
-      s3BucketListRequest.setMaxKeys(options.getS3ListMaxKeys().get());
+    ListObjectsV2Request.Builder s3BucketListRequestBuilder =
+        ListObjectsV2Request.builder().bucket(options.getS3BucketName());
+    if (options.getS3ListMaxKeys().isPresent()) {
+      s3BucketListRequestBuilder.maxKeys(options.getS3ListMaxKeys().get());
+    }
 
     /*
      * S3 will return results in separate pages. Loop through all of the
      * pages, looking for manifests.
      */
-    int completedManifestsCount = 0;
-    ListObjectsV2Result s3ObjectListing;
-    do {
-      s3ObjectListing = s3TaskManager.getS3Client().listObjectsV2(s3BucketListRequest);
-
-      for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
-        String key = objectSummary.getKey();
-        if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(key).matches()) {
-          /*
-           * We've got an object that *looks like* it might be a
-           * manifest file. But we need to parse the key to ensure
-           * that it starts with a valid timestamp.
-           */
-          DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(key);
-          if (manifestId != null) {
-            manifestIds.add(manifestId);
+    AtomicInteger completedManifestsCount = new AtomicInteger();
+    Consumer<S3Object> addToManifest =
+        s3Object -> {
+          if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3Object.key()).matches()) {
+            /*
+             * We've got an object that *looks like* it might be a
+             * manifest file. But we need to parse the key to ensure
+             * that it starts with a valid timestamp.
+             */
+            DataSetManifestId manifestId =
+                DataSetManifestId.parseManifestIdFromS3Key(s3Object.key());
+            if (manifestId != null) {
+              manifestIds.add(manifestId);
+            }
+          } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(s3Object.key()).matches()) {
+            completedManifestsCount.incrementAndGet();
           }
-        } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
-          completedManifestsCount++;
-        }
-      }
+        };
+    SharedS3Utilities.onListObjectsV2Stream(
+        s3TaskManager.getS3Client(), s3BucketListRequestBuilder.build(), addToManifest);
 
-      s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
-    } while (s3ObjectListing.isTruncated());
-
-    this.completedManifestsCount = completedManifestsCount;
+    this.completedManifestsCount = completedManifestsCount.get();
 
     LOGGER.debug("Scanned for data sets in S3. Found '{}'.", manifestsToProcess.size());
     timerS3Scanning.close();
@@ -241,7 +247,7 @@ public final class DataSetQueue {
   /**
    * Reads the {@link DataSetManifest} that was contained in the specified S3 object.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @param options the {@link ExtractionOptions} to use
    * @param manifestToProcessKey the {@link S3Object#getKey()} of the S3 object for the manifest to
    *     be read
@@ -256,13 +262,17 @@ public final class DataSetQueue {
    *     production, and care should be taken to account for its possibility.
    */
   public static DataSetManifest readManifest(
-      AmazonS3 s3Client, ExtractionOptions options, String manifestToProcessKey)
+      S3Client s3Client, ExtractionOptions options, String manifestToProcessKey)
       throws JAXBException, SAXException {
-    try (S3Object manifestObject =
-        s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
-
+    GetObjectRequest getObjectRequest =
+        GetObjectRequest.builder()
+            .bucket(options.getS3BucketName())
+            .key(manifestToProcessKey)
+            .build();
+    try (InputStream dataManifestStream =
+        s3Client.getObjectAsBytes(getObjectRequest).asInputStream()) {
       DataSetManifest manifest =
-          DataSetManifestFactory.newInstance().parseManifest(manifestObject.getObjectContent());
+          DataSetManifestFactory.newInstance().parseManifest(dataManifestStream);
       // Setup the manifest incoming/outgoing location
       if (manifestToProcessKey.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
         manifest.setManifestKeyIncomingLocation(
@@ -275,13 +285,13 @@ public final class DataSetQueue {
 
       return manifest;
 
-    } catch (AmazonServiceException e) {
+    } catch (SdkServiceException e) {
       /*
        * This could likely be retried, but we don't currently support
        * that. For now, just go boom.
        */
       throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
-    } catch (AmazonClientException e) {
+    } catch (SdkClientException e) {
       /*
        * This could likely be retried, but we don't currently support
        * that. For now, just go boom.
