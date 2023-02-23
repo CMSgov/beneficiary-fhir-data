@@ -15,6 +15,11 @@
 		Loads RIF data exported from the CMS Chronic Conditions Warehouse (CCW) into the BFD database.
 	</description>
 
+	<properties>
+		<awssdk.transfer.manager.version>2.20.9</awssdk.transfer.manager.version>
+		<aws.core.version>2.20.9</aws.core.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
@@ -42,6 +47,16 @@
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3-transfer-manager</artifactId>
+			<version>${awssdk.transfer.manager.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+      		<artifactId>aws-core</artifactId>
+			<version>${aws.core.version}</version>
 		</dependency>
 
 		<dependency>

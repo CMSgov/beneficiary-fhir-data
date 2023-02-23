@@ -17,7 +17,9 @@ import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
@@ -70,7 +72,7 @@ public final class SharedS3Utilities {
    * MinioConfig singleton's useMinio value.
    *
    * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
-   * @return the {@link AmazonS3} client to use
+   * @return the {@link S3Client} client to use
    */
   public static S3Client createS3Client(Region awsS3Region) {
     S3MinioConfig minioConfig = S3MinioConfig.Singleton();
@@ -84,11 +86,29 @@ public final class SharedS3Utilities {
   }
 
   /**
+   * Creates an S3AsyncClient that connects to either a local Minio or real Amazon S3 based on the
+   * MinioConfig singleton's useMinio value.
+   *
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
+   * @return the {@link S3Client} client to use
+   */
+  public static S3AsyncClient createS3AsyncClient(Region awsS3Region) {
+    S3MinioConfig minioConfig = S3MinioConfig.Singleton();
+
+    if (minioConfig.useMinio) {
+      return createS3AsyncMinioClient(awsS3Region, minioConfig);
+    }
+    S3AsyncClient s3AsyncClient =
+        S3AsyncClient.builder().defaultsMode(DefaultsMode.STANDARD).region(awsS3Region).build();
+    return s3AsyncClient;
+  }
+
+  /**
    * Creates and returns a new s3 client via minio.
    *
-   * @param awsS3Region the AWS {@link Regions} that should be used when interacting with S3
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
    * @param minioConfig passes the minioConfig to use
-   * @return the {@link AmazonS3} minio client to use
+   * @return the {@link S3Client} minio client to use
    */
   public static S3Client createS3MinioClient(Region awsS3Region, S3MinioConfig minioConfig) {
     // Uses BasicCredentials to connect to the minio client and gets the
@@ -100,20 +120,35 @@ public final class SharedS3Utilities {
     ClientOverrideConfiguration.Builder overrideConfig =
         ClientOverrideConfiguration.builder()
             .putAdvancedOption(SdkAdvancedClientOption.SIGNER, AwsS3V4Signer.create());
+    S3Configuration.Builder s3ConfigBuilder =
+        S3Configuration.builder().pathStyleAccessEnabled(true);
 
     return S3Client.builder()
+        .serviceConfiguration(s3ConfigBuilder.build())
+        .overrideConfiguration(overrideConfig.build())
         .defaultsMode(DefaultsMode.STANDARD)
         .region(awsS3Region)
         .endpointOverride(URI.create(minioConfig.minioEndpointAddress))
-        .forcePathStyle(true)
         .credentialsProvider(StaticCredentialsProvider.create(credentials))
         .build();
   }
 
   /**
+   * Creates and returns a new async s3 client via minio.
+   *
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
+   * @param minioConfig passes the minioConfig to use
+   * @return the {@link S3Client} minio client to use
+   */
+  public static S3AsyncClient createS3AsyncMinioClient(
+      Region awsS3Region, S3MinioConfig minioConfig) {
+    return (S3AsyncClient) (createS3MinioClient(awsS3Region, minioConfig));
+  }
+
+  /**
    * Creates a new test bucket with a name based on the current user and a random number.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @return the bucket name of a new, random {@link Bucket} for use in an integration test
    */
   public static String createTestBucket(S3Client s3Client) {
@@ -193,7 +228,7 @@ public final class SharedS3Utilities {
   /**
    * Deletes a bucket created by {@link #createTestBucket} along with all of its contents.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @param bucketName the name of the bucket to delete along with all of its contents
    */
   public static void deleteTestBucket(S3Client s3Client, String bucketName) {
@@ -223,7 +258,7 @@ public final class SharedS3Utilities {
    * Auto-paginates through the S3Objects returned from the given {@link ListObjectsV2Request} and
    * consumes them via a {@link Consumer}.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @param listObjectsV2Request the {@link ListObjectsV2Request} request to retrieve the s3 objects
    *     over which to paginate and consume
    * @param s3ObjectConsumer the {@link Consumer} to consume the s3Objects
@@ -243,7 +278,7 @@ public final class SharedS3Utilities {
   /**
    * Uploads a JSON resource to an S3 bucket and waits for it to be fully available.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @param bucketName the name of the bucket to store the object in
    * @param objectKey the key for the object
    * @param bytes a {@link ByteSource} referencing the json text
