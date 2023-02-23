@@ -383,13 +383,13 @@ mappings:
     - name: drgCd
       sqlType: varchar(4)
       comment: 'Identifies the diagnosis related group code assigned by the grouper
-       program using the length of stay; covered days, sex age, diagnosis, procedure
+        program using the length of stay; covered days, sex age, diagnosis, procedure
         codes, discharge date and total charges.'
       dbName: drg_cd
     - name: groupCode
       sqlType: varchar(2)
       comment: 'Identifies the American National Standards Institute (ANSI) group code
-       at the claim level.'
+        at the claim level.'
       dbName: group_code
     - name: clmTypInd
       sqlType: varchar(1)
