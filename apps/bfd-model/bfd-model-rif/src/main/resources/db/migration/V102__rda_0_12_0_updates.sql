@@ -1,4 +1,4 @@
--- As part of the 0.10 RDA API update, new raw text fields are added for select date fields and FISS diag_cd_2 is now nullable
+-- As part of the 0.12 RDA API update, new claim level fields added and revenue lines support added
 
 alter table rda.fiss_claims add received_date_text varchar(10);
 alter table rda.fiss_claims add curr_tran_date_text varchar(10);
