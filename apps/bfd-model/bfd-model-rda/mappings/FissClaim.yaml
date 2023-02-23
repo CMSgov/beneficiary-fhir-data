@@ -393,7 +393,7 @@ mappings:
       dbName: group_code
     - name: clmTypInd
       sqlType: varchar(1)
-      nullable: false
+      #TODO: This should be a non-nullable field, but we currently have claims without this value
       comment: 'Identifies the type of claim, which is system generated.'
       dbName: clm_typ_ind
     - name: reposInd
