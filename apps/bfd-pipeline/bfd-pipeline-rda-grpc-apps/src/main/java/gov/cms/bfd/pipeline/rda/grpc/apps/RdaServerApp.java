@@ -16,8 +16,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.regions.Regions;
-import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The server is intended for
@@ -90,11 +90,10 @@ public class RdaServerApp {
       mcsClaimFile = config.readableFileOption("mcsFile").orElse(null);
       final Optional<String> s3Bucket = config.stringOption("s3Bucket");
       if (s3Bucket.isPresent()) {
-        final Regions s3Region =
-            config
-                .enumOption("s3Region", Regions::fromName)
+        final Region s3Region =
+            Optional.of(Region.of(config.stringOption("s3Region").orElse("")))
                 .orElse(SharedS3Utilities.REGION_DEFAULT);
-        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
+        final S3Client s3Client = SharedS3Utilities.createS3Client(s3Region);
         final String s3Directory = config.stringOption("s3Directory").orElse("");
         s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory);
         checkS3Connectivity("FISS", s3Sources.fissClaimChangeFactory());
