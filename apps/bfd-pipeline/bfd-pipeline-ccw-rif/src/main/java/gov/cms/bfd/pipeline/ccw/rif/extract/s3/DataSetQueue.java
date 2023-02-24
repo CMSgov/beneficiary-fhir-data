@@ -249,8 +249,8 @@ public final class DataSetQueue {
    *
    * @param s3Client the {@link S3Client} client to use
    * @param options the {@link ExtractionOptions} to use
-   * @param manifestToProcessKey the {@link S3Object#getKey()} of the S3 object for the manifest to
-   *     be read
+   * @param manifestToProcessKey the {@link S3Object#key()} of the S3 object for the manifest to be
+   *     read
    * @return the {@link DataSetManifest} that was contained in the specified S3 object
    * @throws JAXBException Any {@link JAXBException}s that are encountered will be bubbled up. These
    *     generally indicate that the {@link DataSetManifest} could not be parsed because its content

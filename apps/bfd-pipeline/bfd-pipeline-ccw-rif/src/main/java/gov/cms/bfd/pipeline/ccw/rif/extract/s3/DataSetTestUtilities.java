@@ -75,9 +75,9 @@ public class DataSetTestUtilities {
   /**
    * Creates a put request for the specified S3 bucket.
    *
+   * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
-   * @return a {@link PutObjectRequest} for the specified {@link DataSetManifest}
    */
   public static void putObject(S3Client s3Client, String bucket, DataSetManifest manifest) {
     String keyPrefix =
@@ -89,12 +89,12 @@ public class DataSetTestUtilities {
   /**
    * Create put request within a given bucket for a manifest at a keyed location.
    *
+   * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
    * @param location the location to store the manifest, should be {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
-   * @return a {@link PutObjectRequest} for the specified {@link DataSetManifest}
    */
   public static void putObject(
       S3Client s3Client, String bucket, DataSetManifest manifest, String location) {
@@ -117,11 +117,11 @@ public class DataSetTestUtilities {
    * Creates a put request, placing the items within the {@link
    * CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key inside the given bucket.
    *
+   * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
-   * @return a {@link PutObjectRequest} for the specified content
    */
   public static void putObject(
       S3Client s3Client,
@@ -141,6 +141,7 @@ public class DataSetTestUtilities {
   /**
    * Creates a put request, placing the items within the location key inside the given bucket.
    *
+   * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
@@ -148,7 +149,6 @@ public class DataSetTestUtilities {
    * @param incomingLocation the incoming location, should be {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
-   * @return a {@link PutObjectRequest} for the specified content
    */
   public static void putObject(
       S3Client s3Client,
@@ -164,12 +164,12 @@ public class DataSetTestUtilities {
   /**
    * Creates a put request for the specified S3 bucket.
    *
+   * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param keyPrefix the S3 key prefix to store the new object under
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
-   * @return a {@link PutObjectRequest} for the specified content
    */
   public static void putObject(
       S3Client s3Client,

@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
@@ -68,7 +67,7 @@ public final class S3TaskManager {
   /**
    * Gets the {@link #S3Client}.
    *
-   * @return the {@link S3AsyncClient} client being used by this {@link S3TaskManager}
+   * @return the {@link #S3Client} client being used by this {@link S3TaskManager}
    */
   public S3Client getS3Client() {
     return s3Client;
@@ -77,7 +76,7 @@ public final class S3TaskManager {
   /**
    * Gets the {@link #s3TransferManager}.
    *
-   * @return the Amazon S3 {@link TransferManager} being used by this {@link S3TaskManager}
+   * @return the Amazon S3 {@link S3TransferManager} being used by this {@link S3TaskManager}
    */
   public S3TransferManager getS3TransferManager() {
     return s3TransferManager;
