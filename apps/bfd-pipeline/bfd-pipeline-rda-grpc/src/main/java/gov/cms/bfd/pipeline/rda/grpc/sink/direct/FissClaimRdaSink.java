@@ -45,9 +45,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     super(appState, RdaApiProgress.ClaimType.FISS, autoUpdateLastSeq, errorLimit);
     this.transformer =
         transformer.withMbiCache(
-            transformer
-                .getMbiCache()
-                .withDatabaseLookup(super.entityManager.getEntityManagerFactory()));
+            transformer.getMbiCache().withDatabaseLookup(super.entityManagerFactory));
   }
 
   /**
@@ -61,19 +59,16 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return !InvalidDcnRegex.matcher(fissClaimChange.getDcn()).find();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(FissClaimChange object) {
     return object.getClaim().getDcn();
   }
 
-  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(FissClaimChange object) {
     return object.getSeq();
   }
 
-  /** {@inheritDoc} */
   @Nonnull
   @Override
   RdaChange<RdaFissClaim> transformMessageImpl(String apiVersion, FissClaimChange message) {
@@ -82,7 +77,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return change;
   }
 
-  /** {@inheritDoc} */
   @Override
   int getInsertCount(RdaFissClaim claim) {
     return 1 // Add one for the base claim
@@ -92,7 +86,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         + claim.getAuditTrail().size();
   }
 
-  /** {@inheritDoc} */
   @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaFissClaim> change) {
     final RdaFissClaim claim = change.getClaim();
@@ -112,7 +105,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .build();
   }
 
-  /** {@inheritDoc} */
   @Override
   MessageError createMessageError(
       String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)

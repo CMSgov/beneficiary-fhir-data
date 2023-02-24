@@ -9,6 +9,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.TransactionUtil;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.LongStream;
@@ -240,34 +241,22 @@ public class MbiCache {
      */
     @VisibleForTesting
     ReadResult readOrInsertIfMissing(String mbi) {
-      final var entityManager = entityManagerFactory.createEntityManager();
-      try {
-        entityManager.getTransaction().begin();
-        boolean successful = false;
-        try {
-          final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-          final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
-          final Root<Mbi> root = criteria.from(Mbi.class);
-          criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-          boolean inserted = false;
-          final var records = entityManager.createQuery(criteria).getResultList();
-          var record = records.isEmpty() ? null : records.get(0);
-          if (record == null) {
-            record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
-            inserted = true;
-          }
-          successful = true;
-          return new ReadResult(record, inserted);
-        } finally {
-          if (successful) {
-            entityManager.getTransaction().commit();
-          } else {
-            entityManager.getTransaction().rollback();
-          }
-        }
-      } finally {
-        entityManager.close();
-      }
+      return TransactionUtil.executeFunction(
+          entityManagerFactory,
+          entityManager -> {
+            final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+            final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+            final Root<Mbi> root = criteria.from(Mbi.class);
+            criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+            boolean inserted = false;
+            final var records = entityManager.createQuery(criteria).getResultList();
+            var record = records.isEmpty() ? null : records.get(0);
+            if (record == null) {
+              record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
+              inserted = true;
+            }
+            return new ReadResult(record, inserted);
+          });
     }
 
     /**
