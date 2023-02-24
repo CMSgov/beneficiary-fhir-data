@@ -1,10 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.subset;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.transfer.Download;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.DMEClaimColumn;
@@ -51,6 +47,10 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.services.s3.transfer.Download;
+import software.amazon.awssdk.services.s3.transfer.TransferManager;
+import software.amazon.awssdk.services.s3.transfer.TransferManagerBuilder;
 
 /**
  * Given some RIF data sets, extracts a random subset of beneficiaries and their claims. This is
