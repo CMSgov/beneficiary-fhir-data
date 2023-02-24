@@ -32,8 +32,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.regions.Regions;
-import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * Program to load RDA API NDJSON data files into a database from either a local file or from an S3
@@ -90,7 +90,7 @@ public class LoadRdaJsonApp {
       String fileLocation = config.fileLocation.orElse("");
 
       if (fileLocation.startsWith(AMAZON_S3_PROTOCOL)) {
-        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(config.s3Region);
+        final S3Client s3Client = SharedS3Utilities.createS3Client(config.s3Region);
         final String directory = fileLocation.replace(AMAZON_S3_PROTOCOL, "");
         final S3JsonMessageSources s3Sources =
             new S3JsonMessageSources(s3Client, config.s3Bucket, directory);
@@ -185,7 +185,7 @@ public class LoadRdaJsonApp {
     /** The name of the MCS file to read from at the source. */
     private final Optional<String> mcsFile;
     /** The S3 region to use if the source is an S3 connection. */
-    private final Regions s3Region;
+    private final Region s3Region;
     /** The S3 bucket to use if the source is an S3 connection. */
     private final String s3Bucket;
 
@@ -212,8 +212,7 @@ public class LoadRdaJsonApp {
       fissFile = options.stringOption("file.fiss");
       mcsFile = options.stringOption("file.mcs");
       s3Region =
-          options
-              .enumOption("s3.region", Regions::fromName)
+          Optional.of(Region.of(options.stringOption("s3.region").orElse("")))
               .orElse(SharedS3Utilities.REGION_DEFAULT);
       s3Bucket = options.stringOption("s3.bucket").orElse("");
     }
