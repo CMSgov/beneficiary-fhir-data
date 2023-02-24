@@ -1,12 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.S3ObjectInputStream;
 
 /**
  * Implementation of {@link MessageSource} that reads and serves NDJSON data from a single {@link
@@ -20,10 +21,8 @@ import software.amazon.awssdk.services.s3.model.S3ObjectInputStream;
  * @param <T> the type parameter
  */
 public class S3JsonMessageSource<T> implements MessageSource<T> {
-  /** The S3 object to read. */
-  private final S3Object s3Object;
   /** The raw stream of the {@link #s3Object}. */
-  private final S3ObjectInputStream s3InputStream;
+  private final InputStream s3InputStream;
   /** The source for outputting json messages. */
   private final JsonMessageSource<T> jsonMessageSource;
   /** If the object has not been fully read yet. */
@@ -35,10 +34,10 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
    * @param s3Object the s3 object
    * @param parser the parser to parse the object
    */
-  public S3JsonMessageSource(S3Object s3Object, JsonMessageSource.Parser<T> parser) {
-    this.s3Object = s3Object;
-    s3InputStream = s3Object.getObjectContent();
-    BufferedReader reader = createReader(s3Object.getKey(), s3InputStream);
+  public S3JsonMessageSource(
+      String key, InputStream s3InputStream, JsonMessageSource.Parser<T> parser) {
+    this.s3InputStream = s3InputStream;
+    BufferedReader reader = createReader(key, s3InputStream);
     jsonMessageSource = new JsonMessageSource<>(reader, parser);
     unfinished = true;
   }
@@ -60,7 +59,7 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
   @Override
   public void close() throws Exception {
     // Note: When the JsonMessageSource closes it will also close the S3 stream.
-    closeAll(this::abortUnfinishedS3Stream, jsonMessageSource, s3Object);
+    closeAll(this::abortUnfinishedS3Stream, jsonMessageSource);
   }
 
   /**
@@ -71,8 +70,12 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
    * from the stream.
    */
   private void abortUnfinishedS3Stream() {
-    if (unfinished) {
-      s3InputStream.abort();
+    try {
+      if (unfinished) {
+        s3InputStream.close();
+      }
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
   }
 

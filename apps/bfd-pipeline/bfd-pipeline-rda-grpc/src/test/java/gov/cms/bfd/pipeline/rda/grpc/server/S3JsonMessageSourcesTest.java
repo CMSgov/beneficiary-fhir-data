@@ -3,8 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import com.amazonaws.services.s3.AmazonS3;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /** Tests the {@link S3JsonMessageSources}. */
 public class S3JsonMessageSourcesTest {
@@ -14,7 +14,7 @@ public class S3JsonMessageSourcesTest {
    */
   @Test
   public void testPathConstructionWithNoDirectory() {
-    AmazonS3 s3Client = mock(AmazonS3.class);
+    S3Client s3Client = mock(S3Client.class);
     S3JsonMessageSources sources = new S3JsonMessageSources(s3Client, "bucket", "");
     assertEquals("fiss.ndjson", sources.createFissObjectKey());
     assertEquals("fiss-1-100.ndjson", sources.createFissObjectKey(1, 100));
@@ -29,7 +29,7 @@ public class S3JsonMessageSourcesTest {
    */
   @Test
   public void testPathConstructionWithADirectory() {
-    AmazonS3 s3Client = mock(AmazonS3.class);
+    S3Client s3Client = mock(S3Client.class);
     S3JsonMessageSources sources = new S3JsonMessageSources(s3Client, "bucket", "a/bb/ccc");
     assertEquals("a/bb/ccc/", sources.getDirectoryPath());
   }
@@ -41,7 +41,7 @@ public class S3JsonMessageSourcesTest {
    */
   @Test
   public void testPathConstructionWithADirectoryAndTrailingSlash() {
-    AmazonS3 s3Client = mock(AmazonS3.class);
+    S3Client s3Client = mock(S3Client.class);
     S3JsonMessageSources sources = new S3JsonMessageSources(s3Client, "bucket", "a/bb/");
     assertEquals("a/bb/", sources.getDirectoryPath());
   }

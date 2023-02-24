@@ -3,13 +3,16 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import com.google.common.base.Strings;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import java.io.InputStream;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.AmazonS3;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 /**
- * Uses an {@link AmazonS3} client and a bucket name to simplify creation of {@link MessageSource}s
+ * Uses an {@link S3Client} client and a bucket name to simplify creation of {@link MessageSource}s
  * that read FISS or MCS claims from the bucket.
  */
 public class S3JsonMessageSources {
@@ -22,7 +25,7 @@ public class S3JsonMessageSources {
   private static final String FILE_SUFFIX = "ndjson";
 
   /** The client for interacting with AWS S3 buckets and files. */
-  private final AmazonS3 s3Client;
+  private final S3Client s3Client;
   /** The bucket to use for S3 interactions. */
   @Getter private final String bucketName;
   /** The directory path to save files to. */
@@ -40,7 +43,7 @@ public class S3JsonMessageSources {
    * @param bucketName the bucket files are stored in
    * @param directoryPath the path within the bucket
    */
-  public S3JsonMessageSources(AmazonS3 s3Client, String bucketName, String directoryPath) {
+  public S3JsonMessageSources(S3Client s3Client, String bucketName, String directoryPath) {
     this.s3Client = s3Client;
     this.bucketName = bucketName;
     this.directoryPath = normalizeDirectoryPath(directoryPath);
@@ -165,7 +168,11 @@ public class S3JsonMessageSources {
       String ndjsonObjectKey, JsonMessageSource.Parser<T> parser) {
     LOGGER.info(
         "creating S3JsonMessageSource from S3: bucket={} key={}", bucketName, ndjsonObjectKey);
-    return new S3JsonMessageSource<>(s3Client.getObject(bucketName, ndjsonObjectKey), parser);
+    GetObjectRequest getObjectRequest =
+        GetObjectRequest.builder().bucket(bucketName).key(ndjsonObjectKey).build();
+    InputStream inputStream =
+        s3Client.getObject(getObjectRequest, ResponseTransformer.toBytes()).asInputStream();
+    return new S3JsonMessageSource<>(ndjsonObjectKey, inputStream, parser);
   }
 
   /**
