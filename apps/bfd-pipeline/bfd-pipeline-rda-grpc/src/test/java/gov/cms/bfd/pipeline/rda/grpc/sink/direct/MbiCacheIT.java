@@ -77,7 +77,9 @@ public class MbiCacheIT {
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, entityManager) -> {
-          final MbiCache mbiCache = MbiCache.databaseCache(normalHasher, appMetrics, entityManager);
+          final MbiCache mbiCache =
+              MbiCache.databaseCache(
+                  normalHasher, appMetrics, entityManager.getEntityManagerFactory());
           assertEquals(hash1, mbiCache.lookupMbi(mbi1).getHash());
           assertEquals(hash2, mbiCache.lookupMbi(mbi2).getHash());
 
@@ -115,7 +117,9 @@ public class MbiCacheIT {
           entityManager.getTransaction().commit();
 
           // verify our fake is used instead of a computed correct one
-          final MbiCache mbiCache = MbiCache.databaseCache(normalHasher, appMetrics, entityManager);
+          final MbiCache mbiCache =
+              MbiCache.databaseCache(
+                  normalHasher, appMetrics, entityManager.getEntityManagerFactory());
           assertEquals(fakeHash1, mbiCache.lookupMbi(mbi1).getHash());
           assertEquals(fakeHash1, mbiCache.lookupMbi(mbi1).getHash());
 
@@ -141,7 +145,9 @@ public class MbiCacheIT {
           final MbiCache.DatabaseBackedCache mbiCache =
               spy(
                   new MbiCache.DatabaseBackedCache(
-                      normalHasher, new MbiCache.Metrics(appMetrics), entityManager));
+                      normalHasher,
+                      new MbiCache.Metrics(appMetrics),
+                      entityManager.getEntityManagerFactory()));
 
           // mix of calls in various order with repeats for the same mbi
           assertEquals(hash1, mbiCache.lookupMbi(mbi1).getHash());
@@ -184,7 +190,9 @@ public class MbiCacheIT {
           final MbiCache.DatabaseBackedCache mbiCache =
               spy(
                   new MbiCache.DatabaseBackedCache(
-                      normalHasher, new MbiCache.Metrics(appMetrics), entityManager));
+                      normalHasher,
+                      new MbiCache.Metrics(appMetrics),
+                      entityManager.getEntityManagerFactory()));
           doThrow(error, error, error, error, error)
               .doReturn(new MbiCache.ReadResult(new Mbi(1L, mbi1, hash1), true))
               .when(mbiCache)

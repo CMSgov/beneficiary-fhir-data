@@ -12,7 +12,7 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.LongStream;
-import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -100,12 +100,12 @@ public class MbiCache {
    *
    * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
    * @param appMetrics {@link MetricRegistry} to use for reporting metrics
-   * @param entityManager {@link EntityManager} used to query and create records
+   * @param entityManagerFactory {@link EntityManagerFactory} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
    */
   public static MbiCache databaseCache(
-      IdHasher hasher, MetricRegistry appMetrics, EntityManager entityManager) {
-    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), entityManager);
+      IdHasher hasher, MetricRegistry appMetrics, EntityManagerFactory entityManagerFactory) {
+    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), entityManagerFactory);
   }
 
   /**
@@ -135,11 +135,11 @@ public class MbiCache {
    * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
    * entityManager.
    *
-   * @param entityManager {@link EntityManager} used to query and create records
+   * @param entityManagerFactory {@link EntityManagerFactory} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
    */
-  public MbiCache withDatabaseLookup(EntityManager entityManager) {
-    return new DatabaseBackedCache(hasher, metrics, entityManager);
+  public MbiCache withDatabaseLookup(EntityManagerFactory entityManagerFactory) {
+    return new DatabaseBackedCache(hasher, metrics, entityManagerFactory);
   }
 
   /**
@@ -166,7 +166,7 @@ public class MbiCache {
   @Slf4j
   static class DatabaseBackedCache extends MbiCache {
     /** Handles database entity management. */
-    private final EntityManager entityManager;
+    private final EntityManagerFactory entityManagerFactory;
     /** Creates random values. */
     private final Random random;
 
@@ -175,12 +175,13 @@ public class MbiCache {
      *
      * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
      * @param metrics {@link Metrics} to use for reporting metrics
-     * @param entityManager {@link EntityManager} used to query and create records
+     * @param entityManagerFactory {@link EntityManagerFactory} used to query and create records
      */
     @VisibleForTesting
-    DatabaseBackedCache(IdHasher hasher, Metrics metrics, EntityManager entityManager) {
+    DatabaseBackedCache(
+        IdHasher hasher, Metrics metrics, EntityManagerFactory entityManagerFactory) {
       super(hasher, metrics);
-      this.entityManager = entityManager;
+      this.entityManagerFactory = entityManagerFactory;
       random = new Random();
     }
 
@@ -239,28 +240,33 @@ public class MbiCache {
      */
     @VisibleForTesting
     ReadResult readOrInsertIfMissing(String mbi) {
-      entityManager.getTransaction().begin();
-      boolean successful = false;
+      final var entityManager = entityManagerFactory.createEntityManager();
       try {
-        final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
-        final Root<Mbi> root = criteria.from(Mbi.class);
-        criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-        boolean inserted = false;
-        final var records = entityManager.createQuery(criteria).getResultList();
-        var record = records.isEmpty() ? null : records.get(0);
-        if (record == null) {
-          record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
-          inserted = true;
+        entityManager.getTransaction().begin();
+        boolean successful = false;
+        try {
+          final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+          final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+          final Root<Mbi> root = criteria.from(Mbi.class);
+          criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+          boolean inserted = false;
+          final var records = entityManager.createQuery(criteria).getResultList();
+          var record = records.isEmpty() ? null : records.get(0);
+          if (record == null) {
+            record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
+            inserted = true;
+          }
+          successful = true;
+          return new ReadResult(record, inserted);
+        } finally {
+          if (successful) {
+            entityManager.getTransaction().commit();
+          } else {
+            entityManager.getTransaction().rollback();
+          }
         }
-        successful = true;
-        return new ReadResult(record, inserted);
       } finally {
-        if (successful) {
-          entityManager.getTransaction().commit();
-        } else {
-          entityManager.getTransaction().rollback();
-        }
+        entityManager.close();
       }
     }
 
