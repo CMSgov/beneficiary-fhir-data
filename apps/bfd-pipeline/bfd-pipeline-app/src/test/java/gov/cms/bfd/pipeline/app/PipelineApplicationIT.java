@@ -39,8 +39,8 @@ import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
-import software.amazon.awssdk.services.s3.AmazonS3;
-import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -64,7 +64,7 @@ public final class PipelineApplicationIT {
   @Test
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
-    ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
+    ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder("foo");
     String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();
     appRunBuilder.environment().put("JAVA_HOME", javaHome);
@@ -97,7 +97,7 @@ public final class PipelineApplicationIT {
     Process appProcess = null;
     try {
       // Start the app.
-      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
+      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder("foo");
       appRunBuilder.redirectErrorStream(true);
       appProcess = appRunBuilder.start();
 
@@ -131,9 +131,9 @@ public final class PipelineApplicationIT {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    S3Client s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
 
-    Bucket bucket = null;
+    String bucket = null;
     Process appProcess = null;
     try {
       // Create the (empty) bucket to run against.
@@ -170,7 +170,8 @@ public final class PipelineApplicationIT {
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
-      if (bucket != null) s3Client.deleteBucket(bucket.getName());
+      if (bucket != null)
+        s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
     }
   }
 
@@ -187,8 +188,8 @@ public final class PipelineApplicationIT {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
-    Bucket bucket = null;
+    S3Client s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    String bucket = null;
     Process appProcess = null;
     try {
       /*
@@ -205,19 +206,20 @@ public final class PipelineApplicationIT {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(1),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(1),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Start the app.
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
@@ -615,14 +617,14 @@ public final class PipelineApplicationIT {
   /**
    * Creates a ProcessBuilder configured for an CCS/RIF pipeline test.
    *
-   * @param bucket the S3 {@link Bucket} that the application will be configured to pull RIF data
-   *     from
+   * @param bucket the name of the S3 bucket that the application will be configured to pull RIF
+   *     data from
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
-  private static ProcessBuilder createCcwRifAppProcessBuilder(Bucket bucket) {
+  private static ProcessBuilder createCcwRifAppProcessBuilder(String bucket) {
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
 
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket);
     appRunBuilder
         .environment()
         .put(

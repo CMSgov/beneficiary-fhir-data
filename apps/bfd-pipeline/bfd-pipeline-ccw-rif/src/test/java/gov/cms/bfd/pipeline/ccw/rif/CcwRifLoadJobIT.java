@@ -18,11 +18,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.AmazonS3;
-import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
 public final class CcwRifLoadJobIT {
@@ -35,16 +37,13 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void emptyBucketTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
+    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    String bucket = null;
     try {
       // Create the (empty) bucket to run against.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName());
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -65,7 +64,8 @@ public final class CcwRifLoadJobIT {
       assertEquals(0, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
     } finally {
-      if (bucket != null) s3Client.deleteBucket(bucket.getName());
+      if (bucket != null)
+        s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
     }
   }
 
@@ -110,20 +110,16 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void multipleDataSetsWithSyntheticTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
+    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    String bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options =
-          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -208,40 +204,75 @@ public final class CcwRifLoadJobIT {
           1 + manifestSynthetic.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifestSynthetic.getTimestampText()
-                  + "/0_manifest.xml"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifestSynthetic.getTimestampText()
+                                  + "/0_manifest.xml")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifestSynthetic.getTimestampText()
-                  + "/carrier.rif"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifestSynthetic.getTimestampText()
+                                  + "/carrier.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifestSynthetic.getTimestampText()
-                  + "/inpatient.rif"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifestSynthetic.getTimestampText()
+                                  + "/inpatient.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/0_manifest.xml"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/0_manifest.xml")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/beneficiaries.rif"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/beneficiaries.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
 
     } finally {
       if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
@@ -255,20 +286,16 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void multipleDataSetsTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
+    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    String bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options =
-          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifestA =
           new DataSetManifest(
               Instant.now().minus(1L, ChronoUnit.HOURS),
@@ -277,13 +304,13 @@ public final class CcwRifLoadJobIT {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifestA,
-              manifestA.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifestA);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifestA,
+          manifestA.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetManifest manifestB =
           new DataSetManifest(
               manifestA.getTimestampText(),
@@ -292,13 +319,13 @@ public final class CcwRifLoadJobIT {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("pde.rif", RifFileType.PDE));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifestB,
-              manifestB.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifestB);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifestB,
+          manifestB.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetManifest manifestC =
           new DataSetManifest(
               Instant.now(),
@@ -307,13 +334,13 @@ public final class CcwRifLoadJobIT {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifestC,
-              manifestC.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifestC);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifestC,
+          manifestC.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -366,20 +393,16 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void skipDataSetTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
+    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    String bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options =
-          new ExtractionOptions(bucket.getName(), Optional.of(RifFileType.PDE));
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket, Optional.of(RifFileType.PDE));
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),
@@ -389,19 +412,19 @@ public final class CcwRifLoadJobIT {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(1),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(1),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -448,19 +471,16 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void skipDataSetTestForFutureManifestDate() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
+    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    String bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName());
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now().plus(3, ChronoUnit.DAYS),
@@ -470,19 +490,19 @@ public final class CcwRifLoadJobIT {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(1),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(1),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -538,19 +558,16 @@ public final class CcwRifLoadJobIT {
       List<URL> fileList,
       DataSetManifest inManifest)
       throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
+    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    String bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName());
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest = inManifest;
       if (manifest == null) {
@@ -616,17 +633,16 @@ public final class CcwRifLoadJobIT {
    *     resource lists, should be in the order of the manifest
    */
   private void putSampleFilesInTestBucket(
-      AmazonS3 s3Client,
-      Bucket bucket,
+      S3Client s3Client,
+      String bucket,
       String location,
       DataSetManifest manifest,
       List<URL> resourcesToAdd) {
-    s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, location));
+    DataSetTestUtilities.putObject(s3Client, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket, manifest, manifest.getEntries().get(index), resource, location));
+      DataSetTestUtilities.putObject(
+          s3Client, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
   }
