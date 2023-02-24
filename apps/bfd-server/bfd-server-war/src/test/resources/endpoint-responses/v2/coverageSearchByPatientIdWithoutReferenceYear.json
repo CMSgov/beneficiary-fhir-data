@@ -254,11 +254,11 @@
           "code" : "self",
           "display" : "Self"
         } ]
-      },     
+      },
       "period" : {
         "start" : "2021-02-17",
         "end" : "2022-11-17"
-      },	
+      },
       "payor" : [ {
         "identifier" : {
           "value" : "Centers for Medicare and Medicaid Services"
