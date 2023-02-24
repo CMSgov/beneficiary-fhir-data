@@ -18,11 +18,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.AmazonClientException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.transfer.Download;
+import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
+import software.amazon.awssdk.transfer.s3.model.FileDownload;
+import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
  * Represents an asynchronous operation to download the contents of a specific {@link
@@ -64,13 +69,15 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
   public ManifestEntryDownloadResult call() throws Exception {
     try {
       GetObjectRequest objectRequest =
-          new GetObjectRequest(
-              options.getS3BucketName(),
-              String.format(
-                  "%s/%s/%s",
-                  manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
-                  manifestEntry.getParentManifest().getTimestampText(),
-                  manifestEntry.getName()));
+          GetObjectRequest.builder()
+              .bucket(options.getS3BucketName())
+              .key(
+                  String.format(
+                      "%s/%s/%s",
+                      manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
+                      manifestEntry.getParentManifest().getTimestampText(),
+                      manifestEntry.getName()))
+              .build();
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
       Timer.Context downloadTimer =
@@ -79,9 +86,16 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
               .time();
       LOGGER.debug(
           "Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
-      Download downloadHandle =
-          s3TaskManager.getS3TransferManager().download(objectRequest, localTempFile.toFile());
-      downloadHandle.waitForCompletion();
+      DownloadFileRequest downloadFileRequest =
+          DownloadFileRequest.builder()
+              .getObjectRequest(objectRequest)
+              .addTransferListener(LoggingTransferListener.create())
+              .destination(localTempFile.toFile())
+              .build();
+
+      FileDownload downloadFile =
+          s3TaskManager.getS3TransferManager().downloadFile(downloadFileRequest);
+      CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
       LOGGER.debug(
           "Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
       downloadTimer.close();
@@ -95,8 +109,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
       md5ChkSumTimer.close();
 
-      String downloadedFileMD5ChkSum =
-          downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
+      String downloadedFileMD5ChkSum = downloadResult.response().metadata().get("md5chksum");
       // TODO Remove null check below once Jira CBBD-368 is completed
       if ((downloadedFileMD5ChkSum != null)
           && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))
@@ -109,9 +122,9 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
-    } catch (AmazonClientException e) {
+    } catch (SdkClientException | CompletionException e) {
       throw new AwsFailureException(e);
-    } catch (InterruptedException e) {
+    } catch (CancellationException e) {
       // Shouldn't happen, as our apps don't use thread interrupts.
       throw new BadCodeMonkeyException(e);
     }
