@@ -23,14 +23,14 @@
 	</licenses>
 
 	<issueManagement>
-		<!-- There doesn't seem to be any tooling support for this yet, but it 
+		<!-- There doesn't seem to be any tooling support for this yet, but it
 			doesn't hurt to include it. -->
 		<system>JIRA</system>
 		<url>https://jira.cms.gov/browse/BLUEBUTTON</url>
 	</issueManagement>
 
 	<ciManagement>
-		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245,
 			Sonar (at least) can use this information. -->
 		<system>jenkins</system>
 		<url>https://builds.bfd-management.oeda.cmscloud.local/jenkins</url>
@@ -54,8 +54,8 @@
 	</modules>
 
 	<properties>
-		<!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding, 
-			this property is used by many different plugins to specify the source file 
+		<!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
+			this property is used by many different plugins to specify the source file
 			encoding. We're forcing that to UTF-8, because it's the only sane choice. -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
@@ -68,7 +68,7 @@
 			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
 		<project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
 
-		<!-- Configure Sonar such that projects evaluated by it against it will 
+		<!-- Configure Sonar such that projects evaluated by it against it will
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -102,7 +102,7 @@
 		<slf4j.version>2.0.6</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>8.5.13</flyway.version>
-		<newrelic.agent.version>8.0.0</newrelic.agent.version>
+		<newrelic.agent.version>8.0.1</newrelic.agent.version>
 		<checkstyle.version>10.7.0</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
@@ -163,7 +163,7 @@
 				<version>${newrelic.agent.version}</version>
 			</dependency>
 			<dependency>
-				<!-- Provides a sane facade for the giant mess of incompatible logging 
+				<!-- Provides a sane facade for the giant mess of incompatible logging
 					frameworks in Java. -->
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
@@ -199,14 +199,14 @@
 			</dependency>
 
 			<dependency>
-				<!-- Used to measure performance and collect other runtime statistics 
+				<!-- Used to measure performance and collect other runtime statistics
 					within these projects. -->
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
 				<version>${metrics.version}</version>
 			</dependency>
 			<dependency>
-				<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
 					at runtime. -->
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-jvm</artifactId>
@@ -238,10 +238,10 @@
 			</dependency>
 
 
-			<!-- We lock down the versions of all the various Spring components that 
+			<!-- We lock down the versions of all the various Spring components that
 				child projects use, as incompatibility problems with Spring are common. -->
 			<dependency>
-				<!-- Lock & harmonize the versions of the various Spring Framework modules. 
+				<!-- Lock & harmonize the versions of the various Spring Framework modules.
 					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir-base:pom:6.1.3
 					uses the 5.3.23 version of the Spring Framework. -->
 				<groupId>org.springframework</groupId>
@@ -251,7 +251,7 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<!-- This is the latest release compatible with the version of Spring 
+				<!-- This is the latest release compatible with the version of Spring
 					Framework that we're using, per https://docs.spring.io/spring-data/jpa/docs/2.7.0/reference/html/#dependencies.spring-framework. -->
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
@@ -259,7 +259,7 @@
 			</dependency>
 
 			<dependency>
-				<!-- Lock & harmonize the versions of the various AWS SDK components, 
+				<!-- Lock & harmonize the versions of the various AWS SDK components,
 					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
 				<!-- When checking for dependencies to upgrade, java-sdk-swf-libraries will show up, however
 				the AWS SDK Bom contains an older version for unknown reasons, so it can be ignored. -->
@@ -271,7 +271,7 @@
 			</dependency>
 
 			<dependency>
-				<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
+				<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
 					Hibernate is used for that in our projects.) -->
 				<artifactId>hibernate-jpa-2.1-api</artifactId>
 				<groupId>org.hibernate.javax.persistence</groupId>
@@ -286,15 +286,15 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
-				<!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager, 
+				<!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
 					but may occassionally be needed separately. -->
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
-				<!-- The Hibernate JPA Model Generator, which will produce MetaModel 
-					classes for JPA entities. This happens happens automagically via javac's 
+				<!-- The Hibernate JPA Model Generator, which will produce MetaModel
+					classes for JPA entities. This happens happens automagically via javac's
 					annotation processor. -->
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-jpamodelgen</artifactId>
@@ -343,7 +343,7 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
+				<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
 					for details. -->
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
@@ -419,8 +419,8 @@
 	<build>
 		<resources>
 			<resource>
-				<!-- Enable Maven's resource filtering for text files in 'src/main/resources/'. 
-					This will replace properties in text files with their values, e.g. "${project.groupId}" 
+				<!-- Enable Maven's resource filtering for text files in 'src/main/resources/'.
+					This will replace properties in text files with their values, e.g. "${project.groupId}"
 					will be replaced with "gov.cms.beneficiaryfhirdata". -->
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
@@ -428,8 +428,8 @@
 		</resources>
 		<testResources>
 			<testResource>
-				<!-- Enable Maven's resource filtering for text files in 'src/test/resources/'. 
-					This will replace properties in text files with their values, e.g. "${project.groupId}" 
+				<!-- Enable Maven's resource filtering for text files in 'src/test/resources/'.
+					This will replace properties in text files with their values, e.g. "${project.groupId}"
 					will be replaced with "gov.cms.beneficiaryfhirdata". -->
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
@@ -437,9 +437,9 @@
 		</testResources>
 		<pluginManagement>
 			<plugins>
-				<!-- It adds a lot of noise to this file, but we specify the version 
-					of all plugins used in the module builds here to help ensure that the builds 
-					are always reproducible. This is actually enforced down below by the maven-enforcer-plugin 
+				<!-- It adds a lot of noise to this file, but we specify the version
+					of all plugins used in the module builds here to help ensure that the builds
+					are always reproducible. This is actually enforced down below by the maven-enforcer-plugin
 					execution. -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -447,7 +447,7 @@
 					<version>1.4.1</version>
 				</plugin>
 				<plugin>
-					<!-- Can be used to select which JDK to use (amongst other things). 
+					<!-- Can be used to select which JDK to use (amongst other things).
 						Options must be specified in `~/.m2/toolchains.xml`. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-toolchains-plugin</artifactId>
@@ -588,7 +588,7 @@ checkJavaFormat
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
 						</systemPropertyVariables>
-						
+
 						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
 						<environmentVariables>
 							<TZ>UTC</TZ>
@@ -596,7 +596,7 @@ checkJavaFormat
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- A test code coverage plugin that can operate as a Java agent (and 
+					<!-- A test code coverage plugin that can operate as a Java agent (and
 						thus doesn't require class file instrumentation). -->
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
@@ -607,7 +607,7 @@ checkJavaFormat
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>3.2.2</version>
 					<configuration>
-						<!-- Add some extra information to the JAR manifests. Helpful for folks 
+						<!-- Add some extra information to the JAR manifests. Helpful for folks
 							looking at a JAR, trying to figure out what it is. -->
 						<archive>
 							<manifest>
@@ -661,7 +661,7 @@ checkJavaFormat
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.3</version>
 					<configuration>
-						<!-- Require manual pushes after releases. Makes it easier to clean 
+						<!-- Require manual pushes after releases. Makes it easier to clean
 							things up if releases fail. -->
 						<pushChanges>false</pushChanges>
 						<localCheckout>true</localCheckout>
@@ -708,7 +708,7 @@ checkJavaFormat
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Use the enforcer plugin to help ensure that builds are always 
+						<!-- Use the enforcer plugin to help ensure that builds are always
 							reproducible. -->
 						<id>enforce-plugin-versions</id>
 						<inherited>true</inherited>
@@ -774,7 +774,7 @@ checkJavaFormat
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Always generate a source JAR. This is a best practice, but is 
+						<!-- Always generate a source JAR. This is a best practice, but is
 							also required by OSSRH/Maven Central. -->
 						<id>attach-sources</id>
 						<goals>
@@ -802,7 +802,7 @@ checkJavaFormat
 				</configuration>
 				<executions>
 					<execution>
-						<!-- Always generate a Javadoc JAR. This is a best practice, but is 
+						<!-- Always generate a Javadoc JAR. This is a best practice, but is
 							also required by OSSRH/Maven Central. -->
 						<id>attach-javadocs</id>
 						<goals>
@@ -852,7 +852,7 @@ checkJavaFormat
 
 	<profiles>
 		<profile>
-			<!-- This profile will only be active for builds inside of Eclipse (managed 
+			<!-- This profile will only be active for builds inside of Eclipse (managed
 				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
 			<id>m2e-manage-executions</id>
 			<activation>
@@ -864,7 +864,7 @@ checkJavaFormat
 				<pluginManagement>
 					<plugins>
 						<plugin>
-							<!--This plugin's configuration is used to store Eclipse m2e settings 
+							<!--This plugin's configuration is used to store Eclipse m2e settings
 								only. It has no influence on the Maven build itself. -->
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
@@ -882,7 +882,7 @@ checkJavaFormat
 												</goals>
 											</pluginExecutionFilter>
 											<action>
-												<!-- Don't run this plugin inside m2e; necessary to disable a 
+												<!-- Don't run this plugin inside m2e; necessary to disable a
 													POM warning in Eclipse. -->
 												<ignore/>
 											</action>
@@ -897,7 +897,7 @@ checkJavaFormat
 												</goals>
 											</pluginExecutionFilter>
 											<action>
-												<!-- Don't run this plugin inside m2e; necessary to disable a 
+												<!-- Don't run this plugin inside m2e; necessary to disable a
 													POM warning in Eclipse. -->
 												<ignore/>
 											</action>
@@ -912,7 +912,7 @@ checkJavaFormat
 												</goals>
 											</pluginExecutionFilter>
 											<action>
-												<!-- Don't run this plugin inside m2e; necessary to disable a 
+												<!-- Don't run this plugin inside m2e; necessary to disable a
 													POM warning in Eclipse. -->
 												<ignore/>
 											</action>
