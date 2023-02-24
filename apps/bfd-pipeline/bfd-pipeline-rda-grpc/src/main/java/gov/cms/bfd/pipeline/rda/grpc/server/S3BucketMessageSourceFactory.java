@@ -12,9 +12,11 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import software.amazon.awssdk.services.s3.AmazonS3;
-import software.amazon.awssdk.services.s3.model.ObjectListing;
-import software.amazon.awssdk.services.s3.model.S3ObjectSummary;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
 /**
  * To save on the number of unnecessary calls to S3 to retrieve files and to allow the incremental
@@ -34,7 +36,7 @@ import software.amazon.awssdk.services.s3.model.S3ObjectSummary;
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
   /** The client for interacting with AWS S3 buckets and files. */
-  private final AmazonS3 s3Client;
+  private final S3Client s3Client;
   /** The bucket to use for S3 interactions. */
   private final String bucketName;
   /** The directory path to save files to. */
@@ -58,7 +60,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * @param sequenceNumberGetter the function to get the sequence number
    */
   public S3BucketMessageSourceFactory(
-      AmazonS3 s3Client,
+      S3Client s3Client,
       String bucketName,
       String directoryPath,
       String filePrefix,
@@ -130,19 +132,19 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   @VisibleForTesting
   List<FileEntry> listFiles(long startingSequenceNumber) {
     List<FileEntry> entries = new ArrayList<>();
-    List<S3ObjectSummary> summaries = getObjectListing().getObjectSummaries();
-    for (S3ObjectSummary summary : summaries) {
-      Matcher matcher = matchPattern.matcher(summary.getKey());
+    List<S3Object> s3Objects = getObjectListing();
+    for (S3Object s3Object : s3Objects) {
+      Matcher matcher = matchPattern.matcher(s3Object.key());
       if (matcher.matches()) {
         FileEntry entry;
         if (matcher.group(1) != null) {
           entry =
               new FileEntry(
-                  summary.getKey(),
+                  s3Object.key(),
                   Long.parseLong(matcher.group(2)),
                   Long.parseLong(matcher.group(3)));
         } else {
-          entry = new FileEntry(summary.getKey(), RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
+          entry = new FileEntry(s3Object.key(), RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
         }
         if (entry.maxSequenceNumber >= startingSequenceNumber) {
           entries.add(entry);
@@ -158,11 +160,12 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    *
    * @return the object listing
    */
-  private ObjectListing getObjectListing() {
-    if (Strings.isNullOrEmpty(directoryPath)) {
-      return s3Client.listObjects(bucketName);
-    } else {
-      return s3Client.listObjects(bucketName, directoryPath);
+  private List<S3Object> getObjectListing() {
+    ListObjectsV2Request.Builder listObjectsRequest = ListObjectsV2Request.builder().bucket(bucketName);
+    if (!Strings.isNullOrEmpty(directoryPath)) {
+      listObjectsRequest.prefix(directoryPath);
+    } 
+      return s3Client.listObjectsV2(listObjectsRequest.build()).contents();
     }
   }
 
