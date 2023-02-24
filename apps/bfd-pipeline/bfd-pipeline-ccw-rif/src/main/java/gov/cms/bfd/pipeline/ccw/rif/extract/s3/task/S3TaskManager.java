@@ -65,9 +65,9 @@ public final class S3TaskManager {
   }
 
   /**
-   * Gets the {@link #S3Client}.
+   * Gets the {@link S3Client}.
    *
-   * @return the {@link #S3Client} client being used by this {@link S3TaskManager}
+   * @return the {@link S3Client} client being used by this {@link S3TaskManager}
    */
   public S3Client getS3Client() {
     return s3Client;

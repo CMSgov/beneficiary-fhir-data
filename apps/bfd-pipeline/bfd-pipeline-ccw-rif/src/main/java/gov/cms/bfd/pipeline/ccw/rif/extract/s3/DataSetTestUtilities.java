@@ -52,6 +52,13 @@ public class DataSetTestUtilities {
     SharedS3Utilities.deleteTestBucket(s3Client, bucket);
   }
 
+  /**
+   * Helper method for uploading objects into S3.
+   *
+   * @param s3Client the {@link S3Client} client to use
+   * @param putObjectRequest the {@link PutObjectRequest} to use
+   * @param manifest the {@link DataSetManifest} to use
+   */
   private static void putObjectHelper(
       S3Client s3Client, PutObjectRequest putObjectRequest, DataSetManifest manifest) {
     try {
@@ -102,6 +109,14 @@ public class DataSetTestUtilities {
     putObject(s3Client, bucket, keyPrefix, manifest);
   }
 
+  /**
+   * Create put request within a given bucket for a manifest at a keyed location.
+   *
+   * @param s3Client the {@link S3Client} client to use
+   * @param bucket the name of the bucket to place the new object in
+   * @param keyPrefix the key prefix of the object
+   * @param manifest the {@link DataSetManifest} to push as an object
+   */
   public static void putObject(
       S3Client s3Client, String bucket, String keyPrefix, DataSetManifest manifest) {
     String objectKey =

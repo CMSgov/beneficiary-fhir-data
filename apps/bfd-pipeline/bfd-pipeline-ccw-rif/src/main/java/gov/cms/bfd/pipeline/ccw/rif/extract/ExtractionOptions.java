@@ -110,8 +110,8 @@ public final class ExtractionOptions implements Serializable {
    * Note: This method is intended for test purposes: setting this value to <code>1</code> in tests
    * can help to verify the S3 paging logic.
    *
-   * @return the value to use for {@link ListObjectsV2Request#maxKeys(Integer)} in all S3 list
-   *     operations
+   * @return the value to use for {@link ListObjectsV2Request.Builder#maxKeys(Integer)} in all S3
+   *     list operations
    */
   public Optional<Integer> getS3ListMaxKeys() {
     return Optional.ofNullable(s3ListMaxKeys);

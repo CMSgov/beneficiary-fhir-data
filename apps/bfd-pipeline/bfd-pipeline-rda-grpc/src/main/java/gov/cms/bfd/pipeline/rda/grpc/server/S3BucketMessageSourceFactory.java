@@ -13,10 +13,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
 /**
  * To save on the number of unnecessary calls to S3 to retrieve files and to allow the incremental
@@ -161,12 +159,12 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * @return the object listing
    */
   private List<S3Object> getObjectListing() {
-    ListObjectsV2Request.Builder listObjectsRequest = ListObjectsV2Request.builder().bucket(bucketName);
+    ListObjectsV2Request.Builder listObjectsRequest =
+        ListObjectsV2Request.builder().bucket(bucketName);
     if (!Strings.isNullOrEmpty(directoryPath)) {
       listObjectsRequest.prefix(directoryPath);
-    } 
-      return s3Client.listObjectsV2(listObjectsRequest.build()).contents();
     }
+    return s3Client.listObjectsV2(listObjectsRequest.build()).contents();
   }
 
   /**

@@ -31,7 +31,9 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
   /**
    * Instantiates a new S3 json message source.
    *
-   * @param s3Object the s3 object
+   * @param key the key of the of {@link S3Object} of reference
+   * @param s3InputStream the input stream taken from the response when retrieving the {@link
+   *     S3Object} as a byte array
    * @param parser the parser to parse the object
    */
   public S3JsonMessageSource(
