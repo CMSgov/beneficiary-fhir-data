@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 
@@ -28,8 +29,8 @@ public final class S3TaskManager {
   private final MetricRegistry appMetrics;
   /** The extraction options. */
   private final ExtractionOptions options;
-  /** The amazon async s3 client. */
-  private final S3AsyncClient s3AsyncClient;
+  /** The amazon s3 client. */
+  private final S3Client s3Client;
   /** The s3 transfer manager. */
   private final S3TransferManager s3TransferManager;
   /** The executor for file downloads. */
@@ -53,8 +54,11 @@ public final class S3TaskManager {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3AsyncClient = S3Utilities.createS3AsyncClient(options);
-    this.s3TransferManager = DefaultS3TransferManager.builder().s3Client(s3AsyncClient).build();
+    this.s3Client = S3Utilities.createS3Client(options);
+    this.s3TransferManager =
+        DefaultS3TransferManager.builder()
+            .s3Client(S3Utilities.createS3AsyncClient(options))
+            .build();
 
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
     this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);
@@ -62,12 +66,12 @@ public final class S3TaskManager {
   }
 
   /**
-   * Gets the {@link #S3AsyncClient}.
+   * Gets the {@link #S3Client}.
    *
    * @return the {@link S3AsyncClient} client being used by this {@link S3TaskManager}
    */
-  public S3AsyncClient getS3AsyncClient() {
-    return s3AsyncClient;
+  public S3Client getS3Client() {
+    return s3Client;
   }
 
   /**

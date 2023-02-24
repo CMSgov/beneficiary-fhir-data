@@ -15,8 +15,7 @@ import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.waiters.S3AsyncWaiter;
-import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
+import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 import software.amazon.awssdk.transfer.s3.model.Copy;
 import software.amazon.awssdk.transfer.s3.model.CopyRequest;
 
@@ -89,8 +88,7 @@ public final class DataSetMoveTask implements Callable<Void> {
        */
       HeadObjectRequest headObjectRequest =
           HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
-      String ssekmsKeyId =
-          s3TaskManager.getS3AsyncClient().headObject(headObjectRequest).get().ssekmsKeyId();
+      String ssekmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
       CopyObjectRequest.Builder copyReqBuilder =
           CopyObjectRequest.builder()
               .copySource(options.getS3BucketName())
@@ -106,7 +104,7 @@ public final class DataSetMoveTask implements Callable<Void> {
               .copy(CopyRequest.builder().copyObjectRequest(copyReqBuilder.build()).build());
 
       try {
-        CompletedCopy completedCopy = copy.completionFuture().join();
+        copy.completionFuture().join();
       } catch (CompletionException e) {
         throw new BadCodeMonkeyException(e);
       }
@@ -122,24 +120,19 @@ public final class DataSetMoveTask implements Callable<Void> {
       String sourceKey =
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
 
-      S3AsyncWaiter s3Waiter = s3TaskManager.getS3AsyncClient().waiter();
+      S3Waiter s3Waiter = s3TaskManager.getS3Client().waiter();
       DeleteObjectRequest deleteObjectRequest =
           DeleteObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
-      s3TaskManager.getS3AsyncClient().deleteObject(deleteObjectRequest);
+      s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);
 
       WaiterResponse<HeadObjectResponse> waiterResponse =
-          s3Waiter
-              .waitUntilObjectNotExists(
-                  HeadObjectRequest.builder()
-                      .bucket(options.getS3BucketName())
-                      .key(sourceKey)
-                      .build())
-              .get();
+          s3Waiter.waitUntilObjectNotExists(
+              HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build());
       waiterResponse.matched().response().ifPresent(System.out::println);
-      LOGGER.debug("Data set deleted in S3 (step 2 of move).");
-
-      LOGGER.debug("Renamed data set '{}' in S3, now that processing is complete.", manifest);
-      return null;
     }
+    LOGGER.debug("Data set deleted in S3 (step 2 of move).");
+
+    LOGGER.debug("Renamed data set '{}' in S3, now that processing is complete.", manifest);
+    return null;
   }
 }
