@@ -17,7 +17,7 @@
 
 	<properties>
 		<awssdk.transfer.manager.version>2.20.9</awssdk.transfer.manager.version>
-		<aws.core.version>2.20.9</aws.core.version>
+		<awssdk.core.version>2.20.9</awssdk.core.version>
 	</properties>
 
 	<dependencies>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
       		<artifactId>aws-core</artifactId>
-			<version>${aws.core.version}</version>
+			<version>${awssdk.core.version}</version>
 		</dependency>
 
 		<dependency>

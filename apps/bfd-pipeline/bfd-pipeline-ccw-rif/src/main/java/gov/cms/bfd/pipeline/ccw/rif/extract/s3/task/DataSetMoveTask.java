@@ -5,16 +5,20 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectMetadataRequest;
-import software.amazon.awssdk.services.s3.model.ObjectMetadata;
-import software.amazon.awssdk.services.s3.model.SSEAwsKeyManagementParams;
-import software.amazon.awssdk.services.s3.transfer.Copy;
-import software.amazon.awssdk.waiters.WaiterParameters;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.waiters.S3AsyncWaiter;
+import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
+import software.amazon.awssdk.transfer.s3.model.Copy;
+import software.amazon.awssdk.transfer.s3.model.CopyRequest;
 
 /** Represents an asynchronous operation to move/rename a data set in S3. */
 public final class DataSetMoveTask implements Callable<Void> {
@@ -83,54 +87,59 @@ public final class DataSetMoveTask implements Callable<Void> {
        * will maintain all metadata EXCEPT: server-side-encryption,
        * storage-class, and website-redirect-location).
        */
-      ObjectMetadata objectMetadata =
-          s3TaskManager.getS3Client().getObjectMetadata(options.getS3BucketName(), sourceKey);
-      CopyObjectRequest copyRequest =
-          new CopyObjectRequest(
-              options.getS3BucketName(), sourceKey, options.getS3BucketName(), targetKey);
-      if (objectMetadata.getSSEAwsKmsKeyId() != null) {
-        copyRequest.setSSEAwsKeyManagementParams(
-            new SSEAwsKeyManagementParams(objectMetadata.getSSEAwsKmsKeyId()));
+      HeadObjectRequest headObjectRequest =
+          HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
+      String ssekmsKeyId =
+          s3TaskManager.getS3AsyncClient().headObject(headObjectRequest).get().ssekmsKeyId();
+      CopyObjectRequest.Builder copyReqBuilder =
+          CopyObjectRequest.builder()
+              .copySource(options.getS3BucketName())
+              .destinationKey(sourceKey)
+              .destinationBucket(options.getS3BucketName())
+              .destinationKey(targetKey);
+      if (Strings.isNotBlank(ssekmsKeyId)) {
+        copyReqBuilder.ssekmsKeyId(ssekmsKeyId);
       }
+      Copy copy =
+          s3TaskManager
+              .getS3TransferManager()
+              .copy(CopyRequest.builder().copyObjectRequest(copyReqBuilder.build()).build());
 
-      Copy copyOperation = s3TaskManager.getS3TransferManager().copy(copyRequest);
       try {
-        copyOperation.waitForCopyResult();
-        s3TaskManager
-            .getS3Client()
-            .waiters()
-            .objectExists()
-            .run(
-                new WaiterParameters<GetObjectMetadataRequest>(
-                    new GetObjectMetadataRequest(options.getS3BucketName(), targetKey)));
-      } catch (InterruptedException e) {
+        CompletedCopy completedCopy = copy.completionFuture().join();
+      } catch (CompletionException e) {
         throw new BadCodeMonkeyException(e);
       }
     }
     LOGGER.debug("Data set copied in S3 (step 1 of move).");
 
     /*
-     * After everything's been copied, loop over it all again and delete it the source objects. (We
+     * After everything's been copied, loop over it all again and delete the source objects. (We
      * could do it all in the same loop, but this is a bit easier to clean up from if it goes
      * sideways.)
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
       String sourceKey =
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
-      DeleteObjectRequest deleteObjectRequest =
-          new DeleteObjectRequest(options.getS3BucketName(), sourceKey);
-      s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);
-      s3TaskManager
-          .getS3Client()
-          .waiters()
-          .objectNotExists()
-          .run(
-              new WaiterParameters<GetObjectMetadataRequest>(
-                  new GetObjectMetadataRequest(options.getS3BucketName(), sourceKey)));
-    }
-    LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 
-    LOGGER.debug("Renamed data set '{}' in S3, now that processing is complete.", manifest);
-    return null;
+      S3AsyncWaiter s3Waiter = s3TaskManager.getS3AsyncClient().waiter();
+      DeleteObjectRequest deleteObjectRequest =
+          DeleteObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
+      s3TaskManager.getS3AsyncClient().deleteObject(deleteObjectRequest);
+
+      WaiterResponse<HeadObjectResponse> waiterResponse =
+          s3Waiter
+              .waitUntilObjectNotExists(
+                  HeadObjectRequest.builder()
+                      .bucket(options.getS3BucketName())
+                      .key(sourceKey)
+                      .build())
+              .get();
+      waiterResponse.matched().response().ifPresent(System.out::println);
+      LOGGER.debug("Data set deleted in S3 (step 2 of move).");
+
+      LOGGER.debug("Renamed data set '{}' in S3, now that processing is complete.", manifest);
+      return null;
+    }
   }
 }
