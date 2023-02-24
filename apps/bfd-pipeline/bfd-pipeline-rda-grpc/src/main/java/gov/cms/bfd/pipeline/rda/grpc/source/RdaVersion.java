@@ -1,7 +1,20 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /** A utility class for comparing version numbers. */
 public class RdaVersion {
+
+  private static final String TYPE_GROUP = "type";
+  private static final String MAJOR_GROUP = "major";
+  private static final String MINOR_GROUP = "minor";
+  private static final String PATCH_GROUP = "patch";
+  private static final Pattern VERSION_PATTERN =
+      Pattern.compile(
+          String.format(
+              "^(?<%s>[~^])?(?<%s>\\d+)\\.(?<%s>\\d+)\\.(?<%s>\\d+)$",
+              TYPE_GROUP, MAJOR_GROUP, MINOR_GROUP, PATCH_GROUP));
 
   /** The major version (first number). */
   private final int major;
@@ -11,10 +24,10 @@ public class RdaVersion {
   private final int patch;
 
   /**
-   * The required {@link CompatabilityLevel}, only used when comparing another {@link RdaVersion} to
+   * The required {@link CompatibilityLevel}, only used when comparing another {@link RdaVersion} to
    * this one.
    */
-  private final CompatabilityLevel compatability;
+  private final CompatibilityLevel compatability;
 
   /**
    * Builds an {@link RdaVersion} instance using the given version specifications.
@@ -24,7 +37,7 @@ public class RdaVersion {
    * @param patch The patch version
    * @param compatability The level requirement
    */
-  private RdaVersion(int major, int minor, int patch, CompatabilityLevel compatability) {
+  private RdaVersion(int major, int minor, int patch, CompatibilityLevel compatability) {
     this.major = major;
     this.minor = minor;
     this.patch = patch;
@@ -60,10 +73,14 @@ public class RdaVersion {
 
     switch (compatability) {
       case MAJOR:
-        compatable = rdaVersion.major == major;
+        compatable =
+            rdaVersion.major == major
+                && ((rdaVersion.minor == minor && rdaVersion.patch >= patch)
+                    || rdaVersion.minor > minor);
         break;
       case MINOR:
-        compatable = rdaVersion.major == major && rdaVersion.minor == minor;
+        compatable =
+            rdaVersion.major == major && rdaVersion.minor == minor && rdaVersion.patch >= patch;
         break;
       default:
         compatable =
@@ -74,7 +91,7 @@ public class RdaVersion {
   }
 
   /** The potential compatability levels that can be specified. */
-  public enum CompatabilityLevel {
+  public enum CompatibilityLevel {
     /** Must be same major version. */
     MAJOR,
     /** Must be same Major/Minor version. */
@@ -112,65 +129,34 @@ public class RdaVersion {
      */
     public RdaVersion build() {
       if (versionString != null) {
-        CompatabilityLevel level = CompatabilityLevel.PATCH;
+        Matcher matcher = VERSION_PATTERN.matcher(versionString);
 
-        // Array includes: { Level, Major, Minor, Patch }
-        Integer[] versionParts = new Integer[] {0, 0, 0, 0};
-        int stage = 0;
+        CompatibilityLevel level;
+        int major;
+        int minor;
+        int patch;
 
-        // Go through each character and parse out the version parts
-        for (int i = 0; i < versionString.length() && stage < versionParts.length; ) {
-          char c = versionString.charAt(i);
+        if (matcher.matches()) {
+          String compatibility = matcher.group(TYPE_GROUP);
 
-          // If we're at first stage, look if there is a modifier (~ or ^) to specify compatability
-          // level
-          if (stage == 0) {
-            switch (c) {
-              case '^':
-                level = CompatabilityLevel.MAJOR;
-                // Character found, move to the next character
-                ++i;
-                break;
-              case '~':
-                level = CompatabilityLevel.MINOR;
-                // Character found, move to the next character
-                ++i;
-                break;
-              default:
-                // No special character found, don't advance, so we can process it as a version
-                // number
-                level = CompatabilityLevel.PATCH;
-            }
-
-            // Advance to the next stage
-            ++stage;
+          if (compatibility != null) {
+            level = compatibility.equals("~") ? CompatibilityLevel.MINOR : CompatibilityLevel.MAJOR;
           } else {
-            // Check if it's a digit
-            if (Character.isDigit(c)) {
-              // Add it to the current version part we're on
-              versionParts[stage] *= 10;
-              versionParts[stage] += (c - '0');
-            } else if (c == '.') {
-              // If we find a dot, move to the next stage
-              ++stage;
-            } else {
-              // If it's not a digit or a dot, it's illegal
-              throw new IllegalArgumentException(
-                  String.format(
-                      "Unexpected character found in version string '%s'", versionString));
-            }
-
-            // Move to the next character after we've processed it
-            ++i;
+            level = CompatibilityLevel.PATCH;
           }
-        }
 
-        // Grab our version parts (index 0 was compatability level, but we ignored it, it was only
-        // to make
-        // advancing the stages simpler)
-        int major = versionParts[1];
-        int minor = versionParts[2];
-        int patch = versionParts[3];
+          try {
+            major = Integer.parseInt(matcher.group(MAJOR_GROUP));
+            minor = Integer.parseInt(matcher.group(MINOR_GROUP));
+            patch = Integer.parseInt(matcher.group(PATCH_GROUP));
+          } catch (NumberFormatException e) {
+            // This shouldn't happen
+            throw new IllegalStateException("Failed to parse RDA Version");
+          }
+        } else {
+          throw new IllegalArgumentException(
+              String.format("Invalid RdaVersion format '%s'", versionString));
+        }
 
         return new RdaVersion(major, minor, patch, level);
       } else {

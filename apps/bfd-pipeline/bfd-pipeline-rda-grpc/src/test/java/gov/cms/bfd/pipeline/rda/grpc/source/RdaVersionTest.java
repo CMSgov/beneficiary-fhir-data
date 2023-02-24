@@ -25,9 +25,9 @@ public class RdaVersionTest {
         Arguments.arguments(" 0.0.1", false),
         Arguments.arguments("+0.0.1", false),
         Arguments.arguments("^0.0.1", true),
-        Arguments.arguments("~.0.1", true),
-        Arguments.arguments("1", true),
-        Arguments.arguments("1.0", true));
+        Arguments.arguments("~.0.1", false),
+        Arguments.arguments("1", false),
+        Arguments.arguments("1.0", false));
   }
 
   /**
@@ -51,22 +51,23 @@ public class RdaVersionTest {
   }
 
   /**
-   * Supplies the arguments for the {@link #versionCompatabilityTests(String, String, boolean)}
+   * Supplies the arguments for the {@link #versionCompatibilityTests(String, String, boolean)}
    * tests.
    *
    * @return The arguments for the associated parameterized tests.
    */
-  public static Stream<Arguments> versionCompatabilityTests() {
+  public static Stream<Arguments> versionCompatibilityTests() {
     return Stream.of(
         Arguments.arguments("^0.0.1", "0.0.1", true),
         Arguments.arguments("^0.0.1", "0.1.0", true),
         Arguments.arguments("^0.0.1", "1.0.0", false),
-        Arguments.arguments("^0.1.0", "0.0.1", true),
+        Arguments.arguments("^0.1.0", "0.0.1", false),
         Arguments.arguments("^0.1.0", "0.1.0", true),
         Arguments.arguments("^0.1.0", "1.0.0", false),
         Arguments.arguments("^1.0.0", "0.0.1", false),
         Arguments.arguments("^1.0.0", "0.1.0", false),
         Arguments.arguments("^1.0.0", "1.0.0", true),
+        Arguments.arguments("^1.1.0", "1.0.0", false),
         Arguments.arguments("~0.0.1", "0.0.1", true),
         Arguments.arguments("~0.0.1", "0.1.0", false),
         Arguments.arguments("~0.0.1", "1.0.0", false),
@@ -76,13 +77,14 @@ public class RdaVersionTest {
         Arguments.arguments("~1.0.0", "0.0.1", false),
         Arguments.arguments("~1.0.0", "0.1.0", false),
         Arguments.arguments("~1.0.0", "1.0.0", true),
+        Arguments.arguments("~0.1.1", "0.1.0", false),
         Arguments.arguments("0.0.1", "0.0.1", true),
         Arguments.arguments("0.0.1", "0.1.1", false),
         Arguments.arguments("0.0.1", "1.0.1", false));
   }
 
   /**
-   * Tests that the version compatability check {@link RdaVersion#allows(String)} works correctly.
+   * Tests that the version compatibility check {@link RdaVersion#allows(String)} works correctly.
    *
    * @param requiredVersion The required {@link RdaVersion}.
    * @param testedVersion The {@link RdaVersion} being checked.
@@ -91,7 +93,7 @@ public class RdaVersionTest {
    */
   @ParameterizedTest
   @MethodSource
-  void versionCompatabilityTests(String requiredVersion, String testedVersion, boolean expected) {
+  void versionCompatibilityTests(String requiredVersion, String testedVersion, boolean expected) {
     RdaVersion rdaVersion = RdaVersion.builder().versionString(requiredVersion).build();
 
     assertEquals(expected, rdaVersion.allows(testedVersion));
