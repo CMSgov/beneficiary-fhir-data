@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.subset;
 
-import com.amazonaws.AmazonClientException;
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.DMEClaimColumn;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -47,10 +47,14 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.AmazonS3;
-import software.amazon.awssdk.services.s3.transfer.Download;
-import software.amazon.awssdk.services.s3.transfer.TransferManager;
-import software.amazon.awssdk.services.s3.transfer.TransferManagerBuilder;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
+import software.amazon.awssdk.transfer.s3.model.FileDownload;
+import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
  * Given some RIF data sets, extracts a random subset of beneficiaries and their claims. This is
@@ -293,22 +297,31 @@ public final class DataSetSubsetter {
    */
   private static List<RifFile> downloadDataSet(
       ExtractionOptions options, String dataSetS3KeyPrefix, Path downloadDirectory) {
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
-    TransferManager transferManager =
-        TransferManagerBuilder.standard().withS3Client(s3Client).build();
-
+    S3TransferManager transferManager =
+        DefaultS3TransferManager.builder()
+            .s3Client(S3Utilities.createS3AsyncClient(options))
+            .build();
     String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
     String manifestSuffix = "1_manifest.xml";
 
     Path manifestDownloadPath = downloadDirectory.resolve(manifestSuffix);
     if (!Files.exists(manifestDownloadPath)) {
       String manifestKey = String.format("%s/%s", dataSetPrefix, manifestSuffix);
-      Download manifestDownload =
-          transferManager.download(
-              options.getS3BucketName(), manifestKey, manifestDownloadPath.toFile());
+      DownloadFileRequest downloadFileRequest =
+          DownloadFileRequest.builder()
+              .getObjectRequest(
+                  GetObjectRequest.builder()
+                      .bucket(options.getS3BucketName())
+                      .key(manifestKey)
+                      .build())
+              .addTransferListener(LoggingTransferListener.create())
+              .destination(manifestDownloadPath)
+              .build();
+
       try {
-        manifestDownload.waitForCompletion();
-      } catch (AmazonClientException | InterruptedException e) {
+        FileDownload downloadFile = transferManager.downloadFile(downloadFileRequest);
+        CompletedFileDownload manifestDownload = downloadFile.completionFuture().join();
+      } catch (SdkClientException | CancellationException e) {
         throw new RuntimeException(e);
       }
     }
@@ -331,12 +344,20 @@ public final class DataSetSubsetter {
 
       if (!Files.exists(dataSetFileDownloadPath)) {
         LOGGER.info("Downloading RIF file: '{}'...", manifestEntry.getName());
-        Download dataSetFileDownload =
-            transferManager.download(
-                options.getS3BucketName(), dataSetFileKey, dataSetFileDownloadPath.toFile());
+        DownloadFileRequest downloadFileRequest =
+            DownloadFileRequest.builder()
+                .getObjectRequest(
+                    GetObjectRequest.builder()
+                        .bucket(options.getS3BucketName())
+                        .key(dataSetFileKey)
+                        .build())
+                .addTransferListener(LoggingTransferListener.create())
+                .destination(manifestDownloadPath)
+                .build();
         try {
-          dataSetFileDownload.waitForCompletion();
-        } catch (AmazonClientException | InterruptedException e) {
+          FileDownload downloadFile = transferManager.downloadFile(downloadFileRequest);
+          CompletedFileDownload manifestDownload = downloadFile.completionFuture().join();
+        } catch (SdkClientException | CancellationException e) {
           throw new RuntimeException(e);
         }
       }
@@ -345,7 +366,6 @@ public final class DataSetSubsetter {
       rifFiles.add(dataSetFile);
     }
 
-    transferManager.shutdownNow();
     LOGGER.info("Original RIF files ready.");
     return rifFiles;
   }

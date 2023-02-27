@@ -32,8 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.services.s3.AmazonS3;
-import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /** Integration tests for the RDA server. */
 public class RdaServerJobIT {
@@ -114,8 +113,8 @@ public class RdaServerJobIT {
    */
   @Test
   public void testS3() throws Exception {
-    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
-    Bucket bucket = null;
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
+    String bucket = null;
     try {
       bucket = createTestBucket(s3Client);
       final String directoryPath = "files-go-here";
@@ -123,13 +122,13 @@ public class RdaServerJobIT {
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
               .serverName(SERVER_NAME)
-              .s3Bucket(bucket.getName())
+              .s3Bucket(bucket)
               .s3Directory(directoryPath)
               .build();
       final String fissObjectKey = config.getS3Sources().createFissObjectKey();
       final String mcsObjectKey = config.getS3Sources().createMcsObjectKey();
-      uploadJsonToBucket(s3Client, bucket.getName(), fissObjectKey, fissClaimsSource);
-      uploadJsonToBucket(s3Client, bucket.getName(), mcsObjectKey, mcsClaimsSource);
+      uploadJsonToBucket(s3Client, bucket, fissObjectKey, fissClaimsSource);
+      uploadJsonToBucket(s3Client, bucket, mcsObjectKey, mcsClaimsSource);
 
       final RdaServerJob job = new RdaServerJob(config);
       final ExecutorService exec = Executors.newCachedThreadPool();

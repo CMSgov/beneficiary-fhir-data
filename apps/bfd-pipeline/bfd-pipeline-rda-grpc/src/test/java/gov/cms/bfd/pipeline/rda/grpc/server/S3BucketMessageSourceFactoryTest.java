@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,9 +14,9 @@ import java.util.Map;
 import java.util.function.Function;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.services.s3.AmazonS3;
-import software.amazon.awssdk.services.s3.model.ObjectListing;
-import software.amazon.awssdk.services.s3.model.S3ObjectSummary;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /** Tests the {@link S3BucketMessageSourceFactory}. */
 public class S3BucketMessageSourceFactoryTest {
@@ -26,7 +25,7 @@ public class S3BucketMessageSourceFactoryTest {
   @Test
   public void listFilesTest() {
     final String directoryPath = "/my_directory/";
-    AmazonS3 s3Client =
+    S3Client s3Client =
         createS3Client(
             directoryPath,
             directoryPath + "mcs-215-275.ndjson.gz",
@@ -160,21 +159,16 @@ public class S3BucketMessageSourceFactoryTest {
    * @param filenames the filenames to return as keys
    * @return the mock S3 object
    */
-  private AmazonS3 createS3Client(String directoryPath, String... filenames) {
-    List<S3ObjectSummary> summaries = new ArrayList<>();
+  private S3Client createS3Client(String directoryPath, String... filenames) {
+    List<S3Object> summaries = new ArrayList<>();
     for (String filename : filenames) {
-      S3ObjectSummary summary = mock(S3ObjectSummary.class);
-      doReturn(filename).when(summary).getKey();
+      S3Object summary = mock(S3Object.class);
+      doReturn(filename).when(summary).key();
       summaries.add(summary);
     }
-    ObjectListing listing = mock(ObjectListing.class);
-    doReturn(summaries).when(listing).getObjectSummaries();
-    AmazonS3 s3Client = mock(AmazonS3.class);
-    if (Strings.isNullOrEmpty(directoryPath)) {
-      doReturn(listing).when(s3Client).listObjects(anyString());
-    } else {
-      doReturn(listing).when(s3Client).listObjects(anyString(), eq(directoryPath));
-    }
+
+    S3Client s3Client = mock(S3Client.class);
+    doReturn(summaries).when(s3Client).listObjectsV2(any(ListObjectsV2Request.class));
     return s3Client;
   }
 
@@ -191,7 +185,7 @@ public class S3BucketMessageSourceFactoryTest {
       filenames.add(source.getFilename());
       sourceMap.put(source.getFilename(), source);
     }
-    AmazonS3 s3Client = createS3Client("", filenames.toArray(new String[0]));
+    S3Client s3Client = createS3Client("", filenames.toArray(new String[0]));
     return new S3BucketMessageSourceFactory<>(
         s3Client, "bucket", "", "fiss", "ndjson", sourceMap::get, Function.identity());
   }
