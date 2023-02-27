@@ -11,7 +11,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
-import gov.cms.bfd.pipeline.sharedutils.TransactionUtil;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -31,7 +31,6 @@ import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +45,8 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractClaimRdaSink<TMessage, TClaim>
     implements RdaSink<TMessage, RdaChange<TClaim>> {
-  /** The database entity manager factory. */
-  protected final EntityManagerFactory entityManagerFactory;
+  /** The {@link TransactionManager} used to execute transactions. */
+  protected final TransactionManager transactionManager;
   /** The metric reporter. */
   protected final Metrics metrics;
   /** Clock for creating timestamps. */
@@ -86,7 +85,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       RdaApiProgress.ClaimType claimType,
       boolean autoUpdateLastSeq,
       int errorLimit) {
-    entityManagerFactory = appState.getEntityManagerFactory();
+    transactionManager = new TransactionManager(appState.getEntityManagerFactory());
     metrics = new Metrics(getClass(), appState.getMeters());
     clock = appState.getClock();
     logger = LoggerFactory.getLogger(getClass());
@@ -97,8 +96,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
 
   /** {@inheritDoc} */
   @Override
-  public void close() throws Exception {
+  public void close() {
     resetLatencyMetrics();
+    transactionManager.close();
   }
 
   /**
@@ -110,8 +110,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     try {
-      return TransactionUtil.executeFunction(
-          entityManagerFactory,
+      return transactionManager.executeFunction(
           entityManager -> {
             logger.info("running query to find max sequence number");
             String query =
@@ -139,8 +138,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   @Override
   public void updateLastSequenceNumber(long lastSequenceNumber) {
-    TransactionUtil.executeProcedure(
-        entityManagerFactory,
+    transactionManager.executeProcedure(
         entityManager -> updateLastSequenceNumberImpl(entityManager, lastSequenceNumber));
   }
 
@@ -157,8 +155,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
       throws IOException, ProcessingException {
-    TransactionUtil.executeProcedure(
-        entityManagerFactory,
+    transactionManager.executeProcedure(
         entityManager ->
             entityManager.merge(createMessageError(apiVersion, message, exception.getErrors())));
     checkErrorCount();
@@ -172,8 +169,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public void checkErrorCount() throws ProcessingException {
     final long errorCount =
-        TransactionUtil.executeFunction(
-            entityManagerFactory,
+        transactionManager.executeFunction(
             entityManager -> {
               var query =
                   entityManager.createQuery(
@@ -397,8 +393,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param changes collection of claims to write to the database
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
-    TransactionUtil.executeProcedure(
-        entityManagerFactory,
+    transactionManager.executeProcedure(
         entityManager -> {
           final Instant startTime = Instant.now();
           int insertCount = 0;

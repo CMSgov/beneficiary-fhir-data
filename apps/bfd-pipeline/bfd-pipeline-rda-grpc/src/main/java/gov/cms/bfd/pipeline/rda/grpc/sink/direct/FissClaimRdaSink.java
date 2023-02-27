@@ -44,8 +44,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
       int errorLimit) {
     super(appState, RdaApiProgress.ClaimType.FISS, autoUpdateLastSeq, errorLimit);
     this.transformer =
-        transformer.withMbiCache(
-            transformer.getMbiCache().withDatabaseLookup(super.entityManagerFactory));
+        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(transactionManager));
   }
 
   /**

@@ -9,11 +9,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.bfd.pipeline.sharedutils.TransactionUtil;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.LongStream;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -101,12 +100,12 @@ public class MbiCache {
    *
    * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
    * @param appMetrics {@link MetricRegistry} to use for reporting metrics
-   * @param entityManagerFactory {@link EntityManagerFactory} used to query and create records
+   * @param transactionManager {@link TransactionManager} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
    */
   public static MbiCache databaseCache(
-      IdHasher hasher, MetricRegistry appMetrics, EntityManagerFactory entityManagerFactory) {
-    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), entityManagerFactory);
+      IdHasher hasher, MetricRegistry appMetrics, TransactionManager transactionManager) {
+    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), transactionManager);
   }
 
   /**
@@ -136,11 +135,11 @@ public class MbiCache {
    * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
    * entityManager.
    *
-   * @param entityManagerFactory {@link EntityManagerFactory} used to query and create records
+   * @param transactionManager {@link TransactionManager} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
    */
-  public MbiCache withDatabaseLookup(EntityManagerFactory entityManagerFactory) {
-    return new DatabaseBackedCache(hasher, metrics, entityManagerFactory);
+  public MbiCache withDatabaseLookup(TransactionManager transactionManager) {
+    return new DatabaseBackedCache(hasher, metrics, transactionManager);
   }
 
   /**
@@ -166,23 +165,23 @@ public class MbiCache {
   @VisibleForTesting
   @Slf4j
   static class DatabaseBackedCache extends MbiCache {
-    /** Handles database entity management. */
-    private final EntityManagerFactory entityManagerFactory;
+    /** The {@link TransactionManager} used to execute transactions. */
+    @VisibleForTesting protected final TransactionManager transactionManager;
     /** Creates random values. */
     private final Random random;
 
     /**
-     * Creates a new instance with the specified parameters.
+     * Creates a new instance with the specified parameters. The caller is responsible for closing
+     * the {@link TransactionManager} when it is no longer needed.
      *
      * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
      * @param metrics {@link Metrics} to use for reporting metrics
-     * @param entityManagerFactory {@link EntityManagerFactory} used to query and create records
+     * @param transactionManager {@link TransactionManager} used to query and create records
      */
     @VisibleForTesting
-    DatabaseBackedCache(
-        IdHasher hasher, Metrics metrics, EntityManagerFactory entityManagerFactory) {
+    DatabaseBackedCache(IdHasher hasher, Metrics metrics, TransactionManager transactionManager) {
       super(hasher, metrics);
-      this.entityManagerFactory = entityManagerFactory;
+      this.transactionManager = transactionManager;
       random = new Random();
     }
 
@@ -241,8 +240,7 @@ public class MbiCache {
      */
     @VisibleForTesting
     ReadResult readOrInsertIfMissing(String mbi) {
-      return TransactionUtil.executeFunction(
-          entityManagerFactory,
+      return transactionManager.executeFunction(
           entityManager -> {
             final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
             final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
