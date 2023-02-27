@@ -85,9 +85,8 @@ SHOW_SQL=false
 #
 
 # TEST_WHERE is used to assert the correctness of the script/sql.
-TEST_WHERE=(
-"WHERE bh.bene_history_id >= 0 AND bh.bene_history_id <= 25000000"
-)
+#TEST_WHERE=(
+#"WHERE bh.bene_history_id >= 0 AND bh.bene_history_id <= 25000000")
 
 BENES_WHERE=(
 "WHERE bh.bene_history_id >= 0 AND bh.bene_history_id <= 25000000"
@@ -251,11 +250,6 @@ BENES_WHERE=(
 "WHERE bh.bene_history_id >= 3950000000 AND bh.bene_history_id <= 3975000000"
 "WHERE bh.bene_history_id >= 3975000000 AND bh.bene_history_id <= 4000000000"
 "WHERE bh.bene_history_id >= 4000000000 AND bh.bene_history_id <= 4025000000")
-
-# the action we are going to perform; can be either SELECT or DELETE
-read -r -d '' ACTION_SQL << EOM
-DELETE
-EOM
 
 # sql variable used for record counts
 read -r -d '' FROM_SQL << EOM
