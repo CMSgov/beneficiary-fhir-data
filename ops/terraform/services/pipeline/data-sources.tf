@@ -109,10 +109,9 @@ data "aws_sns_topic" "ok" {
 }
 
 # TODO: this needs to be defined in common
-# TODO: this will be replaced in BFD-2244
 data "aws_sns_topic" "bfd_test_slack_alarm" {
   count = local.is_ephemeral_env ? 0 : 1
-  name  = "bfd-${local.env}-cloudwatch-alarms-alert-testing"
+  name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 # TODO: this needs to be defined in common

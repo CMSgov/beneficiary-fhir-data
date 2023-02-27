@@ -29,10 +29,19 @@ public class FdaDrugCodeDisplayLookup {
    * Stores a map from Drug Code (PRODUCTNDC) to Drug Code Display (SUBSTANCENAME) derived from the
    * downloaded NDC file.
    */
-  private final Map<String, String> ndcProductHashMap = new HashMap<>();
+  private Map<String, String> ndcProductHashMap = new HashMap<>();
 
   /** Tracks the national drug codes that have already had code lookup failures. */
   private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
+
+  /** Keeps track of the PRODUCTNDC column index in the fda_products_utf8.tsv file. */
+  private static int PRODUCT_NDC_COLUMN_INDEX = 1;
+
+  /** Keeps track of the PROPRIETARYNAME column index in the fda_products_utf8.tsv file. */
+  private static int PROPRIETARY_NAME_COLUMN_INDEX = 3;
+
+  /** Keeps track of the SUBSTANCENAME column index in the fda_products_utf8.tsv file. */
+  private static int SUBSTANCE_NAME_COLUMN_INDEX = 13;
 
   /**
    * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't
@@ -80,7 +89,7 @@ public class FdaDrugCodeDisplayLookup {
    * @param includeFakeDrugCode whether to include the fake testing drug code or not
    */
   private FdaDrugCodeDisplayLookup(boolean includeFakeDrugCode) {
-    readFDADrugCodeFile(includeFakeDrugCode);
+    readFDADrugCodeFile(includeFakeDrugCode, getFileInputStream(App.FDA_PRODUCTS_RESOURCE));
   }
 
   /**
@@ -123,61 +132,85 @@ public class FdaDrugCodeDisplayLookup {
   }
 
   /**
-   * Reads all the <code>PRODUCTNDC</code> and <code>SUBSTANCENAME</code> fields from the FDA NDC
-   * Products file which was downloaded during the build process.
+   * Gets the processed FDA data and checks whether the fake drug code needs to be inserted into the
+   * map.
    *
-   * <p>See {@link gov.cms.bfd.server.war.FDADrugDataUtilityApp} for details.
+   * <p>See {@link gov.cms.bfd.data.fda.utility.App} for details.
    *
+   * @param includeFakeDrugCode is whether to incliude fake drug code
+   * @param inputStream is the inputStream that is passed in
    * @return a map with drug codes and fields.
-   * @param includeFakeDrugCode is whether to incliude fake drug code.
    */
-  private Map<String, String> readFDADrugCodeFile(boolean includeFakeDrugCode) {
+  protected Map<String, String> readFDADrugCodeFile(
+      boolean includeFakeDrugCode, InputStream inputStream) {
 
-    InputStream stream = App.class.getClassLoader().getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+    ndcProductHashMap = getFdaProcessedData(includeFakeDrugCode, inputStream);
 
-    if (stream != null) {
-      try (final InputStream ndcProductStream =
-              Thread.currentThread()
-                  .getContextClassLoader()
-                  .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
-          final BufferedReader ndcProductsIn =
-              new BufferedReader(new InputStreamReader(ndcProductStream))) {
-        /*
-         * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
-         * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
-         * retrieval to get the display value which is a combination of PROPRIETARYNAME &
-         * SUBSTANCENAME
-         */
-        String line = "";
-        ndcProductsIn.readLine();
-        while ((line = ndcProductsIn.readLine()) != null) {
-          String ndcProductColumns[] = line.split("\t");
-          try {
-            String nationalDrugCodeManufacturer =
-                StringUtils.leftPad(
-                    ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-            String nationalDrugCodeIngredient =
-                StringUtils.leftPad(
-                    ndcProductColumns[1].substring(
-                        ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                    4,
-                    '0');
-            // ndcProductColumns[3] - Proprietary Name
-            // ndcProductColumns[13] - Substance Name
-            ndcProductHashMap.put(
-                String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-                ndcProductColumns[3] + " - " + ndcProductColumns[13]);
-          } catch (StringIndexOutOfBoundsException e) {
-            continue;
-          }
-        }
-      } catch (IOException e) {
-        throw new UncheckedIOException("Unable to read NDC code data.", e);
-      }
-    }
     if (includeFakeDrugCode) {
       ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
     }
     return ndcProductHashMap;
+  }
+
+  /**
+   * Reads all the <code>PRODUCTNDC</code> and <code>SUBSTANCENAME</code> fields from the FDA NDC
+   * Products file which was downloaded during the build process.
+   *
+   * <p>See {@link gov.cms.bfd.data.fda.utility.App} for details.
+   *
+   * @param includeFakeDrugCode is whether to incliude fake drug code
+   * @param inputStream is the inputStream that is passed in
+   * @return a map with drug codes and fields.
+   */
+  protected Map<String, String> getFdaProcessedData(
+      boolean includeFakeDrugCode, InputStream inputStream) {
+
+    Map<String, String> ndcProcessedData = new HashMap<String, String>();
+
+    try (final InputStream ndcProductStream = inputStream;
+        final BufferedReader ndcProductsIn =
+            new BufferedReader(new InputStreamReader(ndcProductStream))) {
+      /*
+       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
+       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
+       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
+       * SUBSTANCENAME
+       */
+      String line = "";
+      ndcProductsIn.readLine();
+      while ((line = ndcProductsIn.readLine()) != null) {
+        String ndcProductColumns[] = line.split("\t");
+        String nationalDrugCodeManufacturer =
+            StringUtils.leftPad(
+                ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].substring(
+                    0, ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].indexOf("-")),
+                5,
+                '0');
+        String nationalDrugCodeIngredient =
+            StringUtils.leftPad(
+                ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].substring(
+                    ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].indexOf("-") + 1,
+                    ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].length()),
+                4,
+                '0');
+        ndcProcessedData.put(
+            String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+            ndcProductColumns[PROPRIETARY_NAME_COLUMN_INDEX].replace("\"", "")
+                + " - "
+                + ndcProductColumns[SUBSTANCE_NAME_COLUMN_INDEX].replace("\"", ""));
+      }
+    } catch (IOException e) {
+      throw new UncheckedIOException("Unable to read NDC code data.", e);
+    }
+    return ndcProcessedData;
+  }
+  /**
+   * Returns a inputStream from file name passed in.
+   *
+   * @param fileName is the file name passed in
+   * @return InputStream of file.
+   */
+  protected InputStream getFileInputStream(String fileName) {
+    return Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
   }
 }

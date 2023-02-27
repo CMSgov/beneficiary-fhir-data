@@ -1,0 +1,5 @@
+---
+- name: Install Dependencies
+  import_tasks: install-dependencies.yml
+- name: Install Modern Python3
+  import_tasks: install-python3.yml
