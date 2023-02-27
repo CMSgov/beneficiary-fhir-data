@@ -166,7 +166,7 @@ public class MbiCache {
   @Slf4j
   static class DatabaseBackedCache extends MbiCache {
     /** The {@link TransactionManager} used to execute transactions. */
-    @VisibleForTesting protected final TransactionManager transactionManager;
+    private final TransactionManager transactionManager;
     /** Creates random values. */
     private final Random random;
 
