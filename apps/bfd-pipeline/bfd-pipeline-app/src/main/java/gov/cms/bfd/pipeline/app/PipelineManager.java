@@ -388,7 +388,8 @@ public final class PipelineManager implements AutoCloseable {
 
     LOGGER.info("Cancelled all interruptable jobs.");
 
-    // Clean up any pending S3 operations and shut down the S3 manager
+    // Clean up any pending S3 operations and shut down the S3 manager (will be null if not a CCW
+    // pipeline)
     if (s3TaskManagerHandle != null) {
       s3TaskManagerHandle.shutdownSafely();
     }

@@ -80,7 +80,7 @@ public final class PipelineApplication {
    */
   static final int EXIT_CODE_SMOKE_TEST_FAILURE = 3;
 
-  /** Keep this around for cleanup in the event of an error. */
+  /** Keep this around for cleanup in the event of an error with the CCW pipeline. */
   private static S3TaskManager s3TaskManager;
 
   /**
