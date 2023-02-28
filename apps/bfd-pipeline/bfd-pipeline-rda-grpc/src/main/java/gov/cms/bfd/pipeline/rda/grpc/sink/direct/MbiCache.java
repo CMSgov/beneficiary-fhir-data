@@ -95,8 +95,8 @@ public class MbiCache {
    * in the database. The Mbi objects returned from this have their primary key (mbiId) already set
    * and can be used with a persistent claim object. Without requiring a merge.
    *
-   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
-   * entityManager.
+   * <p>Lifespan of the transactionManager is controlled by the caller. This object never closes the
+   * transactionManager.
    *
    * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
    * @param appMetrics {@link MetricRegistry} to use for reporting metrics
@@ -132,8 +132,8 @@ public class MbiCache {
    * Creates a new instance connected to the specified database. Equivalent to calling {@code
    * databaseCache()} with appropriate parameters.
    *
-   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
-   * entityManager.
+   * <p>Lifespan of the transactionManager is controlled by the caller. This object never closes the
+   * transactionManager.
    *
    * @param transactionManager {@link TransactionManager} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
@@ -235,8 +235,8 @@ public class MbiCache {
      * found insert one. Any PersistenceException will be passed through to the caller.
      *
      * @param mbi MBI to look up in the database
-     * @return {@link ReadResult} containing the Mbi that is known to exist in the entityManager and
-     *     a flag to indicate if the record was inserted by this call
+     * @return {@link ReadResult} containing the Mbi that is known to exist in the database and a
+     *     flag to indicate if the record was inserted by this call
      */
     @VisibleForTesting
     ReadResult readOrInsertIfMissing(String mbi) {
