@@ -80,6 +80,9 @@ public final class PipelineApplication {
    */
   static final int EXIT_CODE_SMOKE_TEST_FAILURE = 3;
 
+  /** Keep this around for cleanup in the event of an error. */
+  private static S3TaskManager s3TaskManager;
+
   /**
    * This method is the one that will get called when users launch the application from the command
    * line.
@@ -215,7 +218,8 @@ public final class PipelineApplication {
      * Create the PipelineManager and register all jobs.
      */
     PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
-    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
+    PipelineManager pipelineManager =
+        new PipelineManager(appMetrics, jobRecordStore, s3TaskManager);
     registerShutdownHook(appMetrics, pipelineManager);
     jobs.forEach(pipelineManager::registerJob);
     LOGGER.info("Job processing started.");
@@ -399,8 +403,7 @@ public final class PipelineApplication {
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
-    S3TaskManager s3TaskManager =
-        new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
+    s3TaskManager = new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
