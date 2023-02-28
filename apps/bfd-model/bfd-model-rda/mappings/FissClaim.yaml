@@ -398,7 +398,7 @@ mappings:
       dbName: group_code
     - name: clmTypInd
       sqlType: varchar(1)
-      #TODO: This should be a non-nullable field, but we currently have claims without this value
+      nullable: false
       comment: 'Identifies the type of claim, which is system generated.'
       dbName: clm_typ_ind
     - name: reposInd
@@ -483,6 +483,7 @@ mappings:
   - from: dcn
     to: claimId
     optionalComponents: None
+    # TODO: Change from to claim id field once it is available in RDA API message.
   - from: dcn
     optionalComponents: None
   - from: hicNo

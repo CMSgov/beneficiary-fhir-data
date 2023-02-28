@@ -655,7 +655,8 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=0"),
               new DataTransformer.ErrorMessage("currStatus", "no value set"),
               new DataTransformer.ErrorMessage("currLoc1", "no value set"),
-              new DataTransformer.ErrorMessage("currLoc2", "no value set"));
+              new DataTransformer.ErrorMessage("currLoc2", "no value set"),
+              new DataTransformer.ErrorMessage("clmTypInd", "no value set"));
 
       String expectedMessage =
           String.format(

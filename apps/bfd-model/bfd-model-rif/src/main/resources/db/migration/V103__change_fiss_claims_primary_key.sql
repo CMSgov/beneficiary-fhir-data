@@ -4,6 +4,10 @@
 
 ${logic.psql-only} TRUNCATE rda.fiss_claims CASCADE;
 
+-- Now that fiss_claims has been truncated we can fix nullable status on clm_typ_ind
+
+ALTER TABLE rda.fiss_claims ALTER COLUMN clm_typ_ind SET NOT NULL;
+
 -- Using RENAME leaves all of the foreign key references intact.
 
 ALTER TABLE rda.fiss_audit_trails ${logic.alter-rename-column} dcn ${logic.rename-to} claim_id;

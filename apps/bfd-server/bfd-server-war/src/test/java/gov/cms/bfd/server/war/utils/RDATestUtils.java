@@ -200,6 +200,7 @@ public class RDATestUtils {
             .stmtCovToDate(LocalDate.of(1970, 7, 20))
             .servTypeCd("A")
             .freqCd("C")
+            .clmTypInd("4")
             .build();
 
     Set<RdaFissProcCode> procCodes =
@@ -300,6 +301,7 @@ public class RDATestUtils {
             .stmtCovToDate(LocalDate.of(1970, 8, 3))
             .servTypeCd("A")
             .freqCd("C")
+            .clmTypInd("1")
             .build();
 
     Set<RdaFissProcCode> procCodes =

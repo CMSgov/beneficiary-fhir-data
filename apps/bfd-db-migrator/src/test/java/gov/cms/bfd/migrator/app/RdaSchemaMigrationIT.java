@@ -181,6 +181,7 @@ public class RdaSchemaMigrationIT {
             .currLoc2("1A")
             .pracLocCity("city name can be very long indeed")
             .sequenceNumber(3L)
+            .clmTypInd("1")
             .build();
 
     final RdaFissProcCode procCode0 =
@@ -362,6 +363,7 @@ public class RdaSchemaMigrationIT {
                 .currStatus('1')
                 .currLoc1('A')
                 .currLoc2("1A")
+                .clmTypInd("1")
                 .sequenceNumber(seqNo++)
                 .mbiRecord(mbiRecord)
                 .build();
