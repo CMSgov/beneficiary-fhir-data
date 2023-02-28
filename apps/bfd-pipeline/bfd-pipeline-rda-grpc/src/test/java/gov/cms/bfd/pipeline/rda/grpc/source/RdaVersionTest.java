@@ -58,29 +58,42 @@ public class RdaVersionTest {
    */
   public static Stream<Arguments> versionCompatibilityTests() {
     return Stream.of(
-        Arguments.arguments("^0.0.1", "0.0.1", true),
-        Arguments.arguments("^0.0.1", "0.1.0", true),
-        Arguments.arguments("^0.0.1", "1.0.0", false),
-        Arguments.arguments("^0.1.0", "0.0.1", false),
-        Arguments.arguments("^0.1.0", "0.1.0", true),
-        Arguments.arguments("^0.1.0", "1.0.0", false),
-        Arguments.arguments("^1.0.0", "0.0.1", false),
-        Arguments.arguments("^1.0.0", "0.1.0", false),
-        Arguments.arguments("^1.0.0", "1.0.0", true),
-        Arguments.arguments("^1.1.0", "1.0.0", false),
-        Arguments.arguments("~0.0.1", "0.0.1", true),
-        Arguments.arguments("~0.0.1", "0.1.0", false),
-        Arguments.arguments("~0.0.1", "1.0.0", false),
-        Arguments.arguments("~0.1.0", "0.0.1", false),
-        Arguments.arguments("~0.1.0", "0.1.0", true),
-        Arguments.arguments("~0.1.0", "1.0.0", false),
-        Arguments.arguments("~1.0.0", "0.0.1", false),
-        Arguments.arguments("~1.0.0", "0.1.0", false),
-        Arguments.arguments("~1.0.0", "1.0.0", true),
-        Arguments.arguments("~0.1.1", "0.1.0", false),
-        Arguments.arguments("0.0.1", "0.0.1", true),
-        Arguments.arguments("0.0.1", "0.1.1", false),
-        Arguments.arguments("0.0.1", "1.0.1", false));
+        Arguments.arguments("^0.0.1", "0.0.0", false), // Major match, patch too low
+        Arguments.arguments("^0.0.1", "0.0.1", true), // Major match, patch same
+        Arguments.arguments("^0.0.1", "0.0.2", true), // Major match, patch above
+        Arguments.arguments("^0.0.1", "0.1.0", true), // Major match, minor above
+        Arguments.arguments("^0.0.1", "1.0.0", false), // Major match, major too high
+        Arguments.arguments("^0.1.0", "0.0.1", false), // Major match, minor too low
+        Arguments.arguments("^0.1.0", "0.1.0", true), // Major match, minor same
+        Arguments.arguments("^0.1.1", "0.1.0", false), // Major match, patch too low
+        Arguments.arguments("^0.1.0", "0.1.1", true), // Major match, patch above
+        Arguments.arguments("^0.1.0", "0.2.0", true), // Major match, minor above
+        Arguments.arguments("^0.1.0", "1.0.0", false), // Major match, major too high
+        Arguments.arguments("^1.0.0", "0.0.1", false), // Major match, major too low
+        Arguments.arguments("^1.0.0", "0.1.0", false), // Major match, major too low
+        Arguments.arguments("^1.0.0", "1.0.0", true), // Major match, major same
+        Arguments.arguments("^1.0.0", "1.0.1", true), // Major match, patch above
+        Arguments.arguments("^1.0.0", "1.1.0", true), // Major match, minor above
+        Arguments.arguments("^1.0.1", "1.0.0", false), // Major match, patch too low
+        Arguments.arguments("^1.1.0", "1.0.0", false), // Major match, minor too low
+        Arguments.arguments("~0.0.1", "0.0.0", false), // Minor match, patch too low
+        Arguments.arguments("~0.0.1", "0.0.1", true), // Minor match, patch same
+        Arguments.arguments("~0.0.1", "0.0.2", true), // Minor match, patch above
+        Arguments.arguments("~0.0.1", "0.1.0", false), // Minor match, patch too low
+        Arguments.arguments("~0.0.1", "1.0.0", false), // Minor match, major too high
+        Arguments.arguments("~0.1.0", "0.0.1", false), // Minor match, minor too low
+        Arguments.arguments("~0.1.0", "0.1.0", true), // Minor match, minor same
+        Arguments.arguments("~0.1.0", "0.1.1", true), // Minor match, patch above
+        Arguments.arguments("~0.1.0", "0.2.0", false), // Minor match, minor too high
+        Arguments.arguments("~0.1.0", "1.0.0", false), // Minor match, major too high
+        Arguments.arguments("~1.0.0", "0.0.1", false), // Minor match, major too low
+        Arguments.arguments("~1.0.0", "0.1.0", false), // Minor match, major too low
+        Arguments.arguments("~1.0.0", "1.0.0", true), // Minor match, major same
+        Arguments.arguments("~1.0.1", "0.0.0", false), // Minor match, major too low
+        Arguments.arguments("~0.1.1", "0.1.0", false), // Minor match, patch too low
+        Arguments.arguments("0.0.1", "0.0.1", true), // Patch match, same patch
+        Arguments.arguments("0.0.1", "0.1.1", false), // Patch match, minor not same
+        Arguments.arguments("0.0.1", "1.0.1", false)); // Patch match, major not same
   }
 
   /**
