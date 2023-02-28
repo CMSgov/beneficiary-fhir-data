@@ -17,6 +17,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -39,6 +40,10 @@ import org.junit.jupiter.api.Test;
 
 /** Integration test for the {@link StandardGrpcRdaSource}. */
 public class StandardGrpcRdaSourceIT {
+
+  /** Arbitrary RDA API version to use for testing. */
+  private static final String ARBITRARY_RDA_VERSION = "0.0.1";
+
   /** Example paid claim. */
   private static final String SOURCE_CLAIM_1 =
       "{"
@@ -114,7 +119,9 @@ public class StandardGrpcRdaSourceIT {
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"apiSource\" : \"0.12\",\n"
+          + "  \"apiSource\" : \""
+          + ARBITRARY_RDA_VERSION
+          + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
@@ -161,7 +168,9 @@ public class StandardGrpcRdaSourceIT {
   /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"apiSource\" : \"0.12\",\n"
+          + "  \"apiSource\" : \""
+          + ARBITRARY_RDA_VERSION
+          + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
@@ -227,7 +236,7 @@ public class StandardGrpcRdaSourceIT {
   public void setUp() throws Exception {
     appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
-    rdaVersion = RdaVersion.builder().versionString("~0.12.0").build();
+    rdaVersion = RdaVersion.builder().versionString("~" + ARBITRARY_RDA_VERSION).build();
   }
 
   /**
@@ -349,6 +358,7 @@ public class StandardGrpcRdaSourceIT {
    */
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
+        .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
         .fissSourceFactory(
             sequenceNumber ->
                 WrappedClaimSource.wrapFissClaims(

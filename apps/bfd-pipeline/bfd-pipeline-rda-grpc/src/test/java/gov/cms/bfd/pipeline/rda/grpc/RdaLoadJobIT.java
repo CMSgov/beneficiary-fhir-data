@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
@@ -40,6 +41,9 @@ import org.junit.jupiter.api.Test;
 
 /** The integration test for the full RDA load job. */
 public class RdaLoadJobIT {
+
+  /** Arbitrary RDA API version to use for testing. */
+  private static final String ARBITRARY_RDA_VERSION = "0.0.1";
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   /** The test fiss claim source. */
@@ -104,6 +108,7 @@ public class RdaLoadJobIT {
         (appState, entityManager) -> {
           assertTablesAreEmpty(entityManager);
           RdaServer.LocalConfig.builder()
+              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
               .fissSourceFactory(fissJsonSource(fissClaimJson))
               .build()
               .runWithPortParam(
@@ -148,6 +153,7 @@ public class RdaLoadJobIT {
                   .get(badClaimIndex)
                   .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
           RdaServer.LocalConfig.builder()
+              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
               .fissSourceFactory(fissJsonSource(badFissClaimJson))
               .build()
               .runWithPortParam(
@@ -201,6 +207,7 @@ public class RdaLoadJobIT {
           assertTablesAreEmpty(entityManager);
           RdaServer.InProcessConfig.builder()
               .serverName(RdaServerJob.Config.DEFAULT_SERVER_NAME)
+              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
               .mcsSourceFactory(mcsJsonSource(mcsClaimJson))
               .build()
               .runWithNoParam(
@@ -241,6 +248,7 @@ public class RdaLoadJobIT {
               claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
           assertTrue(fullBatchSize > 0);
           RdaServer.LocalConfig.builder()
+              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
               .mcsSourceFactory(
                   ignored ->
                       new ExceptionMessageSource<>(
@@ -360,7 +368,7 @@ public class RdaLoadJobIT {
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(1))
             .batchSize(BATCH_SIZE)
-            .rdaVersion(RdaVersion.builder().versionString("~0.12.0").build())
+            .rdaVersion(RdaVersion.builder().versionString("~" + ARBITRARY_RDA_VERSION).build())
             .build(),
         rdaSourceConfig.build(),
         new RdaServerJob.Config(),

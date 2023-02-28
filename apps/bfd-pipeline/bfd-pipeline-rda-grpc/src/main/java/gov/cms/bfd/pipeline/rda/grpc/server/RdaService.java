@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
   /** The RDA server version to use when serving messages. */
-  public static final String RDA_PROTO_VERSION = "0.12";
+  public static final String RDA_PROTO_VERSION = "0.12.0";
 
   /** The configuration for the server. */
   private final Config config;

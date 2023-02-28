@@ -6,10 +6,15 @@ import java.util.regex.Pattern;
 /** A utility class for comparing version numbers. */
 public class RdaVersion {
 
+  /** Name for the type group of the RegEx. */
   private static final String TYPE_GROUP = "type";
+  /** Name for the major group of the RegEx. */
   private static final String MAJOR_GROUP = "major";
+  /** Name for the minor group of the RegEx. */
   private static final String MINOR_GROUP = "minor";
+  /** Name for the patch group of the RegEx. */
   private static final String PATCH_GROUP = "patch";
+  /** A RegEx used for matching a versioning string. */
   private static final Pattern VERSION_PATTERN =
       Pattern.compile(
           String.format(

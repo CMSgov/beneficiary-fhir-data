@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
@@ -243,8 +244,10 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String ENV_VAR_KEY_PROCESS_DLQ = "RDA_JOB_PROCESS_DLQ";
 
   /**
-   * The name of the string environment variable that should be used to find the RDA API Version tha
-   * the running job should be configured to ingest data for.
+   * The name of the string environment variable that can be set to override the RDA API Version
+   * that the running job should be configured to ingest data for. The job will normally use the
+   * default value hardcoded in the code, but this env variable can be used for special
+   * circumstances.
    */
   public static final String ENV_VAR_KEY_RDA_VERSION = "RDA_JOB_RDA_VERSION";
 
@@ -586,8 +589,13 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingMcsSeqNum);
     readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    // Default to the hardcoded RDA version in RdaService, restricted to major version
     jobConfig.rdaVersion(
-        RdaVersion.builder().versionString(readEnvStringRequired(ENV_VAR_KEY_RDA_VERSION)).build());
+        RdaVersion.builder()
+            .versionString(
+                readEnvStringOptional(ENV_VAR_KEY_RDA_VERSION)
+                    .orElse("^" + RdaService.RDA_PROTO_VERSION))
+            .build());
     jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
     final RdaSourceConfig grpcConfig =
         RdaSourceConfig.builder()
