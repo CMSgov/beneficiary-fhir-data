@@ -164,30 +164,6 @@ resource "aws_sns_topic_subscription" "ok" {
   endpoint_auto_confirms = true
 }
 
-# Temporary CloudWatch Alarms SNS
-# TODO: Remove in BFD-1773
-resource "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
-  name              = "bfd-${local.env}-cloudwatch-alarms-alert-testing"
-  display_name      = "BFD Cloudwatch Alarm. Created by Terraform."
-  kms_master_key_id = data.aws_kms_key.master_key.id
-}
-
-resource "aws_sns_topic_policy" "cloudwatch_alarms_alert_testing" {
-  arn    = aws_sns_topic.cloudwatch_alarms_alert_testing.arn
-  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_alert_testing.arn, aws_sns_topic.cloudwatch_alarms_alert_testing.arn)
-}
-
-resource "aws_sns_topic" "cloudwatch_alarms_ok_testing" {
-  name              = "bfd-${local.env}-cloudwatch-alarms-ok-testing"
-  display_name      = "BFD Cloudwatch OK notifications. Created by Terraform."
-  kms_master_key_id = data.aws_kms_key.master_key.id
-}
-
-resource "aws_sns_topic_policy" "cloudwatch_alarms_ok_testing" {
-  arn    = aws_sns_topic.cloudwatch_alarms_ok_testing.arn
-  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_ok_testing.arn, aws_sns_topic.cloudwatch_alarms_ok_testing.arn)
-}
-
 resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {
   name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
   display_name      = "BFD Cloudwatch Alarms notices to #bfd-notices. Created by Terraform."
@@ -197,6 +173,39 @@ resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {
 resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_notices" {
   arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn
   policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_notices.arn)
+}
+
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_test" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-test. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_test" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_test.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_test.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_test.arn)
+}
+
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_warnings" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-warnings"
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-warnings. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_warnings" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_warnings.arn)
+}
+
+resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_alerts" {
+  name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-alerts"
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-alerts. Created by Terraform."
+  kms_master_key_id = data.aws_kms_key.master_key.id
+}
+
+resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_alerts" {
+  arn    = aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts.arn
+  policy = format(local.cloudwatch_sns_topic_policy_spec, aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts.arn, aws_sns_topic.cloudwatch_alarms_slack_bfd_alerts.arn)
 }
 
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
