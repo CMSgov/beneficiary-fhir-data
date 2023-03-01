@@ -44,9 +44,12 @@
 - name: Install server-load Application Requirements
   pip:
     requirements: "{{ server_load_dir }}/requirements.txt"
-    executable: pip3
     umask: "0022"
+    virtualenv: "{{ server_load_dir }}/venv"
+    virtualenv_command: python3 -m venv
   become: true
+  become_method: su
+  become_user: "{{ server_load_user }}"
   tags:
     - pre-ami
 
