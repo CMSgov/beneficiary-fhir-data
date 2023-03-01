@@ -1,5 +1,5 @@
 ---
-- name: "Get SSH users from SSM"
+- name: "Get global SSH user data from SSM"
   shell:
     cmd: |
       aws ssm get-parameters-by-path \
@@ -7,23 +7,55 @@
         --path "/bfd/mgmt/common/sensitive/user" \
         --recursive \
         --region us-east-1 \
-        --query 'Parameters' |
-        # This large jq filter will create an array of objects grouped by the user's EUA containing
-        # each user's SSH information
-        jq '
-            [
-                .[]
-                | select(.Name | contains("ssh"))
-                | (.Name | split("/")[6]) as $iam | . += { "Iam": $iam }
-            ]
-            | group_by(.Iam)
-            | .[]
-            | map({(.Name | split("/")[7]): .Value})
-            | add
-        ' |
-        # This separate invocation of jq will combine the distinct objects emitted by the previous
-        # invocation into a single array of objects
-        jq -s
+        --query 'Parameters' | jq -c '@text'
+  register: global_ssh_users
+
+- name: "Parse global SSH users output"
+  set_fact:
+    global_ssh_users: "{{ global_ssh_users.stdout }}"
+
+- name: "Get environment-level SSH user data from SSM"
+  shell:
+    cmd: |
+      aws ssm get-parameters-by-path \
+        --with-decryption \
+        --path "/bfd/{{ env }}/common/sensitive/user" \
+        --recursive \
+        --region us-east-1 \
+        --query 'Parameters' | jq -c '@text'
+  register: env_ssh_users
+  when: env is defined
+  tags:
+    - post-ami
+
+- name: "Parse environment-level SSH users output"
+  set_fact:
+    env_ssh_users: '{{ env_ssh_users.stdout | default(''"[]"'', true) }}'
+
+- name: "Get SSH users from SSM"
+  shell:
+    cmd: |
+      mgmt_user_info={{ global_ssh_users }}
+      env_user_info={{ env_ssh_users }}
+      # This will merge the JSON arrays from the SSM commands above, allowing subsequent jq
+      # invocations to operate on them as if they were a single array
+      jq -s 'add' <<<"$env_user_info $mgmt_user_info" |
+      # This large jq filter will create an array of objects grouped by the user's EUA containing
+      # each user's SSH information
+      jq '
+          [
+              .[]
+              | select(.Name | contains("ssh"))
+              | (.Name | split("/")[6]) as $iam | . += { "Iam": $iam }
+          ]
+          | group_by(.Iam)
+          | .[]
+          | map({(.Name | split("/")[7]): .Value})
+          | add
+      ' |
+      # This separate invocation of jq will combine the distinct objects emitted by the previous
+      # invocation into a single array of objects
+      jq -s
   register: ssh_users
 
 - name: "Parse SSH users to apply"
@@ -36,6 +68,7 @@
     password: "{{ item.ssh_pass | default(omit) }}"
     state: present
   with_items: "{{ ssh_users }}"
+  when: item.ssh_default_access | bool or item.ssh_access | bool
   become: true
 
 - name: "Add user public key"
@@ -43,8 +76,8 @@
     user: "{{ item.ssh_user }}"
     key: "{{ item.ssh_public_key }}"
     state: present
-  when: item.ssh_public_key is defined
   with_items: "{{ ssh_users }}"
+  when: item.ssh_public_key is defined and (item.ssh_default_access | bool or item.ssh_access | bool)
   become: true
 
 - name: "Add user to sudoers file"
@@ -54,4 +87,5 @@
     line: "{{ item.ssh_user }} ALL=(ALL) NOPASSWD: ALL"
     validate: /usr/sbin/visudo -cf %s
   with_items: "{{ ssh_users }}"
+  when: item.ssh_default_sudoer | bool or item.ssh_sudoer | bool
   become: true
