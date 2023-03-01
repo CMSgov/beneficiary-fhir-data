@@ -1,19 +1,49 @@
 ---
+- name: "Get SSH users from SSM"
+  shell:
+    cmd: |
+      aws ssm get-parameters-by-path \
+        --with-decryption \
+        --path "/bfd/mgmt/common/sensitive/user" \
+        --recursive \
+        --region us-east-1 \
+        --query 'Parameters' |
+        # This large jq filter will create an array of objects grouped by the user's EUA containing
+        # each user's SSH information
+        jq '
+            [
+                .[]
+                | select(.Name | contains("ssh"))
+                | (.Name | split("/")[6]) as $iam | . += { "Iam": $iam }
+            ]
+            | group_by(.Iam)
+            | .[]
+            | map({(.Name | split("/")[7]): .Value})
+            | add
+        ' |
+        # This separate invocation of jq will combine the distinct objects emitted by the previous
+        # invocation into a single array of objects
+        jq -s
+  register: ssh_users
+
+- name: "Parse SSH users to apply"
+  set_fact:
+    ssh_users: "{{ ssh_users.stdout | from_json }}"
 
 - name: "Add user"
   user:
-    name: "{{ item.username }}"
-    password: "{{ item.password | default(omit) }}"
+    name: "{{ item.ssh_user }}"
+    password: "{{ item.ssh_pass | default(omit) }}"
     state: present
   with_items: "{{ ssh_users }}"
   become: true
 
 - name: "Add user public key"
   authorized_key:
-    user: "{{ item.username }}"
-    key: "{{ item.public_key }}"
+    user: "{{ item.ssh_user }}"
+    key: "{{ item.ssh_public_key }}"
     state: present
-  when: item.public_key is defined
+  when: item.ssh_public_key is defined
   with_items: "{{ ssh_users }}"
   become: true
 
@@ -21,8 +51,7 @@
   lineinfile:
     path: /etc/sudoers
     state: present
-    line: "{{ item.username }} ALL=(ALL) NOPASSWD: ALL"
+    line: "{{ item.ssh_user }} ALL=(ALL) NOPASSWD: ALL"
     validate: /usr/sbin/visudo -cf %s
-  when: item.sudoer
   with_items: "{{ ssh_users }}"
   become: true
