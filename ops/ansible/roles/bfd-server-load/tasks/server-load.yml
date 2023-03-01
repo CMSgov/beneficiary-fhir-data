@@ -14,9 +14,8 @@
 - name: Create server-load Service User
   user:
     name: "{{ server_load_user }}"
-    shell: /bin/false
   become: true
-  tags: 
+  tags:
     - pre-ami
 
 - name: Create server-load Service Directory
@@ -48,8 +47,17 @@
     virtualenv: "{{ server_load_dir }}/venv"
     virtualenv_command: python3 -m venv
   become: true
-  become_method: su
-  become_user: "{{ server_load_user }}"
+  tags:
+    - pre-ami
+
+- name: Ensure service directory is fully owned by service user
+  file:
+    path: "{{ server_load_dir }}"
+    group: "{{ server_load_user }}"
+    owner: "{{ server_load_user }}"
+    mode: u=rwx,g=rx,o=rx
+    recurse: true
+    state: directory
   tags:
     - pre-ami
 
