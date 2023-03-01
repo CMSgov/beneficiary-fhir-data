@@ -237,7 +237,6 @@ public class FissClaimRdaSinkIT {
           final FissClaimTransformer transformer =
               new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
           final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true, 0);
-          final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
