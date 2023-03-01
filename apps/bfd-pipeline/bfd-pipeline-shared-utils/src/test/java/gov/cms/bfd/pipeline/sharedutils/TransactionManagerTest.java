@@ -1,12 +1,17 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.io.IOException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -118,5 +123,68 @@ public class TransactionManagerTest {
     verify(transaction2, times(2)).commit();
     verify(transaction2, times(0)).rollback();
     verify(entityManager2, times(1)).close();
+  }
+
+  /**
+   * Ensures that {@link TransactionManager#executeFunction} passes through the function's return
+   * value.
+   */
+  @Test
+  void shouldReturnFunctionValueOnSuccess() {
+    final var expectedResult = 42;
+    final var actualResult =
+        transactionManager.executeFunction(
+            em -> {
+              assertSame(em, entityManager1);
+              return expectedResult;
+            });
+    assertEquals(expectedResult, actualResult);
+  }
+
+  /**
+   * Runs a transaction that succeeds but fails to commit and ensures that the commit exception is
+   * passed through to the caller and that all cleanup related exceptions are added to it as
+   * suppressed exceptions.
+   */
+  @Test
+  void shouldThrowCommitException() {
+    final var commitException = new RuntimeException("commit failed!");
+    final var closeException = new RuntimeException("close failed!");
+
+    doThrow(commitException).when(transaction1).commit();
+    doThrow(closeException).when(entityManager1).close();
+    try {
+      transactionManager.executeProcedure(em -> assertSame(em, entityManager1));
+      fail("should have thrown commit exception");
+    } catch (RuntimeException exception) {
+      assertSame(commitException, exception);
+      assertArrayEquals(new Throwable[] {closeException}, exception.getSuppressed());
+    }
+  }
+
+  /**
+   * Runs a transaction that fails with an exception and ensures that the exception passed through
+   * to the caller and that all cleanup related exceptions are added to it as suppressed exceptions.
+   */
+  @Test
+  void shouldSuppressRollbackException() {
+    final var transactionException = new IOException("transaction failed");
+    final var rollbackException = new RuntimeException("rollback failed!");
+    final var closeException = new RuntimeException("close failed!");
+
+    doThrow(rollbackException).when(transaction1).rollback();
+    doThrow(closeException).when(entityManager1).close();
+    try {
+      transactionManager.executeFunction(
+          em -> {
+            assertSame(em, entityManager1);
+            throw transactionException;
+          });
+      fail("should have thrown commit exception");
+    } catch (Exception exception) {
+      assertSame(transactionException, exception);
+      assertArrayEquals(
+          new Throwable[] {rollbackException, closeException}, exception.getSuppressed());
+    }
   }
 }

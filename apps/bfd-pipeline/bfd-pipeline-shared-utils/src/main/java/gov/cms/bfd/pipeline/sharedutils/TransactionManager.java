@@ -13,6 +13,9 @@ import javax.persistence.EntityManagerFactory;
  * many transactions as possible with a single {@link EntityManager} but obtains a new one if any
  * transaction throws an exception.
  *
+ * <p>Takes care of the tedious process of ensuring that any exception thrown by the transaction
+ * itself does not get lost if the subsequent rollback or close operations also throw.
+ *
  * <p>Instances are intended to be dedicated to a particular thread such as a worker thread from a
  * thread pool rather than shared by many instances (although that is possible). Any given instance
  * will only allow one thread at a time to execute a transaction.
@@ -36,8 +39,9 @@ public class TransactionManager implements AutoCloseable {
   }
 
   /**
-   * Runs a transaction that produces a result. Ensures that the transaction is properly committed
-   * if the function completes normally or rolled back if the function throws an exception.
+   * Runs a transaction that produces a result (usually a query). Ensures that the transaction is
+   * properly committed if the function completes normally or rolled back if the function throws an
+   * exception.
    *
    * @param functionLogic logic to invoke with the {@link EntityManager}
    * @param <T> return type of the function
@@ -47,44 +51,38 @@ public class TransactionManager implements AutoCloseable {
    */
   public synchronized <T, E extends Exception> T executeFunction(
       ThrowingFunction<T, EntityManager, E> functionLogic) throws E {
+    Exception transactionException = null;
     final var entityManager = getOrCreateEntityManager();
-    var shouldCommit = false;
     try {
       entityManager.getTransaction().begin();
-      var result = functionLogic.apply(entityManager);
-      shouldCommit = true;
-      return result;
+      return functionLogic.apply(entityManager);
+    } catch (Exception exception) {
+      transactionException = exception;
+      throw exception;
     } finally {
-      completeTransaction(entityManager, shouldCommit);
+      completeTransaction(entityManager, transactionException);
     }
   }
 
   /**
-   * Runs a transaction that does not produce a result. Ensures that the transaction is properly
-   * committed if the procedure completes normally or rolled back if the procedure throws an
-   * exception.
+   * Runs a transaction that does not produce a result (usually an insert or update). Ensures that
+   * the transaction is properly committed if the procedure completes normally or rolled back if the
+   * procedure throws an exception. Internally uses the adapter method {@link
+   * ThrowingConsumer#executeAsFunction} and discards the null result.
    *
    * @param procedureLogic logic to invoke with the {@link EntityManager}
    * @param <E> exception type thrown by the procedure
    * @throws E pass through exception from calling the procedure
    */
-  public synchronized <E extends Exception> void executeProcedure(
+  public <E extends Exception> void executeProcedure(
       ThrowingConsumer<EntityManager, E> procedureLogic) throws E {
-    final var entityManager = getOrCreateEntityManager();
-    var shouldCommit = false;
-    try {
-      entityManager.getTransaction().begin();
-      procedureLogic.accept(entityManager);
-      shouldCommit = true;
-    } finally {
-      completeTransaction(entityManager, shouldCommit);
-    }
+    executeFunction(procedureLogic::executeAsFunction);
   }
 
   /** {@inheritDoc} */
   @Override
   public synchronized void close() {
-    closeEntityManager();
+    closeEntityManager(null);
   }
 
   /**
@@ -112,38 +110,83 @@ public class TransactionManager implements AutoCloseable {
   }
 
   /**
-   * Commits or rolls back the active transaction. If a commit fails, or if {@code shouldCommit} is
-   * false the current {@link EntityManager} is also closed.
+   * Commits or rolls back the active transaction. If a commit fails, or if {@code
+   * transactionException} is non-null the current {@link EntityManager} is also closed. Ensures
+   * that any exceptions thrown during completion are either thrown (if the transaction had been
+   * otherwise successful) or added to the failing exception as being suppressed.
    *
    * @param entityManager the {@link EntityManager} owning the transaction
-   * @param shouldCommit true if commit is needed, false if rollback is needed
+   * @param transactionException null if transaction was successful, otherwise the exception that
+   *     caused transaction to fail
    */
-  private void completeTransaction(EntityManager entityManager, boolean shouldCommit) {
-    boolean shouldClose = true;
+  private void completeTransaction(EntityManager entityManager, Exception transactionException) {
+    if (transactionException == null) {
+      completeSuccessfulTransaction(entityManager);
+    } else {
+      completeFailedTransaction(entityManager, transactionException);
+    }
+  }
+
+  /**
+   * Commits the transaction and clears the entity manager. If the commit fails the entity manager
+   * is closed. Ensures that any exceptions thrown during completion are properly thrown.
+   *
+   * @param entityManager the {@link EntityManager} owning the transaction
+   */
+  private void completeSuccessfulTransaction(EntityManager entityManager) {
+    RuntimeException completionException = null;
     try {
-      if (shouldCommit) {
-        entityManager.getTransaction().commit();
-        entityManager.clear();
-        shouldClose = false;
-      } else {
-        entityManager.getTransaction().rollback();
-      }
+      entityManager.getTransaction().commit();
+      entityManager.clear();
+    } catch (RuntimeException commitException) {
+      completionException = commitException;
+      throw commitException;
     } finally {
-      if (shouldClose) {
-        closeEntityManager();
+      if (completionException != null) {
+        closeEntityManager(completionException);
       }
     }
   }
 
   /**
-   * Close the current {@link EntityManager} if there is one. Resets {@link #entityManager} to null
-   * so a new one will be created next time a transaction is executed.
+   * Rolls back the transaction and closes the entity manager. Ensures that any exception during the
+   * rollback or close are added to the transaction exception as suppressed exceptions.
+   *
+   * @param entityManager the {@link EntityManager} owning the transaction
+   * @param transactionException the exception that caused transaction to fail
    */
-  private void closeEntityManager() {
-    if (entityManager != null) {
-      if (entityManager.isOpen()) {
+  private void completeFailedTransaction(
+      EntityManager entityManager, Exception transactionException) {
+    try {
+      entityManager.getTransaction().rollback();
+    } catch (RuntimeException rollbackException) {
+      transactionException.addSuppressed(rollbackException);
+    } finally {
+      closeEntityManager(transactionException);
+    }
+  }
+
+  /**
+   * Close the current {@link EntityManager} if there is one. Resets {@link #entityManager} to null
+   * so a new one will be created next time a transaction is executed. Any exception thrown during
+   * the close is either thrown (if {@code transactionException} is null) or added to {@code
+   * transactionException} as a suppressed exception.
+   *
+   * @param transactionException the exception that caused transaction to fail or null if there is
+   *     no exception
+   */
+  private void closeEntityManager(@Nullable Exception transactionException) {
+    try {
+      if (entityManager != null && entityManager.isOpen()) {
         entityManager.close();
       }
+    } catch (RuntimeException closeException) {
+      if (transactionException != null) {
+        transactionException.addSuppressed(closeException);
+      } else {
+        throw closeException;
+      }
+    } finally {
       entityManager = null;
     }
   }
