@@ -189,6 +189,23 @@ public final class HospiceClaimTransformerV2Test {
     assertEquals("#provider-org", eob.getProvider().getReference());
   }
 
+  /** Tests that the transformer sets the correct values for the contained organization. */
+  @Test
+  public void shouldHaveOrganizationContainedEntry() {
+    Optional<Resource> resource =
+        eob.getContained().stream().filter(r -> r.getId().equals("#provider-org")).findFirst();
+    assertTrue(resource.isPresent());
+
+    Organization actualEobContainedOrganizationResource = (Organization) resource.get();
+    assertEquals("Fake ORG Name", actualEobContainedOrganizationResource.getName());
+    assertTrue(actualEobContainedOrganizationResource.hasActive());
+    assertTrue(
+        actualEobContainedOrganizationResource.getMeta().getProfile().stream()
+            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findAny()
+            .isPresent());
+  }
+
   /** Tests that the transformer sets the expected patient reference. */
   @Test
   public void shouldHavePatientReference() {

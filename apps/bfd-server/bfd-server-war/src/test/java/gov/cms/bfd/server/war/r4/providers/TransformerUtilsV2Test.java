@@ -26,10 +26,13 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
@@ -43,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -269,6 +273,49 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .orElse(null);
     assertNull(fiNumExtension);
+  }
+
+  /** Ensures the organiation contained resource is mapped correctly in the eob. */
+  @Test
+  public void mapEobCommonGroupInpOutHHAHospiceSNFWhenEOBHasAContainedOrganization() {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    Instant instant = Instant.now();
+
+    TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
+        eob,
+        Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER),
+        Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME),
+        ' ',
+        ' ',
+        Optional.empty(),
+        "",
+        ' ',
+        Optional.empty(),
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        Optional.empty(),
+        Optional.of(instant),
+        Optional.empty(),
+        Optional.empty(),
+        C4BBInstutionalClaimSubtypes.Inpatient,
+        Optional.empty());
+
+    assertEquals(1, eob.getContained().size());
+    Organization actualEobContainedOrganizationResource = (Organization) eob.getContained().get(0);
+    assertEquals("provider-org", actualEobContainedOrganizationResource.getId());
+    assertEquals(true, actualEobContainedOrganizationResource.getActive());
+    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
+    assertTrue(
+        actualEobContainedOrganizationResource.getIdentifier().stream()
+            .filter(s -> s.getSystem().equals(TransformerConstants.CODING_NPI_US))
+            .findFirst()
+            .isPresent());
+    assertTrue(
+        actualEobContainedOrganizationResource.getMeta().getProfile().stream()
+            .filter(o -> o.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findFirst()
+            .isPresent());
   }
 
   /**
@@ -871,5 +918,161 @@ public class TransformerUtilsV2Test {
     Bundle bundle = TransformerUtilsV2.createBundle(paging, eobs, Instant.now());
     assertEquals(1, bundle.getTotal());
     assertEquals(1, Integer.parseInt(BfdMDC.get("resources_returned_count")));
+  }
+
+  /**
+   * Verifies that {@link TransformerUtilsV2#findOrCreateContainedOrganization} sets a new
+   * organization and eob correctly.
+   */
+  @Test
+  public void createContainedOrganizationSetsOrganizationAndEobCorrectly() throws IOException {
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    String expectedId = "#provider-org";
+
+    Organization actualOrganization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+
+    assertEquals(expectedId, actualOrganization.getId());
+    assertTrue(
+        actualOrganization.getMeta().getProfile().stream()
+            .filter(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findFirst()
+            .isPresent());
+
+    Optional<Resource> resource =
+        eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
+
+    assertTrue(resource.isPresent());
+    Organization actualEobContainedOrganizationResource = (Organization) resource.get();
+    assertTrue(
+        actualEobContainedOrganizationResource.getMeta().getProfile().stream()
+            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findAny()
+            .isPresent());
+  }
+
+  /**
+   * Verifies that {@link TransformerUtilsV2#findOrCreateContainedOrganization} finds the
+   * organization and eob doesn't have duplicate entries for the contained resource.
+   */
+  @Test
+  public void findContainedOrganizationSetsOrganizationAndEobCorrectly() throws IOException {
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    String expectedId = "#provider-org";
+
+    Organization actualOrganization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+
+    assertEquals(expectedId, actualOrganization.getId());
+    assertTrue(
+        actualOrganization.getMeta().getProfile().stream()
+            .filter(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findFirst()
+            .isPresent());
+
+    List<Resource> resource =
+        eob.getContained().stream()
+            .filter(r -> r.getId().equals(expectedId))
+            .collect(Collectors.toList());
+    assertEquals(1, resource.size());
+
+    // Call findOrCreateContainedOrganization and make sure it finds the organization that
+    // was created above and doesn't have duplicate entries for eob.
+    actualOrganization = TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+
+    resource =
+        eob.getContained().stream()
+            .filter(r -> r.getId().equals(expectedId))
+            .collect(Collectors.toList());
+
+    assertEquals(1, resource.size());
+
+    Organization actualEobContainedOrganizationResource = (Organization) resource.get(0);
+    assertTrue(
+        actualEobContainedOrganizationResource.getMeta().getProfile().stream()
+            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findAny()
+            .isPresent());
+  }
+
+  /**
+   * Verifies that {@link TransformerUtilsV2#addProviderSlice} sets organization and eob correctly.
+   */
+  @Test
+  public void addProviderSliceSetsOrganizationAndEobCorrectly() throws IOException {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    String expectedNpiOrgName = "expectedNpi";
+    String expectedValue = "1";
+    String expectedId = "provider-org";
+    Instant instant = Instant.now();
+
+    TransformerUtilsV2.addProviderSlice(
+        eob,
+        C4BBOrganizationIdentifierType.NPI,
+        Optional.of(expectedValue),
+        Optional.of(expectedNpiOrgName),
+        Optional.of(instant));
+
+    Optional<Resource> resource =
+        eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
+
+    assertTrue(resource.isPresent());
+    Organization actualEobContainedOrganizationResource = (Organization) resource.get();
+    assertTrue(actualEobContainedOrganizationResource.getActive());
+    assertEquals(expectedNpiOrgName, actualEobContainedOrganizationResource.getName());
+    Identifier identifier =
+        actualEobContainedOrganizationResource.getIdentifier().stream()
+            .filter(i -> i.getSystem().equals(TransformerConstants.CODING_NPI_US))
+            .findFirst()
+            .get();
+    assertEquals(expectedValue, identifier.getValue());
+    assertTrue(
+        actualEobContainedOrganizationResource.getMeta().getProfile().stream()
+            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findFirst()
+            .isPresent());
+  }
+
+  /**
+   * Verifies that {@link TransformerUtilsV2#addProviderSlice} sets organization and eob correctly.
+   */
+  @Test
+  public void addProviderSliceSetsOrganizationAndEobCorrectlyWithDefaultNpiValueOfUnknown()
+      throws IOException {
+
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    Instant instant = Instant.now();
+    String expectedNpiOrgName = "UNKNOWN";
+    String expectedValue = "1";
+    String expectedId = "provider-org";
+
+    TransformerUtilsV2.addProviderSlice(
+        eob,
+        C4BBOrganizationIdentifierType.NPI,
+        Optional.of(expectedValue),
+        Optional.empty(),
+        Optional.of(instant));
+
+    List<Resource> c = eob.getContained();
+    Optional<Resource> resource =
+        eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
+
+    assertTrue(resource.isPresent());
+    Organization actualEobContainedOrganizationResource = (Organization) resource.get();
+    assertEquals("provider-org", actualEobContainedOrganizationResource.getId());
+    assertEquals(true, actualEobContainedOrganizationResource.getActive());
+    assertEquals(expectedNpiOrgName, actualEobContainedOrganizationResource.getName());
+    Identifier identifier =
+        actualEobContainedOrganizationResource.getIdentifier().stream()
+            .filter(i -> i.getSystem().equals(TransformerConstants.CODING_NPI_US))
+            .findFirst()
+            .get();
+    assertEquals(expectedValue, identifier.getValue());
+    assertTrue(
+        actualEobContainedOrganizationResource.getMeta().getProfile().stream()
+            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
+            .findFirst()
+            .isPresent());
   }
 }
