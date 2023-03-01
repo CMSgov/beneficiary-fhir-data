@@ -10,7 +10,7 @@
 /bfd/prod-sbx/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 /bfd/prod-sbx/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/prod-sbx/common/nonsensitive/rds_backup_retention_period: 8 # in days
-/bfd/prod-sbx/common/nonsensitive/rds_iam_database_authentication_enabled: false
+/bfd/prod-sbx/common/nonsensitive/rds_iam_database_authentication_enabled: true
 /bfd/prod-sbx/common/nonsensitive/rds_cluster_identifier: bfd-prod-sbx-aurora-cluster
 /bfd/prod-sbx/common/nonsensitive/rds_instance_class: db.r5.2xlarge
 /bfd/prod-sbx/common/nonsensitive/rds_instance_count: 2
