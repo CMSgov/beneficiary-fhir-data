@@ -54,3 +54,9 @@ data "aws_ssm_parameter" "cpm_aws_account_arn" {
   name            = "/bfd/mgmt/jenkins/sensitive/cpm_aws_account_arn"
   with_decryption = true
 }
+
+module "base_config" {
+  source = "./base_config"
+
+  kms_key_id = data.aws_kms_key.cmk.arn
+}

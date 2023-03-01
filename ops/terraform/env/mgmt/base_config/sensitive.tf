@@ -15,7 +15,7 @@ data "external" "eyaml" {
 resource "aws_ssm_parameter" "common_sensitive" {
   for_each = local.common_sensitive
 
-  key_id    = data.aws_kms_key.cmk.arn
+  key_id    = var.kms_key_id
   name      = each.key
   overwrite = true
   type      = "SecureString"
