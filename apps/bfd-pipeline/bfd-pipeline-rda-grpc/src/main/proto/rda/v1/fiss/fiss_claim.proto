@@ -23,6 +23,8 @@ import "rda/v1/fiss/fiss_process_new_health_insurance_claim_number_indicator.pro
 import "rda/v1/fiss/fiss_processing_type.proto";
 import "rda/v1/fiss/fiss_repository_indicator.proto";
 import "rda/v1/fiss/fiss_source_of_admission.proto";
+import "rda/v1/fiss/fiss_revenue_line.proto";
+import "rda/v1/fiss/fiss_claim_type_indicator.proto";
 
 // FISS (Fiscal Intermediary Shared Systems) Claim
 message FissClaim {
@@ -94,11 +96,13 @@ message FissClaim {
   //
   // The date the claim was received by the Intermediary.
   optional string recd_dt_cymd = 21;
+  optional string recd_dt_cymd_text = 110;
 
   // Current Transaction Date:
   //
   // The last date that the status/location changed or the claim was updated.
   optional string curr_tran_dt_cymd = 22;
+  optional string curr_tran_dt_cymd_text = 111;
 
   // Admitting Diagnosis Code:
   //
@@ -333,6 +337,19 @@ message FissClaim {
     string adj_mbi_ind_unrecognized = 99;
   };
 
+  // DRG
+  optional string drg_cd = 106;
+
+  // Group Code
+  optional string group_code = 107;
+
+  // Claim Type Indicator
+  oneof clm_typ_ind {
+    FissClaimTypeIndicator clm_typ_ind_enum = 108;
+    string clm_typ_ind_unrecognized = 109;
+  };
+
+
   // Adjustment Medicare Beneficiary Identifier
   optional string adj_mbi = 100;
 
@@ -350,4 +367,7 @@ message FissClaim {
 
   // FISS Audit Trail
   repeated FissAuditTrail fiss_audit_trail = 52;
+
+  // FISS Revenue Line
+  repeated FissRevenueLine fiss_revenue_lines = 105;
 }

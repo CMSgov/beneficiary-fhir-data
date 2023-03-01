@@ -113,7 +113,8 @@ public class McsTransformerIT {
                   arguments.getWrappedCounter(),
                   arguments.getData(),
                   arguments.getMbiSampler(),
-                  arguments.getSampleId());
+                  arguments.getSampleId(),
+                  "doesNotMatter");
 
       if (expectedException != null) {
         fail("Expected exception to be thrown, but none thrown");

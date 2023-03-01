@@ -20,6 +20,7 @@ import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Clock;
@@ -56,6 +57,7 @@ public class FissClaimRdaSinkIT {
           claim.setSequenceNumber(3L);
           claim.setDcn("1");
           claim.setHicNo("h1");
+          claim.setClmTypInd("1");
           claim.setCurrStatus('T');
           claim.setCurrLoc1('A');
           claim.setCurrLoc2("1A");
@@ -96,6 +98,7 @@ public class FissClaimRdaSinkIT {
               FissClaim.newBuilder()
                   .setDcn(claim.getDcn())
                   .setHicNo(claim.getHicNo())
+                  .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
                   .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
                   .setCurrLoc1Unrecognized(String.valueOf(claim.getCurrLoc1()))
                   .setCurrLoc2Unrecognized(claim.getCurrLoc2())
@@ -218,6 +221,7 @@ public class FissClaimRdaSinkIT {
                   .addFissProcCodes(0, procCodeMessage)
                   .addFissDiagCodes(0, diagCodeMessage)
                   .setMbi(claim.getMbi())
+                  .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
                   .build();
 
           final FissClaimChange message =
