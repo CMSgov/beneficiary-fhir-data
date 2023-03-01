@@ -18,6 +18,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
@@ -116,7 +117,8 @@ public class FissTransformerIT {
                   arguments.getWrappedCounter(),
                   arguments.getData(),
                   arguments.getMbiSampler(),
-                  arguments.getSampleId());
+                  arguments.getSampleId(),
+                  "inpatient");
 
       if (expectedException != null) {
         fail("Expected exception to be thrown, but none thrown");
@@ -486,6 +488,7 @@ public class FissTransformerIT {
           .setDcn(FI_DOC_CLM_CNTL_NUM)
           .setHicNo(HIC_NO)
           .setMbi(MBI)
+          .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
           .setCurrLoc1Unrecognized(HARDCODED_LOC1)
           .setCurrLoc2Unrecognized(HARDCODED_LOC2)
           .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING)

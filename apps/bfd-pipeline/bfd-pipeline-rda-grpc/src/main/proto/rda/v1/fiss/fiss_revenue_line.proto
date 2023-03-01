@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/fiss/fiss_non_bill_rev_code.proto";
+import "rda/v1/fiss/fiss_claim_type_indicator.proto";
+
+// FISS Revenue Line
+message FissRevenueLine {
+
+  // RDA Position:
+  //
+  // Indicates which position this procedure code is located in on the claim. This value is assigned by RDA.
+  uint32 rda_position = 1;
+
+  // Non Billable Code
+  oneof non_bill_rev_code {
+    FissNonBillRevCode non_bill_rev_code_enum = 16;
+    string non_bill_rev_code_unrecognized = 17;
+  }
+
+  // Revenue Code
+  optional string rev_cd = 18;
+
+  // Total Units or Number of Services Billed
+  optional uint32 rev_units_billed = 19;
+
+  // Total Units or Number of Services Billed
+  optional uint32 rev_serv_unit_cnt = 20;
+
+  // Service Date
+  optional string serv_dt_cymd = 21;
+  optional string serv_dt_cymd_text = 22;
+
+  // Healthcare Common Procedure Coding (HCPC) Code
+  optional string hcpc_cd = 23;
+
+  // Healthcare Common Procedure Coding (HCPC) Indicator
+  optional string hcpc_ind = 24;
+
+  // Healthcare Common Procedure Coding (HCPC)
+  optional string hcpc_modifier = 25;
+
+  // Healthcare Common Procedure Coding (HCPC) Second Occurrence
+  optional string hcpc_modifier2 = 26;
+
+  // Healthcare Common Procedure Coding (HCPC) Third Occurrence
+  optional string hcpc_modifier3 = 27;
+
+  // Healthcare Common Procedure Coding (HCPC) Fourth Occurrence
+  optional string hcpc_modifier4 = 28;
+
+  // Healthcare Common Procedure Coding (HCPC) Fifth Occurrence
+  optional string hcpc_modifier5 = 29;
+
+  // Ambulatory Payment Classification (APC) Healthcare Common Procedure Coding System (HCPCS) APC
+  optional string apc_hcpcs_apc = 30;
+
+  // Accountable Care Organization (ACO) Reduction Remittance Advice Remark Code
+  optional string aco_red_rarc = 31;
+
+  // Pioneer Accountable Care Organization (ACO) Reduction CARC
+  optional string aco_red_carc = 32;
+
+  // Pioneer Accountable Care Organization (ACO) Reduction Group Code
+  optional string aco_red_cagc = 33;
+}
