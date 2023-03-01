@@ -9,8 +9,6 @@
   gather_facts: no
   vars:
     data_pipeline_dir: '/bluebutton-data-pipeline'
-    # TODO: Consider removing `env` when SSH/sudoer users have been resolved in SSM BFD-2068
-    env: "test"
 
   tasks:
     - name: Download BFD Repository
@@ -19,12 +17,6 @@
         dest: /beneficiary-fhir-data
         # use hash from `git_commit` when on stable master branch, otherwise use git_branch name
         version: "{{ git_commit if git_branch == 'master' else git_branch }}"
-      tags: [pre-ami, post-ami]
-
-    # TODO: Remove include_vars when SSH/sudoer users have been resolved in SSM BFD-2068
-    - name: Include env specific variables
-      include_vars:
-        dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
 
     - name: Apply base Cloudwatch Agent Role
