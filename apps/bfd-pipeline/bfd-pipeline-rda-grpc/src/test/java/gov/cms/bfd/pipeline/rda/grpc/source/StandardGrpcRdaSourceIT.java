@@ -56,6 +56,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
           + "  \"mbi\": \"c1ihk7q0g3i\","
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_INPATIENT\","
           + "  \"fissProcCodes\": ["
           + "    {"
           + "      \"procCd\": \"uec\","
@@ -95,6 +96,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
           + "  \"mbi\": \"0vtc7u321x0\","
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_OUTPATIENT\","
           + "  \"fedTaxNb\": \"2845244764\","
           + "  \"fissProcCodes\": ["
           + "    {"
@@ -123,6 +125,7 @@ public class StandardGrpcRdaSourceIT {
           + ARBITRARY_RDA_VERSION
           + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
+          + "  \"clmTypInd\" : \"1\",\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
           + "  \"currStatus\" : \"P\",\n"
@@ -162,6 +165,7 @@ public class StandardGrpcRdaSourceIT {
           + "    \"procDate\" : \"2021-01-07\",\n"
           + "    \"rdaPosition\" : 3\n"
           + "  } ],\n"
+          + "  \"revenueLines\" : [ ],\n"
           + "  \"sequenceNumber\" : 0,\n"
           + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
@@ -172,6 +176,7 @@ public class StandardGrpcRdaSourceIT {
           + ARBITRARY_RDA_VERSION
           + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
+          + "  \"clmTypInd\" : \"3\",\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
           + "  \"currStatus\" : \"R\",\n"
@@ -207,6 +212,7 @@ public class StandardGrpcRdaSourceIT {
           + "    \"rdaPosition\" : 3\n"
           + "  } ],\n"
           + "  \"receivedDate\" : \"2021-05-14\",\n"
+          + "  \"revenueLines\" : [ ],\n"
           + "  \"sequenceNumber\" : 1,\n"
           + "  \"totalChargeAmount\" : 55.91\n"
           + "}";

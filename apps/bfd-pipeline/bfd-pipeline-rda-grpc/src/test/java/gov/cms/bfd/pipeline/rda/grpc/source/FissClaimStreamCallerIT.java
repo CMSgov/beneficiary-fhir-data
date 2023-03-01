@@ -35,7 +35,8 @@ public class FissClaimStreamCallerIT {
           + "  \"principleDiag\": \"uec\","
           + "  \"mbi\": \"c1ihk7q0g3i\","
           + "  \"fissProcCodes\": [],"
-          + "  \"medaProvId\": \"oducjgzt67joc\""
+          + "  \"medaProvId\": \"oducjgzt67joc\","
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_INPATIENT\""
           + "}";
   /** Example rejected claim. */
   private static final String CLAIM_2 =
@@ -52,7 +53,8 @@ public class FissClaimStreamCallerIT {
           + "  \"npiNumber\": \"5764657700\","
           + "  \"mbi\": \"0vtc7u321x0\","
           + "  \"fedTaxNb\": \"2845244764\","
-          + "  \"fissProcCodes\": []"
+          + "  \"fissProcCodes\": [],"
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_OUTPATIENT\""
           + "}";
 
   /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
