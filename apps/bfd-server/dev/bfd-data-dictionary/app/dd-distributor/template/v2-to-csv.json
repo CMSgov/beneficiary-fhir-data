@@ -1,0 +1,30 @@
+{
+    "fields": [
+            {"field": "id", "title": "Element ID"},
+            {"field": "name", "title": "Name"},
+            {"field": "description", "title": "Description"},
+            {"field": "appliesTo", "title": "Applies To"},
+            {"field": "bfdTableType", "title": "BFD Table Type"},
+            {"field": "bfdColumnName", "title": "BFD Column Name"},
+            {"field": "bfdDbType", "title": "BFD Db Type"},
+            {"field": "bfdDbSize", "title": "BFD Db Size"},
+            {"field": "bfdJavaFieldName", "title": "BFD Java Field Name"},
+            {"field": "ccwMapping", "title": "CCW Mapping"},
+            {"field": "cclfMapping", "title": "CCLF Mapping"},
+            {"field": "resource", "title": "R4 Resource"},
+            {"field": "element", "title": "R4 Element"},
+            {"field": "discriminator", "title": "R4 Discriminator"},
+            {"field": "fhirPath", "title": "R4 FhirPath"},
+            {"field": "example", "title": "R4 Example"},
+            {"field": "additional", "title": "R4 Additional"},
+            {"field": "derived", "title": "R4 Derived"},
+            {"field": "note", "title": "R4 Notes"},
+            {"field": "AB2D", "title": "AB2D"},
+            {"field": "BB2", "title": "BB2"},
+            {"field": "BCDA", "title": "BCDA"},
+            {"field": "BFD", "title": "BFD"},
+            {"field": "DPC", "title": "DPC"},
+            {"field": "SyntheticData", "title": "Synthetic Data"}
+        ]
+}
+
