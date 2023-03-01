@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>BFD Data Dictionary</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">    
+    <style type="text/css">
+      table, th, td {
+        border: 0px solid;
+        padding: 5px;
+      }
+      label {
+        color: #6D6D6D;
+        font-weight: bold;
+      }
+      .pg-break {
+        page-break-after: always;
+      }
+      pre {
+        border: 1px solid #ddd;
+        border-left: 3px solid green;
+        color: #666;
+        page-break-inside: avoid;
+        overflow: hidden;
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        margin-bottom: 1.6em;
+        max-width: 100%;
+        padding: 1em 1.5em;
+        display: block;
+        word-wrap: break-all;
+        overflow-wrap: break-word;
+    }      
+    </style>
+  </head>
+  <body>
+      <!-- Title Page -->
+      <div class="columns is-flex is-vcentered">
+        <div class="column is-12" style="text-align: center;">
+          <div class="title has-text-info">BFD V2 Data Dictionary</div>
+          <div class="subtitle">Version 0.0.0.0.0.1</div>
+          <section>
+            <p></p>
+            <p>BFD Version 2</p>
+            <p>Based on FHIR R4 and CARIN STU1</p>
+          </section>
+        </div>
+      </div>
+      <div class="pg-break"></div>
+    <!-- Element Page Loop-->
+    {% for element in elements %}
+        <div class="columns">
+            <div class="column is-8 is-offset-2 has-text-left">
+                <h1 class="title has-text-info">{{element.name}}</h1>
+                <p>{{element.description}}</p>                
+                <p>&nbsp;</p>
+                <table>
+                  {% if element.appliesTo and element.appliesTo[0] != "" %}
+                    <tr>
+                      <td><label>Applies To:</label></td>
+                      <td>
+                          {% for a in element.appliesTo %}
+                              <span>{{a}}</span>
+                          {% endfor %}
+                      </td>
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td><label>Supplied In:</label></td>
+                    <td>
+                        {% for a in element.suppliedIn %}
+                            <span>{{a}}</span>
+                        {% endfor %}
+                    </td>
+                  </tr>
+
+                  <tr><td><label>Data Type:</label></td><td>{{element.bfdDbType}}({{element.bfdDbSize}})</td></tr>
+                </table>
+                                
+                <hr>
+                <h2 class="subtitle has-text-weight-bold">FHIR R4 Mapping Information</h2>
+                {% if element.fhirMapping[0].resource %}
+                  <p><label>Mapping</label><pre>{{element.fhirMapping[0].resource}}.{{element.fhirMapping[0].element}}</pre></p>
+                  <p><label>FHIR Path</label><pre>{{element.fhirMapping[0].fhirPath}}</pre></p>
+                  <p><label>Example</label><pre>{{element.fhirMapping[0].example.replace("\\n","<BR>")}}</pre></p>
+                  <p style="text-align: left;"><label>Discriminator(s)</label>
+                    {% for a in element.fhirMapping[0].discriminator %}
+                    <pre>{{a}}</pre>
+                    {% endfor %}  
+                  </p>
+                  <p style="text-align: left;"><label>Additional Fields</label>
+                    {% for a in element.fhirMapping[0].additional %}
+                    <pre>{{a}}</pre>
+                    {% endfor %}  
+                  </p>
+                  {% if element.fhirMapping[0].note %}
+                    <p><label>Notes:</label>
+                        {{ element.fhirMapping[0].note }}
+                    </p>
+                  {% endif %}
+                {% else %}
+                  <p><pre>NOT MAPPED</pre></p>                  
+                {% endif %}
+                <hr>
+                <h2 class="subtitle has-text-weight-bold">Other Mappings</h2>
+                <table>
+                  <tr>
+                    <td><label>CCW Mapping:</label></td>
+                    <td>
+                        {% for a in element.ccwMapping %}
+                        <span>{{a}}</span>
+                        {% endfor %}
+                    </td>
+                  </tr>
+                  {% if element.cclfMapping and element.cclfMapping[0] != "" %}
+                    <tr>
+                      <td><label>CCLF Mapping:</label></td>
+                      <td>
+                          {% for a in element.cclfMapping %}
+                          <span>{{a}}</span><br>
+                          {% endfor %}
+                      </td>
+                    </tr>
+                  {% endif %}
+                </table>
+            </div>
+        </div>
+        <div class="pg-break"></div>
+    {% endfor %}        
+    </body>
+</html>
+
+
+
+
