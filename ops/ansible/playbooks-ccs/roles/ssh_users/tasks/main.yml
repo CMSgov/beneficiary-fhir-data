@@ -1,5 +1,5 @@
 ---
-- name: "Get global SSH user data from SSM"
+- name: "Get global SSM user data"
   shell:
     cmd: |
       aws ssm get-parameters-by-path \
@@ -10,11 +10,11 @@
         --query 'Parameters' | jq -c '@text'
   register: global_ssh_users
 
-- name: "Parse global SSH users output"
+- name: "Parse global SSM user data"
   set_fact:
     global_ssh_users: "{{ global_ssh_users.stdout }}"
 
-- name: "Get environment-level SSH user data from SSM"
+- name: "Get environment-level SSM user data"
   shell:
     cmd: |
       aws ssm get-parameters-by-path \
@@ -28,13 +28,17 @@
   tags:
     - post-ami
 
-- name: "Parse environment-level SSH users output"
+- name: "Parse environment-level SSM user data"
   set_fact:
     env_ssh_users: '{{ env_ssh_users.stdout | default(''"[]"'', true) }}'
 
-- name: "Get SSH users from SSM"
+- name: "Parse SSH user data from global and environment SSM parameters"
   shell:
     cmd: |
+      # jq, when using the @text escape formatter, will add quotes around the output. Since ansible
+      # (jinja) will template that quoted string literally into this script, we need to omit quotes
+      # The values of both variables will be unescaped JSON, as bash will unescape the string when
+      # parsing the script
       mgmt_user_info={{ global_ssh_users }}
       env_user_info={{ env_ssh_users }}
       # This will merge the JSON arrays from the SSM commands above, allowing subsequent jq
