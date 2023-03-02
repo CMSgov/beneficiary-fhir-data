@@ -5,8 +5,14 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-s','--source', dest='source', type=str, required=True, help='source JSON file')
 parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name/path')
-parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use to build csv - see /template')
+parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use e.g. ./template/v2-to-html.html')
 args = parser.parse_args()
+
+print("Generating HTML from DD content")
+print("")
+print("Template: " + args.template)
+print("Source:   " + args.source)
+print("Target:   " + args.target)
 
 
 # read consolidate json file from DIST folder 
@@ -31,5 +37,6 @@ context = {
 # run jinja template engine
 with open(args.target, mode="w", encoding="utf-8") as results:
     results.write(results_template.render(context))
-    print(f"... wrote {args.target}")
+print("")
+print(f"Finished generating file: {args.target}")
 

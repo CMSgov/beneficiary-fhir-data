@@ -1,12 +1,13 @@
 ﻿#################################################################
 # To use...
 # 
-# Switch to dd-distributor directory  e.g. > cd bfd-data-dictionary\app\dd-distributor
+# Switch to dd-distributor directory  
+# e.g. > cd \beneficiary-fhir-data\apps\bfd-server\dev\bfd-data-dictionary\app\dd-distributor
+#
 # Change target param in commands below to desired location (default is c:\output)
 #
-# cd c:\Users\621222\dev\projects\bfd-data-dictionary\app\dd-distributor
+# cd c:\Users\621222\dev\projects\beneficiary-fhir-data\apps\bfd-server\dev\bfd-data-dictionary\app\dd-distributor
 #################################################################
-
 
 
 ###########
@@ -38,10 +39,10 @@ python dd_to_json.py --source ..\..\data\V2\ --target c:\output\BFD-V2-data-dict
 ###########
 
 # V1
-python dd_to_html.py --template -m v1-to-html.html --source ..\..\dist\V1\BFD-V1-data-dictionary.json --target c:\output\BFD-V1-data-dictionary.html 
+python dd_to_html.py --template v1-to-html.html --source c:\output\BFD-V1-data-dictionary.json --target c:\output\BFD-V1-data-dictionary.html 
 
 # V2
-python dd_to_html.py --template -m v2-to-html.html --source ..\..\dist\V2\BFD-V2-data-dictionary.json --target c:\output\BFD-V2-data-dictionary.html 
+python dd_to_html.py --template v2-to-html.html --source c:\output\BFD-V2-data-dictionary.json --target c:\output\BFD-V2-data-dictionary.html 
 
 
 

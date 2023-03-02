@@ -31,6 +31,7 @@
         display: block;
         word-wrap: break-all;
         overflow-wrap: break-word;
+        text-align: left;
     }      
     </style>
   </head>
@@ -60,7 +61,7 @@
                     <td><label>Applies To:</label></td>
                     <td>
                         {% for a in element.appliesTo %}
-                            <span>{{a}}</span>
+                            <span>{{a}}, </span>
                         {% endfor %}
                     </td>
                   </tr>
@@ -68,28 +69,26 @@
                     <td><label>Supplied In:</label></td>
                     <td>
                         {% for a in element.suppliedIn %}
-                            <span>{{a}}</span>
+                            <span>{{a}}, </span>
                         {% endfor %}
                     </td>
                   </tr>
-
                   <tr><td><label>Data Type:</label></td><td>{{element.bfdDbType}}({{element.bfdDbSize}})</td></tr>
                 </table>
                                 
                 <hr>
                 <h2 class="subtitle has-text-weight-bold">FHIR STU3 Mapping</h2>
-                <p><label>Element</label><pre>{{element.fhirMapping[0].element}}</pre></p>
-                <p><label>Discriminator</label>
-                    <pre style="text-align: left;">
-                        {% for a in element.fhirMapping[0].discriminator %}
-                            {{a}}
-                        {% endfor %}
-                    </pre>
-                </p>
-                {% if element.fhirMapping[0].note %}
-                <p><label>Notes:</label>
-                    {{ element.fhirMapping[0].note }}
-                </p>
+                {% if element.fhirMapping[0].element %}
+                  <p><label>Element</label><pre>{{element.fhirMapping[0].element}}</pre></p>
+                  <p><label>Discriminator</label><pre><code>{% for a in element.fhirMapping[0].discriminator %}{{a}}{% endfor %}</code></pre>
+                  </p>
+                  {% if element.fhirMapping[0].note %}
+                  <p><label>Notes:</label>
+                      {{ element.fhirMapping[0].note }}
+                  </p>
+                  {% endif %}
+                {% else %}
+                  <p><label>Not mapped</label></p>
                 {% endif %}
                 <hr>
                 <h2 class="subtitle has-text-weight-bold">Other Mappings</h2>
@@ -110,12 +109,6 @@
                         {% endfor %}
                     </td>
                   </tr>
-                </table>
-                <hr>
-                <h2 class="subtitle has-text-weight-bold">BFD Info</h2>
-                <table>
-                  <tr><td><label>BFD Column Name:</label></td><td>{{element.bfdColumnName}}</td></tr>
-                  <tr><td><label>BFD Java Field Name:</label></td><td>{{element.bfdJavaFieldName}}</td></tr>
                 </table>
             </div>
         </div>
