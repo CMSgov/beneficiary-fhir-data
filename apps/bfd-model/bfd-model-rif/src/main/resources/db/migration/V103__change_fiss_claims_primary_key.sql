@@ -32,4 +32,4 @@ ALTER TABLE rda.fiss_revenue_lines ALTER COLUMN claim_id ${logic.alter-column-ty
 
 -- Reset the progress table so we can reingest all FISS claims under the new schema.
 
-DELETE FROM rda.rda_api_progress WHERE claim_type = 'fiss';
+DELETE FROM rda.rda_api_progress WHERE claim_type = 'FISS';
