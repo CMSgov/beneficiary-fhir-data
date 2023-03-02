@@ -122,44 +122,37 @@
     terraform plan
     ```
 
-13. Assuming that there are no anomalous changes and that the plan matches expectations, apply the
-    plan:
-
-    ```bash
-    terraform apply
-    ```
-
-14. Now that the user's username and SSH public key are available in the `mgmt` environment, the
-    user's SSH access and `sudoer` access can be defined per-environment. If the user has been given
-    default access to SSH _and_ to use `sudo` then steps #15 through #24 can be skipped as the user
+13. Now that the user's username and SSH public key are set in the `mgmt` environment, the user's
+    SSH access and `sudoer` access can be defined per-environment. If the user has been given
+    default access to SSH _and_ to use `sudo` then steps #14 through #22 can be skipped as the user
     does not need to be configured in our established environments
-15. **From the root of the repository**, navigate to the `base` Terraform service module:
+14. **From the root of the repository**, navigate to the `base` Terraform service module:
 
     ```bash
     cd ops/terraform/services/base
     ```
 
-16. Once again, initialize the module:
+15. Once again, initialize the module:
 
     ```bash
     terraform init
     ```
 
-17. Then, select the workspace corresponding to the environment you are provisioning the user's
+16. Then, select the workspace corresponding to the environment you are provisioning the user's
     access for:
 
     ```bash
     terraform workspace select <prod|prod-sbx|test>
     ```
 
-18. Then, run the plan and verify that all of `base`'s resources are found and that there are no
+17. Then, run the plan and verify that all of `base`'s resources are found and that there are no
     changes:
 
     ```bash
     terraform plan
     ```
 
-19. Similarly to step #7, use the `edit-eyaml.sh` to open the corresponding environment's `.eyaml`
+18. Similarly to step #7, use the `edit-eyaml.sh` to open the corresponding environment's `.eyaml`
     in your defined `EDITOR`:
 
     ```bash
@@ -167,7 +160,7 @@
     scripts/edit-eyaml.sh <prod|prod-sbx|test>
     ```
 
-20. Find the block of SSM keys corresponding to SSH, or, if the block of keys do not yet exist,
+19. Find the block of SSM keys corresponding to SSH, or, if the block of keys do not yet exist,
     append the below to the end of the file. `....` should be replaced with the user's EUA ID. What
     each key represents is as follows:
 
@@ -187,24 +180,54 @@
     /bfd/${env}/common/sensitive/user/..../ssh_sudoer: bool
     ```
 
-21. Close the file. This will save your changes and re-encrypt the encrypted YAML file for the
+20. Close the file. This will save your changes and re-encrypt the encrypted YAML file for the
     current environment.
-22. Plan the changes to the Terraform state and verify that there are only _additions_ to the state
+21. Plan the changes to the Terraform state and verify that there are only _additions_ to the state
     and that these additions correspond to the new SSH SSM parameters defined in step #20:
 
     ```bash
     terraform plan
     ```
 
-23. Assuming that there are no anomalous changes and that the plan matches expectations, apply the
-    plan:
+22. Repeat steps #14 through #21 for each environment that the user should be provisioned in
+23. Open a new Pull Request with the changes to all configuration in the associated branch
+24. Once approved, the changes to `mgmt` can be applied:
 
-    ```bash
-    terraform apply
-    ```
+    1. From the root of the repository, `cd` into the `mgmt` module:
 
-24. Repeat steps #17 through #23 for each environment that the user should be provisioned in
-25. Once finished, the new user will be _fully_ provisioned the next time the `Build App AMIs` stage
+       ```bash
+       cd ops/terraform/env/mgmt
+       ```
+
+    2. Apply the changes to configuration ensuring that there are no unexpected changes:
+
+       ```bash
+       terraform apply
+       ```
+
+25. Once approved, the changes to each established environment can also be applied:
+
+    1. `cd` into the `base` service Terraform module:
+
+       ```bash
+       cd ops/terraform/services/base
+       ```
+
+    2. Switch to the current environment's corresponding workspace:
+
+       ```bash
+       terraform workspace select <prod|prod-sbx|test>
+       ```
+
+    3. Apply the changes to configuration ensuring that there are no unexpected changes:
+
+       ```bash
+       terraform apply
+       ```
+
+    4. Repeat the above steps for each established environment that was changed
+
+26. Once finished, the new user will be _fully_ provisioned the next time the `Build App AMIs` stage
     is ran in our deployment pipeline. In the meantime, anytime a _brand new_ instance is _launched_
     the new user will be able to SSH into it assuming either `ssh_default_access` is `true` or if,
     for the instance's environment, `ssh_access` is `true`
@@ -285,7 +308,8 @@
    /bfd/mgmt/common/sensitive/user/..../ssh_default_sudoer: bool
    ```
 
-9. Knowing the user's EUA, find their corresponding SSM keys and do one of the following to disable their SSH access:
+9. Knowing the user's EUA, find their corresponding SSM keys and do one of the following to disable
+   their SSH access:
    1. Simply delete all of the keys associated with the user. This will remove their access globally
       and should be done if the user is no longer a contributor to BFD. You will still need to check
       each established environment in order to remove any orphaned SSM keys for environment-specific
@@ -307,42 +331,35 @@
     terraform plan
     ```
 
-13. Assuming that there are no anomalous changes and that the plan matches expectations, apply the
-    plan:
-
-    ```bash
-    terraform apply
-    ```
-
-14. Now that the user's access has been removed in the global `mgmt` module, you will need to check
+13. Now that the user's access has been removed in the global `mgmt` module, you will need to check
     each established environment's configuration to ensure that their access is removed from each
-15. **From the root of the repository**, navigate to the `base` Terraform service module:
+14. **From the root of the repository**, navigate to the `base` Terraform service module:
 
     ```bash
     cd ops/terraform/services/base
     ```
 
-16. Once again, initialize the module:
+15. Once again, initialize the module:
 
     ```bash
     terraform init
     ```
 
-17. Then, select the workspace corresponding to the environment you are modifying the user's access
+16. Then, select the workspace corresponding to the environment you are modifying the user's access
     for:
 
     ```bash
     terraform workspace select <prod|prod-sbx|test>
     ```
 
-18. Then, run the plan and verify that all of `base`'s resources are found and that there are no
+17. Then, run the plan and verify that all of `base`'s resources are found and that there are no
     changes:
 
     ```bash
     terraform plan
     ```
 
-19. Similarly to step #7, use the `edit-eyaml.sh` to open the corresponding environment's `.eyaml`
+18. Similarly to step #7, use the `edit-eyaml.sh` to open the corresponding environment's `.eyaml`
     in your defined `EDITOR`:
 
     ```bash
@@ -350,7 +367,7 @@
     scripts/edit-eyaml.sh <prod|prod-sbx|test>
     ```
 
-20. Find the block of SSM keys corresponding to SSH, or, if the block of keys do not yet exist, you
+19. Find the block of SSM keys corresponding to SSH, or, if the block of keys do not yet exist, you
     can skip to step #??. `....` should be replaced with the user's EUA ID. What each key represents
     is as follows:
 
@@ -370,31 +387,61 @@
     /bfd/${env}/common/sensitive/user/..../ssh_sudoer: bool
     ```
 
-21. Similarly to step #9, there are two options for restricting SSH access in the environment
+20. Similarly to step #9, there are two options for restricting SSH access in the environment
     configuration:
     1. Simply set `ssh_access` to `false`. Assuming that `ssh_default_access` was set to `false` in
        step #9, this will disable access to this environment entirely
     2. Remove the keys associated with the user. Assuming that the user's corresponding `ssh_user`
        and `ssh_public_key` keys in `mgmt` were also removed, the user will no longer have access to
        SSH into this environment
-22. Close the file. This will save your changes and re-encrypt the encrypted YAML file for the
+21. Close the file. This will save your changes and re-encrypt the encrypted YAML file for the
     current environment.
-23. Plan the changes to the Terraform state and verify that there are only \_removals from the state
+22. Plan the changes to the Terraform state and verify that there are only _removals_ from the state
     and that these removals correspond to the new SSH SSM parameters defined in step #20:
 
     ```bash
     terraform plan
     ```
 
-24. Assuming that there are no anomalous changes and that the plan matches expectations, apply the
-    plan:
+23. Repeat steps #14 through #22 for each environment that the user should be removed from
+24. Open a new Pull Request with the changes to all configuration in the associated branch
+25. Once approved, the changes to `mgmt` can be applied:
 
-    ```bash
-    terraform apply
-    ```
+    1. From the root of the repository, `cd` into the `mgmt` module:
 
-25. Repeat steps #17 through #23 for each environment that the user should be removed from
-26. Once finished, the new user will be _fully_ removed the next time the `Build App AMIs` stage is
+       ```bash
+       cd ops/terraform/env/mgmt
+       ```
+
+    2. Apply the changes to configuration ensuring that there are no unexpected changes:
+
+       ```bash
+       terraform apply
+       ```
+
+26. Once approved, the changes to each established environment can also be applied:
+
+    1. `cd` into the `base` service Terraform module:
+
+       ```bash
+       cd ops/terraform/services/base
+       ```
+
+    2. Switch to the current environment's corresponding workspace:
+
+       ```bash
+       terraform workspace select <prod|prod-sbx|test>
+       ```
+
+    3. Apply the changes to configuration ensuring that there are no unexpected changes:
+
+       ```bash
+       terraform apply
+       ```
+
+    4. Repeat the above steps for each established environment that was changed
+
+27. Once finished, the new user will be _fully_ removed the next time the `Build App AMIs` stage is
     ran in our deployment pipeline. If the user's configuration was **removed** entirely (deleted
     from SSM), the user will not be removed until the next build. However, if their access was
     revoked _without_ their corresponding SSM parameters being removed outright
