@@ -55,6 +55,32 @@ POLICY
 
 }
 
+resource "aws_iam_policy" "packer_ssm" {
+  description = "Policy granting permission for bfd-packer profiled instances to access some common SSM hierarchies"
+  name        = "bfd-${local.env}-packer-ssm"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": [
+        "ssm:GetParametersByPath",
+        "ssm:GetParameters",
+        "ssm:GetParameter"
+      ],
+      "Resource": [
+        %{ for env in local.established_envs ~}
+        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${env}/common/*"
+        %{ endfor ~}
+      ],
+      "Sid": "BFDProfile"
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+}
+
 resource "aws_iam_policy" "code_artifact_rw" {
   description = "CodeArtifact read/write permissions"
   name        = "bfd-${local.env}-codeartifact-rw"

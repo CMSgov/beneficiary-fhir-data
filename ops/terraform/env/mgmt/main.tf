@@ -1,6 +1,13 @@
 locals {
   account_id              = data.aws_caller_identity.current.account_id
   env                     = "mgmt"
+  established_envs = [
+    "mgmt",
+    "test",
+    "prod-sbx",
+    "prod"
+  ]
+
   bfd_insights_kms_key_id = data.aws_kms_key.insights.arn
   kms_key_id              = data.aws_kms_key.cmk.arn
   tf_state_kms_key_id     = data.aws_kms_key.tf_state.arn
