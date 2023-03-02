@@ -438,9 +438,5 @@
 
     4. Repeat the above steps for each established environment that was changed
 
-27. Once finished, the new user will be _fully_ removed the next time the `Build App AMIs` stage is
-    ran in our deployment pipeline. If the user's configuration was **removed** entirely (deleted
-    from SSM), the user will not be removed until the next build. However, if their access was
-    revoked _without_ their corresponding SSM parameters being removed outright
-    (`ssh_default_access`/`ssh_access`/`ssh_default_sudoer`/`ssh_sudoer` was modified) then newly
-    launched instances will respect the updated access configuration.
+27. Once finished, the user's access will be _fully_ updated the next time the `Build App AMIs`
+    stage is ran in our deployment pipeline.
