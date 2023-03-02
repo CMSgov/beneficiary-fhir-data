@@ -71,10 +71,12 @@ RUN curl -o python3.tgz $PYTHON3_TAR_SOURCE && \
     cd $(basename $PYTHON3_TAR_SOURCE .tgz) && \
     ./configure && make && make altinstall
 
-RUN ln -s /usr/local/bin/python3.9 /usr/bin/python3 && \
-    ln -s /usr/local/bin/pip3.9 /usr/bin/pip3
+RUN ln -fs /usr/local/bin/python3.9 /usr/bin/python3 && \
+    ln -fs /usr/local/bin/pip3.9 /usr/bin/pip3
 
 RUN /usr/bin/python3 -m pip install --upgrade pip
+
+RUN rm -rf $(basename $PYTHON3_TAR_SOURCE .tgz) python3.tgz
 
 RUN systemctl set-default multi-user.target
 STOPSIGNAL SIGRTMIN+3
