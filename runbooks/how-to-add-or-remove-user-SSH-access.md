@@ -243,9 +243,6 @@
 > Additionally:
 >
 > - You will need to know the user's EUA
-> - You will need the user's SSH public key and desired username
-> - You will need to know the level of access the user has to each established environment and
->   whether they should be given access by default
 
 1. In your terminal, navigate to the root of your local copy of the `beneficiary-fhir-data`
    repository using `cd`
