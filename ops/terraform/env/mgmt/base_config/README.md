@@ -8,7 +8,9 @@ module's `values`.
 
 The techniques for configuration management have been adapted from the existing work done in the
 `base` Terraform service module. See its [README](../../../services/base/README.md) for more
-information on known limitations with this strategy as well as proper formatting for SSM values.
+information on known limitations with this strategy as well as proper formatting for SSM values. The
+sections detailing how to read and decrypt, and edit encrypted YAML apply for this module as well,
+as this module contains similar scripts for doing this work.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
