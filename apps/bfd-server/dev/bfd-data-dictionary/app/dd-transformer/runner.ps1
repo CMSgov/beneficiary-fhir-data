@@ -1,12 +1,12 @@
 ﻿#################################################################
 # To use...
 # 
-# Switch to dd-distributor directory  
-# e.g. > cd \beneficiary-fhir-data\apps\bfd-server\dev\bfd-data-dictionary\app\dd-distributor
+# Switch to dd-transformer directory  
+# e.g. > cd \beneficiary-fhir-data\apps\bfd-server\dev\bfd-data-dictionary\app\dd-transformer
 #
 # Change target param in commands below to desired location (default is c:\output)
 #
-# cd c:\Users\621222\dev\projects\beneficiary-fhir-data\apps\bfd-server\dev\bfd-data-dictionary\app\dd-distributor
+# cd c:\Users\621222\dev\projects\beneficiary-fhir-data\apps\bfd-server\dev\bfd-data-dictionary\app\dd-transformer
 #################################################################
 
 
