@@ -325,7 +325,7 @@
     ```
 
 12. Plan the changes to the Terraform state and verify that there are only _removals_ from the state
-    and that these removals correspond to the new SSH SSM parameters defined in step #9:
+    and that these removals correspond to the changes made in step #9:
 
     ```bash
     terraform plan
@@ -397,7 +397,7 @@
 21. Close the file. This will save your changes and re-encrypt the encrypted YAML file for the
     current environment.
 22. Plan the changes to the Terraform state and verify that there are only _removals_ from the state
-    and that these removals correspond to the new SSH SSM parameters defined in step #20:
+    and that these removals correspond to the changes made in step #20:
 
     ```bash
     terraform plan
