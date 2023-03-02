@@ -4,6 +4,7 @@
   - [Prerequisites](#prerequisites)
   - [Instructions](#instructions)
     - [How to Add a New User's SSH Key and Configure Access](#how-to-add-a-new-users-ssh-key-and-configure-access)
+    - [How to Remove a User's SSH Access](#how-to-remove-a-users-ssh-access)
 
 <!-- ## Glossary -->
 
@@ -207,3 +208,195 @@
     is ran in our deployment pipeline. In the meantime, anytime a _brand new_ instance is _launched_
     the new user will be able to SSH into it assuming either `ssh_default_access` is `true` or if,
     for the instance's environment, `ssh_access` is `true`
+
+### How to Remove a User's SSH Access
+
+> It is recommended that you read the following `README`s for more information on the SSM
+> configuration scheme used by BFD before continuing:
+>
+> - [`mgmt`'s `base_config` `README`](../ops/terraform/env/mgmt/base_config/README.md)
+> - [`base` service `README`](../ops/terraform/services/base/README.md)
+>
+> Additionally:
+>
+> - You will need to know the user's EUA
+> - You will need the user's SSH public key and desired username
+> - You will need to know the level of access the user has to each established environment and
+>   whether they should be given access by default
+
+1. In your terminal, navigate to the root of your local copy of the `beneficiary-fhir-data`
+   repository using `cd`
+2. In your terminal, relative to the root of this repository, `cd` to the directory associated with
+   the `mgmt` Terraform module:
+
+   ```bash
+   cd ops/terraform/env/mgmt
+   ```
+
+3. Initialize the Terraform state locally:
+
+   ```bash
+   terraform init
+   ```
+
+4. Once initialized, view the Terraform plan and verify that Terraform is able to load state for all
+   of the resources managed by the `mgmt` module and that no changes are necessary:
+
+   ```bash
+   terraform plan
+   ```
+
+5. Navigate into the `base_config` module's directory:
+
+   ```bash
+   cd base_config
+   ```
+
+6. Ensure you are authenticated with AWS and are able to run AWS CLI commands
+7. Open the encrypted yaml `mgmt.eyaml` for editing using the `edit-eyaml.sh` script using the
+   commands below. This will decrypt the encrypted `mgmt.eyaml` file and open it in your defined
+   `EDITOR`. The script will wait until the file is _closed_ by your editor, at which point it will
+   re-encrypt `mgmt.eyaml` with your changes and save it
+
+   ```bash
+   chmod +x scripts/edit-eyaml.sh
+   scripts/edit-eyaml.sh mgmt
+   ```
+
+8. You will see many keys grouped together in the format shown below. In the example below, `....`
+   represents each user's EUA ID. Each key represents the following:
+
+   1. `ssh_user` represents the user's SSH username that they will use to connect to a machine using
+      their key
+   2. `ssh_public_key` represents the _public_ key component of the user's key-pair
+   3. `ssh_default_access` defines whether the user has access, _by default_, to connect via SSH to
+      any BFD instance in _any_ environment. Essentially, this overrides per-environment access for
+      a given user and should be set to `true` for users that require access in all environments
+      (such as those in our on-call rotation)
+   4. `ssh_default_sudoer` defines whether the user has `sudoer` permission, _by default_, for any
+      BFD instance in _any_ environment. Essentially, this overrides per-environment `sudoer` access
+      for a given user and should only be set to `true` for users that need access to `sudo` in all
+      environments (such as those in our on-call rotation)
+
+   ```yml
+   /bfd/mgmt/common/sensitive/user/..../ssh_user: "some.username"
+   /bfd/mgmt/common/sensitive/user/..../ssh_public_key: "ssh-key .... identity"
+   /bfd/mgmt/common/sensitive/user/..../ssh_default_access: bool
+   /bfd/mgmt/common/sensitive/user/..../ssh_default_sudoer: bool
+   ```
+
+9. Knowing the user's EUA, find their corresponding SSM keys and do one of the following to disable their SSH access:
+   1. Simply delete all of the keys associated with the user. This will remove their access globally
+      and should be done if the user is no longer a contributor to BFD. You will still need to check
+      each established environment in order to remove any orphaned SSM keys for environment-specific
+      access
+   2. Set `ssh_default_access` to `false`. This will disable _default_ access, so you will still
+      need to follow the proceeding steps to modify `ssh_access` in all established environments
+      to remove their access completely
+10. Close the file. This should immediately update the encrypted `mgmt.eyaml` with your new changes
+11. Return to the `mgmt` module:
+
+    ```bash
+    cd ..
+    ```
+
+12. Plan the changes to the Terraform state and verify that there are only _removals_ from the state
+    and that these removals correspond to the new SSH SSM parameters defined in step #9:
+
+    ```bash
+    terraform plan
+    ```
+
+13. Assuming that there are no anomalous changes and that the plan matches expectations, apply the
+    plan:
+
+    ```bash
+    terraform apply
+    ```
+
+14. Now that the user's access has been removed in the global `mgmt` module, you will need to check
+    each established environment's configuration to ensure that their access is removed from each
+15. **From the root of the repository**, navigate to the `base` Terraform service module:
+
+    ```bash
+    cd ops/terraform/services/base
+    ```
+
+16. Once again, initialize the module:
+
+    ```bash
+    terraform init
+    ```
+
+17. Then, select the workspace corresponding to the environment you are modifying the user's access
+    for:
+
+    ```bash
+    terraform workspace select <prod|prod-sbx|test>
+    ```
+
+18. Then, run the plan and verify that all of `base`'s resources are found and that there are no
+    changes:
+
+    ```bash
+    terraform plan
+    ```
+
+19. Similarly to step #7, use the `edit-eyaml.sh` to open the corresponding environment's `.eyaml`
+    in your defined `EDITOR`:
+
+    ```bash
+    chmod +x scripts/edit-eyaml.sh
+    scripts/edit-eyaml.sh <prod|prod-sbx|test>
+    ```
+
+20. Find the block of SSM keys corresponding to SSH, or, if the block of keys do not yet exist, you
+    can skip to step #??. `....` should be replaced with the user's EUA ID. What each key represents
+    is as follows:
+
+    1. `ssh_access` defines whether the user has the ability to SSH into instances launched in the
+       current environment. If this is `false`, the user will not have the ability to SSH into any
+       instance, whereas if this is `true` the user _will_ be able to SSH. Note that this is
+       overriden by `ssh_default_access` (in the `mgmt` "environment") if `ssh_default_access` is
+       `true`. Omission is treated as `false`
+    2. `ssh_sudoer` defines whether the user has the ability to run `sudo` and act as `root` on
+       instances launched in the current environment. If this is `false`, the user will not have the
+       ability to run `sudo` and act as `root`, whereas if this is `true` the user _will_ be able to
+       do so. Note that this is overriden by `ssh_default_sudoer` (in the `mgmt` "environment") if
+       `ssh_default_sudoer` is `true`. Omission is treated as `false`
+
+    ```yaml
+    /bfd/${env}/common/sensitive/user/..../ssh_access: bool
+    /bfd/${env}/common/sensitive/user/..../ssh_sudoer: bool
+    ```
+
+21. Similarly to step #9, there are two options for restricting SSH access in the environment
+    configuration:
+    1. Simply set `ssh_access` to `false`. Assuming that `ssh_default_access` was set to `false` in
+       step #9, this will disable access to this environment entirely
+    2. Remove the keys associated with the user. Assuming that the user's corresponding `ssh_user`
+       and `ssh_public_key` keys in `mgmt` were also removed, the user will no longer have access to
+       SSH into this environment
+22. Close the file. This will save your changes and re-encrypt the encrypted YAML file for the
+    current environment.
+23. Plan the changes to the Terraform state and verify that there are only \_removals from the state
+    and that these removals correspond to the new SSH SSM parameters defined in step #20:
+
+    ```bash
+    terraform plan
+    ```
+
+24. Assuming that there are no anomalous changes and that the plan matches expectations, apply the
+    plan:
+
+    ```bash
+    terraform apply
+    ```
+
+25. Repeat steps #17 through #23 for each environment that the user should be removed from
+26. Once finished, the new user will be _fully_ removed the next time the `Build App AMIs` stage is
+    ran in our deployment pipeline. If the user's configuration was **removed** entirely (deleted
+    from SSM), the user will not be removed until the next build. However, if their access was
+    revoked _without_ their corresponding SSM parameters being removed outright
+    (`ssh_default_access`/`ssh_access`/`ssh_default_sudoer`/`ssh_sudoer` was modified) then newly
+    launched instances will respect the updated access configuration.
