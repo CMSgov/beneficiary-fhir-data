@@ -92,7 +92,7 @@
       any BFD instance in _any_ environment. Essentially, this overrides per-environment access for
       a given user and should be set to `true` for users that require access in all environments
       (such as those in our on-call rotation)
-   4. `ssh_default_sudoer` defines whether the user has `sudoer` permission, _by defualt_, for any
+   4. `ssh_default_sudoer` defines whether the user has `sudoer` permission, _by default_, for any
       BFD instance in _any_ environment. Essentially, this overrides per-environment `sudoer` access
       for a given user and should only be set to `true` for users that need access to `sudo` in all
       environments (such as those in our on-call rotation)
