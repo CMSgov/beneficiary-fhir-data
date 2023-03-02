@@ -11,8 +11,9 @@ target_path = args.target
 out_file = open(target_path, 'w', newline='')
 
 print("Generating consolidated JSON file from DD content")
-print("Source Folder: " + source_dir)
-print("Target File:   " + target_path)
+print("")
+print("Source: " + source_dir)
+print("Target: " + target_path)
 
 out_json = json.loads("[]")  # initialize output to an empty json array
 ct = 0

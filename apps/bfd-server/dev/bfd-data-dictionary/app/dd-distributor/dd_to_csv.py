@@ -42,9 +42,9 @@ def build_csv_row(element):
 ########################
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing source data file e.g. bfd-data-dictionary/data/V2')
+parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing source data files e.g. bfd-data-dictionary/data/V2')
 parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file path e.g. c:/output/BFD-V2-data-dict.csv')
-parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use to build csv e.g. template/v2-to-csv.json')
+parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use to build csv e.g. ./template/v2-to-csv.json')
 args = parser.parse_args()
 template_path = args.template
 source_dir = args.source
@@ -56,9 +56,10 @@ out_file = open(args.target, 'w', newline='')
 csv_writer = csv.writer(out_file)
 
 print("Generating CSV from DD content")
-print("Template:      " + args.template)
-print("Source Folder: " + args.source)
-print("Target File:   " + args.target)
+print("")
+print("Template:  " + args.template)
+print("Source:    " + args.source)
+print("Target:    " + args.target)
 
 
 csv_writer.writerow(build_csv_header())

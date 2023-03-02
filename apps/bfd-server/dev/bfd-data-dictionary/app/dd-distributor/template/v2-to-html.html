@@ -31,6 +31,7 @@
         display: block;
         word-wrap: break-all;
         overflow-wrap: break-word;
+        text-align: left;
     }      
     </style>
   </head>
@@ -61,7 +62,7 @@
                       <td><label>Applies To:</label></td>
                       <td>
                           {% for a in element.appliesTo %}
-                              <span>{{a}}</span>
+                              <span>{{a}}, </span>
                           {% endfor %}
                       </td>
                     </tr>
@@ -70,7 +71,7 @@
                     <td><label>Supplied In:</label></td>
                     <td>
                         {% for a in element.suppliedIn %}
-                            <span>{{a}}</span>
+                            <span>{{a}}, </span>
                         {% endfor %}
                     </td>
                   </tr>
@@ -84,15 +85,7 @@
                   <p><label>Mapping</label><pre>{{element.fhirMapping[0].resource}}.{{element.fhirMapping[0].element}}</pre></p>
                   <p><label>FHIR Path</label><pre>{{element.fhirMapping[0].fhirPath}}</pre></p>
                   <p><label>Example</label><pre>{{element.fhirMapping[0].example.replace("\\n","<BR>")}}</pre></p>
-                  <p style="text-align: left;"><label>Discriminator(s)</label>
-                    {% for a in element.fhirMapping[0].discriminator %}
-                    <pre>{{a}}</pre>
-                    {% endfor %}  
-                  </p>
-                  <p style="text-align: left;"><label>Additional Fields</label>
-                    {% for a in element.fhirMapping[0].additional %}
-                    <pre>{{a}}</pre>
-                    {% endfor %}  
+                  <p style="text-align: left;"><label>Discriminator(s)</label>{% for a in element.fhirMapping[0].discriminator %}<pre>{{a}}</pre>{% endfor %}  
                   </p>
                   {% if element.fhirMapping[0].note %}
                     <p><label>Notes:</label>
@@ -100,7 +93,7 @@
                     </p>
                   {% endif %}
                 {% else %}
-                  <p><pre>NOT MAPPED</pre></p>                  
+                  <p><pre>Not Mapped</pre></p>                  
                 {% endif %}
                 <hr>
                 <h2 class="subtitle has-text-weight-bold">Other Mappings</h2>
