@@ -7,8 +7,10 @@
 - hosts: bfd-db-migrator
   tasks:
     - name: Install Prerequisites
-      package:
-        name:
+      vars:
+        ansible_python_interpreter: /usr/bin/python
+      yum:
+        pkg:
           - procps
           - awscli
           - jq

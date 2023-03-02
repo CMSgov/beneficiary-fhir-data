@@ -24,18 +24,18 @@ import lombok.With;
 /** Provides infrastructure needed when unit testing ConcurrentRdaSink and associated classes. */
 @ThreadSafe
 public class TestDatabase {
-
-  /** The sinks for the database. */
+  /** List of all of the {@link TestDatabase.Sink} instances that have been created. */
   private final List<Sink> sinks = new ArrayList<>();
-  /** The claims 'written' to the database. */
+  /** Map of all of the claims that have been written. Key is the claim id. */
   private final Map<String, Claim> claims = new TreeMap<>();
-  /** The last set sequence number. */
+
+  /** Sequence number value simulating a progress table. */
   private long lastSequenceNumber;
 
   /**
-   * Adds a new sync to the internal list of sinks and returns it.
+   * Creates a new {@link TestDatabase.Sink} instance.
    *
-   * @return the created rda sink
+   * @return the sink that was created
    */
   public synchronized RdaSink<Message, Claim> createSink() {
     var sink = new Sink();
@@ -44,37 +44,36 @@ public class TestDatabase {
   }
 
   /**
-   * Gets the {@link #lastSequenceNumber}.
+   * Gets the current sequence number value.
    *
-   * @return the last sequence number
+   * @return the sequence number
    */
   public synchronized long getLastSequenceNumber() {
     return lastSequenceNumber;
   }
 
   /**
-   * Gets an immutable list of the {@link #claims}.
+   * Gets an immutable list of all claims that have been written to the database.
    *
-   * @return the claims
+   * @return the list of claims
    */
   public synchronized List<Claim> getClaims() {
     return ImmutableList.copyOf(claims.values());
   }
 
   /**
-   * Determines if all sinks are closed.
+   * Verifies that all sinks have been closed.
    *
-   * @return {@link true} if ALL sinks are closed
+   * @return true if all of the sinks have been closed
    */
   public synchronized boolean allClosed() {
     return sinks.stream().allMatch(s -> s.closed);
   }
 
   /**
-   * Sets the {@link #lastSequenceNumber}. Will fail an assertion if the sequence number being set
-   * is not larger than the current {@link #lastSequenceNumber}.
+   * Sets the last sequence number. Simulates having a progress table.
    *
-   * @param value the new sequence number to set
+   * @param value sequence number value to save
    */
   private synchronized void setLastSequenceNumber(long value) {
     assertTrue(value >= lastSequenceNumber, "sequenceNumber should only increase");
@@ -82,44 +81,44 @@ public class TestDatabase {
   }
 
   /**
-   * Adds a {@link Claim} to the list of {@link #claims}.
+   * Simulates writing a claim to the database by adding it to our map.
    *
-   * @param claim the claim to add
+   * @param claim the claim to write
    */
   private synchronized void addClaim(Claim claim) {
     claims.put(claim.getClaimId(), claim);
   }
 
-  /** Represents a simplified message as used in a sink for use in testing. */
+  /** Simulated message object meant to be used in tests alongside {@link TestDatabase.Claim}. */
   @Value
   @AllArgsConstructor
   public static class Message {
-    /** The message claim id. */
+    /** Unique key for the claim. */
     String claimId;
-    /** The claim data of this message. */
+    /** The claim. */
     String claimData;
-    /** The sequence number of this message. */
+    /** The message sequence number. */
     long sequenceNumber;
-    /** If this message should simulate a failure on transformation. */
+    /** When true attempts to transform the message into a claim should throw an exception. */
     @With public boolean failOnTransform;
-    /** If this message should simulate a failure on writing. */
+    /** When true attempts to write the claim to the database should throw an exception. */
     @With public boolean failOnWrite;
 
     /**
-     * Instantiates a new Message.
+     * Constructs an instance.
      *
-     * @param claimId the claim id
-     * @param claimData the claim data
-     * @param sequenceNumber the sequence number
+     * @param claimId Unique key for the claim.
+     * @param claimData the claim
+     * @param sequenceNumber the message sequence number
      */
     public Message(String claimId, String claimData, long sequenceNumber) {
       this(claimId, claimData, sequenceNumber, false, false);
     }
 
     /**
-     * Creates a test claim given an api version using the data of this message.
+     * Transforms this message into a {@link TestDatabase.Claim}.
      *
-     * @param apiVersion the api version
+     * @param apiVersion RDA API version number string
      * @return the claim
      */
     public Claim toClaim(String apiVersion) {
@@ -127,35 +126,35 @@ public class TestDatabase {
     }
   }
 
-  /** Represents a simplified test claim to be used in a sink. */
+  /** Simulated claim object meant to be used in tests alongside {@link TestDatabase.Message}. */
   @Value
   @AllArgsConstructor
   public static class Claim {
-    /** The claim id. */
+    /** Unique key for the claim. */
     String claimId;
-    /** The claim's simplified data. */
+    /** The claim. */
     String claimData;
-    /** The sequence number. */
+    /** The message sequence number. */
     long sequenceNumber;
-    /** The api version. */
+    /** RDA API version number string. */
     String apiVersion;
-    /** If this claim should simulate failing on writing. */
+    /** When true attempts to write the claim to the database should throw an exception. */
     boolean failOnWrite;
 
     /**
-     * Instantiates a new Claim.
+     * Constructs an instance.
      *
-     * @param claimId the claim id
-     * @param claimData the claim data
-     * @param sequenceNumber the sequence number
-     * @param apiVersion the api version
+     * @param claimId Unique key for the claim.
+     * @param claimData the claim
+     * @param sequenceNumber the message sequence number
+     * @param apiVersion RDA API version number string
      */
     public Claim(String claimId, String claimData, long sequenceNumber, String apiVersion) {
       this(claimId, claimData, sequenceNumber, apiVersion, false);
     }
 
     /**
-     * Creates a test message from this claim's data.
+     * Creates a {@link TestDatabase.Message} containing this claim.
      *
      * @return the message
      */
@@ -164,16 +163,16 @@ public class TestDatabase {
     }
   }
 
-  /** A test sink that uses simplified models for messages and claims. */
+  /** An {@link RdaSink} instance used for testing. */
   @ThreadSafe
   private class Sink implements RdaSink<Message, Claim> {
-    /** If this sink is closed. */
+    /** True if {@link #close()} has been called. */
     private boolean closed;
 
     /**
-     * Gets if this sink is {@link #closed}.
+     * Determine if {@link #close()} has been called.
      *
-     * @return {@link true} if this sink is closed
+     * @return true if {@link #close()} has been called.
      */
     public synchronized boolean isClosed() {
       return closed;

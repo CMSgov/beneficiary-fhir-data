@@ -312,6 +312,9 @@ public class RDABridge {
     Path file = path.resolve(sourceName);
     String fileType = FilenameUtils.getExtension(file.getFileName().toString());
 
+    // This is used to set the FissClaimTypwIndicator for FISS claims
+    final String fileName = sourceName.split("\\.")[0];
+
     if (parserMap.containsKey(fileType)) {
       try (Parser<String> parser = parserMap.get(fileType).apply(file)) {
         parser.init();
@@ -327,7 +330,8 @@ public class RDABridge {
 
           try {
             Optional<MessageOrBuilder> message =
-                transformer.transform(wrappedMessage, sequenceCounter, data, mbiSampler, sampleId);
+                transformer.transform(
+                    wrappedMessage, sequenceCounter, data, mbiSampler, sampleId, fileName);
 
             // If a message was returned, it has no more line items, and can be written.
             if (message.isPresent()) {

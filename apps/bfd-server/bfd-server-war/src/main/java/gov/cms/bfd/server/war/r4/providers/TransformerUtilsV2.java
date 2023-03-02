@@ -3766,17 +3766,23 @@ public final class TransformerUtilsV2 {
    * @param id The resource ID
    * @return The found or new {@link Organization} resource
    */
-  static Resource findOrCreateContainedOrg(ExplanationOfBenefit eob, String id) {
-    Optional<Resource> org = eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+  static Organization findOrCreateContainedOrganization(ExplanationOfBenefit eob, String id) {
+    Optional<Resource> organization =
+        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
 
     // If it isn't there, add one
-    if (!org.isPresent()) {
-      org = Optional.of(new Organization().setId(id));
-      org.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
-      eob.getContained().add(org.get());
+    if (!organization.isPresent()) {
+      organization = Optional.of(new Organization().setId(id));
+      organization.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
+      eob.getContained().add(organization.get());
     }
 
-    return org.get();
+    // At this point `organization.get()` will always return
+    if (!Organization.class.isInstance(organization.get())) {
+      throw new BadCodeMonkeyException();
+    }
+
+    return (Organization) organization.get();
   }
 
   /**
@@ -3815,14 +3821,7 @@ public final class TransformerUtilsV2 {
       Optional<String> npiOrgName,
       Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
-      Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
-
-      // We are assuming that the contained resource with an id of "provider-org" is an Organization
-      if (!Organization.class.isInstance(providerResource)) {
-        throw new BadCodeMonkeyException();
-      }
-
-      Organization provider = (Organization) providerResource;
+      Organization organization = findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID);
 
       // Add the new Identifier to the Organization
       Identifier id =
@@ -3834,21 +3833,21 @@ public final class TransformerUtilsV2 {
       if (type == C4BBOrganizationIdentifierType.NPI) {
         id.setSystem(TransformerConstants.CODING_NPI_US);
         if (!npiOrgName.isEmpty()) {
-          provider.setName(npiOrgName.get());
+          organization.setName(npiOrgName.get());
         } else {
-          provider.setName(NPI_ORG_DISPLAY_DEFAULT);
+          organization.setName(NPI_ORG_DISPLAY_DEFAULT);
           if (value.isPresent())
             LOGGER.info("Organization not found for npi number:" + value.get());
           else LOGGER.info("Organization not found for empty npi nummber");
         }
       }
 
-      provider.addIdentifier(id);
+      organization.addIdentifier(id);
 
       // Set active to value of true
-      provider.setActive(true);
+      organization.setActive(true);
 
-      setLastUpdated(provider, lastUpdated);
+      setLastUpdated(organization, lastUpdated);
 
       // This gets updated for every call, but always set to the same value
       eob.getProvider().setReference(PROVIDER_ORG_REFERENCE);
