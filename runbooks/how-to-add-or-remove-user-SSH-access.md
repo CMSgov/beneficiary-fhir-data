@@ -368,7 +368,7 @@
     ```
 
 19. Find the block of SSM keys corresponding to SSH, or, if the block of keys do not yet exist, you
-    can skip to step #??. `....` should be replaced with the user's EUA ID. What each key represents
+    can skip to step #23. `....` should be replaced with the user's EUA ID. What each key represents
     is as follows:
 
     1. `ssh_access` defines whether the user has the ability to SSH into instances launched in the
