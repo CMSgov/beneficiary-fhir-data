@@ -24,7 +24,6 @@ mappings:
       dbName: rda_position
     - name: nonBillRevCode
       sqlType: varchar(1)
-      nullable: false
       comment: 'Identifies whether the revenue code and / or the HCPCS code are valid.'
       dbName: non_bill_rev_code
     - name: revCd
