@@ -7,6 +7,9 @@
 # troubleshooting scenarios.
 #}
 
+# Source the pythonic virtual environment
+source "{{ server_load_dir }}/venv/bin/activate"
+
 # BFD_ENVIRONMENT defaults to 'test' in the server-load application
 {{ (env is defined) | ternary('', '#') }}export BFD_ENVIRONMENT='{{ env | default('', true) }}'
 
