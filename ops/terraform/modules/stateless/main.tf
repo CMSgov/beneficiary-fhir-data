@@ -27,24 +27,6 @@ locals {
     ]
   }
   vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
-
-  # Specifying per-environment alarms here rather than through variables and in each env-specific
-  # stateless module as it will be easier to lift this out when stateless/stateful is refactored
-  log_alarms_topic_arns_by_env = {
-    prod = {
-      alarm = data.aws_sns_topic.cloudwatch_alarms.arn
-      ok    = data.aws_sns_topic.cloudwatch_ok.arn
-    }
-    # TODO: Replace testing SNS topics in BFD-2244
-    prod-sbx = {
-      alarm = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
-      ok    = data.aws_sns_topic.cloudwatch_ok_testing.arn
-    }
-    test = {
-      alarm = null
-      ok    = null
-    }
-  }
 }
 
 
@@ -94,15 +76,6 @@ data "aws_sns_topic" "cloudwatch_alarms" {
 }
 data "aws_sns_topic" "cloudwatch_ok" {
   name = "bfd-${var.env_config.env}-cloudwatch-ok"
-}
-
-# Temporary CloudWatch SLO alarms topics
-# TODO: Remove in BFD-1773
-data "aws_sns_topic" "cloudwatch_alarms_alert_testing" {
-  name = "bfd-${var.env_config.env}-cloudwatch-alarms-alert-testing"
-}
-data "aws_sns_topic" "cloudwatch_ok_testing" {
-  name = "bfd-${var.env_config.env}-cloudwatch-alarms-ok-testing"
 }
 
 # aurora security group
@@ -282,16 +255,11 @@ module "bfd_server_metrics" {
 module "bfd_server_slo_alarms" {
   source                   = "../resources/bfd_server_slo_alarms"
   env                      = var.env_config.env
-  alert_notification_arn   = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
-  warning_notification_arn = data.aws_sns_topic.cloudwatch_alarms_alert_testing.arn
-  ok_notification_arn      = data.aws_sns_topic.cloudwatch_ok_testing.arn
 }
 
 module "bfd_server_log_alarms" {
   source                 = "../resources/bfd_server_log_alarms"
   env                    = var.env_config.env
-  alarm_notification_arn = local.log_alarms_topic_arns_by_env[var.env_config.env].alarm
-  ok_notification_arn    = local.log_alarms_topic_arns_by_env[var.env_config.env].ok
 }
 
 ## This is where cloudwatch dashboards are managed. 

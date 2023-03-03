@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
@@ -15,8 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
-/** Tests the {@link WriterThreadPool}. */
-public class WriterThreadPoolIT {
+/** Tests for the {@link ConcurrentRdaSink} class. */
+public class ConcurrentRdaSinkIT {
   /** Test value for version. */
   private static final String VERSION = "Version";
 
@@ -30,10 +31,10 @@ public class WriterThreadPoolIT {
   public void testSuccess() throws Exception {
     final TestDatabase database = new TestDatabase();
     final List<TestDatabase.Message> messages = createTestMessages();
-    try (WriterThreadPool<TestDatabase.Message, TestDatabase.Claim> pool =
-        new WriterThreadPool<>(17, 11, database::createSink)) {
-      for (TestDatabase.Message message : messages) {
-        pool.addToQueue(VERSION, message);
+    try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
+        new ConcurrentRdaSink<>(17, 11, database::createSink)) {
+      for (List<TestDatabase.Message> messageList : createBatchesOfMessages(messages, 11)) {
+        pool.writeMessages(VERSION, messageList);
       }
     }
     assertTrue(database.allClosed(), "all sinks closed");
@@ -53,10 +54,10 @@ public class WriterThreadPoolIT {
     messages.set(messages.size() - 1, messages.get(messages.size() - 1).withFailOnTransform(true));
 
     Exception error = null;
-    try (WriterThreadPool<TestDatabase.Message, TestDatabase.Claim> pool =
-        new WriterThreadPool<>(5, 9, database::createSink)) {
-      for (TestDatabase.Message message : messages) {
-        pool.addToQueue(VERSION, message);
+    try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
+        new ConcurrentRdaSink<>(5, 9, database::createSink)) {
+      for (List<TestDatabase.Message> messageList : createBatchesOfMessages(messages, 9)) {
+        pool.writeMessages(VERSION, messageList);
       }
     } catch (Exception ex) {
       error = ex;
@@ -81,10 +82,10 @@ public class WriterThreadPoolIT {
     messages.set(messages.size() - 1, messages.get(messages.size() - 1).withFailOnWrite(true));
 
     Exception error = null;
-    try (WriterThreadPool<TestDatabase.Message, TestDatabase.Claim> pool =
-        new WriterThreadPool<>(5, 9, database::createSink)) {
-      for (TestDatabase.Message message : messages) {
-        pool.addToQueue(VERSION, message);
+    try (ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> pool =
+        new ConcurrentRdaSink<>(5, 9, database::createSink)) {
+      for (List<TestDatabase.Message> messageList : createBatchesOfMessages(messages, 9)) {
+        pool.writeMessages(VERSION, messageList);
       }
     } catch (Exception ex) {
       error = ex;
@@ -97,9 +98,9 @@ public class WriterThreadPoolIT {
   }
 
   /**
-   * Creates some messages for the test to queue and write.
+   * Creates 10,000 test messages containing 10 versions each of 1,000 claims.
    *
-   * @return the list of messages
+   * @return the test messages
    */
   private List<TestDatabase.Message> createTestMessages() {
     List<String> claimIds =
@@ -121,10 +122,10 @@ public class WriterThreadPoolIT {
   }
 
   /**
-   * Gets the lists of claims expected to be written.
+   * Filter the list of all test messages to extract the last version of each claim within them.
    *
-   * @param messages the messages to be turned into claims
-   * @return the list of expected claims
+   * @param messages all of the test messages (including multiple messages per claim)
+   * @return list of final version of every claim
    */
   private List<TestDatabase.Claim> expectedClaims(List<TestDatabase.Message> messages) {
     Map<String, TestDatabase.Claim> uniqueClaims = new TreeMap<>();
@@ -132,5 +133,29 @@ public class WriterThreadPoolIT {
       uniqueClaims.put(message.getClaimId(), message.toClaim(VERSION));
     }
     return List.copyOf(uniqueClaims.values());
+  }
+
+  /**
+   * Split the list of messages into smaller lists containing batchSize messages each.
+   *
+   * @param messages all messages in a single list
+   * @param batchSize number of messages per batch
+   * @return list of batches
+   */
+  private List<List<TestDatabase.Message>> createBatchesOfMessages(
+      List<TestDatabase.Message> messages, int batchSize) {
+    List<List<TestDatabase.Message>> batches = new ArrayList<>();
+    List<TestDatabase.Message> batch = new ArrayList<>();
+    for (TestDatabase.Message message : messages) {
+      batch.add(message);
+      if (batch.size() == batchSize) {
+        batches.add(List.copyOf(batch));
+        batch.clear();
+      }
+    }
+    if (batch.size() > 0) {
+      batches.add(List.copyOf(batch));
+    }
+    return List.copyOf(batches);
   }
 }

@@ -41,3 +41,25 @@ resource "aws_s3_bucket_acl" "this" {
   bucket = aws_s3_bucket.this.id
   acl    = "private"
 }
+
+resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
+  bucket = aws_s3_bucket.this.id
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "Incoming/"
+    id                  = "${module.bfd_pipeline_slis.lambda_name}-incoming"
+    lambda_function_arn = module.bfd_pipeline_slis.lambda_arn
+  }
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "Done/"
+    id                  = "${module.bfd_pipeline_slis.lambda_name}-done"
+    lambda_function_arn = module.bfd_pipeline_slis.lambda_arn
+  }
+}

@@ -220,19 +220,23 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               }
             }
           } catch (GrpcResponseStream.StreamInterruptedException ex) {
+            log.info("shutting down due to interrupted stream");
             // If our thread is interrupted we cancel the stream so the server knows we're done
             // and then shut down normally.
             flushBatch = false;
             processResult.setInterrupted(true);
           } catch (GrpcResponseStream.DroppedConnectionException ex) {
+            log.info("shutting down due to dropped stream");
             if (isUnexpectedDroppedConnectionException(lastProcessedTime, ex)) {
               processResult.setException(ex);
             }
           } catch (ProcessingException ex) {
+            log.info("shutting down due to ProcessingException: {}", ex.getMessage());
             flushBatch = false;
             processResult.addCount(ex.getProcessedCount());
             processResult.setException(ex);
           } catch (Exception ex) {
+            log.info("shutting down due to Exception: {}", ex.getMessage());
             flushBatch = false;
             processResult.setException(ex);
           }
@@ -246,6 +250,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
           }
 
           closer.close(() -> sink.shutdown(MAX_SINK_SHUTDOWN_WAIT));
+          closer.close(() -> processResult.addCount(sink.getProcessedCount()));
 
           try {
             closer.finish();
@@ -256,8 +261,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               processResult.setException(ex);
             }
           }
-
-          processResult.addCount(sink.getProcessedCount());
 
           return processResult;
         });
