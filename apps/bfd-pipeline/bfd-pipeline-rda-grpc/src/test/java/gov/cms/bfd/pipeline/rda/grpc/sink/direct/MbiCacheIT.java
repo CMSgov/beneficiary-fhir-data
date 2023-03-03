@@ -1,7 +1,12 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.Mbi;
@@ -76,16 +81,17 @@ public class MbiCacheIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
-          final MbiCache mbiCache = MbiCache.databaseCache(normalHasher, appMetrics, entityManager);
+        (appState, transactionManager) -> {
+          final MbiCache mbiCache =
+              MbiCache.databaseCache(normalHasher, appMetrics, transactionManager);
           assertEquals(hash1, mbiCache.lookupMbi(mbi1).getHash());
           assertEquals(hash2, mbiCache.lookupMbi(mbi2).getHash());
 
-          Mbi databaseMbiEntity = RdaPipelineTestUtils.lookupCachedMbi(entityManager, mbi1);
+          Mbi databaseMbiEntity = RdaPipelineTestUtils.lookupCachedMbi(transactionManager, mbi1);
           assertNotNull(databaseMbiEntity);
           assertEquals(hash1, databaseMbiEntity.getHash());
 
-          databaseMbiEntity = RdaPipelineTestUtils.lookupCachedMbi(entityManager, mbi2);
+          databaseMbiEntity = RdaPipelineTestUtils.lookupCachedMbi(transactionManager, mbi2);
           assertNotNull(databaseMbiEntity);
           assertEquals(hash2, databaseMbiEntity.getHash());
 
@@ -106,21 +112,21 @@ public class MbiCacheIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final String fakeHash1 = "not-a-real-hash-but-loads-from-db";
 
           // preload our fake hash code
-          entityManager.getTransaction().begin();
-          entityManager.persist(new Mbi(mbi1, fakeHash1));
-          entityManager.getTransaction().commit();
+          transactionManager.executeProcedure(
+              entityManager -> entityManager.persist(new Mbi(mbi1, fakeHash1)));
 
           // verify our fake is used instead of a computed correct one
-          final MbiCache mbiCache = MbiCache.databaseCache(normalHasher, appMetrics, entityManager);
+          final MbiCache mbiCache =
+              MbiCache.databaseCache(normalHasher, appMetrics, transactionManager);
           assertEquals(fakeHash1, mbiCache.lookupMbi(mbi1).getHash());
           assertEquals(fakeHash1, mbiCache.lookupMbi(mbi1).getHash());
 
           // verify database still contains our fake hash
-          Mbi databaseMbiEntity = RdaPipelineTestUtils.lookupCachedMbi(entityManager, mbi1);
+          Mbi databaseMbiEntity = RdaPipelineTestUtils.lookupCachedMbi(transactionManager, mbi1);
           assertNotNull(databaseMbiEntity);
           assertEquals(fakeHash1, databaseMbiEntity.getHash());
         });
@@ -137,11 +143,11 @@ public class MbiCacheIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final MbiCache.DatabaseBackedCache mbiCache =
               spy(
                   new MbiCache.DatabaseBackedCache(
-                      normalHasher, new MbiCache.Metrics(appMetrics), entityManager));
+                      normalHasher, new MbiCache.Metrics(appMetrics), transactionManager));
 
           // mix of calls in various order with repeats for the same mbi
           assertEquals(hash1, mbiCache.lookupMbi(mbi1).getHash());
@@ -179,12 +185,12 @@ public class MbiCacheIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final PersistenceException error = new PersistenceException("oops");
           final MbiCache.DatabaseBackedCache mbiCache =
               spy(
                   new MbiCache.DatabaseBackedCache(
-                      normalHasher, new MbiCache.Metrics(appMetrics), entityManager));
+                      normalHasher, new MbiCache.Metrics(appMetrics), transactionManager));
           doThrow(error, error, error, error, error)
               .doReturn(new MbiCache.ReadResult(new Mbi(1L, mbi1, hash1), true))
               .when(mbiCache)
