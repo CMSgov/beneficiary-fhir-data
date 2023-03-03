@@ -2,22 +2,23 @@ from jinja2 import Environment, FileSystemLoader
 import json
 import argparse
 
+# define arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-s','--source', dest='source', type=str, required=True, help='source JSON file')
 parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name/path')
-parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use e.g. ./template/v2-to-html.html')
+parser.add_argument('-m', '--templateDir', dest='templateDir', type=str,  required=True, help='dir wher templates live')
+parser.add_argument('-n', '--templateFile', dest='templateFile', type=str,  required=True, help='template file name')
 args = parser.parse_args()
 
 print("Generating HTML from DD content")
 print("")
-print("Template: " + args.template)
+print("Template: " + args.templateDir + "\\" + args.templateFile)
 print("Source:   " + args.source)
 print("Target:   " + args.target)
 
 
-# read consolidate json file from DIST folder 
-# TODO: Note this is a dependency on something other than content in the /DATA folder; may want to rethink this
-# TODO: this also assumes a single JSON file; woudl be nice to have a ability to pass folder and convert all JSON in folder to HTML
+# open source file (consolidated JSON file)
+# TODO: refactor to allow user to specify folder as well as file
 with open(args.source,encoding='utf-8') as json_file:
     elements = json.load(json_file)
 
@@ -27,9 +28,9 @@ def customSort(k):
 elements.sort(key=customSort)
 
 # setup jina template vars
-environment = Environment(loader=FileSystemLoader("template/"))  # TODO: this forces caller to specify a template from /template folder
+environment = Environment(loader=FileSystemLoader(args.templateDir))  # TODO: this forces caller to specify a template from /template folder
 results_filename = args.target
-results_template = environment.get_template(args.template)
+results_template = environment.get_template(args.templateFile)
 context = {
     "elements": elements
 }
@@ -37,6 +38,8 @@ context = {
 # run jinja template engine
 with open(args.target, mode="w", encoding="utf-8") as results:
     results.write(results_template.render(context))
+
+#close up
 print("")
 print(f"Finished generating file: {args.target}")
 
