@@ -29,9 +29,11 @@
       vars:
         data_server_tmp_dir: "{{ data_server_dir }}/tmp"
 
+    # TODO: This role is _probably_ unused in favor of the CW Agent that is installed during launch -- remove it
     - name: Apply base Cloudwatch Agent Role
       import_role:
         name: cloudwatch-agent-instrumented
+      when: env is defined
 
     - name: Add SSH users
       import_role:
