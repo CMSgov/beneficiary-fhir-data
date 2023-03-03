@@ -228,7 +228,7 @@
     4. Repeat the above steps for each established environment that was changed
 
 26. Once finished, the new user will be _fully_ provisioned the next time the `Build App AMIs` stage
-    is ran in our deployment pipeline. In the meantime, anytime a _brand new_ instance is _launched_
+    is run in our deployment pipeline. In the meantime, anytime a _brand new_ instance is _launched_
     the new user will be able to SSH into it assuming either `ssh_default_access` is `true` or if,
     for the instance's environment, `ssh_access` is `true`
 
