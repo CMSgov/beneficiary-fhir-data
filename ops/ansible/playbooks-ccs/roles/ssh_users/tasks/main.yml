@@ -7,7 +7,7 @@
         --path "/bfd/mgmt/common/sensitive/user" \
         --recursive \
         --region us-east-1 \
-        --query 'Parameters' | jq -c '@text'
+        --query 'Parameters' | jq -c
   register: global_ssh_users
 
 - name: "Parse global SSM user data"
@@ -22,7 +22,7 @@
         --path "/bfd/{{ env }}/common/sensitive/user" \
         --recursive \
         --region us-east-1 \
-        --query 'Parameters' | jq -c '@text'
+        --query 'Parameters' | jq -c
   register: env_ssh_users
   when: env is defined
   tags:
@@ -30,20 +30,14 @@
 
 - name: "Parse environment-level SSM user data"
   set_fact:
-    env_ssh_users: '{{ env_ssh_users.stdout | default(''"[]"'', true) }}'
+    env_ssh_users: "{{ env_ssh_users.stdout | default('[]', true) }}"
 
 - name: "Parse SSH user data from global and environment SSM parameters"
   shell:
     cmd: |
-      # jq, when using the @text escape formatter, will add quotes around the output. Since ansible
-      # (jinja) will template that quoted string literally into this script, we need to omit quotes
-      # The values of both variables will be unescaped JSON, as bash will unescape the string when
-      # parsing the script
-      mgmt_user_info={{ global_ssh_users }}
-      env_user_info={{ env_ssh_users }}
       # This will merge the JSON arrays from the SSM commands above, allowing subsequent jq
       # invocations to operate on them as if they were a single array
-      jq -s 'add' <<<"$env_user_info $mgmt_user_info" |
+      jq -s 'add' <<<"$ENV_USER_INFO $MGMT_USER_INFO" |
       # This large jq filter will create an array of objects grouped by the user's EUA containing
       # each user's SSH information
       jq '
@@ -59,7 +53,10 @@
       ' |
       # This separate invocation of jq will combine the distinct objects emitted by the previous
       # invocation into a single array of objects
-      jq -s
+      jq -s -c
+  environment:
+    MGMT_USER_INFO: "{{ global_ssh_users | to_json }}"
+    ENV_USER_INFO: "{{ env_ssh_users | to_json }}"
   register: unfiltered_ssh_users
 
 - name: "Parse SSH users to apply"
