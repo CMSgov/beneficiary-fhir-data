@@ -7,12 +7,12 @@
         --path "/bfd/mgmt/common/sensitive/user" \
         --recursive \
         --region us-east-1 \
-        --query 'Parameters' | jq -c
-  register: global_ssh_users
+        --query 'Parameters'
+  register: global_user_data
 
 - name: "Parse global SSM user data"
   set_fact:
-    global_ssh_users: "{{ global_ssh_users.stdout }}"
+    global_user_data: "{{ global_user_data.stdout }}"
 
 - name: "Get environment-level SSM user data"
   shell:
@@ -22,22 +22,23 @@
         --path "/bfd/{{ env }}/common/sensitive/user" \
         --recursive \
         --region us-east-1 \
-        --query 'Parameters' | jq -c
-  register: env_ssh_users
+        --query 'Parameters'
+  register: env_user_data
   when: env is defined
   tags:
     - post-ami
 
 - name: "Parse environment-level SSM user data"
   set_fact:
-    env_ssh_users: "{{ env_ssh_users.stdout | default('[]', true) }}"
+    env_user_data: "{{ env_user_data.stdout | default([], true) }}"
+
+- name: "Merge global and environment level SSM user data"
+  set_fact:
+    merged_user_data: "{{ env_user_data + global_user_data }}"
 
 - name: "Parse SSH user data from global and environment SSM parameters"
   shell:
     cmd: |
-      # This will merge the JSON arrays from the SSM commands above, allowing subsequent jq
-      # invocations to operate on them as if they were a single array
-      jq -s 'add' <<<"$ENV_USER_INFO $MGMT_USER_INFO" |
       # This large jq filter will create an array of objects grouped by the user's EUA containing
       # each user's SSH information
       jq '
@@ -50,13 +51,12 @@
           | .[]
           | map({(.Name | split("/")[7]): .Value})
           | add
-      ' |
+      ' <<< "$MERGED_USER_DATA" |
       # This separate invocation of jq will combine the distinct objects emitted by the previous
       # invocation into a single array of objects
-      jq -s -c
+      jq -s
   environment:
-    MGMT_USER_INFO: "{{ global_ssh_users | to_json }}"
-    ENV_USER_INFO: "{{ env_ssh_users | to_json }}"
+    MERGED_USER_DATA: "{{ merged_user_data | to_json }}"
   register: unfiltered_ssh_users
 
 - name: "Parse SSH users to apply"
