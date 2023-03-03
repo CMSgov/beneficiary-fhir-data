@@ -22,7 +22,7 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           "fiss",
           RdaFissClaim.class,
           RdaFissClaim.Fields.mbiRecord,
-          RdaFissClaim.Fields.dcn,
+          RdaFissClaim.Fields.claimId,
           List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
           FissClaimTransformerV2::transform);
 

@@ -96,7 +96,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return RdaClaimMessageMetaData.builder()
         .sequenceNumber(change.getSequenceNumber())
         .claimType(RdaApiProgress.ClaimType.FISS)
-        .claimId(claim.getDcn())
+        .claimId(claim.getClaimId())
         .mbiRecord(claim.getMbiRecord())
         .claimState(String.valueOf(claim.getCurrStatus()))
         .lastUpdated(claim.getLastUpdated())

@@ -23,7 +23,7 @@ public final class ClaimResponseTypeV2<TEntity>
           "fiss",
           RdaFissClaim.class,
           RdaFissClaim.Fields.mbiRecord,
-          RdaFissClaim.Fields.dcn,
+          RdaFissClaim.Fields.claimId,
           List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
           FissClaimResponseTransformerV2::transform);
 
