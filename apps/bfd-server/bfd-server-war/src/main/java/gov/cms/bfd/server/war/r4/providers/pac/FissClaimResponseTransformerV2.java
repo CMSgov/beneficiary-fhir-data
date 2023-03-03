@@ -77,7 +77,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private static ClaimResponse transformClaim(RdaFissClaim claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
-    claim.setId("f-" + claimGroup.getDcn());
+    claim.setId("f-" + claimGroup.getClaimId());
     claim.setContained(List.of(FissTransformerV2.getContainedPatient(claimGroup)));
     claim.getIdentifier().add(createClaimIdentifier(BBCodingSystems.FISS.DCN, claimGroup.getDcn()));
     claim.setExtension(getExtension(claimGroup));
@@ -87,7 +87,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
     claim.setPatient(new Reference("#patient"));
-    claim.setRequest(new Reference(String.format("Claim/f-%s", claimGroup.getDcn())));
+    claim.setRequest(new Reference(String.format("Claim/f-%s", claimGroup.getClaimId())));
 
     claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());

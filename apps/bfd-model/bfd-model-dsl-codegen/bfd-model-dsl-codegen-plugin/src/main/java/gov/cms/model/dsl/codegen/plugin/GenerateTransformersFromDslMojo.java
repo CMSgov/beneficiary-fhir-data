@@ -592,7 +592,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
           loop.addStatement(
               "itemTo.set$L($L.get$L())",
               TransformerUtil.capitalize(elementField.getTo()),
-              FieldTransformer.SOURCE_VAR,
+              FieldTransformer.DEST_VAR,
               TransformerUtil.capitalize(elementField.getTo()));
         }
       }
