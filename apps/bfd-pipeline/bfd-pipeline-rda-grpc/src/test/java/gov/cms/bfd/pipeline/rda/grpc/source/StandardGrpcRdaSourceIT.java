@@ -277,6 +277,7 @@ public class StandardGrpcRdaSourceIT {
    */
   @Test
   public void grpcCallWithCorrectAuthToken() throws Exception {
+
     createServerConfig()
         .authorizedToken("secret")
         .build()
@@ -294,6 +295,39 @@ public class StandardGrpcRdaSourceIT {
               assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
               assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
             });
+  }
+
+  /** Verifies that a GRPC call with an incompatible RDA version will throw an exception. */
+  @Test
+  public void grpcCallWithIncompatibleRdaVersion() {
+    final RdaVersion requireHigherRdaVersion =
+        RdaVersion.builder().versionString("100.100.100").build();
+
+    try {
+      createServerConfig()
+          .authorizedToken("secret")
+          .build()
+          .runWithPortParam(
+              port -> {
+                RdaSourceConfig config =
+                    createSourceConfig(port).authenticationToken("secret").build();
+                try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+                    new StandardGrpcRdaSource<>(
+                        config,
+                        streamCaller,
+                        appMetrics,
+                        "fiss",
+                        Optional.empty(),
+                        requireHigherRdaVersion)) {
+                  source.retrieveAndProcessObjects(3, sink);
+                }
+              });
+      fail("Should have thrown exception");
+    } catch (Exception e) {
+      assertEquals(e.getCause().getClass(), IllegalStateException.class);
+      assertEquals(
+          e.getCause().getMessage(), "Can not ingest data from API running version '0.0.1'");
+    }
   }
 
   /**

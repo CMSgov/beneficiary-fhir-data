@@ -1,12 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -188,6 +191,55 @@ public class DLQGrpcRdaSourceTest {
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
     assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
+  }
+
+  /**
+   * Verifies that {@link AbstractGrpcRdaSource#checkApiVersion(String)} is called, and that any
+   * thrown exception is thrown up the stack.
+   */
+  @Test
+  public void shouldThrowExceptionIfRdaVersionCheckThrows() throws Exception {
+    final String claimType = "fiss";
+    IllegalStateException expectedException = new IllegalStateException("Bad");
+
+    DLQGrpcRdaSource<Long, Long> sourceSpy =
+        spy(
+            new DLQGrpcRdaSource<>(
+                mockManager,
+                Objects::equals,
+                mockConfig,
+                mockCaller,
+                meters,
+                claimType,
+                rdaVersion));
+
+    final CallOptions mockCallOptions = mock(CallOptions.class);
+
+    // Set up config mocks, needs to return fake call options and channel
+    doReturn(mockCallOptions).when(mockConfig).createCallOptions();
+
+    // Always return fake version for caller's version call
+    doReturn(TEST_RDA_VERSION).when(mockCaller).callVersionService(mockChannel, mockCallOptions);
+
+    lenient().doNothing().when(sourceSpy).checkApiVersion(anyString());
+
+    doThrow(expectedException).when(sourceSpy).checkApiVersion(TEST_RDA_VERSION);
+
+    try {
+      // We're testing the lambda logic in this test, so have to grab it first from the method that
+      // returns it
+      AbstractGrpcRdaSource.Processor logic =
+          sourceSpy.dlqProcessingLogic(
+              mockSink,
+              MessageError.ClaimType.FISS,
+              Set.of(FISS_ERROR_ONE_SEQ, FISS_ERROR_TWO_SEQ));
+
+      AbstractGrpcRdaSource.ProcessResult actualResult = logic.process();
+
+      fail("Expected exception not thrown");
+    } catch (Exception actualException) {
+      assertSame(expectedException, actualException, "Unexpected exception: " + actualException);
+    }
   }
 
   /**

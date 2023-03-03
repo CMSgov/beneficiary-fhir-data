@@ -215,6 +215,27 @@ public class StandardGrpcRdaSourceTest {
   }
 
   /**
+   * Verifies that {@link AbstractGrpcRdaSource#checkApiVersion(String)} is called, and that any
+   * thrown exception is thrown up the stack.
+   */
+  @Test
+  public void testThrowsExceptionWhenRdaCheckThrows() {
+    IllegalStateException expectedException = new IllegalStateException("Bad");
+
+    lenient().doNothing().when(source).checkApiVersion(anyString());
+
+    doThrow(expectedException).when(source).checkApiVersion(VERSION);
+
+    try {
+      source.retrieveAndProcessObjects(2, sink);
+      fail("Expected exception not thrown");
+    } catch (Exception e) {
+      Throwable actualException = e.getCause();
+      assertSame(expectedException, actualException, "Expected exception not thrown");
+    }
+  }
+
+  /**
    * Verify that normal (happy path) processing saves objects, updates all expected metrics, and
    * shuts down cleanly.
    *
