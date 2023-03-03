@@ -37,7 +37,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
       int errorLimit) {
     super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq, errorLimit);
     this.transformer =
-        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
+        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(transactionManager));
   }
 
   /** {@inheritDoc} */
