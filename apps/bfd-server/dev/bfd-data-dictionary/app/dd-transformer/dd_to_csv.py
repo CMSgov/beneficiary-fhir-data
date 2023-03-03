@@ -4,7 +4,6 @@ import csv
 import argparse
 
 
-
 # func to build csv header row
 def build_csv_header():
     hrow = []
@@ -13,6 +12,7 @@ def build_csv_header():
     return hrow
 
 # func to retrieve value for given field - most fields are just simple key[value] but some fields require somewhat specialized handling
+# TODO: refactor this func to address hardcoded field names
 def field_val(element_json, field):
     # handling varies by field
     match field:
@@ -37,18 +37,14 @@ def build_csv_row(element):
         row.append(field_val(element,x["field"]))
     return row
 
-########################
-# MAIN
-########################
-
+# define arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing source data files e.g. bfd-data-dictionary/data/V2')
 parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file path e.g. c:/output/BFD-V2-data-dict.csv')
 parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use to build csv e.g. ./template/v2-to-csv.json')
 args = parser.parse_args()
-template_path = args.template
-source_dir = args.source
 
+# open files
 with open(args.template, 'r') as template_file:
     template_json = json.load(template_file)
 template_file.close()
@@ -61,22 +57,26 @@ print("Template:  " + args.template)
 print("Source:    " + args.source)
 print("Target:    " + args.target)
 
-
+# main loop
 csv_writer.writerow(build_csv_header())
 ct = 0
 for file_name in os.listdir(args.source):    # loop thru source data folder, read each json file, translate to csv and write row to file
     if file_name.endswith(".json"):
-        source_path = args.source + file_name
+        source_path = args.source + "\\" + file_name
         with open(source_path) as element_file:
             element_json = json.load(element_file)
             row = build_csv_row(element_json)
             csv_writer.writerow(row)
             element_file.close()
             ct += 1
+
+# close out
 out_file.close()
 print("")
 print("CSV file generated. " + str(ct) + " source files processed.")
 
 # TODO:
-# Lots of bulletproofing needed, esp around os/dir/file operations
+# Lots of bulletproofing needed, esp around os/dir/file operations, path handling, etc.
 # Improve error handling
+# consider using library like pandas
+# 
