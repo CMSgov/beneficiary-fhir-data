@@ -6,16 +6,28 @@ data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
 }
 
-# NOTE: locust load test controller needs a well-vetted bfd image
-#       the db-migrator image was chosen somewhat arbitrarily
+# TODO: this is a temporary work-around until versioning becomes a reality
+# the following logic produces a map of ami filters to their filter values:
+# `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
+# `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided
+locals {
+  filters = { for k, v in {
+    "image-id" = var.ami_id_override,
+    "tag:Branch" = var.ami_id_override == null ? "master" : null } : k => v if v != null
+  }
+}
+
 data "aws_ami" "main" {
   most_recent = true
   owners      = ["self"]
   name_regex  = ".*server-load.*"
 
-  filter {
-    name   = "tag:Branch"
-    values = ["master"]
+  dynamic "filter" {
+    for_each = local.filters
+    content {
+      name   = filter.key
+      values = [filter.value]
+    }
   }
 }
 

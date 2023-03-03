@@ -87,3 +87,9 @@ variable "stop_on_node_limit" {
   type        = bool
   default     = true
 }
+
+variable "ami_id_override" {
+  default     = null
+  description = "BFD Server Load override ami-id. Defaults to latest server-load AMI from `master`."
+  type        = string
+}

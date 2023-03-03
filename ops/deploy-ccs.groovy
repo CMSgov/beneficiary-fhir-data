@@ -40,6 +40,11 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the BFD DB Migrator service, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdMigratorAmiId
+
+	/**
+	 * The ID of the AMI that will run the bfd-server-load service's controller, or <code>null</code> if such an AMI does not yet exist.
+	 */
+	String bfdServerLoadAmiId
 }
 
 /**
@@ -79,6 +84,13 @@ def findAmis() {
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
+		bfdServerLoadAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=server-load-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		)
 	)
 }
 
@@ -122,6 +134,7 @@ packer build -color=false -var vault_password_file="$vaultPasswordFile" \
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
 			bfdServerAmiId: amiIds.bfdServerAmiId,
 			bfdMigratorAmiId: amiIds.bfdMigratorAmiId,
+			bfdServerLoadAmiId: amiIds.bfdServerLoadAmiId,
 		)
 	}
 }
@@ -169,6 +182,8 @@ packer build -color=false \
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
 					bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
+					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
 			)
 		}
 	}
