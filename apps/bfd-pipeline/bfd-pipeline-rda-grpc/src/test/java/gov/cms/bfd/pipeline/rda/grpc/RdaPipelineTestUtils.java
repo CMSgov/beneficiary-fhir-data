@@ -7,6 +7,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import io.micrometer.core.instrument.Counter;
@@ -17,7 +18,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.Clock;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -75,13 +75,14 @@ public class RdaPipelineTestUtils {
   }
 
   /**
-   * Creates a temporary in-memory HSQLDB that is destroyed when the test ends plus a
-   * PipelineApplicationState and EntityManager using that db, passes them to the provided lambda
-   * function, then closes them and destroys the database.
+   * Creates a temporary in-memory HSQLDB that is destroyed when the test ends plus a {@link
+   * PipelineApplicationState} and {@link TransactionManager} using that db, passes them to the
+   * provided lambda function, then closes them and destroys the database.
    *
    * @param testClass used to create a db name
    * @param clock used for the app state
    * @param test lambda to receive the appState and perform some testing
+   * @throws Exception pass through from test
    */
   public static void runTestWithTemporaryDb(Class<?> testClass, Clock clock, DatabaseConsumer test)
       throws Exception {
@@ -95,19 +96,15 @@ public class RdaPipelineTestUtils {
           PipelineApplicationState.createPooledDataSource(dbOptions, appMetrics);
       DatabaseSchemaManager.createOrUpdateSchema(dataSource);
       try (PipelineApplicationState appState =
-          new PipelineApplicationState(
-              new SimpleMeterRegistry(),
-              appMetrics,
-              dataSource,
-              RDA_PERSISTENCE_UNIT_NAME,
-              clock)) {
-        final EntityManager entityManager =
-            appState.getEntityManagerFactory().createEntityManager();
-        try {
-          test.accept(appState, entityManager);
-        } finally {
-          entityManager.close();
-        }
+              new PipelineApplicationState(
+                  new SimpleMeterRegistry(),
+                  appMetrics,
+                  dataSource,
+                  RDA_PERSISTENCE_UNIT_NAME,
+                  clock);
+          TransactionManager transactionManager =
+              new TransactionManager(appState.getEntityManagerFactory())) {
+        test.accept(appState, transactionManager);
       }
     }
   }
@@ -115,19 +112,20 @@ public class RdaPipelineTestUtils {
   /**
    * Looks for a record in the MbiCache table using the given EntityManager.
    *
-   * @param entityManager used to perform the query
+   * @param transactionManager used to perform the query
    * @param mbi mbi string to look for
    * @return null if not cached otherwise the Mbi record from database
    */
-  public static Mbi lookupCachedMbi(EntityManager entityManager, String mbi) {
-    entityManager.getTransaction().begin();
-    final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
-    final Root<Mbi> root = criteria.from(Mbi.class);
-    criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-    final var records = entityManager.createQuery(criteria).getResultList();
-    entityManager.getTransaction().commit();
-    return records.isEmpty() ? null : records.get(0);
+  public static Mbi lookupCachedMbi(TransactionManager transactionManager, String mbi) {
+    return transactionManager.executeFunction(
+        entityManager -> {
+          final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+          final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+          final Root<Mbi> root = criteria.from(Mbi.class);
+          criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+          final var records = entityManager.createQuery(criteria).getResultList();
+          return records.isEmpty() ? null : records.get(0);
+        });
   }
 
   /** An interface for a test database. */
@@ -137,9 +135,10 @@ public class RdaPipelineTestUtils {
      * Accepts parameters for the consumer.
      *
      * @param appState the app state
-     * @param entityManager the entity manager
+     * @param transactionManager the entity manager
      * @throws Exception any exception setting up the consumer
      */
-    void accept(PipelineApplicationState appState, EntityManager entityManager) throws Exception;
+    void accept(PipelineApplicationState appState, TransactionManager transactionManager)
+        throws Exception;
   }
 }
