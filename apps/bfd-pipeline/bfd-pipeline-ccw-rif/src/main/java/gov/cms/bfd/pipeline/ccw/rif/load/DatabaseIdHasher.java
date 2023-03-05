@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.util.List;
@@ -13,7 +15,17 @@ import javax.persistence.EntityManager;
  * well as permanently caching them in a database.
  */
 public class DatabaseIdHasher {
+  /** Query used to find existing hash record. */
+  @VisibleForTesting
+  static final String QueryString = "select h.hash from IdHash h where h.id = :id";
+  /** Query parameter name for identifier. */
+  @VisibleForTesting static final String IdParamName = "id";
+
+  /** Used to compute hash values. */
   private final IdHasher hasher;
+  /**
+   * Used to hold recently used hash values in memory as well as to manage when to insert a record.
+   */
   private final Cache<String, String> cache;
 
   /**
@@ -36,7 +48,8 @@ public class DatabaseIdHasher {
    * addition to returning it.
    *
    * <p>If multiple threads call this with the same key the first will perform the computation and
-   * database update and others will wait for that operation to complete.
+   * database update and others will wait for that operation to complete then they will return the
+   * value from the first thread.
    *
    * <p>The database operations take place within the provided {@link EntityManager}s current
    * transaction.
@@ -48,8 +61,8 @@ public class DatabaseIdHasher {
   public String computeIdentifierHash(EntityManager entityManager, String identifier) {
     try {
       return cache.get(identifier, () -> getOrInsertIdentifierHash(entityManager, identifier));
-    } catch (ExecutionException e) {
-      final var cause = e.getCause();
+    } catch (UncheckedExecutionException | ExecutionException e) {
+      Throwable cause = e.getCause();
       if (cause instanceof RuntimeException) {
         throw (RuntimeException) cause;
       } else {
@@ -69,17 +82,16 @@ public class DatabaseIdHasher {
   private String getOrInsertIdentifierHash(EntityManager entityManager, String identifier) {
     List<String> records =
         entityManager
-            .createQuery("select h.hash from IdHash h where h.id = :id", String.class)
-            .setParameter("id", identifier)
+            .createQuery(QueryString, String.class)
+            .setParameter(IdParamName, identifier)
             .setMaxResults(1)
             .getResultList();
     if (records.size() > 0) {
       return records.get(0);
     }
 
-    String hash = hasher.computeIdentifierHash(identifier);
-    IdHash record = new IdHash(identifier, hash);
-    entityManager.persist(record);
+    final String hash = hasher.computeIdentifierHash(identifier);
+    entityManager.persist(new IdHash(identifier, hash));
     return hash;
   }
 }

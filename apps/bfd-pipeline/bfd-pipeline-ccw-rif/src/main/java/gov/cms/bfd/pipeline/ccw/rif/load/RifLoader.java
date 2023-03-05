@@ -19,7 +19,6 @@ import gov.cms.bfd.model.rif.RecordAction;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
@@ -192,35 +191,6 @@ public final class RifLoader {
   }
 
   /**
-   * Determines if the database we're connected to is a PostgreSQL database.
-   *
-   * @return <code>true</code> if {@link EntityManagerFactory} is connected to a PostgreSQL
-   *     database, <code>false</code> if it is not
-   */
-  private boolean isDatabasePostgreSql() {
-    AtomicBoolean result = new AtomicBoolean(false);
-
-    EntityManager entityManager = null;
-    try {
-      entityManager = appState.getEntityManagerFactory().createEntityManager();
-      Session session = entityManager.unwrap(Session.class);
-      session.doWork(
-          new Work() {
-            /** @see org.hibernate.jdbc.Work#execute(java.sql.Connection) */
-            @Override
-            public void execute(Connection connection) throws SQLException {
-              String databaseName = connection.getMetaData().getDatabaseProductName();
-              if (databaseName.equals("PostgreSQL")) result.set(true);
-            }
-          });
-    } finally {
-      if (entityManager != null) entityManager.close();
-    }
-
-    return result.get();
-  }
-
-  /**
    * Consumes the input {@link Stream} of {@link RifRecordEvent}s, pushing each {@link
    * RifRecordEvent}'s record to the database, and passing the result for each of those bundles to
    * the specified error handler and result handler, as appropriate.
@@ -299,76 +269,68 @@ public final class RifLoader {
      * always run in a consistent manner.
      */
 
-    try (PostgreSqlCopyInserter postgresBatch =
-        new PostgreSqlCopyInserter(appState.getEntityManagerFactory(), fileEventMetrics)) {
-      // Define the Consumer that will handle each batch.
-      Consumer<List<RifRecordEvent<?>>> batchProcessor =
-          recordsBatch -> {
-            /*
-             * Submit the RifRecordEvent for asynchronous processing. Note
-             * that, due to the ExecutorService's configuration (see in
-             * constructor), this will block if too many tasks are already
-             * pending. That's desirable behavior, as it prevents
-             * OutOfMemoryErrors.
-             */
-            processAsync(loadExecutor, recordsBatch, loadedFileId, postgresBatch, resultHandler);
-          };
+    // Define the Consumer that will handle each batch.
+    Consumer<List<RifRecordEvent<?>>> batchProcessor =
+        recordsBatch -> {
+          /*
+           * Submit the RifRecordEvent for asynchronous processing. Note
+           * that, due to the ExecutorService's configuration (see in
+           * constructor), this will block if too many tasks are already
+           * pending. That's desirable behavior, as it prevents
+           * OutOfMemoryErrors.
+           */
+          processAsync(loadExecutor, recordsBatch, loadedFileId, resultHandler);
+        };
 
-      // Collect records into batches and submit each to batchProcessor.
-      try {
-        if (options.getRecordBatchSize() > 1)
-          BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
-              .forEach(batchProcessor);
-        else
-          dataToLoad
-              .getRecords()
-              .map(
-                  record -> {
-                    List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
-                    ittyBittyBatch.add(record);
-                    return ittyBittyBatch;
-                  })
-              .forEach(batchProcessor);
-      } catch (Exception e) {
-        LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
-        timerDataSetFile.stop();
-        throw e;
-      }
+    // Collect records into batches and submit each to batchProcessor.
+    try {
+      if (options.getRecordBatchSize() > 1)
+        BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
+            .forEach(batchProcessor);
+      else
+        dataToLoad
+            .getRecords()
+            .map(
+                record -> {
+                  List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
+                  ittyBittyBatch.add(record);
+                  return ittyBittyBatch;
+                })
+            .forEach(batchProcessor);
+    } catch (Exception e) {
+      LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
+      timerDataSetFile.stop();
+      throw e;
+    }
 
-      // Wait for all submitted batches to complete.
-      try {
-        loadExecutor.shutdown();
-        boolean terminatedSuccessfully =
-            loadExecutor.awaitTermination(MAX_BATCH_WAIT_TIME_HOURS, TimeUnit.HOURS);
-        if (!terminatedSuccessfully)
-          throw new IllegalStateException(
-              String.format(
-                  "%s failed to complete processing the records in time: '%s'.",
-                  this.getClass().getSimpleName(), dataToLoad));
-      } catch (InterruptedException e) {
-        // Interrupts should not be used on this thread, so go boom.
-        throw new RuntimeException(e);
-      }
+    // Wait for all submitted batches to complete.
+    try {
+      loadExecutor.shutdown();
+      boolean terminatedSuccessfully =
+          loadExecutor.awaitTermination(MAX_BATCH_WAIT_TIME_HOURS, TimeUnit.HOURS);
+      if (!terminatedSuccessfully)
+        throw new IllegalStateException(
+            String.format(
+                "%s failed to complete processing the records in time: '%s'.",
+                this.getClass().getSimpleName(), dataToLoad));
+    } catch (InterruptedException e) {
+      // Interrupts should not be used on this thread, so go boom.
+      throw new RuntimeException(e);
+    }
 
-      /*
-       * If any batch load tripped a fatal error, we should throw an exception
-       * on this thread to kill the pipeline. Exceptions thrown from the batch thread with the
-       * error are ignored/lost, so have this synchronized boolean signal to do this specifically on the main thread.
-       * We also can't use a passed-in error handler from up the execution chain or else the pipeline manager shutdown procedure
-       * waits for this thread to shut down, which is waiting on the above 72-hour timeout before it unblocks.
-       *
-       * FUTURE: If we wish to be more discerning about recoverable errors, we could return false here which will
-       * allow the pipeline to continue operating if an error is considered non-fatal (it also currently moves the failed files
-       * to "Done" instead of "Failed", which would need to be fixed.)
-       */
-      if (fatalFailure.get()) {
-        throw new IllegalStateException("Fatal error during rif file processing.");
-      }
-
-      // Submit the queued PostgreSQL COPY operations, if any.
-      if (!postgresBatch.isEmpty()) {
-        postgresBatch.submit();
-      }
+    /*
+     * If any batch load tripped a fatal error, we should throw an exception
+     * on this thread to kill the pipeline. Exceptions thrown from the batch thread with the
+     * error are ignored/lost, so have this synchronized boolean signal to do this specifically on the main thread.
+     * We also can't use a passed-in error handler from up the execution chain or else the pipeline manager shutdown procedure
+     * waits for this thread to shut down, which is waiting on the above 72-hour timeout before it unblocks.
+     *
+     * FUTURE: If we wish to be more discerning about recoverable errors, we could return false here which will
+     * allow the pipeline to continue operating if an error is considered non-fatal (it also currently moves the failed files
+     * to "Done" instead of "Failed", which would need to be fixed.)
+     */
+    if (fatalFailure.get()) {
+      throw new IllegalStateException("Fatal error during rif file processing.");
     }
 
     LOGGER.info("Processed '{}'.", dataToLoad);
@@ -383,20 +345,17 @@ public final class RifLoader {
    * @param loadExecutor the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
-   * @param postgresBatch the {@link PostgreSqlCopyInserter} for the current set of {@link
-   *     RifFilesEvent}s being processed
    * @param resultHandler the {@link Consumer} to notify when the batch completes successfully
    */
   private void processAsync(
       BlockingThreadPoolExecutor loadExecutor,
       List<RifRecordEvent<?>> recordsBatch,
       long loadedFileId,
-      PostgreSqlCopyInserter postgresBatch,
       Consumer<RifRecordLoadResult> resultHandler) {
     loadExecutor.submit(
         () -> {
           try {
-            List<RifRecordLoadResult> processResults = process(recordsBatch, loadedFileId);
+            List<RifRecordLoadResult> processResults = processBatch(recordsBatch, loadedFileId);
             processResults.forEach(resultHandler::accept);
           } catch (Throwable e) {
             LOGGER.error("Error caught when processing async batch!", e);
@@ -413,7 +372,7 @@ public final class RifLoader {
    * @param loadedFileId the loaded file id
    * @return the {@link RifRecordLoadResult}s that model the results of the operation
    */
-  private List<RifRecordLoadResult> process(
+  private List<RifRecordLoadResult> processBatch(
       List<RifRecordEvent<?>> recordsBatch, long loadedFileId) {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
     MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
@@ -438,15 +397,40 @@ public final class RifLoader {
             .time();
 
     try {
-      List<RifRecordLoadResult> loadResults =
+      final var transactionResult =
           transactionManager.executeFunctionWithRetries(
-              1, entityManager -> process(entityManager, recordsBatch, loadedFileId));
+              1,
+              entityManager ->
+                  processBatchInTransaction(entityManager, recordsBatch, loadedFileId));
+
+      appState
+          .getMetrics()
+          .meter(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "retries"))
+          .mark(transactionResult.getNumRetries());
+
+      if (transactionResult.getNumRetries() > 0) {
+        assert transactionResult.getFirstException() != null;
+        LOGGER.info(
+            "batch processing required retries following exception: retries={} class={}",
+            transactionResult.getNumRetries(),
+            transactionResult.getFirstException().getClass().getName());
+      }
+
+      for (RifRecordLoadResult rifRecordLoadResult : transactionResult.getValue()) {
+        fileEventMetrics
+            .meter(
+                MetricRegistry.name(
+                    getClass().getSimpleName(),
+                    "records",
+                    rifRecordLoadResult.getLoadAction().name()))
+            .mark(1);
+      }
 
       // Update the metrics now that things have been pushed.
       timerBatchSuccess.stop();
       timerBatchTypeSuccess.stop();
 
-      return loadResults;
+      return transactionResult.getValue();
     } catch (Throwable t) {
       timerBundleFailure.stop();
       fileEventMetrics
@@ -461,11 +445,12 @@ public final class RifLoader {
   /**
    * Processes (loads) a record into the database and returns the load result.
    *
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
    * @return the {@link RifRecordLoadResult}s that model the results of the operation
    */
-  private List<RifRecordLoadResult> process(
+  private List<RifRecordLoadResult> processBatchInTransaction(
       EntityManager entityManager, List<RifRecordEvent<?>> recordsBatch, long loadedFileId)
       throws IOException {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
@@ -583,10 +568,6 @@ public final class RifLoader {
       } else throw new BadCodeMonkeyException();
 
       LOGGER.trace("Loaded '{}' record.", rifFileType);
-
-      fileEventMetrics
-          .meter(MetricRegistry.name(getClass().getSimpleName(), "records", loadAction.name()))
-          .mark(1);
 
       loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
     }
@@ -1197,34 +1178,26 @@ public final class RifLoader {
     loadedFile.setRifType(fileEvent.getFile().getFileType().toString());
     loadedFile.setCreated(Instant.now());
 
+    long loadedFileId;
     try {
-      EntityManager em = appState.getEntityManagerFactory().createEntityManager();
-      EntityTransaction txn = null;
-      try {
-        // Insert the passed in loaded file
-        txn = em.getTransaction();
-        txn.begin();
-        em.persist(loadedFile);
-        txn.commit();
-        LOGGER.info(
-            "Inserting LoadedFile {} of type {} created at {}",
-            loadedFile.getLoadedFileId(),
-            loadedFile.getRifType(),
-            loadedFile.getCreated());
+      loadedFileId =
+          transactionManager.executeFunction(
+              entityManager -> {
+                // Insert the passed in loaded file
+                entityManager.persist(loadedFile);
+                LOGGER.info(
+                    "Inserting LoadedFile {} of type {} created at {}",
+                    loadedFile.getLoadedFileId(),
+                    loadedFile.getRifType(),
+                    loadedFile.getCreated());
 
-        return loadedFile.getLoadedFileId();
-      } finally {
-        if (em != null && em.isOpen()) {
-          if (txn != null && txn.isActive()) {
-            txn.rollback();
-          }
-          em.close();
-        }
-      }
+                return loadedFile.getLoadedFileId();
+              });
     } catch (Exception ex) {
       errorHandler.accept(ex);
-      return -1;
+      loadedFileId = -1;
     }
+    return loadedFileId;
   }
 
   /**
@@ -1244,7 +1217,8 @@ public final class RifLoader {
         em.clear(); // Must be done before JPQL statements
         em.flush();
         List<Long> oldIds =
-            em.createQuery("select f.loadedFileId from LoadedFile f where created < :oldDate")
+            em.createQuery(
+                    "select f.loadedFileId from LoadedFile f where created < :oldDate", Long.class)
                 .setParameter("oldDate", oldDate)
                 .getResultList();
 
@@ -1305,18 +1279,14 @@ public final class RifLoader {
    * @return the number of instances in the db
    */
   private long queryForEntityCount(Class<?> entityType) {
-    EntityManager entityManager = null;
-    try {
-      entityManager = appState.getEntityManagerFactory().createEntityManager();
+    return transactionManager.executeFunction(
+        entityManager -> {
+          CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+          CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+          criteriaQuery.select(criteriaBuilder.count(criteriaQuery.from(entityType)));
 
-      CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-      CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-      criteriaQuery.select(criteriaBuilder.count(criteriaQuery.from(entityType)));
-
-      return entityManager.createQuery(criteriaQuery).getSingleResult();
-    } finally {
-      if (entityManager != null) entityManager.close();
-    }
+          return entityManager.createQuery(criteriaQuery).getSingleResult();
+        });
   }
 
   /**
@@ -1329,6 +1299,7 @@ public final class RifLoader {
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
    * @param idHasher the {@link DatabaseIdHasher} to use
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
   private void hashBeneficiaryHicn(
@@ -1364,6 +1335,7 @@ public final class RifLoader {
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
    * @param idHasher the {@link DatabaseIdHasher} to use
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
   private void hashBeneficiaryMbi(
@@ -1398,6 +1370,7 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
   private void hashBeneficiaryHistoryHicn(
@@ -1433,6 +1406,7 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
   private void hashBeneficiaryHistoryMbi(
@@ -1467,6 +1441,7 @@ public final class RifLoader {
    * systems: the HICN is the only unique beneficiary identifier shared between those two systems.
    *
    * @param idHasher the {@link IdHasher} to use
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param hicn the Medicare beneficiary HICN to be hashed
    * @return a one-way cryptographic hash of the specified HICN value, exactly 64 characters long
    */
@@ -1479,6 +1454,7 @@ public final class RifLoader {
    * Computes a one-way cryptographic hash of the specified MBI value.
    *
    * @param idHasher the {@link IdHasher} to use
+   * @param entityManager the {@link EntityManager} for the current transaction
    * @param mbi the Medicare beneficiary id to be hashed
    * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
    */
