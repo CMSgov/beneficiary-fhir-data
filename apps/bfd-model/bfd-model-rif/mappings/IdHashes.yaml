@@ -1,0 +1,21 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.IdHash
+  id: IdHash
+  minStringLength: 1
+  nullableFieldAccessorType: Optional
+  sourceType: RifCsv
+  table:
+    columns:
+    - comment: Unhashed identifier string.
+      name: id
+      nullable: false
+      sqlType: varchar(80)
+    - comment: Hashed identifier string.
+      name: hash
+      nullable: false
+      sqlType: varchar(64)
+    equalsNeeded: false
+    name: id_hashes
+    primaryKeyColumns:
+    - id
+    quoteNames: false
