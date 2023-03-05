@@ -439,8 +439,8 @@ public final class RifLoader {
 
     try {
       List<RifRecordLoadResult> loadResults =
-          transactionManager.executeFunction(
-              entityManager -> process(entityManager, recordsBatch, loadedFileId));
+          transactionManager.executeFunctionWithRetries(
+              1, entityManager -> process(entityManager, recordsBatch, loadedFileId));
 
       // Update the metrics now that things have been pushed.
       timerBatchSuccess.stop();
