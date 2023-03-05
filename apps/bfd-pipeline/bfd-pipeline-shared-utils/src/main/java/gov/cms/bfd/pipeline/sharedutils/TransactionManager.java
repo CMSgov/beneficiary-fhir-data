@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import java.util.Random;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -61,6 +62,53 @@ public class TransactionManager implements AutoCloseable {
       throw exception;
     } finally {
       completeTransaction(entityManager, transactionException);
+    }
+  }
+
+  /**
+   * Base number used for transaction retry delay. This amount is adjusted using a random number
+   * generator.
+   */
+  private static final long BaseRetryMilliseconds = 250;
+
+  /**
+   * Maximum multiplier for {@link #BaseRetryMilliseconds} used to compute overall delay before
+   * retrying a failed transaction.
+   */
+  private static final int MaxRetryDelayMultiple = 4;
+
+  /**
+   * Runs a transaction that produces a result (usually a query). Ensures that the transaction is
+   * properly committed if the function completes normally or rolled back if the function throws an
+   * exception.
+   *
+   * <p>If the first attempt fails, this function retries the transaction up to {@code maxRetries}
+   * times before throwing the original exception. The function must be reentrant since each retry
+   * calls the function again.
+   *
+   * @param maxRetries max number of retry attempts
+   * @param functionLogic logic to invoke with the {@link EntityManager}
+   * @param <T> return type of the function
+   * @param <E> exception type thrown by the function
+   * @throws E pass through exception from calling the function
+   * @return return value from the function
+   */
+  public synchronized <T, E extends Exception> T executeFunctionWithRetries(
+      int maxRetries, ThrowingFunction<T, EntityManager, E> functionLogic) throws E {
+    try {
+      return executeFunction(functionLogic);
+    } catch (Exception firstException) {
+      final var random = new Random();
+      for (int retryNumber = 1; retryNumber <= maxRetries; ++retryNumber) {
+        try {
+          int retryDelayMultiple = retryNumber + random.nextInt(MaxRetryDelayMultiple);
+          Thread.sleep(BaseRetryMilliseconds * retryDelayMultiple);
+          return executeFunction(functionLogic);
+        } catch (Exception retryException) {
+          firstException.addSuppressed(retryException);
+        }
+      }
+      throw firstException;
     }
   }
 
