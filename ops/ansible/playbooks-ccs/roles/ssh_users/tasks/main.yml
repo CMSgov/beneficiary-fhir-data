@@ -91,20 +91,32 @@
     grouped_ssh_users: "{{ grouped_ssh_users | default([]) + [_val] }}"
   no_log: true
 
+# Filters any users in the configuration that do not have either default access or access to the
+# current launch environment. Additionally maps the incoming list of objects such that stringified
+# bools become true bools and the "ssh_default*" properties are merged with their non-default
+# counterpart
 - name: "Filter invalid users or users without access"
   loop: "{{ grouped_ssh_users }}"
   when: ssh_user_valid
   vars:
+    ssh_user_entry: |
+      {{ 
+        {
+          "ssh_user": item.ssh_user,
+          "ssh_public_key": item.ssh_public_key,
+          "ssh_access": item.ssh_default_access | default('false', true) | bool or
+                        item.ssh_access | default('false', true) | bool,
+          "ssh_sudoer": item.ssh_default_sudoer | default('false', true) | bool or
+                        item.ssh_sudoer | default('false', true) | bool,
+          "ssh_pass": item.ssh_pass | default(omit)
+        }
+      }}
     ssh_user_valid: >
       {{
-        item.ssh_user is defined and
-        item.ssh_public_key is defined and
-        (
-          item.ssh_default_access | default('false', true) | bool or
-          item.ssh_access | default('false', true) | bool
-        )
+        ssh_user_entry.ssh_user is defined and
+        ssh_user_entry.ssh_public_key is defined and
+        ssh_user_entry.ssh_access
       }}
-    ssh_user_entry: "{{ item }}"
   set_fact:
     ssh_users: "{{ ssh_users | default([]) + [ssh_user_entry] }}"
   no_log: true
@@ -134,8 +146,6 @@
     line: "{{ item.ssh_user }} ALL=(ALL) NOPASSWD: ALL"
     validate: /usr/sbin/visudo -cf %s
   with_items: "{{ ssh_users }}"
-  when: >
-    item.ssh_default_sudoer | default('false', true) | bool or
-    item.ssh_sudoer | default('false', true) | bool
+  when: item.ssh_sudoer
   become: true
   no_log: true
