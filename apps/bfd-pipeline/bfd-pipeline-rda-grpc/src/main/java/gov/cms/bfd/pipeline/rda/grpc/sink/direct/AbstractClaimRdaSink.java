@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -44,8 +45,8 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractClaimRdaSink<TMessage, TClaim>
     implements RdaSink<TMessage, RdaChange<TClaim>> {
-  /** The database entity manager. */
-  protected final EntityManager entityManager;
+  /** The {@link TransactionManager} used to execute transactions. */
+  protected final TransactionManager transactionManager;
   /** The metric reporter. */
   protected final Metrics metrics;
   /** Clock for creating timestamps. */
@@ -84,7 +85,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       RdaApiProgress.ClaimType claimType,
       boolean autoUpdateLastSeq,
       int errorLimit) {
-    entityManager = appState.getEntityManagerFactory().createEntityManager();
+    transactionManager = new TransactionManager(appState.getEntityManagerFactory());
     metrics = new Metrics(getClass(), appState.getMeters());
     clock = appState.getClock();
     logger = LoggerFactory.getLogger(getClass());
@@ -95,11 +96,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
 
   /** {@inheritDoc} */
   @Override
-  public void close() throws Exception {
-    if (entityManager != null && entityManager.isOpen()) {
-      entityManager.close();
-    }
+  public void close() {
     resetLatencyMetrics();
+    transactionManager.close();
   }
 
   /**
@@ -111,18 +110,22 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     try {
-      logger.info("running query to find max sequence number");
-      String query =
-          String.format(
-              "select p.%s from RdaApiProgress p where p.claimType='%s'",
-              RdaApiProgress.Fields.lastSequenceNumber, claimType.name());
-      final List<Long> sequenceNumber =
-          entityManager.createQuery(query, Long.class).getResultList();
-      final Optional<Long> answer =
-          sequenceNumber.isEmpty() ? Optional.empty() : Optional.of(sequenceNumber.get(0));
-      logger.info(
-          "max sequence number result is {}", answer.map(n -> Long.toString(n)).orElse("none"));
-      return answer;
+      return transactionManager.executeFunction(
+          entityManager -> {
+            logger.info("running query to find max sequence number");
+            String query =
+                String.format(
+                    "select p.%s from RdaApiProgress p where p.claimType='%s'",
+                    RdaApiProgress.Fields.lastSequenceNumber, claimType.name());
+            final List<Long> sequenceNumber =
+                entityManager.createQuery(query, Long.class).getResultList();
+            final Optional<Long> answer =
+                sequenceNumber.isEmpty() ? Optional.empty() : Optional.of(sequenceNumber.get(0));
+            logger.info(
+                "max sequence number result is {}",
+                answer.map(n -> Long.toString(n)).orElse("none"));
+            return answer;
+          });
     } catch (Exception ex) {
       throw new ProcessingException(ex, 0);
     }
@@ -135,18 +138,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   @Override
   public void updateLastSequenceNumber(long lastSequenceNumber) {
-    boolean commit = false;
-    entityManager.getTransaction().begin();
-    try {
-      updateLastSequenceNumberImpl(lastSequenceNumber);
-      commit = true;
-    } finally {
-      if (commit) {
-        entityManager.getTransaction().commit();
-      } else {
-        entityManager.getTransaction().rollback();
-      }
-    }
+    transactionManager.executeProcedure(
+        entityManager -> updateLastSequenceNumberImpl(entityManager, lastSequenceNumber));
   }
 
   /**
@@ -162,10 +155,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public void writeError(
       String apiVersion, TMessage message, DataTransformer.TransformationException exception)
       throws IOException, ProcessingException {
-    entityManager.getTransaction().begin();
-    entityManager.merge(createMessageError(apiVersion, message, exception.getErrors()));
-    entityManager.getTransaction().commit();
-
+    transactionManager.executeProcedure(
+        entityManager ->
+            entityManager.merge(createMessageError(apiVersion, message, exception.getErrors())));
     checkErrorCount();
   }
 
@@ -176,14 +168,17 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    */
   @Override
   public void checkErrorCount() throws ProcessingException {
-    var query =
-        entityManager.createQuery(
-            "select count(error) from MessageError error where status = :status and claimType = :claimType",
-            Long.class);
-    query.setParameter("status", MessageError.Status.UNRESOLVED);
-    query.setParameter("claimType", MessageError.ClaimType.valueOf(claimType.name()));
-    long errorCount = query.getSingleResult();
-
+    final long errorCount =
+        transactionManager.executeFunction(
+            entityManager -> {
+              var query =
+                  entityManager.createQuery(
+                      "select count(error) from MessageError error where status = :status and claimType = :claimType",
+                      Long.class);
+              query.setParameter("status", MessageError.Status.UNRESOLVED);
+              query.setParameter("claimType", MessageError.ClaimType.valueOf(claimType.name()));
+              return query.getSingleResult();
+            });
     if (errorCount > errorLimit) {
       throw new ProcessingException(new IllegalStateException("Error limit reached"), 0);
     }
@@ -296,9 +291,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * Updates the {@link RdaApiProgress} table with the sequence number for the most recently added
    * claim of a given type.
    *
+   * @param entityManager the {@link EntityManager} to use for the update.
    * @param lastSequenceNumber The sequence number of the most recently added claim of a given type.
    */
-  private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
+  private void updateLastSequenceNumberImpl(EntityManager entityManager, long lastSequenceNumber) {
     RdaApiProgress progress =
         RdaApiProgress.builder()
             .claimType(claimType)
@@ -397,38 +393,31 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param changes collection of claims to write to the database
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
-    final Instant startTime = Instant.now();
-    boolean commit = false;
-    int insertCount = 0;
-
-    try {
-      entityManager.getTransaction().begin();
-      for (RdaChange<TClaim> change : changes) {
-        if (change.getType() != RdaChange.Type.DELETE) {
-          var metaData = createMetaData(change);
-          entityManager.merge(metaData);
-          entityManager.merge(change.getClaim());
-          insertCount += getInsertCount(change.getClaim());
-        } else {
-          // TODO: [DCGEO-131] accept DELETE changes from RDA API
-          throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
-        }
-      }
-      if (autoUpdateLastSeq) {
-        updateLastSequenceNumberImpl(maxSeq);
-      }
-      commit = true;
-    } finally {
-      if (commit) {
-        entityManager.getTransaction().commit();
-      } else {
-        entityManager.getTransaction().rollback();
-      }
-      entityManager.clear();
-      metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
-      metrics.dbBatchSize.record(changes.size());
-      metrics.insertCount.record(insertCount);
-    }
+    transactionManager.executeProcedure(
+        entityManager -> {
+          final Instant startTime = Instant.now();
+          int insertCount = 0;
+          try {
+            for (RdaChange<TClaim> change : changes) {
+              if (change.getType() != RdaChange.Type.DELETE) {
+                var metaData = createMetaData(change);
+                entityManager.merge(metaData);
+                entityManager.merge(change.getClaim());
+                insertCount += getInsertCount(change.getClaim());
+              } else {
+                throw new IllegalArgumentException(
+                    "RDA API DELETE changes are not currently supported");
+              }
+            }
+            if (autoUpdateLastSeq) {
+              updateLastSequenceNumberImpl(entityManager, maxSeq);
+            }
+          } finally {
+            metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
+            metrics.dbBatchSize.record(changes.size());
+            metrics.insertCount.record(insertCount);
+          }
+        });
   }
 
   /**
@@ -495,9 +484,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Counter failures;
     /** Number of objects written. */
     private final Counter objectsWritten;
-    /** Number of objects stored using <code>persist()</code>. */
+    /** Number of objects stored using {@code persist()}. */
     private final Counter objectsPersisted;
-    /** Number of objects stored using <code>merge()</code>. */
+    /** Number of objects stored using {@code merge()}. */
     private final Counter objectsMerged;
     /** Number of objects successfully transformed. */
     private final Counter transformSuccesses;

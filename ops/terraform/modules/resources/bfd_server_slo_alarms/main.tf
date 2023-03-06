@@ -116,12 +116,12 @@ locals {
     slo_http500_percent_1hr_alert = {
       type      = "alert"
       period    = 1 * 60 * 60
-      threshold = "90"
+      threshold = "10"
     }
     slo_http500_percent_1hr_warning = {
       type      = "warning"
       period    = 1 * 60 * 60
-      threshold = "50"
+      threshold = "1"
     }
     slo_http500_percent_24hr_alert = {
       type      = "alert"

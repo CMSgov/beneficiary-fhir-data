@@ -9,10 +9,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.LongStream;
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -95,17 +95,17 @@ public class MbiCache {
    * in the database. The Mbi objects returned from this have their primary key (mbiId) already set
    * and can be used with a persistent claim object. Without requiring a merge.
    *
-   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
-   * entityManager.
+   * <p>Lifespan of the transactionManager is controlled by the caller. This object never closes the
+   * transactionManager.
    *
    * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
    * @param appMetrics {@link MetricRegistry} to use for reporting metrics
-   * @param entityManager {@link EntityManager} used to query and create records
+   * @param transactionManager {@link TransactionManager} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
    */
   public static MbiCache databaseCache(
-      IdHasher hasher, MetricRegistry appMetrics, EntityManager entityManager) {
-    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), entityManager);
+      IdHasher hasher, MetricRegistry appMetrics, TransactionManager transactionManager) {
+    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), transactionManager);
   }
 
   /**
@@ -132,14 +132,14 @@ public class MbiCache {
    * Creates a new instance connected to the specified database. Equivalent to calling {@code
    * databaseCache()} with appropriate parameters.
    *
-   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
-   * entityManager.
+   * <p>Lifespan of the transactionManager is controlled by the caller. This object never closes the
+   * transactionManager.
    *
-   * @param entityManager {@link EntityManager} used to query and create records
+   * @param transactionManager {@link TransactionManager} used to query and create records
    * @return an {@link MbiCache} instance with a corresponding record in the database
    */
-  public MbiCache withDatabaseLookup(EntityManager entityManager) {
-    return new DatabaseBackedCache(hasher, metrics, entityManager);
+  public MbiCache withDatabaseLookup(TransactionManager transactionManager) {
+    return new DatabaseBackedCache(hasher, metrics, transactionManager);
   }
 
   /**
@@ -165,22 +165,23 @@ public class MbiCache {
   @VisibleForTesting
   @Slf4j
   static class DatabaseBackedCache extends MbiCache {
-    /** Handles database entity management. */
-    private final EntityManager entityManager;
+    /** The {@link TransactionManager} used to execute transactions. */
+    private final TransactionManager transactionManager;
     /** Creates random values. */
     private final Random random;
 
     /**
-     * Creates a new instance with the specified parameters.
+     * Creates a new instance with the specified parameters. The caller is responsible for closing
+     * the {@link TransactionManager} when it is no longer needed.
      *
      * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
      * @param metrics {@link Metrics} to use for reporting metrics
-     * @param entityManager {@link EntityManager} used to query and create records
+     * @param transactionManager {@link TransactionManager} used to query and create records
      */
     @VisibleForTesting
-    DatabaseBackedCache(IdHasher hasher, Metrics metrics, EntityManager entityManager) {
+    DatabaseBackedCache(IdHasher hasher, Metrics metrics, TransactionManager transactionManager) {
       super(hasher, metrics);
-      this.entityManager = entityManager;
+      this.transactionManager = transactionManager;
       random = new Random();
     }
 
@@ -234,34 +235,26 @@ public class MbiCache {
      * found insert one. Any PersistenceException will be passed through to the caller.
      *
      * @param mbi MBI to look up in the database
-     * @return {@link ReadResult} containing the Mbi that is known to exist in the entityManager and
-     *     a flag to indicate if the record was inserted by this call
+     * @return {@link ReadResult} containing the Mbi that is known to exist in the database and a
+     *     flag to indicate if the record was inserted by this call
      */
     @VisibleForTesting
     ReadResult readOrInsertIfMissing(String mbi) {
-      entityManager.getTransaction().begin();
-      boolean successful = false;
-      try {
-        final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
-        final Root<Mbi> root = criteria.from(Mbi.class);
-        criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-        boolean inserted = false;
-        final var records = entityManager.createQuery(criteria).getResultList();
-        var record = records.isEmpty() ? null : records.get(0);
-        if (record == null) {
-          record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
-          inserted = true;
-        }
-        successful = true;
-        return new ReadResult(record, inserted);
-      } finally {
-        if (successful) {
-          entityManager.getTransaction().commit();
-        } else {
-          entityManager.getTransaction().rollback();
-        }
-      }
+      return transactionManager.executeFunction(
+          entityManager -> {
+            final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+            final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+            final Root<Mbi> root = criteria.from(Mbi.class);
+            criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+            boolean inserted = false;
+            final var records = entityManager.createQuery(criteria).getResultList();
+            var record = records.isEmpty() ? null : records.get(0);
+            if (record == null) {
+              record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
+              inserted = true;
+            }
+            return new ReadResult(record, inserted);
+          });
     }
 
     /**

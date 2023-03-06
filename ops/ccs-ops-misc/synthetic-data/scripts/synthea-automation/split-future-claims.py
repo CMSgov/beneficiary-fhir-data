@@ -151,7 +151,7 @@ def create_manifest(path, file_list, timestamp):
     '''
     with open(path + "/0_manifest.xml", "w") as manifest:
         manifest_lines = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
-        manifest_lines += f'<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9" timestamp="{timestamp}" sequenceId="0" syntheticData="true">\n'
+        manifest_lines += f'<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10" timestamp="{timestamp}" sequenceId="0" syntheticData="true">\n'
         for file in file_list:
             type = file.rstrip('.csv').upper()
             manifest_lines += f'  <entry name="{file}" type="{type}"/>\n'
