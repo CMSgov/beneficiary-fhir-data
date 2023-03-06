@@ -4,9 +4,9 @@ import argparse
 
 # define arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-s','--source', dest='source', type=str, required=True, help='source JSON file')
-parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name/path')
-parser.add_argument('-m', '--templateDir', dest='templateDir', type=str,  required=True, help='dir wher templates live')
+parser.add_argument('-s','--source', dest='source', type=str, required=True, help='source JSON file.  see dd_to_json.py')
+parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name')
+parser.add_argument('-m', '--templateDir', dest='templateDir', type=str,  required=True, help='folder wher templates live')
 parser.add_argument('-n', '--templateFile', dest='templateFile', type=str,  required=True, help='template file name')
 args = parser.parse_args()
 

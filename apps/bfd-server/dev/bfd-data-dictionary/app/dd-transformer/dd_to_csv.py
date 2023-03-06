@@ -39,9 +39,9 @@ def build_csv_row(element):
 
 # define arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing source data files e.g. bfd-data-dictionary/data/V2')
-parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file path e.g. c:/output/BFD-V2-data-dict.csv')
-parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='path of template to use to build csv e.g. ./template/v2-to-csv.json')
+parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing data dictionary source data files e.g. bfd-data-dictionary/data/V2')
+parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name e.g. /BFD-V2-data-dict.csv')
+parser.add_argument('-m', '--template', dest='template', type=str,  required=True, help='template file name to use e.g. ./template/v2-to-csv.json')
 args = parser.parse_args()
 
 # open files

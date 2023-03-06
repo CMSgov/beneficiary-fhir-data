@@ -4,8 +4,8 @@ import argparse
 
 # define arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing source file(s)')
-parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name/path')
+parser.add_argument('-s','--source', dest='source', type=str, required=True, help='folder containing data dictionary source JSON file(s)')
+parser.add_argument('-t','--target', dest='target', type=str,  required=True, help='target file name')
 args = parser.parse_args()
 source_dir = args.source
 target_path = args.target
