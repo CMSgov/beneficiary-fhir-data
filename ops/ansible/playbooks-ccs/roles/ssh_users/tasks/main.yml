@@ -51,8 +51,7 @@
 # parameter response object to just its Name, Value and the IAM of the user (_Iam) which will be
 # used in subsequent steps to group SSH data by user
 - name: "Filter unrelated data"
-  loop: |
-    {{ merged_user_data | selectattr("Name", "search", "ssh") }}
+  loop: "{{ merged_user_data | selectattr('Name', 'search', 'ssh') }}"
   vars:
     _val: |
       {{
@@ -78,8 +77,7 @@
   # list of lists where each list within the outer list has two elements with the first item being
   # the group's grouped-by value and the second element being a list of all of the grouped items.
   # See the "from" example from the comment above for what that looks like
-  loop: |
-    {{ unfiltered_ssh_users | groupby("_Iam") }}
+  loop: "{{ unfiltered_ssh_users | groupby('_Iam') }}"
   vars:
     # Ansible will automatically parse the JSON string templated below as a dictionary, this is
     # why we do not need to explicitly convert it from json (i.e. using the "from_json" filter)
