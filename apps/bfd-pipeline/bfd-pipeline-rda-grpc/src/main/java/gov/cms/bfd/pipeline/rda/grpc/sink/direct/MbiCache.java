@@ -70,12 +70,13 @@ public abstract class MbiCache {
       metrics.addLookup();
       return cache.get(mbi, () -> computeMbi(mbi));
     } catch (ExecutionException ex) {
-      final var computed = computeMbi(mbi);
-      log.warn(
-          "caught exception while saving generated hash: hash={} message={}",
-          computed.getHash(),
-          ex.getCause().getMessage());
-      return computed;
+      final Throwable cause = ex.getCause();
+      log.warn("caught exception while saving generated hash: message={}", cause.getMessage());
+      if (cause instanceof RuntimeException) {
+        throw (RuntimeException) cause;
+      } else {
+        throw new RuntimeException(cause);
+      }
     }
   }
 
