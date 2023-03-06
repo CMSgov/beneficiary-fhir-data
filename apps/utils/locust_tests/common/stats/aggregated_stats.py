@@ -107,12 +107,12 @@ class TaskStats:
     """The median response time, in milliseconds, of each of this Task's requests"""
     average_response_time: float
     """The average response time, in milliseconds, of each of this Task's requests"""
-    min_response_time: float
+    min_response_time: int
     """The fastest response time, in milliseconds, out of all this Task's requests"""
-    max_response_time: float
+    max_response_time: int
     """The slowest respone time, in milliseconds, out of all this Task's requests"""
     total_reqs_per_second: float
-    """The average number of requests-per-second of this Taks's requests over the test run"""
+    """The average number of requests-per-second of this Task's requests over the test run"""
     total_fails_per_sec: float
     """The average number of failures-per-second of this Task's requests over the test run"""
     response_time_percentiles: ResponseTimePercentiles
@@ -132,16 +132,16 @@ class TaskStats:
             a given Task
         """
         return cls(
-            task_name=stats_entry.name,
-            request_method=stats_entry.method,
-            num_requests=stats_entry.num_requests,
-            num_failures=stats_entry.num_failures,
-            median_response_time=stats_entry.median_response_time,
-            average_response_time=stats_entry.avg_response_time,
-            min_response_time=stats_entry.min_response_time or 0,
-            max_response_time=stats_entry.max_response_time,
-            total_reqs_per_second=stats_entry.total_rps,
-            total_fails_per_sec=stats_entry.total_fail_per_sec,
+            task_name=str(stats_entry.name),
+            request_method=str(stats_entry.method),
+            num_requests=int(stats_entry.num_requests),
+            num_failures=int(stats_entry.num_failures),
+            median_response_time=int(stats_entry.median_response_time),
+            average_response_time=float(stats_entry.avg_response_time),
+            min_response_time=int(stats_entry.min_response_time or 0),
+            max_response_time=int(stats_entry.max_response_time),
+            total_reqs_per_second=float(stats_entry.total_rps),
+            total_fails_per_sec=float(stats_entry.total_fail_per_sec),
             response_time_percentiles=cls.__get_percentiles_dict(stats_entry),
         )
 

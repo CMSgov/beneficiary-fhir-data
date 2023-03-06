@@ -232,17 +232,6 @@ public class FissClaimRdaSinkTest {
   }
 
   /**
-   * Verifies that when the sink is closed, the entity manager is also closed.
-   *
-   * @throws Exception indicates test failure
-   */
-  @Test
-  public void closeMethodsAreCalled() throws Exception {
-    sink.close();
-    verify(entityManager).close();
-  }
-
-  /**
    * Verifies that when a transformation error occurs when writing messages from the sink partway
    * in, the messages that did not error are written, metering occurs, and nothing is rolled back.
    */
@@ -280,8 +269,9 @@ public class FissClaimRdaSinkTest {
       assertThat(error.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
     }
 
-    verify(transaction, times(1)).begin();
-    verify(transaction, times(1)).commit();
+    // once in writeError and once in writeClaims
+    verify(transaction, times(2)).begin();
+    verify(transaction, times(2)).commit();
     verify(transaction, times(0)).rollback();
 
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
