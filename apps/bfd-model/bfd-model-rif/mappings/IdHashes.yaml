@@ -17,5 +17,5 @@ mappings:
     equalsNeeded: false
     name: id_hashes
     primaryKeyColumns:
-    - id
+    - hash
     quoteNames: false
