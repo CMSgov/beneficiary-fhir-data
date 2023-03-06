@@ -299,19 +299,25 @@ public final class RifLoader {
           };
 
       // Collect records into batches and submit each to batchProcessor.
-      if (options.getRecordBatchSize() > 1)
-        BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
-            .forEach(batchProcessor);
-      else
-        dataToLoad
-            .getRecords()
-            .map(
-                record -> {
-                  List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
-                  ittyBittyBatch.add(record);
-                  return ittyBittyBatch;
-                })
-            .forEach(batchProcessor);
+      try {
+        if (options.getRecordBatchSize() > 1)
+          BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
+              .forEach(batchProcessor);
+        else
+          dataToLoad
+              .getRecords()
+              .map(
+                  record -> {
+                    List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
+                    ittyBittyBatch.add(record);
+                    return ittyBittyBatch;
+                  })
+              .forEach(batchProcessor);
+      } catch (Exception e) {
+        LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
+        timerDataSetFile.stop();
+        throw e;
+      }
 
       // Wait for all submitted batches to complete.
       try {
@@ -364,6 +370,7 @@ public final class RifLoader {
                 process(recordsBatch, loadedFileId, postgresBatch);
             processResults.forEach(resultHandler::accept);
           } catch (Throwable e) {
+            LOGGER.error("Error caught when processing async batch!");
             errorHandler.accept(e);
           }
         });
