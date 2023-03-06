@@ -1,4 +1,9 @@
 ---
+# Note that "no_log" is set on each sensitive operation as Ansible will sometimes print whatever
+# facts a particular step is setting. Since SSH data is sensitive, we don't want that data to be
+# logged to stdout whenever this Ansible playbook is applied (especially in Jenkins). Instead, with
+# "no_log", sensitive information will be replaced with "None"
+
 - name: "Get global SSM user data"
   shell:
     cmd: |
@@ -9,10 +14,12 @@
         --region us-east-1 \
         --query 'Parameters'
   register: global_user_data
+  no_log: true
 
 - name: "Parse global SSM user data"
   set_fact:
     global_user_data: "{{ global_user_data.stdout }}"
+  no_log: true
 
 - name: "Get environment-level SSM user data"
   shell:
@@ -27,58 +34,82 @@
   when: env is defined
   tags:
     - post-ami
+  no_log: true
 
 - name: "Parse environment-level SSM user data"
   set_fact:
     env_user_data: "{{ env_user_data.stdout | default([], true) }}"
+  no_log: true
 
 - name: "Merge global and environment level SSM user data"
   set_fact:
     merged_user_data: "{{ env_user_data + global_user_data }}"
+  no_log: true
 
-- name: "Parse SSH user data from global and environment SSM parameters"
-  shell:
-    cmd: |
-      # This large jq filter will create an array of objects grouped by the user's EUA containing
-      # each user's SSH information
-      jq '
-          [
-              .[]
-              | select(.Name | contains("ssh"))
-              | (.Name | split("/")[6]) as $iam | . += { "Iam": $iam }
-          ]
-          | group_by(.Iam)
-          | .[]
-          | map({(.Name | split("/")[7]): .Value})
-          | add
-      ' <<< "$MERGED_USER_DATA" |
-      # This separate invocation of jq will combine the distinct objects emitted by the previous
-      # invocation into a single array of objects
-      jq -s
-  environment:
-    MERGED_USER_DATA: "{{ merged_user_data | to_json }}"
-  register: unfiltered_ssh_users
-
-- name: "Parse SSH users to apply"
+# This step simply removes any data from SSM that is unrelated to ssh -- more specifically, any SSM
+# parameter with a name that does not contain "ssh". Additionally, this step maps each returned SSM
+# parameter response object to just its Name, Value and the IAM of the user (_Iam) which will be
+# used in subsequent steps to group SSH data by user
+- name: "Filter unrelated data"
+  loop: |
+    {{ merged_user_data | selectattr("Name", "search", "ssh") }}
+  vars:
+    _val: |
+      {{
+        {
+          "Name": item.Name,
+          "Value": item.Value,
+          "_Iam": (item.Name | split("/"))[6]
+        } 
+      }}
   set_fact:
-    unfiltered_ssh_users: "{{ unfiltered_ssh_users.stdout | from_json }}"
+    unfiltered_ssh_users: "{{ unfiltered_ssh_users | default([]) + [_val] }}"
+  no_log: true
+
+# This step both groups each associated SSM parameter by its corresponding IAM user and maps each
+# corresponding Name/Value dictionary to { Name: Value }. These are then merged into a single
+# dictionary grouped by the user.
+# I.e. from:
+# ["IAM", [{ "Name": "/bfd/env/common/sensitive/IAM/ssh_access", "Value": "true"}, { "Name": "/bfd/env/common/sensitive/IAM/ssh_sudoer": "Value": "true"}, ...]]
+# to:
+# {"ssh_access": "true", "ssh_sudoer": "true", ...}
+- name: "Group SSH configuration per-user"
+  # groupby's behavior in an Ansible step context is a bit difficult to work with: it will return a
+  # list of lists where each list within the outer list has two elements with the first item being
+  # the group's grouped-by value and the second element being a list of all of the grouped items.
+  # See the "from" example from the comment above for what that looks like
+  loop: |
+    {{ unfiltered_ssh_users | groupby("_Iam") }}
+  vars:
+    # Ansible will automatically parse the JSON string templated below as a dictionary, this is
+    # why we do not need to explicitly convert it from json (i.e. using the "from_json" filter)
+    _val: |
+      {
+        {% for ssh_data in item[1] %}
+          "{{ (ssh_data.Name | split("/"))[7] }}": "{{ssh_data.Value}}",
+        {% endfor %}
+      }
+  set_fact:
+    grouped_ssh_users: "{{ grouped_ssh_users | default([]) + [_val] }}"
+  no_log: true
 
 - name: "Filter invalid users or users without access"
-  loop: "{{ unfiltered_ssh_users }}"
+  loop: "{{ grouped_ssh_users }}"
   when: ssh_user_valid
   vars:
     ssh_user_valid: >
-      {{ 
-        item.ssh_user is defined and 
+      {{
+        item.ssh_user is defined and
         item.ssh_public_key is defined and
         (
-          item.ssh_default_access | default('false', true) | bool or 
+          item.ssh_default_access | default('false', true) | bool or
           item.ssh_access | default('false', true) | bool
-        ) 
+        )
       }}
     ssh_user_entry: "{{ item }}"
   set_fact:
     ssh_users: "{{ ssh_users | default([]) + [ssh_user_entry] }}"
+  no_log: true
 
 - name: "Add user"
   user:
@@ -104,6 +135,6 @@
     validate: /usr/sbin/visudo -cf %s
   with_items: "{{ ssh_users }}"
   when: >
-    item.ssh_default_sudoer | default('false', true) | bool or 
+    item.ssh_default_sudoer | default('false', true) | bool or
     item.ssh_sudoer | default('false', true) | bool
   become: true
