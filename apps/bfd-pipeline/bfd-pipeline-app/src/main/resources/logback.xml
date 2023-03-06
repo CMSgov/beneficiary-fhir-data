@@ -20,9 +20,10 @@
 
 	<!-- At 'trace', Hibernate will log SQL parameter values. -->
 	<logger name="org.hibernate.type" level="info" />
-	
-	<!-- Log each SQL statement run by Flyway, to give us a rough progress indicator. Note that this may need to be revisited when/if our Flyway scripts get longer/larger: dozens of extra log events are fine but thousands are probably not. -->
-	<logger name="org.flywaydb.core.internal.dbsupport.SqlScript" level="debug" />
+
+	<!-- Useful for debugging pipeline job issues if set to debug -->
+	<logger name="gov.cms.bfd.pipeline.app.PipelineManager" level="info" />
+	<logger name="gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore" level="info" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
