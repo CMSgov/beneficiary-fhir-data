@@ -66,7 +66,8 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             "ssm:*",
             "lambda:*",
             "glue:*",
-            "firehose:*"
+            "firehose:*",
+            "athena:*"
           ],
           "Effect" : "Allow",
           "Resource" : "*",
