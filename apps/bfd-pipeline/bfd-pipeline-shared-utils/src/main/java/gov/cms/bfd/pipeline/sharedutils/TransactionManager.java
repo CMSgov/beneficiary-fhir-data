@@ -4,11 +4,13 @@ import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.util.Random;
+import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import lombok.Data;
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * Manages life cycle of an {@link EntityManager} to execute one or more transactions. Executes as
@@ -85,9 +87,11 @@ public class TransactionManager implements AutoCloseable {
    *
    * <p>If the first attempt fails, this function retries the transaction up to {@code maxRetries}
    * times before throwing the original exception. The function must be reentrant since each retry
-   * calls the function again.
+   * calls the function again. Only exceptions which satisfy the given predicate are considered safe
+   * to retry.
    *
    * @param maxRetries max number of retry attempts
+   * @param isRetriableException {@link Predicate} to determine if a given exception is retriable
    * @param functionLogic logic to invoke with the {@link EntityManager}
    * @param <T> return type of the function
    * @param <E> exception type thrown by the function
@@ -95,20 +99,28 @@ public class TransactionManager implements AutoCloseable {
    * @return return object containing result following possible retries
    */
   public synchronized <T, E extends Exception> RetryResult<T> executeFunctionWithRetries(
-      int maxRetries, ThrowingFunction<T, EntityManager, E> functionLogic) throws E {
+      int maxRetries,
+      Predicate<Exception> isRetriableException,
+      ThrowingFunction<T, EntityManager, E> functionLogic)
+      throws E {
     try {
       T result = executeFunction(functionLogic);
       return new RetryResult<>(result);
     } catch (Exception firstException) {
-      final var random = new Random();
-      for (int retryNumber = 1; retryNumber <= maxRetries; ++retryNumber) {
-        try {
-          int retryDelayMultiple = retryNumber + random.nextInt(MaxRetryDelayMultiple);
-          Thread.sleep(BaseRetryMilliseconds * retryDelayMultiple);
-          T result = executeFunction(functionLogic);
-          return new RetryResult<>(result, retryNumber, firstException);
-        } catch (Exception retryException) {
-          firstException.addSuppressed(retryException);
+      if (isRetriableException.test(firstException)) {
+        final var random = new Random();
+        for (int retryNumber = 1; retryNumber <= maxRetries; ++retryNumber) {
+          try {
+            int retryDelayMultiple = retryNumber + random.nextInt(MaxRetryDelayMultiple);
+            Thread.sleep(BaseRetryMilliseconds * retryDelayMultiple);
+            T result = executeFunction(functionLogic);
+            return new RetryResult<>(result, retryNumber, firstException);
+          } catch (Exception retryException) {
+            firstException.addSuppressed(retryException);
+            if (!isRetriableException.test(retryException)) {
+              break;
+            }
+          }
         }
       }
       throw firstException;
@@ -243,6 +255,17 @@ public class TransactionManager implements AutoCloseable {
   }
 
   /**
+   * Standard {@link Predicate} instance to recognize a constraint violation intended to simplify
+   * passing a predicate to {@link #executeFunctionWithRetries}.
+   *
+   * @param exception the exception to test
+   * @return true if the exception is a constraint violation
+   */
+  public static boolean isConstraintViolation(Exception exception) {
+    return exception instanceof ConstraintViolationException;
+  }
+
+  /**
    * Data class used to hold result of calling {@link #executeFunctionWithRetries}.
    *
    * @param <T> type of value returned by the function
@@ -273,7 +296,7 @@ public class TransactionManager implements AutoCloseable {
      * @param firstException first exception that triggered the retries
      */
     public RetryResult(T value, int numRetries, @Nullable Exception firstException) {
-      assert firstException == null || numRetries == 0;
+      assert firstException != null || numRetries == 0;
       this.value = value;
       this.numRetries = numRetries;
       this.firstException = firstException;
