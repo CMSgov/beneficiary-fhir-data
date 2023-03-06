@@ -400,6 +400,7 @@ public final class RifLoader {
       final var transactionResult =
           transactionManager.executeFunctionWithRetries(
               1,
+              TransactionManager::isConstraintViolation,
               entityManager ->
                   processBatchInTransaction(entityManager, recordsBatch, loadedFileId));
 
