@@ -116,6 +116,7 @@
     state: present
   with_items: "{{ ssh_users }}"
   become: true
+  no_log: true
 
 - name: "Add user public key"
   authorized_key:
@@ -124,6 +125,7 @@
     state: present
   with_items: "{{ ssh_users }}"
   become: true
+  no_log: true
 
 - name: "Add user to sudoers file"
   lineinfile:
@@ -136,3 +138,4 @@
     item.ssh_default_sudoer | default('false', true) | bool or
     item.ssh_sudoer | default('false', true) | bool
   become: true
+  no_log: true
