@@ -58,7 +58,7 @@
         {
           "Name": item.Name,
           "Value": item.Value,
-          "_Iam": (item.Name | split("/"))[6]
+          "_Iam": item.Name.split("/")[6]
         } 
       }}
   set_fact:
@@ -84,7 +84,7 @@
     _val: |
       {
         {% for ssh_data in item[1] %}
-          "{{ (ssh_data.Name | split("/"))[7] }}": "{{ssh_data.Value}}",
+          "{{ ssh_data.Name.split("/")[7] }}": "{{ssh_data.Value}}",
         {% endfor %}
       }
   set_fact:
