@@ -96,11 +96,12 @@ public class DirectRdaLoadApp {
    */
   private static Optional<PipelineJob<?>> createPipelineJob(
       RdaLoadOptions jobConfig, PipelineApplicationState appState, String claimType) {
+    final var mbiCache = jobConfig.createComputedMbiCache(appState);
     switch (claimType.toLowerCase()) {
       case "fiss":
-        return Optional.of(jobConfig.createFissClaimsLoadJob(appState));
+        return Optional.of(jobConfig.createFissClaimsLoadJob(appState, mbiCache));
       case "mcs":
-        return Optional.of(jobConfig.createMcsClaimsLoadJob(appState));
+        return Optional.of(jobConfig.createMcsClaimsLoadJob(appState, mbiCache));
       default:
         return Optional.empty();
     }

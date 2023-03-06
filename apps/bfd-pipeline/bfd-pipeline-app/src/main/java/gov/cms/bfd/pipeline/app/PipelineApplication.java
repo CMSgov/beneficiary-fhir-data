@@ -379,10 +379,11 @@ public final class PipelineApplication {
         LOGGER.info("Skipping RdaServerJob registration - not enabled in app configuration.");
       }
 
-      jobs.add(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      final var mbiCache = rdaLoadOptions.createComputedMbiCache(rdaAppState);
+      jobs.add(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState, mbiCache));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
 
-      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState, mbiCache));
       LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");
