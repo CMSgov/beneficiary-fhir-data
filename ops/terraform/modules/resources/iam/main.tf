@@ -170,7 +170,7 @@ resource "aws_iam_policy" "kms_mgmt" {
       "Action": ["kms:Decrypt"],
       "Effect": "Allow",
       "Resource": [
-        "${data.aws_kms_key.mgmt_key.arn}",
+        "${data.aws_kms_key.mgmt_key.arn}"
       ]
     }
   ],
