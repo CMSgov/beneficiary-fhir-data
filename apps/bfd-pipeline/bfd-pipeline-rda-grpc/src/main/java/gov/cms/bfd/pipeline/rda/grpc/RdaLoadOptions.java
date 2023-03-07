@@ -101,13 +101,16 @@ public class RdaLoadOptions implements Serializable {
   }
 
   /**
-   * Creates a new {@link MbiCache} instance that computes hashes on demand.
+   * Creates a new {@link MbiCache} instance that computes hashes on demand. Scales the cache size
+   * by multiplying the configured size times the number of writer threads.
    *
    * @param appState the shared {@link PipelineApplicationState}
    * @return a new {@link MbiCache} instance
    */
   public MbiCache createComputedMbiCache(PipelineApplicationState appState) {
-    return MbiCache.computedCache(idHasherConfig, appState.getMetrics());
+    var scaledCacheSize = jobConfig.getWriteThreads() * idHasherConfig.getCacheSize();
+    var scaledHasherConfig = idHasherConfig.toBuilder().cacheSize(scaledCacheSize).build();
+    return MbiCache.computedCache(scaledHasherConfig, appState.getMetrics());
   }
 
   /**
