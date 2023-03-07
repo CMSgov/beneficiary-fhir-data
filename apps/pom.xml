@@ -122,8 +122,8 @@
 
 		<!-- Dependencies required for connecting to a gRPC API -->
 		<grpc_java.version>1.53.0</grpc_java.version>
-		<protoc.version>3.21.2</protoc.version>
-		<protobuf.version>3.21.2</protobuf.version>
+		<protoc.version>3.21.12</protoc.version>
+		<protobuf.version>3.21.12</protobuf.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -412,6 +412,35 @@
 				<groupId>com.newrelic.telemetry</groupId>
 				<artifactId>telemetry-http-okhttp</artifactId>
 				<version>${telemetry-http-okhttp.version}</version>
+			</dependency>
+
+			<!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-netty-shaded</artifactId>
+				<version>${grpc_java.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf</artifactId>
+				<version>${grpc_java.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-stub</artifactId>
+				<version>${grpc_java.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Provides core protobuf library.  -->
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf.version}</version>
+			</dependency>
+			<dependency>
+				<!-- provides JsonFormat and JsonParser -->
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java-util</artifactId>
+				<version>${protobuf.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

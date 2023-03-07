@@ -50,24 +50,19 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>${grpc_java.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>${grpc_java.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>${grpc_java.version}</version>
         </dependency>
         <dependency>
             <!-- provides JsonFormat and JsonParser -->
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <version>${protobuf.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <!-- Used to serialize and deserialize objects to JSON during testing. -->
