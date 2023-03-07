@@ -87,7 +87,7 @@
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.2</junit.version>
-		<javadoc.version>3.4.1</javadoc.version>
+		<javadoc.version>3.5.0</javadoc.version>
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
@@ -483,7 +483,7 @@
 					<version>1.0.4</version>
 					<configuration>
 						<hooks>
-							<pre-commit>
+							<pre-commit><![CDATA[
 #!/usr/bin/env bash
 set -e
 
@@ -498,7 +498,7 @@ checkJavaFormat() {
   cd apps
 
   set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&amp;1
+  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&1
   checkResult=$?
   set -e
 
@@ -515,14 +515,14 @@ checkSecretFilesForPlainText() {
   echo 'Verifying secret files are not in plaintext...'
   set +e
   # read list of files containing secrets
-  IFS=$'\n' read -d '' -r -a secrets &lt; .secrets
+  IFS=$'\n' read -d '' -r -a secrets < .secrets
 
   # make list of files to be committed by printing out a newline
   # separated list of files staged for commit to a temporary file
   # and reading it as an array
   tmpfile=$(mktemp)
   git diff --cached --name-only --diff-filter=ACM > $tmpfile
-  IFS=$'\n' read -d '' -r -a commits &lt; $tmpfile
+  IFS=$'\n' read -d '' -r -a commits < $tmpfile
 
   # for all files to be committed which are a secret file,
   # grep for the header "$ANSIBLE_VAULT;1.1;AES256"
@@ -543,7 +543,7 @@ checkSecretFilesForPlainText() {
 
 checkSecretFilesForPlainText
 checkJavaFormat
-							</pre-commit>
+							]]></pre-commit>
 						</hooks>
 					</configuration>
 				</plugin>
