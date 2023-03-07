@@ -1,0 +1,35 @@
+{
+    "id": 628,
+    "name": "Claim Sub Type",
+    "description": "The sub type of claim that was submitted. See the CARIN IG and specifically this valueset for more information: http://www.hl7.org/fhir/us/carin-bb/ValueSet-C4BBInstitutionalClaimSubType.html",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}
