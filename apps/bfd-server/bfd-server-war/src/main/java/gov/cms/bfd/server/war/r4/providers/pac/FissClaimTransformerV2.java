@@ -84,7 +84,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
         claimGroup.getStmtCovToDate() != null
             && claimGroup.getStmtCovToDate().isBefore(ICD_9_CUTOFF_DATE);
 
-    claim.setId("f-" + claimGroup.getDcn());
+    claim.setId("f-" + claimGroup.getClaimId());
     claim.setContained(
         List.of(
             FissTransformerV2.getContainedPatient(claimGroup),
