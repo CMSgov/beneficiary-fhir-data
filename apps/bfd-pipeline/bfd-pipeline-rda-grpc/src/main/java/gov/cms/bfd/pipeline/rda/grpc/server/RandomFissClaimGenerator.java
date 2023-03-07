@@ -180,6 +180,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
    */
   private void addRandomFieldValues(FissClaim.Builder claim) {
     always("dcn", () -> claim.setDcn(randomDigit(5, 8)));
+    always("intermediaryNb", () -> claim.setIntermediaryNb(randomDigit(1, 5)));
     always("hicNo", () -> claim.setHicNo(randomDigit(12, 12)));
     always("currStatus", () -> claim.setCurrStatusEnum(randomEnum(FissClaimStatusEnums)));
     oneOf(
