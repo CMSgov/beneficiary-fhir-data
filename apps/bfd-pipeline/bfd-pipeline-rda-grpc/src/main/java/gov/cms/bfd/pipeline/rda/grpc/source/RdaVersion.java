@@ -3,7 +3,19 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** A utility class for comparing version numbers. */
+/**
+ * Defines a RDA version in the format of [major].[minor].[patch], with optional range modifier for
+ * checking version compatibility.
+ *
+ * <p>The versioning system used here is a subset of Semantic Versioning, with support for exact
+ * match, minor match, and major match. Examples of valid version definitions include:
+ *
+ * <ul>
+ *   <li>0.10.1 - Must exactly match version 0.10.1
+ *   <li>~0.10.1 - Must be a 0.10.x version equal to or higher than 0.10.1
+ *   <li>^0.10.1 - Must be a 0.x.x version equal to or higher than 0.10.1
+ * </ul>
+ */
 public class RdaVersion {
 
   /** Name for the type group of the RegEx. */
@@ -32,7 +44,7 @@ public class RdaVersion {
    * The required {@link CompatibilityLevel}, only used when comparing another {@link RdaVersion} to
    * this one.
    */
-  private final CompatibilityLevel compatability;
+  private final CompatibilityLevel compatibility;
 
   /**
    * Builds an {@link RdaVersion} instance using the given version specifications.
@@ -40,13 +52,13 @@ public class RdaVersion {
    * @param major The major version
    * @param minor The minor version
    * @param patch The patch version
-   * @param compatability The level requirement
+   * @param compatibility The level requirement
    */
-  private RdaVersion(int major, int minor, int patch, CompatibilityLevel compatability) {
+  private RdaVersion(int major, int minor, int patch, CompatibilityLevel compatibility) {
     this.major = major;
     this.minor = minor;
     this.patch = patch;
-    this.compatability = compatability;
+    this.compatibility = compatibility;
   }
 
   /**
@@ -74,28 +86,31 @@ public class RdaVersion {
     // Parse the version
     RdaVersion rdaVersion = builder().versionString(versionString).build();
 
-    boolean compatable;
+    boolean compatible;
 
-    switch (compatability) {
+    switch (compatibility) {
       case MAJOR:
-        compatable =
+        // Must be a higher or equal version, within the same major
+        compatible =
             rdaVersion.major == major
                 && ((rdaVersion.minor == minor && rdaVersion.patch >= patch)
                     || rdaVersion.minor > minor);
         break;
       case MINOR:
-        compatable =
+        // Must be a higher or equal version, within the same major & minor
+        compatible =
             rdaVersion.major == major && rdaVersion.minor == minor && rdaVersion.patch >= patch;
         break;
       default:
-        compatable =
+        // Must be exactly the same version
+        compatible =
             rdaVersion.major == major && rdaVersion.minor == minor && rdaVersion.patch == patch;
     }
 
-    return compatable;
+    return compatible;
   }
 
-  /** The potential compatability levels that can be specified. */
+  /** The potential compatibility levels that can be specified. */
   public enum CompatibilityLevel {
     /** Must be same major version. */
     MAJOR,
