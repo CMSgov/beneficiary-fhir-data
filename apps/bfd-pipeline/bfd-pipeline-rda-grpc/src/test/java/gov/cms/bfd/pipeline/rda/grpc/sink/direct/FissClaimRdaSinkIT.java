@@ -65,7 +65,7 @@ public class FissClaimRdaSinkIT {
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
-          procCode0.setDcn(claim.getDcn());
+          procCode0.setClaimId(claim.getClaimId());
           procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
@@ -73,7 +73,7 @@ public class FissClaimRdaSinkIT {
           claim.getProcCodes().add(procCode0);
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
-          diagCode0.setDcn(claim.getDcn());
+          diagCode0.setClaimId(claim.getClaimId());
           diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
@@ -174,6 +174,7 @@ public class FissClaimRdaSinkIT {
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
+          claim.setClaimId("1");
           claim.setDcn("1");
           claim.setHicNo("h1");
           claim.setCurrStatus('T');
@@ -183,7 +184,7 @@ public class FissClaimRdaSinkIT {
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
-          procCode0.setDcn(claim.getDcn());
+          procCode0.setClaimId(claim.getClaimId());
           procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
@@ -191,7 +192,7 @@ public class FissClaimRdaSinkIT {
           claim.getProcCodes().add(procCode0);
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
-          diagCode0.setDcn(claim.getDcn());
+          diagCode0.setClaimId(claim.getClaimId());
           diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");

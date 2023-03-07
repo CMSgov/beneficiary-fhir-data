@@ -322,7 +322,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     optional("newHic", () -> claim.setNewHic(randomAlphaNumeric(1, 12)));
     optional("drgCd", () -> claim.setDrgCd(randomAlphaNumeric(1, 4)));
     optional("groupCode", () -> claim.setGroupCode(randomAlphaNumeric(1, 2)));
-    oneOf(
+    optionalOneOf(
         "clmTypInd",
         () -> claim.setClmTypIndEnum(randomEnum(FissClaimTypeIndicatorEnums)),
         () -> claim.setClmTypIndUnrecognized(randomAlphaNumeric(1, 1)));
@@ -604,7 +604,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
             always(
                 String.format("[%d]", i),
                 () -> {
-                  oneOf(
+                  optionalOneOf(
                       "nonBillRevCode",
                       () -> revenue.setNonBillRevCodeEnum(randomEnum(FissNonBillRevCodeEnums)),
                       () -> revenue.setNonBillRevCodeUnrecognized(randomAlphaNumeric(1, 1)));

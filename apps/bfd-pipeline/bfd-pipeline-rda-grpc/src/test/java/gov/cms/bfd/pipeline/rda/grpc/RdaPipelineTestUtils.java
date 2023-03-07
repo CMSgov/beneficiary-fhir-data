@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
@@ -94,7 +95,8 @@ public class RdaPipelineTestUtils {
       final MetricRegistry appMetrics = new MetricRegistry();
       final HikariDataSource dataSource =
           PipelineApplicationState.createPooledDataSource(dbOptions, appMetrics);
-      DatabaseSchemaManager.createOrUpdateSchema(dataSource);
+      assertTrue(
+          DatabaseSchemaManager.createOrUpdateSchema(dataSource), "schema migration failure");
       try (PipelineApplicationState appState =
               new PipelineApplicationState(
                   new SimpleMeterRegistry(),

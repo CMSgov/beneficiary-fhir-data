@@ -114,7 +114,7 @@ public class FissClaimTransformer {
       final String itemNamePrefix = namePrefix + "procCodes" + "-" + index + "-";
       final FissProcedureCode itemFrom = from.getFissProcCodes(index);
       final FissProcCode itemTo = transformMessageToFissProcCode(itemFrom,transformer,now,itemNamePrefix);
-      itemTo.setDcn(from.getDcn());
+      itemTo.setDcn(to.getDcn());
       itemTo.setPriority(index);
       to.getProcCodes().add(itemTo);
     }
