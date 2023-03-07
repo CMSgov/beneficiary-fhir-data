@@ -9,6 +9,8 @@
   gather_facts: no
   vars:
     db_migrator_dir: /opt/bfd-db-migrator
+    # TODO: Remove this when CloudWatch Agent role is properly removed from build tasks
+    env: "test"
 
   tasks:
     - name: Download BFD Repository
