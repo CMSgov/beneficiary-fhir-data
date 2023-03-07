@@ -115,14 +115,12 @@ public class FissClaimTransformerTest {
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
     claim.setCurrStatus('T');
-    claim.setClmTypInd("1");
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9000");
     claim.setLastUpdated(clock.instant());
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
@@ -233,7 +231,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
@@ -252,8 +249,6 @@ public class FissClaimTransformerTest {
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("2");
@@ -289,7 +284,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
@@ -312,7 +306,6 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9997");
@@ -349,7 +342,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
@@ -386,7 +378,6 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9997");
@@ -433,7 +424,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
@@ -471,7 +461,6 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9997");
@@ -518,7 +507,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
@@ -534,7 +522,6 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9997");
@@ -567,7 +554,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
@@ -595,7 +581,6 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9997");
@@ -655,8 +640,7 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=0"),
               new DataTransformer.ErrorMessage("currStatus", "no value set"),
               new DataTransformer.ErrorMessage("currLoc1", "no value set"),
-              new DataTransformer.ErrorMessage("currLoc2", "no value set"),
-              new DataTransformer.ErrorMessage("clmTypInd", "no value set"));
+              new DataTransformer.ErrorMessage("currLoc2", "no value set"));
 
       String expectedMessage =
           String.format(
@@ -2505,7 +2489,6 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setClmTypInd("1");
     claim.setCurrStatus('T');
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9000");
@@ -2513,7 +2496,6 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
@@ -2587,7 +2569,6 @@ public class FissClaimTransformerTest {
       return FissClaim.newBuilder()
           .setDcn("dcn")
           .setHicNo("hicn")
-          .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
           .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
           .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
           .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
