@@ -9,7 +9,7 @@
     cmd: |
       aws ssm get-parameters-by-path \
         --with-decryption \
-        --path "/bfd/mgmt/common/sensitive/user" \
+        --path "/bfd/mgmt/common/sensitive/user/" \
         --recursive \
         --region us-east-1 \
         --query 'Parameters'
@@ -26,7 +26,7 @@
     cmd: |
       aws ssm get-parameters-by-path \
         --with-decryption \
-        --path "/bfd/{{ env }}/common/sensitive/user" \
+        --path "/bfd/{{ env }}/common/sensitive/user/" \
         --recursive \
         --region us-east-1 \
         --query 'Parameters'
