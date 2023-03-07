@@ -45,6 +45,7 @@ resource "aws_iam_policy" "ssm" {
             ],
             "Resource": [
                 "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
                 "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/*",
                 "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/server/*"
             ]

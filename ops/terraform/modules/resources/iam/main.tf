@@ -98,6 +98,7 @@ resource "aws_iam_policy" "ssm" {
         "ssm:GetParameter"
       ],
       "Resource": [
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/sensitive/user/*",
         "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/nonsensitive/*",
         "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/${local.service}/*"
       ]
