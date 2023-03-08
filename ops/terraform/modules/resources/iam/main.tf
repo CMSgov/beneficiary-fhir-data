@@ -8,6 +8,10 @@ data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
+data "aws_kms_key" "mgmt_key" {
+  key_id = "alias/bfd-mgmt-cmk"
+}
+
 data "aws_iam_policy" "cloudwatch_agent_policy" {
   arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
@@ -94,7 +98,7 @@ resource "aws_iam_policy" "ssm" {
         "ssm:GetParameter"
       ],
       "Resource": [
-
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/sensitive/user/*",
         "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/nonsensitive/*",
         "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/${local.service}/*"
       ]
@@ -123,4 +127,61 @@ EOF
 resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.ssm.arn
+}
+
+resource "aws_iam_policy" "ssm_mgmt" {
+  description = "Policy granting BFD Server in ${var.env_config.env} environment access to certain mgmt SSM hierarchies"
+  name        = "bfd-${var.env_config.env}-${local.service}-ssm-mgmt-parameters"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": [
+        "ssm:GetParametersByPath",
+        "ssm:GetParameters",
+        "ssm:GetParameter"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/mgmt/common/sensitive/user/*"
+      ],
+      "Sid": "BFDProfile"
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+}
+
+# attach AWS managed SSM mgmt parameters to all EC2 instances
+resource "aws_iam_role_policy_attachment" "ssm_mgmt" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.ssm_mgmt.arn
+}
+
+resource "aws_iam_policy" "kms_mgmt" {
+  description = "Policy granting BFD Server in ${var.env_config.env} environment access to decrypt using the mgmt KMS key"
+  name        = "bfd-${var.env_config.env}-${local.service}-kms-mgmt"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": ["kms:Decrypt"],
+      "Effect": "Allow",
+      "Resource": [
+        "${data.aws_kms_key.mgmt_key.arn}"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+}
+
+# attach policy allowing BFD Server to decrypt using mgmt KMS to all EC2 instances
+resource "aws_iam_role_policy_attachment" "kms_mgmt" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.kms_mgmt.arn
 }
