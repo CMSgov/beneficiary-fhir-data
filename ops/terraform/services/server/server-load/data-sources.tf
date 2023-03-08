@@ -2,6 +2,10 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_kms_key" "mgmt_cmk" {
+  key_id = "alias/bfd-mgmt-cmk"
+}
+
 data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
 }

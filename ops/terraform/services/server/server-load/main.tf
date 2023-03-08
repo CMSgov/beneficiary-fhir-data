@@ -27,8 +27,9 @@ locals {
   # to cleanup properly
   lambda_timeout_seconds = min(900, var.test_runtime_limit + 15)
 
-  kms_key_arn = data.aws_kms_key.cmk.arn
-  kms_key_id  = data.aws_kms_key.cmk.key_id
+  mgmt_kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
+  kms_key_arn      = data.aws_kms_key.cmk.arn
+  kms_key_id       = data.aws_kms_key.cmk.key_id
 
   ami_id                     = data.aws_ami.main.id
   instance_type              = "m5.large"
