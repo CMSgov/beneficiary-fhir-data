@@ -99,8 +99,6 @@ public final class RifLoader {
   private final LoadAppOptions options;
   /** The shared application state. */
   private final PipelineApplicationState appState;
-  /** Used to execute database transactions. */
-  private final TransactionManager transactionManager;
   /** ID hasher that caches values in database. */
   private final DatabaseIdHasher hasher;
 
@@ -113,7 +111,6 @@ public final class RifLoader {
   public RifLoader(LoadAppOptions options, PipelineApplicationState appState) {
     this.options = options;
     this.appState = appState;
-    transactionManager = new TransactionManager(appState.getEntityManagerFactory());
 
     // A single cache can serve all threads efficiently so we base the cache on the product of cache
     // size
@@ -270,25 +267,25 @@ public final class RifLoader {
         };
 
     // Collect records into batches and submit each to batchProcessor.
-      try {
-    if (options.getRecordBatchSize() > 1)
-      BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
-          .forEach(batchProcessor);
-    else
-      dataToLoad
-          .getRecords()
-          .map(
-              record -> {
-                List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
-                ittyBittyBatch.add(record);
-                return ittyBittyBatch;
-              })
-          .forEach(batchProcessor);
-      } catch (Exception e) {
-        LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
-        timerDataSetFile.stop();
-        throw e;
-      }
+    try {
+      if (options.getRecordBatchSize() > 1)
+        BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
+            .forEach(batchProcessor);
+      else
+        dataToLoad
+            .getRecords()
+            .map(
+                record -> {
+                  List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
+                  ittyBittyBatch.add(record);
+                  return ittyBittyBatch;
+                })
+            .forEach(batchProcessor);
+    } catch (Exception e) {
+      LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
+      timerDataSetFile.stop();
+      throw e;
+    }
 
     // Wait for all submitted batches to complete.
     try {
@@ -368,7 +365,8 @@ public final class RifLoader {
             .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
             .time();
 
-    try {
+    try (TransactionManager transactionManager =
+        new TransactionManager(appState.getEntityManagerFactory())) {
       final var transactionResult =
           transactionManager.executeFunctionWithRetries(
               1,
@@ -1152,7 +1150,8 @@ public final class RifLoader {
     loadedFile.setCreated(Instant.now());
 
     long loadedFileId;
-    try {
+    try (TransactionManager transactionManager =
+        new TransactionManager(appState.getEntityManagerFactory())) {
       loadedFileId =
           transactionManager.executeFunction(
               entityManager -> {
@@ -1252,14 +1251,17 @@ public final class RifLoader {
    * @return the number of instances in the db
    */
   private long queryForEntityCount(Class<?> entityType) {
-    return transactionManager.executeFunction(
-        entityManager -> {
-          CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-          CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-          criteriaQuery.select(criteriaBuilder.count(criteriaQuery.from(entityType)));
+    try (TransactionManager transactionManager =
+        new TransactionManager(appState.getEntityManagerFactory())) {
+      return transactionManager.executeFunction(
+          entityManager -> {
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+            criteriaQuery.select(criteriaBuilder.count(criteriaQuery.from(entityType)));
 
-          return entityManager.createQuery(criteriaQuery).getSingleResult();
-        });
+            return entityManager.createQuery(criteriaQuery).getSingleResult();
+          });
+    }
   }
 
   /**
