@@ -17,6 +17,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -118,7 +119,9 @@ public class StandardGrpcRdaSourceIT {
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"apiSource\" : \"0.13\",\n"
+          + "  \"apiSource\" : \""
+          + RdaService.RDA_PROTO_VERSION
+          + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"claimId\" : \"63843470\",\n"
           + "  \"clmTypInd\" : \"1\",\n"
@@ -169,7 +172,9 @@ public class StandardGrpcRdaSourceIT {
   /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"apiSource\" : \"0.13\",\n"
+          + "  \"apiSource\" : \""
+          + RdaService.RDA_PROTO_VERSION
+          + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
           + "  \"claimId\" : \"2643602\",\n"
           + "  \"clmTypInd\" : \"3\",\n"
@@ -227,6 +232,8 @@ public class StandardGrpcRdaSourceIT {
   private MeterRegistry appMetrics;
   /** The json sink. */
   private JsonCaptureSink sink;
+  /** The RdaVersion to require. */
+  private RdaVersion rdaVersion;
 
   /**
    * Sets the test dependencies up.
@@ -237,6 +244,7 @@ public class StandardGrpcRdaSourceIT {
   public void setUp() throws Exception {
     appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
+    rdaVersion = RdaVersion.builder().versionString("~" + RdaService.RDA_PROTO_VERSION).build();
   }
 
   /**
@@ -271,6 +279,7 @@ public class StandardGrpcRdaSourceIT {
    */
   @Test
   public void grpcCallWithCorrectAuthToken() throws Exception {
+
     createServerConfig()
         .authorizedToken("secret")
         .build()
@@ -288,6 +297,41 @@ public class StandardGrpcRdaSourceIT {
               assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
               assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
             });
+  }
+
+  /** Verifies that a GRPC call with an incompatible RDA version will throw an exception. */
+  @Test
+  public void grpcCallWithIncompatibleRdaVersion() {
+    final RdaVersion requireHigherRdaVersion =
+        RdaVersion.builder().versionString("100.100.100").build();
+
+    try {
+      createServerConfig()
+          .authorizedToken("secret")
+          .build()
+          .runWithPortParam(
+              port -> {
+                RdaSourceConfig config =
+                    createSourceConfig(port).authenticationToken("secret").build();
+                try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+                    new StandardGrpcRdaSource<>(
+                        config,
+                        streamCaller,
+                        appMetrics,
+                        "fiss",
+                        Optional.empty(),
+                        requireHigherRdaVersion)) {
+                  source.retrieveAndProcessObjects(3, sink);
+                }
+              });
+      fail("Should have thrown exception");
+    } catch (Exception e) {
+      assertEquals(e.getCause().getClass(), IllegalStateException.class);
+      assertEquals(
+          e.getCause().getMessage(),
+          String.format(
+              "Can not ingest data from API running version '%s'", RdaService.RDA_PROTO_VERSION));
+    }
   }
 
   /**
@@ -389,7 +433,8 @@ public class StandardGrpcRdaSourceIT {
   @Nonnull
   private StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
       RdaSourceConfig config) {
-    return new StandardGrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
+    return new StandardGrpcRdaSource<>(
+        config, streamCaller, appMetrics, "fiss", Optional.empty(), rdaVersion);
   }
 
   /** The sink for json data. */

@@ -54,6 +54,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType the claim type
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
    */
   public DLQGrpcRdaSource(
       EntityManager entityManager,
@@ -61,7 +62,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
       MeterRegistry appMetrics,
-      String claimType) {
+      String claimType,
+      RdaVersion rdaVersion) {
     this(
         entityManager,
         sequencePredicate,
@@ -69,7 +71,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
         caller,
         config::createCallOptions,
         appMetrics,
-        claimType);
+        claimType,
+        rdaVersion);
   }
 
   /**
@@ -84,6 +87,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * @param callOptionsFactory factory for generating runtime options for the gRPC call
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType string representation of the claim type
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
    */
   @VisibleForTesting
   DLQGrpcRdaSource(
@@ -93,13 +97,15 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
       MeterRegistry appMetrics,
-      String claimType) {
+      String claimType,
+      RdaVersion rdaVersion) {
     super(
         Preconditions.checkNotNull(channel),
         Preconditions.checkNotNull(caller),
         Preconditions.checkNotNull(claimType),
         callOptionsFactory,
-        appMetrics);
+        appMetrics,
+        rdaVersion);
     this.dao = new DLQDao(Preconditions.checkNotNull(entityManager));
     this.sequencePredicate = sequencePredicate;
   }
@@ -155,6 +161,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
     return () -> {
       ProcessResult processResult = new ProcessResult();
       final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+      checkApiVersion(apiVersion);
 
       for (final long startingSequenceNumber : sequenceNumbers) {
         log.info(
