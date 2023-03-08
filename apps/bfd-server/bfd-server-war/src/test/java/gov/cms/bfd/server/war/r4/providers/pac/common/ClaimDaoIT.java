@@ -153,7 +153,7 @@ public class ClaimDaoIT {
             goodMbiHash,
             null,
             null,
-            List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)),
+            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID, RDATestUtils.FISS_CLAIM_B_CLAIM_ID)),
         new ServiceDateQueryParam(
             "bad-mbi-matches-none-no-dates", badMbiHash, null, null, List.of()),
         new ServiceDateQueryParam(
@@ -180,31 +180,31 @@ public class ClaimDaoIT {
             new DateRangeParam(
                 new DateParam("ge1970-08-01T00:00:00Z"), new DateParam("lt1970-08-07T00:00:00Z")),
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
-            List.of(RDATestUtils.FISS_CLAIM_A_DCN)),
+            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID)),
         new ServiceDateQueryParam(
             "lastUpdated-matches-2",
             goodMbiHash,
             new DateRangeParam(new DateParam("ge1970-08-01T00:00:00Z"), null),
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
-            List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)),
+            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID, RDATestUtils.FISS_CLAIM_B_CLAIM_ID)),
         new ServiceDateQueryParam(
             "serviceDate-matches-1-from",
             goodMbiHash,
             null,
             new DateRangeParam(null, new DateParam("lt1970-07-11")),
-            List.of(RDATestUtils.FISS_CLAIM_A_DCN)),
+            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID)),
         new ServiceDateQueryParam(
             "serviceDate-matches-1-to",
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("gt1970-08-01"), null),
-            List.of(RDATestUtils.FISS_CLAIM_B_DCN)),
+            List.of(RDATestUtils.FISS_CLAIM_B_CLAIM_ID)),
         new ServiceDateQueryParam(
             "serviceDate-matches-2",
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("ge1970-07-19"), new DateParam("lt1970-08-01")),
-            List.of(RDATestUtils.FISS_CLAIM_A_DCN, RDATestUtils.FISS_CLAIM_B_DCN)));
+            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID, RDATestUtils.FISS_CLAIM_B_CLAIM_ID)));
   }
 
   /**
@@ -226,7 +226,7 @@ public class ClaimDaoIT {
             testParam.serviceDateParam);
     assertEquals(
         testParam.expectedClaimIds,
-        claims.stream().map(RdaFissClaim::getDcn).collect(Collectors.toList()));
+        claims.stream().map(RdaFissClaim::getClaimId).collect(Collectors.toList()));
   }
 
   /**

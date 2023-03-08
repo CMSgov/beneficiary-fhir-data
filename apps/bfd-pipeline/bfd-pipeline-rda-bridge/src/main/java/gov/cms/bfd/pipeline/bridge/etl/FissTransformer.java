@@ -36,6 +36,8 @@ public class FissTransformer extends AbstractTransformer {
   private final Map<String, BeneficiaryData> mbiMap;
   /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
+  /** Appended to DCN to create a claim id. */
+  private static final String CLAIM_ID_SUFFIX = "key";
 
   /** {@inheritDoc} */
   @Override
@@ -88,6 +90,18 @@ public class FissTransformer extends AbstractTransformer {
   }
 
   /**
+   * Creates a value suitable for use as a unique claim ID. Currently just adds a suffix to the DCN
+   * value.
+   *
+   * @param dcn document control number from claim
+   * @return claim id value
+   */
+  @VisibleForTesting
+  static String createClaimId(String dcn) {
+    return dcn + CLAIM_ID_SUFFIX;
+  }
+
+  /**
    * Adds additional line items to an existing claim.
    *
    * <p>Not currently implemented for FISS claims.
@@ -131,6 +145,7 @@ public class FissTransformer extends AbstractTransformer {
 
     FissClaim.Builder claimBuilder =
         FissClaim.newBuilder()
+            .setRdaClaimKey(createClaimId(dcn))
             .setDcn(dcn)
             .setMbi(mbiMap.get(beneId).getMbi())
             .setHicNo(mbiMap.get(beneId).getHicNo())
@@ -197,11 +212,13 @@ public class FissTransformer extends AbstractTransformer {
     addDiagCodes(claimBuilder, data);
     addProcCodes(claimBuilder, data);
 
+    FissClaim claim = claimBuilder.build();
     return FissClaimChange.newBuilder()
         .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
         .setSeq(sequenceNumber.inc())
-        .setClaim(claimBuilder.build())
+        .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setRdaClaimKey(claim.getRdaClaimKey())
         .setDcn(dcn)
         .setSource(
             RecordSource.newBuilder()

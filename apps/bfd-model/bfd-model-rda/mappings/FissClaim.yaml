@@ -487,10 +487,9 @@ mappings:
     - SpecialFacility
     - Unrecognized
   transformations:
-  - from: dcn
+  - from: rdaClaimKey
     to: claimId
     optionalComponents: None
-    # TODO: Change from to claim id field once it is available in RDA API message.
   - from: dcn
     optionalComponents: None
   - from: intermediaryNb
