@@ -335,10 +335,13 @@ public class FissClaimRdaSinkTest {
   private List<FissClaimChange> messagesForBatch(List<RdaChange<RdaFissClaim>> batch) {
     final var messages = ImmutableList.<FissClaimChange>builder();
     for (RdaChange<RdaFissClaim> change : batch) {
+      RdaFissClaim claim = change.getClaim();
       var message =
           FissClaimChange.newBuilder()
-              .setDcn(change.getClaim().getDcn())
               .setSeq(change.getSequenceNumber())
+              .setDcn(claim.getDcn())
+              .setRdaClaimKey(claim.getClaimId())
+              .setIntermediaryNb(claim.getIntermediaryNb())
               .build();
       doReturn(change).when(transformer).transformClaim(message);
       messages.add(message);
@@ -354,8 +357,9 @@ public class FissClaimRdaSinkTest {
    */
   private RdaChange<RdaFissClaim> createClaim(String dcn) {
     RdaFissClaim claim = new RdaFissClaim();
-    claim.setClaimId(dcn);
     claim.setDcn(dcn);
+    claim.setClaimId(dcn + "id");
+    claim.setIntermediaryNb("inter");
     claim.setApiSource(VERSION);
     return new RdaChange<>(
         nextSeq++,

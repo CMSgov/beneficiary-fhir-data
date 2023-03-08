@@ -115,8 +115,9 @@ public class FissClaimRdaSinkIT {
           final FissClaimChange message =
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
-                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
+                  .setRdaClaimKey(claim.getClaimId())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setClaim(claimMessage)
                   .build();
 
@@ -238,8 +239,9 @@ public class FissClaimRdaSinkIT {
           final FissClaimChange message =
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
-                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
+                  .setRdaClaimKey(claim.getClaimId())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setClaim(claimMessage)
                   .build();
 
@@ -277,7 +279,7 @@ public class FissClaimRdaSinkIT {
 
             assertEquals(Long.valueOf(3), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());
-            assertEquals(claim.getDcn(), error.getClaimId());
+            assertEquals(claim.getClaimId(), error.getClaimId());
             assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());
           }
         });
