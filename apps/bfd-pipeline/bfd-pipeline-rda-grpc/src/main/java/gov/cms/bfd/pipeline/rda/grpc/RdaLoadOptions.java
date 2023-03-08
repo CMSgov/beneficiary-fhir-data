@@ -118,7 +118,8 @@ public class RdaLoadOptions implements Serializable {
                   rdaSourceConfig,
                   new FissClaimStreamCaller(),
                   appState.getMeters(),
-                  "fiss");
+                  "fiss",
+                  jobConfig.getRdaVersion());
     } else {
       preJobTaskFactory = EmptyRdaSource::new;
     }
@@ -132,7 +133,8 @@ public class RdaLoadOptions implements Serializable {
                 new FissClaimStreamCaller(),
                 appState.getMeters(),
                 "fiss",
-                jobConfig.getStartingFissSeqNum()),
+                jobConfig.getStartingFissSeqNum(),
+                jobConfig.getRdaVersion()),
         createFissSinkFactory(appState),
         appState.getMeters());
   }
@@ -190,7 +192,8 @@ public class RdaLoadOptions implements Serializable {
                   rdaSourceConfig,
                   new McsClaimStreamCaller(),
                   appState.getMeters(),
-                  "mcs");
+                  "mcs",
+                  jobConfig.getRdaVersion());
     } else {
       preJobTaskFactory = EmptyRdaSource::new;
     }
@@ -204,7 +207,8 @@ public class RdaLoadOptions implements Serializable {
                 new McsClaimStreamCaller(),
                 appState.getMeters(),
                 "mcs",
-                jobConfig.getStartingMcsSeqNum()),
+                jobConfig.getStartingMcsSeqNum(),
+                jobConfig.getRdaVersion()),
         createMcsSinkFactory(appState),
         appState.getMeters());
   }
