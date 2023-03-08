@@ -42,6 +42,9 @@ export RDA_JOB_WRITE_THREADS='{{ data_pipeline_rda_job_write_threads }}'
 {% if data_pipeline_rda_process_dlq is defined %}
 export RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
 {% endif %}
+{% if data_pipeline_rda_version is defined %}
+export RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
+{% endif %}
 {% if data_pipeline_rda_job_starting_fiss_seq_num is defined %}
 export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'
 {% endif %}

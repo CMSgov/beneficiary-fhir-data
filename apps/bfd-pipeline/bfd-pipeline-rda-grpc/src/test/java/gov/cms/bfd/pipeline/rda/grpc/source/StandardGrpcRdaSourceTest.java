@@ -84,7 +84,7 @@ public class StandardGrpcRdaSourceTest {
   private static final Integer INVALID_CLAIM = 106;
 
   /** String used as a RDA API "version" in the unit tests. */
-  public static final String VERSION = "version";
+  public static final String VERSION = "0.0.1";
 
   /** A MeterRegistry used to verify metrics. */
   private MeterRegistry appMetrics;
@@ -100,6 +100,8 @@ public class StandardGrpcRdaSourceTest {
   @Mock private ClientCall<Integer, Integer> clientCall;
   /** A mock response stream used to simulate claims arriving from the RDA API server. */
   @Mock private GrpcResponseStream<Integer> mockResponseStream;
+  /** A mock {@link RdaVersion} to use for testing. */
+  @Mock private RdaVersion rdaVersion;
   /** The object we are testing. */
   private StandardGrpcRdaSource<Integer, Integer> source;
   /** Shortcut for accessing the {@link StandardGrpcRdaSource.Metrics} object. */
@@ -125,7 +127,10 @@ public class StandardGrpcRdaSourceTest {
                 "ints",
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
-                RdaSourceConfig.ServerType.Remote));
+                RdaSourceConfig.ServerType.Remote,
+                rdaVersion));
+    lenient().doReturn(false).when(rdaVersion).allows(anyString());
+    lenient().doReturn(true).when(rdaVersion).allows(VERSION);
     lenient().doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
     lenient().doAnswer(i -> i.getArgument(0).toString()).when(sink).getClaimIdForMessage(any());
     metrics = source.getMetrics();
@@ -198,7 +203,8 @@ public class StandardGrpcRdaSourceTest {
                 "ints",
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
-                RdaSourceConfig.ServerType.InProcess));
+                RdaSourceConfig.ServerType.InProcess,
+                rdaVersion));
 
     doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
 
@@ -206,6 +212,27 @@ public class StandardGrpcRdaSourceTest {
 
     verifyNoInteractions(caller);
     verify(sink).readMaxExistingSequenceNumber();
+  }
+
+  /**
+   * Verifies that {@link AbstractGrpcRdaSource#checkApiVersion(String)} is called, and that any
+   * thrown exception is thrown up the stack.
+   */
+  @Test
+  public void testThrowsExceptionWhenRdaCheckThrows() {
+    IllegalStateException expectedException = new IllegalStateException("Bad");
+
+    lenient().doNothing().when(source).checkApiVersion(anyString());
+
+    doThrow(expectedException).when(source).checkApiVersion(VERSION);
+
+    try {
+      source.retrieveAndProcessObjects(2, sink);
+      fail("Expected exception not thrown");
+    } catch (Exception e) {
+      Throwable actualException = e.getCause();
+      assertSame(expectedException, actualException, "Expected exception not thrown");
+    }
   }
 
   /**
@@ -258,7 +285,8 @@ public class StandardGrpcRdaSourceTest {
                 "ints",
                 Optional.of(CONFIGURED_SEQUENCE_NUMBER),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
-                RdaSourceConfig.ServerType.Remote));
+                RdaSourceConfig.ServerType.Remote,
+                rdaVersion));
     doReturn(createResponse(CLAIM_1))
         .when(caller)
         .callService(channel, CallOptions.DEFAULT, CONFIGURED_SEQUENCE_NUMBER - 1);
@@ -332,22 +360,7 @@ public class StandardGrpcRdaSourceTest {
   public void testHandlesExceptionFromCaller() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
-    // unchecked - This is fine for making a mock.
-    //noinspection unchecked
-    final GrpcStreamCaller<Integer> caller = mock(GrpcStreamCaller.class);
     doThrow(error).when(caller).callService(any(), any(), anyLong());
-    source =
-        spy(
-            new StandardGrpcRdaSource<>(
-                clock,
-                channel,
-                caller,
-                () -> CallOptions.DEFAULT,
-                appMetrics,
-                "ints",
-                Optional.empty(),
-                MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
-                RdaSourceConfig.ServerType.Remote));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
