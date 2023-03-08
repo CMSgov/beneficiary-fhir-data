@@ -218,8 +218,9 @@ public class FissTransformer extends AbstractTransformer {
         .setSeq(sequenceNumber.inc())
         .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-        .setRdaClaimKey(claim.getRdaClaimKey())
         .setDcn(dcn)
+        .setRdaClaimKey(claim.getRdaClaimKey())
+        .setIntermediaryNb(claim.getIntermediaryNb())
         .setSource(
             RecordSource.newBuilder()
                 // Hardcoding values for test data, this data is only used in production for

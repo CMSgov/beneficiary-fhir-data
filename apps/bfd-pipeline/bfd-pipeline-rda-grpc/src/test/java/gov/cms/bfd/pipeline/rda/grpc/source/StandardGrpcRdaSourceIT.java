@@ -479,7 +479,7 @@ public class StandardGrpcRdaSourceIT {
 
     @Override
     public String getClaimIdForMessage(FissClaimChange object) {
-      return object.getClaim().getDcn();
+      return object.getClaim().getRdaClaimKey();
     }
 
     /** {@inheritDoc} */

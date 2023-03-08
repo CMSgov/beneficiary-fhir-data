@@ -401,8 +401,9 @@ public class FissTransformerIT {
         .setSeq(sequenceNumber)
         .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
-        .setRdaClaimKey(FissTransformer.createClaimId(dcn))
         .setDcn(dcn)
+        .setRdaClaimKey(FissTransformer.createClaimId(dcn))
+        .setIntermediaryNb(claim.getIntermediaryNb())
         .setSource(
             RecordSource.newBuilder()
                 .setPhase("P1")

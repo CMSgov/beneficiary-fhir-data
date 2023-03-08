@@ -77,8 +77,8 @@ public class FissClaimTransformer extends AbstractClaimTransformer {
     if (errors.size() > 0) {
       String message =
           String.format(
-              "failed with %d errors: seq=%d dcn=%s errors=%s",
-              errors.size(), change.getSeq(), from.getDcn(), errors);
+              "failed with %d errors: seq=%d rdaClaimKey=%s errors=%s",
+              errors.size(), change.getSeq(), from.getRdaClaimKey(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
 

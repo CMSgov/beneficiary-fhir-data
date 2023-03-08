@@ -671,7 +671,7 @@ public class FissClaimTransformerTest {
 
       String expectedMessage =
           String.format(
-              "failed with %d errors: seq=%d dcn= errors=[%s]",
+              "failed with %d errors: seq=%d rdaClaimKey= errors=[%s]",
               expectedErrors.size(),
               SEQUENCE_NUM,
               expectedErrors.stream()
@@ -2645,9 +2645,11 @@ public class FissClaimTransformerTest {
     RdaChange<RdaFissClaim> transformClaim(FissClaim claim) {
       var changeBuilder =
           FissClaimChange.newBuilder()
-              .setSeq(MIN_SEQUENCE_NUM)
               .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+              .setSeq(MIN_SEQUENCE_NUM)
               .setDcn(claim.getDcn())
+              .setRdaClaimKey(claim.getRdaClaimKey())
+              .setIntermediaryNb(claim.getIntermediaryNb())
               .setClaim(claim);
       return transformer.transformClaim(changeBuilder.build());
     }
