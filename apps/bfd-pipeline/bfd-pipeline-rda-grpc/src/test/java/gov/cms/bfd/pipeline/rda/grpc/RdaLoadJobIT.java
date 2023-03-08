@@ -20,6 +20,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -35,7 +36,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -79,6 +79,8 @@ public class RdaLoadJobIT {
    * All of our test claims should be valid for our IT tests to succeed. This test ensures this is
    * the case and catches any incompatibility issues when a new RDA API version contains breaking
    * changes.
+   *
+   * @throws Exception indicates test failure
    */
   @Test
   public void fissClaimsAreValid() throws Exception {
@@ -105,8 +107,8 @@ public class RdaLoadJobIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         RdaLoadJobIT.class,
         clock,
-        (appState, entityManager) -> {
-          assertTablesAreEmpty(entityManager);
+        (appState, transactionManager) -> {
+          assertTablesAreEmpty(transactionManager);
           RdaServer.LocalConfig.builder()
               .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
               .fissSourceFactory(fissJsonSource(fissClaimJson))
@@ -119,7 +121,7 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
               JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
-          List<RdaFissClaim> claims = getRdaFissClaims(entityManager);
+          List<RdaFissClaim> claims = getRdaFissClaims(transactionManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaFissClaim resultClaim : claims) {
             FissClaim expected = findMatchingFissClaim(expectedClaims, resultClaim);
@@ -136,14 +138,16 @@ public class RdaLoadJobIT {
   /**
    * Verifies that an invalid FISS claim terminates the job and that all complete batches prior to
    * the bad claim have been written to the database.
+   *
+   * @throws Exception indicates test failure
    */
   @Test
   public void invalidFissClaimTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         RdaLoadJobIT.class,
         clock,
-        (appState, entityManager) -> {
-          assertTablesAreEmpty(entityManager);
+        (appState, transactionManager) -> {
+          assertTablesAreEmpty(transactionManager);
           final List<String> badFissClaimJson = new ArrayList<>(fissClaimJson);
           final int badClaimIndex = badFissClaimJson.size() - 1;
           final int fullBatchSize = badFissClaimJson.size() - badFissClaimJson.size() % BATCH_SIZE;
@@ -168,7 +172,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getMessage().contains("Error limit reached"));
                     }
                   });
-          List<RdaFissClaim> claims = getRdaFissClaims(entityManager);
+          List<RdaFissClaim> claims = getRdaFissClaims(transactionManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -177,6 +181,8 @@ public class RdaLoadJobIT {
    * All of our test claims should be valid for our IT tests to succeed. This test ensures this is
    * the case and catches any incompatibility issues when a new RDA API version contains breaking
    * changes.
+   *
+   * @throws Exception indicates test failure
    */
   @Test
   public void mcsClaimsAreValid() throws Exception {
@@ -203,8 +209,8 @@ public class RdaLoadJobIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         RdaLoadJobIT.class,
         clock,
-        (appState, entityManager) -> {
-          assertTablesAreEmpty(entityManager);
+        (appState, transactionManager) -> {
+          assertTablesAreEmpty(transactionManager);
           RdaServer.InProcessConfig.builder()
               .serverName(RdaServerJob.Config.DEFAULT_SERVER_NAME)
               .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
@@ -218,7 +224,7 @@ public class RdaLoadJobIT {
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
               JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
-          List<RdaMcsClaim> claims = getRdaMcsClaims(entityManager);
+          List<RdaMcsClaim> claims = getRdaMcsClaims(transactionManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaMcsClaim resultClaim : claims) {
             McsClaim expected = findMatchingMcsClaim(expectedClaims, resultClaim);
@@ -235,14 +241,16 @@ public class RdaLoadJobIT {
   /**
    * Verifies that a Server error terminates the job and that all complete batches prior to the bad
    * claim have been written to the database.
+   *
+   * @throws Exception indicates test failure
    */
   @Test
   public void serverExceptionTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         RdaLoadJobIT.class,
         clock,
-        (appState, entityManager) -> {
-          assertTablesAreEmpty(entityManager);
+        (appState, transactionManager) -> {
+          assertTablesAreEmpty(transactionManager);
           final int claimsToSendBeforeThrowing = mcsClaimJson.size() / 2;
           final int fullBatchSize =
               claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
@@ -269,7 +277,7 @@ public class RdaLoadJobIT {
                       assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                     }
                   });
-          List<RdaMcsClaim> claims = getRdaMcsClaims(entityManager);
+          List<RdaMcsClaim> claims = getRdaMcsClaims(transactionManager);
           assertEquals(fullBatchSize, claims.size());
         });
   }
@@ -313,35 +321,39 @@ public class RdaLoadJobIT {
   /**
    * Asserts that the Fiss and MCS tables are empty.
    *
-   * @param entityManager the entity manager
+   * @param transactionManager the transaction manager
    */
-  private void assertTablesAreEmpty(EntityManager entityManager) {
-    assertEquals(0, getRdaFissClaims(entityManager).size());
-    assertEquals(0, getRdaMcsClaims(entityManager).size());
+  private void assertTablesAreEmpty(TransactionManager transactionManager) {
+    assertEquals(0, getRdaFissClaims(transactionManager).size());
+    assertEquals(0, getRdaMcsClaims(transactionManager).size());
   }
 
   /**
    * Gets the MCS claims from the database using a query.
    *
-   * @param entityManager the entity manager to connect to the database
+   * @param transactionManager the transaction manager to connect to the database
    * @return the rda mcs claims
    */
-  private List<RdaMcsClaim> getRdaMcsClaims(EntityManager entityManager) {
-    return entityManager
-        .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
-        .getResultList();
+  private List<RdaMcsClaim> getRdaMcsClaims(TransactionManager transactionManager) {
+    return transactionManager.executeFunction(
+        entityManager ->
+            entityManager
+                .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
+                .getResultList());
   }
 
   /**
    * Gets the Fiss claims from the database using a query.
    *
-   * @param entityManager the entity manager to connect to the database
+   * @param transactionManager the transaction manager to connect to the database
    * @return the rda fiss claims
    */
-  private List<RdaFissClaim> getRdaFissClaims(EntityManager entityManager) {
-    return entityManager
-        .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
-        .getResultList();
+  private List<RdaFissClaim> getRdaFissClaims(TransactionManager transactionManager) {
+    return transactionManager.executeFunction(
+        entityManager ->
+            entityManager
+                .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+                .getResultList());
   }
 
   /**
