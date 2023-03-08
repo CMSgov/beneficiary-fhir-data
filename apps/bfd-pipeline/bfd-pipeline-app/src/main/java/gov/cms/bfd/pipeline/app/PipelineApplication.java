@@ -351,16 +351,7 @@ public final class PipelineApplication {
               PipelineApplicationState.PERSISTENCE_UNIT_NAME,
               Clock.systemUTC());
 
-      final PipelineApplicationState mbiCacheAppState =
-          new PipelineApplicationState(
-              appMeters,
-              appMetrics,
-              pooledDataSource,
-              PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-              Clock.systemUTC());
-
-      jobs.add(
-          createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState, mbiCacheAppState));
+      jobs.add(createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
       LOGGER.warn("CcwRifLoadJob is disabled in app configuration.");
@@ -404,13 +395,10 @@ public final class PipelineApplication {
    *
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
-   * @param mbiCacheAppState the {@link PipelineApplicationState} to use for creating mbi cache
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private static PipelineJob<?> createCcwRifLoadJob(
-      CcwRifLoadOptions loadOptions,
-      PipelineApplicationState appState,
-      PipelineApplicationState mbiCacheAppState) {
+      CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
