@@ -111,7 +111,7 @@ public class FissClaimTransformerTest {
    */
   @Test
   public void minimumValidClaim() {
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("inter");
     claim.setHicNo("hicn");
@@ -120,6 +120,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9000");
     claim.setLastUpdated(clock.instant());
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("inter")
         .setHicNo("hicn")
@@ -139,7 +140,7 @@ public class FissClaimTransformerTest {
    */
   @Test
   public void basicFieldsTestForClaimObjectTransformation() {
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setSequenceNumber(42L);
     claim.setIntermediaryNb("12345");
@@ -178,6 +179,7 @@ public class FissClaimTransformerTest {
     claim.setBillTypCd("ABC");
     claim.setLastUpdated(clock.instant());
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setHicNo("hicn")
         .setIntermediaryNb("12345")
@@ -233,6 +235,7 @@ public class FissClaimTransformerTest {
   @Test
   public void basicFieldsTestForProcCodeObjectTransformation() {
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -252,6 +255,7 @@ public class FissClaimTransformerTest {
                 .setProcFlag("fl-2")
                 .setProcDt("2021-07-06")
                 .build());
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -260,13 +264,13 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("2");
     claim.setLastUpdated(clock.instant());
     RdaFissProcCode code = new RdaFissProcCode();
-    code.setClaimId("dcn");
+    code.setClaimId("claim_id");
     code.setRdaPosition((short) 1);
     code.setProcCode("code-1");
     code.setProcFlag("fl-1");
     claim.getProcCodes().add(code);
     code = new RdaFissProcCode();
-    code.setClaimId("dcn");
+    code.setClaimId("claim_id");
     code.setRdaPosition((short) 2);
     code.setProcCode("code-2");
     code.setProcFlag("fl-2");
@@ -288,6 +292,7 @@ public class FissClaimTransformerTest {
   @Test
   public void basicFieldsTestForDiagCodeObjectTransformation() {
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -310,7 +315,7 @@ public class FissClaimTransformerTest {
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO)
                 .build());
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -319,14 +324,14 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     RdaFissDiagnosisCode code = new RdaFissDiagnosisCode();
-    code.setClaimId("dcn");
+    code.setClaimId("claim_id");
     code.setRdaPosition((short) 1);
     code.setDiagCd2("");
     code.setDiagPoaInd("W");
     code.setBitFlags("1234");
     claim.getDiagCodes().add(code);
     code = new RdaFissDiagnosisCode();
-    code.setClaimId("dcn");
+    code.setClaimId("claim_id");
     code.setRdaPosition((short) 2);
     code.setDiagCd2("code-2");
     code.setDiagPoaInd("N");
@@ -348,6 +353,7 @@ public class FissClaimTransformerTest {
   @Test
   public void basicFieldsTestForInsuredPayerObjectTransformation() {
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -384,7 +390,7 @@ public class FissClaimTransformerTest {
                         .setInsuredDob("2021-11-22")
                         .build())
                 .build());
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -393,7 +399,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     RdaFissPayer payer = new RdaFissPayer();
-    payer.setClaimId("dcn");
+    payer.setClaimId("claim_id");
     payer.setRdaPosition((short) 1);
     payer.setPayerType(RdaFissPayer.PayerType.Insured);
     payer.setPayersId("H");
@@ -432,6 +438,7 @@ public class FissClaimTransformerTest {
   @Test
   public void basicFieldsTestForBeneZPayerObjectTransformation() {
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -469,7 +476,7 @@ public class FissClaimTransformerTest {
                             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_GRANDCHILD)
                         .build())
                 .build());
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -478,7 +485,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     RdaFissPayer payer = new RdaFissPayer();
-    payer.setClaimId("dcn");
+    payer.setClaimId("claim_id");
     payer.setRdaPosition((short) 1);
     payer.setPayerType(RdaFissPayer.PayerType.BeneZ);
     payer.setPayersId("H");
@@ -517,6 +524,7 @@ public class FissClaimTransformerTest {
   @Test
   public void basicFieldsTestForAuditTrailObjectTransformation() {
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -532,7 +540,7 @@ public class FissClaimTransformerTest {
                 .setBadtCurrDateCymd("2021-12-03")
                 .setRdaPosition(1)
                 .build());
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -541,7 +549,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     RdaFissAuditTrail auditTrail = new RdaFissAuditTrail();
-    auditTrail.setClaimId("dcn");
+    auditTrail.setClaimId("claim_id");
     auditTrail.setRdaPosition((short) 1);
     auditTrail.setBadtStatus("M");
     auditTrail.setBadtLoc("1");
@@ -566,6 +574,7 @@ public class FissClaimTransformerTest {
   @Test
   public void basicFieldsTestForRevenueLinesObjectTransformation() {
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -593,7 +602,7 @@ public class FissClaimTransformerTest {
                 .setAcoRedCarc("two")
                 .setAcoRedCagc("of")
                 .build());
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -602,7 +611,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     RdaFissRevenueLine revenueLine = new RdaFissRevenueLine();
-    revenueLine.setClaimId("dcn");
+    revenueLine.setClaimId("claim_id");
     revenueLine.setRdaPosition((short) 1);
     revenueLine.setNonBillRevCode("E");
     revenueLine.setRevCd("abcd");
@@ -675,6 +684,27 @@ public class FissClaimTransformerTest {
   }
 
   // region Claim tests
+
+  /**
+   * Tests the rdaClaimKey field is properly copied when a message object is passed through the
+   * transformer.
+   */
+  @Test
+  public void testClaimClaimId() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setRdaClaimKey, RdaFissClaim::getClaimId, "claimId", 32);
+  }
+
+  /**
+   * Tests the dcn field is properly copied when a message object is passed through the transformer.
+   */
+  @Test
+  public void testClaimDcn() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setDcn, RdaFissClaim::getDcn, "dcn", 23);
+  }
 
   /**
    * Tests the intermediaryNb field is properly copied when a message object is passed through the
@@ -2518,7 +2548,7 @@ public class FissClaimTransformerTest {
   @Test
   public void servTypeCdEnums() {
     // these required fields must always be present for the transform to be error free
-    claim.setClaimId("dcn");
+    claim.setClaimId("claim_id");
     claim.setDcn("dcn");
     claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
@@ -2527,6 +2557,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9000");
     claim.setLastUpdated(clock.instant());
     claimBuilder
+        .setRdaClaimKey("claim_id")
         .setDcn("dcn")
         .setIntermediaryNb("12345")
         .setHicNo("hicn")
@@ -2601,6 +2632,7 @@ public class FissClaimTransformerTest {
     @Override
     FissClaim.Builder createClaimBuilder() {
       return FissClaim.newBuilder()
+          .setRdaClaimKey("claim_id")
           .setDcn("dcn")
           .setIntermediaryNb("inter")
           .setHicNo("hicn")
@@ -2664,7 +2696,7 @@ public class FissClaimTransformerTest {
     RdaFissAuditTrail getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getAuditTrail().size());
       RdaFissAuditTrail answer = claim.getAuditTrail().iterator().next();
-      assertEquals("dcn", answer.getClaimId());
+      assertEquals("claim_id", answer.getClaimId());
       return answer;
     }
     /** {@inheritDoc} */
@@ -2693,7 +2725,7 @@ public class FissClaimTransformerTest {
     RdaFissPayer getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getPayers().size());
       RdaFissPayer answer = claim.getPayers().iterator().next();
-      assertEquals("dcn", answer.getClaimId());
+      assertEquals("claim_id", answer.getClaimId());
       return answer;
     }
     /** {@inheritDoc} */
@@ -2723,7 +2755,7 @@ public class FissClaimTransformerTest {
     RdaFissPayer getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getPayers().size());
       RdaFissPayer answer = claim.getPayers().iterator().next();
-      assertEquals("dcn", answer.getClaimId());
+      assertEquals("claim_id", answer.getClaimId());
       return answer;
     }
     /** {@inheritDoc} */
@@ -2754,7 +2786,7 @@ public class FissClaimTransformerTest {
     RdaFissProcCode getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getProcCodes().size());
       RdaFissProcCode answer = claim.getProcCodes().iterator().next();
-      assertEquals("dcn", answer.getClaimId());
+      assertEquals("claim_id", answer.getClaimId());
       return answer;
     }
     /** {@inheritDoc} */
@@ -2803,7 +2835,7 @@ public class FissClaimTransformerTest {
     RdaFissDiagnosisCode getTestEntity(RdaFissClaim claim) {
       assertEquals(1, claim.getDiagCodes().size());
       RdaFissDiagnosisCode answer = claim.getDiagCodes().iterator().next();
-      assertEquals("dcn", answer.getClaimId());
+      assertEquals("claim_id", answer.getClaimId());
       return answer;
     }
     /** {@inheritDoc} */

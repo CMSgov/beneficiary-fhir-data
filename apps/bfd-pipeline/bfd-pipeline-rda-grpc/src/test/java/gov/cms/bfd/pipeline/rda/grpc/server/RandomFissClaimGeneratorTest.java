@@ -465,6 +465,7 @@ public class RandomFissClaimGeneratorTest {
             + "  \"clmTypIndUnrecognized\": \"w\",\n"
             + "  \"recdDtCymdText\": \"2021-02-07\",\n"
             + "  \"currTranDtCymdText\": \"2021-01-20\",\n"
+            + "  \"rdaClaimKey\": \"196698\",\n"
             + "  \"intermediaryNb\": \"0914\"\n"
             + "}",
         json);

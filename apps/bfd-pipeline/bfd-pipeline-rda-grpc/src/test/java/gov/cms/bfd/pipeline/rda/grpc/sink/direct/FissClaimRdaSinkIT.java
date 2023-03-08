@@ -55,6 +55,7 @@ public class FissClaimRdaSinkIT {
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
+          claim.setClaimId("1id");
           claim.setDcn("1");
           claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
@@ -97,6 +98,7 @@ public class FissClaimRdaSinkIT {
 
           final FissClaim claimMessage =
               FissClaim.newBuilder()
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
                   .setIntermediaryNb(claim.getIntermediaryNb())
                   .setHicNo(claim.getHicNo())
@@ -113,6 +115,7 @@ public class FissClaimRdaSinkIT {
           final FissClaimChange message =
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
                   .setClaim(claimMessage)
                   .build();
@@ -176,7 +179,7 @@ public class FissClaimRdaSinkIT {
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
-          claim.setClaimId("1");
+          claim.setClaimId("1id");
           claim.setDcn("1");
           claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
@@ -218,6 +221,7 @@ public class FissClaimRdaSinkIT {
 
           final FissClaim claimMessage =
               FissClaim.newBuilder()
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
                   .setIntermediaryNb("12345")
                   .setHicNo(claim.getHicNo())
@@ -234,6 +238,7 @@ public class FissClaimRdaSinkIT {
           final FissClaimChange message =
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
                   .setClaim(claimMessage)
                   .build();

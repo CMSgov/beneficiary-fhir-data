@@ -351,7 +351,10 @@ public class FissTransformerIT {
     Optional<MessageOrBuilder> expectedResponse = Optional.of(expectedResponseClaimChange);
 
     FissClaim expectedWrappedClaim =
-        TestData.createDefaultClaimBuilder().setDcn(NEW_CLAIM_DCN).build();
+        TestData.createDefaultClaimBuilder()
+            .setDcn(NEW_CLAIM_DCN)
+            .setRdaClaimKey(FissTransformer.createClaimId(NEW_CLAIM_DCN))
+            .build();
     FissClaimChange expectedWrappedClaimChange =
         createFissClaimChange(expectedWrappedClaim, NEW_CLAIM_DCN, 2);
 
@@ -398,6 +401,7 @@ public class FissTransformerIT {
         .setSeq(sequenceNumber)
         .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setRdaClaimKey(FissTransformer.createClaimId(dcn))
         .setDcn(dcn)
         .setSource(
             RecordSource.newBuilder()
@@ -462,9 +466,11 @@ public class FissTransformerIT {
     private static final String PRCDR_DT1 = "10-Jan-2011";
     /** Claim Line Number. */
     private static final String CLM_LINE_NUM = "1";
-
     /** Hardcoded IntermediaryNb. */
     private static final String HARDCODED_INTERMEDIARY_NB = "?";
+    /** Hard coded RdaClaimKey. */
+    private static final String HARDCODED_RDA_CLAIM_KEY =
+        FissTransformer.createClaimId(FI_DOC_CLM_CNTL_NUM);
     /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
     /** Hardcoded Location2. */
@@ -487,6 +493,7 @@ public class FissTransformerIT {
      */
     public static FissClaim.Builder createDefaultClaimBuilder() {
       return FissClaim.newBuilder()
+          .setRdaClaimKey(HARDCODED_RDA_CLAIM_KEY)
           .setDcn(FI_DOC_CLM_CNTL_NUM)
           .setHicNo(HIC_NO)
           .setMbi(MBI)

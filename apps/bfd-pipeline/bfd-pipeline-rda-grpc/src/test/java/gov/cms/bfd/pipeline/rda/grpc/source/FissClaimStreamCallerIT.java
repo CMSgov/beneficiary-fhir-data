@@ -25,6 +25,7 @@ public class FissClaimStreamCallerIT {
   /** Example paid claim. */
   private static final String CLAIM_1 =
       "{"
+          + "  \"rdaClaimKey\": \"63843470id\","
           + "  \"dcn\": \"63843470\","
           + "  \"intermediaryNb\": \"53412\","
           + "  \"hicNo\": \"916689703543\","
@@ -42,6 +43,7 @@ public class FissClaimStreamCallerIT {
   /** Example rejected claim. */
   private static final String CLAIM_2 =
       "{"
+          + "  \"rdaClaimKey\": \"2643602id\","
           + "  \"dcn\": \"2643602\","
           + "  \"intermediaryNb\": \"24153\","
           + "  \"hicNo\": \"640930211775\","
@@ -97,11 +99,13 @@ public class FissClaimStreamCallerIT {
               assertTrue(results.hasNext());
 
               RdaFissClaim claim = transform(results.next());
+              assertEquals("63843470id", claim.getClaimId());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
+              assertEquals("2643602id", claim.getClaimId());
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(2), claim.getSequenceNumber());
               assertFalse(results.hasNext());
