@@ -31,6 +31,7 @@ locals {
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
   # Data source lookups
+  mgmt_kms_key_arn      = data.aws_kms_key.mgmt_cmk.arn
   kms_key_arn           = data.aws_kms_key.cmk.arn
   kms_key_id            = data.aws_kms_key.cmk.key_id
   vpn_security_group_id = data.aws_security_group.vpn.id

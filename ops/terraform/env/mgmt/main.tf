@@ -1,6 +1,12 @@
 locals {
   account_id              = data.aws_caller_identity.current.account_id
   env                     = "mgmt"
+  established_envs = [
+    "test",
+    "prod-sbx",
+    "prod"
+  ]
+
   bfd_insights_kms_key_id = data.aws_kms_key.insights.arn
   kms_key_id              = data.aws_kms_key.cmk.arn
   tf_state_kms_key_id     = data.aws_kms_key.tf_state.arn
@@ -53,4 +59,10 @@ data "aws_ssm_parameter" "cbc_aws_account_arn" {
 data "aws_ssm_parameter" "cpm_aws_account_arn" {
   name            = "/bfd/mgmt/jenkins/sensitive/cpm_aws_account_arn"
   with_decryption = true
+}
+
+module "base_config" {
+  source = "./base_config"
+
+  kms_key_id = data.aws_kms_key.cmk.arn
 }

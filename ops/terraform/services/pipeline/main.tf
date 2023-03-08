@@ -94,6 +94,7 @@ locals {
   max_claim_latency_alarm_actions = local.is_ephemeral_env ? [] : [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn]
 
   # data-source resolution
+  mgmt_kms_key_arn      = data.aws_kms_key.mgmt_cmk.arn
   ami_id                = data.aws_ami.main.image_id
   availability_zone     = data.external.rds.result["WriterAZ"]
   kms_key_id            = data.aws_kms_key.cmk.arn
