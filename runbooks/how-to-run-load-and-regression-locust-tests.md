@@ -203,10 +203,10 @@ any trailing characters after `PORT` as well.
     ```bash
     DB_CLUSTER_ID=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/common/nonsensitive/rds_cluster_identifier" \
                      --region "us-east-1" | jq -r '.Parameter.Value')
-    DB_USERNAME=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_username" \
+    DB_USERNAME=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/data_server_db_username" \
                      --with-decryption \
                      --region "us-east-1" | jq -r '.Parameter.Value')
-    DB_RAW_PASSWORD=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_password" \
+    DB_RAW_PASSWORD=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/data_server_db_password" \
                      --with-decryption \
                      --region "us-east-1" | jq -r '.Parameter.Value')
     DB_PASSWORD=$(printf %s "$DB_RAW_PASSWORD" | jq -sRr @uri)
@@ -351,10 +351,10 @@ any trailing characters after `PORT` as well.
     ```bash
     DB_CLUSTER_ID=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/common/nonsensitive/rds_cluster_identifier" \
                      --region "us-east-1" | jq -r '.Parameter.Value')
-    DB_USERNAME=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_username" \
+    DB_USERNAME=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/data_server_db_username" \
                      --with-decryption \
                      --region "us-east-1" | jq -r '.Parameter.Value')
-    DB_RAW_PASSWORD=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/vault_data_server_db_password" \
+    DB_RAW_PASSWORD=$(aws ssm get-parameter --name "/bfd/$BFD_ENV/server/sensitive/data_server_db_password" \
                      --with-decryption \
                      --region "us-east-1" | jq -r '.Parameter.Value')
     DB_PASSWORD=$(printf %s "$DB_RAW_PASSWORD" | jq -sRr @uri)
