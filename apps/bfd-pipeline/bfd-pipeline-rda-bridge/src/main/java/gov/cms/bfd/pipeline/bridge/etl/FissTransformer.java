@@ -36,8 +36,6 @@ public class FissTransformer extends AbstractTransformer {
   private final Map<String, BeneficiaryData> mbiMap;
   /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
-  /** Appended to DCN to create a claim id. */
-  private static final String CLAIM_ID_SUFFIX = "key";
 
   /** {@inheritDoc} */
   @Override
