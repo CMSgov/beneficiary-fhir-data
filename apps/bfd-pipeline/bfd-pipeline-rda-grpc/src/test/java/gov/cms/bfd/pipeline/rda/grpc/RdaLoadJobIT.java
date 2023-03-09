@@ -116,7 +116,8 @@ public class RdaLoadJobIT {
               .runWithPortParam(
                   port -> {
                     final RdaLoadOptions config = createRdaLoadOptions(port);
-                    final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
+                    final var mbiCache = config.createComputedMbiCache(appState);
+                    final PipelineJob<?> job = config.createFissClaimsLoadJob(appState, mbiCache);
                     job.call();
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
@@ -163,7 +164,9 @@ public class RdaLoadJobIT {
               .runWithPortParam(
                   port -> {
                     final RdaLoadOptions config = createRdaLoadOptions(port);
-                    final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
+                    final var mbiCache = config.createComputedMbiCache(appState);
+                    final RdaFissClaimLoadJob job =
+                        config.createFissClaimsLoadJob(appState, mbiCache);
                     try {
                       job.callRdaServiceAndStoreRecords();
                       fail("expected an exception to be thrown");
@@ -218,8 +221,9 @@ public class RdaLoadJobIT {
               .build()
               .runWithNoParam(
                   () -> {
-                    final RdaLoadOptions config = createRdaLoadOptions(-1);
-                    final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
+                    final var config = createRdaLoadOptions(-1);
+                    final var mbiCache = config.createComputedMbiCache(appState);
+                    final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState, mbiCache);
                     job.call();
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
@@ -267,8 +271,10 @@ public class RdaLoadJobIT {
               .build()
               .runWithPortParam(
                   port -> {
-                    final RdaLoadOptions config = createRdaLoadOptions(port);
-                    final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);
+                    final var config = createRdaLoadOptions(port);
+                    final var mbiCache = config.createComputedMbiCache(appState);
+                    final RdaMcsClaimLoadJob job =
+                        config.createMcsClaimsLoadJob(appState, mbiCache);
                     try {
                       job.callRdaServiceAndStoreRecords();
                       fail("expected an exception to be thrown");

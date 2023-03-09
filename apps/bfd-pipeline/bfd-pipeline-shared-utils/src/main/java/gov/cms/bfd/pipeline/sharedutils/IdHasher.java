@@ -87,7 +87,7 @@ public class IdHasher {
   }
 
   /** Configuration options that encapsulates the settings for computing a hash. */
-  @Builder
+  @Builder(toBuilder = true)
   @AllArgsConstructor
   public static class Config implements Serializable {
     private static final long serialVersionUID = 4911655334835485L;
