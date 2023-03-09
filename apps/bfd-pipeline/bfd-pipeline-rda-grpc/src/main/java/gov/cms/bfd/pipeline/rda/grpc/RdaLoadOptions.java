@@ -101,12 +101,27 @@ public class RdaLoadOptions implements Serializable {
   }
 
   /**
+   * Creates a new {@link MbiCache} instance that computes hashes on demand. Scales the cache size
+   * by multiplying the configured size times the number of writer threads.
+   *
+   * @param appState the shared {@link PipelineApplicationState}
+   * @return a new {@link MbiCache} instance
+   */
+  public MbiCache createComputedMbiCache(PipelineApplicationState appState) {
+    var scaledCacheSize = jobConfig.getWriteThreads() * idHasherConfig.getCacheSize();
+    var scaledHasherConfig = idHasherConfig.toBuilder().cacheSize(scaledCacheSize).build();
+    return MbiCache.computedCache(scaledHasherConfig, appState.getMetrics());
+  }
+
+  /**
    * Factory method to construct a new job instance using standard parameters.
    *
    * @param appState the shared {@link PipelineApplicationState}
+   * @param mbiCache the shared {@link MbiCache}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public RdaFissClaimLoadJob createFissClaimsLoadJob(PipelineApplicationState appState) {
+  public RdaFissClaimLoadJob createFissClaimsLoadJob(
+      PipelineApplicationState appState, MbiCache mbiCache) {
     Callable<RdaSource<FissClaimChange, RdaChange<RdaFissClaim>>> preJobTaskFactory;
 
     if (jobConfig.shouldProcessDLQ()) {
@@ -135,7 +150,7 @@ public class RdaLoadOptions implements Serializable {
                 "fiss",
                 jobConfig.getStartingFissSeqNum(),
                 jobConfig.getRdaVersion()),
-        createFissSinkFactory(appState),
+        createFissSinkFactory(appState, mbiCache),
         appState.getMeters());
   }
 
@@ -143,18 +158,17 @@ public class RdaLoadOptions implements Serializable {
    * Helper method to define a FISS sink factory.
    *
    * @param appState the shared {@link PipelineApplicationState}
+   * @param mbiCache the shared {@link MbiCache}
    * @return A FISS sink factory that creates {@link RdaSink} objects.
    */
   private ThrowingFunction<
           RdaSink<FissClaimChange, RdaChange<RdaFissClaim>>,
           AbstractRdaLoadJob.SinkTypePreference,
           Exception>
-      createFissSinkFactory(PipelineApplicationState appState) {
+      createFissSinkFactory(PipelineApplicationState appState, MbiCache mbiCache) {
     return (AbstractRdaLoadJob.SinkTypePreference sinkTypePreference) -> {
       RdaSink<FissClaimChange, RdaChange<RdaFissClaim>> sink;
-      FissClaimTransformer transformer =
-          new FissClaimTransformer(
-              appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
+      FissClaimTransformer transformer = new FissClaimTransformer(appState.getClock(), mbiCache);
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
         sink = new FissClaimRdaSink(appState, transformer, true, errorLimit);
@@ -178,9 +192,11 @@ public class RdaLoadOptions implements Serializable {
    * Factory method to construct a new job instance using standard parameters.
    *
    * @param appState the app state
+   * @param mbiCache the shared {@link MbiCache}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
+  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(
+      PipelineApplicationState appState, MbiCache mbiCache) {
     Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTaskFactory;
 
     if (jobConfig.shouldProcessDLQ()) {
@@ -209,7 +225,7 @@ public class RdaLoadOptions implements Serializable {
                 "mcs",
                 jobConfig.getStartingMcsSeqNum(),
                 jobConfig.getRdaVersion()),
-        createMcsSinkFactory(appState),
+        createMcsSinkFactory(appState, mbiCache),
         appState.getMeters());
   }
 
@@ -217,18 +233,17 @@ public class RdaLoadOptions implements Serializable {
    * Helper method to define an MCS sink factory.
    *
    * @param appState the shared {@link PipelineApplicationState}
+   * @param mbiCache the shared {@link MbiCache}
    * @return An MCS sink factory that creates {@link RdaSink} objects.
    */
   private ThrowingFunction<
           RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>,
           AbstractRdaLoadJob.SinkTypePreference,
           Exception>
-      createMcsSinkFactory(PipelineApplicationState appState) {
+      createMcsSinkFactory(PipelineApplicationState appState, MbiCache mbiCache) {
     return (AbstractRdaLoadJob.SinkTypePreference sinkTypePreference) -> {
       RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>> sink;
-      McsClaimTransformer transformer =
-          new McsClaimTransformer(
-              appState.getClock(), MbiCache.computedCache(idHasherConfig, appState.getMetrics()));
+      McsClaimTransformer transformer = new McsClaimTransformer(appState.getClock(), mbiCache);
 
       if (sinkTypePreference == AbstractRdaLoadJob.SinkTypePreference.SYNCHRONOUS) {
         sink = new McsClaimRdaSink(appState, transformer, true, errorLimit);

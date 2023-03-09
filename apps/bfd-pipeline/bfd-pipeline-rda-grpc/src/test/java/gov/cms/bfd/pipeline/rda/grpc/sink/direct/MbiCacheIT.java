@@ -144,10 +144,8 @@ public class MbiCacheIT {
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
-          final MbiCache.DatabaseBackedCache mbiCache =
-              spy(
-                  new MbiCache.DatabaseBackedCache(
-                      normalHasher, new MbiCache.Metrics(appMetrics), transactionManager));
+          final MbiCache mbiCache =
+              spy(MbiCache.databaseCache(normalHasher, appMetrics, transactionManager));
 
           // mix of calls in various order with repeats for the same mbi
           assertEquals(hash1, mbiCache.lookupMbi(mbi1).getHash());
@@ -167,10 +165,10 @@ public class MbiCacheIT {
           assertEquals(0, mbiCache.getMetrics().getTotalRetries());
 
           // every mbi except mbi1 should have been looked up in the database exactly once
-          verify(mbiCache, times(2)).lookupMbiImpl(mbi1);
-          verify(mbiCache, times(1)).lookupMbiImpl(mbi2);
-          verify(mbiCache, times(1)).lookupMbiImpl(mbi3);
-          verify(mbiCache, times(1)).lookupMbiImpl(mbi4);
+          verify(mbiCache, times(2)).computeMbi(mbi1);
+          verify(mbiCache, times(1)).computeMbi(mbi2);
+          verify(mbiCache, times(1)).computeMbi(mbi3);
+          verify(mbiCache, times(1)).computeMbi(mbi4);
         });
   }
 
@@ -187,10 +185,10 @@ public class MbiCacheIT {
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final PersistenceException error = new PersistenceException("oops");
-          final MbiCache.DatabaseBackedCache mbiCache =
+          final MbiCache.DatabaseBacked mbiCache =
               spy(
-                  new MbiCache.DatabaseBackedCache(
-                      normalHasher, new MbiCache.Metrics(appMetrics), transactionManager));
+                  (MbiCache.DatabaseBacked)
+                      MbiCache.databaseCache(normalHasher, appMetrics, transactionManager));
           doThrow(error, error, error, error, error)
               .doReturn(new MbiCache.ReadResult(new Mbi(1L, mbi1, hash1), true))
               .when(mbiCache)

@@ -357,9 +357,10 @@ public class LoadRdaJsonApp {
      */
     private List<PipelineJob<?>> createPipelineJobs(
         RdaLoadOptions jobConfig, PipelineApplicationState appState) {
-      List<PipelineJob<?>> answer = new ArrayList<>();
-      fissFile.ifPresent(f -> answer.add(jobConfig.createFissClaimsLoadJob(appState)));
-      mcsFile.ifPresent(f -> answer.add(jobConfig.createMcsClaimsLoadJob(appState)));
+      final var mbiCache = jobConfig.createComputedMbiCache(appState);
+      final List<PipelineJob<?>> answer = new ArrayList<>();
+      fissFile.ifPresent(f -> answer.add(jobConfig.createFissClaimsLoadJob(appState, mbiCache)));
+      mcsFile.ifPresent(f -> answer.add(jobConfig.createMcsClaimsLoadJob(appState, mbiCache)));
       return answer;
     }
   }
