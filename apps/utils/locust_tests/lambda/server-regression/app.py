@@ -141,10 +141,10 @@ def handler(event, context):
             f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
         )
         username = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/data_server_db_username", with_decrypt=True
         )
         raw_password = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/data_server_db_password", with_decrypt=True
         )
         cert_key = get_ssm_parameter(
             f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
