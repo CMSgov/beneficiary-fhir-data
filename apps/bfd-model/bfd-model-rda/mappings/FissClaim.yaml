@@ -29,6 +29,7 @@ mappings:
         used for. This is a unique field created by the system.'
     - name: intermediaryNb
       sqlType: varchar(5)
+      nullable: false
       dbName: intermediary_nb
       comment: "This field identifies the identification number of the fiscal intermediary as
         designated by the Centers for Medicare and Medicaid Services (CMS)."
