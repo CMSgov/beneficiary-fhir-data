@@ -327,7 +327,7 @@ public class FissTransformerIT {
   /**
    * Sets {@link Arguments} the claim to a new claim that has been previously processed.
    *
-   * @return {@link Arugments} the expected claim lines and their associated numbers
+   * @return {@link Arguments} the expected claim lines and their associated numbers
    */
   private static Arguments newNonFirstClaimCase() {
     final String NEW_CLAIM_DCN = "dcn87654321";
@@ -353,7 +353,7 @@ public class FissTransformerIT {
     FissClaim expectedWrappedClaim =
         TestData.createDefaultClaimBuilder()
             .setDcn(NEW_CLAIM_DCN)
-            .setRdaClaimKey(FissTransformer.createClaimId(NEW_CLAIM_DCN))
+            .setRdaClaimKey(TestData.CLM_ID)
             .build();
     FissClaimChange expectedWrappedClaimChange =
         createFissClaimChange(expectedWrappedClaim, NEW_CLAIM_DCN, 2);
@@ -402,7 +402,7 @@ public class FissTransformerIT {
         .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setDcn(dcn)
-        .setRdaClaimKey(FissTransformer.createClaimId(dcn))
+        .setRdaClaimKey(TestData.CLM_ID)
         .setIntermediaryNb(claim.getIntermediaryNb())
         .setSource(
             RecordSource.newBuilder()
@@ -469,9 +469,6 @@ public class FissTransformerIT {
     private static final String CLM_LINE_NUM = "1";
     /** Hardcoded IntermediaryNb. */
     private static final String HARDCODED_INTERMEDIARY_NB = "?";
-    /** Hard coded RdaClaimKey. */
-    private static final String HARDCODED_RDA_CLAIM_KEY =
-        FissTransformer.createClaimId(FI_DOC_CLM_CNTL_NUM);
     /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
     /** Hardcoded Location2. */
@@ -494,7 +491,7 @@ public class FissTransformerIT {
      */
     public static FissClaim.Builder createDefaultClaimBuilder() {
       return FissClaim.newBuilder()
-          .setRdaClaimKey(HARDCODED_RDA_CLAIM_KEY)
+          .setRdaClaimKey(CLM_ID)
           .setDcn(FI_DOC_CLM_CNTL_NUM)
           .setHicNo(HIC_NO)
           .setMbi(MBI)
