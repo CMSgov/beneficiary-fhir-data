@@ -9,14 +9,16 @@ from typing import Callable, Dict, List, Optional, Union
 
 from locust import FastHttpUser, events
 from locust.argument_parser import LocustArgumentParser
+from locust.contrib.fasthttp import ResponseContextManager
 from locust.env import Environment
 
 from common import custom_args, data, validation
 from common.locust_utils import is_distributed, is_locust_worker
 from common.stats import stats_compare, stats_writers
-from common.stats.aggregated_stats import StatsCollector
+from common.stats.aggregated_stats import FinalCompareResult, StatsCollector
 from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
+from common.validation import ValidationResult
 
 _COMPARISONS_METADATA_PATH = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be
@@ -63,28 +65,47 @@ def _(environment: Environment, **kwargs) -> None:
         stats_config = StatsConfiguration.from_parsed_opts(environment.parsed_options)
     except ValueError as exc:
         logger.warning("Unable to get stats configuration: %s", str(exc))
+        environment.process_exit_code = 1
         return
 
-    # If stats_config is valid, get the aggregated stats of the stopping test run
-    stats_collector = StatsCollector(
-        environment, stats_config.stats_store_tags, stats_config.stats_env
-    )
-    stats = stats_collector.collect_stats()
-
-    try:
-        compare_result = stats_compare.do_stats_comparison(
-            environment,
-            stats_config,
-            stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH,
-            stats,
+    compare_result = FinalCompareResult.NOT_APPLICABLE
+    if stats_config.stats_store and stats_config.stats_env:
+        # If stats_config is valid, get the aggregated stats of the stopping test run
+        stats_collector = StatsCollector(
+            environment, stats_config.stats_store_tags, stats_config.stats_env
         )
-        stats.metadata.compare_result = compare_result  # type: ignore
+        stats = stats_collector.collect_stats()
+        assert stats.metadata is not None
+
+        try:
+            stat_comparsion_meta_path = (
+                stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH
+            )
+            if stat_comparsion_meta_path:
+                compare_result = stats_compare.do_stats_comparison(
+                    stats_config,
+                    stat_comparsion_meta_path,
+                    stats,
+                )
+        except Exception as exc:
+            compare_result = FinalCompareResult.FAILED
+            logger.error("Stat comparsion was not able to complete; err: %s", str(exc))
+
+        stats.metadata.compare_result = compare_result
         stats.metadata.validation_result = validation_result
 
-        logger.info("Final comparison result was: %s", compare_result.value)
-        logger.info("Final validation result was: %s", validation_result.value)
-    finally:
-        stats_writers.write_stats(stats_config, stats)
+        if stats_config.stats_store:
+            stats_writers.write_stats(stats_config, stats)
+
+    logger.info("Final comparison result was: %s", compare_result.value)
+    logger.info("Final validation result was: %s", validation_result.value)
+
+    if compare_result == FinalCompareResult.FAILED or validation_result == ValidationResult.FAILED:
+        environment.process_exit_code = 1
+        logger.error(
+            "Test run failed overall as comparison or validation result failed; locust exiting with"
+            " return code 1"
+        )
 
 
 def set_comparisons_metadata_path(path: str) -> None:
@@ -161,7 +182,11 @@ class BFDUserBase(FastHttpUser):
             catch_response=True,  # type: ignore -- known Locust argument
         ) as response:
             if response.status_code != 200:
-                response.failure(f"Status Code: {response.status_code}")
+                if isinstance(response, ResponseContextManager):
+                    # pylint: disable=E1121
+                    response.failure(f"Status Code: {response.status_code}")
+                else:
+                    response.failure()
             elif response.text:
                 # Check for valid "next" URLs that we can add to a URL pool.
                 next_url = BFDUserBase.__get_next_url(response.text)
