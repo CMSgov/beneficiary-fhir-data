@@ -6,3 +6,12 @@ line-length = 100
 
 [tool.isort]
 profile = "isort"
+
+[tool.pyright]
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportMissingTypeArgument = false
+reportMissingParameterType = false
+reportConstantRedefinition = false
