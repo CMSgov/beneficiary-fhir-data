@@ -68,7 +68,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 
 ### Initializing the Repository
 1. Install JDK 11. You'll need Java 11 to run BFD. You can install OpenJDK 11 however you prefer.
-1. Install Maven 3. Project tasks are handled by Apache Maven. Install it however you prefer.
+1. Install Maven 3 (Ideally 3.90+ for [build caching](./apps/.mvn/extensions.xml)). Project tasks are handled by Apache Maven. Install it however you prefer.
 1. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following (change the jdkHome appropriately):
     ```xml
     <?xml version="1.0" encoding="UTF8"?>
