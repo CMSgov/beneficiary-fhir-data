@@ -58,7 +58,7 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    def amiSourceTagKey = amiSourceId
+                    def amiSourceTagKey = "amiSourceId"
                     def goldqueryValue = "amzn2legacy*"
 
                     platinumAmiId = sh(
