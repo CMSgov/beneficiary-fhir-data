@@ -86,9 +86,8 @@ class StatComparison:
 
 
 def do_stats_comparison(
-    environment: Environment,
     stats_config: StatsConfiguration,
-    stats_metadata_path: Optional[str],
+    stats_metadata_path: str,
     stats: AggregatedStats,
 ) -> FinalCompareResult:
     """Compares the current run's stats (totals and all tasks) against a user-configured baseline,
@@ -109,10 +108,6 @@ def do_stats_comparison(
         return FinalCompareResult.NOT_APPLICABLE
 
     logger = logging.getLogger()
-
-    if not stats_metadata_path:
-        logger.error("No comparison metadata file found -- stats cannot be compared.")
-        return FinalCompareResult.NOT_APPLICABLE
 
     stats_loader = StatsLoader.create(stats_config, stats.metadata)  # type: ignore
     try:
@@ -202,7 +197,6 @@ def do_stats_comparison(
                 str(stats_config.stats_compare.value),
                 stats_config.stats_compare_tag,
             )
-            environment.process_exit_code = 1
 
             return FinalCompareResult.FAILED
     else:

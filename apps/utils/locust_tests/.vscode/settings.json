@@ -17,5 +17,7 @@
   // https://github.com/Microsoft/python-language-server/issues/887.
   // None of the proposed solutions seemed to work, other than disabling this
   // linting error
-  "python.linting.pylintArgs": ["--disable=import-error"]
+  "python.linting.pylintArgs": ["--disable=import-error"],
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "strict"
 }

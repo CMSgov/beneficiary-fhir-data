@@ -11,7 +11,8 @@ ENV  PATH="/var/lang/lib/python3.9/site-packages:${PATH}"
 FROM python as app
 # Copy function code
 COPY . ${LAMBDA_TASK_ROOT}
-RUN cp "${LAMBDA_TASK_ROOT}/lambda/server-regression/app.py" "${LAMBDA_TASK_ROOT}"
+RUN mv "${LAMBDA_TASK_ROOT}/lambda/server-regression/app.py" "${LAMBDA_TASK_ROOT}"
+RUN rm -rf "${LAMBDA_TASK_ROOT}/lambda"
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD [ "app.handler" ]
