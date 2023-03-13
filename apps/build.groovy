@@ -85,7 +85,7 @@ EOF
 
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true clean verify"
+		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
 	}
 
 	return new AppBuildResults(
