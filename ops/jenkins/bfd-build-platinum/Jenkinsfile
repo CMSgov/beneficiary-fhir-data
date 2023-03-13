@@ -80,7 +80,7 @@ spec:
                     platinumAmiSourceTag = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
-                    --filters "Name=${amiSourceTagKey},Values=${goldAmiId}" \
+                    --filters 'Name=${amiSourceTagKey},Values=${goldAmiId}' \
                     --query 'Images[*].[ImageId]' \
                      --output text"
                     ).trim()
