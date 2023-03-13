@@ -90,7 +90,7 @@ spec:
 
         stage('Build Platinum AMI') {
             steps {
-                echo platinumAmi
+                echo platinumAmiId
                 echo goldAmiId
                 echo platinumAmiSourceTag
 
