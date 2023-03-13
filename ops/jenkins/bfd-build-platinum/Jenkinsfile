@@ -40,29 +40,31 @@ spec:
     }
   }
 
-    stage('Prepare') {
-        steps {
-            // Load the child Jenkinsfiles.
-            scriptForDeploys = load('ops/deploy-ccs.groovy')
+    stages {
+        stage('Prepare') {
+            steps {
+                // Load the child Jenkinsfiles.
+                scriptForDeploys = load('ops/deploy-ccs.groovy')
+            }
         }
-	}
 
-	stage('Find AMIs') {
-        steps {
-            platinumAmiId = sh(
-            returnStdout: true,
-            script: "aws ec2 describe-images --owners self --filters \
-            'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
-            'Name=state,Values=available' --region us-east-1 --output json | \
-            jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-            ).trim()
+        stage('Find AMIs') {
+            steps {
+                platinumAmiId = sh(
+                returnStdout: true,
+                script: "aws ec2 describe-images --owners self --filters \
+                'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+                'Name=state,Values=available' --region us-east-1 --output json | \
+                jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+                ).trim()
+            }
+        }
+
+        stage('Build Platinum AMI') {
+            steps {
+                echo platinumAmiId
+                // amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+            }
         }
     }
-
-	stage('Build Platinum AMI') {
-        steps {
-            echo platinumAmiId
-            // amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
-        }
-	}
 }
