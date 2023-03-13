@@ -10,7 +10,10 @@
 def awsCredentials
 def appBuildResults
 def amiIds
+def amiSourceTagKey
 def platinumAmiId
+def goldAmiId
+def platinumAmiSourceTag
 def currentStage
 
 pipeline {
@@ -54,6 +57,10 @@ spec:
         stage('Find AMIs') {
             steps {
                 script {
+                    awsAuth.assumeRole()
+
+                    amiSourceTagKey = amiSourceId
+                    
                     platinumAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --owners self --filters \
@@ -61,13 +68,29 @@ spec:
                     'Name=state,Values=available' --region us-east-1 --output json | \
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim()
+
+                    goldAmiId = sh(
+                    returnStdout: true,
+                    script: "aws ec2 describe-images --filters \
+                    'Name=name,Values="amzn2legacy*"' \
+                    'Name=state,Values=available' --region us-east-1 --output json | \
+                    jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+                    ).trim() 
+
+                    platinumAmiSourceTag = sh(
+                    returnStdout: true,
+                    script: "aws ec2 describe-images \
+                    --filters "Name=${amiSourceTagKey},Values=${goldAmiId}" \
+                    --query 'Images[*].[ImageId]' \
+                     --output text"
+                    ).trim()
                 }
             }
         }
 
         stage('Build Platinum AMI') {
             steps {
-                echo platinumAmiId
+                echo platinumAmi
                 // amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
             }
         }
