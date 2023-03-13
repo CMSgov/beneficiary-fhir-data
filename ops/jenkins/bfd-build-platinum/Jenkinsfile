@@ -44,8 +44,9 @@ spec:
         stage('Prepare') {
             steps {
                 script {
-                    // Load the child Jenkinsfiles.
-                    scriptForDeploys = load('ops/deploy-ccs.groovy')
+                   // Load the child Jenkinsfiles.
+					scriptForApps = load('apps/build.groovy')
+					scriptForDeploys = load('ops/deploy-ccs.groovy')
                 }
             }
         }
