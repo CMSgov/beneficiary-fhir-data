@@ -1,0 +1,39 @@
+#!/usr/bin/env groovy
+
+/**
+ * <p>
+ * This script will be run by Jenkins when building platinum AMI images.
+ * </p>
+ */
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def awsCredentials
+def appBuildResults
+def amiIds
+def currentStage
+def gitCommitId
+def gitRepoUrl
+			
+try {
+			stage('Build Platinum AMI') {
+				currentStage = env.STAGE_NAME
+				if (params.build_platinum || amiIds.platinumAmiId == null) {
+					milestone(label: 'stage_build_platinum_ami_start')
+
+					container('bfd-cbc-build') {
+						amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
+				}
+			}
+
+} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
+	currentBuild.result = "ABORTED"
+	throw e
+} catch (ex) {
+	currentBuild.result = "FAILURE"
+	throw ex
+} finally {
+	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+}
