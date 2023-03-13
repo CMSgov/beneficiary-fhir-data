@@ -12,14 +12,17 @@ SSM_IMAGE_TAG_PARAMETER="/bfd/mgmt/server/nonsensitive/server_regression_latest_
 DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"${GIT_SHORT_HASH}"}"
 DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
+aws ecr-public get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "public.ecr.aws"
+aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
+
+DOCKER_BUILDKIT=1 # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
 docker build . \
   --file "./lambda/server-regression/Dockerfile" \
   --tag "$IMAGE_NAME:${DOCKER_TAG}" \
   --tag "$IMAGE_NAME:${DOCKER_TAG_LATEST}" \
   --platform "linux/amd64"
 
-aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
-docker push "$IMAGE_NAME" --all-tags
+docker image push --all-tags "$IMAGE_NAME"
 
 aws ssm put-parameter \
   --name "$SSM_IMAGE_TAG_PARAMETER" \
