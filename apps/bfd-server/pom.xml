@@ -17,6 +17,7 @@
 
 	<properties>
 		<hapi-fhir.version>6.4.0</hapi-fhir.version>
+		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
 	</properties>
 
 	<modules>
