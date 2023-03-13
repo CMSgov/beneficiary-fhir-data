@@ -10,30 +10,53 @@
 def awsCredentials
 def appBuildResults
 def amiIds
+def platinumAmiId
 def currentStage
-def gitCommitId
-def gitRepoUrl
-			
-try {
-			stage('Build Platinum AMI') {
-				currentStage = env.STAGE_NAME
-				if (params.build_platinum || amiIds.platinumAmiId == null) {
-					milestone(label: 'stage_build_platinum_ami_start')
 
-					container('bfd-cbc-build') {
-						amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
-					}
-				} else {
-					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
-				}
-			}
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer 'bfd-cbc-build'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
+    }
+  }
 
-} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
-	currentBuild.result = "ABORTED"
-	throw e
-} catch (ex) {
-	currentBuild.result = "FAILURE"
-	throw ex
-} finally {
-	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+    stage('Prepare') {
+	    // Load the child Jenkinsfiles.
+		scriptForDeploys = load('ops/deploy-ccs.groovy')
+	}
+
+	stage('Find AMIs') {
+        platinumAmiId = sh(
+		returnStdout: true,
+		script: "aws ec2 describe-images --owners self --filters \
+		'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+		'Name=state,Values=available' --region us-east-1 --output json | \
+		jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim()
+    }
+
+	stage('Build Platinum AMI') {
+        echo platinumAmiId
+		// amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+	}
 }
