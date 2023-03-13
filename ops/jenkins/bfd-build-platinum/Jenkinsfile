@@ -10,7 +10,6 @@
 def awsCredentials
 def appBuildResults
 def amiIds
-def amiSourceTagKey
 def platinumAmiId
 def goldAmiId
 def platinumAmiSourceTag
@@ -59,8 +58,9 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    amiSourceTagKey = amiSourceId
-                    
+                    def amiSourceTagKey = amiSourceId
+                    def goldqueryValue = "amzn2legacy*"
+
                     platinumAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --owners self --filters \
@@ -72,7 +72,7 @@ spec:
                     goldAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --filters \
-                    'Name=name,Values="amzn2legacy*"' \
+                    'Name=name,Values=${goldqueryValue}' \
                     'Name=state,Values=available' --region us-east-1 --output json | \
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim() 
@@ -91,6 +91,9 @@ spec:
         stage('Build Platinum AMI') {
             steps {
                 echo platinumAmi
+                echo goldAmiId
+                echo platinumAmiSourceTag
+
                 // amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
             }
         }
