@@ -66,10 +66,6 @@ spec:
             }
         }
 
-        /* This stage switches the gitBranchName (needed for our CCS downsream stages)
-			value if the build is a PR as the BRANCH_NAME var is populated with the build
-			name during PR builds.
-			*/
 			stage('Set Branch Name') {
                 steps {
                     script {
@@ -78,14 +74,14 @@ spec:
                 }
 			}
 
-			/*stage('Build Apps') {
+			stage('Build Apps') {
                 steps {
                     script {
                         awsAuth.assumeRole()
                         appBuildResults = scriptForApps.build(verboseMaven)
                     }
                 }
-			}*/
+			}
 
         stage('Find AMIs') {
             steps {
@@ -95,6 +91,7 @@ spec:
                     def amiSourceTagKey = "amiSourceId"
                     def goldqueryValue = "amzn2legacy*"
 
+                    // query for the latest platinum AMI ID
                     platinumAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --owners self --filters \
@@ -103,6 +100,7 @@ spec:
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim()
 
+                    // query for the latest gold AMI ID
                     goldAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --filters \
@@ -111,6 +109,7 @@ spec:
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim() 
 
+                    // query for the current value of the sourceAmiId tag on the latest platinum image
                     platinumSourceTagAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
@@ -125,17 +124,16 @@ spec:
         stage('Build Platinum AMI') {
             steps {
                 script {
-                    echo platinumAmiId
-                    echo goldAmiId
-                    echo platinumSourceTagAmiId
-
                     awsAuth.assumeRole()
                      
+                    // Build latest images if sourceAmiId tag is set to the latest gold AMI ID
                     if (platinumSourceTagAmiId == goldAmiId) {
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+                    // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag or the sourceAmiId tag does not match the Gold AMI ID
                     } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
                         amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 
+                        // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID. 
                         platinumAmiId = sh(
                         returnStdout: true,
                         script: "aws ec2 describe-images --owners self --filters \
