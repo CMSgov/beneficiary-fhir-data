@@ -51,13 +51,6 @@ spec:
                    // Load the child Jenkinsfiles.
                    scriptForApps = load('apps/build.groovy')
 				   scriptForDeploys = load('ops/deploy-ccs.groovy')
-
-                   awsAuth.assumeRole()
-
-                   // Find the most current AMI IDs (if any).
-				   amiIds = null
-				   amiIds = scriptForDeploys.findAmis()
-
                 }
             }
         }
@@ -88,7 +81,7 @@ spec:
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim() 
 
-                    // query for the current value of the sourceAmiId tag on the latest platinum image
+                    // query any AMI Ids where the sourceAmiId tag is set to the Gold AMI ID 
                     platinumSourceTagAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
@@ -105,18 +98,14 @@ spec:
                 script {
                     awsAuth.assumeRole()
                      
-                    if (platinumSourceTagAmiId == goldAmiId) {
+                    if (platinumSourceTagAmiId.length() != 0) {
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                         echo 'using latest images'
                        
                         amyIds = scriptForDeploys.findAmis()
-                    } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
-                        
-
-                        // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag or the sourceAmiId tag does not match the Gold AMI ID
+                    } else if (platinumSourceTagAmiId.length() == 0) {
+                        // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag/sourceAmiId not set to gold AMI ID
                         echo 'deploying and tagging new platinum AMI'
-                        echo "${platinumSourceTagAmiId}"
-                        echo "${goldAmiId}"
 
                         amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 
