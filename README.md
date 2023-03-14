@@ -113,9 +113,19 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
       minio/minio server /data --console-address ":9001"
     ```
-6. Run mvn install with the following 
+6. In order to run bfd locally using test containers for integration tests, Docker for Desktop (https://www.docker.com/products/docker-desktop/) or Podman must be installed. Docker for desktop is recommended
+   since test containers will automatically detect and launch containers for integration tests.  
+   TODO: Podman is supported as well.
+   bfd-server integration tests are still currently using HSQL for integration tests.
+   If you rather use HSQL instead of test containers, add the parameter -Dits.db.url=jdbc:bfd-test:hsqldb:mem to your mvn clean install command. 
+
+7. Run mvn install with the following 
     ```
-     mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+     mvn -Dmaven.build.cache.enabled=false -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+    ```
+   If you want to run integration tests with HSQL only, run mvn install with the following
+    ```
+     mvn -Dmaven.build.cache.enabled=false -Dits.db.url=jdbc:bfd-test:hsqldb:mem -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
     ```
    You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
 

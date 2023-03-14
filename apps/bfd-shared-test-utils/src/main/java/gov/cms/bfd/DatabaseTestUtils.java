@@ -64,9 +64,6 @@ public final class DatabaseTestUtils {
   /** The password used for test container database password. */
   static final String TEST_CONTAINER_DATABASE_PASSWORD = "bfdtest";
 
-  /** The default test container database image to use. */
-  static final String TEST_CONTAINER_DEFAULT_DATABASE_IMAGE = "postgres:14.6";
-
   /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
   private static DatabaseTestUtils SINGLETON;
 
@@ -378,8 +375,7 @@ public final class DatabaseTestUtils {
       String username, String password) {
 
     if (container == null || !container.isRunning()) {
-      String testContainerDatabaseImage =
-          System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DEFAULT_DATABASE_IMAGE);
+      String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
       container =
           new PostgreSQLContainer(testContainerDatabaseImage)
               .withDatabaseName("fhirdb")
