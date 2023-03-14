@@ -95,6 +95,7 @@ spec:
                      
                     if (platinumSourceTagAmiId == goldAmiId) {
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
+                        amiIds = null
                         amyIds = scriptForDeploys.findAmis()
                     } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
                         // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag or the sourceAmiId tag does not match the Gold AMI ID
