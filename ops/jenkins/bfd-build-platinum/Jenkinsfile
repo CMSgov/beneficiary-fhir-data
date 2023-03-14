@@ -86,6 +86,8 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
+                    echo platinumSourceTagAmiId
+
                     if (platinumSourceTagAmiId.length() != 0) {
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                         echo 'using latest images'
