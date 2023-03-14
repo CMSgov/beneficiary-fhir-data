@@ -45,7 +45,8 @@ spec:
                 script {
                 
                    // Load the child Jenkinsfiles.
-					scriptForDeploys = load('ops/deploy-ccs.groovy')
+                   scriptForApps = load('apps/build.groovy')
+				   scriptForDeploys = load('ops/deploy-ccs.groovy')
                 }
             }
         }
