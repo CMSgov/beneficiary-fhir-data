@@ -72,11 +72,7 @@ spec:
 			stage('Set Branch Name') {
                 steps {
                     script {
-                        if (env.BRANCH_NAME.startsWith('PR')) {
-                            gitBranchName = env.CHANGE_BRANCH
-                        } else {
-                            gitBranchName = env.BRANCH_NAME
-                        }
+                        gitBranchName = env.BRANCH_NAME
                     }
                 }
 			}
@@ -131,6 +127,8 @@ spec:
                     echo goldAmiId
                     echo platinumSourceTagAmiId
 
+                    awsAuth.assumeRole()
+                     
                     if (platinumSourceTagAmiId.length() == 0) {
                         echo "no source tag"
                     }
