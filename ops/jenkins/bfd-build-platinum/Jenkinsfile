@@ -80,6 +80,7 @@ spec:
 			stage('Build Apps') {
                 steps {
                     script {
+                        awsAuth.assumeRole()
                         appBuildResults = scriptForApps.build(verboseMaven)
                     }
                 }
