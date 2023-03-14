@@ -7,14 +7,10 @@
  */
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def awsCredentials
-def appBuildResults
 def amiIds
 def platinumAmiId
 def goldAmiId
 def platinumSourceTagAmiId
-def currentStage
-def verboseMaven = params.verbose_mvn_logging
 
 pipeline {
   agent {
@@ -51,37 +47,9 @@ spec:
                    // Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
-
-                    // Find the most current AMI IDs (if any).
-					amiIds = null
-					amiIds = scriptForDeploys.findAmis()
-
-					// Get the current commit id
-					gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-
-					// Get the remote repo url. This assumes we are using git+https not git+ssh.
-					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
-
                 }
             }
         }
-
-			stage('Set Branch Name') {
-                steps {
-                    script {
-                        gitBranchName = env.BRANCH_NAME
-                    }
-                }
-			}
-
-			stage('Build Apps') {
-                steps {
-                    script {
-                        awsAuth.assumeRole()
-                        appBuildResults = scriptForApps.build(verboseMaven)
-                    }
-                }
-			}
 
         stage('Find AMIs') {
             steps {
@@ -126,11 +94,11 @@ spec:
                 script {
                     awsAuth.assumeRole()
                      
-                    // Build latest images if sourceAmiId tag is set to the latest gold AMI ID
                     if (platinumSourceTagAmiId == goldAmiId) {
-                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
-                    // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag or the sourceAmiId tag does not match the Gold AMI ID
+                        // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
+                        amyIds = scriptForApps.findAmis()
                     } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
+                        // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag or the sourceAmiId tag does not match the Gold AMI ID
                         amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 
                         // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID. 
