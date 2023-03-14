@@ -9,7 +9,7 @@
 // These variables are accessible throughout this file (except inside methods and classes).
 def amiIds
 def goldAmiId
-def platinumSourceTagAmiId
+def platinumAmiId
 
 pipeline {
     agent {
@@ -69,7 +69,7 @@ spec:
                     ).trim()
 
                     // query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
-                    platinumSourceTagAmiId = sh(
+                    platinumAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
                     --filters 'Name=tag:amiSourceId,Values=${goldAmiId}' \
@@ -87,17 +87,15 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    if (platinumSourceTagAmiId.length() != 0) {
+                    if (platinumAmiId.length() != 0) {
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
-                        echo 'using latest images'
-
-                        amyIds = scriptForDeploys.findAmis()
-                    } else if (platinumSourceTagAmiId.length() == 0) {
+                        echo 'Using latest platinum AMI image: ${platinumAmiId}'
+                    } else if (platinumAmiId.length() == 0) {
                         // Build new platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
-                        echo 'deploying and tagging new platinum AMI'
+                        echo 'Deploying and tagging new platinum AMI'
 
                         // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
-                        amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+                        scriptForDeploys.buildPlatinumAmi(amiIds)
                     }
                 }
             }
