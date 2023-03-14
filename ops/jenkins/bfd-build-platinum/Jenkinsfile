@@ -78,14 +78,14 @@ spec:
                 }
 			}
 
-			'''stage('Build Apps') {
+			/*stage('Build Apps') {
                 steps {
                     script {
                         awsAuth.assumeRole()
                         appBuildResults = scriptForApps.build(verboseMaven)
                     }
                 }
-			}'''
+			}*/
 
         stage('Find AMIs') {
             steps {
@@ -136,7 +136,7 @@ spec:
                     }
 
 
-                    '''if (platinumSourceTagAmiId == goldAmiId) {
+                    /*if (platinumSourceTagAmiId == goldAmiId) {
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
                     } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
                         amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
@@ -154,7 +154,7 @@ spec:
                         script: "aws ec2 create-tags \
                         --resources ${platinumAmiId} --tags Key=amiSourceId,Value=${goldAmiId}"
                         )
-                    }'''
+                    }*/
                 }
             }
         }
