@@ -1,7 +1,7 @@
 import dataclasses
 import re
 from argparse import Namespace
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -48,12 +48,10 @@ class StatsConfiguration:
     """Dataclass that holds data about where and how aggregated performance statistics are stored
     and compared"""
 
-    stats_store: StatsStorageType
+    stats_store: Optional[StatsStorageType]
     """The storage type that the stats will be written to"""
-    stats_env: StatsEnvironment
+    stats_env: Optional[StatsEnvironment]
     """The test running environment from which the statistics will be collected"""
-    stats_store_tags: List[str]
-    """A simple List of string tags that are used to partition collected statistics when stored"""
     stats_store_file_path: Optional[str]
     """The local parent directory where JSON files will be written to.
     Used only if type is file, ignored if type is s3"""
@@ -70,12 +68,14 @@ class StatsConfiguration:
     """Indicates the type of performance stats comparison that will be done"""
     stats_compare_tag: Optional[str]
     """Indicates the tag from which comparison statistics will be loaded"""
-    stats_compare_load_limit: int
-    """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
-    comparisons"""
     stats_compare_meta_file: Optional[str]
     """Indicates the path to a JSON file containing metadata about how stats should be compared for
     the running test suite. Overrides the default specified by the test suite, if any"""
+    stats_store_tags: List[str] = field(default_factory=list)
+    """A simple List of string tags that are used to partition collected statistics when stored"""
+    stats_compare_load_limit: int = 5
+    """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
+    comparisons"""
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
@@ -125,6 +125,7 @@ class StatsConfiguration:
             dest="stats_store_tags",
             env_var="LOCUS_STATS_STORE_TAG",
             action="append",
+            default=[]
         )
         stats_group.add_argument(
             "--stats-store-file-path",
