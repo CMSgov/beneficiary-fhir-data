@@ -8,7 +8,6 @@
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def amiIds
-def platinumAmiId
 def goldAmiId
 def platinumSourceTagAmiId
 
@@ -39,9 +38,9 @@ spec:
         }
     }
 
-    // Run Every day at 8:30 AM Pacific / 3:30 PM UTC
+    // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
     triggers {
-        cron('30 15 * * *')
+        cron('30 11 * * *')
     }
 
     stages {
@@ -60,32 +59,22 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    def amiSourceTagKey = 'amiSourceId'
-                    def goldqueryValue = 'amzn2legacy*'
-
-                    // query for the latest platinum AMI ID
-                    platinumAmiId = sh(
-                    returnStdout: true,
-                    script: "aws ec2 describe-images --owners self --filters \
-                    'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
-                    'Name=state,Values=available' --region us-east-1 --output json | \
-                    jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-                    ).trim()
-
                     // query for the latest gold AMI ID
                     goldAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --filters \
-                    'Name=name,Values=${goldqueryValue}' \
+                    'Name=name,Values=amzn2legacy*' \
                     'Name=state,Values=available' --region us-east-1 --output json | \
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim()
 
-                    // query any AMI Ids where the sourceAmiId tag is set to the Gold AMI ID
+                    // query any platinum AMI Ids where the sourceAmiId tag is set to the Gold AMI ID
                     platinumSourceTagAmiId = sh(
                     returnStdout: true,
-                    script: "aws ec2 describe-images \
-                    --filters 'Name=tag:${amiSourceTagKey},Values=${goldAmiId}' \
+                    script: "aws ec2 describe-images --owners self --filters \
+                    'Name=tag:amiSourceId,Values=${goldAmiId}' \
+                    'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+                    'Name=state,Values=available' --region us-east-1 --output json | \
                     --query 'Images[*].[ImageId]' \
                      --output text"
                     ).trim()
@@ -107,22 +96,8 @@ spec:
                         // Build new platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
                         echo 'deploying and tagging new platinum AMI'
 
-                        amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
-
                         // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
-                        platinumAmiId = sh(
-                        returnStdout: true,
-                        script: "aws ec2 describe-images --owners self --filters \
-                        'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
-                        'Name=state,Values=available' --region us-east-1 --output json | \
-                        jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-                        ).trim()
-
-                        sh(
-                        returnStdout: true,
-                        script: "aws ec2 create-tags \
-                        --resources ${platinumAmiId} --tags Key=amiSourceId,Value=${goldAmiId}"
-                        )
+                        amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
                     }
                 }
             }
