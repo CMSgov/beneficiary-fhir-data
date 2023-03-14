@@ -70,17 +70,23 @@ spec:
 			name during PR builds.
 			*/
 			stage('Set Branch Name') {
-				script {
-					if (env.BRANCH_NAME.startsWith('PR')) {
-						gitBranchName = env.CHANGE_BRANCH
-					} else {
-						gitBranchName = env.BRANCH_NAME
-					}
-				}
+                steps {
+                    script {
+                        if (env.BRANCH_NAME.startsWith('PR')) {
+                            gitBranchName = env.CHANGE_BRANCH
+                        } else {
+                            gitBranchName = env.BRANCH_NAME
+                        }
+                    }
+                }
 			}
 
 			stage('Build Apps') {
-				appBuildResults = scriptForApps.build(verboseMaven)
+                steps {
+                    script {
+                        appBuildResults = scriptForApps.build(verboseMaven)
+                    }
+                }
 			}
 
         stage('Find AMIs') {
@@ -129,7 +135,7 @@ spec:
                         echo "no source tag"
                     }
 
-                    
+
                     '''if (platinumSourceTagAmiId == goldAmiId) {
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
                     } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
