@@ -59,7 +59,7 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    // query for the latest gold AMI ID
+                    // Query for the latest gold AMI ID
                     goldAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --filters \
@@ -68,7 +68,7 @@ spec:
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim()
 
-                    // query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
+                    // Query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
                     platinumAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
