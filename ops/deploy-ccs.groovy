@@ -131,10 +131,10 @@ packer build -color=false -var vault_password_file="$vaultPasswordFile" \
 			platinumAmiId: extractAmiIdFromPackerManifest(
 				readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")
 			),
-			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
-			bfdServerAmiId: amiIds.bfdServerAmiId,
-			bfdMigratorAmiId: amiIds.bfdMigratorAmiId,
-			bfdServerLoadAmiId: amiIds.bfdServerLoadAmiId,
+			bfdPipelineAmiId: "", 
+			bfdServerAmiId: "",
+			bfdMigratorAmiId: "",
+			bfdServerLoadAmiId: "",
 		)
 	}
 }
