@@ -115,9 +115,8 @@ spec:
 
                         // Build new platinum if the latest Platinum AMI does not have a sourceAmiId tag or the sourceAmiId tag does not match the Gold AMI ID
                         echo 'deploying and tagging new platinum AMI'
-                        echo platinumSourceTagAmiId
-                        echo goldAmiId
-                        echo platinumSourceTagAmiId.length()
+                        echo "${platinumSourceTagAmiId}"
+                        echo "${goldAmiId}"
 
                         amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 
