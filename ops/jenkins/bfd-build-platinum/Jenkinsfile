@@ -47,11 +47,13 @@ spec:
         stage('Prepare') {
             steps {
                 script {
+                
                    // Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
                     // Find the most current AMI IDs (if any).
+                    awsAuth.assumeRole()
 					amiIds = null
 					amiIds = scriptForDeploys.findAmis()
 
