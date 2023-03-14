@@ -24,16 +24,6 @@
  * </p>
  */
 
-/*
- * Optionality:
- * - Performance Tests:
- *     - Default: 2 workers, 60 seconds
- *     - Extended: 4 workers, 300 seconds
- *     - Stress: 100 workers, 1800 seconds
- * - Misc. Tasks:
- *
- */
-
 properties([
 	parameters([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),

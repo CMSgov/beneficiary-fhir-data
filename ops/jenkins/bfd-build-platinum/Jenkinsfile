@@ -68,7 +68,7 @@ spec:
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim()
 
-                    // query any AMI Ids where the sourceAmiId tag is set to the Gold AMI ID
+                    // query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
                     platinumSourceTagAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
@@ -86,10 +86,6 @@ spec:
             steps {
                 script {
                     awsAuth.assumeRole()
-
-                    echo 'value of tag ID image'
-                    
-                    echo platinumSourceTagAmiId
 
                     if (platinumSourceTagAmiId.length() != 0) {
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
