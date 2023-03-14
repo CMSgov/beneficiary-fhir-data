@@ -12,8 +12,9 @@ def appBuildResults
 def amiIds
 def platinumAmiId
 def goldAmiId
-def platinumAmiSourceTag
+def platinumSourceTagAmiId
 def currentStage
+def verboseMaven = params.verbose_mvn_logging
 
 pipeline {
   agent {
@@ -49,9 +50,38 @@ spec:
                    // Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
+
+                    // Find the most current AMI IDs (if any).
+					amiIds = null
+					amiIds = scriptForDeploys.findAmis()
+
+					// Get the current commit id
+					gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+					// Get the remote repo url. This assumes we are using git+https not git+ssh.
+					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+
                 }
             }
         }
+
+        /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+			value if the build is a PR as the BRANCH_NAME var is populated with the build
+			name during PR builds.
+			*/
+			stage('Set Branch Name') {
+				script {
+					if (env.BRANCH_NAME.startsWith('PR')) {
+						gitBranchName = env.CHANGE_BRANCH
+					} else {
+						gitBranchName = env.BRANCH_NAME
+					}
+				}
+			}
+
+			stage('Build Apps') {
+				appBuildResults = scriptForApps.build(verboseMaven)
+			}
 
         stage('Find AMIs') {
             steps {
@@ -77,7 +107,7 @@ spec:
                     jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim() 
 
-                    platinumAmiSourceTag = sh(
+                    platinumSourceTagAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images \
                     --filters 'Name=tag:${amiSourceTagKey},Values=${goldAmiId}' \
@@ -90,11 +120,36 @@ spec:
 
         stage('Build Platinum AMI') {
             steps {
-                echo platinumAmiId
-                echo goldAmiId
-                echo platinumAmiSourceTag
+                script {
+                    echo platinumAmiId
+                    echo goldAmiId
+                    echo platinumSourceTagAmiId
 
-                // amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+                    if (platinumSourceTagAmiId.length() == 0) {
+                        echo "no source tag"
+                    }
+
+                    
+                    '''if (platinumSourceTagAmiId == goldAmiId) {
+                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+                    } else if (platinumSourceTagAmiId != goldAmiId || platinumSourceTagAmiId.length() == 0) {
+                        amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+
+                        platinumAmiId = sh(
+                        returnStdout: true,
+                        script: "aws ec2 describe-images --owners self --filters \
+                        'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+                        'Name=state,Values=available' --region us-east-1 --output json | \
+                        jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+                        ).trim()
+
+                        sh(
+                        returnStdout: true,
+                        script: "aws ec2 create-tags \
+                        --resources ${platinumAmiId} --tags Key=amiSourceId,Value=${goldAmiId}"
+                        )
+                    }'''
+                }
             }
         }
     }

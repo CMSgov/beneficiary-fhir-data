@@ -27,8 +27,7 @@ Note: If there are pending deployments or db migrations, make sure those finish 
 8. From the `Stage View` for `branch master`, selecting `Build with Parameters` link on left-side displays a set of parameters that can be applied to the pipeline build:
     - `deploy_prod_from_non_master` : if enabled, deploy to prod-like envs for builds of this project's non-master branches.
     - `deploy_prod_skip_confirm` : if enabled, skips prompting for confirmation before deploying to most prod-like envs.
-    - `build_platinum` : if enabled, build/update the _platinum_ base AMI; while no hard-fast rule for when to deploy an updated AMI, it is generally done about once/week. An quick way to ascertain the last deployment, is to look at the `Build Platinum AMI` column in the `Stage` view; any builds of the AMI will show there.
-    - `use_latest_images` : if enabled, defer to latest available AMIs; skips `App` and `App Image` Stages.
+\    - `use_latest_images` : if enabled, defer to latest available AMIs; skips `App` and `App Image` Stages.
     - `verbose_mvn_logging` : if enabled, `mvn` will produce verbose logs.
     - `skip_migrator_deployment` : if enabled, AND building a non-trunk or non-master branch, then do not deploy the migrator to the `test` environment.
     - `server_regression_image_override` : text input that can be used to identify/override the `Docker` image tag used when deploying the server-regression lambda.

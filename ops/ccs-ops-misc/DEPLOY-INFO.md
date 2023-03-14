@@ -6,7 +6,6 @@ Deployment Info
 - Single, multibranch Jenkinsfile provides all stage orchestration.
   - App build logic located here: `apps/build.groovy`
   - Deploy logic located here: `ops/deploy-ccs.groovy`
-- Platinum AMI is an optional stage controlled by `build_platinum` var.  Recommend building at least once a month.
 - Only the master branch can deploy to production environments unless `deploy_prod_from_non_master` var is set to true.
 - Deployment stages use locks to prevent multiple deployments from occuring at once to the same environment.
 - There is a gate (manual approval stage) between TEST and PROD-SBX deployment, but not between PROD-SBX and PROD deployment.  Recommend locking the PROD environment in order to gate the PROD-SBX deployment for additional testing.
