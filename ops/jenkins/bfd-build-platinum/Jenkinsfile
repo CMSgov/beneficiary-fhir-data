@@ -86,14 +86,12 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    echo platinumSourceTagAmiId
-
-                    if (platinumSourceTagAmiId.length() != 0) {
+                    if (platinumSourceTagAmiId.length() != 'null') {
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                         echo 'using latest images'
 
                         amyIds = scriptForDeploys.findAmis()
-                    } else if (platinumSourceTagAmiId.length() == 0) {
+                    } else if (platinumSourceTagAmiId == 'null') {
                         // Build new platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
                         echo 'deploying and tagging new platinum AMI'
 
