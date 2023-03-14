@@ -53,7 +53,6 @@ spec:
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
                     // Find the most current AMI IDs (if any).
-                    awsAuth.assumeRole()
 					amiIds = null
 					amiIds = scriptForDeploys.findAmis()
 
@@ -79,14 +78,14 @@ spec:
                 }
 			}
 
-			stage('Build Apps') {
+			'''stage('Build Apps') {
                 steps {
                     script {
                         awsAuth.assumeRole()
                         appBuildResults = scriptForApps.build(verboseMaven)
                     }
                 }
-			}
+			}'''
 
         stage('Find AMIs') {
             steps {
