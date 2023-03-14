@@ -72,11 +72,10 @@ spec:
                     platinumSourceTagAmiId = sh(
                     returnStdout: true,
                     script: "aws ec2 describe-images --owners self --filters \
-                    'Name=tag:amiSourceId,Values=${goldAmiId}' \
                     'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+                    'Name=tag:amiSourceId,Values=${goldAmiId}' \
                     'Name=state,Values=available' --region us-east-1 --output json | \
-                    --query 'Images[*].[ImageId]' \
-                     --output text"
+                    jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
                     ).trim()
                 }
             }
