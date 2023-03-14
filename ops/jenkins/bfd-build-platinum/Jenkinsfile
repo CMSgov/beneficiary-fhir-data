@@ -9,6 +9,10 @@
 // These variables are accessible throughout this file (except inside methods and classes).
 def amiIds
 def platinumAmiId
+def bfdPipelineAmiId
+def bfdServerAmiId
+def bfdMigratorAmiId
+def bfdServerLoadAmiId
 def goldAmiId
 def platinumSourceTagAmiId
 
