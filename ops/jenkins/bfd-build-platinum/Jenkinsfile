@@ -39,9 +39,9 @@ spec:
         }
     }
 
-    // Run Every day at 9 AM
+    // Run Every day at 8:30 AM Pacific / 3:30 PM UTC
     triggers {
-        cron('* 9 * * *')
+        cron('30 15 * * *')
     }
 
     stages {
