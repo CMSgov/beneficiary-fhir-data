@@ -11,7 +11,7 @@
 /bfd/test/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/test/common/nonsensitive/rds_backup_retention_period: 8 # in days
 /bfd/test/common/nonsensitive/rds_iam_database_authentication_enabled: false
-/bfd/test/common/nonsensitive/rds_cluster_identifier: bfd-test-aurora-cluster
+/bfd/test/common/nonsensitive/rds_cluster_identifier: bfd-test-aurora-cluster-03-14-2023
 /bfd/test/common/nonsensitive/rds_instance_class: db.r5.12xlarge
 /bfd/test/common/nonsensitive/rds_instance_count: 3
 /bfd/test/common/nonsensitive/rds_master_username: bfduser
@@ -37,13 +37,13 @@
 /bfd/${env}/pipeline/shared/nonsensitive/data_pipeline_micrometer_cw_interval: PT1M
 ## PIPELINE CCW
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
-/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
 /bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
 ## PIPELINE+RDA
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-/bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_enabled: true 
+/bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_enabled: false
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: UNDEFINED
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_server_type: 'Remote'
