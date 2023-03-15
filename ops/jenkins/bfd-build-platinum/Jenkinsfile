@@ -7,7 +7,6 @@
  */
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def amiIds
 def goldAmiId
 def platinumAmiId
 
@@ -100,7 +99,7 @@ spec:
                             dir('ops/ansible/playbooks-ccs') {
                                 sh '''
                             packer build -color=false -var vault_password_file="$vaultPasswordFile" \
-                            -var source_ami="$goldAmi" \
+                            -var source_ami="$goldAmiId" \
                             -var subnet_id=subnet-092c2a68bd18b34d1 \
                             ../../packer/build_bfd-platinum.json
                             '''
