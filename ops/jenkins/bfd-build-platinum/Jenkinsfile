@@ -47,7 +47,6 @@ spec:
             steps {
                 script {
                     // Load the child Jenkinsfiles.
-                    scriptForApps = load('apps/build.groovy')
                 }
             }
         }
