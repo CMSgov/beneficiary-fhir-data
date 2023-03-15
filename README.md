@@ -118,16 +118,21 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
    TODO: Podman is supported as well.
    bfd-server integration tests are still currently using HSQL for integration tests.
    If you rather use HSQL instead of test containers, add the parameter -Dits.db.url=jdbc:bfd-test:hsqldb:mem to your mvn clean install command. 
-
-7. Run mvn install with the following 
+  
+   Run mvn install with the following to run integration tests with test containers.
     ```
-     mvn -Dmaven.build.cache.enabled=false -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+     mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
     ```
    If you want to run integration tests with HSQL only, run mvn install with the following
     ```
-     mvn -Dmaven.build.cache.enabled=false -Dits.db.url=jdbc:bfd-test:hsqldb:mem -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+     mvn -Dits.db.url=jdbc:bfd-test:hsqldb:mem -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
     ```
    You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
+   
+   If you want to disable the maven cache on the maven run, run mvn install with the following
+   ```
+     mvn  -Dmaven.build.cache.enabled=false -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+    ```
 
 ### Loading Beneficiary
 1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
