@@ -45,9 +45,6 @@ spec:
     stages {
         stage('Prepare') {
             steps {
-                script {
-                    // Load the child Jenkinsfiles.
-                }
             }
         }
 
