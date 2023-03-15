@@ -137,10 +137,9 @@ public final class DatabaseTestUtils {
       password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
     } else {
       /*
-            * Build default DB connection properties that use HSQL, just as they're configured in
-      the
-            * parent POM.
-            */
+       * Build default DB connection properties that use HSQL, just as they're configured in the
+       * parent POM.
+       */
       String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
 
       // Build the actual DB connection properties to use.
