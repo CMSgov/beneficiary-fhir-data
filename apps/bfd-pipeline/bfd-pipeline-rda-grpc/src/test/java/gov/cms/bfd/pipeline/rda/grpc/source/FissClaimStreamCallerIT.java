@@ -26,6 +26,7 @@ public class FissClaimStreamCallerIT {
   private static final String CLAIM_1 =
       "{"
           + "  \"dcn\": \"63843470\","
+          + "  \"intermediaryNb\": \"53412\","
           + "  \"hicNo\": \"916689703543\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
@@ -42,6 +43,7 @@ public class FissClaimStreamCallerIT {
   private static final String CLAIM_2 =
       "{"
           + "  \"dcn\": \"2643602\","
+          + "  \"intermediaryNb\": \"24153\","
           + "  \"hicNo\": \"640930211775\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","

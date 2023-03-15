@@ -56,6 +56,7 @@ public class FissClaimRdaSinkIT {
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
           claim.setDcn("1");
+          claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
           claim.setClmTypInd("1");
           claim.setCurrStatus('T');
@@ -97,6 +98,7 @@ public class FissClaimRdaSinkIT {
           final FissClaim claimMessage =
               FissClaim.newBuilder()
                   .setDcn(claim.getDcn())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setHicNo(claim.getHicNo())
                   .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
                   .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
@@ -176,6 +178,7 @@ public class FissClaimRdaSinkIT {
           claim.setSequenceNumber(3L);
           claim.setClaimId("1");
           claim.setDcn("1");
+          claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
           claim.setCurrStatus('T');
           claim.setCurrLoc1('A');
@@ -216,6 +219,7 @@ public class FissClaimRdaSinkIT {
           final FissClaim claimMessage =
               FissClaim.newBuilder()
                   .setDcn(claim.getDcn())
+                  .setIntermediaryNb("12345")
                   .setHicNo(claim.getHicNo())
                   .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
                   .setCurrLoc1Unrecognized(String.valueOf(claim.getCurrLoc1()))

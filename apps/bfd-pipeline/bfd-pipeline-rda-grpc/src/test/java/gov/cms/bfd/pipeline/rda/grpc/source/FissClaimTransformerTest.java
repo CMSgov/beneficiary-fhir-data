@@ -113,6 +113,7 @@ public class FissClaimTransformerTest {
   public void minimumValidClaim() {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("inter");
     claim.setHicNo("hicn");
     claim.setCurrStatus('T');
     claim.setCurrLoc1('M');
@@ -120,6 +121,7 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("inter")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -140,6 +142,7 @@ public class FissClaimTransformerTest {
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
     claim.setSequenceNumber(42L);
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setDrgCd("drug");
     claim.setGroupCode("to");
@@ -177,6 +180,7 @@ public class FissClaimTransformerTest {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
+        .setIntermediaryNb("12345")
         .setDrgCd("drug")
         .setGroupCode("to")
         .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
@@ -230,6 +234,7 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForProcCodeObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -248,6 +253,7 @@ public class FissClaimTransformerTest {
                 .setProcDt("2021-07-06")
                 .build());
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -283,6 +289,7 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForDiagCodeObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -305,6 +312,7 @@ public class FissClaimTransformerTest {
                 .build());
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -341,6 +349,7 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForInsuredPayerObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -377,6 +386,7 @@ public class FissClaimTransformerTest {
                 .build());
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -423,6 +433,7 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForBeneZPayerObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -460,6 +471,7 @@ public class FissClaimTransformerTest {
                 .build());
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -506,6 +518,7 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForAuditTrailObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -521,6 +534,7 @@ public class FissClaimTransformerTest {
                 .build());
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -553,6 +567,7 @@ public class FissClaimTransformerTest {
   public void basicFieldsTestForRevenueLinesObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -580,6 +595,7 @@ public class FissClaimTransformerTest {
                 .build());
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -637,6 +653,8 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage(
                   "claimId", "invalid length: expected=[1,32] actual=0"),
               new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=0"),
+              new DataTransformer.ErrorMessage(
+                  "intermediaryNb", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=0"),
               new DataTransformer.ErrorMessage("currStatus", "no value set"),
               new DataTransformer.ErrorMessage("currLoc1", "no value set"),
@@ -657,6 +675,20 @@ public class FissClaimTransformerTest {
   }
 
   // region Claim tests
+
+  /**
+   * Tests the intermediaryNb field is properly copied when a message object is passed through the
+   * transformer.
+   */
+  @Test
+  public void testIntermediaryNb() {
+    new ClaimFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setIntermediaryNb,
+            RdaFissClaim::getIntermediaryNb,
+            "intermediaryNb",
+            5);
+  }
 
   /**
    * Tests the hicNo field is properly copied when a message object is passed through the
@@ -2488,6 +2520,7 @@ public class FissClaimTransformerTest {
     // these required fields must always be present for the transform to be error free
     claim.setClaimId("dcn");
     claim.setDcn("dcn");
+    claim.setIntermediaryNb("12345");
     claim.setHicNo("hicn");
     claim.setCurrStatus('T');
     claim.setCurrLoc1('M');
@@ -2495,6 +2528,7 @@ public class FissClaimTransformerTest {
     claim.setLastUpdated(clock.instant());
     claimBuilder
         .setDcn("dcn")
+        .setIntermediaryNb("12345")
         .setHicNo("hicn")
         .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
@@ -2568,6 +2602,7 @@ public class FissClaimTransformerTest {
     FissClaim.Builder createClaimBuilder() {
       return FissClaim.newBuilder()
           .setDcn("dcn")
+          .setIntermediaryNb("inter")
           .setHicNo("hicn")
           .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
           .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
