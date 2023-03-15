@@ -30,7 +30,8 @@
       ],
       "tags": {
         "Name": "bfd-amzn2-jdk11-platinum-{{isotime \"20060102030405\"}}",
-        "Application": "bfd-platinum"
+        "Application": "bfd-platinum",
+        "amiSourceId": "{{user `source_ami`}}"
       },
       "encrypt_boot": true,
       "kms_key_id": "076b1eb1-2fe3-45d3-a8c8-dae8c26d4e8c"
