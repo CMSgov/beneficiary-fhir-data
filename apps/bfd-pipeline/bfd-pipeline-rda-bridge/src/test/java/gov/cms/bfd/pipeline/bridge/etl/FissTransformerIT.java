@@ -463,6 +463,8 @@ public class FissTransformerIT {
     /** Claim Line Number. */
     private static final String CLM_LINE_NUM = "1";
 
+    /** Hardcoded IntermediaryNb. */
+    private static final String HARDCODED_INTERMEDIARY_NB = "?";
     /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
     /** Hardcoded Location2. */
@@ -494,6 +496,7 @@ public class FissTransformerIT {
           .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING)
           .setCurrTranDtCymd(HARDCODED_TRAN_DATE_CYMD)
           .setFedTaxNb(HARDCODED_FED_TAX_NUMBER)
+          .setIntermediaryNb(HARDCODED_INTERMEDIARY_NB)
           .setRecdDtCymd(HARDCODED_RECEIVED_DATE_CYMD)
           .addFissPayers(
               FissPayer.newBuilder()
