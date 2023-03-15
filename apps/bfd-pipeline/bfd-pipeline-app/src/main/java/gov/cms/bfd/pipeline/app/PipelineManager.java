@@ -302,7 +302,7 @@ public final class PipelineManager implements AutoCloseable {
         jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
         jobsEnqueuedHandles.remove(jobRecordId);
       }
-      LOGGER.error("Handle job failure in Pipeline: " + exception.getMessage(), exception);
+      LOGGER.error("Job failure in Pipeline: " + exception.getMessage(), exception);
     }
   }
 
@@ -340,16 +340,6 @@ public final class PipelineManager implements AutoCloseable {
    * jobs support being stopped while in progress, so this method may block for quite a while.
    */
   public void stop() {
-    stop(null);
-  }
-
-  /**
-   * This will eventually end all jobs and shut down this {@link PipelineManager}. Note: not all
-   * jobs support being stopped while in progress, so this method may block for quite a while.
-   *
-   * @param s3TaskManager the s3 task manager to clean up, if any
-   */
-  public void stop(S3TaskManager s3TaskManager) {
     // If something has already shut us down, we're done.
     if (jobExecutor.isShutdown()) {
       return;
@@ -458,7 +448,7 @@ public final class PipelineManager implements AutoCloseable {
    *     implementation (see {@link NullPipelineJobArguments} for those {@link PipelineJob}
    *     implementations which do not need arguments)
    */
-  static final class PipelineJobHandle<A extends PipelineJobArguments> {
+  private static final class PipelineJobHandle<A extends PipelineJobArguments> {
     /** The {@link PipelineJob} that the paired {@link Future} is for. */
     private final PipelineJob<A> job;
     /** The {@link Future} representing an execution of the paired {@link PipelineJob}. */
@@ -602,12 +592,7 @@ public final class PipelineManager implements AutoCloseable {
          * way we have to catch cancel-before-start events (the PipelineJobWrapper can't do it,
          * since it won't get called in the first place).
          */
-        synchronized (jobsEnqueuedHandles) {
-          if (jobsEnqueuedHandles.containsKey(jobRecord.getId())) {
-            jobRecordStore.recordJobCancellation(jobRecord.getId());
-            jobsEnqueuedHandles.remove(jobRecord.getId());
-          }
-        }
+        handleJobCancellation(jobRecord.getId());
         LOGGER.info("Job cancelled: " + jobRecord.getJobType());
       } else if (jobThrowable instanceof InterruptedException) {
         // If our job has been interrupted, we are already shutting down, so just ignore it.
