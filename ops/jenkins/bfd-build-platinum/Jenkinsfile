@@ -99,11 +99,11 @@ spec:
                             dir('ops/ansible/playbooks-ccs') {
                                 env.goldAmi = goldAmiId
                                 sh '''
-                            packer build -color=false -var vault_password_file="$vaultPasswordFile" \
-                            -var source_ami="${goldAmi}" \
-                            -var subnet_id=subnet-092c2a68bd18b34d1 \
-                            ../../packer/build_bfd-platinum.json
-                            '''
+                                packer build -color=false -var vault_password_file="$vaultPasswordFile" \
+                                -var source_ami="${goldAmi}" \
+                                -var subnet_id=subnet-092c2a68bd18b34d1 \
+                                ../../packer/build_bfd-platinum.json
+                                '''
                             }
                         }
                     }
