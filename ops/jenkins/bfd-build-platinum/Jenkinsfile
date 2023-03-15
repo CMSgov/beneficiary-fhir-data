@@ -97,9 +97,10 @@ spec:
                         withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
                             // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
                             dir('ops/ansible/playbooks-ccs') {
+                                echo goldAmiId
                                 sh '''
                             packer build -color=false -var vault_password_file="$vaultPasswordFile" \
-                            -var source_ami="$goldAmiId" \
+                            -var source_ami="${goldAmiId}" \
                             -var subnet_id=subnet-092c2a68bd18b34d1 \
                             ../../packer/build_bfd-platinum.json
                             '''
