@@ -91,11 +91,21 @@ spec:
                         // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                         echo "Using latest platinum AMI image: ${platinumAmiId}"
                     } else if (platinumAmiId.length() == 0) {
-                        // Build new platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
+                        // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
                         echo 'Deploying and tagging new platinum AMI'
 
                         // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
-                        scriptForDeploys.buildPlatinumAmi(amiIds)
+                        withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
+                            // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+                            dir('ops/ansible/playbooks-ccs') {
+                                sh '''
+                            packer build -color=false -var vault_password_file="$vaultPasswordFile" \
+                            -var source_ami="$goldAmi" \
+                            -var subnet_id=subnet-092c2a68bd18b34d1 \
+                            ../../packer/build_bfd-platinum.json
+                            '''
+                            }
+                        }
                     }
                 }
             }
