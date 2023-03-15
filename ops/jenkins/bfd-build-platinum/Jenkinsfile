@@ -43,10 +43,6 @@ spec:
     }
 
     stages {
-        stage('Prepare') {
-            
-        }
-
         stage('Find AMIs') {
             steps {
                 script {
