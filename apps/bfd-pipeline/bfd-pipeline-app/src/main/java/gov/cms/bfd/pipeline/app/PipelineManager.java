@@ -15,6 +15,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobRecordId;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobFailure;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
@@ -261,8 +262,7 @@ public final class PipelineManager implements AutoCloseable {
        * Futures.addCallback(...) a little bit further below for a discussion of some additional
        * monitoring we need and add in.)
        */
-      jobWrapper = new PipelineJobWrapper<>(job, jobRecord, jobRecordStore, jobsEnqueuedHandles);
-      jobRecordStore.recordJobEnqueue(jobRecord.getId());
+      jobWrapper = new PipelineJobWrapper<>(job, jobRecord);
 
       // Ensure code below doesn't accidentally use the unwrapped job.
       job = jobWrapper;
@@ -291,10 +291,65 @@ public final class PipelineManager implements AutoCloseable {
   }
 
   /**
+   * Handle job failure by de-queueing and recording the failure.
+   *
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   * @param exception The exception from the job failure
+   */
+  private void handleJobFailure(PipelineJobRecordId jobRecordId, Exception exception) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
+        jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
+        jobsEnqueuedHandles.remove(jobRecordId);
+      }
+      LOGGER.error("Handle job failure in Pipeline: " + exception.getMessage(), exception);
+    }
+  }
+
+  /**
+   * Handle job cancellation by de-queueing and recording cancellation.
+   *
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   */
+  private void handleJobCancellation(PipelineJobRecordId jobRecordId) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
+        jobRecordStore.recordJobCancellation(jobRecordId);
+        jobsEnqueuedHandles.remove(jobRecordId);
+      }
+    }
+  }
+
+  /**
+   * Handle normal job completion by de-queueing and recording completion.
+   *
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   * @param jobOutcome the outcome of the job to record
+   */
+  private void handleJobCompletion(PipelineJobRecordId jobRecordId, PipelineJobOutcome jobOutcome) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
+        jobRecordStore.recordJobCompletion(jobRecordId, jobOutcome);
+        jobsEnqueuedHandles.remove(jobRecordId);
+      }
+    }
+  }
+
+  /**
    * This will eventually end all jobs and shut down this {@link PipelineManager}. Note: not all
    * jobs support being stopped while in progress, so this method may block for quite a while.
    */
   public void stop() {
+    stop(null);
+  }
+
+  /**
+   * This will eventually end all jobs and shut down this {@link PipelineManager}. Note: not all
+   * jobs support being stopped while in progress, so this method may block for quite a while.
+   *
+   * @param s3TaskManager the s3 task manager to clean up, if any
+   */
+  public void stop(S3TaskManager s3TaskManager) {
     // If something has already shut us down, we're done.
     if (jobExecutor.isShutdown()) {
       return;
@@ -431,6 +486,90 @@ public final class PipelineManager implements AutoCloseable {
   }
 
   /**
+   * This {@link PipelineJob} implementation wraps a delegate {@link PipelineJob}, providing data to
+   * {@link PipelineJobRecordStore} about that job's execution and status.
+   *
+   * @param <A> the {@link PipelineJobArguments} type associated with this {@link PipelineJob}
+   *     implementation (see {@link NullPipelineJobArguments} for those {@link PipelineJob}
+   *     implementations which do not need arguments)
+   */
+  private final class PipelineJobWrapper<A extends PipelineJobArguments> implements PipelineJob<A> {
+    /** The {@link PipelineJob} to wrap and monitor. */
+    private final PipelineJob<A> wrappedJob;
+    /** The {@link PipelineJobRecord} for the job to wrap and monitor. */
+    private final PipelineJobRecord<A> jobRecord;
+
+    /**
+     * Constructs a new {@link PipelineJobWrapper} for the specified {@link PipelineJob}.
+     *
+     * @param wrappedJob the {@link PipelineJob} to wrap and monitor
+     * @param jobRecord the {@link PipelineJobRecord} for the job to wrap and monitor
+     */
+    public PipelineJobWrapper(PipelineJob<A> wrappedJob, PipelineJobRecord<A> jobRecord) {
+      this.wrappedJob = wrappedJob;
+      this.jobRecord = jobRecord;
+      jobRecordStore.recordJobEnqueue(jobRecord.getId());
+    }
+
+    /**
+     * Gets the {@link #jobRecord}.
+     *
+     * @return the {@link PipelineJobRecord} for this {@link PipelineJobWrapper}
+     */
+    public PipelineJobRecord<A> getJobRecord() {
+      return jobRecord;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public PipelineJobType<A> getType() {
+      return wrappedJob.getType();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Optional<PipelineJobSchedule> getSchedule() {
+      return wrappedJob.getSchedule();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isInterruptible() {
+      return wrappedJob.isInterruptible();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public PipelineJobOutcome call() throws Exception {
+      jobRecordStore.recordJobStart(jobRecord.getId());
+
+      try {
+        PipelineJobOutcome jobOutcome = wrappedJob.call();
+        handleJobCompletion(jobRecord.getId(), jobOutcome);
+        return jobOutcome;
+      } catch (InterruptedException e) {
+        /*
+         * This indicates that someone has successfully interrupted the job, which should only have
+         * happened when we're trying to shut down. Whether or not PipelineJob.isInterruptible() for
+         * this job, it's now been stopped, so we should record the cancellation.
+         */
+        handleJobCancellation(jobRecord.getId());
+
+        // Restore the interrupt so things can get back to shutting down.
+        Thread.currentThread().interrupt();
+        LOGGER.error(
+            "PipeLineJobOutcome interrupt failed with the the following: " + e.getMessage(), e);
+        throw new InterruptedException("Re-firing job interrupt.");
+      } catch (Exception e) {
+        handleJobFailure(jobRecord.getId(), e);
+
+        // Wrap and re-throw the failure.
+        throw new Exception("Re-throwing job failure.", e);
+      }
+    }
+  }
+
+  /**
    * A {@link FutureCallback} for Guava {@link ListenableFuture}s for {@link PipelineJobWrapper}
    * tasks, providing data to {@link PipelineJobRecordStore} about a job's execution and status.
    */
@@ -470,6 +609,9 @@ public final class PipelineManager implements AutoCloseable {
           }
         }
         LOGGER.info("Job cancelled: " + jobRecord.getJobType());
+      } else if (jobThrowable instanceof InterruptedException) {
+        // If our job has been interrupted, we are already shutting down, so just ignore it.
+        LOGGER.info("Job interrupted: " + jobRecord.getJobType());
       } else {
         /* If the job failed and wasnt cancelled, it threw some other exception mid-stream,
          * and now we must die as we almost certainly cannot continue with the tainted batch sitting in Incoming.
@@ -477,7 +619,6 @@ public final class PipelineManager implements AutoCloseable {
          * FUTURE: We may be able to more fault-tolerant by moving the failed batch
          * into the Failed folder when this happens and continuing to run
          */
-        jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(jobThrowable));
         PipelineApplication.shutdown();
       }
     }
