@@ -141,6 +141,7 @@ public class FissTransformer extends AbstractTransformer {
             .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING)
             .setCurrTranDtCymd("1970-01-01")
             .setFedTaxNb("XX-XXXXXXX")
+            .setIntermediaryNb("?")
             .setRecdDtCymd("1970-01-01");
 
     // Build beneZ payer object
