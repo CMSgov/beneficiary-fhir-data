@@ -122,6 +122,7 @@ public final class RifLoader {
      * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
      */
     this.idHasher = new IdHasher(options.getIdHasherConfig());
+    fatalFailure = new AtomicBoolean();
   }
 
   /**
