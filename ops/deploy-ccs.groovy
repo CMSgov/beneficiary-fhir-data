@@ -95,51 +95,6 @@ def findAmis() {
 }
 
 /**
- * <p>
- * Builds the base "platinum" AMI to use for new instances/AMIs.
- * </p>
- * <p>
- * Why "platinum"? Because it's essentially a respin of the CCS environment's "gold master", with
- * updates and additional tooling and configuration applied.
- * </p>
- *
- * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that already exist
- * @return a new {@link AmiIds} instance detailing the shiny new AMI that is now available for use, and any other that were already available
- * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
- */
-def buildPlatinumAmi(AmiIds amiIds) {
-	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-		env.goldAmi = sh(
-			returnStdout: true,
-			script: '''
-aws ec2 describe-images --filters \
-'Name=name,Values="amzn2legacy*"' \
-'Name=state,Values=available' --region us-east-1 --output json | \
-jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'
-'''
-		).trim()
-		// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-		dir('ops/ansible/playbooks-ccs') {
-			sh '''
-packer build -color=false -var vault_password_file="$vaultPasswordFile" \
- -var source_ami="$goldAmi" \
--var subnet_id=subnet-092c2a68bd18b34d1 \
-../../packer/build_bfd-platinum.json
-'''
-		}
-		return new AmiIds(
-			platinumAmiId: extractAmiIdFromPackerManifest(
-				readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")
-			),
-			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
-			bfdServerAmiId: amiIds.bfdServerAmiId,
-			bfdMigratorAmiId: amiIds.bfdMigratorAmiId,
-			bfdServerLoadAmiId: amiIds.bfdServerLoadAmiId,
-		)
-	}
-}
-
-/**
  * Builds the BFD Pipeline and BFD Server AMIs.
  *
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that already exist
