@@ -1,5 +1,7 @@
 package gov.cms.bfd;
 
+import static java.util.Collections.singletonMap;
+
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.FileReader;
@@ -28,6 +30,9 @@ import org.hsqldb.server.ServerAcl.AclFormatException;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -53,6 +58,12 @@ public final class DatabaseTestUtils {
   /** The password used for HSQL locally. */
   static final String HSQL_SERVER_PASSWORD = "test";
 
+  /** The username used for test container database username. */
+  static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
+
+  /** The password used for test container database password. */
+  static final String TEST_CONTAINER_DATABASE_PASSWORD = "bfdtest";
+
   /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
   private static DatabaseTestUtils SINGLETON;
 
@@ -61,6 +72,9 @@ public final class DatabaseTestUtils {
    * #initUnpooledDataSource()}.
    */
   private final DataSource unpooledDataSource;
+
+  /** Generic container for postgressql. */
+  private static GenericContainer container = null;
 
   /**
    * Constructs a new {@link DatabaseTestUtils} instance. Marked <code>private</code>; use {@link
@@ -105,7 +119,19 @@ public final class DatabaseTestUtils {
     Optional<Properties> bfdServerTestDatabaseProperties = readTestDatabaseProperties();
 
     String url, username, password;
-    if (bfdServerTestDatabaseProperties.isPresent()) {
+    url = System.getProperty("its.db.url", "");
+    String usernameDefault = null;
+    String passwordDefault = null;
+
+    if (url != "" && url.endsWith("tc")) {
+      // Build the actual DB connection properties to use.
+      username = System.getProperty("its.db.username", usernameDefault);
+      if (username != null && username.trim().isEmpty())
+        username = TEST_CONTAINER_DATABASE_USERNAME;
+      password = System.getProperty("its.db.password", passwordDefault);
+      if (password != null && password.trim().isEmpty())
+        password = TEST_CONTAINER_DATABASE_PASSWORD;
+    } else if (bfdServerTestDatabaseProperties.isPresent()) {
       url = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.url");
       username = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.username");
       password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
@@ -115,8 +141,6 @@ public final class DatabaseTestUtils {
        * parent POM.
        */
       String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
-      String usernameDefault = null;
-      String passwordDefault = null;
 
       // Build the actual DB connection properties to use.
       url = System.getProperty("its.db.url", urlDefault);
@@ -234,6 +258,8 @@ public final class DatabaseTestUtils {
       dataSource = initUnpooledDataSourceForHsqlServer(url, username, password);
     } else if (url.startsWith("jdbc:postgresql:")) {
       dataSource = initUnpooledDataSourceForPostgresql(url, username, password);
+    } else if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "tc")) {
+      dataSource = initUnpooledDataSourceForTestContainerWithPostgres(username, password);
     } else {
       throw new RuntimeException("Unsupported test DB URL: " + url);
     }
@@ -320,6 +346,50 @@ public final class DatabaseTestUtils {
     if (username != null) dataSource.setUser(username);
     if (password != null) dataSource.setPassword(password);
 
+    // In order to store and retrieve JSON in postgresql without adding any additional maven
+    // dependencies  we can set this property to allow String values to be transparently
+    // converted to/from jsonb values.
+    try {
+      dataSource.setProperty("stringtype", "unspecified");
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
+    if (!migrationSuccess) {
+      throw new RuntimeException("Schema migration failed during test setup");
+    }
+
+    return dataSource;
+  }
+
+  /**
+   * Initiates a Test Container PostgreSQL {@link DataSource} for the test DB.
+   *
+   * @param username the username for the test database to connect to
+   * @param password the password for the test database to connect to
+   * @return a PostgreSQL {@link DataSource} for the test DB
+   */
+  private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
+      String username, String password) {
+
+    if (container == null || !container.isRunning()) {
+      String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
+      container =
+          new PostgreSQLContainer(testContainerDatabaseImage)
+              .withDatabaseName("fhirdb")
+              .withUsername(username)
+              .withPassword(password)
+              .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
+
+      container.start();
+    }
+
+    JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
+    DataSource dataSource =
+        initUnpooledDataSourceForPostgresql(
+            jdbcContainer.getJdbcUrl(), jdbcContainer.getUsername(), jdbcContainer.getPassword());
+
     boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
     if (!migrationSuccess) {
       throw new RuntimeException("Schema migration failed during test setup");
@@ -373,15 +443,18 @@ public final class DatabaseTestUtils {
     LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
     flyway.clean();
     // Drop any created types since flyway's clean doesnt do this
-    try (Connection connection = getUnpooledDataSource().getConnection(); ) {
-      try (Statement statement = connection.createStatement()) {
-        statement.executeUpdate("DROP TYPE JSONB");
-        statement.executeUpdate("DROP TYPE JSON");
+    // Make sure we are not using test containers locally.
+    if (!url.startsWith("jdbc:postgresql://localhost")) {
+      try (Connection connection = getUnpooledDataSource().getConnection(); ) {
+        try (Statement statement = connection.createStatement()) {
+          statement.executeUpdate("DROP TYPE JSONB");
+          statement.executeUpdate("DROP TYPE JSON");
+        }
+        connection.commit();
+      } catch (SQLException e) {
+        LOGGER.error("SQL Exception when cleaning DB: ", e);
+        return false;
       }
-      connection.commit();
-    } catch (SQLException e) {
-      LOGGER.error("SQL Exception when cleaning DB: ", e);
-      return false;
     }
     return true;
   }
