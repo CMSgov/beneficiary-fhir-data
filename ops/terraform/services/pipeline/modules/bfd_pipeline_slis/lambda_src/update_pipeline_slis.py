@@ -8,11 +8,11 @@ from datetime import datetime, timedelta
 from enum import Enum
 from functools import reduce
 from itertools import chain, combinations
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Optional, Type, TypeVar
 from urllib.parse import unquote
 
 import boto3
-from botocore import exceptions as boto3_exceptions
+from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
 
 T = TypeVar("T")
@@ -35,11 +35,11 @@ BOTO_CONFIG = Config(
 cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)
 s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
 
-COMMON_UNRECOVERABLE_EXCEPTIONS = [
+COMMON_UNRECOVERABLE_EXCEPTIONS: list[Type[BaseException]] = [
     cw_client.exceptions.InvalidParameterValueException,
     cw_client.exceptions.MissingRequiredParameterException,
     cw_client.exceptions.InvalidParameterCombinationException,
-    boto3_exceptions.ParamValidationError,
+    botocore_exceptions.ParamValidationError,
 ]
 """Exceptions common to CloudWatch Metrics operations that cannot be retried upon, and so should be
 immediately raised to the calling function (in this case, the handler)"""
@@ -107,7 +107,7 @@ def powerset(items: list[T]) -> chain[T]:
     null set) of the incoming list. Used to automatically generate all possible
     dimensioned metrics for a given metric. Implementation adapted from Python's official
     itertools-recipes documentation
-    
+
     Example:
         powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 
@@ -155,7 +155,7 @@ def gen_all_dimensioned_metrics(
 def backoff_retry(
     func: Callable[[], T],
     retries: int = PUT_METRIC_DATA_MAX_RETRIES,
-    ignored_exceptions: list[Exception] = None,
+    ignored_exceptions: Optional[list[Type[BaseException]]] = None,
 ) -> Optional[T]:
     """Generic function for wrapping another callable (function) that may raise errors and require
     some form of retry mechanism. Supports passing a list of exceptions/errors for the retry logic
@@ -165,8 +165,8 @@ def backoff_retry(
         func (Callable[[], T]): The function to retry
         retries (int, optional): The number of times to retry before raising the error causing the
         failure. Defaults to PUT_METRIC_DATA_MAX_RETRIES.
-        ignored_exceptions (list[Exception], optional): A list of exceptions to skip retrying and
-        instead immediately raise to the calling function. Defaults to [].
+        ignored_exceptions (list[Type[BaseException]] , optional): A list of exceptions to skip
+        iretrying and nstead immediately raise to the calling function. Defaults to [].
 
     Raises:
         exc: Any exception in ignored_exceptions, or the exception thrown on the final retry
@@ -180,12 +180,18 @@ def backoff_retry(
     for try_number in range(1, retries):
         try:
             return func()
-        except Exception as exc:
+        # Pylint will complain this is too broad, and it is, but unfortunately it appears that
+        # boto3 client exceptions extend directly from BaseException rather than the more correct
+        # Exception type. Rather than deal with the dynamic type headache from boto3's exceptions,
+        # we just catch BaseException and re-raise certain BaseExceptions that should never be
+        # caught
+        except BaseException as exc:  # pylint: disable=W0718
             # Raise the exception if it is any of the explicitly ignored exceptions or if this
-            # was the last try
+            # was the last try or if the exception is one of a few special base exceptions
             if (
-                any(isinstance(exc) is ignored_exc for ignored_exc in ignored_exceptions)
+                any(isinstance(exc, ignored_exc) for ignored_exc in ignored_exceptions)
                 or try_number == retries
+                or isinstance(exc, (KeyboardInterrupt, SystemExit))
             ):
                 raise exc
 
@@ -247,7 +253,7 @@ def get_metric_data(
     from CloudWatch Metrics.
 
     Args:
-        metric_data_queries (list[MetricDataQuery]): A list of data queries to return metric data 
+        metric_data_queries (list[MetricDataQuery]): A list of data queries to return metric data
         for
         statistic (str): The statistic for the queried metric(s) to return
         period (int, optional): The period of the metric, correlates to its storage resolution.
