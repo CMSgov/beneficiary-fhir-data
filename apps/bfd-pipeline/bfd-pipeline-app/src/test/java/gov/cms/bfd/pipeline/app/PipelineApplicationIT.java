@@ -159,6 +159,9 @@ public final class PipelineApplicationIT {
       // Start the app.
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
       appRunBuilder.redirectErrorStream(true);
+      // appRunBuilder.environment().put("AWS_ACCESS_KEY", MINIO_ACCESS_KEY);
+      // appRunBuilder.environment().put("AWS_SECRET_KEY", MINIO_SECRET_KEY);
+      appRunBuilder.environment().put("s3.local", "true");
       appProcess = appRunBuilder.start();
 
       // Read the app's output.

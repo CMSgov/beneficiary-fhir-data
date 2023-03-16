@@ -22,9 +22,9 @@ public class MinioTestContainer {
   /** Singleton instance of MinioContainer. */
   private static MinioTestContainer myInstance = null;
   /** Port number for minio. */
-  private static final int DEFAULT_PORT = 9000;
+  private static final int DEFAULT_PORT = 9050;
   /** minio image that will be loaded into testcontainers. */
-  private static final String DEFAULT_IMAGE = "minio/minio";
+  private static final String DEFAULT_IMAGE = "minio-test/minio";
   /** default tag name. */
   private static final String DEFAULT_TAG = "edge";
   /** directory within container to use. */
@@ -32,14 +32,12 @@ public class MinioTestContainer {
   /** minio Health check URL. */
   private static final String HEALTH_ENDPOINT = "/minio/health/ready";
   /** access user name for S3. */
-  private static final String MINIO_ACCESS_KEY =
-      System.getProperty("s3.localUser", "bfdLocalS3Dev");
+  public static final String MINIO_ACCESS_KEY = System.getProperty("s3.localUser", "bfdLocalS3Dev");
   /** access password for S3. */
-  private static final String MINIO_SECRET_KEY =
-      System.getProperty("s3.localPass", "bfdLocalS3Dev");
+  public static final String MINIO_SECRET_KEY = System.getProperty("s3.localPass", "bfdLocalS3Dev");
   /** minio host and port. */
   private static final String MINIO_URL =
-      System.getProperty("s3.localAddress", "http://localhost:9000");
+      System.getProperty("s3.localAddress", "http://localhost:9050");
   /** GenericContainer from testcontaers. */
   public static GenericContainer minioContainer = null;
 
