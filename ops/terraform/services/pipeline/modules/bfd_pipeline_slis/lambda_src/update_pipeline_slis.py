@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from functools import reduce
 from itertools import chain, combinations
-from typing import Callable, Optional, Type, TypeVar
+from typing import Any, Callable, Optional, Tuple, Type, TypeVar
 from urllib.parse import unquote
 
 import boto3
@@ -21,8 +21,8 @@ PUT_METRIC_DATA_MAX_RETRIES = 10
 """The maxmium number of exponentially backed-off retries to attempt when trying to call the AWS
 PutMetricData API"""
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
-METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE")
-ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID")
+METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
+ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -102,7 +102,7 @@ class MetricDataResult:
     values: list[float]
 
 
-def powerset(items: list[T]) -> chain[T]:
+def powerset(items: list[T]) -> chain[Tuple[T]]:
     """This function computes the powerset (the set of all subsets including the set itself and the
     null set) of the incoming list. Used to automatically generate all possible
     dimensioned metrics for a given metric. Implementation adapted from Python's official
@@ -115,7 +115,7 @@ def powerset(items: list[T]) -> chain[T]:
         items (list[T]): A list of items to compute the powerset from
 
     Returns:
-        chain[T]: A generator that will yield subsets starting with the null set upto the set
+        chain[Tuple[T]]: A generator that will yield subsets starting with the null set upto the set
     """
     return chain.from_iterable(combinations(items, r) for r in range(len(items) + 1))
 
@@ -156,7 +156,7 @@ def backoff_retry(
     func: Callable[[], T],
     retries: int = PUT_METRIC_DATA_MAX_RETRIES,
     ignored_exceptions: Optional[list[Type[BaseException]]] = None,
-) -> Optional[T]:
+) -> T:
     """Generic function for wrapping another callable (function) that may raise errors and require
     some form of retry mechanism. Supports passing a list of exceptions/errors for the retry logic
     to ignore and instead raise to the calling function to handle
@@ -204,7 +204,7 @@ def backoff_retry(
             )
             time.sleep(sleep_time)
 
-    return None
+    raise RuntimeError(f"Number of retries exceeded the maximum of {retries} attempts")
 
 
 def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
@@ -318,7 +318,7 @@ def handler(event, context):
         return
 
     try:
-        record = event["Records"][0]
+        record: dict[str, Any] = event["Records"][0]
     except KeyError as exc:
         print(f"The incoming event was invalid: {exc}")
         return
@@ -337,7 +337,7 @@ def handler(event, context):
         return
 
     try:
-        file_key = record["s3"]["object"]["key"]
+        file_key: str = record["s3"]["object"]["key"]
     except KeyError as exc:
         print(f"No bucket file found in event notification: {exc}")
         return
