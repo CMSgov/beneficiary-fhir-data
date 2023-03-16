@@ -55,6 +55,7 @@ public class FissClaimRdaSinkIT {
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
+          claim.setClaimId("1id");
           claim.setDcn("1");
           claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
@@ -97,6 +98,7 @@ public class FissClaimRdaSinkIT {
 
           final FissClaim claimMessage =
               FissClaim.newBuilder()
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
                   .setIntermediaryNb(claim.getIntermediaryNb())
                   .setHicNo(claim.getHicNo())
@@ -114,6 +116,8 @@ public class FissClaimRdaSinkIT {
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
                   .setDcn(claim.getDcn())
+                  .setRdaClaimKey(claim.getClaimId())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setClaim(claimMessage)
                   .build();
 
@@ -176,7 +180,7 @@ public class FissClaimRdaSinkIT {
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
-          claim.setClaimId("1");
+          claim.setClaimId("1id");
           claim.setDcn("1");
           claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
@@ -218,6 +222,7 @@ public class FissClaimRdaSinkIT {
 
           final FissClaim claimMessage =
               FissClaim.newBuilder()
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
                   .setIntermediaryNb("12345")
                   .setHicNo(claim.getHicNo())
@@ -235,6 +240,8 @@ public class FissClaimRdaSinkIT {
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
                   .setDcn(claim.getDcn())
+                  .setRdaClaimKey(claim.getClaimId())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setClaim(claimMessage)
                   .build();
 
@@ -272,7 +279,7 @@ public class FissClaimRdaSinkIT {
 
             assertEquals(Long.valueOf(3), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());
-            assertEquals(claim.getDcn(), error.getClaimId());
+            assertEquals(claim.getClaimId(), error.getClaimId());
             assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());
           }
         });

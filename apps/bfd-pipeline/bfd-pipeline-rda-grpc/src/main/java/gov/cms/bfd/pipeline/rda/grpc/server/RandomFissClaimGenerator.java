@@ -179,6 +179,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
    * @param claim The claim object to add random base field values to
    */
   private void addRandomFieldValues(FissClaim.Builder claim) {
+    always("rdaClaimKey", () -> claim.setRdaClaimKey(randomDigit(6, 9)));
     always("dcn", () -> claim.setDcn(randomDigit(5, 8)));
     always("intermediaryNb", () -> claim.setIntermediaryNb(randomDigit(1, 5)));
     always("hicNo", () -> claim.setHicNo(randomDigit(12, 12)));
