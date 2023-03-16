@@ -24,7 +24,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -53,6 +52,19 @@ import org.opentest4j.TestAbortedException;
 public final class PipelineApplicationIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
+
+  // private static MinioTestContainer minioContainer;
+  /*
+   @BeforeAll
+   public static void setupMinioTestContainer() {
+     MinioTestContainer.startContainer();
+   }
+
+   @AfterAll
+   public static void tearDownMinioTestContainer() {
+     MinioTestContainer.stopContainer();
+   }
+  */
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
@@ -131,7 +143,9 @@ public final class PipelineApplicationIT {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
+
+    // SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
 
     Bucket bucket = null;
     Process appProcess = null;
