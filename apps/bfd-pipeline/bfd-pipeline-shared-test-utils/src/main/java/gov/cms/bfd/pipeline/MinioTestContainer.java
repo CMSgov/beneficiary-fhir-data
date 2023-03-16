@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.pipeline;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;

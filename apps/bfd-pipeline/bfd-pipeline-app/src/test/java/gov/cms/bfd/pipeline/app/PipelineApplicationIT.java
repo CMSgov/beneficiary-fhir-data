@@ -10,6 +10,7 @@ import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.MinioTestContainer;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -24,6 +25,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -38,6 +40,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 
@@ -53,18 +57,17 @@ public final class PipelineApplicationIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
 
-  // private static MinioTestContainer minioContainer;
-  /*
-   @BeforeAll
-   public static void setupMinioTestContainer() {
-     MinioTestContainer.startContainer();
-   }
+  /** Sets the minio test container. */
+  @BeforeAll
+  public static void setupMinioTestContainer() {
+    MinioTestContainer.startContainer();
+  }
 
-   @AfterAll
-   public static void tearDownMinioTestContainer() {
-     MinioTestContainer.stopContainer();
-   }
-  */
+  /** Tear down minio test container. */
+  @AfterAll
+  public static void tearDownMinioTestContainer() {
+    MinioTestContainer.stopContainer();
+  }
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
