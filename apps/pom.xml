@@ -129,9 +129,10 @@
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
-		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
+		<its.db.url>jdbc:bfd-test:tc</its.db.url>
 		<its.db.username/>
 		<its.db.password/>
+		<its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
@@ -617,6 +618,7 @@ checkJavaFormat
 							<its.db.url>${its.db.url}</its.db.url>
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
+							<its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
 						</systemPropertyVariables>
 
 						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
