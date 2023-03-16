@@ -277,11 +277,9 @@ mappings:
     joins:
     - class: parent
       entityMapping: CarrierClaimLine
-      fetchType: EAGER
       fieldName: lines
       mappedBy: parentClaim
       orderBy: LINE_NUM ASC
-      joinType: OneToMany
     name: carrier_claims
     primaryKeyColumns:
     - claimId
