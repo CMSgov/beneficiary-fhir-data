@@ -106,7 +106,7 @@ public final class RifLoader {
    * Keeps track of a fatal error during loading in one of the batch threads so we know to fail the
    * job (and kill the pipeline).
    */
-  private static volatile boolean fatalFailure;
+  private static volatile AtomicBoolean fatalFailure;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -231,7 +231,7 @@ public final class RifLoader {
       Consumer<Throwable> errorHandler,
       Consumer<RifRecordLoadResult> resultHandler) {
 
-    fatalFailure = false;
+    fatalFailure.set(false);
     BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(options);
 
     MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
@@ -350,7 +350,7 @@ public final class RifLoader {
        * allow the pipeline to continue operating if an error is considered non-fatal (it also currently moves the failed files
        * to "Done" instead of "Failed", which would need to be fixed.)
        */
-      if (fatalFailure) {
+      if (fatalFailure.get()) {
         throw new IllegalStateException("Fatal error during rif file processing.");
       }
 
@@ -391,7 +391,7 @@ public final class RifLoader {
           } catch (Throwable e) {
             LOGGER.error("Error caught when processing async batch!", e);
             // Cannot use errorHandler here, as it will cause a long wait before shutdown
-            fatalFailure = true;
+            fatalFailure.set(true);
           }
         });
   }
