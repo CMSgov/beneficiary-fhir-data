@@ -214,18 +214,12 @@ def backoff_retry(
     for try_number in range(1, retries):
         try:
             return func()
-        # Pylint will complain this is too broad, and it is, but unfortunately it appears that
-        # boto3 client exceptions extend directly from BaseException rather than the more correct
-        # Exception type. Rather than deal with the dynamic type headache from boto3's exceptions,
-        # we just catch BaseException and re-raise certain BaseExceptions that should never be
-        # caught
-        except BaseException as exc:  # pylint: disable=W0718
+        except Exception as exc:  # pylint: disable=W0718
             # Raise the exception if it is any of the explicitly ignored exceptions or if this
             # was the last try or if the exception is one of a few special base exceptions
             if (
                 any(isinstance(exc, ignored_exc) for ignored_exc in ignored_exceptions)
                 or try_number == retries
-                or isinstance(exc, (KeyboardInterrupt, SystemExit))
             ):
                 raise exc
 
