@@ -107,12 +107,15 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
         clock,
         startingSequenceNumber,
         KEY_CACHE_SIZE,
-        FissClaim::getDcn,
+        FissClaim::getRdaClaimKey,
         (timestamp, type, seq, claim) ->
             FissClaimChange.newBuilder()
                 .setTimestamp(timestamp)
                 .setChangeType(type)
                 .setSeq(seq)
+                .setDcn(claim.getDcn())
+                .setRdaClaimKey(claim.getRdaClaimKey())
+                .setIntermediaryNb(claim.getIntermediaryNb())
                 .setClaim(claim)
                 .setSource(
                     RecordSource.newBuilder()

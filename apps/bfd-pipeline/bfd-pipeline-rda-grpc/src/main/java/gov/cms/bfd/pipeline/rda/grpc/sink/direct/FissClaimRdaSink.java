@@ -61,7 +61,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(FissClaimChange object) {
-    return object.getClaim().getDcn();
+    return object.getClaim().getRdaClaimKey();
   }
 
   /** {@inheritDoc} */
@@ -116,7 +116,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
       throws IOException {
     return MessageError.builder()
         .sequenceNumber(change.getSeq())
-        .claimId(change.getClaim().getDcn())
+        .claimId(change.getClaim().getRdaClaimKey())
         .claimType(MessageError.ClaimType.FISS)
         .apiSource(apiVersion)
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))

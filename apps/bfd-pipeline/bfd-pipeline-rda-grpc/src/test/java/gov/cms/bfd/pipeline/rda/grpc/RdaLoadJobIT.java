@@ -1,6 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -301,7 +304,7 @@ public class RdaLoadJobIT {
       ImmutableList<FissClaimChange> expectedClaims, RdaFissClaim resultClaim) {
     return expectedClaims.stream()
         .map(FissClaimChange::getClaim)
-        .filter(claim -> claim.getDcn().equals(resultClaim.getDcn()))
+        .filter(claim -> claim.getRdaClaimKey().equals(resultClaim.getClaimId()))
         .findAny()
         .orElse(null);
   }

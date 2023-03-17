@@ -55,7 +55,7 @@ public class RdaClaimMessageMetaData {
   private long sequenceNumber;
 
   /** Either dcn (FISS) or idrClmHdIcn (MCS). */
-  @Column(name = "claim_id", length = 25, nullable = false)
+  @Column(name = "claim_id", length = 32, nullable = false)
   private String claimId;
 
   @ManyToOne(fetch = FetchType.EAGER)

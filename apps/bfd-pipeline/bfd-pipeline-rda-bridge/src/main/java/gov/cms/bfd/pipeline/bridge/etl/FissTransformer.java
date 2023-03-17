@@ -126,11 +126,13 @@ public class FissTransformer extends AbstractTransformer {
 
     mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
+    final String claimId = getClaimId(data);
     final String dcn =
-        ifNull(data.get(Fiss.FI_DOC_CLM_CNTL_NUM).orElse(null), () -> convertDcn(data));
+        ifNull(data.get(Fiss.FI_DOC_CLM_CNTL_NUM).orElse(null), () -> convertDcn(claimId));
 
     FissClaim.Builder claimBuilder =
         FissClaim.newBuilder()
+            .setRdaClaimKey(claimId)
             .setDcn(dcn)
             .setMbi(mbiMap.get(beneId).getMbi())
             .setHicNo(mbiMap.get(beneId).getHicNo())
@@ -197,12 +199,15 @@ public class FissTransformer extends AbstractTransformer {
     addDiagCodes(claimBuilder, data);
     addProcCodes(claimBuilder, data);
 
+    FissClaim claim = claimBuilder.build();
     return FissClaimChange.newBuilder()
         .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
         .setSeq(sequenceNumber.inc())
-        .setClaim(claimBuilder.build())
+        .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setDcn(dcn)
+        .setRdaClaimKey(claim.getRdaClaimKey())
+        .setIntermediaryNb(claim.getIntermediaryNb())
         .setSource(
             RecordSource.newBuilder()
                 // Hardcoding values for test data, this data is only used in production for
@@ -251,17 +256,27 @@ public class FissTransformer extends AbstractTransformer {
   }
 
   /**
-   * Fallback method for creating a claim identifier from the CLM_ID field.
+   * Fallback method for creating a claim identifier from the CLM_ID field. Uses a hash to generate
+   * a string of the appropriate length.
+   *
+   * @param claimId The value returned by {@link #getClaimId}
+   * @return The generated claim identifier
+   */
+  @VisibleForTesting
+  String convertDcn(String claimId) {
+    return "-" + DigestUtils.sha256Hex(claimId).substring(0, 22);
+  }
+
+  /**
+   * Get the value for use as a {@link FissClaim#getRdaClaimKey} value. Requires that the record
+   * contain a CLM_ID field value.
    *
    * @param data The data to pull from for claim data
    * @return The generated claim identifier
    */
-  @VisibleForTesting
-  String convertDcn(Parser.Data<String> data) {
-    String claimId =
-        data.get(Fiss.CLM_ID)
-            .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
-    return "-" + DigestUtils.sha256Hex(claimId).substring(0, 22);
+  private static String getClaimId(Parser.Data<String> data) {
+    return data.get(Fiss.CLM_ID)
+        .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
   }
 
   /**
