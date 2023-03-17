@@ -50,8 +50,8 @@ class PipelineDataStatus(str, Enum):
     by the ETL pipeline. The value of each enum is the parent directory of the incoming file,
     indicating status"""
 
-    AVAILABLE = "incoming"
-    LOADED = "done"
+    INCOMING = "incoming"
+    DONE = "done"
 
 
 class RifFileType(str, Enum):
@@ -380,7 +380,7 @@ def handler(event, context):
 
         timestamp_metric = (
             PipelineMetrics.TIME_DATA_AVAILABLE
-            if pipeline_data_status == PipelineDataStatus.AVAILABLE
+            if pipeline_data_status == PipelineDataStatus.INCOMING
             else PipelineMetrics.TIME_DATA_LOADED
         )
 
@@ -418,7 +418,7 @@ def handler(event, context):
             )
             return
 
-        if pipeline_data_status == PipelineDataStatus.AVAILABLE:
+        if pipeline_data_status == PipelineDataStatus.INCOMING:
             print(
                 "Incoming file indicates data has been made available to load to the ETL pipeline."
                 f' Checking if this is the first time data is available for group "{ccw_timestamp}"'
@@ -501,7 +501,7 @@ def handler(event, context):
                 print(
                     f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
                 )
-        elif pipeline_data_status == PipelineDataStatus.LOADED:
+        elif pipeline_data_status == PipelineDataStatus.DONE:
             print(
                 "Incoming file indicates data has been loaded. Calculating time deltas and checking"
                 " if the incoming file was the last loaded file..."
@@ -613,7 +613,7 @@ def handler(event, context):
 
             print("Checking if the incoming file is the last file to be loaded...")
             etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
-            incoming_path_prefix = f"{PipelineDataStatus.AVAILABLE.capitalize()}/{ccw_timestamp}/"
+            incoming_path_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{ccw_timestamp}/"
             if list(etl_bucket.objects.filter(Prefix=incoming_path_prefix)):
                 print(
                     f"Objects still exist in {incoming_path_prefix}. Incoming file is likely not"
