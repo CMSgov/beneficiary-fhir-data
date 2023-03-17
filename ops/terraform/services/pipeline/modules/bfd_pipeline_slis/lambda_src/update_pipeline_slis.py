@@ -453,16 +453,17 @@ def handler(event, context):
 
             try:
                 print(
-                    f'Retrieving metric data from "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}"'
-                    f" with dimensions {group_timestamp_dimension}..."
+                    "Retrieving metric data from"
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
+                    f" {group_timestamp_dimension}..."
                 )
                 result = backoff_retry(
                     func=get_data_first_available_for_group,
                     ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
                 )
                 print(
-                    f'Metric "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
-                    f" {group_timestamp_dimension} retrieved successfully"
+                    f'Metric "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with'
+                    f" dimensions {group_timestamp_dimension} retrieved successfully"
                 )
             except Exception as exc:
                 print(
@@ -476,10 +477,11 @@ def handler(event, context):
                 if x.label == PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
             ]:
                 print(
-                    f'Metric data exists for "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with'
-                    f" dimensions {group_timestamp_dimension}. Incoming file is part of an ongoing,"
-                    " existing data load, and therefore does not indicate the time of the first"
-                    " data load for its group. Stopping..."
+                    "Metric data exists for"
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
+                    f" {group_timestamp_dimension}. Incoming file is part of an ongoing, existing"
+                    " data load, and therefore does not indicate the time of the first data load"
+                    " for its group. Stopping..."
                 )
                 return
 
@@ -487,7 +489,8 @@ def handler(event, context):
                 "No metric data result was found for metric"
                 f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}, this indicates that the"
                 " incoming file is the start of a new data load. Putting data to metric"
-                f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value {utc_timestamp}'
+                f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
+                f" {utc_timestamp}"
             )
 
             def put_data_first_available_metrics():
@@ -504,8 +507,9 @@ def handler(event, context):
 
             try:
                 print(
-                    f'Putting time metric data to "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}"'
-                    f" with value {utc_timestamp}..."
+                    "Putting time metric data to"
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
+                    f" {utc_timestamp}..."
                 )
                 backoff_retry(
                     func=put_data_first_available_metrics,
@@ -542,8 +546,8 @@ def handler(event, context):
 
             try:
                 print(
-                    f'Getting corresponding "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" time'
-                    f' metric for the current RIF file type "{rif_file_type.name}" in group'
+                    f'Getting corresponding "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}"'
+                    f' time metric for the current RIF file type "{rif_file_type.name}" in group'
                     f' "{ccw_timestamp}"...'
                 )
                 result = backoff_retry(
@@ -610,14 +614,16 @@ def handler(event, context):
 
             try:
                 print(
-                    f'Putting time delta metrics to "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
-                    f" with value {load_time_delta.seconds}..."
+                    "Putting time delta metrics to"
+                    f' "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}" with value'
+                    f" {load_time_delta.seconds}..."
                 )
                 backoff_retry(
                     func=put_time_delta_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
                 )
                 print(
-                    f'Metrics put to "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}" successfully'
+                    f'Metrics put to "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
+                    " successfully"
                 )
             except Exception as exc:
                 print(
