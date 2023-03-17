@@ -10,7 +10,7 @@
 /bfd/test/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 /bfd/test/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/test/common/nonsensitive/rds_backup_retention_period: 8 # in days
-/bfd/test/common/nonsensitive/rds_iam_database_authentication_enabled: false
+/bfd/test/common/nonsensitive/rds_iam_database_authentication_enabled: true
 /bfd/test/common/nonsensitive/rds_cluster_identifier: bfd-test-aurora-cluster
 /bfd/test/common/nonsensitive/rds_instance_class: db.r5.12xlarge
 /bfd/test/common/nonsensitive/rds_instance_count: 3
