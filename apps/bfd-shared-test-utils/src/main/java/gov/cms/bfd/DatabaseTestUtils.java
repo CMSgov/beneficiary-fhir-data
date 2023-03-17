@@ -438,7 +438,10 @@ public final class DatabaseTestUtils {
         Flyway.configure()
             .dataSource(unpooledDataSource)
             .schemas(FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]))
+            .baselineOnMigrate(true)
+            .baselineVersion("0")
             .connectRetries(2)
+            .cleanDisabled(false)
             .load();
     LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
     flyway.clean();

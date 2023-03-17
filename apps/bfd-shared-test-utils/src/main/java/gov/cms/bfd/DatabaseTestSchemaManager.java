@@ -10,6 +10,7 @@ import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.MigrationState;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.flywaydb.core.internal.database.postgresql.PostgreSQLConfigurationExtension;
 import org.flywaydb.core.internal.sqlscript.FlywaySqlScriptException;
 
 /**
@@ -77,6 +78,10 @@ public class DatabaseTestSchemaManager {
     // Trying to prevent career-limiting mistakes.
     flywayBuilder.cleanDisabled(true);
 
+    // Apply a baseline for non-empty databases, start at version 0
+    flywayBuilder.baselineOnMigrate(true);
+    flywayBuilder.baselineVersion("0");
+
     // The default name for the schema table changed in Flyway 5.
     // We need to specify the original table name for backwards compatibility.
     flywayBuilder.table("schema_version");
@@ -86,6 +91,14 @@ public class DatabaseTestSchemaManager {
     if (flywayScriptLocationOverride != null && flywayScriptLocationOverride.length() > 0) {
       flywayBuilder.locations(flywayScriptLocationOverride);
     }
+
+    // Transactional locks default to `true` as of Flyway 9.1.2 and better
+    // See https://github.com/flyway/flyway/issues/3497
+    // See https://github.com/flyway/flyway/commit/022a646b7959aa7a9a11760d8e93e5e238fbd6ec
+    flywayBuilder
+        .getPluginRegister()
+        .getPlugin(PostgreSQLConfigurationExtension.class)
+        .setTransactionalLock(false);
 
     return flywayBuilder.load();
   }
