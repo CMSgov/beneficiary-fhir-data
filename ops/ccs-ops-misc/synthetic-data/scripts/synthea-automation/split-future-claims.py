@@ -137,7 +137,6 @@ def create_week_folders_and_manifests(file_data_tuples, synthea_output_filepath,
     ## Create folders and manifests
     for week in weeks_files.keys():
         week_folder_path = synthea_output_filepath + week
-        print(f"Week path: {week_folder_path}")
         if not week == today.strftime(manifest_date_format) and not os.path.exists(week_folder_path):
             ## Skip today's date since we'll replace those files in place
             os.mkdir(week_folder_path)
