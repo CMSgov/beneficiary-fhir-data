@@ -70,14 +70,29 @@ class RifFileType(str, Enum):
     SNF = "snf"
 
 
-class PipelineMetrics(str, Enum):
+@dataclass
+class PipelineMetricMetadata:
+    """Encapsulates metadata about a given pipeline metric"""
+
+    metric_name: str
+    """The name of the metric in CloudWatch Metrics, excluding namespace"""
+    unit: str
+    """The unit of the metric. Must conform to the list of supported CloudWatch Metrics"""
+
+
+class PipelineMetrics(PipelineMetricMetadata, Enum):
     """Enumeration of pipeline metrics that can be stored in CloudWatch Metrics"""
 
-    TIME_DATA_AVAILABLE = "time/data-available"
-    TIME_DATA_FIRST_AVAILABLE = "time/data-first-available"
-    TIME_DATA_LOADED = "time/data-loaded"
-    TIME_DATA_FULLY_LOADED = "time/data-fully-loaded"
-    TIME_DELTA_DATA_LOAD_TIME = "time-delta/data-load-time"
+    TIME_DATA_AVAILABLE = PipelineMetricMetadata("time/data-available", "Seconds")
+    TIME_DATA_FIRST_AVAILABLE = PipelineMetricMetadata("time/data-first-available", "Seconds")
+    TIME_DATA_LOADED = PipelineMetricMetadata("time/data-loaded", "Seconds")
+    TIME_DATA_FULLY_LOADED = PipelineMetricMetadata("time/data-fully-loaded", "Seconds")
+    TIME_DELTA_DATA_LOAD_TIME = PipelineMetricMetadata("time-delta/data-load-time", "Seconds")
+
+    def __init__(self, data: PipelineMetricMetadata):
+        for key in data.__annotations__.keys():
+            value = getattr(data, key)
+            setattr(self, key, value)
 
     def full_name(self) -> str:
         """Returns the fully qualified name of the metric, which includes the metric namespace and
@@ -394,10 +409,10 @@ def handler(event, context):
             put_metric_data(
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=gen_all_dimensioned_metrics(
-                    metric_name=timestamp_metric.value,
+                    metric_name=timestamp_metric.metric_name,
                     timestamp=event_timestamp,
                     value=utc_timestamp,
-                    unit="Seconds",
+                    unit=timestamp_metric.unit,
                     dimensions=[rif_type_dimension, group_timestamp_dimension],
                 ),
             )
@@ -429,7 +444,7 @@ def handler(event, context):
                     metric_data_queries=[
                         MetricDataQuery(
                             metric_namespace=METRICS_NAMESPACE,
-                            metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.value,
+                            metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
                             dimensions=group_timestamp_dimension,
                         )
                     ],
@@ -479,11 +494,11 @@ def handler(event, context):
                 return put_metric_data(
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.value,
+                        metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
                         dimensions=[group_timestamp_dimension],
                         timestamp=event_timestamp,
                         value=utc_timestamp,
-                        unit="Seconds",
+                        unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
                     ),
                 )
 
@@ -518,7 +533,7 @@ def handler(event, context):
                     metric_data_queries=[
                         MetricDataQuery(
                             metric_namespace=METRICS_NAMESPACE,
-                            metric_name=PipelineMetrics.TIME_DATA_AVAILABLE.value,
+                            metric_name=PipelineMetrics.TIME_DATA_AVAILABLE.metric_name,
                             dimensions=rif_type_dimension | group_timestamp_dimension,
                         ),
                     ],
@@ -585,11 +600,11 @@ def handler(event, context):
                 put_metric_data(
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.value,
+                        metric_name=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                         dimensions=[rif_type_dimension, group_timestamp_dimension],
                         value=load_time_delta.seconds,
                         timestamp=event_timestamp,
-                        unit="Seconds",
+                        unit=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.unit,
                     ),
                 )
 
@@ -631,11 +646,11 @@ def handler(event, context):
                 return put_metric_data(
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetrics.TIME_DATA_FULLY_LOADED.value,
+                        metric_name=PipelineMetrics.TIME_DATA_FULLY_LOADED.metric_name,
                         dimensions=[group_timestamp_dimension],
                         timestamp=event_timestamp,
                         value=utc_timestamp,
-                        unit="Seconds",
+                        unit=PipelineMetrics.TIME_DATA_FULLY_LOADED.unit,
                     ),
                 )
 
