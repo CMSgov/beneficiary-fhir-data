@@ -100,9 +100,7 @@ def split_future_synthea_load(args):
                 ## write today's files to overwrite the originals
                 write_path = f"{synthea_output_filepath}{file_name}"
             else:
-                ## The folder gets saved with _ instead of : since colon is illegal
-                week_formatted = week_key.replace(':', '_')
-                write_path = f"{synthea_output_filepath}{week_formatted}/{file_name}"
+                write_path = f"{synthea_output_filepath}{week_key}/{file_name}"
             ## Add header to data
             data = [headers[file_name]] + file_dict[week_key]
             with open(write_path, 'w') as f:
@@ -138,7 +136,8 @@ def create_week_folders_and_manifests(file_data_tuples, synthea_output_filepath,
     
     ## Create folders and manifests
     for week in weeks_files.keys():
-        week_folder_path = synthea_output_filepath + "/" + week.replace(':', '_')
+        week_folder_path = synthea_output_filepath + week
+        print(f"Week path: {week_folder_path}")
         if not week == today.strftime(manifest_date_format) and not os.path.exists(week_folder_path):
             ## Skip today's date since we'll replace those files in place
             os.mkdir(week_folder_path)
