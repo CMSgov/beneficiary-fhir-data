@@ -33,20 +33,6 @@ BOTO_CONFIG = Config(
     },
 )
 
-cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)
-s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
-sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)
-sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
-
-COMMON_UNRECOVERABLE_EXCEPTIONS: list[Type[BaseException]] = [
-    cw_client.exceptions.InvalidParameterValueException,
-    cw_client.exceptions.MissingRequiredParameterException,
-    cw_client.exceptions.InvalidParameterCombinationException,
-    botocore_exceptions.ParamValidationError,
-]
-"""Exceptions common to CloudWatch Metrics operations that cannot be retried upon, and so should be
-immediately raised to the calling function (in this case, the handler)"""
-
 
 class PipelineDataStatus(str, Enum):
     """Represents the possible states of data: either data is available to load, or has been loaded
@@ -104,13 +90,33 @@ class PipelineMetrics(PipelineMetricMetadata, Enum):
         Returns:
             str: The "full name" of the metric
         """
-        return f"{METRICS_NAMESPACE}/{self.value}"
+        return f"{METRICS_NAMESPACE}/{self.value.name}"
 
 
 def handler(event: Any, context: Any):
     if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
         print("Not all necessary environment variables were defined, exiting...")
         return
+
+    try:
+        cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)
+        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
+        sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)
+        sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
+        etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
+    except Exception as exc:
+        print(
+            "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
+            f" {exc}"
+        )
+        return
+
+    common_unrecoverable_exceptions: list[Type[BaseException]] = [
+        cw_client.exceptions.InvalidParameterValueException,
+        cw_client.exceptions.MissingRequiredParameterException,
+        cw_client.exceptions.InvalidParameterCombinationException,
+        botocore_exceptions.ParamValidationError,
+    ]
 
     try:
         record: dict[str, Any] = event["Records"][0]
@@ -181,7 +187,7 @@ def handler(event: Any, context: Any):
                         dimensions=[rif_type_dimension, group_timestamp_dimension],
                     ),
                 ),
-                ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                ignored_exceptions=common_unrecoverable_exceptions,
             )
             print(f'Successfully put metrics to "{timestamp_metric.full_name()}"')
         except Exception as exc:
@@ -213,7 +219,7 @@ def handler(event: Any, context: Any):
                         ]
                     )
                     == 0,
-                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                    ignored_exceptions=common_unrecoverable_exceptions,
                 )
             except Exception as exc:
                 print(
@@ -249,7 +255,7 @@ def handler(event: Any, context: Any):
                                 unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
                             ),
                         ),
-                        ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                        ignored_exceptions=common_unrecoverable_exceptions,
                     )
                     print("Data put successfully")
                 except Exception as exc:
@@ -294,7 +300,7 @@ def handler(event: Any, context: Any):
                         ],
                         statistic="Maximum",
                     ),
-                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
+                    ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
                 )
                 print(
                     f'Metric "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
@@ -360,7 +366,7 @@ def handler(event: Any, context: Any):
                             unit=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.unit,
                         ),
                     ),
-                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                    ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print(
                     f'Metrics put to "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
@@ -374,7 +380,6 @@ def handler(event: Any, context: Any):
                 return
 
             print("Checking if the incoming file is the last file to be loaded...")
-            etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
             incoming_path_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{ccw_timestamp}/"
             if list(etl_bucket.objects.filter(Prefix=incoming_path_prefix)):
                 print(
@@ -407,7 +412,7 @@ def handler(event: Any, context: Any):
                             unit=PipelineMetrics.TIME_DATA_FULLY_LOADED.unit,
                         ),
                     ),
-                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                    ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print("Data put successfully")
             except Exception as exc:
