@@ -177,11 +177,11 @@ def handler(event: Any, context: Any):
         re.IGNORECASE,
     ):
         pipeline_data_status = PipelineDataStatus(match.group(1).lower())
-        ccw_timestamp = match.group(2)
+        group_timestamp = match.group(2)
         rif_file_type = RifFileType(match.group(3).lower())
 
         rif_type_dimension = {"data_type": rif_file_type.name.lower()}
-        group_timestamp_dimension = {"group_timestamp": ccw_timestamp}
+        group_timestamp_dimension = {"group_timestamp": group_timestamp}
 
         timestamp_metric = (
             PipelineMetrics.TIME_DATA_AVAILABLE
@@ -223,13 +223,13 @@ def handler(event: Any, context: Any):
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             print(
                 "Incoming file indicates data has been made available to load to the ETL pipeline."
-                f' Checking if this is the first time data is available for group "{ccw_timestamp}"'
+                f' Checking if this is the first time data is available for group "{group_timestamp}"'
             )
 
             try:
                 print(
                     f"Checking if the {SENTINEL_QUEUE_NAME} queue contains any sentinel messages"
-                    f" for the current group ({ccw_timestamp})..."
+                    f" for the current group ({group_timestamp})..."
                 )
                 queue_is_empty = backoff_retry(
                     func=lambda: len(
@@ -238,7 +238,7 @@ def handler(event: Any, context: Any):
                             for msg in check_sentinel_queue(
                                 sentinel_queue=sentinel_queue, timeout=10
                             )
-                            if msg.group_timestamp == ccw_timestamp
+                            if msg.group_timestamp == group_timestamp
                         ]
                     )
                     == 0,
@@ -254,8 +254,8 @@ def handler(event: Any, context: Any):
             if queue_is_empty:
                 print(
                     f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
-                    f" group {ccw_timestamp}, this indicates that the incoming file is the start of"
-                    f" a new data load for group {ccw_timestamp}. Putting data to metric"
+                    f" group {group_timestamp}, this indicates that the incoming file is the start of"
+                    f" a new data load for group {group_timestamp}. Putting data to metric"
                     f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
                     f" {utc_timestamp}"
                 )
@@ -293,7 +293,7 @@ def handler(event: Any, context: Any):
 
                 print(
                     f"Posting sentinel message to {SENTINEL_QUEUE_NAME} SQS queue to indicate that"
-                    f" data load has begun for group {ccw_timestamp} and that no additional data"
+                    f" data load has begun for group {group_timestamp} and that no additional data"
                     " should be put to the"
                     f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()} metric for this"
                     " group"
@@ -306,7 +306,7 @@ def handler(event: Any, context: Any):
                     )
                     backoff_retry(
                         func=lambda: post_sentinel_message(
-                            sentinel_queue=sentinel_queue, group_timestamp=ccw_timestamp
+                            sentinel_queue=sentinel_queue, group_timestamp=group_timestamp
                         ),
                         ignored_exceptions=common_unrecoverable_exceptions,
                     )
@@ -320,8 +320,8 @@ def handler(event: Any, context: Any):
             else:
                 print(
                     f"Sentinel value was received from queue {SENTINEL_QUEUE_NAME} for current"
-                    f" group {ccw_timestamp}. Incoming file is part of an ongoing, existing data"
-                    f" load for group {ccw_timestamp}, and therefore does not indicate the time of"
+                    f" group {group_timestamp}. Incoming file is part of an ongoing, existing data"
+                    f" load for group {group_timestamp}, and therefore does not indicate the time of"
                     " the first data load for this group. Stopping..."
                 )
         elif pipeline_data_status == PipelineDataStatus.DONE:
@@ -340,7 +340,7 @@ def handler(event: Any, context: Any):
                 print(
                     f'Getting corresponding "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}"'
                     f' time metric for the current RIF file type "{rif_file_type.name}" in group'
-                    f' "{ccw_timestamp}"...'
+                    f' "{group_timestamp}"...'
                 )
                 result = backoff_retry(
                     func=lambda: get_metric_data(
@@ -434,15 +434,15 @@ def handler(event: Any, context: Any):
                 return
 
             print("Checking if the pipeline load has completed...")
-            if not _is_pipeline_load_complete(bucket=etl_bucket, group_timestamp=ccw_timestamp):
+            if not _is_pipeline_load_complete(bucket=etl_bucket, group_timestamp=group_timestamp):
                 print(
-                    f"Not all files have yet to be loaded for group {ccw_timestamp}. Data load is"
+                    f"Not all files have yet to be loaded for group {group_timestamp}. Data load is"
                     " not complete. Stopping..."
                 )
                 return
 
             print(
-                f"All files have been loaded for group {ccw_timestamp}. This indicates that the"
+                f"All files have been loaded for group {group_timestamp}. This indicates that the"
                 " data load has been completed for this group. Putting data to metric"
                 f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"'
             )
