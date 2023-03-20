@@ -94,6 +94,28 @@ class PipelineMetrics(PipelineMetricMetadata, Enum):
         return f"{METRICS_NAMESPACE}/{metric_metadata.metric_name}"
 
 
+def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
+    done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
+    # Returns the file names of all text files within the "done" folder for the current bucket
+    finished_rifs = [
+        object.key.removeprefix(done_prefix)
+        for object in bucket.objects.filter(Prefix=done_prefix)
+        if object.key.endswith(".txt")
+    ]
+
+    # We check for all RIFs _except_ beneficiary history as beneficiary history is a RIF type not
+    # expected to exist in CCW-provided loads -- it only appears in synthetic loads
+    rif_types_to_check = [e for e in RifFileType if e != RifFileType.BENEFICIARY_HISTORY]
+
+    # Check, for each rif file type, if any finished rif has the corresponding rif type prefix.
+    # Essentially, this ensures that all non-optional (excluding beneficiary history) RIF types have
+    # been loaded and exist in the Done/ folder
+    return all(
+        any(rif_file_name.lower().startswith(rif_type.value) for rif_file_name in finished_rifs)
+        for rif_type in rif_types_to_check
+    )
+
+
 def handler(event: Any, context: Any):
     if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
         print("Not all necessary environment variables were defined, exiting...")
@@ -411,19 +433,18 @@ def handler(event: Any, context: Any):
                 )
                 return
 
-            print("Checking if the incoming file is the last file to be loaded...")
-            incoming_path_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{ccw_timestamp}/"
-            if list(etl_bucket.objects.filter(Prefix=incoming_path_prefix)):
+            print("Checking if the pipeline load has completed...")
+            if not _is_pipeline_load_complete(bucket=etl_bucket, group_timestamp=ccw_timestamp):
                 print(
-                    f"Objects still exist in {incoming_path_prefix}. Incoming file is likely not"
-                    " the last to be loaded, stopping..."
+                    f"Not all files have yet to be loaded for group {ccw_timestamp}. Data load is"
+                    " not complete. Stopping..."
                 )
                 return
 
             print(
-                f"No objects found in {incoming_path_prefix}, incoming file is likely last to"
-                " be loaded. Putting data to"
-                f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"...'
+                f"All files have been loaded for group {ccw_timestamp}. This indicates that the"
+                " data load has been completed for this group. Putting data to metric"
+                f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"'
             )
 
             try:
