@@ -223,7 +223,8 @@ def handler(event: Any, context: Any):
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             print(
                 "Incoming file indicates data has been made available to load to the ETL pipeline."
-                f' Checking if this is the first time data is available for group "{group_timestamp}"'
+                " Checking if this is the first time data is available for group"
+                f' "{group_timestamp}"'
             )
 
             try:
@@ -254,8 +255,8 @@ def handler(event: Any, context: Any):
             if queue_is_empty:
                 print(
                     f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
-                    f" group {group_timestamp}, this indicates that the incoming file is the start of"
-                    f" a new data load for group {group_timestamp}. Putting data to metric"
+                    f" group {group_timestamp}, this indicates that the incoming file is the start"
+                    f" of a new data load for group {group_timestamp}. Putting data to metric"
                     f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
                     f" {utc_timestamp}"
                 )
@@ -321,8 +322,8 @@ def handler(event: Any, context: Any):
                 print(
                     f"Sentinel value was received from queue {SENTINEL_QUEUE_NAME} for current"
                     f" group {group_timestamp}. Incoming file is part of an ongoing, existing data"
-                    f" load for group {group_timestamp}, and therefore does not indicate the time of"
-                    " the first data load for this group. Stopping..."
+                    f" load for group {group_timestamp}, and therefore does not indicate the time"
+                    " of the first data load for this group. Stopping..."
                 )
         elif pipeline_data_status == PipelineDataStatus.DONE:
             print(
