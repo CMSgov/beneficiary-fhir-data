@@ -510,10 +510,9 @@ def handler(event: Any, context: Any):
 
             try:
                 print(
-                    "Calculating and putting to"
-                    f' "{PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the total'
-                    f" time delta ({full_load_time_delta.seconds} s) from start to finish for the"
-                    f" current pipeline load for group {group_timestamp}"
+                    f'Putting to "{PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the'
+                    f" total time delta ({full_load_time_delta.seconds} s) from start to finish for"
+                    f" the current pipeline load for group {group_timestamp}"
                 )
                 backoff_retry(
                     func=lambda: put_metric_data(
