@@ -101,9 +101,9 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
     # Returns the file names of all text files within the "done" folder for the current bucket
     finished_rifs = [
-        object.key.removeprefix(done_prefix)
+        str(object.key).removeprefix(done_prefix)
         for object in bucket.objects.filter(Prefix=done_prefix)
-        if object.key.endswith(".txt")
+        if str(object.key).endswith(".txt")
     ]
 
     # We check for all RIFs _except_ beneficiary history as beneficiary history is a RIF type not
@@ -114,7 +114,7 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     # Essentially, this ensures that all non-optional (excluding beneficiary history) RIF types have
     # been loaded and exist in the Done/ folder
     return all(
-        any(rif_file_name.lower().startswith(rif_type.value) for rif_file_name in finished_rifs)
+        any(rif_type.value in rif_file_name.lower() for rif_file_name in finished_rifs)
         for rif_type in rif_types_to_check
     )
 
