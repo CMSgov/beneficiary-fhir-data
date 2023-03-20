@@ -261,15 +261,14 @@ download_mapping_files_from_s3(){
   deactivate
 }
 
-# Function that invokes a python S3 utility to download synthea script files.
-download_script_files_from_s3(){
+# Function that invokes a python S3 utility to download synthea script file.
+download_script_file_from_s3(){
   echo "download script files from S3 from: ${TARGET_SYNTHEA_DIR}"
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
   python3 ./s3_utilities.py "${TARGET_SYNTHEA_DIR}" "download_script"
-  # make sure the scripts are executable
+  # make sure the script is executable
   chmod +x "${TARGET_SYNTHEA_DIR}/national_bfd.sh"
-  chmod +x "${TARGET_SYNTHEA_DIR}/national_bfd_v2.sh"
   deactivate
 }
 
@@ -396,8 +395,8 @@ activate_py_env
 # invoke function to download proprietary Mitre mapping files.
 download_mapping_files_from_s3
 
-# invoke function to download proprietary Mitre shell script files.
-download_script_files_from_s3
+# invoke function to download proprietary Mitre shell script file.
+download_script_file_from_s3
 
 # invoke function to download (if available) a previous run's end_state.properties file.
 download_props_file_from_s3
