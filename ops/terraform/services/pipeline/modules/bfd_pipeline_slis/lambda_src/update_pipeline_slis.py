@@ -77,6 +77,9 @@ class PipelineMetrics(PipelineMetricMetadata, Enum):
     TIME_DATA_LOADED = PipelineMetricMetadata("time/data-loaded", "Seconds")
     TIME_DATA_FULLY_LOADED = PipelineMetricMetadata("time/data-fully-loaded", "Seconds")
     TIME_DELTA_DATA_LOAD_TIME = PipelineMetricMetadata("time-delta/data-load-time", "Seconds")
+    TIME_DELTA_FULL_DATA_LOAD_TIME = PipelineMetricMetadata(
+        "time-delta/data-full-load-time", "Seconds"
+    )
 
     def __init__(self, data: PipelineMetricMetadata):
         for key in data.__annotations__.keys():
@@ -491,6 +494,45 @@ def handler(event: Any, context: Any):
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print("Data put successfully")
+            except Exception as exc:
+                print(
+                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
+                )
+
+            # There should only ever be one single data point for the first available metric for the
+            # current group, so we don't need to sort or otherwise filter the list of values
+            first_available_time = datetime.utcfromtimestamp(
+                data_first_available_metric_data.values[0]
+            )
+            full_load_time_delta = (
+                event_timestamp.replace(tzinfo=first_available_time.tzinfo) - first_available_time
+            )
+
+            try:
+                print(
+                    "Calculating and putting to"
+                    f' "{PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the total'
+                    f" time delta ({full_load_time_delta.seconds} s) from start to finish for the"
+                    f" current pipeline load for group {group_timestamp}"
+                )
+                backoff_retry(
+                    func=lambda: put_metric_data(
+                        cw_client=cw_client,
+                        metric_namespace=METRICS_NAMESPACE,
+                        metrics=gen_all_dimensioned_metrics(
+                            metric_name=PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                            dimensions=[group_timestamp_dimension],
+                            timestamp=event_timestamp,
+                            value=full_load_time_delta.seconds,
+                            unit=PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                        ),
+                    ),
+                    ignored_exceptions=common_unrecoverable_exceptions,
+                )
+                print(
+                    "Data put to metric"
+                    f' "{PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" successfully'
+                )
             except Exception as exc:
                 print(
                     f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
