@@ -340,9 +340,15 @@ def handler(event: Any, context: Any):
             try:
                 print(
                     f'Getting corresponding "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}"'
-                    f' time metric for the current RIF file type "{rif_file_type.name}" in group'
-                    f' "{group_timestamp}"...'
+                    f' time metric for the current RIF file type "{rif_file_type.name}" and'
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" time metric in'
+                    f' group "{group_timestamp}"...'
                 )
+                # We get both the last available metric for the current RIF file type _and_ the
+                # current load's first available time metric to reduce the number of API calls. The
+                # first available time metric is only used if the load has finished (the
+                # notification that started this lambda was for the last-loaded file), otherwise
+                # it's discarded
                 result = backoff_retry(
                     func=lambda: get_metric_data(
                         cw_client=cw_client,
@@ -352,14 +358,21 @@ def handler(event: Any, context: Any):
                                 metric_name=PipelineMetrics.TIME_DATA_AVAILABLE.metric_name,
                                 dimensions=rif_type_dimension | group_timestamp_dimension,
                             ),
+                            MetricDataQuery(
+                                metric_namespace=METRICS_NAMESPACE,
+                                metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                                dimensions=group_timestamp_dimension,
+                            ),
                         ],
                         statistic="Maximum",
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
                 )
                 print(
-                    f'Metric "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
-                    f" {rif_type_dimension | group_timestamp_dimension} retrieved successfully"
+                    f'"{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
+                    f" {rif_type_dimension | group_timestamp_dimension} and"
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
+                    f" {group_timestamp_dimension} retrieved successfully"
                 )
             except Exception as exc:
                 print(
@@ -373,11 +386,20 @@ def handler(event: Any, context: Any):
                     for x in result
                     if x.label == PipelineMetrics.TIME_DATA_AVAILABLE.full_name() and x.values
                 ][0]
+                # As explained above, this metric's data will only be used if this lambda was
+                # invoked for the last-loaded file (thus, the pipeline load has finished).
+                # Otherwise, this metric data is discarded
+                data_first_available_metric_data = [
+                    x
+                    for x in result
+                    if x.label == PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
+                ][0]
             except IndexError as exc:
                 print(
                     "No metric data result was found for metric"
-                    f" {PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}, no time delta can be"
-                    " computed. Stopping..."
+                    f' "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" or'
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}", no time delta(s)'
+                    " can be computed. Stopping..."
                 )
                 return
 
