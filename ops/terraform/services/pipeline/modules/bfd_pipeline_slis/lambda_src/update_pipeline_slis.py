@@ -162,30 +162,26 @@ def handler(event: Any, context: Any):
 
         utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
 
-        # An inline function is defined here to pass to backoff_retry() as Python does not support
-        # multiple line lambdas, so this is the next-best option
-        def put_timestamp_metrics():
-            # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
-            # dimensions of the given metric based upon the powerset of the dimensions):
-            put_metric_data(
-                cw_client=cw_client,
-                metric_namespace=METRICS_NAMESPACE,
-                metrics=gen_all_dimensioned_metrics(
-                    metric_name=timestamp_metric.metric_name,
-                    timestamp=event_timestamp,
-                    value=utc_timestamp,
-                    unit=timestamp_metric.unit,
-                    dimensions=[rif_type_dimension, group_timestamp_dimension],
-                ),
-            )
-
         try:
             print(
                 f'Putting data timestamp metrics "{timestamp_metric.full_name()}" up'
                 f" to CloudWatch with unix timestamp value {utc_timestamp}"
             )
             backoff_retry(
-                func=put_timestamp_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
+                # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
+                # dimensions of the given metric based upon the powerset of the dimensions):
+                func=lambda: put_metric_data(
+                    cw_client=cw_client,
+                    metric_namespace=METRICS_NAMESPACE,
+                    metrics=gen_all_dimensioned_metrics(
+                        metric_name=timestamp_metric.metric_name,
+                        timestamp=event_timestamp,
+                        value=utc_timestamp,
+                        unit=timestamp_metric.unit,
+                        dimensions=[rif_type_dimension, group_timestamp_dimension],
+                    ),
+                ),
+                ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
             )
             print(f'Successfully put metrics to "{timestamp_metric.full_name()}"')
         except Exception as exc:
@@ -201,21 +197,22 @@ def handler(event: Any, context: Any):
                 f' Checking if this is the first time data is available for group "{ccw_timestamp}"'
             )
 
-            def check_if_queue_empty():
-                msgs_with_timestamp = [
-                    msg
-                    for msg in check_sentinel_queue(sentinel_queue=sentinel_queue, timeout=10)
-                    if msg.group_timestamp == ccw_timestamp
-                ]
-                return len(msgs_with_timestamp) == 0
-
             try:
                 print(
                     f"Checking if the {SENTINEL_QUEUE_NAME} queue contains any sentinel messages"
                     f" for the current group ({ccw_timestamp})..."
                 )
                 queue_is_empty = backoff_retry(
-                    func=check_if_queue_empty,
+                    func=lambda: len(
+                        [
+                            msg
+                            for msg in check_sentinel_queue(
+                                sentinel_queue=sentinel_queue, timeout=10
+                            )
+                            if msg.group_timestamp == ccw_timestamp
+                        ]
+                    )
+                    == 0,
                     ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
                 )
             except Exception as exc:
@@ -234,19 +231,6 @@ def handler(event: Any, context: Any):
                     f" {utc_timestamp}"
                 )
 
-                def put_data_first_available_metrics():
-                    return put_metric_data(
-                        cw_client=cw_client,
-                        metric_namespace=METRICS_NAMESPACE,
-                        metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                            dimensions=[group_timestamp_dimension],
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
-                        ),
-                    )
-
                 try:
                     print(
                         "Putting time metric data to"
@@ -254,7 +238,17 @@ def handler(event: Any, context: Any):
                         f" {utc_timestamp}..."
                     )
                     backoff_retry(
-                        func=put_data_first_available_metrics,
+                        func=lambda: put_metric_data(
+                            cw_client=cw_client,
+                            metric_namespace=METRICS_NAMESPACE,
+                            metrics=gen_all_dimensioned_metrics(
+                                metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                                dimensions=[group_timestamp_dimension],
+                                timestamp=event_timestamp,
+                                value=utc_timestamp,
+                                unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
+                            ),
+                        ),
                         ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
                     )
                     print("Data put successfully")
@@ -282,19 +276,6 @@ def handler(event: Any, context: Any):
                 " loaded)..."
             )
 
-            def get_data_available_metric():
-                return get_metric_data(
-                    cw_client=cw_client,
-                    metric_data_queries=[
-                        MetricDataQuery(
-                            metric_namespace=METRICS_NAMESPACE,
-                            metric_name=PipelineMetrics.TIME_DATA_AVAILABLE.metric_name,
-                            dimensions=rif_type_dimension | group_timestamp_dimension,
-                        ),
-                    ],
-                    statistic="Maximum",
-                )
-
             try:
                 print(
                     f'Getting corresponding "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}"'
@@ -302,7 +283,17 @@ def handler(event: Any, context: Any):
                     f' "{ccw_timestamp}"...'
                 )
                 result = backoff_retry(
-                    func=get_data_available_metric,
+                    func=lambda: get_metric_data(
+                        cw_client=cw_client,
+                        metric_data_queries=[
+                            MetricDataQuery(
+                                metric_namespace=METRICS_NAMESPACE,
+                                metric_name=PipelineMetrics.TIME_DATA_AVAILABLE.metric_name,
+                                dimensions=rif_type_dimension | group_timestamp_dimension,
+                            ),
+                        ],
+                        statistic="Maximum",
+                    ),
                     ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
                 )
                 print(
@@ -351,19 +342,6 @@ def handler(event: Any, context: Any):
 
             load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
 
-            def put_time_delta_metrics():
-                put_metric_data(
-                    cw_client=cw_client,
-                    metric_namespace=METRICS_NAMESPACE,
-                    metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                        dimensions=[rif_type_dimension, group_timestamp_dimension],
-                        value=load_time_delta.seconds,
-                        timestamp=event_timestamp,
-                        unit=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    ),
-                )
-
             try:
                 print(
                     "Putting time delta metrics to"
@@ -371,7 +349,18 @@ def handler(event: Any, context: Any):
                     f" {load_time_delta.seconds}..."
                 )
                 backoff_retry(
-                    func=put_time_delta_metrics, ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS
+                    func=lambda: put_metric_data(
+                        cw_client=cw_client,
+                        metric_namespace=METRICS_NAMESPACE,
+                        metrics=gen_all_dimensioned_metrics(
+                            metric_name=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                            dimensions=[rif_type_dimension, group_timestamp_dimension],
+                            value=load_time_delta.seconds,
+                            timestamp=event_timestamp,
+                            unit=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.unit,
+                        ),
+                    ),
+                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
                 )
                 print(
                     f'Metrics put to "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
@@ -400,19 +389,6 @@ def handler(event: Any, context: Any):
                 f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"...'
             )
 
-            def put_data_fully_loaded():
-                return put_metric_data(
-                    cw_client=cw_client,
-                    metric_namespace=METRICS_NAMESPACE,
-                    metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetrics.TIME_DATA_FULLY_LOADED.metric_name,
-                        dimensions=[group_timestamp_dimension],
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit=PipelineMetrics.TIME_DATA_FULLY_LOADED.unit,
-                    ),
-                )
-
             try:
                 print(
                     "Putting time metric data to"
@@ -420,7 +396,17 @@ def handler(event: Any, context: Any):
                     f" {utc_timestamp}..."
                 )
                 backoff_retry(
-                    func=put_data_fully_loaded,
+                    func=lambda: put_metric_data(
+                        cw_client=cw_client,
+                        metric_namespace=METRICS_NAMESPACE,
+                        metrics=gen_all_dimensioned_metrics(
+                            metric_name=PipelineMetrics.TIME_DATA_FULLY_LOADED.metric_name,
+                            dimensions=[group_timestamp_dimension],
+                            timestamp=event_timestamp,
+                            value=utc_timestamp,
+                            unit=PipelineMetrics.TIME_DATA_FULLY_LOADED.unit,
+                        ),
+                    ),
                     ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
                 )
                 print("Data put successfully")
