@@ -38,6 +38,13 @@ def check_sentinel_queue(sentinel_queue: Any, timeout: int = 1) -> list[Sentinel
 
 
 def post_sentinel_message(sentinel_queue: Any, group_timestamp: str):
+    """Posts a sentinel message to the provided queue indicating that the given group has started
+    to load data
+
+    Args:
+        sentinel_queue (Any): boto3 SQS Queue
+        group_timestamp (str): The timestamp of the pipeline data load
+    """
     sentinel_queue.send_message(
         MessageBody=json.dumps(asdict(SentinelMessage(group_timestamp=group_timestamp)))
     )
