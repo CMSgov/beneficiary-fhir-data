@@ -1,4 +1,5 @@
 import calendar
+import json
 import operator
 import os
 import re
@@ -23,6 +24,7 @@ PutMetricData API"""
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
+SENTINEL_QUEUE_NAME = os.environ.get("QUEUE_NAME", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -34,6 +36,8 @@ BOTO_CONFIG = Config(
 
 cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)
 s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
+sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)
+sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
 
 COMMON_UNRECOVERABLE_EXCEPTIONS: list[Type[BaseException]] = [
     cw_client.exceptions.InvalidParameterValueException,
@@ -134,6 +138,11 @@ class MetricDataResult:
     label: str
     timestamps: list[datetime]
     values: list[float]
+
+
+@dataclass
+class SentinelMessage:
+    group_timestamp: str
 
 
 def powerset(items: list[T]) -> chain[Tuple[T]]:
@@ -340,8 +349,37 @@ def get_metric_data(
     ]
 
 
+def check_sentinel_queue(timeout: int = 1) -> list[SentinelMessage]:
+    """Checks the sentinel SQS queue for messages and returns their values
+
+    Args:
+        timeout (int, optional): Amount of time to poll for messages in queue. Defaults to 1 second
+
+    Returns:
+        list[SentinelMessage]: The list of sentinel messages in the queue
+    """
+    responses = sentinel_queue.receive_messages(WaitTimeSeconds=timeout)
+
+    def load_json_safe(json_str: str) -> Optional[dict[str, str]]:
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            return None
+        except TypeError:
+            return None
+
+    raw_messages = [load_json_safe(response.body) for response in responses]
+    filtered_messages = [
+        SentinelMessage(**message)
+        for message in raw_messages
+        if message is not None and "group_timestamp" in message
+    ]
+
+    return filtered_messages
+
+
 def handler(event, context):
-    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID]):
+    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
         print("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -433,86 +471,73 @@ def handler(event, context):
                 f' Checking if this is the first time data is available for group "{ccw_timestamp}"'
             )
 
-            def get_data_first_available_for_group():
-                return get_metric_data(
-                    metric_data_queries=[
-                        MetricDataQuery(
-                            metric_namespace=METRICS_NAMESPACE,
-                            metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                            dimensions=group_timestamp_dimension,
-                        )
-                    ],
-                    statistic="Maximum",
-                )
+            def check_if_queue_empty():
+                msgs_with_timestamp = [
+                    msg
+                    for msg in check_sentinel_queue(timeout=10)
+                    if msg.group_timestamp == ccw_timestamp
+                ]
+                return len(msgs_with_timestamp) == 0
 
             try:
                 print(
-                    "Retrieving metric data from"
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
-                    f" {group_timestamp_dimension}..."
+                    f"Checking if the {SENTINEL_QUEUE_NAME} queue contains any sentinel messages"
+                    f" for the current group ({ccw_timestamp})..."
                 )
-                result = backoff_retry(
-                    func=get_data_first_available_for_group,
-                    ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS + [KeyError],
-                )
-                print(
-                    f'Metric "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with'
-                    f" dimensions {group_timestamp_dimension} retrieved successfully"
-                )
-            except Exception as exc:
-                print(
-                    f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}"
-                )
-                return
-
-            if [
-                x
-                for x in result
-                if x.label == PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
-            ]:
-                print(
-                    "Metric data exists for"
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
-                    f" {group_timestamp_dimension}. Incoming file is part of an ongoing, existing"
-                    " data load, and therefore does not indicate the time of the first data load"
-                    " for its group. Stopping..."
-                )
-                return
-
-            print(
-                "No metric data result was found for metric"
-                f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}, this indicates that the"
-                " incoming file is the start of a new data load. Putting data to metric"
-                f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
-                f" {utc_timestamp}"
-            )
-
-            def put_data_first_available_metrics():
-                return put_metric_data(
-                    metric_namespace=METRICS_NAMESPACE,
-                    metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                        dimensions=[group_timestamp_dimension],
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
-                    ),
-                )
-
-            try:
-                print(
-                    "Putting time metric data to"
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
-                    f" {utc_timestamp}..."
-                )
-                backoff_retry(
-                    func=put_data_first_available_metrics,
+                queue_is_empty = backoff_retry(
+                    func=check_if_queue_empty,
                     ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
                 )
-                print("Data put successfully")
             except Exception as exc:
                 print(
-                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
+                    "An unrecoverable error occurred when trying to check the"
+                    f" {SENTINEL_QUEUE_NAME} queue; err: {exc}"
+                )
+                return
+
+            if queue_is_empty:
+                print(
+                    f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
+                    f" group {ccw_timestamp}, this indicates that the incoming file is the start of"
+                    f" a new data load for group {ccw_timestamp}. Putting data to metric"
+                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
+                    f" {utc_timestamp}"
+                )
+
+                def put_data_first_available_metrics():
+                    return put_metric_data(
+                        metric_namespace=METRICS_NAMESPACE,
+                        metrics=gen_all_dimensioned_metrics(
+                            metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                            dimensions=[group_timestamp_dimension],
+                            timestamp=event_timestamp,
+                            value=utc_timestamp,
+                            unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
+                        ),
+                    )
+
+                try:
+                    print(
+                        "Putting time metric data to"
+                        f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
+                        f" {utc_timestamp}..."
+                    )
+                    backoff_retry(
+                        func=put_data_first_available_metrics,
+                        ignored_exceptions=COMMON_UNRECOVERABLE_EXCEPTIONS,
+                    )
+                    print("Data put successfully")
+                except Exception as exc:
+                    print(
+                        "An unrecoverable error occurred when trying to call PutMetricData; err:"
+                        f" {exc}"
+                    )
+            else:
+                print(
+                    f"Sentinel value was received from queue {SENTINEL_QUEUE_NAME} for current"
+                    f" group {ccw_timestamp}. Incoming file is part of an ongoing, existing data"
+                    f" load for group {ccw_timestamp}, and therefore does not indicate the time of"
+                    " the first data load for this group. Stopping..."
                 )
         elif pipeline_data_status == PipelineDataStatus.DONE:
             print(
