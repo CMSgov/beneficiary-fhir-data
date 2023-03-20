@@ -160,7 +160,7 @@ def get_metric_data(
     # function understands
     data_queries_dict_list = [
         {
-            "Id": "m1",
+            "Id": f"m{ind}",
             "MetricStat": {
                 "Metric": {
                     "Namespace": m.metric_namespace,
@@ -179,7 +179,7 @@ def get_metric_data(
             "Label": f"{m.metric_namespace}/{m.metric_name}",
             "ReturnData": True,
         }
-        for m in metric_data_queries
+        for ind, m in enumerate(metric_data_queries)
     ]
 
     result = cw_client.get_metric_data(
