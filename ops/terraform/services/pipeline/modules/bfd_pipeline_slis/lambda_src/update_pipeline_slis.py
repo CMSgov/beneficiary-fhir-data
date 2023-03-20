@@ -1,26 +1,25 @@
 import calendar
-import json
-import operator
 import os
 import re
-import time
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from functools import reduce
-from itertools import chain, combinations
-from typing import Any, Callable, Optional, Tuple, Type, TypeVar
+from typing import Any, Type
 from urllib.parse import unquote
 
 import boto3
 from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
 
-T = TypeVar("T")
+from backoff_retry import backoff_retry
+from cw_metrics import (
+    MetricDataQuery,
+    gen_all_dimensioned_metrics,
+    get_metric_data,
+    put_metric_data,
+)
+from sqs import check_sentinel_queue
 
-PUT_METRIC_DATA_MAX_RETRIES = 10
-"""The maxmium number of exponentially backed-off retries to attempt when trying to call the AWS
-PutMetricData API"""
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
@@ -108,277 +107,7 @@ class PipelineMetrics(PipelineMetricMetadata, Enum):
         return f"{METRICS_NAMESPACE}/{self.value}"
 
 
-@dataclass
-class MetricData:
-    """Dataclass representing the data needed to "put" a metric up to CloudWatch Metrics. Represents
-    both the metric itself (name, dimensions, unit) and the value that is put to said metric
-    (timestamp, value)"""
-
-    metric_name: str
-    timestamp: datetime
-    value: float
-    unit: str
-    dimensions: dict[str, str] = field(default_factory=dict)
-
-
-@dataclass
-class MetricDataQuery:
-    """Dataclass representing the data needed to get a metric from CloudWatch Metrics. Metrics are
-    identified by their namespace, name, and dimensions"""
-
-    metric_namespace: str
-    metric_name: str
-    dimensions: dict[str, str] = field(default_factory=dict)
-
-
-@dataclass
-class MetricDataResult:
-    """Dataclass representing the result of a successful GetMetricData operation"""
-
-    label: str
-    timestamps: list[datetime]
-    values: list[float]
-
-
-@dataclass
-class SentinelMessage:
-    group_timestamp: str
-
-
-def powerset(items: list[T]) -> chain[Tuple[T]]:
-    """This function computes the powerset (the set of all subsets including the set itself and the
-    null set) of the incoming list. Used to automatically generate all possible
-    dimensioned metrics for a given metric. Implementation adapted from Python's official
-    itertools-recipes documentation
-
-    Example:
-        powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
-
-    Args:
-        items (list[T]): A list of items to compute the powerset from
-
-    Returns:
-        chain[Tuple[T]]: A generator that will yield subsets starting with the null set upto the set
-    """
-    return chain.from_iterable(combinations(items, r) for r in range(len(items) + 1))
-
-
-def gen_all_dimensioned_metrics(
-    metric_name: str, timestamp: datetime, value: float, unit: str, dimensions: list[dict[str, str]]
-) -> list[MetricData]:
-    """Generates all of the possible dimensioned (and single undimensioned) metrics from the
-    powerset of the list of dimensions passed-in. Useful as all metrics created by this Lambda
-    have the same value, timestamp, and name and only differ on their aggregations
-
-    Args:
-        metric_name (str): Name of the metric
-        timestamp (datetime): Timestamp to store with the metrics
-        value (float): Value to store with the metrics in each dimension
-        unit (str): The Unit of the metric
-        dimensions (list[dict[str, str]]): The list of dimensions to compute the powerset; this
-        determines the number of metrics that will be stored (2**dimensions.count)
-
-    Returns:
-        list[MetricData]: A list of metrics with each being a set in the powerset of dimensions
-    """
-
-    return [
-        MetricData(
-            metric_name=metric_name,
-            timestamp=timestamp,
-            value=value,
-            # Merge the chain/generator of dimensions of arbitrary size using the "|" operator
-            dimensions=reduce(operator.ior, x, {}),
-            unit=unit,
-        )
-        for x in powerset(dimensions)
-    ]
-
-
-def backoff_retry(
-    func: Callable[[], T],
-    retries: int = PUT_METRIC_DATA_MAX_RETRIES,
-    ignored_exceptions: Optional[list[Type[BaseException]]] = None,
-) -> T:
-    """Generic function for wrapping another callable (function) that may raise errors and require
-    some form of retry mechanism. Supports passing a list of exceptions/errors for the retry logic
-    to ignore and instead raise to the calling function to handle
-
-    Args:
-        func (Callable[[], T]): The function to retry
-        retries (int, optional): The number of times to retry before raising the error causing the
-        failure. Defaults to PUT_METRIC_DATA_MAX_RETRIES.
-        ignored_exceptions (list[Type[BaseException]] , optional): A list of exceptions to skip
-        iretrying and nstead immediately raise to the calling function. Defaults to [].
-
-    Raises:
-        exc: Any exception in ignored_exceptions, or the exception thrown on the final retry
-
-    Returns:
-        T: The return type of func
-    """
-    if ignored_exceptions is None:
-        ignored_exceptions = []
-
-    for try_number in range(1, retries):
-        try:
-            return func()
-        except Exception as exc:  # pylint: disable=W0718
-            # Raise the exception if it is any of the explicitly ignored exceptions or if this
-            # was the last try or if the exception is one of a few special base exceptions
-            if (
-                any(isinstance(exc, ignored_exc) for ignored_exc in ignored_exceptions)
-                or try_number == retries
-            ):
-                raise exc
-
-            # Exponentially back-off from hitting the API to ensure we don't hit the API limit.
-            # See https://docs.aws.amazon.com/general/latest/gr/api-retries.html
-            sleep_time = (2**try_number * 100.0) / 1000.0
-            print(
-                f"Unhandled error occurred, retrying in {sleep_time} seconds; attempt"
-                f" #{try_number} of {retries}, err: {exc}"
-            )
-            time.sleep(sleep_time)
-
-    raise RuntimeError(f"Number of retries exceeded the maximum of {retries} attempts")
-
-
-def put_metric_data(metric_namespace: str, metrics: list[MetricData]):
-    """Wraps the boto3 CloudWatch PutMetricData API operation to allow for usage of the MetricData
-    dataclass
-
-    Args:
-        metric_namespace (str): The Namespace of the metric(s) to store in CloudWatch
-        metrics (list[MetricData]): The metrics to store
-    """
-
-    # Convert from a list of the MetricData class to a list of dicts that boto3 understands for this
-    # API. See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data
-    metrics_dict_list = [
-        {
-            "MetricName": m.metric_name,
-            "Timestamp": m.timestamp,
-            "Value": m.value,
-            "Unit": m.unit,
-            "Dimensions": [
-                {
-                    "Name": dim_name,
-                    "Value": dim_value,
-                }
-                for dim_name, dim_value in m.dimensions.items()
-            ],
-        }
-        for m in metrics
-    ]
-
-    cw_client.put_metric_data(
-        Namespace=metric_namespace,
-        MetricData=metrics_dict_list,
-    )
-
-
-def get_metric_data(
-    metric_data_queries: list[MetricDataQuery],
-    statistic: str,
-    period: int = 60,
-    start_time: datetime = datetime.utcnow() - timedelta(days=15),
-    end_time: datetime = datetime.utcnow(),
-) -> list[MetricDataResult]:
-    """Wraps the GetMetricData CloudWatch Metrics API operation to allow for easier usage. By
-    default, standard resolution metrics from the current time to 15 days in the past are retrieved
-    from CloudWatch Metrics.
-
-    Args:
-        metric_data_queries (list[MetricDataQuery]): A list of data queries to return metric data
-        for
-        statistic (str): The statistic for the queried metric(s) to return
-        period (int, optional): The period of the metric, correlates to its storage resolution.
-        Defaults to 60.
-        start_time (datetime, optional): The start of the time period to search. Defaults to
-        datetime.utcnow()-timedelta(days=15).
-        end_time (datetime, optional): The end of the time period to search. Defaults to
-        datetime.utcnow().
-
-    Returns:
-        list[MetricDataResult]: A list of results for each data query with each label matching the
-        namespace and metric name of its corresponding metric
-
-    Raises:
-        KeyError: Raised if the inner GetMetricData query fails for an unknown reason that is
-        unhandled or its return value does not conform to its expected definition
-    """
-
-    # Transform the list of MetricDataQuery into a list of dicts that the boto3 GetMetricData
-    # function understands
-    data_queries_dict_list = [
-        {
-            "Id": "m1",
-            "MetricStat": {
-                "Metric": {
-                    "Namespace": m.metric_namespace,
-                    "MetricName": m.metric_name,
-                    "Dimensions": [
-                        {
-                            "Name": dim_name,
-                            "Value": dim_value,
-                        }
-                        for dim_name, dim_value in m.dimensions.items()
-                    ],
-                },
-                "Period": period,
-                "Stat": statistic,
-            },
-            "Label": f"{m.metric_namespace}/{m.metric_name}",
-            "ReturnData": True,
-        }
-        for m in metric_data_queries
-    ]
-
-    result = cw_client.get_metric_data(
-        MetricDataQueries=data_queries_dict_list,
-        StartTime=start_time,
-        EndTime=end_time,
-    )
-
-    return [
-        MetricDataResult(
-            label=result["Label"], timestamps=result["Timestamps"], values=result["Values"]
-        )
-        for result in result["MetricDataResults"]
-    ]
-
-
-def check_sentinel_queue(timeout: int = 1) -> list[SentinelMessage]:
-    """Checks the sentinel SQS queue for messages and returns their values
-
-    Args:
-        timeout (int, optional): Amount of time to poll for messages in queue. Defaults to 1 second
-
-    Returns:
-        list[SentinelMessage]: The list of sentinel messages in the queue
-    """
-    responses = sentinel_queue.receive_messages(WaitTimeSeconds=timeout)
-
-    def load_json_safe(json_str: str) -> Optional[dict[str, str]]:
-        try:
-            return json.loads(json_str)
-        except json.JSONDecodeError:
-            return None
-        except TypeError:
-            return None
-
-    raw_messages = [load_json_safe(response.body) for response in responses]
-    filtered_messages = [
-        SentinelMessage(**message)
-        for message in raw_messages
-        if message is not None and "group_timestamp" in message
-    ]
-
-    return filtered_messages
-
-
-def handler(event, context):
+def handler(event: Any, context: Any):
     if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
         print("Not all necessary environment variables were defined, exiting...")
         return
@@ -439,6 +168,7 @@ def handler(event, context):
             # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
             # dimensions of the given metric based upon the powerset of the dimensions):
             put_metric_data(
+                cw_client=cw_client,
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=gen_all_dimensioned_metrics(
                     metric_name=timestamp_metric.metric_name,
@@ -474,7 +204,7 @@ def handler(event, context):
             def check_if_queue_empty():
                 msgs_with_timestamp = [
                     msg
-                    for msg in check_sentinel_queue(timeout=10)
+                    for msg in check_sentinel_queue(sentinel_queue=sentinel_queue, timeout=10)
                     if msg.group_timestamp == ccw_timestamp
                 ]
                 return len(msgs_with_timestamp) == 0
@@ -506,6 +236,7 @@ def handler(event, context):
 
                 def put_data_first_available_metrics():
                     return put_metric_data(
+                        cw_client=cw_client,
                         metric_namespace=METRICS_NAMESPACE,
                         metrics=gen_all_dimensioned_metrics(
                             metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
@@ -553,6 +284,7 @@ def handler(event, context):
 
             def get_data_available_metric():
                 return get_metric_data(
+                    cw_client=cw_client,
                     metric_data_queries=[
                         MetricDataQuery(
                             metric_namespace=METRICS_NAMESPACE,
@@ -621,6 +353,7 @@ def handler(event, context):
 
             def put_time_delta_metrics():
                 put_metric_data(
+                    cw_client=cw_client,
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.metric_name,
@@ -669,6 +402,7 @@ def handler(event, context):
 
             def put_data_fully_loaded():
                 return put_metric_data(
+                    cw_client=cw_client,
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetrics.TIME_DATA_FULLY_LOADED.metric_name,
