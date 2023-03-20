@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Optional
 
 
@@ -35,3 +35,9 @@ def check_sentinel_queue(sentinel_queue: Any, timeout: int = 1) -> list[Sentinel
     ]
 
     return filtered_messages
+
+
+def post_sentinel_message(sentinel_queue: Any, group_timestamp: str):
+    sentinel_queue.send_message(
+        MessageBody=json.dumps(asdict(SentinelMessage(group_timestamp=group_timestamp)))
+    )

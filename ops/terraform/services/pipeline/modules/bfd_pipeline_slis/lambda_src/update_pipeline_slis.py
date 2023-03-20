@@ -18,7 +18,7 @@ from cw_metrics import (
     get_metric_data,
     put_metric_data,
 )
-from sqs import check_sentinel_queue
+from sqs import check_sentinel_queue, post_sentinel_message
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
@@ -90,7 +90,8 @@ class PipelineMetrics(PipelineMetricMetadata, Enum):
         Returns:
             str: The "full name" of the metric
         """
-        return f"{METRICS_NAMESPACE}/{self.value.name}"
+        metric_metadata: PipelineMetricMetadata = self.value
+        return f"{METRICS_NAMESPACE}/{metric_metadata.metric_name}"
 
 
 def handler(event: Any, context: Any):
@@ -257,11 +258,42 @@ def handler(event: Any, context: Any):
                         ),
                         ignored_exceptions=common_unrecoverable_exceptions,
                     )
-                    print("Data put successfully")
+                    print(
+                        "Metrics put to"
+                        f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()} successfully"
+                    )
                 except Exception as exc:
                     print(
                         "An unrecoverable error occurred when trying to call PutMetricData; err:"
                         f" {exc}"
+                    )
+                    return
+
+                print(
+                    f"Posting sentinel message to {SENTINEL_QUEUE_NAME} SQS queue to indicate that"
+                    f" data load has begun for group {ccw_timestamp} and that no additional data"
+                    " should be put to the"
+                    f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()} metric for this"
+                    " group"
+                )
+
+                try:
+                    backoff_retry(
+                        func=sentinel_queue.purge,
+                        ignored_exceptions=common_unrecoverable_exceptions,
+                    )
+                    backoff_retry(
+                        func=lambda: post_sentinel_message(
+                            sentinel_queue=sentinel_queue, group_timestamp=ccw_timestamp
+                        ),
+                        ignored_exceptions=common_unrecoverable_exceptions,
+                    )
+
+                    print(f"Sentinel message posted to {SENTINEL_QUEUE_NAME} successfully")
+                except Exception as exc:
+                    print(
+                        "An unrecoverable error occurred when trying to post message to the"
+                        f" {SENTINEL_QUEUE_NAME} SQS queue: {exc}"
                     )
             else:
                 print(
