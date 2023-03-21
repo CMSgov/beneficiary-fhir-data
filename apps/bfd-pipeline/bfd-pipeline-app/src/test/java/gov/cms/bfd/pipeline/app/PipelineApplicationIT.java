@@ -151,7 +151,6 @@ public final class PipelineApplicationIT {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    // AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
     Bucket bucket = null;
     Process appProcess = null;
     try {
@@ -209,7 +208,6 @@ public final class PipelineApplicationIT {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    // AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
     Bucket bucket = null;
     Process appProcess = null;
     try {
