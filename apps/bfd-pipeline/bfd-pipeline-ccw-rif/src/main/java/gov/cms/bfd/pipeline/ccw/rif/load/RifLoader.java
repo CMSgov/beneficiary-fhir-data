@@ -99,6 +99,15 @@ public final class RifLoader {
   /** The shared application state. */
   private final PipelineApplicationState appState;
 
+  /** The maximum amount of time in hours we will wait for a job to complete loading its batches. */
+  private final int MAX_BATCH_WAIT_TIME_HOURS = 72;
+
+  /**
+   * Keeps track of a fatal error during loading in one of the batch threads so we know to fail the
+   * job (and kill the pipeline).
+   */
+  private static volatile AtomicBoolean fatalFailure;
+
   /**
    * Constructs a new {@link RifLoader} instance.
    *
@@ -113,6 +122,7 @@ public final class RifLoader {
      * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
      */
     this.idHasher = new IdHasher(options.getIdHasherConfig());
+    fatalFailure = new AtomicBoolean();
   }
 
   /**
@@ -221,6 +231,8 @@ public final class RifLoader {
       RifFileRecords dataToLoad,
       Consumer<Throwable> errorHandler,
       Consumer<RifRecordLoadResult> resultHandler) {
+
+    fatalFailure.set(false);
     BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(options);
 
     MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
@@ -289,13 +301,7 @@ public final class RifLoader {
              * pending. That's desirable behavior, as it prevents
              * OutOfMemoryErrors.
              */
-            processAsync(
-                loadExecutor,
-                recordsBatch,
-                loadedFileId,
-                postgresBatch,
-                resultHandler,
-                errorHandler);
+            processAsync(loadExecutor, recordsBatch, loadedFileId, postgresBatch, resultHandler);
           };
 
       // Collect records into batches and submit each to batchProcessor.
@@ -322,7 +328,8 @@ public final class RifLoader {
       // Wait for all submitted batches to complete.
       try {
         loadExecutor.shutdown();
-        boolean terminatedSuccessfully = loadExecutor.awaitTermination(72, TimeUnit.HOURS);
+        boolean terminatedSuccessfully =
+            loadExecutor.awaitTermination(MAX_BATCH_WAIT_TIME_HOURS, TimeUnit.HOURS);
         if (!terminatedSuccessfully)
           throw new IllegalStateException(
               String.format(
@@ -331,6 +338,21 @@ public final class RifLoader {
       } catch (InterruptedException e) {
         // Interrupts should not be used on this thread, so go boom.
         throw new RuntimeException(e);
+      }
+
+      /*
+       * If any batch load tripped a fatal error, we should throw an exception
+       * on this thread to kill the pipeline. Exceptions thrown from the batch thread with the
+       * error are ignored/lost, so have this synchronized boolean signal to do this specifically on the main thread.
+       * We also can't use a passed-in error handler from up the execution chain or else the pipeline manager shutdown procedure
+       * waits for this thread to shut down, which is waiting on the above 72-hour timeout before it unblocks.
+       *
+       * FUTURE: If we wish to be more discerning about recoverable errors, we could return false here which will
+       * allow the pipeline to continue operating if an error is considered non-fatal (it also currently moves the failed files
+       * to "Done" instead of "Failed", which would need to be fixed.)
+       */
+      if (fatalFailure.get()) {
+        throw new IllegalStateException("Fatal error during rif file processing.");
       }
 
       // Submit the queued PostgreSQL COPY operations, if any.
@@ -354,15 +376,13 @@ public final class RifLoader {
    * @param postgresBatch the {@link PostgreSqlCopyInserter} for the current set of {@link
    *     RifFilesEvent}s being processed
    * @param resultHandler the {@link Consumer} to notify when the batch completes successfully
-   * @param errorHandler the {@link Consumer} to notify when the batch fails for any reason
    */
   private void processAsync(
       BlockingThreadPoolExecutor loadExecutor,
       List<RifRecordEvent<?>> recordsBatch,
       long loadedFileId,
       PostgreSqlCopyInserter postgresBatch,
-      Consumer<RifRecordLoadResult> resultHandler,
-      Consumer<Throwable> errorHandler) {
+      Consumer<RifRecordLoadResult> resultHandler) {
     loadExecutor.submit(
         () -> {
           try {
@@ -370,8 +390,9 @@ public final class RifLoader {
                 process(recordsBatch, loadedFileId, postgresBatch);
             processResults.forEach(resultHandler::accept);
           } catch (Throwable e) {
-            LOGGER.error("Error caught when processing async batch!");
-            errorHandler.accept(e);
+            LOGGER.error("Error caught when processing async batch!", e);
+            // Cannot use errorHandler here, as it will cause a long wait before shutdown
+            fatalFailure.set(true);
           }
         });
   }

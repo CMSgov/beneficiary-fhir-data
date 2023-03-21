@@ -526,14 +526,16 @@ public final class PipelineApplication {
      */
 
     LOGGER.error("Data set failed with an unhandled error. Application will exit.", throwable);
+    shutdown();
+  }
 
-    /*
-     * This will trigger the shutdown monitors, block until they complete, and then terminate this
-     * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
-     * be halted: 1) this thread is the CcwRifLoadJob's and that thread will block then die,
-     * and 2) the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home,
-     * folks.
-     */
+  /**
+   * This will trigger the shutdown monitors, block until they complete, and then terminate this
+   * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
+   * be halted: 1) this thread is the CcwRifLoadJob's and that thread will block then die, and 2)
+   * the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home, folks.
+   */
+  static void shutdown() {
     System.exit(EXIT_CODE_JOB_FAILED);
   }
 }

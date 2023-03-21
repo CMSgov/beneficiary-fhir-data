@@ -418,23 +418,6 @@ public final class PipelineManager implements AutoCloseable {
           int numLeft = jobExecutorThreadPoolHandle.getActiveCount();
           LOGGER.info("  Waiting on {} threads to resolve in the job executor...", numLeft);
         }
-        // Debug threads still running; may help figure out if something is stuck
-        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-        for (Thread thread : threadSet) {
-          // Ignore JVM threads
-          if (!thread.getName().equals("Reference Handler")
-              && !thread.getName().equals("Signal Dispatcher")
-              && !thread.getName().equals("Finalizer")
-              && !thread.getName().equals("Common-Cleaner")) {
-            // Grab the parent if possible
-            String parent = "?";
-            if (thread.getThreadGroup() != null && thread.getThreadGroup().getParent() != null) {
-              parent = thread.getThreadGroup().getParent().getName();
-            }
-            LOGGER.debug(
-                "\nThread: {}\nState: {}\nParent: {}", thread.getName(), thread.getState(), parent);
-          }
-        }
         lastWaitMessage = Optional.of(Instant.now());
       }
       try {
@@ -568,12 +551,11 @@ public final class PipelineManager implements AutoCloseable {
             "PipeLineJobOutcome interrupt failed with the the following: " + e.getMessage(), e);
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
-        // This will print the job failure + exception stacktrace
         handleJobFailure(jobRecord.getId(), e);
-        // If we've blown up without explicit recovery possible, stop the pipeline
-        stop();
+
+        // Wrap and re-throw the failure.
+        throw new Exception("Re-throwing job failure.", e);
       }
-      return PipelineJobOutcome.WORK_DONE;
     }
   }
 
@@ -611,8 +593,19 @@ public final class PipelineManager implements AutoCloseable {
          * since it won't get called in the first place).
          */
         handleJobCancellation(jobRecord.getId());
+        LOGGER.info("Job cancelled: " + jobRecord.getJobType());
+      } else if (jobThrowable instanceof InterruptedException) {
+        // If our job has been interrupted, we are already shutting down, so just ignore it.
+        LOGGER.info("Job interrupted: " + jobRecord.getJobType());
+      } else {
+        /* If the job failed and wasnt cancelled, it threw some other exception mid-stream,
+         * and now we must die as we almost certainly cannot continue with the tainted batch sitting in Incoming.
+         * This will call the proper shutdown procedures and exit gracefully.
+         * FUTURE: We may be able to more fault-tolerant by moving the failed batch
+         * into the Failed folder when this happens and continuing to run
+         */
+        PipelineApplication.shutdown();
       }
-      LOGGER.info("Job cancelled: " + jobRecord.getJobType());
     }
   }
 }

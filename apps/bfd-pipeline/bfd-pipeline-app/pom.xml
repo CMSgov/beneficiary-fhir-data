@@ -116,6 +116,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.github.stefanbirkner</groupId>
+			<artifactId>system-lambda</artifactId>
+			<version>${system-lambda-version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
