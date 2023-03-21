@@ -99,7 +99,6 @@ public final class SyntheaRifLoadJobIT {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    // AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
@@ -233,7 +232,6 @@ public final class SyntheaRifLoadJobIT {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    // AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
