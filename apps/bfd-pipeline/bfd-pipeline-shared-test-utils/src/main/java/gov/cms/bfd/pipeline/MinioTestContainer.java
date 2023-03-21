@@ -6,7 +6,6 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -63,8 +62,8 @@ public class MinioTestContainer {
   }
 
   /**
-   * Instantiates a new {@link MinioTestContainer} by leveraging testconatins to spin-up a docker
-   * minio image using a docker compose resource file.
+   * Instantiates a new {@link MinioTestContainer} by leveraging testcontainers to spin-up a docker
+   * minio image using a docker compose resource file that we create.
    */
   private MinioTestContainer() {
     String dockerFileName = System.getProperty("java.io.tmpdir") + "/docker-compose.yml";
@@ -74,15 +73,26 @@ public class MinioTestContainer {
       fos.close();
       yamlFile = new File(dockerFileName);
 
+      /*
+       * create a MinIO container by leveraging testcontainers DockerComposeContainer functionality;
+       * not the most stylistic way to go about this, but it is cheap/easy and at some point we'll
+       * look to replacing MinIO with real-life mocking.
+       */
       minioContainer =
           new DockerComposeContainer<>(yamlFile).withExposedService("minio-service", DEFAULT_PORT);
       minioContainer.start();
 
+      /*
+       * bit of a hack here; if the S3MinioConfig.useMinio is set to true, all S3-related utilities
+       * will bypass any AWS-specific S3 functionality (like permissions, KMS, etc.) when creating
+       * buckets or adding artifacts to S3 buckets. So we'll just set that status and current S3
+       * utilities will know what to do.
+       */
       S3MinioConfig.Singleton()
           .setConfig(MINIO_ACCESS_KEY, MINIO_SECRET_KEY, "http://localhost:" + DEFAULT_PORT, true);
-      // yamlFile.delete();
+
       LOGGER.info("MinioTestsContainer started....used Docker file: " + dockerFileName);
-    } catch (IOException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }

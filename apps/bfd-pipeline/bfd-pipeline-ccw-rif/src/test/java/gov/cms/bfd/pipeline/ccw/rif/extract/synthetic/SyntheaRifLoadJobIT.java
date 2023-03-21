@@ -46,7 +46,7 @@ public final class SyntheaRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client; // = MinioTestContainer.createS3MinioClient();
+  private static AmazonS3 s3Client;
 
   /** Sets the minio test container. */
   @BeforeAll

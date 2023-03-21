@@ -12,9 +12,11 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.MinioTestContainer;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
@@ -56,10 +58,14 @@ public final class PipelineApplicationIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
 
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client;
+
   /** Sets the minio test container. */
   @BeforeAll
   public static void setupMinioTestContainer() {
     MinioTestContainer.getInstance();
+    s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
   }
 
   /** Tear down minio test container. */
@@ -145,7 +151,7 @@ public final class PipelineApplicationIT {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
+    // AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
     Bucket bucket = null;
     Process appProcess = null;
     try {
@@ -203,7 +209,7 @@ public final class PipelineApplicationIT {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
+    // AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
     Bucket bucket = null;
     Process appProcess = null;
     try {

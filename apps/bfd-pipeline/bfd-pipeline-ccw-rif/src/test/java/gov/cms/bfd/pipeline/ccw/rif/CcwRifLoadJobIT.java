@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -32,19 +31,13 @@ public final class CcwRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client; // = MinioTestContainer.createS3MinioClient();
+  private static AmazonS3 s3Client;
 
   /** Sets the minio test container. */
   @BeforeAll
   public static void setupMinioTestContainer() {
     MinioTestContainer.getInstance();
     s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-  }
-
-  /** Tear down minio test container. */
-  @AfterAll
-  public static void tearDownMinioTestContainer() {
-    // MinioTestContainer.getInstance().stopContainer();
   }
 
   /**
