@@ -35,7 +35,7 @@ public final class ManifestEntryDownloadTaskIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client; // = MinioTestContainer.createS3MinioClient();
+  private static AmazonS3 s3Client;
   /** The S3 task manager. */
   private S3TaskManager s3TaskManager;
 
