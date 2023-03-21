@@ -23,7 +23,7 @@ from sqs import check_sentinel_queue, post_sentinel_message
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
-SENTINEL_QUEUE_NAME = os.environ.get("QUEUE_NAME", "")
+SENTINEL_QUEUE_NAME = os.environ.get("SENTINEL_QUEUE_NAME", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
