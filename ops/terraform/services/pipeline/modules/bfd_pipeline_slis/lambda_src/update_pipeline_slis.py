@@ -69,7 +69,7 @@ class PipelineMetricMetadata:
     """The unit of the metric. Must conform to the list of supported CloudWatch Metrics"""
 
 
-class PipelineMetrics(PipelineMetricMetadata, Enum):
+class PipelineMetric(PipelineMetricMetadata, Enum):
     """Enumeration of pipeline metrics that can be stored in CloudWatch Metrics"""
 
     TIME_DATA_AVAILABLE = PipelineMetricMetadata("time/data-available", "Seconds")
@@ -194,9 +194,9 @@ def handler(event: Any, context: Any):
         group_timestamp_dimension = {"group_timestamp": group_timestamp}
 
         timestamp_metric = (
-            PipelineMetrics.TIME_DATA_AVAILABLE
+            PipelineMetric.TIME_DATA_AVAILABLE
             if pipeline_data_status == PipelineDataStatus.INCOMING
-            else PipelineMetrics.TIME_DATA_LOADED
+            else PipelineMetric.TIME_DATA_LOADED
         )
 
         utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
@@ -267,14 +267,14 @@ def handler(event: Any, context: Any):
                     f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
                     f" group {group_timestamp}, this indicates that the incoming file is the start"
                     f" of a new data load for group {group_timestamp}. Putting data to metric"
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
+                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
                     f" {utc_timestamp}"
                 )
 
                 try:
                     print(
                         "Putting time metric data to"
-                        f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
+                        f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
                         f" {utc_timestamp}..."
                     )
                     backoff_retry(
@@ -282,18 +282,18 @@ def handler(event: Any, context: Any):
                             cw_client=cw_client,
                             metric_namespace=METRICS_NAMESPACE,
                             metrics=gen_all_dimensioned_metrics(
-                                metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
                                 dimensions=[group_timestamp_dimension],
                                 timestamp=event_timestamp,
                                 value=utc_timestamp,
-                                unit=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.unit,
+                                unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
                             ),
                         ),
                         ignored_exceptions=common_unrecoverable_exceptions,
                     )
                     print(
                         "Metrics put to"
-                        f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()} successfully"
+                        f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} successfully"
                     )
                 except Exception as exc:
                     print(
@@ -306,7 +306,7 @@ def handler(event: Any, context: Any):
                     f"Posting sentinel message to {SENTINEL_QUEUE_NAME} SQS queue to indicate that"
                     f" data load has begun for group {group_timestamp} and that no additional data"
                     " should be put to the"
-                    f" {PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()} metric for this"
+                    f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} metric for this"
                     " group"
                 )
 
@@ -349,9 +349,9 @@ def handler(event: Any, context: Any):
 
             try:
                 print(
-                    f'Getting corresponding "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}"'
+                    f'Getting corresponding "{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}"'
                     f' time metric for the current RIF file type "{rif_file_type.name}" and'
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" time metric in'
+                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" time metric in'
                     f' group "{group_timestamp}"...'
                 )
                 # We get both the last available metric for the current RIF file type _and_ the
@@ -365,12 +365,12 @@ def handler(event: Any, context: Any):
                         metric_data_queries=[
                             MetricDataQuery(
                                 metric_namespace=METRICS_NAMESPACE,
-                                metric_name=PipelineMetrics.TIME_DATA_AVAILABLE.metric_name,
+                                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
                                 dimensions=rif_type_dimension | group_timestamp_dimension,
                             ),
                             MetricDataQuery(
                                 metric_namespace=METRICS_NAMESPACE,
-                                metric_name=PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
                                 dimensions=group_timestamp_dimension,
                             ),
                         ],
@@ -379,9 +379,9 @@ def handler(event: Any, context: Any):
                     ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
                 )
                 print(
-                    f'"{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
+                    f'"{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
                     f" {rif_type_dimension | group_timestamp_dimension} and"
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
+                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
                     f" {group_timestamp_dimension} retrieved successfully"
                 )
             except Exception as exc:
@@ -394,7 +394,7 @@ def handler(event: Any, context: Any):
                 data_available_metric_data = [
                     x
                     for x in result
-                    if x.label == PipelineMetrics.TIME_DATA_AVAILABLE.full_name() and x.values
+                    if x.label == PipelineMetric.TIME_DATA_AVAILABLE.full_name() and x.values
                 ][0]
                 # As explained above, this metric's data will only be used if this lambda was
                 # invoked for the last-loaded file (thus, the pipeline load has finished).
@@ -402,13 +402,13 @@ def handler(event: Any, context: Any):
                 data_first_available_metric_data = [
                     x
                     for x in result
-                    if x.label == PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
+                    if x.label == PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
                 ][0]
             except IndexError as exc:
                 print(
                     "No metric data result was found for metric"
-                    f' "{PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}" or'
-                    f' "{PipelineMetrics.TIME_DATA_FIRST_AVAILABLE.full_name()}", no time delta(s)'
+                    f' "{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}" or'
+                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}", no time delta(s)'
                     " can be computed. Stopping..."
                 )
                 return
@@ -428,7 +428,7 @@ def handler(event: Any, context: Any):
             except ValueError as exc:
                 print(
                     "No values were returned for metric"
-                    f" {PipelineMetrics.TIME_DATA_AVAILABLE.full_name()}, no time delta can be"
+                    f" {PipelineMetric.TIME_DATA_AVAILABLE.full_name()}, no time delta can be"
                     " computed. Stopping..."
                 )
                 return
@@ -438,7 +438,7 @@ def handler(event: Any, context: Any):
             try:
                 print(
                     "Putting time delta metrics to"
-                    f' "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}" with value'
+                    f' "{PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}" with value'
                     f" {load_time_delta.seconds} s..."
                 )
                 backoff_retry(
@@ -446,23 +446,23 @@ def handler(event: Any, context: Any):
                         cw_client=cw_client,
                         metric_namespace=METRICS_NAMESPACE,
                         metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                            metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                             dimensions=[rif_type_dimension, group_timestamp_dimension],
                             value=load_time_delta.seconds,
                             timestamp=event_timestamp,
-                            unit=PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.unit,
+                            unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
                         ),
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print(
-                    f'Metrics put to "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
+                    f'Metrics put to "{PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
                     " successfully"
                 )
             except Exception as exc:
                 print(
                     "An unrecoverable error occurred when trying to call PutMetricData for metric"
-                    f" {PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}: {exc}"
+                    f" {PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}: {exc}"
                 )
                 return
 
@@ -480,7 +480,7 @@ def handler(event: Any, context: Any):
                 print(
                     f"All files have been loaded for group {group_timestamp}. This indicates that"
                     " the data load has been completed for this group. Putting data to metric"
-                    f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}" with value'
+                    f' "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" with value'
                     f" {utc_timestamp}"
                 )
                 backoff_retry(
@@ -488,17 +488,17 @@ def handler(event: Any, context: Any):
                         cw_client=cw_client,
                         metric_namespace=METRICS_NAMESPACE,
                         metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetrics.TIME_DATA_FULLY_LOADED.metric_name,
+                            metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                             dimensions=[group_timestamp_dimension],
                             timestamp=event_timestamp,
                             value=utc_timestamp,
-                            unit=PipelineMetrics.TIME_DATA_FULLY_LOADED.unit,
+                            unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                         ),
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print(
-                    f'Data put to "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"'
+                    f'Data put to "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}"'
                     " successfully"
                 )
             except Exception as exc:
@@ -517,7 +517,7 @@ def handler(event: Any, context: Any):
 
             try:
                 print(
-                    f'Putting to "{PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the'
+                    f'Putting to "{PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the'
                     f" total time delta ({full_load_time_delta.seconds} s) from start to finish for"
                     f" the current pipeline load for group {group_timestamp}"
                 )
@@ -526,18 +526,18 @@ def handler(event: Any, context: Any):
                         cw_client=cw_client,
                         metric_namespace=METRICS_NAMESPACE,
                         metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                            metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
                             dimensions=[group_timestamp_dimension],
                             timestamp=event_timestamp,
                             value=full_load_time_delta.seconds,
-                            unit=PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                            unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
                         ),
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print(
                     "Data put to metric"
-                    f' "{PipelineMetrics.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" successfully'
+                    f' "{PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" successfully'
                 )
             except Exception as exc:
                 print(
