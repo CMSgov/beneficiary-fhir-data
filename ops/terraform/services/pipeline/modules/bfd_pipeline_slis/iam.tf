@@ -105,7 +105,7 @@ resource "aws_iam_policy" "sqs" {
     },
     {
       "Effect": "Allow",
-      "Action": ["kms:GenerateDataKey*"],
+      "Action": ["kms:GenerateDataKey*", "kms:Decrypt"],
       "Resource": ["${local.kms_key_arn}"]
     }
   ]
@@ -136,6 +136,7 @@ EOF
   managed_policy_arns = [
     aws_iam_policy.cloudwatch_metrics.arn,
     aws_iam_policy.s3.arn,
-    aws_iam_policy.logs.arn
+    aws_iam_policy.logs.arn,
+    aws_iam_policy.sqs.arn
   ]
 }
