@@ -109,6 +109,8 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))
         .message(protobufObjectWriter.print(change))
         .status(MessageError.Status.UNRESOLVED)
+        .createdDate(clock.instant())
+        .updatedDate(clock.instant())
         .build();
   }
 }

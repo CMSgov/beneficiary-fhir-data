@@ -59,8 +59,8 @@ public class DLQGrpcRdaSourceTest {
   /** Mock {@link GrpcStreamCaller} to use in testing. */
   @Mock private GrpcStreamCaller<Long> mockCaller;
 
-  /** Mock {@link DLQGrpcRdaSource.DLQDao} to use in testing. */
-  @Mock private DLQGrpcRdaSource.DLQDao mockDao;
+  /** Mock {@link DLQDao} to use in testing. */
+  @Mock private DLQDao mockDao;
 
   /** Mock {@link RdaVersion} to use in testing. */
   @Mock private RdaVersion rdaVersion;

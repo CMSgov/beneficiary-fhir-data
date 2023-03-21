@@ -10,9 +10,8 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -78,6 +76,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
         appMetrics,
         claimType,
         rdaVersion,
+        Clock.systemUTC(),
         config.getMessageErrorExpirationDays());
   }
 
@@ -94,6 +93,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType string representation of the claim type
    * @param rdaVersion The required {@link RdaVersion} in order to ingest data
+   * @param clock {@link Clock} used for current time calculations
    * @param messageErrorExpirationDays value for messageErrorExpirationDays
    */
   @VisibleForTesting
@@ -106,6 +106,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       MeterRegistry appMetrics,
       String claimType,
       RdaVersion rdaVersion,
+      Clock clock,
       int messageErrorExpirationDays) {
     super(
         Preconditions.checkNotNull(channel),
@@ -114,7 +115,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
         callOptionsFactory,
         appMetrics,
         rdaVersion);
-    this.dao = new DLQDao(Preconditions.checkNotNull(transactionManager));
+    this.dao = new DLQDao(clock, Preconditions.checkNotNull(transactionManager));
     this.sequencePredicate = sequencePredicate;
     this.messageErrorExpirationDays = messageErrorExpirationDays;
   }
@@ -292,97 +293,5 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
       return processResult;
     };
-  }
-
-  /** Utility Data Access Object (DAO) class for querying the database. */
-  @VisibleForTesting
-  @RequiredArgsConstructor
-  static class DLQDao implements AutoCloseable {
-
-    /** Used to execute transactions. */
-    private final TransactionManager transactionManager;
-
-    /**
-     * Finds all message errors with the matching claim type and status.
-     *
-     * @param claimType the claim type to match
-     * @param status the status to match
-     * @return the list of errors that match the conditions
-     */
-    public List<MessageError> findAllMessageErrorsByClaimTypeAndStatus(
-        MessageError.ClaimType claimType, MessageError.Status status) {
-      return transactionManager.executeFunction(
-          entityManager ->
-              entityManager
-                  .createQuery(
-                      "select error from MessageError error where error.claimType = :claimType and error.status = :status",
-                      MessageError.class)
-                  .setParameter("claimType", claimType)
-                  .setParameter("status", status)
-                  .getResultList());
-    }
-
-    /**
-     * Updates the message error status for the entry with the specified sequence number and type.
-     *
-     * @param sequenceNumber the sequence number to check for
-     * @param type the type to check for
-     * @param status the status to update with
-     * @return the number of entities affected by the update
-     */
-    public long updateState(
-        Long sequenceNumber, MessageError.ClaimType type, MessageError.Status status) {
-      return transactionManager.executeFunction(
-          entityManager -> {
-            long entitiesAffected = 0L;
-
-            MessageError messageError =
-                entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
-
-            if (messageError != null) {
-              messageError.setStatus(status);
-              entityManager.merge(messageError);
-              entitiesAffected = 1L;
-            }
-
-            return entitiesAffected;
-          });
-    }
-
-    /**
-     * Deletes any unprocessed records with the given type that are more than the given number of
-     * days old.
-     *
-     * @param maxAgeDays max age in days to retain in the database
-     * @param claimType type of messages to delete
-     * @return number of records deleted
-     */
-    public long deleteExpiredMessageErrors(int maxAgeDays, MessageError.ClaimType claimType) {
-      return transactionManager.executeFunction(
-          entityManager ->
-              entityManager
-                  .createQuery(
-                      "delete from MessageError error"
-                          + " where error.claimType = :claimType"
-                          + " and error.status <> :keepStatus"
-                          + " and error.updatedDate < :minKeepDate",
-                      Long.class)
-                  .setParameter("claimType", claimType)
-                  .setParameter("keepStatus", MessageError.Status.UNRESOLVED)
-                  .setParameter("minKeepDate", Instant.now().minus(maxAgeDays, ChronoUnit.DAYS))
-                  .getSingleResult());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Closes our transaction manager.
-     *
-     * @throws Exception pass through
-     */
-    @Override
-    public void close() throws Exception {
-      transactionManager.close();
-    }
   }
 }

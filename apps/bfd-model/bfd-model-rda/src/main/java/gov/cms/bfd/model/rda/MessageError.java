@@ -8,8 +8,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -78,32 +76,36 @@ public class MessageError {
   @Column(name = "message", nullable = false, columnDefinition = "jsonb")
   private String message;
 
+  /** The status of this record. */
   @Enumerated(EnumType.STRING)
   @Column(name = "status", length = 20, nullable = false)
   private Status status;
 
-  /** Hibernate used method to set certain values only on insert */
-  @PrePersist
-  protected void onCreate() {
-    createdDate = Instant.now();
-    updatedDate = Instant.now();
-  }
-
-  /** Hibernate used method to update certain values only on updates */
-  @PreUpdate
-  protected void onUpdate() {
-    updatedDate = Instant.now();
-  }
-
+  /** Possible values for {@link #claimType}. */
   public enum ClaimType {
+    /** A FISS claim. * */
     FISS,
+    /** A MCS claim. * */
     MCS
   }
 
+  /** Possible values for {@link #status}. */
   public enum Status {
+    /** Starting state for new errors. */
     UNRESOLVED,
+    /** The error has been corrected. */
     RESOLVED,
+    /** This sequence number is no longer available in RDA API. */
     OBSOLETE
+  }
+
+  /**
+   * Gets a primary key object for this record.
+   *
+   * @return the {@link PK}
+   */
+  public PK getPK() {
+    return new PK(sequenceNumber, claimType);
   }
 
   /** PK class for the MessageError table */
