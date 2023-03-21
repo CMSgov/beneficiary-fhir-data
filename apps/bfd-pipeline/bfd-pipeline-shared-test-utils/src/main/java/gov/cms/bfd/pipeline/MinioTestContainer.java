@@ -21,33 +21,18 @@ public class MinioTestContainer {
   /** Singleton instance of MinioContainer. */
   private static MinioTestContainer myInstance = null;
 
-  /** Port number for minio. */
+  /** S3 access port number for minio. */
   private static final int DEFAULT_PORT = 9000;
+  /** minio console Port number. */
+  private static final int CONSOLE_PORT = DEFAULT_PORT + 1;
   /** access user name for S3. */
   public static final String MINIO_ACCESS_KEY = System.getProperty("s3.localUser", "bfdLocalS3Dev");
   /** access password for S3. */
   public static final String MINIO_SECRET_KEY = System.getProperty("s3.localPass", "bfdLocalS3Dev");
-  /** DockerComposeContainer from testcontainers. */
-  public static DockerComposeContainer minioContainer = null;
   /** YAML file. */
   private static File yamlFile;
-
-  /**
-   * docker compose file contents; done this way as this class may be called upon from anywhere in
-   * bfd-pipeline tests. All we care about is that minio is running.
-   */
-  private static final String dockerCompose =
-      "version: '3.7'\n"
-          + "services:\n"
-          + "  minio-service:\n"
-          + "    image: minio/minio:latest\n"
-          + "    command: minio server --console-address :9001 /data\n"
-          + "    ports:\n"
-          + "      - \"9000:9000\"\n"
-          + "      - \"9001:9001\"\n"
-          + "    environment:\n"
-          + "      MINIO_ROOT_USER: bfdLocalS3Dev\n"
-          + "      MINIO_ROOT_PASSWORD: bfdLocalS3Dev";
+  /** DockerComposeContainer from testcontainers. */
+  public static DockerComposeContainer minioContainer = null;
 
   /**
    * Singleton method to ensure there is only one instance of the {@link MinioTestContainer} class.
@@ -67,9 +52,38 @@ public class MinioTestContainer {
    */
   private MinioTestContainer() {
     String dockerFileName = System.getProperty("java.io.tmpdir") + "/docker-compose.yml";
+    // build a docker compose file that we can feed to testcontainers; done this
+    // way as MinioTestContainer may be called from anywhere so a static resource
+    // file would require a search, etc.
+    StringBuilder sb = new StringBuilder();
+    sb.append("version: '3.7'\n")
+        .append("services:\n")
+        .append("  minio-service:\n")
+        .append("    image: minio/minio:latest\n");
+    sb.append("    command: minio server --console-address :")
+        .append(Integer.toString(CONSOLE_PORT))
+        .append(" /data\n");
+    sb.append("      - \"")
+        .append(Integer.toString(DEFAULT_PORT))
+        .append(":")
+        .append(Integer.toString(DEFAULT_PORT))
+        .append("\"\n");
+    sb.append("      - \"")
+        .append(Integer.toString(CONSOLE_PORT))
+        .append(":")
+        .append(Integer.toString(CONSOLE_PORT))
+        .append("\"\n");
+    sb.append("    environment:\n")
+        .append("      MINIO_ROOT_USER: ")
+        .append(MINIO_ACCESS_KEY)
+        .append("\n")
+        .append("      MINIO_ROOT_PASSWORD: ")
+        .append(MINIO_SECRET_KEY)
+        .append("\n");
+
     try {
       FileOutputStream fos = new FileOutputStream(dockerFileName);
-      fos.write(dockerCompose.getBytes());
+      fos.write(sb.toString().getBytes());
       fos.close();
       yamlFile = new File(dockerFileName);
 
