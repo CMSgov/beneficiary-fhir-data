@@ -34,6 +34,14 @@ resource "aws_lambda_function" "this" {
 
   kms_key_arn = local.kms_key_arn
 
+  # Ensures that only _one_ instance of this Lambda can run at any given time. This stops the
+  # possible duplicate submissions to the first available time metric that could otherwise occur
+  # if two instances of this Lambda are invoked close together. This _does_ take from our total
+  # reserved concurrent executions, so we should investigate an even more robust method of stopping
+  # duplicate submissions
+  # TODO: Investigate other methods of stopping duplicate sample submissions to first available metric
+  reserved_concurrent_executions = 1
+
   filename         = data.archive_file.lambda_src.output_path
   source_code_hash = data.archive_file.lambda_src.output_base64sha256
   architectures    = ["x86_64"]
