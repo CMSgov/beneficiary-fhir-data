@@ -44,6 +44,9 @@ public class DLQGrpcRdaSourceTest {
   /** Arbitrary rda api version being used for tests. */
   private static final String TEST_RDA_VERSION = "0.0.1";
 
+  /** Max age for message errors table. */
+  private static final int MAX_DQL_AGE_DAYS = 100;
+
   /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Long, Long> mockSink;
 
@@ -74,7 +77,8 @@ public class DLQGrpcRdaSourceTest {
     meters = new SimpleMeterRegistry();
     lenient().doReturn(false).when(rdaVersion).allows(anyString());
     lenient().doReturn(true).when(rdaVersion).allows(TEST_RDA_VERSION);
-    doReturn(mockChannel).when(mockConfig).createChannel();
+    lenient().doReturn(MAX_DQL_AGE_DAYS).when(mockConfig).getMessageErrorExpirationDays();
+    lenient().doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
   /** Testing value to use for the first FISS error sequence number. */
@@ -151,6 +155,59 @@ public class DLQGrpcRdaSourceTest {
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
     assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
+
+    // should have triggered DLQ cleanup method
+    verify(mockDao).deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+  }
+
+  /**
+   * Ensure that {@link DLQGrpcRdaSource#deleteExpiredDlqRecords} calls the dao method and returns
+   * its result.
+   */
+  @Test
+  void deleteExpiredDlqRecordsShouldCallDaoAndReturnResult() {
+    final var claimType = "fiss";
+    final var source =
+        new DLQGrpcRdaSource<>(
+            mockManager,
+            Objects::equals,
+            mockChannel,
+            mockCaller,
+            mockConfig::createCallOptions,
+            meters,
+            claimType,
+            rdaVersion,
+            MAX_DQL_AGE_DAYS,
+            mockDao);
+    doReturn(18)
+        .when(mockDao)
+        .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+    assertEquals(18, source.deleteExpiredDlqRecords(MessageError.ClaimType.FISS));
+  }
+
+  /**
+   * Ensure that {@link DLQGrpcRdaSource#deleteExpiredDlqRecords} calls the dao method and returns
+   * its result and captures any exception it throws.
+   */
+  @Test
+  void deleteExpiredDlqRecordsShouldCallDaoAndCaptureException() {
+    final var claimType = "fiss";
+    final var source =
+        new DLQGrpcRdaSource<>(
+            mockManager,
+            Objects::equals,
+            mockChannel,
+            mockCaller,
+            mockConfig::createCallOptions,
+            meters,
+            claimType,
+            rdaVersion,
+            MAX_DQL_AGE_DAYS,
+            mockDao);
+    doThrow(new RuntimeException("can't stop me!"))
+        .when(mockDao)
+        .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+    assertEquals(0, source.deleteExpiredDlqRecords(MessageError.ClaimType.FISS));
   }
 
   /** Checks that the logic lambda was successfully and correctly invoked for MCS claims. */

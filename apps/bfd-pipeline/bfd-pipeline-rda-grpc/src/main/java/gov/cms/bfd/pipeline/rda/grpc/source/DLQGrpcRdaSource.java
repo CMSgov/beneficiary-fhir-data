@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
@@ -76,8 +77,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
         appMetrics,
         claimType,
         rdaVersion,
-        Clock.systemUTC(),
-        config.getMessageErrorExpirationDays());
+        config.getMessageErrorExpirationDays(),
+        new DLQDao(Clock.systemUTC(), Preconditions.checkNotNull(transactionManager)));
   }
 
   /**
@@ -93,8 +94,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType string representation of the claim type
    * @param rdaVersion The required {@link RdaVersion} in order to ingest data
-   * @param clock {@link Clock} used for current time calculations
    * @param messageErrorExpirationDays value for messageErrorExpirationDays
+   * @param dao {@link DLQDao} used for database transactions
    */
   @VisibleForTesting
   DLQGrpcRdaSource(
@@ -106,8 +107,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       MeterRegistry appMetrics,
       String claimType,
       RdaVersion rdaVersion,
-      Clock clock,
-      int messageErrorExpirationDays) {
+      int messageErrorExpirationDays,
+      DLQDao dao) {
     super(
         Preconditions.checkNotNull(channel),
         Preconditions.checkNotNull(caller),
@@ -115,7 +116,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
         callOptionsFactory,
         appMetrics,
         rdaVersion);
-    this.dao = new DLQDao(clock, Preconditions.checkNotNull(transactionManager));
+    this.dao = dao;
     this.sequencePredicate = sequencePredicate;
     this.messageErrorExpirationDays = messageErrorExpirationDays;
   }
@@ -179,11 +180,14 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * processing to be completed any errors during the transaction are simply logged.
    *
    * @param type the {@link MessageError.ClaimType} of records to delete
+   * @return number of records deleted
    */
+  @CanIgnoreReturnValue
   @VisibleForTesting
-  void deleteExpiredDlqRecords(MessageError.ClaimType type) {
+  int deleteExpiredDlqRecords(MessageError.ClaimType type) {
+    int deletedRecordCount;
     try {
-      long deletedRecordCount = dao.deleteExpiredMessageErrors(messageErrorExpirationDays, type);
+      deletedRecordCount = dao.deleteExpiredMessageErrors(messageErrorExpirationDays, type);
       if (deletedRecordCount > 0) {
         log.info("Deleted {} expired {} claims from DLQ", deletedRecordCount, type);
       } else {
@@ -192,7 +196,9 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
     } catch (Exception ex) {
       // Exceptions are not fatal, they just need to be logged for reference.
       log.warn("Caught exception while deleting expired {} claims from DLQ", claimType, ex);
+      deletedRecordCount = 0;
     }
+    return deletedRecordCount;
   }
 
   /**
