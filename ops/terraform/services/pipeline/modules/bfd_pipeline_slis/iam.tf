@@ -82,6 +82,37 @@ resource "aws_iam_policy" "logs" {
 EOF
 }
 
+resource "aws_iam_policy" "sqs" {
+  name = "${local.lambda_full_name}-sqs"
+  description = join("", [
+    "Permissions for the ${local.lambda_full_name} Lambda to send and receive messages from the ",
+    "${aws_sqs_queue.this.name} SQS queue"
+  ])
+  policy = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage",
+        "sqs:DeleteMessage",
+        "sqs:ReceiveMessage",
+        "sqs:PurgeQueue"
+      ],
+      "Resource": ["${aws_sqs_queue.this.arn}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["kms:GenerateDataKey*"],
+      "Resource": ["${local.kms_key_arn}"]
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role" "this" {
   name        = local.lambda_full_name
   path        = "/"

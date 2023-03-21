@@ -3,6 +3,7 @@ locals {
   region = data.aws_region.current.name
 
   kms_key_arn = var.aws_kms_key_arn
+  kms_key_id  = var.aws_kms_key_id
 
   lambda_full_name = "bfd-${local.env}-update-pipeline-slis"
 
@@ -43,10 +44,17 @@ resource "aws_lambda_function" "this" {
   timeout          = 300
   environment {
     variables = {
-      METRICS_NAMESPACE = local.metrics_namespace
-      ETL_BUCKET_ID     = data.aws_s3_bucket.etl.id
+      METRICS_NAMESPACE   = local.metrics_namespace
+      ETL_BUCKET_ID       = data.aws_s3_bucket.etl.id
+      SENTINEL_QUEUE_NAME = aws_sqs_queue.this.name
     }
   }
 
   role = aws_iam_role.this.arn
+}
+
+resource "aws_sqs_queue" "this" {
+  name                       = local.lambda_full_name
+  visibility_timeout_seconds = 0
+  kms_master_key_id          = local.kms_key_id
 }
