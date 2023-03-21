@@ -179,6 +179,15 @@ public class RdaSourceConfig implements Serializable {
   }
 
   /**
+   * The maximum number of days to retain records in the DLQ after they have been processed.
+   *
+   * @return max age for processed records
+   */
+  public int getMessageErrorExpirationDays() {
+    return 100;
+  }
+
+  /**
    * Creates a remove channel builder.
    *
    * @return the channel builder

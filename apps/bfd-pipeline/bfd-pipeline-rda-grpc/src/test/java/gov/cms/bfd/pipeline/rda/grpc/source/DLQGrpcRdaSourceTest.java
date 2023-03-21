@@ -20,6 +20,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -29,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,8 +47,8 @@ public class DLQGrpcRdaSourceTest {
   /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Long, Long> mockSink;
 
-  /** Mock {@link EntityManager} to use in testing. */
-  @Mock private EntityManager mockManager;
+  /** Mock {@link TransactionManager} to use in testing. */
+  @Mock private TransactionManager mockManager;
 
   /** Mock {@link ManagedChannel} to use in testing. */
   @Mock private ManagedChannel mockChannel;
