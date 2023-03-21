@@ -103,7 +103,7 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     finished_rifs = [
         str(object.key).removeprefix(done_prefix)
         for object in bucket.objects.filter(Prefix=done_prefix)
-        if str(object.key).endswith(".txt")
+        if str(object.key).endswith(".txt") or str(object.key).endswith(".csv")
     ]
 
     # We check for all RIFs _except_ beneficiary history as beneficiary history is a RIF type not
@@ -117,6 +117,13 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
         any(rif_type.value in rif_file_name.lower() for rif_file_name in finished_rifs)
         for rif_type in rif_types_to_check
     )
+
+
+def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
+    incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group_timestamp}/"
+    incoming_objects = list(bucket.objects.filter(Prefix=incoming_key_prefix))
+
+    return len(incoming_objects) == 0
 
 
 def handler(event: Any, context: Any):
@@ -460,7 +467,9 @@ def handler(event: Any, context: Any):
                 return
 
             print("Checking if the pipeline load has completed...")
-            if not _is_pipeline_load_complete(bucket=etl_bucket, group_timestamp=group_timestamp):
+            if not _is_pipeline_load_complete(
+                bucket=etl_bucket, group_timestamp=group_timestamp
+            ) or not _is_incoming_folder_empty(bucket=etl_bucket, group_timestamp=group_timestamp):
                 print(
                     f"Not all files have yet to be loaded for group {group_timestamp}. Data load is"
                     " not complete. Stopping..."
