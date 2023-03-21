@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.MinioTestContainer;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -20,6 +21,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,22 @@ import org.slf4j.LoggerFactory;
 public final class CcwRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
 
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client; // = MinioTestContainer.createS3MinioClient();
+
+  /** Sets the minio test container. */
+  @BeforeAll
+  public static void setupMinioTestContainer() {
+    MinioTestContainer.getInstance();
+    s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+  }
+
+  /** Tear down minio test container. */
+  @AfterAll
+  public static void tearDownMinioTestContainer() {
+    // MinioTestContainer.getInstance().stopContainer();
+  }
+
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
    *
@@ -35,7 +54,6 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void emptyBucketTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create the (empty) bucket to run against.
@@ -110,7 +128,6 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void multipleDataSetsWithSyntheticTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
@@ -255,7 +272,6 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void multipleDataSetsTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
@@ -366,7 +382,6 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void skipDataSetTest() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
@@ -448,7 +463,6 @@ public final class CcwRifLoadJobIT {
    */
   @Test
   public void skipDataSetTestForFutureManifestDate() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
@@ -538,7 +552,6 @@ public final class CcwRifLoadJobIT {
       List<URL> fileList,
       DataSetManifest inManifest)
       throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*

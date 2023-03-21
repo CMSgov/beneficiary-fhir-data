@@ -10,12 +10,21 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PublicAccessBlockConfiguration;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SSEAlgorithm;
+import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
+import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
+import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
+import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
+import com.amazonaws.services.s3.model.SetPublicAccessBlockRequest;
 import com.amazonaws.waiters.WaiterParameters;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
@@ -98,13 +107,15 @@ public final class SharedS3Utilities {
    */
   public static Bucket createTestBucket(AmazonS3 s3Client) {
     String username = System.getProperty("user.name");
+
     if (Strings.isNullOrEmpty(username)) {
       username = "anonymous";
     } else {
-      username = username.replaceAll("[@\\\\]", "-");
+      username = username.toLowerCase().replaceAll("[@\\\\]", "-");
     }
     final int randomId = ThreadLocalRandom.current().nextInt(100000);
-    final String bucketName = String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username, randomId);
+    final String bucketName =
+        String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username.toLowerCase(), randomId);
 
     // if not running S3 inside minio (i.e., vs. real AWS S3 buckets), then we need
     // to be observant of CMS security constraints; inside minio, not so much!
@@ -117,14 +128,13 @@ public final class SharedS3Utilities {
       //  - no public access
       //  - support only TLS-enabled connections
       //  - data is encrypted
-      bucket = s3Client.createBucket(bucketName);
-      /*bucket =
-      s3Client.createBucket(
-          new CreateBucketRequest(bucketName)
-              .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));*/
+      bucket =
+          s3Client.createBucket(
+              new CreateBucketRequest(bucketName)
+                  .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
 
       // block everything public related
-      /*s3Client.setPublicAccessBlock(
+      s3Client.setPublicAccessBlock(
           new SetPublicAccessBlockRequest()
               .withBucketName(bucketName)
               .withPublicAccessBlockConfiguration(
@@ -144,11 +154,11 @@ public final class SharedS3Utilities {
                           new ServerSideEncryptionRule()
                               .withApplyServerSideEncryptionByDefault(
                                   new ServerSideEncryptionByDefault()
-                                      .withSSEAlgorithm(SSEAlgorithm.AES256)))));*/
+                                      .withSSEAlgorithm(SSEAlgorithm.AES256)))));
 
       // we'll shortcut this with a JSON policy
-      // final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
-      // s3Client.setBucketPolicy(bucketName, tlsPolicy);
+      final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
+      s3Client.setBucketPolicy(bucketName, tlsPolicy);
     }
 
     waitForBucketToExist(s3Client, bucketName);

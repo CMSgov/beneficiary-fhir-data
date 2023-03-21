@@ -25,7 +25,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -60,13 +59,13 @@ public final class PipelineApplicationIT {
   /** Sets the minio test container. */
   @BeforeAll
   public static void setupMinioTestContainer() {
-    MinioTestContainer.startContainer();
+    MinioTestContainer.getInstance();
   }
 
   /** Tear down minio test container. */
   @AfterAll
   public static void tearDownMinioTestContainer() {
-    MinioTestContainer.stopContainer();
+    MinioTestContainer.getInstance().stopContainer();
   }
 
   /**
@@ -147,9 +146,6 @@ public final class PipelineApplicationIT {
     skipOnUnsupportedOs();
 
     AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
-
-    // SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
-
     Bucket bucket = null;
     Process appProcess = null;
     try {
@@ -207,7 +203,7 @@ public final class PipelineApplicationIT {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    AmazonS3 s3Client = MinioTestContainer.createS3MinioClient();
     Bucket bucket = null;
     Process appProcess = null;
     try {

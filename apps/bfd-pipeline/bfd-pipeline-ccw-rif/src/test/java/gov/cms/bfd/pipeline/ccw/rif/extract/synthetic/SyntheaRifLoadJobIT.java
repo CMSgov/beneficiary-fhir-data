@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -43,6 +44,15 @@ import org.slf4j.LoggerFactory;
 /** Integration tests for Synthea pre-validation bucket handling. */
 public final class SyntheaRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
+
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client; // = MinioTestContainer.createS3MinioClient();
+
+  /** Sets the minio test container. */
+  @BeforeAll
+  public static void setupMinioTestContainer() {
+    s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+  }
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -89,7 +99,7 @@ public final class SyntheaRifLoadJobIT {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    // AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
@@ -223,7 +233,7 @@ public final class SyntheaRifLoadJobIT {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    // AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.

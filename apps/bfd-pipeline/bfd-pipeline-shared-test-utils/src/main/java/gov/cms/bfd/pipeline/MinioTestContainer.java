@@ -1,17 +1,15 @@
 package gov.cms.bfd.pipeline;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import java.time.Duration;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
-import org.testcontainers.utility.Base58;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.DockerComposeContainer;
 
 /**
  * MinioContainer is a testcontainer object for configuring minio to use as an S3 bucket;
@@ -19,80 +17,90 @@ import org.testcontainers.utility.Base58;
  * maven cmd-line parameters.
  */
 public class MinioTestContainer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MinioTestContainer.class);
+
   /** Singleton instance of MinioContainer. */
   private static MinioTestContainer myInstance = null;
+
   /** Port number for minio. */
-  private static final int DEFAULT_PORT = 9050;
-  /** minio image that will be loaded into testcontainers. */
-  private static final String DEFAULT_IMAGE = "minio-test/minio";
-  /** default tag name. */
-  private static final String DEFAULT_TAG = "edge";
-  /** directory within container to use. */
-  private static final String DEFAULT_STORAGE_DIRECTORY = "/data";
-  /** minio Health check URL. */
-  private static final String HEALTH_ENDPOINT = "/minio/health/ready";
+  private static final int DEFAULT_PORT = 9000;
   /** access user name for S3. */
   public static final String MINIO_ACCESS_KEY = System.getProperty("s3.localUser", "bfdLocalS3Dev");
   /** access password for S3. */
   public static final String MINIO_SECRET_KEY = System.getProperty("s3.localPass", "bfdLocalS3Dev");
-  /** minio host and port. */
-  private static final String MINIO_URL =
-      System.getProperty("s3.localAddress", "http://localhost:9050");
-  /** GenericContainer from testcontaers. */
-  public static GenericContainer minioContainer = null;
+  /** DockerComposeContainer from testcontainers. */
+  public static DockerComposeContainer minioContainer = null;
+  /** YAML file. */
+  private static File yamlFile;
 
-  /** construct a {@link GenericContainer} for the minio instance and start the container. */
-  public static void startContainer() {
-    if (minioContainer == null) {
-      createContainer();
-    }
-    if (minioContainer.isCreated() && !minioContainer.isRunning()) {
-      minioContainer.start();
-    }
-  }
+  /**
+   * docker compose file contents; done this way as this class may be called upon from anywhere in
+   * bfd-pipeline tests. All we care about is that minio is running.
+   */
+  private static final String dockerCompose =
+      "version: '3.7'\n"
+          + "services:\n"
+          + "  minio-service:\n"
+          + "    image: minio/minio:latest\n"
+          + "    command: minio server --console-address :9001 /data\n"
+          + "    ports:\n"
+          + "      - \"9000:9000\"\n"
+          + "      - \"9001:9001\"\n"
+          + "    environment:\n"
+          + "      MINIO_ROOT_USER: bfdLocalS3Dev\n"
+          + "      MINIO_ROOT_PASSWORD: bfdLocalS3Dev";
 
-  /** stops the minio {@link GenericContainer} container instance. */
-  public static void stopContainer() {
-    if (minioContainer != null && minioContainer.isRunning()) {
-      minioContainer.stop();
-      minioContainer = null;
+  /**
+   * Singleton method to ensure there is only one instance of the {@link MinioTestContainer} class.
+   *
+   * @return {@link MinioTestContainer}
+   */
+  public static MinioTestContainer getInstance() {
+    if (myInstance == null) {
+      myInstance = new MinioTestContainer();
     }
-  }
-
-  /** construct a {@link GenericContainer} for the minio instance. */
-  private static void createContainer() {
-    minioContainer =
-        new GenericContainer(DEFAULT_IMAGE + ":" + DEFAULT_TAG)
-            .withEnv("MINIO_ACCESS_KEY", MINIO_ACCESS_KEY)
-            .withEnv("MINIO_SECRET_KEY", MINIO_SECRET_KEY)
-            .withCommand("server", DEFAULT_STORAGE_DIRECTORY)
-            .withExposedPorts(DEFAULT_PORT)
-            .withNetworkAliases("minio-" + Base58.randomString(6))
-            .waitingFor(
-                new HttpWaitStrategy()
-                    .forPath(HEALTH_ENDPOINT)
-                    .forPort(DEFAULT_PORT)
-                    .withStartupTimeout(Duration.ofSeconds(20)));
+    return myInstance;
   }
 
   /**
-   * Creates and returns a new s3 client via minio; uses {@link BasicAWSCredentials} to connect to
-   * the minio client.
+   * Instantiates a new {@link MinioTestContainer} by leveraging testconatins to spin-up a docker
+   * minio image using a docker compose resource file.
+   */
+  private MinioTestContainer() {
+    String dockerFileName = System.getProperty("java.io.tmpdir") + "/docker-compose.yml";
+    try {
+      FileOutputStream fos = new FileOutputStream(dockerFileName);
+      fos.write(dockerCompose.getBytes());
+      fos.close();
+      yamlFile = new File(dockerFileName);
+
+      minioContainer =
+          new DockerComposeContainer<>(yamlFile).withExposedService("minio-service", DEFAULT_PORT);
+      minioContainer.start();
+
+      S3MinioConfig.Singleton()
+          .setConfig(MINIO_ACCESS_KEY, MINIO_SECRET_KEY, "http://localhost:" + DEFAULT_PORT, true);
+      // yamlFile.delete();
+      LOGGER.info("MinioTestsContainer started....used Docker file: " + dockerFileName);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /** stops the minio {@link DockerComposeContainer} container instance. */
+  public void stopContainer() {
+    if (minioContainer != null) {
+      LOGGER.info("MinioTestContainer closing....");
+      minioContainer.stop();
+    }
+  }
+
+  /**
+   * Creates (as needed) a new {@link AmazonS3} minio client.
    *
    * @return the {@link AmazonS3} minio client to use
    */
   public static AmazonS3 createS3MinioClient() {
-    AWSCredentials credentials = new BasicAWSCredentials(MINIO_ACCESS_KEY, MINIO_SECRET_KEY);
-    ClientConfiguration clientConfiguration = new ClientConfiguration();
-    clientConfiguration.setSignerOverride("AWSS3V4SignerType");
-
-    return AmazonS3ClientBuilder.standard()
-        .withEndpointConfiguration(
-            new AwsClientBuilder.EndpointConfiguration(
-                MINIO_URL, SharedS3Utilities.REGION_DEFAULT.name()))
-        .withPathStyleAccessEnabled(true)
-        .withClientConfiguration(clientConfiguration)
-        .withCredentials(new AWSStaticCredentialsProvider(credentials))
-        .build();
+    return SharedS3Utilities.createS3MinioClient(Regions.AP_EAST_1, S3MinioConfig.Singleton());
   }
 }
