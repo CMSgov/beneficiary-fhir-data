@@ -225,9 +225,9 @@ def handler(event: Any, context: Any):
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             print(
-                "Incoming file indicates data has been made available to load to the ETL pipeline."
-                " Checking if this is the first time data is available for group"
-                f' "{group_timestamp}"'
+                "RIF file location indicates data has been made available to load to the ETL"
+                " pipeline. Checking if this is the first time data is available for group"
+                f' "{group_timestamp}"...'
             )
 
             try:
@@ -432,7 +432,7 @@ def handler(event: Any, context: Any):
                 print(
                     "Putting time delta metrics to"
                     f' "{PipelineMetrics.TIME_DELTA_DATA_LOAD_TIME.full_name()}" with value'
-                    f" {load_time_delta.seconds}..."
+                    f" {load_time_delta.seconds} s..."
                 )
                 backoff_retry(
                     func=lambda: put_metric_data(
@@ -467,17 +467,12 @@ def handler(event: Any, context: Any):
                 )
                 return
 
-            print(
-                f"All files have been loaded for group {group_timestamp}. This indicates that the"
-                " data load has been completed for this group. Putting data to metric"
-                f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"'
-            )
-
             try:
                 print(
-                    "Putting time metric data to"
+                    f"All files have been loaded for group {group_timestamp}. This indicates that"
+                    " the data load has been completed for this group. Putting data to metric"
                     f' "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}" with value'
-                    f" {utc_timestamp}..."
+                    f" {utc_timestamp}"
                 )
                 backoff_retry(
                     func=lambda: put_metric_data(
@@ -493,7 +488,10 @@ def handler(event: Any, context: Any):
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
-                print("Data put successfully")
+                print(
+                    f'Data put to "{PipelineMetrics.TIME_DATA_FULLY_LOADED.full_name()}"'
+                    " successfully"
+                )
             except Exception as exc:
                 print(
                     f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
