@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.catchSystemExit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,9 +123,7 @@ public final class PipelineManagerIT {
           .until(
               () ->
                   jobRecordStore.getJobRecords().stream()
-                      .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
-                      .findAny()
-                      .isPresent());
+                      .anyMatch(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted()));
 
       // Verify that one of the completed mock job iterations looks correct.
       Optional<PipelineJobRecord<?>> mockJobRecord =
@@ -141,43 +142,54 @@ public final class PipelineManagerIT {
    */
   @Test
   public void runFailingMockOneshotJob() throws Exception {
-    // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore =
-        new PipelineJobRecordStore(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
-    try (PipelineManager pipelineManager =
-        new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            jobRecordStore,
-            mockS3TaskManager)) {
-      MockJob mockJob =
-          new MockJob(
-              Optional.empty(),
-              () -> {
-                throw new RuntimeException("boom");
-              });
-      pipelineManager.registerJob(mockJob);
-      jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+    try (MockedStatic<PipelineApplication> mockPipelineApp =
+        Mockito.mockStatic(PipelineApplication.class)) {
+      // Create the pipeline and have it run a mock job.
+      PipelineJobRecordStore jobRecordStore =
+          new PipelineJobRecordStore(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
+      try (PipelineManager pipelineManager =
+          new PipelineManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              jobRecordStore,
+              mockS3TaskManager)) {
+        MockJob mockJob =
+            new MockJob(
+                Optional.empty(),
+                () -> {
+                  throw new RuntimeException("boom");
+                });
+        pipelineManager.registerJob(mockJob);
 
-      // Wait until a completed iteration of the mock job can be found.
-      Awaitility.await()
-          .atMost(1, TimeUnit.SECONDS)
-          .until(
-              () ->
-                  jobRecordStore.getJobRecords().stream()
-                      .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
-                      .findAny()
-                      .isPresent());
+        int statusCode =
+            catchSystemExit(
+                () -> {
+                  jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
 
-      // Verify that one of the completed mock job iterations looks correct.
-      Optional<PipelineJobRecord<?>> mockJobRecord =
-          jobRecordStore.getJobRecords().stream()
-              .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
-              .findAny();
+                  // Wait until a completed iteration of the mock job can be found.
+                  Awaitility.await()
+                      .atMost(1, TimeUnit.SECONDS)
+                      .until(
+                          () ->
+                              jobRecordStore.getJobRecords().stream()
+                                  .anyMatch(
+                                      j ->
+                                          MockJob.JOB_TYPE.equals(j.getJobType())
+                                              && j.isCompleted()));
+                });
 
-      assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+        assertEquals(2, statusCode);
 
-      assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+        // Verify that one of the completed mock job iterations looks correct.
+        Optional<PipelineJobRecord<?>> mockJobRecord =
+            jobRecordStore.getJobRecords().stream()
+                .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
+                .findAny();
+
+        assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+
+        assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+      }
     }
   }
 
@@ -247,17 +259,25 @@ public final class PipelineManagerIT {
                 throw new RuntimeException("boom");
               });
       pipelineManager.registerJob(mockJob);
-      jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
 
-      // Wait until a completed job can be found.
-      Awaitility.await()
-          .atMost(1, TimeUnit.SECONDS)
-          .until(
-              () ->
-                  jobRecordStore.getJobRecords().stream()
-                      .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
-                      .findAny()
-                      .isPresent());
+      int statusCode =
+          catchSystemExit(
+              () -> {
+                jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+                // Wait until a completed job can be found.
+                Awaitility.await()
+                    .atMost(1, TimeUnit.SECONDS)
+                    .until(
+                        () ->
+                            jobRecordStore.getJobRecords().stream()
+                                .filter(
+                                    j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+                                .findAny()
+                                .isPresent());
+              });
+
+      assertEquals(2, statusCode);
 
       // Verify that one of the completed mock job iterations looks correct.
       Optional<PipelineJobRecord<?>> mockJobRecord =
@@ -506,10 +526,7 @@ public final class PipelineManagerIT {
           .until(
               () ->
                   jobRecordStore.getJobRecords().stream()
-                          .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompleted())
-                          .findAny()
-                          .isPresent()
-                      == false);
+                      .noneMatch(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompleted()));
 
       // Stop the pipeline.
       pipelineManager.stop();
