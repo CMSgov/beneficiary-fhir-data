@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
@@ -46,7 +47,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
   /** Used to compare sequence values. */
   private final BiPredicate<Long, TMessage> sequencePredicate;
   /** Number of days after which processed messages should expire and be deleted from the DLQ. */
-  private final int messageErrorExpirationDays;
+  private final Optional<Integer> messageErrorExpirationDays;
 
   /**
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
@@ -107,7 +108,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
       MeterRegistry appMetrics,
       String claimType,
       RdaVersion rdaVersion,
-      int messageErrorExpirationDays,
+      Optional<Integer> messageErrorExpirationDays,
       DLQDao dao) {
     super(
         Preconditions.checkNotNull(channel),
@@ -153,7 +154,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
     MessageError.ClaimType type = MessageError.ClaimType.valueOf(claimType.toUpperCase());
 
-    deleteExpiredDlqRecords(type);
+    messageErrorExpirationDays.ifPresent(maxAgeDays -> deleteExpiredDlqRecords(maxAgeDays, type));
 
     List<MessageError> messageErrors =
         dao.findAllMessageErrorsByClaimTypeAndStatus(type, MessageError.Status.UNRESOLVED);
@@ -179,15 +180,16 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * separate transaction. Because deleting records is not absolutely required for the DLQ
    * processing to be completed any errors during the transaction are simply logged.
    *
+   * @param maxAgeDays maximum days to retain processed message error records
    * @param type the {@link MessageError.ClaimType} of records to delete
    * @return number of records deleted
    */
   @CanIgnoreReturnValue
   @VisibleForTesting
-  int deleteExpiredDlqRecords(MessageError.ClaimType type) {
+  int deleteExpiredDlqRecords(int maxAgeDays, MessageError.ClaimType type) {
     int deletedRecordCount;
     try {
-      deletedRecordCount = dao.deleteExpiredMessageErrors(messageErrorExpirationDays, type);
+      deletedRecordCount = dao.deleteExpiredMessageErrors(maxAgeDays, type);
       if (deletedRecordCount > 0) {
         log.info("Deleted {} expired {} claims from DLQ", deletedRecordCount, type);
       } else {

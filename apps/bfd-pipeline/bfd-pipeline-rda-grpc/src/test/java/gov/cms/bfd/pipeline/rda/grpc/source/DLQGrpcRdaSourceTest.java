@@ -29,6 +29,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,7 +78,10 @@ public class DLQGrpcRdaSourceTest {
     meters = new SimpleMeterRegistry();
     lenient().doReturn(false).when(rdaVersion).allows(anyString());
     lenient().doReturn(true).when(rdaVersion).allows(TEST_RDA_VERSION);
-    lenient().doReturn(MAX_DQL_AGE_DAYS).when(mockConfig).getMessageErrorExpirationDays();
+    lenient()
+        .doReturn(Optional.of(MAX_DQL_AGE_DAYS))
+        .when(mockConfig)
+        .getMessageErrorExpirationDays();
     lenient().doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
@@ -177,12 +181,12 @@ public class DLQGrpcRdaSourceTest {
             meters,
             claimType,
             rdaVersion,
-            MAX_DQL_AGE_DAYS,
+            Optional.of(MAX_DQL_AGE_DAYS),
             mockDao);
     doReturn(18)
         .when(mockDao)
         .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
-    assertEquals(18, source.deleteExpiredDlqRecords(MessageError.ClaimType.FISS));
+    assertEquals(18, source.deleteExpiredDlqRecords(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS));
   }
 
   /**
@@ -202,12 +206,12 @@ public class DLQGrpcRdaSourceTest {
             meters,
             claimType,
             rdaVersion,
-            MAX_DQL_AGE_DAYS,
+            Optional.of(MAX_DQL_AGE_DAYS),
             mockDao);
     doThrow(new RuntimeException("can't stop me!"))
         .when(mockDao)
         .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
-    assertEquals(0, source.deleteExpiredDlqRecords(MessageError.ClaimType.FISS));
+    assertEquals(0, source.deleteExpiredDlqRecords(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS));
   }
 
   /** Checks that the logic lambda was successfully and correctly invoked for MCS claims. */

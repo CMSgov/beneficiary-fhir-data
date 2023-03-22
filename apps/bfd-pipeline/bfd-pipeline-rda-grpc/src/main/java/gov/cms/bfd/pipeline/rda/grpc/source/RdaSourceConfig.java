@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import gov.cms.bfd.model.rda.MessageError;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import lombok.Builder;
@@ -48,6 +50,8 @@ public class RdaSourceConfig implements Serializable {
   private final Long expirationDate;
   /** The token to pass to the RDA API server to authenticate the client. */
   @Nullable private final String authenticationToken;
+  /** Maximum number of days to retain processed {@link MessageError} records in the database. */
+  @Nullable private final Integer messageErrorExpirationDays;
 
   /**
    * Specifies which type of server we want to connect to. {@code Remote} is the normal
@@ -74,6 +78,7 @@ public class RdaSourceConfig implements Serializable {
    * @param maxIdle the max idle
    * @param minIdleTimeBeforeConnectionDrop the min idle time before connection drop
    * @param authenticationToken the authentication token
+   * @param messageErrorExpirationDays days until message errors expire
    */
   @Builder
   private RdaSourceConfig(
@@ -83,7 +88,8 @@ public class RdaSourceConfig implements Serializable {
       String inProcessServerName,
       Duration maxIdle,
       @Nullable Duration minIdleTimeBeforeConnectionDrop,
-      @Nullable String authenticationToken) {
+      @Nullable String authenticationToken,
+      @Nullable Integer messageErrorExpirationDays) {
     this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
     this.host = host;
     this.port = port;
@@ -110,6 +116,7 @@ public class RdaSourceConfig implements Serializable {
       this.authenticationToken = null;
       this.expirationDate = null;
     }
+    this.messageErrorExpirationDays = messageErrorExpirationDays;
   }
 
   /**
@@ -183,8 +190,8 @@ public class RdaSourceConfig implements Serializable {
    *
    * @return max age for processed records
    */
-  public int getMessageErrorExpirationDays() {
-    return 100;
+  public Optional<Integer> getMessageErrorExpirationDays() {
+    return Optional.ofNullable(messageErrorExpirationDays);
   }
 
   /**
