@@ -22,7 +22,7 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

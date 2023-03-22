@@ -3,6 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static gov.cms.bfd.model.rda.MessageError.Status.OBSOLETE;
 import static gov.cms.bfd.model.rda.MessageError.Status.RESOLVED;
 import static gov.cms.bfd.model.rda.MessageError.Status.UNRESOLVED;
+import static gov.cms.bfd.pipeline.rda.grpc.source.TransformerTestUtils.assertContentsHaveSamePropertyValues;
+import static gov.cms.bfd.pipeline.rda.grpc.source.TransformerTestUtils.assertObjectsHaveSamePropertyValues;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,13 +14,20 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link DLQDaoIT}. */
 public class DLQDaoIT {
+  /**
+   * Primary key comparator used to sort {@link MessageError} objects when comparing actual and
+   * expected lists of errors.
+   */
+  private static final Comparator<MessageError> ComparatorForSorting =
+      Comparator.comparing(MessageError::getSequenceNumber)
+          .thenComparing(MessageError::getClaimType);
+
   /** Fixed clock for predictable times. */
   private final Clock clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
   /** Expected type for all tests. */
@@ -29,6 +38,48 @@ public class DLQDaoIT {
   private final int maxAgeDays = 100;
   /** Precomputed value for threshold of record expiration. */
   private final Instant oldestUpdateDateToKeep = clock.instant().minus(maxAgeDays, ChronoUnit.DAYS);
+
+  /**
+   * Verifies that basic insert, read, and delete operations work properly since they are used in
+   * other tests.
+   *
+   * @throws Exception pass through
+   */
+  @Test
+  void testBasicOperations() throws Exception {
+    long seqNo = 0;
+    final var record1 = createRecord(++seqNo, claimType, UNRESOLVED, -1);
+    final var record2 = createRecord(++seqNo, claimType, UNRESOLVED, -1);
+    final var record3 = createRecord(++seqNo, ignoredClaimType, UNRESOLVED, -1);
+
+    final var allRecords = List.of(record1, record2, record3);
+
+    RdaPipelineTestUtils.runTestWithTemporaryDb(
+        DLQDaoIT.class,
+        clock,
+        (appState, transactionManager) -> {
+          try (var dao = new DLQDao(clock, transactionManager)) {
+            try {
+              dao.insertMessageErrors(allRecords);
+
+              // verify we can read records one at a time
+              for (MessageError record : allRecords) {
+                var recordInDb = dao.readRecord(record.getSequenceNumber(), record.getClaimType());
+                assertTrue(recordInDb.isPresent());
+                assertObjectsHaveSamePropertyValues(record, recordInDb.get());
+              }
+
+              // verify we can read all records at once
+              assertContentsHaveSamePropertyValues(
+                  allRecords, dao.readAllMessageErrors(), ComparatorForSorting);
+            } finally {
+              // clean up database and ensure we deleted everything
+              dao.deleteAllMessageErrors();
+              assertTrue(dao.readAllMessageErrors().isEmpty());
+            }
+          }
+        });
+  }
 
   /** Verifies that records are correctly found by type and status. */
   @Test
@@ -48,12 +99,14 @@ public class DLQDaoIT {
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
             try {
+
               dao.insertMessageErrors(allRecordsBefore);
 
               // we know there should be some matching records
               final var actualMatches =
                   dao.findAllMessageErrorsByClaimTypeAndStatus(claimType, UNRESOLVED);
-              assertEquals(createKeysSet(expectedMatches), createKeysSet(actualMatches));
+              assertContentsHaveSamePropertyValues(
+                  expectedMatches, actualMatches, ComparatorForSorting);
 
               // we did not insert anything matching this combination
               var noMatches = dao.findAllMessageErrorsByClaimTypeAndStatus(claimType, RESOLVED);
@@ -81,6 +134,11 @@ public class DLQDaoIT {
     final var wrongSeqSameTypeRecord = createRecord(2, claimType, UNRESOLVED, 1);
     final var allRecordsBefore =
         List.of(recordToUpdate, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
+
+    final var updatedRecord =
+        recordToUpdate.toBuilder().status(RESOLVED).updatedDate(clock.instant()).build();
+    final var allRecordsAfter =
+        List.of(updatedRecord, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         DLQDaoIT.class,
@@ -111,8 +169,8 @@ public class DLQDaoIT {
                     // the update date should have been updated
                     assertEquals(clock.instant(), rec.getUpdatedDate());
                   });
-              assertTrue(remainingRecords.contains(wrongSeqSameTypeRecord));
-              assertTrue(remainingRecords.contains(sameSeqNoWrongTypeRecord));
+              assertContentsHaveSamePropertyValues(
+                  allRecordsAfter, remainingRecords, ComparatorForSorting);
             } finally {
               dao.deleteAllMessageErrors();
             }
@@ -170,7 +228,8 @@ public class DLQDaoIT {
               // verify we deleted as many records as expected
               assertEquals(2, deletedCount);
               // verify only the expected records remain in the database
-              assertEquals(createKeysSet(allRecordsAfter), createKeysSet(remainingRecords));
+              assertContentsHaveSamePropertyValues(
+                  allRecordsAfter, remainingRecords, ComparatorForSorting);
             } finally {
               dao.deleteAllMessageErrors();
             }
@@ -208,16 +267,5 @@ public class DLQDaoIT {
         .errors("")
         .message("")
         .build();
-  }
-
-  /**
-   * Turn a list of {@link MessageError} objects into a {@link Set} containing just their primary
-   * keys. Used for existence checks to ensure database contains an exact set of records.
-   *
-   * @param records records to convert to keys
-   * @return the converted keys
-   */
-  private Set<MessageError.PK> createKeysSet(List<MessageError> records) {
-    return records.stream().map(MessageError::getPK).collect(Collectors.toUnmodifiableSet());
   }
 }
