@@ -34,6 +34,13 @@ message FissClaim {
   // specific claims, and differentiates between claims for the same beneficiary.
   string dcn = 1;
 
+  // Claim Key:
+  //
+  // The claim key is simply a concatenation of the DCN and the INTERMEDIARY-NB fields. By itself, The DCN
+  // is not guaranteed to be a globally unique number, so it is combined with the INTERMEDIARY-NB to ensure
+  // uniqueness across different contractor workloads.
+  string rda_claim_key = 112;
+
   // Health Insurance Claim Number:
   //
   // Identifies the beneficiary number associated with a claim record, as assigned by CMS.
@@ -349,12 +356,17 @@ message FissClaim {
     string clm_typ_ind_unrecognized = 109;
   };
 
-
   // Adjustment Medicare Beneficiary Identifier
   optional string adj_mbi = 100;
 
   // Medical Record Number
   optional string medical_record_no = 101;
+
+  // Intermediary Number
+  //
+  // This field identifies the identification number of the fiscal intermediary as
+  // designated by the Centers for Medicare and Medicaid Services (CMS).
+  string intermediary_nb = 113;
 
   // FISS Procedure Codes
   repeated FissProcedureCode fiss_proc_codes = 28;

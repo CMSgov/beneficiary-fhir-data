@@ -40,14 +40,12 @@ import org.junit.jupiter.api.Test;
 
 /** Integration test for the {@link StandardGrpcRdaSource}. */
 public class StandardGrpcRdaSourceIT {
-
-  /** Arbitrary RDA API version to use for testing. */
-  private static final String ARBITRARY_RDA_VERSION = "0.0.1";
-
   /** Example paid claim. */
   private static final String SOURCE_CLAIM_1 =
       "{"
+          + "  \"rdaClaimKey\": \"63843470id\","
           + "  \"dcn\": \"63843470\","
+          + "  \"intermediaryNb\": \"53412\","
           + "  \"hicNo\": \"916689703543\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
@@ -85,7 +83,9 @@ public class StandardGrpcRdaSourceIT {
   /** Example rejected claim. */
   private static final String SOURCE_CLAIM_2 =
       "{"
+          + "  \"rdaClaimKey\": \"2643602id\","
           + "  \"dcn\": \"2643602\","
+          + "  \"intermediaryNb\": \"24153\","
           + "  \"hicNo\": \"640930211775\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
@@ -122,10 +122,10 @@ public class StandardGrpcRdaSourceIT {
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
           + "  \"apiSource\" : \""
-          + ARBITRARY_RDA_VERSION
+          + RdaService.RDA_PROTO_VERSION
           + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
-          + "  \"claimId\" : \"63843470\",\n"
+          + "  \"claimId\" : \"63843470id\",\n"
           + "  \"clmTypInd\" : \"1\",\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
@@ -134,6 +134,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"dcn\" : \"63843470\",\n"
           + "  \"diagCodes\" : [ ],\n"
           + "  \"hicNo\" : \"916689703543\",\n"
+          + "  \"intermediaryNb\" : \"53412\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "  \"mbi\" : \"c1ihk7q0g3i\",\n"
           + "  \"mbiHash\" : \"c3b21bb6fef6e8af99a175e53b20893048dc2cd9f566a4930d8c1e6f8a30822d\",\n"
@@ -145,26 +146,26 @@ public class StandardGrpcRdaSourceIT {
           + "  \"payers\" : [ ],\n"
           + "  \"principleDiag\" : \"uec\",\n"
           + "  \"procCodes\" : [ {\n"
-          + "    \"claimId\" : \"63843470\",\n"
-          + "    \"procCode\" : \"egkkkw\",\n"
-          + "    \"procDate\" : \"2021-02-03\",\n"
-          + "    \"procFlag\" : \"hsw\",\n"
-          + "    \"rdaPosition\" : 2\n"
-          + "  }, {\n"
-          + "    \"claimId\" : \"63843470\",\n"
-          + "    \"procCode\" : \"uec\",\n"
-          + "    \"procFlag\" : \"nli\",\n"
-          + "    \"rdaPosition\" : 1\n"
-          + "  }, {\n"
-          + "    \"claimId\" : \"63843470\",\n"
+          + "    \"claimId\" : \"63843470id\",\n"
           + "    \"procCode\" : \"ods\",\n"
           + "    \"procDate\" : \"2021-01-03\",\n"
           + "    \"rdaPosition\" : 4\n"
           + "  }, {\n"
-          + "    \"claimId\" : \"63843470\",\n"
+          + "    \"claimId\" : \"63843470id\",\n"
+          + "    \"procCode\" : \"uec\",\n"
+          + "    \"procFlag\" : \"nli\",\n"
+          + "    \"rdaPosition\" : 1\n"
+          + "  }, {\n"
+          + "    \"claimId\" : \"63843470id\",\n"
           + "    \"procCode\" : \"zhaj\",\n"
           + "    \"procDate\" : \"2021-01-07\",\n"
           + "    \"rdaPosition\" : 3\n"
+          + "  }, {\n"
+          + "    \"claimId\" : \"63843470id\",\n"
+          + "    \"procCode\" : \"egkkkw\",\n"
+          + "    \"procDate\" : \"2021-02-03\",\n"
+          + "    \"procFlag\" : \"hsw\",\n"
+          + "    \"rdaPosition\" : 2\n"
           + "  } ],\n"
           + "  \"revenueLines\" : [ ],\n"
           + "  \"sequenceNumber\" : 0,\n"
@@ -174,10 +175,10 @@ public class StandardGrpcRdaSourceIT {
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
           + "  \"apiSource\" : \""
-          + ARBITRARY_RDA_VERSION
+          + RdaService.RDA_PROTO_VERSION
           + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
-          + "  \"claimId\" : \"2643602\",\n"
+          + "  \"claimId\" : \"2643602id\",\n"
           + "  \"clmTypInd\" : \"3\",\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
@@ -187,6 +188,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"diagCodes\" : [ ],\n"
           + "  \"fedTaxNumber\" : \"2845244764\",\n"
           + "  \"hicNo\" : \"640930211775\",\n"
+          + "  \"intermediaryNb\" : \"24153\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "  \"mbi\" : \"0vtc7u321x0\",\n"
           + "  \"mbiHash\" : \"b30cb27025eceae66fcedf88c3c2a8631381f1ffc26fcc9d46271038dae58721\",\n"
@@ -198,17 +200,17 @@ public class StandardGrpcRdaSourceIT {
           + "  \"payers\" : [ ],\n"
           + "  \"principleDiag\" : \"egnj\",\n"
           + "  \"procCodes\" : [ {\n"
-          + "    \"claimId\" : \"2643602\",\n"
-          + "    \"procCode\" : \"vvqtwoz\",\n"
-          + "    \"procDate\" : \"2021-04-29\",\n"
-          + "    \"rdaPosition\" : 2\n"
-          + "  }, {\n"
-          + "    \"claimId\" : \"2643602\",\n"
+          + "    \"claimId\" : \"2643602id\",\n"
           + "    \"procCode\" : \"egnj\",\n"
           + "    \"procDate\" : \"2021-05-13\",\n"
           + "    \"rdaPosition\" : 1\n"
           + "  }, {\n"
-          + "    \"claimId\" : \"2643602\",\n"
+          + "    \"claimId\" : \"2643602id\",\n"
+          + "    \"procCode\" : \"vvqtwoz\",\n"
+          + "    \"procDate\" : \"2021-04-29\",\n"
+          + "    \"rdaPosition\" : 2\n"
+          + "  }, {\n"
+          + "    \"claimId\" : \"2643602id\",\n"
           + "    \"procCode\" : \"fipyd\",\n"
           + "    \"procFlag\" : \"g\",\n"
           + "    \"rdaPosition\" : 3\n"
@@ -244,7 +246,7 @@ public class StandardGrpcRdaSourceIT {
   public void setUp() throws Exception {
     appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
-    rdaVersion = RdaVersion.builder().versionString("~" + ARBITRARY_RDA_VERSION).build();
+    rdaVersion = RdaVersion.builder().versionString("~" + RdaService.RDA_PROTO_VERSION).build();
   }
 
   /**
@@ -328,7 +330,9 @@ public class StandardGrpcRdaSourceIT {
     } catch (Exception e) {
       assertEquals(e.getCause().getClass(), IllegalStateException.class);
       assertEquals(
-          e.getCause().getMessage(), "Can not ingest data from API running version '0.0.1'");
+          e.getCause().getMessage(),
+          String.format(
+              "Can not ingest data from API running version '%s'", RdaService.RDA_PROTO_VERSION));
     }
   }
 
@@ -400,7 +404,6 @@ public class StandardGrpcRdaSourceIT {
    */
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
-        .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
         .fissSourceFactory(
             sequenceNumber ->
                 WrappedClaimSource.wrapFissClaims(
@@ -476,7 +479,7 @@ public class StandardGrpcRdaSourceIT {
 
     @Override
     public String getClaimIdForMessage(FissClaimChange object) {
-      return object.getClaim().getDcn();
+      return object.getClaim().getRdaClaimKey();
     }
 
     /** {@inheritDoc} */

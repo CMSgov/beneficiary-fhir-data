@@ -17,6 +17,11 @@
 
 	<properties>
 		<hapi-fhir.version>6.4.0</hapi-fhir.version>
+		<!-- This is hardcoded as HSQL until we can find a
+		    fix for running integration tests with test containers.
+		    This will be taken care of in the future jira ticket BFD-2499.
+		  -->
+		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
 	</properties>
 
 	<modules>

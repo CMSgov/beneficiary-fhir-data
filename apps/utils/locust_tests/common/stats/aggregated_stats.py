@@ -26,7 +26,7 @@ class StatsCollector(object):
         self,
         locust_env: Environment,
         stats_tags: List[str],
-        running_env: StatsEnvironment = StatsEnvironment.TEST,
+        running_env: StatsEnvironment,
     ) -> None:
         """Creates a new instance of StatsCollector given the current Locust environment and a list
         of percentiles to report.
@@ -35,12 +35,12 @@ class StatsCollector(object):
             locust_env (Environment): Current Locust environment
             stats_tag (str): A string which tags the output JSON; used to distinguish between
             separate test runs
-            running_env (StatsEnvironment, optional): A StatsEnvironment enum which represents the
-            current testing environment; either TEST or PROD. Defaults to TEST.
+            running_env (StatsEnvironment): A StatsEnvironment enum which represents the
+            current testing environment; either TEST, PROD or PROD_SBX
         """
         super().__init__()
-        self.locust_env = locust_env
 
+        self.locust_env = locust_env
         self.stats_tags = stats_tags
         self.running_env = running_env
 

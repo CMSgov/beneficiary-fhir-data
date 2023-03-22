@@ -23,6 +23,7 @@
 
 	<!-- Useful for debugging pipeline job issues if set to debug -->
 	<logger name="gov.cms.bfd.pipeline.app.PipelineManager" level="info" />
+	<logger name="gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob" level="info" />
 	<logger name="gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore" level="info" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
