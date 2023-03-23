@@ -373,17 +373,15 @@ public final class DatabaseTestUtils {
   private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
       String username, String password) {
 
-    if (container == null || !container.isRunning()) {
-      String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
-      container =
-          new PostgreSQLContainer(testContainerDatabaseImage)
-              .withDatabaseName("fhirdb")
-              .withUsername(username)
-              .withPassword(password)
-              .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
+    String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
+    container =
+        new PostgreSQLContainer(testContainerDatabaseImage)
+            .withDatabaseName("fhirdb")
+            .withUsername(username)
+            .withPassword(password)
+            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
 
-      container.start();
-    }
+    container.start();
 
     JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
     DataSource dataSource =
