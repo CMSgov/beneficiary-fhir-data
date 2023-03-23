@@ -11,7 +11,7 @@ locals {
     patient_all        = "*/fhir/Patient*"
     eob_all            = "*/fhir/ExplanationOfBenefit*"
     claim_all          = "*/fhir/Claim/*"
-    claim_resource_all = "*/fhir/ClaimResource/*"
+    claim_response_all = "*/fhir/ClaimResource/*"
   }
 
   endpoint_patterns = {
@@ -353,7 +353,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claimre
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_resource_all}\" && ",
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_per_kb = *}"
@@ -377,7 +377,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_resource_all}\" && ",
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
     "$.mdc.resources_returned_count = 0 && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
@@ -400,7 +400,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_resource_all}\" && ",
+    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
