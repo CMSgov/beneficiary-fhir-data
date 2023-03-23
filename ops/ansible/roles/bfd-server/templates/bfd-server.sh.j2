@@ -154,4 +154,5 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
   "-DbfdServer.pac.claimSourceTypes=${BFD_PAC_CLAIM_SOURCE_TYPES}" \
   "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
+  "-Dorg.jboss.logging.provider=slf4j" \
   >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
