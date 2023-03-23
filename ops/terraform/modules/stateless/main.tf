@@ -220,7 +220,7 @@ module "fhir_asg" {
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    instance_type = "c5.4xlarge"
+    instance_type = "c6i.4xlarge"
     volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
