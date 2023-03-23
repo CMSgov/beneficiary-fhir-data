@@ -39,7 +39,7 @@ abstract class AbstractRandomClaimGenerator<T> {
   private final RandomClaimGeneratorConfig config;
 
   /** The sequence number of the generated claim, which regulates randomness between claims. */
-  private int sequence;
+  private long sequence;
 
   /**
    * A path that will be used to randomly generate values.
@@ -69,8 +69,17 @@ abstract class AbstractRandomClaimGenerator<T> {
    *
    * @param sequence The sequence number to start generating claims from.
    */
-  public void setSequence(int sequence) {
+  public void setSequence(long sequence) {
     this.sequence = sequence;
+  }
+
+  /**
+   * Increments the current sequence value. Can be used to skip an arbitrary number of claims.
+   *
+   * @param delta value to add to current sequence number
+   */
+  public void incrementSequence(long delta) {
+    this.sequence += delta;
   }
 
   /**

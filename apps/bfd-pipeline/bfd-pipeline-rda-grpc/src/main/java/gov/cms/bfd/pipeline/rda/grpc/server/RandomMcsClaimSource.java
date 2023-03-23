@@ -40,13 +40,17 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
     this.maxToSend = maxToSend;
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public MessageSource<McsClaim> skip(long numberToSkip) throws Exception {
+    generator.incrementSequence(numberToSkip);
+    return this;
+  }
+
   @Override
   public boolean hasNext() {
     return sent < maxToSend;
   }
 
-  /** {@inheritDoc} */
   @Override
   public McsClaim next() {
     if (sent >= maxToSend) {
@@ -56,7 +60,6 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
     return generator.randomClaim();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() {}
 

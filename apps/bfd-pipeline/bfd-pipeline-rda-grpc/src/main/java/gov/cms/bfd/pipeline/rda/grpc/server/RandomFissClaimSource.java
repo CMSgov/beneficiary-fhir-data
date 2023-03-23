@@ -40,13 +40,17 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
     this.maxToSend = maxToSend;
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public MessageSource<FissClaim> skip(long numberToSkip) throws Exception {
+    generator.incrementSequence(numberToSkip);
+    return this;
+  }
+
   @Override
   public boolean hasNext() {
     return sent < maxToSend;
   }
 
-  /** {@inheritDoc} */
   @Override
   public FissClaim next() {
     if (sent >= maxToSend) {
@@ -56,7 +60,6 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
     return generator.randomClaim();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() {}
 
