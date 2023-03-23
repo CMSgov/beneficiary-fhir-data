@@ -156,7 +156,12 @@ class AbstractRandomClaimGeneratorTest {
      * @param clock the clock for timestamps
      */
     TestGenerator(long seed, boolean optionalOverride, Clock clock) {
-      super(seed, optionalOverride, clock);
+      super(
+          RandomClaimGeneratorConfig.builder()
+              .seed(seed)
+              .optionalOverride(optionalOverride)
+              .clock(clock)
+              .build());
     }
 
     /**

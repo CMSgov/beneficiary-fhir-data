@@ -23,7 +23,13 @@ public class RandomMcsClaimGeneratorTest {
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
     final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
-    final RandomMcsClaimGenerator generator = new RandomMcsClaimGenerator(1, true, july1);
+    final RandomMcsClaimGenerator generator =
+        new RandomMcsClaimGenerator(
+            RandomClaimGeneratorConfig.builder()
+                .seed(1)
+                .optionalOverride(true)
+                .clock(july1)
+                .build());
     final McsClaim claim = generator.randomClaim();
     final String json = JsonFormat.printer().print(claim);
     assertEquals(claim.getIdrDtlCnt(), claim.getMcsDetailsList().size());

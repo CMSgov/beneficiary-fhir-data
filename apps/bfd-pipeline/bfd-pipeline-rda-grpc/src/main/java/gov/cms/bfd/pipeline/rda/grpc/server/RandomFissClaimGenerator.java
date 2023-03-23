@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode;
 import gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator;
@@ -33,7 +32,6 @@ import gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation;
 import gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissRevenueLine;
 import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
-import java.time.Clock;
 import java.util.List;
 
 /**
@@ -140,20 +138,16 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
    * @param seed seed for the PRNG
    */
   public RandomFissClaimGenerator(long seed) {
-    super(seed, false, Clock.systemUTC());
+    this(RandomClaimGeneratorConfig.builder().seed(seed).build());
   }
 
   /**
-   * Creates an instance for use in unit tests. Setting optionalOverride to true causes all optional
-   * fields to be added to the claim. This is useful in some tests.
+   * Creates an instance with the specified settings.
    *
-   * @param seed seed for the PRNG
-   * @param optionalOverride true if all optional fields should be populated
-   * @param clock the clock
+   * @param config configuration settings
    */
-  @VisibleForTesting
-  RandomFissClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    super(seed, optionalOverride, clock);
+  RandomFissClaimGenerator(RandomClaimGeneratorConfig config) {
+    super(config);
   }
 
   /** {@inheritDoc} */

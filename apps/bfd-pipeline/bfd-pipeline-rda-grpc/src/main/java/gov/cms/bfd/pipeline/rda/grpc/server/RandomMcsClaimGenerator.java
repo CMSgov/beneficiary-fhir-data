@@ -23,7 +23,6 @@ import gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService;
 import gov.cms.mpsm.rda.v1.mcs.McsTypeOfService;
-import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -113,19 +112,16 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
    * @param seed seed for the PRNG
    */
   public RandomMcsClaimGenerator(long seed) {
-    super(seed, false, Clock.systemUTC());
+    this(RandomClaimGeneratorConfig.builder().seed(seed).build());
   }
 
   /**
-   * Creates an instance for use in unit tests. Setting optionalOverride to true causes all optional
-   * fields to be added to the claim. This is useful in some tests.
+   * Creates an instance with the specified settings.
    *
-   * @param seed seed for the PRNG
-   * @param optionalOverride true if all optional fields should be populated
-   * @param clock clock to generate current time/date values (needed for tests)
+   * @param config configuration settings
    */
-  public RandomMcsClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    super(seed, optionalOverride, clock);
+  public RandomMcsClaimGenerator(RandomClaimGeneratorConfig config) {
+    super(config);
   }
 
   /** {@inheritDoc} */

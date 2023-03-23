@@ -23,7 +23,13 @@ public class RandomFissClaimGeneratorTest {
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
     final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
-    final RandomFissClaimGenerator generator = new RandomFissClaimGenerator(1, true, july1);
+    final RandomFissClaimGenerator generator =
+        new RandomFissClaimGenerator(
+            RandomClaimGeneratorConfig.builder()
+                .seed(1)
+                .optionalOverride(true)
+                .clock(july1)
+                .build());
     final FissClaim claim = generator.randomClaim();
     final String json = JsonFormat.printer().print(claim);
     assertEquals(

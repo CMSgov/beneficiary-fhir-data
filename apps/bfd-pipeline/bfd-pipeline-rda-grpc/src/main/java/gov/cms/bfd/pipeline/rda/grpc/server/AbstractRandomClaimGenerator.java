@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
  * <p>To keep the randomly generated values stable, each field should be set using it's own path,
  * defined by the propertyName of {@link #always(String, Runnable)}, {@link #optional(String,
  * Runnable)}, {@link #oneOf(String, Runnable...)}, and {@link #optionalOneOf(String, Runnable...)}.
- * The {@link Random} object is specific to each field path and is seeded using the {@link #seed},
- * {@link #sequence}, and currently stored {@link #path}.
+ * The {@link Random} object is specific to each field path and is seeded using the {@link
+ * RandomClaimGeneratorConfig#seed}, {@link #sequence}, and currently stored {@link #path}.
  *
  * @param <T> The type of claim this generate generates.
  */
@@ -35,16 +35,8 @@ abstract class AbstractRandomClaimGenerator<T> {
   /** The maximum number of days in the past that a random date value can be generated for. */
   private static final int MAX_DAYS_AGO = 180;
 
-  /** The base seed value used for all generated random values. */
-  private final long seed;
-
-  /**
-   * Denotes if all {@link #optional(String, Runnable)} or {@link #optionalOneOf(String,
-   * Runnable...)} should be executed regardless of random results.
-   */
-  private final boolean optionalOverride;
-  /** The {@link Clock} object to use with generating time based values. */
-  private final Clock clock;
+  /** Our configuration settings. */
+  private final RandomClaimGeneratorConfig config;
 
   /** The sequence number of the generated claim, which regulates randomness between claims. */
   private int sequence;
@@ -53,22 +45,19 @@ abstract class AbstractRandomClaimGenerator<T> {
    * A path that will be used to randomly generate values.
    *
    * <p>The path should be updated for each value being generated, ensuring each field has a
-   * different random, but stable, value. The path is used along with the {@link #seed} and {@link
-   * #sequence} to seed the {@link Random} object used to generate field values.
+   * different random, but stable, value. The path is used along with the {@link
+   * RandomClaimGeneratorConfig#seed} and {@link #sequence} to seed the {@link Random} object used
+   * to generate field values.
    */
   private final Stack<String> path;
 
   /**
    * Constructs an instance.
    *
-   * @param seed numeric seed value for the PRNG
-   * @param optionalOverride when true optionals will always be generated (used for tests)
-   * @param clock Clock to generate current time/date values (needed for tests)
+   * @param config configuration settings
    */
-  AbstractRandomClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    this.seed = seed;
-    this.optionalOverride = optionalOverride;
-    this.clock = clock;
+  AbstractRandomClaimGenerator(RandomClaimGeneratorConfig config) {
+    this.config = config;
     this.sequence = 0;
     this.path = new Stack<>();
   }
@@ -177,7 +166,8 @@ abstract class AbstractRandomClaimGenerator<T> {
    */
   protected String randomDate() {
     RandomValueContext ctx = createContext();
-    final LocalDate date = LocalDate.now(clock).minusDays(ctx.randomInteger(MAX_DAYS_AGO));
+    final LocalDate date =
+        LocalDate.now(config.getClock()).minusDays(ctx.randomInteger(MAX_DAYS_AGO));
     return date.toString();
   }
 
@@ -204,8 +194,8 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
-   * Creates a {@link RandomValueContext} using the current {@link #seed}, {@link #sequence}, and
-   * {@link #path} attributes that can be used to generate random values.
+   * Creates a {@link RandomValueContext} using the current {@link RandomClaimGeneratorConfig#seed},
+   * {@link #sequence}, and {@link #path} attributes that can be used to generate random values.
    *
    * @return The created {@link RandomValueContext}.
    */
@@ -214,8 +204,8 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
-   * Creates a {@link RandomValueContext} using the current {@link #seed}, {@link #sequence}, and
-   * {@link #path} attributes that can be used to generate random values.
+   * Creates a {@link RandomValueContext} using the current {@link RandomClaimGeneratorConfig#seed},
+   * {@link #sequence}, and {@link #path} attributes that can be used to generate random values.
    *
    * @param prefix An optional (nullable) prefix that can be used for accessory random values, such
    *     as determining if an optional() value should be added.
@@ -225,7 +215,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     String prefixString = prefix != null && !prefix.isBlank() ? prefix + "." : "";
     String propertyPath =
         prefixString + path.stream().filter(Objects::nonNull).collect(Collectors.joining("."));
-    return new RandomValueContext(seed + sequence + propertyPath.hashCode());
+    return new RandomValueContext(config.getSeed() + sequence + propertyPath.hashCode());
   }
 
   /**
@@ -278,7 +268,7 @@ abstract class AbstractRandomClaimGenerator<T> {
 
     boolean shouldRun = createContext("Optional").randomBoolean();
 
-    if (optionalOverride || shouldRun) {
+    if (config.isOptionalOverride() || shouldRun) {
       action.run();
     }
 
@@ -326,7 +316,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     boolean shouldRun = createContext("Optional").randomBoolean();
     final int index = createContext("OneOf").randomInteger(actions.length);
 
-    if (optionalOverride || shouldRun) {
+    if (config.isOptionalOverride() || shouldRun) {
       actions[index].run();
     }
 
@@ -339,7 +329,7 @@ abstract class AbstractRandomClaimGenerator<T> {
    * @return A reference to the internal {@link Clock} used by this instance.
    */
   protected Clock getClock() {
-    return clock;
+    return config.getClock();
   }
 
   /**

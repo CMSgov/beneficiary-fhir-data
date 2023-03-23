@@ -4,6 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -62,8 +63,8 @@ public class RdaServerApp {
   private static class Config {
     /** The port to use for the RDI Server. */
     private final int port;
-    /** The seed value for the RDI Server. */
-    private final long seed;
+    /** The {@link RandomClaimGeneratorConfig} to use for random claim generation. */
+    private final RandomClaimGeneratorConfig randomClaimConfig;
     /** The max number to send for the RDI Server. */
     private final int maxToSend;
 
@@ -84,7 +85,10 @@ public class RdaServerApp {
       final ConfigLoader config =
           ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
       port = config.intValue("port", 5003);
-      seed = config.longOption("seed").orElseGet(System::currentTimeMillis);
+      randomClaimConfig =
+          RandomClaimGeneratorConfig.builder()
+              .seed(config.longOption("seed").orElseGet(System::currentTimeMillis))
+              .build();
       maxToSend = config.intValue("maxToSend", 5_000);
       fissClaimFile = config.readableFileOption("fissFile").orElse(null);
       mcsClaimFile = config.readableFileOption("mcsFile").orElse(null);
@@ -150,8 +154,10 @@ public class RdaServerApp {
         LOGGER.info(
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
-            seed);
-        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
+            randomClaimConfig.getSeed());
+        return new RandomFissClaimSource(randomClaimConfig, maxToSend)
+            .toClaimChanges()
+            .skip(sequenceNumber);
       }
     }
 
@@ -179,8 +185,10 @@ public class RdaServerApp {
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
-            seed);
-        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
+            randomClaimConfig.getSeed());
+        return new RandomMcsClaimSource(randomClaimConfig, maxToSend)
+            .toClaimChanges()
+            .skip(sequenceNumber);
       }
     }
   }

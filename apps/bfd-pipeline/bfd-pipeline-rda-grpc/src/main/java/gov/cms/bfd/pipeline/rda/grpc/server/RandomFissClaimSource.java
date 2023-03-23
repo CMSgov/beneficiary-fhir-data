@@ -18,13 +18,23 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
   private int sent;
 
   /**
-   * Instantiates a new {@link RandomFissClaimSource}.
+   * Creates a new instance.
    *
    * @param seed the seed for randomization
    * @param maxToSend the max number of claims to send
    */
   public RandomFissClaimSource(long seed, int maxToSend) {
-    generator = new RandomFissClaimGenerator(seed);
+    this(RandomClaimGeneratorConfig.builder().seed(seed).build(), maxToSend);
+  }
+
+  /**
+   * Creates a new instance.
+   *
+   * @param config the random generator configuration
+   * @param maxToSend the max number of claims to send
+   */
+  public RandomFissClaimSource(RandomClaimGeneratorConfig config, int maxToSend) {
+    generator = new RandomFissClaimGenerator(config);
     sent = 0;
     generator.setSequence(sent);
     this.maxToSend = maxToSend;
