@@ -110,7 +110,7 @@ public class DatabaseTestSchemaManager {
    * @return the {@link Map} of key-value replacements to use for {@link
    *     FluentConfiguration#placeholders(Map)}
    */
-  private static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
+  public static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
     Map<String, String> placeholders = new HashMap<>();
     try (Connection connection = dataSource.getConnection()) {
       if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {

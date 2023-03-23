@@ -442,6 +442,7 @@ public final class DatabaseTestUtils {
             .baselineVersion("0")
             .connectRetries(2)
             .cleanDisabled(false)
+            .placeholders(DatabaseTestSchemaManager.createScriptPlaceholdersMap(unpooledDataSource))
             .load();
     LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
     flyway.clean();
