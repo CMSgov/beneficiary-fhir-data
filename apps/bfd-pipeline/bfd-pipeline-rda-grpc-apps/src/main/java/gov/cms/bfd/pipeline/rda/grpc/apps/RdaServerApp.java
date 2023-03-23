@@ -27,7 +27,20 @@ import org.slf4j.LoggerFactory;
  * 5003.
  */
 public class RdaServerApp {
+  /** Used for logging. */
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaServerApp.class);
+
+  /**
+   * Adjustment applied to {@link RandomClaimGeneratorConfig#randomErrorSeed} for FISS claims so
+   * that FISS and MCS jobs use a different seed.
+   */
+  private static final int FISS_RANDOM_ERROR_SEED_DELTA = 12345;
+
+  /**
+   * Adjustment applied to {@link RandomClaimGeneratorConfig#randomErrorSeed} for MCS claims so that
+   * FISS and MCS jobs use a different seed.
+   */
+  private static final int MCS_RANDOM_ERROR_SEED_DELTA = 67890;
 
   /**
    * Starts a RDA API server listening on localhost at a specific port. Configuration is controlled
@@ -87,7 +100,8 @@ public class RdaServerApp {
       port = config.intValue("port", 5003);
       randomClaimConfig =
           RandomClaimGeneratorConfig.builder()
-              .seed(config.longOption("seed").orElseGet(System::currentTimeMillis))
+              .seed(config.longOption("random.seed").orElseGet(System::currentTimeMillis))
+              .randomErrorRate(config.intOption("random.errorRate").orElse(0))
               .build();
       maxToSend = config.intValue("maxToSend", 5_000);
       fissClaimFile = config.readableFileOption("fissFile").orElse(null);
@@ -155,7 +169,8 @@ public class RdaServerApp {
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
             randomClaimConfig.getSeed());
-        return new RandomFissClaimSource(randomClaimConfig, maxToSend)
+        final var adjustedConfig = adjustErrorSeed(FISS_RANDOM_ERROR_SEED_DELTA);
+        return new RandomFissClaimSource(adjustedConfig, maxToSend)
             .toClaimChanges()
             .skip(sequenceNumber);
       }
@@ -186,10 +201,24 @@ public class RdaServerApp {
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             randomClaimConfig.getSeed());
-        return new RandomMcsClaimSource(randomClaimConfig, maxToSend)
+        final var adjustedConfig = adjustErrorSeed(MCS_RANDOM_ERROR_SEED_DELTA);
+        return new RandomMcsClaimSource(adjustedConfig, maxToSend)
             .toClaimChanges()
             .skip(sequenceNumber);
       }
+    }
+
+    /**
+     * Add a small number to the configured random error seed so that different claim types will not
+     * generate errors on the exact same sequence number.
+     *
+     * @param delta amount to add to configured seed
+     * @return config with the modified seed value
+     */
+    private RandomClaimGeneratorConfig adjustErrorSeed(int delta) {
+      final var oldSeed = randomClaimConfig.getRandomErrorSeed();
+      final var adjustedSeed = oldSeed + delta;
+      return randomClaimConfig.toBuilder().randomErrorSeed(adjustedSeed).build();
     }
   }
 }

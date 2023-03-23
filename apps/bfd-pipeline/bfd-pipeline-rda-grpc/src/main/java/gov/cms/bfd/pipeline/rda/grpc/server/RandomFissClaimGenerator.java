@@ -150,7 +150,6 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
     super(config);
   }
 
-  /** {@inheritDoc} */
   @Override
   public FissClaim createRandomClaim() {
     FissClaim.Builder claim = FissClaim.newBuilder();
@@ -163,8 +162,24 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
           addRandomPayers(claim);
           addRandomAudits(claim);
           addRandomRevenueLines(claim);
+          if (shouldInsertErrorIntoCurrentClaim()) {
+            addErrorToClaim(claim);
+          }
         });
     return claim.build();
+  }
+
+  /**
+   * Sets a randomly chosen field to an invalid value to ensure that a transformation error will be
+   * generated downstream.
+   *
+   * @param claim the claim to modify
+   */
+  private void addErrorToClaim(FissClaim.Builder claim) {
+    oneOf(
+        "random-error",
+        () -> claim.setDcn(randomDigit(50, 50)),
+        () -> claim.setIntermediaryNb(randomDigit(10, 10)));
   }
 
   /**

@@ -124,7 +124,6 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     super(config);
   }
 
-  /** {@inheritDoc} */
   @Override
   public McsClaim createRandomClaim() {
     final int detailCount = 1 + randomInt(MAX_DETAILS);
@@ -143,9 +142,24 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
           addDetails(claim, detailCount);
           addLocations(claim);
           adjustServiceDatesFromDetails(claim);
+          if (shouldInsertErrorIntoCurrentClaim()) {
+            addErrorToClaim(claim);
+          }
         });
-
     return claim.build();
+  }
+
+  /**
+   * Sets a randomly chosen field to an invalid value to ensure that a transformation error will be
+   * generated downstream.
+   *
+   * @param claim the claim to modify
+   */
+  private void addErrorToClaim(McsClaim.Builder claim) {
+    oneOf(
+        "random-error",
+        () -> claim.setIdrContrId(randomDigit(20, 20)),
+        () -> claim.setIdrHic(randomDigit(20, 20)));
   }
 
   /**

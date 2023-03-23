@@ -42,6 +42,7 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
 
   @Override
   public MessageSource<McsClaim> skip(long numberToSkip) throws Exception {
+    sent += numberToSkip;
     generator.incrementSequence(numberToSkip);
     return this;
   }

@@ -23,4 +23,16 @@ public class RandomClaimGeneratorConfig {
 
   /** The {@link Clock} object to use with generating time based values. */
   @Builder.Default private final Clock clock = Clock.systemUTC();
+
+  /**
+   * When positive this number indicates that roughly one claim in this number of claims should
+   * contain a randomly inserted transformation error.
+   */
+  private final int randomErrorRate;
+
+  /**
+   * Seed for separate random number generator used in conjunction with {@link #randomErrorRate} to
+   * decide when to randomly insert a transformation error into claims.
+   */
+  @Builder.Default private final long randomErrorSeed = System.currentTimeMillis();
 }

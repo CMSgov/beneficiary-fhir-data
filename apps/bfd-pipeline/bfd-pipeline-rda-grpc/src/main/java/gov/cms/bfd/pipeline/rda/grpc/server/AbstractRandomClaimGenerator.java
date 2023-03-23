@@ -38,6 +38,12 @@ abstract class AbstractRandomClaimGenerator<T> {
   /** Our configuration settings. */
   private final RandomClaimGeneratorConfig config;
 
+  /**
+   * Plain {@link Random} used to generate random number for deciding whether to insert an invalid
+   * field into a generated claim.
+   */
+  private final Random errorGenerationRandom;
+
   /** The sequence number of the generated claim, which regulates randomness between claims. */
   private long sequence;
 
@@ -58,8 +64,9 @@ abstract class AbstractRandomClaimGenerator<T> {
    */
   AbstractRandomClaimGenerator(RandomClaimGeneratorConfig config) {
     this.config = config;
-    this.sequence = 0;
-    this.path = new Stack<>();
+    errorGenerationRandom = new Random(config.getRandomErrorSeed());
+    sequence = 0;
+    path = new Stack<>();
   }
 
   /**
@@ -79,7 +86,7 @@ abstract class AbstractRandomClaimGenerator<T> {
    * @param delta value to add to current sequence number
    */
   public void incrementSequence(long delta) {
-    this.sequence += delta;
+    sequence += delta;
   }
 
   /**
@@ -107,6 +114,17 @@ abstract class AbstractRandomClaimGenerator<T> {
    * @return the claim type
    */
   public abstract T createRandomClaim();
+
+  /**
+   * Determines whether or not the currently generated claim should have a transformation error
+   * added to it. Used by derived classes to insert claim specific invalid fields.
+   *
+   * @return true if current claim should have a transformation error added to it
+   */
+  protected boolean shouldInsertErrorIntoCurrentClaim() {
+    return config.getRandomErrorRate() > 0
+        && errorGenerationRandom.nextInt(config.getRandomErrorRate()) == 0;
+  }
 
   /**
    * RDA API enums always define a special value that the protobuf API intends as a special

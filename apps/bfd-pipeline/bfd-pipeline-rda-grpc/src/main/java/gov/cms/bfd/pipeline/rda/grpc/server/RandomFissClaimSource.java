@@ -42,6 +42,7 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
 
   @Override
   public MessageSource<FissClaim> skip(long numberToSkip) throws Exception {
+    sent += numberToSkip;
     generator.incrementSequence(numberToSkip);
     return this;
   }
