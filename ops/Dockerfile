@@ -1,5 +1,5 @@
 # declaring flyway as a COPY source in al2 image
-FROM flyway/flyway:8 as flyway
+FROM flyway/flyway:9 as flyway
 RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.placeholders.type.text=text >> /flyway/conf/flyway.conf \
     && echo flyway.placeholders.logic.tablespaces-escape=-- >> /flyway/conf/flyway.conf \
@@ -20,7 +20,10 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.schemas=public >> /flyway/conf/flyway.conf \
     && echo flyway.url=jdbc:postgresql://db:5432/fhirdb >> /flyway/conf/flyway.conf \
     && echo flyway.password=bfd >> /flyway/conf/flyway.conf \
-    && echo flyway.user=bfd >> /flyway/conf/flyway.conf
+    && echo flyway.user=bfd >> /flyway/conf/flyway.conf \
+    && echo flyway.baselineOnMigrate=true >> /flyway/conf/flyway.conf \
+    && echo flyway.baselineVersion=0 >> /flyway/conf/flyway.conf \
+    && echo flyway.postgresql.transactional.lock=false >> /flyway/conf/flyway.conf
 
 FROM amazonlinux:2 as al2
 ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz"
