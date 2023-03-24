@@ -97,11 +97,16 @@ public class RdaServerApp {
     private Config(String[] args) throws Exception {
       final ConfigLoader config =
           ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
+      final var defaultRandomSeed = System.currentTimeMillis();
       port = config.intValue("port", 5003);
       randomClaimConfig =
           RandomClaimGeneratorConfig.builder()
-              .seed(config.longOption("random.seed").orElseGet(System::currentTimeMillis))
-              .randomErrorRate(config.intOption("random.errorRate").orElse(0))
+              .seed(config.longOption("random.seed").orElse(defaultRandomSeed))
+              .optionalOverride(config.booleanValue("random.verbose", false))
+              .randomErrorRate(config.intOption("random.error.rate").orElse(0))
+              .randomErrorSeed(config.longOption("random.error.seed").orElse(defaultRandomSeed))
+              .maxUniqueMbis(config.intOption("random.max.mbi").orElse(0))
+              .maxUniqueClaimIds(config.intOption("random.max.claimId").orElse(0))
               .build();
       maxToSend = config.intValue("maxToSend", 5_000);
       fissClaimFile = config.readableFileOption("fissFile").orElse(null);

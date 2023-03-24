@@ -120,6 +120,7 @@ class AbstractRandomClaimGeneratorTest {
    *
    * @param claims claims to process
    * @param fieldGetter getter for the field to check
+   * @param <T> arbitrary type of claims
    * @return number of distinct values
    */
   static <T> Long countDistinctFieldValues(List<T> claims, Function<T, String> fieldGetter) {
@@ -135,6 +136,7 @@ class AbstractRandomClaimGeneratorTest {
    *
    * @param claims claims to process
    * @param fieldGetter getter for the field to check
+   * @param <T> arbitrary type of claims
    * @return max field length
    */
   static <T> int maxFieldLength(List<T> claims, Function<T, String> fieldGetter) {
@@ -220,7 +222,6 @@ class AbstractRandomClaimGeneratorTest {
       return createRandomClaim();
     }
 
-    /** {@inheritDoc} */
     @Override
     public Map<String, Object> createRandomClaim() {
       Map<String, Object> randomData = new HashMap<>();
