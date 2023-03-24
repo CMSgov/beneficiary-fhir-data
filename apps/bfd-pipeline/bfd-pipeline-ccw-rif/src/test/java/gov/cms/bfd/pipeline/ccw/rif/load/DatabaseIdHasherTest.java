@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.util.List;
@@ -59,7 +60,7 @@ public class DatabaseIdHasherTest {
     idHasher =
         new IdHasher(
             IdHasher.Config.builder().hashPepperString("pepper").hashIterations(1).build());
-    dbHasher = new DatabaseIdHasher(entityManagerFactory, idHasher, 2);
+    dbHasher = new DatabaseIdHasher(new MetricRegistry(), entityManagerFactory, idHasher, 2);
   }
 
   /**
@@ -92,6 +93,9 @@ public class DatabaseIdHasherTest {
     verify(query, times(1)).setMaxResults(anyInt());
     verify(query, times(1)).getResultList();
     verify(entityManager, times(1)).persist(any());
+
+    assertEquals(4L, dbHasher.getMetrics().getLookups());
+    assertEquals(1L, dbHasher.getMetrics().getMisses());
   }
 
   /** Verifies that {@link RuntimeException}s are not wrapped but just passed through unchanged. */

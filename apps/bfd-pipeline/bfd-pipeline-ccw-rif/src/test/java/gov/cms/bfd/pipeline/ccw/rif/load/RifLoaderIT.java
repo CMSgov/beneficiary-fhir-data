@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
@@ -122,7 +123,8 @@ public final class RifLoaderIT {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
-    DatabaseIdHasher hasher = new DatabaseIdHasher(entityManagerFactory, idHasher, 10);
+    DatabaseIdHasher hasher =
+        new DatabaseIdHasher(new MetricRegistry(), entityManagerFactory, idHasher, 10);
 
     /*
      * These are the two samples from `dev/design-decisions-readme.md` that
@@ -149,7 +151,8 @@ public final class RifLoaderIT {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
-    DatabaseIdHasher hasher = new DatabaseIdHasher(entityManagerFactory, idHasher, 10);
+    DatabaseIdHasher hasher =
+        new DatabaseIdHasher(new MetricRegistry(), entityManagerFactory, idHasher, 10);
 
     /*
      * These are the two samples from `dev/design-decisions-readme.md` that
@@ -186,7 +189,11 @@ public final class RifLoaderIT {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     DatabaseIdHasher hasher =
-        new DatabaseIdHasher(entityManagerFactory, new IdHasher(options.getIdHasherConfig()), 10);
+        new DatabaseIdHasher(
+            new MetricRegistry(),
+            entityManagerFactory,
+            new IdHasher(options.getIdHasherConfig()),
+            10);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -243,7 +250,11 @@ public final class RifLoaderIT {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     DatabaseIdHasher hasher =
-        new DatabaseIdHasher(entityManagerFactory, new IdHasher(options.getIdHasherConfig()), 10);
+        new DatabaseIdHasher(
+            new MetricRegistry(),
+            entityManagerFactory,
+            new IdHasher(options.getIdHasherConfig()),
+            10);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -1577,7 +1588,11 @@ public final class RifLoaderIT {
   private static void assertAreInDatabase(
       LoadAppOptions options, EntityManagerFactory entityManagerFactory, Stream<Object> records) {
     DatabaseIdHasher hasher =
-        new DatabaseIdHasher(entityManagerFactory, new IdHasher(options.getIdHasherConfig()), 10);
+        new DatabaseIdHasher(
+            new MetricRegistry(),
+            entityManagerFactory,
+            new IdHasher(options.getIdHasherConfig()),
+            10);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();

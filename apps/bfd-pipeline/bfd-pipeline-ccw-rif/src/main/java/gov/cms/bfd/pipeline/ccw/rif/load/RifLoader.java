@@ -129,6 +129,7 @@ public final class RifLoader {
         options.getLoaderThreads() * options.getIdHasherConfig().getCacheSize();
     idHasher =
         new DatabaseIdHasher(
+            appState.getMetrics(),
             appState.getEntityManagerFactory(),
             new IdHasher(options.getIdHasherConfig()),
             maxCacheSize);
