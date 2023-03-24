@@ -13,7 +13,6 @@
     <artifactId>bfd-pipeline-rda-bridge</artifactId>
     <packaging>jar</packaging>
 
-    <name>RDA Bridge</name>
     <description>Utility project for creating RDA data</description>
 
     <properties>
