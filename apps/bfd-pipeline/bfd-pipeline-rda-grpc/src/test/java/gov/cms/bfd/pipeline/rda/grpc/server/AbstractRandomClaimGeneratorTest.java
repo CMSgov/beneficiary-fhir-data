@@ -7,8 +7,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
@@ -110,6 +113,37 @@ class AbstractRandomClaimGeneratorTest {
           fail(String.format("Unexpected value type: %s", valueCanonicalName));
       }
     }
+  }
+
+  /**
+   * Count the number of distinct non-empty values in the provided list of objects.
+   *
+   * @param claims claims to process
+   * @param fieldGetter getter for the field to check
+   * @return number of distinct values
+   */
+  static <T> Long countDistinctFieldValues(List<T> claims, Function<T, String> fieldGetter) {
+    return claims.stream()
+        .map(fieldGetter)
+        .filter(fieldValue -> !fieldValue.isEmpty())
+        .distinct()
+        .count();
+  }
+
+  /**
+   * Find the maximum string length for a field in the provided list of objects.
+   *
+   * @param claims claims to process
+   * @param fieldGetter getter for the field to check
+   * @return max field length
+   */
+  static <T> int maxFieldLength(List<T> claims, Function<T, String> fieldGetter) {
+    return claims.stream()
+        .map(fieldGetter)
+        .filter(fieldValue -> !fieldValue.isEmpty())
+        .map(String::length)
+        .max(Comparator.naturalOrder())
+        .orElse(0);
   }
 
   /** Special derived class for testing purposes. */

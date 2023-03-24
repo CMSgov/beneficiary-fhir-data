@@ -35,4 +35,12 @@ public class RandomClaimGeneratorConfig {
    * decide when to randomly insert a transformation error into claims.
    */
   @Builder.Default private final long randomErrorSeed = System.currentTimeMillis();
+
+  /** When positive this number indicates the maximum number of unique MBI values to generate. */
+  private final int maxUniqueMbis;
+
+  /**
+   * When positive this number indicates the maximum number of unique claim id values to generate.
+   */
+  private final int maxUniqueClaimIds;
 }

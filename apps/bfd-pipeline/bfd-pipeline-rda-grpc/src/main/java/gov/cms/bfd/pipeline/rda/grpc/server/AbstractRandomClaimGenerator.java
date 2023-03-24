@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -127,6 +128,24 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
+   * Gets the maximum number of unique MBIs.
+   *
+   * @return the maximum number of unique MBIs
+   */
+  protected int getMaxUniqueMbis() {
+    return config.getMaxUniqueMbis();
+  }
+
+  /**
+   * Gets the maximum number of unique claim ids.
+   *
+   * @return the maximum number of unique claim ids
+   */
+  protected int getMaxUniqueClaimIds() {
+    return config.getMaxUniqueClaimIds();
+  }
+
+  /**
    * RDA API enums always define a special value that the protobuf API intends as a special
    * placeholder for garbled/invalid data. This field is named UNRECOGNIZED. This method is used to
    * accept all the defined enum values, skip this special value, and return an immutable list of
@@ -161,6 +180,18 @@ abstract class AbstractRandomClaimGenerator<T> {
    */
   protected String randomDigit(int minLength, int maxLength) {
     return randomString(DIGIT, minLength, maxLength);
+  }
+
+  /**
+   * Generates a random integer in the range {@code [0,rangeLimit)}. The string is left padded to
+   * length if necessary.
+   *
+   * @param minLength minimum length of resulting string
+   * @param rangeLimit max value (exclusive) of the integer
+   * @return the string
+   */
+  public String randomDigitStringInRange(int minLength, int rangeLimit) {
+    return createContext().randomDigitStringInRange(minLength, rangeLimit);
   }
 
   /**
@@ -421,6 +452,19 @@ abstract class AbstractRandomClaimGenerator<T> {
         sb.append(randomChar(characters));
       }
       return sb.toString();
+    }
+
+    /**
+     * Generates a random integer in the range {@code [0,rangeLimit)}. The string is left padded to
+     * length if necessary.
+     *
+     * @param minLength minimum length of resulting string
+     * @param rangeLimit max value (exclusive) of the integer
+     * @return the string
+     */
+    public String randomDigitStringInRange(int minLength, int rangeLimit) {
+      var rawNumber = Integer.toString(random.nextInt(rangeLimit));
+      return Strings.padStart(rawNumber, minLength, '0');
     }
 
     /**

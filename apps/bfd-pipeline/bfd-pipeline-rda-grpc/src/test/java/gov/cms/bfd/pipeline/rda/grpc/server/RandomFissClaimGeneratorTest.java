@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import static gov.cms.bfd.pipeline.rda.grpc.server.AbstractRandomClaimGeneratorTest.countDistinctFieldValues;
+import static gov.cms.bfd.pipeline.rda.grpc.server.AbstractRandomClaimGeneratorTest.maxFieldLength;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -8,6 +11,9 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for the {@link RandomFissClaimGenerator}. */
@@ -34,7 +40,7 @@ public class RandomFissClaimGeneratorTest {
     final String json = JsonFormat.printer().print(claim);
     assertEquals(
         "{\n"
-            + "  \"dcn\": \"793471\",\n"
+            + "  \"dcn\": \"79347185903055953987254\",\n"
             + "  \"hicNo\": \"618367226005\",\n"
             + "  \"currStatusEnum\": \"CLAIM_STATUS_ROUTING\",\n"
             + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\",\n"
@@ -471,9 +477,65 @@ public class RandomFissClaimGeneratorTest {
             + "  \"clmTypIndUnrecognized\": \"w\",\n"
             + "  \"recdDtCymdText\": \"2021-02-07\",\n"
             + "  \"currTranDtCymdText\": \"2021-01-20\",\n"
-            + "  \"rdaClaimKey\": \"196698\",\n"
-            + "  \"intermediaryNb\": \"0914\"\n"
+            + "  \"rdaClaimKey\": \"19669840573147667643640083677381\",\n"
+            + "  \"intermediaryNb\": \"09142\"\n"
             + "}",
         json);
+  }
+
+  /** Verifies that the overrides in the {@link RandomClaimGeneratorConfig} are enforced. */
+  @Test
+  public void testFieldOverrides() {
+    final int maxClaimIds = 18;
+    final int maxMbis = 14;
+    final var normalConfig = RandomClaimGeneratorConfig.builder().seed(1).build();
+    final var normalGenerator = new RandomFissClaimGenerator(normalConfig);
+    final var normalClaims =
+        IntStream.range(1, 100)
+            .mapToObj(i -> normalGenerator.randomClaim())
+            .collect(Collectors.toList());
+
+    // We expect to normally get many more unique values than the overrides will use.
+    assertThat(
+        countDistinctFieldValues(normalClaims, FissClaim::getRdaClaimKey),
+        Matchers.greaterThan((long) maxClaimIds));
+    assertThat(
+        countDistinctFieldValues(normalClaims, FissClaim::getMbi),
+        Matchers.greaterThan((long) maxMbis));
+
+    // We expect these ids to normally fall within their normal field length.
+    assertThat(
+        maxFieldLength(normalClaims, FissClaim::getDcn),
+        Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
+    assertThat(
+        maxFieldLength(normalClaims, FissClaim::getIntermediaryNb),
+        Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
+
+    final var overrideConfig =
+        normalConfig
+            .toBuilder()
+            .maxUniqueClaimIds(maxClaimIds)
+            .maxUniqueMbis(maxMbis)
+            .randomErrorRate(10)
+            .randomErrorSeed(1)
+            .build();
+    final var overrideGenerator = new RandomFissClaimGenerator(overrideConfig);
+    final var overrideClaims =
+        IntStream.range(1, 100)
+            .mapToObj(i -> overrideGenerator.randomClaim())
+            .collect(Collectors.toList());
+
+    // We expect to get exactly the specified number of unique ids.
+    assertEquals(maxClaimIds, countDistinctFieldValues(overrideClaims, FissClaim::getRdaClaimKey));
+    assertEquals(maxMbis, countDistinctFieldValues(overrideClaims, FissClaim::getMbi));
+
+    // We expect these ids to sometimes have a value with the forced error length when we are
+    // forcing errors.
+    assertEquals(
+        RandomMcsClaimGenerator.ForcedErrorFieldLength,
+        maxFieldLength(overrideClaims, FissClaim::getDcn));
+    assertEquals(
+        RandomMcsClaimGenerator.ForcedErrorFieldLength,
+        maxFieldLength(overrideClaims, FissClaim::getIntermediaryNb));
   }
 }

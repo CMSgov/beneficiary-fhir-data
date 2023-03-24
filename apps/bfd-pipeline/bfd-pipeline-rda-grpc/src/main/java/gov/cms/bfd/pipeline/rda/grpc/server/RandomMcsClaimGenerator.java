@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
 import gov.cms.mpsm.rda.v1.mcs.McsAudit;
@@ -97,6 +98,13 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   private static final List<McsLocationActivityCode> McsLocationActivityCodeEnums =
       enumValues(McsLocationActivityCode.values());
 
+  /** Max length of a FISS claim id. */
+  private static final int McsClaimIdLength = 15;
+  /** Max length of a MBI. */
+  private static final int MbiLength = 11;
+  /** Field length used when forcing a transformation error in a claim. */
+  @VisibleForTesting static final int ForcedErrorFieldLength = 50;
+
   static {
     // MCS status codes are special since the STATUS_CODE_NOT_USED is considered invalid by the
     // transformer. This block preserves the natural ordering of the enum values while removing the
@@ -104,15 +112,6 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     Set<McsStatusCode> statusCodes = new LinkedHashSet<>(Arrays.asList(McsStatusCode.values()));
     statusCodes.remove(McsStatusCode.STATUS_CODE_NOT_USED);
     McsStatusCodeEnums = enumValues(new ArrayList<>(statusCodes).toArray(new McsStatusCode[0]));
-  }
-
-  /**
-   * Creates an instance with the specified seed.
-   *
-   * @param seed seed for the PRNG
-   */
-  public RandomMcsClaimGenerator(long seed) {
-    this(RandomClaimGeneratorConfig.builder().seed(seed).build());
   }
 
   /**
@@ -132,7 +131,9 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     always(
         "mcs",
         () -> {
-          always("idrClmHdIcn", () -> claim.setIdrClmHdIcn(randomDigit(5, 8)));
+          always(
+              "idrClmHdIcn",
+              () -> claim.setIdrClmHdIcn(randomDigit(McsClaimIdLength, McsClaimIdLength)));
           final String idrClmHdIcn = claim.getIdrClmHdIcn();
 
           addRandomFieldValues(claim, detailCount);
@@ -142,24 +143,9 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
           addDetails(claim, detailCount);
           addLocations(claim);
           adjustServiceDatesFromDetails(claim);
-          if (shouldInsertErrorIntoCurrentClaim()) {
-            addErrorToClaim(claim);
-          }
+          adjustFieldsBasedOnConfigOverrides(claim);
         });
     return claim.build();
-  }
-
-  /**
-   * Sets a randomly chosen field to an invalid value to ensure that a transformation error will be
-   * generated downstream.
-   *
-   * @param claim the claim to modify
-   */
-  private void addErrorToClaim(McsClaim.Builder claim) {
-    oneOf(
-        "random-error",
-        () -> claim.setIdrContrId(randomDigit(20, 20)),
-        () -> claim.setIdrHic(randomDigit(20, 20)));
   }
 
   /**
@@ -206,7 +192,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
         () -> claim.setIdrBillProvStatusCdUnrecognized(randomLetter(1, 1)));
     optional("idrTotBilledAmt", () -> claim.setIdrTotBilledAmt(randomAmount()));
     optional("idrClaimReceiptDate", () -> claim.setIdrClaimReceiptDate(randomDate()));
-    optional("idrClaimMbi", () -> claim.setIdrClaimMbi(randomAlphaNumeric(11, 11)));
+    optional("idrClaimMbi", () -> claim.setIdrClaimMbi(randomAlphaNumeric(MbiLength, MbiLength)));
     // IdrHdrFromDos will be set later
     // IdrHdrToDos will be set later
     oneOf(
@@ -520,6 +506,28 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     if (minDate.isPresent() && maxDate.isPresent()) {
       claim.setIdrHdrFromDos(minDate.get());
       claim.setIdrHdrToDos(maxDate.get());
+    }
+  }
+
+  /**
+   * Replace field values if necessary based on the overrides specified in the {@link
+   * RandomClaimGeneratorConfig}.
+   *
+   * @param claim claim to be updated
+   */
+  private void adjustFieldsBasedOnConfigOverrides(McsClaim.Builder claim) {
+    if (getMaxUniqueClaimIds() > 0) {
+      claim.setIdrClmHdIcn(randomDigitStringInRange(McsClaimIdLength, getMaxUniqueClaimIds()));
+    }
+    if (getMaxUniqueMbis() > 0 && !claim.getIdrClaimMbi().isEmpty()) {
+      claim.setIdrClaimMbi(randomDigitStringInRange(MbiLength, getMaxUniqueMbis()));
+    }
+    if (shouldInsertErrorIntoCurrentClaim()) {
+      // update a random field with a string that is too long
+      oneOf(
+          "random-error",
+          () -> claim.setIdrContrId(randomDigit(ForcedErrorFieldLength, ForcedErrorFieldLength)),
+          () -> claim.setIdrHic(randomDigit(ForcedErrorFieldLength, ForcedErrorFieldLength)));
     }
   }
 }
