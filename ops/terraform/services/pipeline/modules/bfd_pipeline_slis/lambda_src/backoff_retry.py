@@ -22,7 +22,7 @@ def backoff_retry(
         retries (int, optional): The number of times to retry before raising the error causing the
         failure. Defaults to PUT_METRIC_DATA_MAX_RETRIES.
         ignored_exceptions (list[Type[BaseException]] , optional): A list of exceptions to skip
-        iretrying and nstead immediately raise to the calling function. Defaults to [].
+        retrying and instead immediately raise to the calling function. Defaults to [].
 
     Raises:
         exc: Any exception in ignored_exceptions, or the exception thrown on the final retry
