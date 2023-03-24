@@ -30,12 +30,6 @@ public class RandomClaimGeneratorConfig {
    */
   private final int randomErrorRate;
 
-  /**
-   * Seed for separate random number generator used in conjunction with {@link #randomErrorRate} to
-   * decide when to randomly insert a transformation error into claims.
-   */
-  @Builder.Default private final long randomErrorSeed = System.currentTimeMillis();
-
   /** When positive this number indicates the maximum number of unique MBI values to generate. */
   private final int maxUniqueMbis;
 

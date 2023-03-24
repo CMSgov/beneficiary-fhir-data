@@ -419,7 +419,6 @@ public class RandomMcsClaimGeneratorTest {
             .maxUniqueClaimIds(maxClaimIds)
             .maxUniqueMbis(maxMbis)
             .randomErrorRate(10)
-            .randomErrorSeed(1)
             .build();
     final var overrideGenerator = new RandomMcsClaimGenerator(overrideConfig);
     final var overrideClaims =

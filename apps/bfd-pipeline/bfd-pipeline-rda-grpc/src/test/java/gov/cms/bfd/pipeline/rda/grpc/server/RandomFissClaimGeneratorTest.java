@@ -517,7 +517,6 @@ public class RandomFissClaimGeneratorTest {
             .maxUniqueClaimIds(maxClaimIds)
             .maxUniqueMbis(maxMbis)
             .randomErrorRate(10)
-            .randomErrorSeed(1)
             .build();
     final var overrideGenerator = new RandomFissClaimGenerator(overrideConfig);
     final var overrideClaims =
