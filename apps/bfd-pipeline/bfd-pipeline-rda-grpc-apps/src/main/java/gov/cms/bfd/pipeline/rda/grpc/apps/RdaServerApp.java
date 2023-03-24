@@ -169,11 +169,11 @@ public class RdaServerApp {
             s3Sources.getBucketName());
         return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
       } else {
+        final var adjustedConfig = adjustErrorSeed(FISS_RANDOM_SEED_DELTA);
         LOGGER.info(
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
-            randomClaimConfig.getSeed());
-        final var adjustedConfig = adjustErrorSeed(FISS_RANDOM_SEED_DELTA);
+            adjustedConfig.getSeed());
         return new RandomFissClaimSource(adjustedConfig, maxToSend)
             .toClaimChanges()
             .skip(sequenceNumber);
@@ -201,11 +201,11 @@ public class RdaServerApp {
             s3Sources.getBucketName());
         return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
       } else {
+        final var adjustedConfig = adjustErrorSeed(MCS_RANDOM_SEED_DELTA);
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
-            randomClaimConfig.getSeed());
-        final var adjustedConfig = adjustErrorSeed(MCS_RANDOM_SEED_DELTA);
+            adjustedConfig.getSeed());
         return new RandomMcsClaimSource(adjustedConfig, maxToSend)
             .toClaimChanges()
             .skip(sequenceNumber);
