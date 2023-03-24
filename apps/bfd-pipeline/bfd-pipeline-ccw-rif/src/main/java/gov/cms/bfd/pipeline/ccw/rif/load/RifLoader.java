@@ -127,7 +127,11 @@ public final class RifLoader {
     // and thread count.
     final int maxCacheSize =
         options.getLoaderThreads() * options.getIdHasherConfig().getCacheSize();
-    hasher = new DatabaseIdHasher(new IdHasher(options.getIdHasherConfig()), maxCacheSize);
+    hasher =
+        new DatabaseIdHasher(
+            appState.getEntityManagerFactory(),
+            new IdHasher(options.getIdHasherConfig()),
+            maxCacheSize);
     fatalFailure = new AtomicBoolean();
   }
 
@@ -463,8 +467,8 @@ public final class RifLoader {
 
     if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
-        hashBeneficiaryHistoryHicn(entityManager, rifRecordEvent);
-        hashBeneficiaryHistoryMbi(entityManager, rifRecordEvent);
+        hashBeneficiaryHistoryHicn(rifRecordEvent);
+        hashBeneficiaryHistoryMbi(rifRecordEvent);
       }
     }
 
@@ -692,7 +696,7 @@ public final class RifLoader {
             oldBeneficiaryRecord.get().getMedicareBeneficiaryId())) {
       newBeneficiaryRecord.setMbiHash(oldBeneficiaryRecord.get().getMbiHash());
     } else {
-      hashBeneficiaryMbi(idHasher, entityManager, rifRecordEvent);
+      hashBeneficiaryMbi(idHasher, rifRecordEvent);
     }
 
     if (rifRecordEvent.getRecordAction() == RecordAction.UPDATE) {
@@ -1318,8 +1322,7 @@ public final class RifLoader {
 
     Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
     if (beneficiary.getHicnUnhashed().isPresent()) {
-      String hicnHash =
-          computeHicnHash(idHasher, entityManager, beneficiary.getHicnUnhashed().get());
+      String hicnHash = computeHicnHash(idHasher, beneficiary.getHicnUnhashed().get());
       beneficiary.setHicn(hicnHash);
     } else {
       beneficiary.setHicn(null);
@@ -1338,11 +1341,9 @@ public final class RifLoader {
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
    * @param idHasher the {@link DatabaseIdHasher} to use
-   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryMbi(
-      DatabaseIdHasher idHasher, EntityManager entityManager, RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryMbi(DatabaseIdHasher idHasher, RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
 
     Timer.Context timerHashing =
@@ -1354,8 +1355,7 @@ public final class RifLoader {
 
     Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
     if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
-      String mbiHash =
-          computeMbiHash(idHasher, entityManager, beneficiary.getMedicareBeneficiaryId().get());
+      String mbiHash = computeMbiHash(idHasher, beneficiary.getMedicareBeneficiaryId().get());
       beneficiary.setMbiHash(Optional.of(mbiHash));
     } else {
       beneficiary.setMbiHash(Optional.empty());
@@ -1373,11 +1373,9 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
-   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHistoryHicn(
-      EntityManager entityManager, RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHistoryHicn(RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
       return;
 
@@ -1394,8 +1392,7 @@ public final class RifLoader {
     beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
 
     // set the hashed Hicn
-    beneficiaryHistory.setHicn(
-        computeHicnHash(hasher, entityManager, beneficiaryHistory.getHicn()));
+    beneficiaryHistory.setHicn(computeHicnHash(hasher, beneficiaryHistory.getHicn()));
 
     timerHashing.stop();
   }
@@ -1409,11 +1406,9 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
-   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHistoryMbi(
-      EntityManager entityManager, RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHistoryMbi(RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
       return;
 
@@ -1431,7 +1426,7 @@ public final class RifLoader {
         .getMedicareBeneficiaryId()
         .ifPresent(
             mbi -> {
-              String mbiHash = computeMbiHash(hasher, entityManager, mbi);
+              String mbiHash = computeMbiHash(hasher, mbi);
               beneficiaryHistory.setMbiHash(Optional.of(mbiHash));
             });
 
@@ -1444,25 +1439,22 @@ public final class RifLoader {
    * systems: the HICN is the only unique beneficiary identifier shared between those two systems.
    *
    * @param idHasher the {@link IdHasher} to use
-   * @param entityManager the {@link EntityManager} for the current transaction
    * @param hicn the Medicare beneficiary HICN to be hashed
    * @return a one-way cryptographic hash of the specified HICN value, exactly 64 characters long
    */
-  static String computeHicnHash(
-      DatabaseIdHasher idHasher, EntityManager entityManager, String hicn) {
-    return idHasher.computeIdentifierHash(entityManager, hicn);
+  static String computeHicnHash(DatabaseIdHasher idHasher, String hicn) {
+    return idHasher.computeIdentifierHash(hicn);
   }
 
   /**
    * Computes a one-way cryptographic hash of the specified MBI value.
    *
    * @param idHasher the {@link IdHasher} to use
-   * @param entityManager the {@link EntityManager} for the current transaction
    * @param mbi the Medicare beneficiary id to be hashed
    * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
    */
-  static String computeMbiHash(DatabaseIdHasher idHasher, EntityManager entityManager, String mbi) {
-    return idHasher.computeIdentifierHash(entityManager, mbi);
+  static String computeMbiHash(DatabaseIdHasher idHasher, String mbi) {
+    return idHasher.computeIdentifierHash(mbi);
   }
 
   /**

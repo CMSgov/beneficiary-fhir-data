@@ -19,6 +19,8 @@ import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +36,13 @@ import org.mockito.quality.Strictness;
 public class DatabaseIdHasherTest {
 
   /** Mock entity manager. */
+  @Mock private EntityManagerFactory entityManagerFactory;
+  /** Mock entity manager. */
   @Mock private EntityManager entityManager;
   /** Mock query. */
   @Mock private TypedQuery<String> query;
+  /** Mock transaction. */
+  @Mock private EntityTransaction transaction;
   /** Uncached hasher used by cached hasher and to check hash values are correct. */
   private IdHasher idHasher;
   /** Hasher being tested. */
@@ -45,13 +51,15 @@ public class DatabaseIdHasherTest {
   /** Basic wiring of mocks and creation of non-mocks. */
   @BeforeEach
   void setUp() {
+    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
+    doReturn(transaction).when(entityManager).getTransaction();
     doReturn(query).when(entityManager).createQuery(QueryString, String.class);
     doReturn(query).when(query).setMaxResults(anyInt());
     doReturn(query).when(query).setParameter(eq(IdParamName), anyString());
     idHasher =
         new IdHasher(
             IdHasher.Config.builder().hashPepperString("pepper").hashIterations(1).build());
-    dbHasher = new DatabaseIdHasher(idHasher, 2);
+    dbHasher = new DatabaseIdHasher(entityManagerFactory, idHasher, 2);
   }
 
   /**
@@ -70,16 +78,16 @@ public class DatabaseIdHasherTest {
 
     // the first call will run the query and persist the record
     doReturn(List.of()).when(query).getResultList();
-    assertEquals(expectedHash, dbHasher.computeIdentifierHash(entityManager, identifier));
+    assertEquals(expectedHash, dbHasher.computeIdentifierHash(identifier));
     verify(query, times(1)).setParameter(IdParamName, identifier);
     verify(query, times(1)).setMaxResults(1);
     verify(query, times(1)).getResultList();
     verify(entityManager, times(1)).persist(refEq(expectedRecord));
 
     // all other calls will return cached value and no queries will be performed
-    assertEquals(expectedHash, dbHasher.computeIdentifierHash(entityManager, identifier));
-    assertEquals(expectedHash, dbHasher.computeIdentifierHash(entityManager, identifier));
-    assertEquals(expectedHash, dbHasher.computeIdentifierHash(entityManager, identifier));
+    assertEquals(expectedHash, dbHasher.computeIdentifierHash(identifier));
+    assertEquals(expectedHash, dbHasher.computeIdentifierHash(identifier));
+    assertEquals(expectedHash, dbHasher.computeIdentifierHash(identifier));
     verify(query, times(1)).setParameter(anyString(), any());
     verify(query, times(1)).setMaxResults(anyInt());
     verify(query, times(1)).getResultList();
@@ -94,9 +102,7 @@ public class DatabaseIdHasherTest {
 
     doThrow(expectedException).when(entityManager).persist(any());
     final var actualException =
-        assertThrows(
-            RuntimeException.class,
-            () -> dbHasher.computeIdentifierHash(entityManager, identifier));
+        assertThrows(RuntimeException.class, () -> dbHasher.computeIdentifierHash(identifier));
     assertSame(expectedException, actualException);
   }
 }

@@ -6,9 +6,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  * Wraps an {@link IdHasher} and provides support for caching recently computed hashes in memory as
@@ -18,9 +20,20 @@ public class DatabaseIdHasher {
   /** Query used to find existing hash record. */
   @VisibleForTesting
   static final String QueryString = "select h.hash from IdHash h where h.id = :id";
+
   /** Query parameter name for identifier. */
   @VisibleForTesting static final String IdParamName = "id";
 
+  /**
+   * Maximum number of retry attempts the cache will make when trying to a record to the database if
+   * constraint violations are detected. Should not be necessary since the cache will prevent
+   * multiple threads in this processing trying to insert the same hash simultaneously but added in
+   * case some other process is doing so.
+   */
+  private static final int MaxRetries = 2;
+
+  /** Used to create {@link EntityManager}s. */
+  private final EntityManagerFactory entityManagerFactory;
   /** Used to compute hash values. */
   private final IdHasher hasher;
   /**
@@ -32,10 +45,13 @@ public class DatabaseIdHasher {
    * Creates an instance with the given maximum size and using the provided {@link IdHasher} to
    * compute values that are not present in the database.
    *
+   * @param entityManagerFactory used to create {@link EntityManager}s
    * @param idHasher {@link IdHasher} used when computing is necessary
    * @param maxCacheSize maximum number of hashes to cache in memory cache
    */
-  public DatabaseIdHasher(IdHasher idHasher, int maxCacheSize) {
+  public DatabaseIdHasher(
+      EntityManagerFactory entityManagerFactory, IdHasher idHasher, int maxCacheSize) {
+    this.entityManagerFactory = entityManagerFactory;
     this.hasher = idHasher;
     cache = CacheBuilder.newBuilder().maximumSize(maxCacheSize).build();
   }
@@ -54,13 +70,12 @@ public class DatabaseIdHasher {
    * <p>The database operations take place within the provided {@link EntityManager}s current
    * transaction.
    *
-   * @param entityManager the {@link EntityManager} used for database query and insert
    * @param identifier any ID to be hashed
    * @return a one-way cryptographic hash of the specified ID value, exactly 64 characters long
    */
-  public String computeIdentifierHash(EntityManager entityManager, String identifier) {
+  public String computeIdentifierHash(String identifier) {
     try {
-      return cache.get(identifier, () -> getOrInsertIdentifierHash(entityManager, identifier));
+      return cache.get(identifier, () -> getOrInsertIdentifierHash(identifier));
     } catch (UncheckedExecutionException | ExecutionException e) {
       Throwable cause = e.getCause();
       if (cause instanceof RuntimeException) {
@@ -68,6 +83,25 @@ public class DatabaseIdHasher {
       } else {
         throw new RuntimeException(cause);
       }
+    }
+  }
+
+  /**
+   * Query the database for a match and return it if found. Otherwise compute the value and insert
+   * it into the database then return it. Retries the insert if any constraint violations are
+   * detected.
+   *
+   * @param identifier any ID to be hashed
+   * @return a one-way cryptographic hash of the specified ID value, exactly 64 characters long
+   */
+  private String getOrInsertIdentifierHash(String identifier) {
+    try (var transactionManager = new TransactionManager(entityManagerFactory)) {
+      return transactionManager
+          .executeFunctionWithRetries(
+              MaxRetries,
+              TransactionManager::isConstraintViolation,
+              entityManager -> getOrInsertIdentifierHash(entityManager, identifier))
+          .getValue();
     }
   }
 
