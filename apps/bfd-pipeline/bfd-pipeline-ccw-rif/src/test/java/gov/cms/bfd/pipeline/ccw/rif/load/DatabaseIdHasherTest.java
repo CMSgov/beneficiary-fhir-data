@@ -15,9 +15,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -60,7 +60,7 @@ public class DatabaseIdHasherTest {
     idHasher =
         new IdHasher(
             IdHasher.Config.builder().hashPepperString("pepper").hashIterations(1).build());
-    dbHasher = new DatabaseIdHasher(new MetricRegistry(), entityManagerFactory, idHasher, 2);
+    dbHasher = new DatabaseIdHasher(new SimpleMeterRegistry(), entityManagerFactory, idHasher, 2);
   }
 
   /**

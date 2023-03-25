@@ -123,13 +123,12 @@ public final class RifLoader {
     this.appState = appState;
 
     // A single cache can serve all threads efficiently so we base the cache on the product of cache
-    // size
-    // and thread count.
+    // size and thread count.
     final int maxCacheSize =
         options.getLoaderThreads() * options.getIdHasherConfig().getCacheSize();
     idHasher =
         new DatabaseIdHasher(
-            appState.getMetrics(),
+            appState.getMeters(),
             appState.getEntityManagerFactory(),
             new IdHasher(options.getIdHasherConfig()),
             maxCacheSize);

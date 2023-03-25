@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
@@ -9,6 +8,8 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.EntityManager;
@@ -53,13 +54,13 @@ public class DatabaseIdHasher {
    * Creates an instance with the given maximum size and using the provided {@link IdHasher} to
    * compute values that are not present in the database.
    *
-   * @param appMetrics {@link MetricRegistry} to use for reporting metrics
+   * @param appMetrics {@link MeterRegistry} to use for reporting metrics
    * @param entityManagerFactory used to create {@link EntityManager}s
    * @param idHasher {@link IdHasher} used when computing is necessary
    * @param maxCacheSize maximum number of hashes to cache in memory cache
    */
   public DatabaseIdHasher(
-      MetricRegistry appMetrics,
+      MeterRegistry appMetrics,
       EntityManagerFactory entityManagerFactory,
       IdHasher idHasher,
       int maxCacheSize) {
@@ -164,37 +165,39 @@ public class DatabaseIdHasher {
   @VisibleForTesting
   static class Metrics {
     /** Tracks number of calls to {@link DatabaseIdHasher#computeIdentifierHash}. */
-    private final Meter lookups;
+    private final Counter lookups;
     /**
      * Tracks number of calls to {@link DatabaseIdHasher#computeIdentifierHash} in which identifier
      * was not present in the cache.
      */
-    private final Meter misses;
+    private final Counter misses;
     /** Tracks number of times database read/write had to be reattempted to arrive at a result. */
-    private final Meter retries;
+    private final Counter retries;
 
     /**
      * Creates the metrics.
      *
-     * @param appMetrics {@link MetricRegistry} to hold the metrics
+     * @param appMetrics {@link MeterRegistry} to hold the metrics
      */
-    Metrics(MetricRegistry appMetrics) {
+    Metrics(MeterRegistry appMetrics) {
       lookups =
-          appMetrics.meter(MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "lookups"));
+          appMetrics.counter(
+              MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "lookups"));
       misses =
-          appMetrics.meter(MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "misses"));
+          appMetrics.counter(MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "misses"));
       retries =
-          appMetrics.meter(MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "retries"));
+          appMetrics.counter(
+              MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "retries"));
     }
 
     /** Increment number of lookups metric. */
     void addLookup() {
-      lookups.mark();
+      lookups.increment();
     }
 
     /** Increment number of misses metric. */
     void addMiss() {
-      misses.mark();
+      misses.increment();
     }
 
     /**
@@ -203,7 +206,7 @@ public class DatabaseIdHasher {
      * @param count the number of retries
      */
     void addRetries(int count) {
-      retries.mark(count);
+      retries.increment(count);
     }
 
     /**
@@ -212,7 +215,7 @@ public class DatabaseIdHasher {
      * @return current lookups metric value.
      */
     long getLookups() {
-      return lookups.getCount();
+      return (long) lookups.count();
     }
 
     /**
@@ -221,7 +224,7 @@ public class DatabaseIdHasher {
      * @return current misses metric value.
      */
     long getMisses() {
-      return misses.getCount();
+      return (long) misses.count();
     }
 
     /**
@@ -229,8 +232,8 @@ public class DatabaseIdHasher {
      *
      * @return total number of retries.
      */
-    long getTotalRetries() {
-      return retries.getCount();
+    long getRetries() {
+      return (long) retries.count();
     }
   }
 }

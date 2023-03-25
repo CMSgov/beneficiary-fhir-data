@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
@@ -37,6 +36,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -124,7 +124,7 @@ public final class RifLoaderIT {
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
     DatabaseIdHasher hasher =
-        new DatabaseIdHasher(new MetricRegistry(), entityManagerFactory, idHasher, 10);
+        new DatabaseIdHasher(new SimpleMeterRegistry(), entityManagerFactory, idHasher, 10);
 
     /*
      * These are the two samples from `dev/design-decisions-readme.md` that
@@ -152,7 +152,7 @@ public final class RifLoaderIT {
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
     DatabaseIdHasher hasher =
-        new DatabaseIdHasher(new MetricRegistry(), entityManagerFactory, idHasher, 10);
+        new DatabaseIdHasher(new SimpleMeterRegistry(), entityManagerFactory, idHasher, 10);
 
     /*
      * These are the two samples from `dev/design-decisions-readme.md` that
@@ -190,7 +190,7 @@ public final class RifLoaderIT {
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     DatabaseIdHasher hasher =
         new DatabaseIdHasher(
-            new MetricRegistry(),
+            new SimpleMeterRegistry(),
             entityManagerFactory,
             new IdHasher(options.getIdHasherConfig()),
             10);
@@ -251,7 +251,7 @@ public final class RifLoaderIT {
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     DatabaseIdHasher hasher =
         new DatabaseIdHasher(
-            new MetricRegistry(),
+            new SimpleMeterRegistry(),
             entityManagerFactory,
             new IdHasher(options.getIdHasherConfig()),
             10);
@@ -1589,7 +1589,7 @@ public final class RifLoaderIT {
       LoadAppOptions options, EntityManagerFactory entityManagerFactory, Stream<Object> records) {
     DatabaseIdHasher hasher =
         new DatabaseIdHasher(
-            new MetricRegistry(),
+            new SimpleMeterRegistry(),
             entityManagerFactory,
             new IdHasher(options.getIdHasherConfig()),
             10);
