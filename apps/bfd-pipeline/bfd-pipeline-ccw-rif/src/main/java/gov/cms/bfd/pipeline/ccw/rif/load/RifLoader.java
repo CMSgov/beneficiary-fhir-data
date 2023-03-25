@@ -631,7 +631,7 @@ public final class RifLoader {
             newBeneficiaryRecord.getHicnUnhashed(), oldBeneficiaryRecord.get().getHicnUnhashed())) {
       newBeneficiaryRecord.setHicn(oldBeneficiaryRecord.get().getHicn());
     } else {
-      hashBeneficiaryHicn(idHasher, entityManager, rifRecordEvent);
+      hashBeneficiaryHicn(idHasher, rifRecordEvent);
     }
     if (oldBeneficiaryRecord.isPresent()
         && Objects.equals(
@@ -1249,11 +1249,9 @@ public final class RifLoader {
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
    * @param idHasher the {@link DatabaseIdHasher} to use
-   * @param entityManager the {@link EntityManager} for the current transaction
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHicn(
-      DatabaseIdHasher idHasher, EntityManager entityManager, RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHicn(DatabaseIdHasher idHasher, RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
 
     Timer.Context timerHashing =
