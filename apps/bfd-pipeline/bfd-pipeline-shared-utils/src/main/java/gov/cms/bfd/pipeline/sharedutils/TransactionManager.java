@@ -262,7 +262,14 @@ public class TransactionManager implements AutoCloseable {
    * @return true if the exception is a constraint violation
    */
   public static boolean isConstraintViolation(Exception exception) {
-    return exception instanceof ConstraintViolationException;
+    Throwable throwable = exception;
+    while (throwable != null) {
+      if (throwable instanceof ConstraintViolationException) {
+        return true;
+      }
+      throwable = throwable.getCause();
+    }
+    return false;
   }
 
   /**
