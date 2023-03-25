@@ -92,10 +92,6 @@ public final class RifLoader {
   private static final Logger LOGGER_RECORD_COUNTS =
       LoggerFactory.getLogger(RifLoader.class.getName() + ".recordCounts");
 
-  /** Multiple of threads for max jobs in executor service. */
-  private static final int EXECUTOR_THREAD_MULTIPLE =
-      Integer.parseInt(Optional.ofNullable(System.getenv("EXECUTOR_THREAD_MULTIPLE")).orElse("10"));
-
   /** The load options. */
   private final LoadAppOptions options;
   /** The shared application state. */
@@ -142,26 +138,13 @@ public final class RifLoader {
    * @return the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    */
   private static BlockingThreadPoolExecutor createLoadExecutor(LoadAppOptions options) {
-    /*
-     * A 16 vCPU ETL server can handle 400 loader threads at less than 30%
-     * CPU usage (once a steady state is hit). The biggest limit here is
-     * what the DB will allow.
-     */
-    int threadPoolSize = options.getLoaderThreads();
-
-    /*
-     * It's tempting to think that a large queue will improve performance,
-     * but in reality: nope. Once the ETL hits a steady state, the queue
-     * will almost always be empty, so about all it accomplishes is
-     * unnecessarily eating up a bunch of RAM when the ETL happens to be
-     * running more slowly (for whatever reason).
-     */
-    int taskQueueSize = EXECUTOR_THREAD_MULTIPLE * threadPoolSize;
+    final int threadPoolSize = options.getLoaderThreads();
+    final int workQueueSize = options.getLoaderThreads() * options.getWorkQueueSizeMultiple();
 
     LOGGER.info(
         "Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
         options.getLoaderThreads(),
-        taskQueueSize,
+        workQueueSize,
         options.getRecordBatchSize());
 
     /*
@@ -172,7 +155,7 @@ public final class RifLoader {
      * the task queue is full.
      */
     BlockingThreadPoolExecutor loadExecutor =
-        new BlockingThreadPoolExecutor(threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
+        new BlockingThreadPoolExecutor(threadPoolSize, workQueueSize, 100, TimeUnit.MILLISECONDS);
     return loadExecutor;
   }
 

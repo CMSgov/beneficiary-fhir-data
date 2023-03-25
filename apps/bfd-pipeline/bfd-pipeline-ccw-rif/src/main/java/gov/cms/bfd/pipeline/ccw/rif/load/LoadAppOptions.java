@@ -55,6 +55,9 @@ public final class LoadAppOptions implements Serializable {
    */
   private final int recordBatchSize;
 
+  /** The maximum size (per thread) of the work queue used to process batches. */
+  private final int workQueueSizeMultiple;
+
   /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
@@ -63,20 +66,24 @@ public final class LoadAppOptions implements Serializable {
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
    * @param filterNon2023Benes the filter non 2023 benes
    * @param recordBatchSize the load batch size
+   * @param workQueueSizeMultiple the work queue size multiple
    */
   public LoadAppOptions(
       IdHasher.Config idHasherConfig,
       int loaderThreads,
       boolean idempotencyRequired,
       boolean filterNon2023Benes,
-      int recordBatchSize) {
+      int recordBatchSize,
+      int workQueueSizeMultiple) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
+    if (workQueueSizeMultiple < 1) throw new IllegalArgumentException();
 
     this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
     this.filteringNonNullAndNon2023Benes = filterNon2023Benes;
     this.recordBatchSize = recordBatchSize;
+    this.workQueueSizeMultiple = workQueueSizeMultiple;
   }
 
   /**
@@ -131,7 +138,15 @@ public final class LoadAppOptions implements Serializable {
     return filteringNonNullAndNon2023Benes;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Gets the {@link #workQueueSizeMultiple}.
+   *
+   * @return the size
+   */
+  public int getWorkQueueSizeMultiple() {
+    return workQueueSizeMultiple;
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -145,6 +160,10 @@ public final class LoadAppOptions implements Serializable {
     builder.append(idempotencyRequired);
     builder.append(", filteringNonNullAndNon2023Benes=");
     builder.append(filteringNonNullAndNon2023Benes);
+    builder.append(", recordBatchSize=");
+    builder.append(recordBatchSize);
+    builder.append(", workQueueSizeMultiple=");
+    builder.append(workQueueSizeMultiple);
     builder.append("]");
     return builder.toString();
   }
