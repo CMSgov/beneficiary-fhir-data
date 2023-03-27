@@ -647,6 +647,8 @@ public final class PipelineApplicationIT {
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
+    // This is an arbitrary value for the RDA Version for these tests.
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_VERSION, "~0.0.1");
 
     return appRunBuilder;
   }

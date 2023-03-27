@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -178,7 +179,9 @@ public class LoadRdaJsonApp {
     private final int batchSize;
     /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
-    /** The location where the files are. This could be a local directory or S3 path */
+    /** The RDA Version for the data to load. */
+    private final RdaVersion rdaVersion;
+    /** The location where the files are, this could be a local directory or S3 path. */
     private final Optional<String> fileLocation;
     /** The name of the FISS file to read from at the source. */
     private final Optional<String> fissFile;
@@ -208,6 +211,7 @@ public class LoadRdaJsonApp {
       writeThreads = options.intValue("job.writeThreads", 1);
       batchSize = options.intValue("job.batchSize", 100);
       runSchemaMigration = options.booleanValue("job.migration", false);
+      rdaVersion = RdaVersion.builder().versionString(options.stringValue("rda.version")).build();
       fileLocation = options.stringOption("file.location");
       fissFile = options.stringOption("file.fiss");
       mcsFile = options.stringOption("file.mcs");
@@ -241,6 +245,7 @@ public class LoadRdaJsonApp {
               .writeThreads(writeThreads)
               .batchSize(batchSize)
               .sinkTypePreference(sinkTypePreference)
+              .rdaVersion(rdaVersion)
               .build();
       final RdaSourceConfig grpcConfig =
           RdaSourceConfig.builder()
@@ -352,9 +357,10 @@ public class LoadRdaJsonApp {
      */
     private List<PipelineJob<?>> createPipelineJobs(
         RdaLoadOptions jobConfig, PipelineApplicationState appState) {
-      List<PipelineJob<?>> answer = new ArrayList<>();
-      fissFile.ifPresent(f -> answer.add(jobConfig.createFissClaimsLoadJob(appState)));
-      mcsFile.ifPresent(f -> answer.add(jobConfig.createMcsClaimsLoadJob(appState)));
+      final var mbiCache = jobConfig.createComputedMbiCache(appState);
+      final List<PipelineJob<?>> answer = new ArrayList<>();
+      fissFile.ifPresent(f -> answer.add(jobConfig.createFissClaimsLoadJob(appState, mbiCache)));
+      mcsFile.ifPresent(f -> answer.add(jobConfig.createMcsClaimsLoadJob(appState, mbiCache)));
       return answer;
     }
   }

@@ -26,7 +26,7 @@ def _(environment: Environment, **kwargs):
     global master_pac_mbis
     master_pac_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
-        db.get_pac_hashed_mbis,
+        db.get_pac_hashed_mbis_smoketest,
         use_table_sample=False,
         data_type_name="pac_mbis",
     )

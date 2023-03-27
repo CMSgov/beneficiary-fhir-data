@@ -82,12 +82,13 @@
 		<aws-java-sdk-bom.version>1.12.410</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.5</spring-data-jpa.version>
 		<spring-framework.version>5.3.23</spring-framework.version>
+
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
 		but not all (in particular, entity-manager does not have a 6.0 version available yet).
 		Staying on latest 5.x version until all components have 6.0 versions available. -->
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.2</junit.version>
-		<javadoc.version>3.4.1</javadoc.version>
+		<javadoc.version>3.5.0</javadoc.version>
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
@@ -95,8 +96,11 @@
 		<jackson-datatype-jdk8.version>2.14.2</jackson-datatype-jdk8.version>
 		<jackson-dataformat-yaml.version>2.14.2</jackson-dataformat-yaml.version>
 		<jackson-datatype-jsr310.version>2.14.2</jackson-datatype-jsr310.version>
+                <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
+                <snakeyaml.version>2.0</snakeyaml.version>
 
 		<mockito.version>5.1.1</mockito.version>
+		<system-lambda-version>1.2.1</system-lambda-version>
 		<postgresql.version>42.5.4</postgresql.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
 		<slf4j.version>2.0.6</slf4j.version>
@@ -122,15 +126,16 @@
 
 		<!-- Dependencies required for connecting to a gRPC API -->
 		<grpc_java.version>1.53.0</grpc_java.version>
-		<protoc.version>3.21.2</protoc.version>
-		<protobuf.version>3.21.2</protobuf.version>
+		<protoc.version>3.21.12</protoc.version>
+		<protobuf.version>3.21.12</protobuf.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
-		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
+		<its.db.url>jdbc:bfd-test:tc</its.db.url>
 		<its.db.username/>
 		<its.db.password/>
+		<its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
@@ -351,6 +356,13 @@
 			</dependency>
 
 			<dependency>
+				<!-- Used implicitly by jackson-dataformat-yaml.  -->
+				<!-- Defining it here to override older version referenced by jackson-dataformat-yaml. -->
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snakeyaml.version}</version>
+			</dependency>
+			<dependency>
 				<!-- Add YAML support to jackson -->
 				<groupId>com.fasterxml.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
@@ -412,6 +424,35 @@
 				<groupId>com.newrelic.telemetry</groupId>
 				<artifactId>telemetry-http-okhttp</artifactId>
 				<version>${telemetry-http-okhttp.version}</version>
+			</dependency>
+
+			<!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-netty-shaded</artifactId>
+				<version>${grpc_java.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf</artifactId>
+				<version>${grpc_java.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-stub</artifactId>
+				<version>${grpc_java.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Provides core protobuf library.  -->
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf.version}</version>
+			</dependency>
+			<dependency>
+				<!-- provides JsonFormat and JsonParser -->
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java-util</artifactId>
+				<version>${protobuf.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -483,7 +524,7 @@
 					<version>1.0.4</version>
 					<configuration>
 						<hooks>
-							<pre-commit>
+							<pre-commit><![CDATA[
 #!/usr/bin/env bash
 set -e
 
@@ -498,7 +539,7 @@ checkJavaFormat() {
   cd apps
 
   set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&amp;1
+  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&1
   checkResult=$?
   set -e
 
@@ -515,14 +556,14 @@ checkSecretFilesForPlainText() {
   echo 'Verifying secret files are not in plaintext...'
   set +e
   # read list of files containing secrets
-  IFS=$'\n' read -d '' -r -a secrets &lt; .secrets
+  IFS=$'\n' read -d '' -r -a secrets < .secrets
 
   # make list of files to be committed by printing out a newline
   # separated list of files staged for commit to a temporary file
   # and reading it as an array
   tmpfile=$(mktemp)
   git diff --cached --name-only --diff-filter=ACM > $tmpfile
-  IFS=$'\n' read -d '' -r -a commits &lt; $tmpfile
+  IFS=$'\n' read -d '' -r -a commits < $tmpfile
 
   # for all files to be committed which are a secret file,
   # grep for the header "$ANSIBLE_VAULT;1.1;AES256"
@@ -543,7 +584,7 @@ checkSecretFilesForPlainText() {
 
 checkSecretFilesForPlainText
 checkJavaFormat
-							</pre-commit>
+							]]></pre-commit>
 						</hooks>
 					</configuration>
 				</plugin>
@@ -587,6 +628,7 @@ checkJavaFormat
 							<its.db.url>${its.db.url}</its.db.url>
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
+							<its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
 						</systemPropertyVariables>
 
 						<!-- Needed to avoid test failures when comparing ETL timestamps. -->

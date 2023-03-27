@@ -1,0 +1,28 @@
+{
+    "fields": [
+            {"field": "id", "title": "Element ID"},
+            {"field": "name", "title": "Name"},
+            {"field": "description", "title": "Description"},
+            {"field": "appliesTo", "title": "Applies To"},
+            {"field": "bfdDbType", "title": "Data Type"},
+            {"field": "bfdDbSize", "title": "Data Size"},
+            {"field": "resource", "title": "STU3 Resource"},
+            {"field": "element", "title": "STU3 Element"},
+            {"field": "discriminator", "title": "STU3 Discriminator"},
+            {"field": "additional", "title": "STU3 Additional"},
+            {"field": "derived", "title": "STU3 Derived"},
+            {"field": "note", "title": "STU3 Notes"},
+            {"field": "ccwMapping", "title": "CCW Mapping"},
+            {"field": "cclfMapping", "title": "CCLF Mapping"},
+            {"field": "bfdTableType", "title": "BFD Table Type"},
+            {"field": "bfdColumnName", "title": "BFD Column Name"},
+            {"field": "bfdJavaFieldName", "title": "BFD Java Field Name"},
+            {"field": "AB2D", "title": "AB2D"},
+            {"field": "BB2", "title": "BB2"},
+            {"field": "BCDA", "title": "BCDA"},
+            {"field": "BFD", "title": "BFD"},
+            {"field": "DPC", "title": "DPC"},
+            {"field": "SyntheticData", "title": "Synthetic Data"}
+        ]
+}
+

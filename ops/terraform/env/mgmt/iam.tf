@@ -55,6 +55,57 @@ POLICY
 
 }
 
+resource "aws_iam_policy" "packer_ssm" {
+  description = "Policy granting permission for bfd-packer profiled instances to access some common SSM hierarchies"
+  name        = "bfd-${local.env}-packer-ssm"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": [
+        "ssm:GetParametersByPath",
+        "ssm:GetParameters",
+        "ssm:GetParameter"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        %{ for env in local.established_envs ~}
+        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${env}/common/*",
+        %{ endfor ~}
+        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/*"
+      ],
+      "Sid": "BFDProfile"
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+}
+
+resource "aws_iam_policy" "packer_kms" {
+  description = "Policy granting permission for bfd-packer profiled instances to decrypt using mgmt and established environment KMS keys"
+  name        = "bfd-${local.env}-packer-kms"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": ["kms:Decrypt"],
+      "Effect": "Allow",
+      "Resource": [
+        "${local.kms_key_id}",
+        "${local.test_kms_key_id}",
+        "${local.prod_sbx_kms_key_id}",
+        "${local.prod_kms_key_id}"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+}
+
 resource "aws_iam_policy" "code_artifact_rw" {
   description = "CodeArtifact read/write permissions"
   name        = "bfd-${local.env}-codeartifact-rw"

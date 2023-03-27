@@ -55,9 +55,13 @@ public class RDATestUtils {
   /** Test mbi has (old). */
   public static final String MBI_OLD_HASH = "3816a4c752";
   /** Test fiss claim (DCN). */
-  public static final String FISS_CLAIM_A_DCN = "123456";
+  public static final String FISS_CLAIM_A_DCN = "123456d";
   /** Test fiss claim (DCN). */
-  public static final String FISS_CLAIM_B_DCN = "123457";
+  public static final String FISS_CLAIM_B_DCN = "123457d";
+  /** Test fiss claim (ClaimId). */
+  public static final String FISS_CLAIM_A_CLAIM_ID = "123456";
+  /** Test fiss claim (ClaimId). */
+  public static final String FISS_CLAIM_B_CLAIM_ID = "123457";
 
   /** The entity manager. */
   private EntityManager entityManager;
@@ -173,7 +177,9 @@ public class RDATestUtils {
     RdaFissClaim claim =
         RdaFissClaim.builder()
             .sequenceNumber(1L)
+            .claimId(FISS_CLAIM_A_CLAIM_ID)
             .dcn(FISS_CLAIM_A_DCN)
+            .intermediaryNb("99999")
             .hicNo("hicnumber")
             .currStatus('a')
             .currLoc1('z')
@@ -195,19 +201,20 @@ public class RDATestUtils {
             .stmtCovToDate(LocalDate.of(1970, 7, 20))
             .servTypeCd("A")
             .freqCd("C")
+            .clmTypInd("4")
             .build();
 
     Set<RdaFissProcCode> procCodes =
         Set.of(
             RdaFissProcCode.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 1)
                 .procCode("CODEABC")
                 .procFlag("FLAG")
                 .procDate(LocalDate.of(1970, 7, 20))
                 .build(),
             RdaFissProcCode.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 2)
                 .procCode("CODECBA")
                 .procFlag("FLA2")
@@ -216,19 +223,19 @@ public class RDATestUtils {
     Set<RdaFissDiagnosisCode> diagnosisCodes =
         Set.of(
             RdaFissDiagnosisCode.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 1)
                 .diagCd2("admitcd")
                 .diagPoaInd("Z")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 2)
                 .diagCd2("other")
                 .diagPoaInd("U")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 3)
                 .diagCd2("princcd")
                 .diagPoaInd("n")
@@ -237,7 +244,7 @@ public class RDATestUtils {
     Set<RdaFissPayer> payers =
         Set.of(
             RdaFissPayer.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 1)
                 .beneFirstName("jim")
                 .beneMidInit("k")
@@ -248,7 +255,7 @@ public class RDATestUtils {
                 .payersName("MEDICARE")
                 .build(),
             RdaFissPayer.builder()
-                .dcn(FISS_CLAIM_A_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 2)
                 .insuredName("BAKER  JIM  K")
                 .payerType(RdaFissPayer.PayerType.Insured)
@@ -273,7 +280,9 @@ public class RDATestUtils {
     RdaFissClaim claim =
         RdaFissClaim.builder()
             .sequenceNumber(2L)
+            .claimId(FISS_CLAIM_B_CLAIM_ID)
             .dcn(FISS_CLAIM_B_DCN)
+            .intermediaryNb("99999")
             .hicNo("hicnumbe2")
             .currStatus('\0')
             .currLoc1('r')
@@ -294,12 +303,13 @@ public class RDATestUtils {
             .stmtCovToDate(LocalDate.of(1970, 8, 3))
             .servTypeCd("A")
             .freqCd("C")
+            .clmTypInd("1")
             .build();
 
     Set<RdaFissProcCode> procCodes =
         Set.of(
             RdaFissProcCode.builder()
-                .dcn(FISS_CLAIM_B_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 1)
                 .procCode("CODEABD")
                 .procFlag("FLAC")
@@ -309,19 +319,19 @@ public class RDATestUtils {
     Set<RdaFissDiagnosisCode> diagnosisCodes =
         Set.of(
             RdaFissDiagnosisCode.builder()
-                .dcn(FISS_CLAIM_B_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 1)
                 .diagCd2("princcc")
                 .diagPoaInd("Y")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn(FISS_CLAIM_B_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 2)
                 .diagCd2("other2")
                 .diagPoaInd("w")
                 .build(),
             RdaFissDiagnosisCode.builder()
-                .dcn(FISS_CLAIM_B_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 3)
                 .diagCd2("admitcc")
                 .diagPoaInd("1")
@@ -330,7 +340,7 @@ public class RDATestUtils {
     Set<RdaFissPayer> payers =
         Set.of(
             RdaFissPayer.builder()
-                .dcn(FISS_CLAIM_B_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 1)
                 .beneFirstName("alice")
                 .beneMidInit("r")
@@ -341,7 +351,7 @@ public class RDATestUtils {
                 .payersName("MEDICARE")
                 .build(),
             RdaFissPayer.builder()
-                .dcn(FISS_CLAIM_B_DCN)
+                .claimId(claim.getClaimId())
                 .rdaPosition((short) 2)
                 .insuredName("SMITH  ALICE  R")
                 .payerType(RdaFissPayer.PayerType.Insured)

@@ -9,10 +9,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.LongStream;
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -33,37 +33,73 @@ import lombok.extern.slf4j.Slf4j;
  * excessive lookups in case we encounter the same MBI frequently during a session.
  */
 @Slf4j
-public class MbiCache {
+public abstract class MbiCache {
   /**
-   * Increment of time used by {@link DatabaseBackedCache#waitForRetry} to compute exponential
-   * backoff delay when retrying insert of record into MBI cache table. The value is somewhat
-   * arbitrary but should be long enough to be meaningful but short enough to not impose excessive
-   * wait times.
+   * Increment of time used by {@link DatabaseBacked#waitForRetry} to compute exponential backoff
+   * delay when retrying insert of record into MBI cache table. The value is somewhat arbitrary but
+   * should be long enough to be meaningful but short enough to not impose excessive wait times.
    */
-  private static final int RETRY_INTERVAL_MILLIS = 50;
-
-  /** Used to compute hash values for raw MBI strings. */
-  protected final IdHasher hasher;
+  private static final int RETRY_INTERVAL_MILLIS = 100;
 
   /** Used to track metrics for dashboards. */
   @Getter(AccessLevel.PACKAGE)
   protected final Metrics metrics;
 
   /** In-memory cache used to prevent re-calculation of recently used MBI hashes. */
-  private final Cache<String, Mbi> cache;
+  protected final Cache<String, Mbi> cache;
 
   /**
    * Constructs a new instance that computes all hash values on demand.
    *
-   * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
    * @param metrics {@link Metrics} to use for reporting metrics
+   * @param cache {@link Cache} used to manage recent values in memory
    */
-  @VisibleForTesting
-  MbiCache(IdHasher hasher, Metrics metrics) {
-    this.hasher = hasher;
+  protected MbiCache(Metrics metrics, Cache<String, Mbi> cache) {
     this.metrics = metrics;
-    cache = CacheBuilder.newBuilder().maximumSize(hasher.getConfig().getCacheSize()).build();
+    this.cache = cache;
   }
+
+  /**
+   * Returns an Mbi object containing an appropriate hash value for the given MBI string.
+   *
+   * @param mbi the MBI to be hashed
+   * @return an {@link Mbi} object with correct hash value
+   */
+  public final Mbi lookupMbi(String mbi) {
+    try {
+      metrics.addLookup();
+      return cache.get(mbi, () -> computeMbi(mbi));
+    } catch (ExecutionException ex) {
+      final Throwable cause = ex.getCause();
+      log.warn("caught exception while saving generated hash: message={}", cause.getMessage());
+      if (cause instanceof RuntimeException) {
+        throw (RuntimeException) cause;
+      } else {
+        throw new RuntimeException(cause);
+      }
+    }
+  }
+
+  /**
+   * Creates a new instance connected to the specified database. Equivalent to calling {@link
+   * #databaseCache} with appropriate parameters. Shares the same in memory cache as this instance
+   * but does its database lookup using the provided {@link TransactionManager}.
+   *
+   * <p>Lifespan of the transactionManager is controlled by the caller. This object never closes the
+   * transactionManager.
+   *
+   * @param transactionManager {@link TransactionManager} used to query and create records
+   * @return an instance using a database backed cache as well as in memory cache
+   */
+  public abstract MbiCache withDatabaseLookup(TransactionManager transactionManager);
+
+  /**
+   * Returns an Mbi object containing an appropriate hash value for the given MBI string.
+   *
+   * @param mbi the MBI to be hashed
+   * @return an {@link Mbi} object with correct hash value
+   */
+  protected abstract Mbi computeMbi(String mbi);
 
   /**
    * Produces a simple instance that computes the hash value when needed and is not connected to any
@@ -87,7 +123,11 @@ public class MbiCache {
    * @return an MbiCache instance with no database connection
    */
   public static MbiCache computedCache(IdHasher.Config config, MetricRegistry appMetrics) {
-    return new MbiCache(new IdHasher(config), new Metrics(appMetrics));
+    IdHasher hasher = new IdHasher(config);
+    Cache<String, Mbi> cache =
+        CacheBuilder.newBuilder().maximumSize(hasher.getConfig().getCacheSize()).build();
+    Metrics metrics = new Metrics(appMetrics);
+    return new Computed(metrics, cache, hasher);
   }
 
   /**
@@ -95,64 +135,50 @@ public class MbiCache {
    * in the database. The Mbi objects returned from this have their primary key (mbiId) already set
    * and can be used with a persistent claim object. Without requiring a merge.
    *
-   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
-   * entityManager.
+   * <p>Lifespan of the transactionManager is controlled by the caller. This object never closes the
+   * transactionManager.
    *
    * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
    * @param appMetrics {@link MetricRegistry} to use for reporting metrics
-   * @param entityManager {@link EntityManager} used to query and create records
-   * @return an {@link MbiCache} instance with a corresponding record in the database
+   * @param transactionManager {@link TransactionManager} used to query and create records
+   * @return an instance with a corresponding record in the database
    */
   public static MbiCache databaseCache(
-      IdHasher hasher, MetricRegistry appMetrics, EntityManager entityManager) {
-    return new DatabaseBackedCache(hasher, new Metrics(appMetrics), entityManager);
+      IdHasher hasher, MetricRegistry appMetrics, TransactionManager transactionManager) {
+    Cache<String, Mbi> cache =
+        CacheBuilder.newBuilder().maximumSize(hasher.getConfig().getCacheSize()).build();
+    Metrics metrics = new Metrics(appMetrics);
+    return new DatabaseBacked(metrics, cache, hasher, new Random(), transactionManager);
   }
 
-  /**
-   * Returns an Mbi object containing an appropriate hash value for the given MBI string.
-   *
-   * @param mbi the MBI to be hashed
-   * @return an {@link Mbi} object with correct hash value
-   */
-  public Mbi lookupMbi(String mbi) {
-    try {
-      metrics.addLookup();
-      return cache.get(mbi, () -> lookupMbiImpl(mbi));
-    } catch (ExecutionException ex) {
-      final var hash = hasher.computeIdentifierHash(mbi);
-      log.warn(
-          "caught exception while saving generated hash: hash={} message={}",
-          hash,
-          ex.getCause().getMessage());
+  /** Concrete class that computes new hashes on demand. */
+  static class Computed extends MbiCache {
+    /** Used to compute hash values for raw MBI strings. */
+    protected final IdHasher hasher;
+
+    /**
+     * Creates a new instance with the specified parameters.
+     *
+     * @param metrics {@link Metrics} to use for reporting metrics
+     * @param cache {@link Cache} used to manage recent values in memory
+     * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
+     */
+    Computed(Metrics metrics, Cache<String, Mbi> cache, IdHasher hasher) {
+      super(metrics, cache);
+      this.hasher = hasher;
+    }
+
+    @Override
+    public MbiCache withDatabaseLookup(TransactionManager transactionManager) {
+      return new DatabaseBacked(metrics, cache, hasher, new Random(), transactionManager);
+    }
+
+    @Override
+    protected Mbi computeMbi(String mbi) {
+      metrics.addMiss();
+      metrics.addRetries(0);
       return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
     }
-  }
-
-  /**
-   * Creates a new instance connected to the specified database. Equivalent to calling {@code
-   * databaseCache()} with appropriate parameters.
-   *
-   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
-   * entityManager.
-   *
-   * @param entityManager {@link EntityManager} used to query and create records
-   * @return an {@link MbiCache} instance with a corresponding record in the database
-   */
-  public MbiCache withDatabaseLookup(EntityManager entityManager) {
-    return new DatabaseBackedCache(hasher, metrics, entityManager);
-  }
-
-  /**
-   * Method called to perform the computation and/or I/O necessary to produce an Mbi object from an
-   * MBI string.
-   *
-   * @param mbi an unhashed medicare beneficiary ID
-   * @return corresponding {@link Mbi}
-   */
-  protected Mbi lookupMbiImpl(String mbi) {
-    metrics.addMiss();
-    metrics.addRetries(0);
-    return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
   }
 
   /**
@@ -164,38 +190,50 @@ public class MbiCache {
    */
   @VisibleForTesting
   @Slf4j
-  static class DatabaseBackedCache extends MbiCache {
-    /** Handles database entity management. */
-    private final EntityManager entityManager;
+  static class DatabaseBacked extends MbiCache {
+    /** Used to compute hash values for raw MBI strings. */
+    protected final IdHasher hasher;
+    /** The {@link TransactionManager} used to execute transactions. */
+    private final TransactionManager transactionManager;
     /** Creates random values. */
     private final Random random;
 
     /**
-     * Creates a new instance with the specified parameters.
+     * Creates a new instance with the specified parameters. The caller is responsible for closing
+     * the {@link TransactionManager} when it is no longer needed.
      *
-     * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
      * @param metrics {@link Metrics} to use for reporting metrics
-     * @param entityManager {@link EntityManager} used to query and create records
+     * @param cache {@link Cache} used to manage recent values in memory
+     * @param hasher {@link IdHasher} used to compute hash values for raw MBI strings.
+     * @param random {@link Random} used to generate random wait times during retries
+     * @param transactionManager {@link TransactionManager} used to query and create records
      */
-    @VisibleForTesting
-    DatabaseBackedCache(IdHasher hasher, Metrics metrics, EntityManager entityManager) {
-      super(hasher, metrics);
-      this.entityManager = entityManager;
-      random = new Random();
+    DatabaseBacked(
+        Metrics metrics,
+        Cache<String, Mbi> cache,
+        IdHasher hasher,
+        Random random,
+        TransactionManager transactionManager) {
+      super(metrics, cache);
+      this.hasher = hasher;
+      this.random = random;
+      this.transactionManager = transactionManager;
     }
 
     /**
-     * Look up or write cached MBI database record. In case of database exception re-attempt up to 5
-     * times with a short random interval. Exception is most likely caused by two threads attempting
-     * to write the same MBI so the first retry should resolve the issue. If all retries fail we
-     * simply return the computed hash value and let the caller try to write the record.
+     * {@inheritDoc}
+     *
+     * <p>Look up or write cached MBI database record. In case of database exception re-attempt up
+     * to 5 times with a short random interval. Exception is most likely caused by two threads
+     * attempting to write the same MBI so the first retry should resolve the issue. If all retries
+     * fail we simply return the computed hash value and let the caller try to write the record.
      *
      * @param mbi MBI to be hashed
      * @return MBI hash value
      */
     @VisibleForTesting
     @Override
-    public Mbi lookupMbiImpl(String mbi) {
+    protected Mbi computeMbi(String mbi) {
       ReadResult result = new ReadResult(null, false);
       int retryNumber = 0;
       while (result.isEmpty() && retryNumber <= 5) {
@@ -230,38 +268,44 @@ public class MbiCache {
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Creates a new instance using the specified {@link TransactionManager} but sharing all
+     * other resources with this instance.
+     *
+     * @param transactionManager {@link TransactionManager} used to query and create records
+     * @return the cache
+     */
+    @Override
+    public MbiCache withDatabaseLookup(TransactionManager transactionManager) {
+      return new DatabaseBacked(metrics, cache, hasher, random, transactionManager);
+    }
+
+    /**
      * Look up the value in the database and return its hash if a record is found. If no record is
      * found insert one. Any PersistenceException will be passed through to the caller.
      *
      * @param mbi MBI to look up in the database
-     * @return {@link ReadResult} containing the Mbi that is known to exist in the entityManager and
-     *     a flag to indicate if the record was inserted by this call
+     * @return {@link ReadResult} containing the Mbi that is known to exist in the database and a
+     *     flag to indicate if the record was inserted by this call
      */
     @VisibleForTesting
     ReadResult readOrInsertIfMissing(String mbi) {
-      entityManager.getTransaction().begin();
-      boolean successful = false;
-      try {
-        final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
-        final Root<Mbi> root = criteria.from(Mbi.class);
-        criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
-        boolean inserted = false;
-        final var records = entityManager.createQuery(criteria).getResultList();
-        var record = records.isEmpty() ? null : records.get(0);
-        if (record == null) {
-          record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
-          inserted = true;
-        }
-        successful = true;
-        return new ReadResult(record, inserted);
-      } finally {
-        if (successful) {
-          entityManager.getTransaction().commit();
-        } else {
-          entityManager.getTransaction().rollback();
-        }
-      }
+      return transactionManager.executeFunction(
+          entityManager -> {
+            final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+            final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+            final Root<Mbi> root = criteria.from(Mbi.class);
+            criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+            boolean inserted = false;
+            final var records = entityManager.createQuery(criteria).getResultList();
+            var record = records.isEmpty() ? null : records.get(0);
+            if (record == null) {
+              record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
+              inserted = true;
+            }
+            return new ReadResult(record, inserted);
+          });
     }
 
     /**
@@ -281,7 +325,7 @@ public class MbiCache {
     }
   }
 
-  /** Used to return two output values from {@link DatabaseBackedCache#readOrInsertIfMissing}. */
+  /** Used to return two output values from {@link DatabaseBacked#readOrInsertIfMissing}. */
   @VisibleForTesting
   @Data
   static class ReadResult {

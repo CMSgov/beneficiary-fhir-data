@@ -100,9 +100,7 @@ def split_future_synthea_load(args):
                 ## write today's files to overwrite the originals
                 write_path = f"{synthea_output_filepath}{file_name}"
             else:
-                ## The folder gets saved with _ instead of : since colon is illegal
-                week_formatted = week_key.replace(':', '_')
-                write_path = f"{synthea_output_filepath}{week_formatted}/{file_name}"
+                write_path = f"{synthea_output_filepath}{week_key}/{file_name}"
             ## Add header to data
             data = [headers[file_name]] + file_dict[week_key]
             with open(write_path, 'w') as f:
@@ -138,7 +136,7 @@ def create_week_folders_and_manifests(file_data_tuples, synthea_output_filepath,
     
     ## Create folders and manifests
     for week in weeks_files.keys():
-        week_folder_path = synthea_output_filepath + "/" + week.replace(':', '_')
+        week_folder_path = synthea_output_filepath + week
         if not week == today.strftime(manifest_date_format) and not os.path.exists(week_folder_path):
             ## Skip today's date since we'll replace those files in place
             os.mkdir(week_folder_path)
@@ -151,7 +149,7 @@ def create_manifest(path, file_list, timestamp):
     '''
     with open(path + "/0_manifest.xml", "w") as manifest:
         manifest_lines = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
-        manifest_lines += f'<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9" timestamp="{timestamp}" sequenceId="0" syntheticData="true">\n'
+        manifest_lines += f'<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10" timestamp="{timestamp}" sequenceId="0" syntheticData="true">\n'
         for file in file_list:
             type = file.rstrip('.csv').upper()
             manifest_lines += f'  <entry name="{file}" type="{type}"/>\n'

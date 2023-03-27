@@ -141,10 +141,10 @@ def handler(event, context):
             f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
         )
         username = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_username", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/data_server_db_username", with_decrypt=True
         )
         raw_password = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/vault_data_server_db_password", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/data_server_db_password", with_decrypt=True
         )
         cert_key = get_ssm_parameter(
             f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
@@ -180,7 +180,7 @@ def handler(event, context):
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
     store_tag_args = [f"--stats-store-tag={tag}" for tag in invoke_event.store_tags]
-    process = subprocess.run(
+    regression_process = subprocess.run(
         [
             "locust",
             f"--locustfile=/var/task/{invoke_event.suite_version}/regression_suite.py",
@@ -204,13 +204,40 @@ def handler(event, context):
         text=True,
         check=False,
     )
+    regression_suite_succeeded = regression_process.returncode == 0
+
+    # This is a temporary addition to the regression suite lambda in order to easily smoketest PACA
+    # endpoints. No performance statistics are collected as the data this smoketest test suite
+    # operates on is not synthetic nor is it consistent across environments. Because it's just a
+    # smoketest the number of users, spawn rate, and runtime are not entirely important and so have
+    # been made static.
+    # TODO: Replace this in favor of merging PACA endpoint tests into the full regression suite in BFD-2490
+    paca_smoketest_process = subprocess.run(
+        [
+            "locust",
+            "--locustfile=/var/task/v2/partially_adjudicated_smoketest.py",
+            f"--host={invoke_event.host}",
+            "--users=10",
+            "--spawn-rate=10",
+            "--spawned-runtime=10s",
+            f"--database-connection-string={db_dsn}",
+            f"--client-cert-path={cert_path}",
+            "--headless",
+            "--only-summary",
+        ],
+        text=True,
+        check=False,
+    )
+    paca_smoketest_succeeded = paca_smoketest_process.returncode == 0
 
     # Signal the outcome of the locust test run
     send_pipeline_signal(
         signal_queue_url=signal_queue_url,
-        result=TestResult.SUCCESS if process.returncode == 0 else TestResult.FAILURE,
+        result=TestResult.SUCCESS
+        if regression_suite_succeeded and paca_smoketest_succeeded
+        else TestResult.FAILURE,
         message="Pipeline run finished, check the CloudWatch logs for more information",
         context=context,
     )
 
-    return process.stdout
+    return regression_process.stdout

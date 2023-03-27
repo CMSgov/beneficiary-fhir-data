@@ -44,7 +44,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
       int errorLimit) {
     super(appState, RdaApiProgress.ClaimType.FISS, autoUpdateLastSeq, errorLimit);
     this.transformer =
-        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
+        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(transactionManager));
   }
 
   /**
@@ -61,7 +61,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(FissClaimChange object) {
-    return object.getClaim().getDcn();
+    return object.getClaim().getRdaClaimKey();
   }
 
   /** {@inheritDoc} */
@@ -96,7 +96,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return RdaClaimMessageMetaData.builder()
         .sequenceNumber(change.getSequenceNumber())
         .claimType(RdaApiProgress.ClaimType.FISS)
-        .claimId(claim.getDcn())
+        .claimId(claim.getClaimId())
         .mbiRecord(claim.getMbiRecord())
         .claimState(String.valueOf(claim.getCurrStatus()))
         .lastUpdated(claim.getLastUpdated())
@@ -116,7 +116,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
       throws IOException {
     return MessageError.builder()
         .sequenceNumber(change.getSeq())
-        .claimId(change.getClaim().getDcn())
+        .claimId(change.getClaim().getRdaClaimKey())
         .claimType(MessageError.ClaimType.FISS)
         .apiSource(apiVersion)
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))

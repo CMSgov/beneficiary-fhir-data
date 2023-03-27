@@ -31,7 +31,7 @@ EOF
 
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
-  description = "Permissions to /bfd/${local.env}/common and /bfd/${local.env}/server SSM hierarchies"
+  description = "Permissions to /bfd/${local.env}/common, /bfd/${local.env}/server, and /bfd/mgmt/common/sensitive/user SSM hierarchies"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -44,6 +44,8 @@ resource "aws_iam_policy" "ssm" {
                 "ssm:GetParameter"
             ],
             "Resource": [
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
+                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
                 "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/*",
                 "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/server/*"
             ]
@@ -55,7 +57,7 @@ EOF
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${local.service}-kms"
-  description = "Permissions to decrypt master KMS key for ${local.env}"
+  description = "Permissions to decrypt master KMS key for ${local.env}, and the mgmt KMS key"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -66,7 +68,8 @@ resource "aws_iam_policy" "kms" {
                 "kms:Decrypt"
             ],
             "Resource": [
-                "${local.kms_key_arn}"
+                "${local.kms_key_arn}",
+                "${local.mgmt_kms_key_arn}"
             ]
         }
     ]

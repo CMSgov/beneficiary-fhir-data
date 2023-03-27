@@ -1,0 +1,104 @@
+#!/usr/bin/env groovy
+
+/**
+ * <p>
+ * This script will be run by Jenkins when building platinum AMI images.
+ * </p>
+ */
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def goldAmiId
+def platinumAmiId
+
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
+        }
+    }
+
+    // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
+    triggers {
+        cron('30 11 * * *')
+    }
+
+    stages {
+        stage('Find AMIs') {
+            steps {
+                script {
+                    awsAuth.assumeRole()
+
+                    // Query for the latest gold AMI ID
+                    goldAmiId = sh(
+                    returnStdout: true,
+                    script: "aws ec2 describe-images --filters \
+                    'Name=name,Values=amzn2legacy*' \
+                    'Name=state,Values=available' --region us-east-1 --output json | \
+                    jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+                    ).trim()
+
+                    // Query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
+                    platinumAmiId = sh(
+                    returnStdout: true,
+                    script: "aws ec2 describe-images \
+                    --filters 'Name=tag:amiSourceId,Values=${goldAmiId}' \
+                    'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+                    'Name=state,Values=available' --region us-east-1 \
+                    --query 'Images[*].[ImageId]' \
+                     --output text"
+                    ).trim()
+                }
+            }
+        }
+
+        stage('Build Platinum AMI') {
+            steps {
+                script {
+                    awsAuth.assumeRole()
+
+                    if (platinumAmiId.length() != 0) {
+                        // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
+                        echo "Using latest platinum AMI image: ${platinumAmiId}"
+                    } else if (platinumAmiId.length() == 0) {
+                        // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
+                        echo 'Deploying and tagging new platinum AMI'
+
+                        // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
+                        withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
+                            // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+                            dir('ops/ansible/playbooks-ccs') {
+                                env.goldAmi = goldAmiId
+                                sh '''
+                                packer build -color=false -var vault_password_file="$vaultPasswordFile" \
+                                -var source_ami="${goldAmi}" \
+                                -var subnet_id=subnet-092c2a68bd18b34d1 \
+                                ../../packer/build_bfd-platinum.json
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

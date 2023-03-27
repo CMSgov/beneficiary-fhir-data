@@ -21,11 +21,8 @@ readonly DOCKERFILE_PATH
 BFD_S3_UTILITIES_SCRIPT="s3_utilities.py"
 readonly BFD_S3_UTILITIES_SCRIPT
 
-SYNTHEA_NATIONAL_V1_SCRIPT="national_bfd.sh"
-readonly SYNTHEA_NATIONAL_V1_SCRIPT
-
-SYNTHEA_NATIONAL_V2_SCRIPT="national_bfd_v2.sh"
-readonly SYNTHEA_NATIONAL_V2_SCRIPT
+SYNTHEA_NATIONAL_SCRIPT="national_bfd.sh"
+readonly SYNTHEA_NATIONAL_SCRIPT
 
 SYNTHEA_JAR_FILE="synthea-with-dependencies.jar"
 readonly SYNTHEA_JAR_FILE
@@ -107,8 +104,7 @@ push_image_to_ecr() {
 clean_up() {
   rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/src"
   rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_JAR_FILE"
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_NATIONAL_V1_SCRIPT"
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_NATIONAL_V2_SCRIPT"
+  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_NATIONAL_SCRIPT"
 }
 
 clean_up

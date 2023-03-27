@@ -5,6 +5,7 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
@@ -259,6 +260,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     /** Indicates the preferred sink type to create for created jobs. */
     private final SinkTypePreference sinkTypePreference;
 
+    /** Indicates the RDA Version (range) that the job is allows to process. */
+    private final RdaVersion rdaVersion;
+
     /**
      * Instantiates a new config.
      *
@@ -268,7 +272,8 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      * @param startingFissSeqNum the starting fiss seq num
      * @param startingMcsSeqNum the starting MCS seq num
      * @param processDLQ if the job should process the DLQ
-     * @param sinkTypePreference The {@link SinkTypePreference} to use for created jobs.
+     * @param sinkTypePreference The {@link SinkTypePreference} to use for created jobs
+     * @param rdaVersion The required {@link RdaVersion} in order to ingest data
      */
     @Builder
     private Config(
@@ -278,7 +283,8 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
         @Nullable Long startingFissSeqNum,
         @Nullable Long startingMcsSeqNum,
         boolean processDLQ,
-        SinkTypePreference sinkTypePreference) {
+        SinkTypePreference sinkTypePreference,
+        RdaVersion rdaVersion) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
       this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
@@ -286,6 +292,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       this.startingMcsSeqNum = startingMcsSeqNum;
       this.processDLQ = processDLQ;
       this.sinkTypePreference = sinkTypePreference;
+      this.rdaVersion = rdaVersion;
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
@@ -320,6 +327,15 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      */
     public boolean shouldProcessDLQ() {
       return processDLQ;
+    }
+
+    /**
+     * Returns the RDA API version that jobs using this config can ingest data from.
+     *
+     * @return The RDA API version that jobs using this config can ingest data from.
+     */
+    public RdaVersion getRdaVersion() {
+      return rdaVersion;
     }
   }
 

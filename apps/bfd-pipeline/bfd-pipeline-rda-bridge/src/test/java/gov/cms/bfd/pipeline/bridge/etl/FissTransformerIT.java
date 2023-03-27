@@ -327,7 +327,7 @@ public class FissTransformerIT {
   /**
    * Sets {@link Arguments} the claim to a new claim that has been previously processed.
    *
-   * @return {@link Arugments} the expected claim lines and their associated numbers
+   * @return {@link Arguments} the expected claim lines and their associated numbers
    */
   private static Arguments newNonFirstClaimCase() {
     final String NEW_CLAIM_DCN = "dcn87654321";
@@ -351,7 +351,10 @@ public class FissTransformerIT {
     Optional<MessageOrBuilder> expectedResponse = Optional.of(expectedResponseClaimChange);
 
     FissClaim expectedWrappedClaim =
-        TestData.createDefaultClaimBuilder().setDcn(NEW_CLAIM_DCN).build();
+        TestData.createDefaultClaimBuilder()
+            .setDcn(NEW_CLAIM_DCN)
+            .setRdaClaimKey(TestData.CLM_ID)
+            .build();
     FissClaimChange expectedWrappedClaimChange =
         createFissClaimChange(expectedWrappedClaim, NEW_CLAIM_DCN, 2);
 
@@ -399,6 +402,8 @@ public class FissTransformerIT {
         .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setDcn(dcn)
+        .setRdaClaimKey(TestData.CLM_ID)
+        .setIntermediaryNb(claim.getIntermediaryNb())
         .setSource(
             RecordSource.newBuilder()
                 .setPhase("P1")
@@ -462,7 +467,8 @@ public class FissTransformerIT {
     private static final String PRCDR_DT1 = "10-Jan-2011";
     /** Claim Line Number. */
     private static final String CLM_LINE_NUM = "1";
-
+    /** Hardcoded IntermediaryNb. */
+    private static final String HARDCODED_INTERMEDIARY_NB = "?";
     /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
     /** Hardcoded Location2. */
@@ -485,6 +491,7 @@ public class FissTransformerIT {
      */
     public static FissClaim.Builder createDefaultClaimBuilder() {
       return FissClaim.newBuilder()
+          .setRdaClaimKey(CLM_ID)
           .setDcn(FI_DOC_CLM_CNTL_NUM)
           .setHicNo(HIC_NO)
           .setMbi(MBI)
@@ -494,6 +501,7 @@ public class FissTransformerIT {
           .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING)
           .setCurrTranDtCymd(HARDCODED_TRAN_DATE_CYMD)
           .setFedTaxNb(HARDCODED_FED_TAX_NUMBER)
+          .setIntermediaryNb(HARDCODED_INTERMEDIARY_NB)
           .setRecdDtCymd(HARDCODED_RECEIVED_DATE_CYMD)
           .addFissPayers(
               FissPayer.newBuilder()

@@ -139,12 +139,11 @@ public final class DataSetQueue {
       DataSetManifest.DataSetManifestId manifestId, String manifestS3Key) {
     DataSetManifest manifest;
 
-    // If the keyspace we're scanning doesnt exist, bail early
+    /*
+     * If the keyspace we're scanning doesnt exist, bail early (This can happen if we're loading synthetic data,
+     * as it checks the regular incoming folder for the manifest first.)
+     */
     if (!s3TaskManager.getS3Client().doesObjectExist(options.getS3BucketName(), manifestS3Key)) {
-      LOGGER.warn(
-          "Unable to find keyspace {} in bucket {} while scanning for manifests.",
-          manifestS3Key,
-          options.getS3BucketName());
       return;
     }
 

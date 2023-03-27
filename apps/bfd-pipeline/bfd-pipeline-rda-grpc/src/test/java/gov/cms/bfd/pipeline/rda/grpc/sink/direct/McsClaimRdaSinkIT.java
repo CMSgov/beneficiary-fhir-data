@@ -48,7 +48,7 @@ public class McsClaimRdaSinkIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         McsClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final LocalDate today = LocalDate.of(2022, 1, 3);
           final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
@@ -114,9 +114,11 @@ public class McsClaimRdaSinkIT {
           assertEquals(1, count);
 
           List<RdaMcsClaim> resultClaims =
-              entityManager
-                  .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
-                  .getResultList();
+              transactionManager.executeFunction(
+                  entityManager ->
+                      entityManager
+                          .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
+                          .getResultList());
           assertEquals(1, resultClaims.size());
           RdaMcsClaim resultClaim = resultClaims.get(0);
           assertEquals(Long.valueOf(7), resultClaim.getSequenceNumber());
@@ -130,7 +132,8 @@ public class McsClaimRdaSinkIT {
               Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());
 
           Mbi databaseMbiEntity =
-              RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getIdrClaimMbi());
+              RdaPipelineTestUtils.lookupCachedMbi(
+                  transactionManager, claimMessage.getIdrClaimMbi());
           assertNotNull(databaseMbiEntity);
           assertEquals(claim.getIdrClaimMbi(), databaseMbiEntity.getMbi());
           assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
@@ -152,7 +155,7 @@ public class McsClaimRdaSinkIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         McsClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final LocalDate today = LocalDate.of(2022, 1, 3);
           final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
@@ -210,22 +213,25 @@ public class McsClaimRdaSinkIT {
           final McsClaimTransformer transformer =
               new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
           final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true, 0);
-          final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
           assertThrows(ProcessingException.class, () -> sink.writeMessage("version", message));
 
           List<RdaMcsClaim> resultClaims =
-              entityManager
-                  .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
-                  .getResultList();
+              transactionManager.executeFunction(
+                  entityManager ->
+                      entityManager
+                          .createQuery("select c from RdaMcsClaim c", RdaMcsClaim.class)
+                          .getResultList());
           assertEquals(0, resultClaims.size());
 
           List<MessageError> errors =
-              entityManager
-                  .createQuery("select e from MessageError e", MessageError.class)
-                  .getResultList();
+              transactionManager.executeFunction(
+                  entityManager ->
+                      entityManager
+                          .createQuery("select e from MessageError e", MessageError.class)
+                          .getResultList());
           assertEquals(1, errors.size());
 
           for (MessageError error : errors) {

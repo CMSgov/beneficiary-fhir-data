@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
 import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobArguments;
@@ -21,6 +22,7 @@ import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +65,15 @@ public final class PipelineManager implements AutoCloseable {
    * exception to that rule.
    */
   private final ListeningScheduledExecutorService jobExecutor;
+
+  /**
+   * This is a handle of the internal thread pool used by our job executor. The only reason this is
+   * stored here is to report the number of remaining threads remaining when we encounter an error
+   * and are waiting on all jobs/threads to close out before the pipeline shuts down completely, as
+   * the {@link ListeningScheduledExecutorService} doesn't have a good way to get its number of
+   * running threads or an instance of this underlying thread pool.
+   */
+  private static ScheduledThreadPoolExecutor jobExecutorThreadPoolHandle;
 
   /**
    * This {@link Map} stores handles to all enqueued job {@link Future}s. We need to keep track of
@@ -119,19 +130,32 @@ public final class PipelineManager implements AutoCloseable {
   private final Map<PipelineJobType<?>, PipelineJob<?>> jobRegistry;
 
   /**
+   * Keep a reference to the S3 task manager to properly clean it up if we need to shut down the
+   * application unexpectedly.
+   */
+  private final S3TaskManager s3TaskManagerHandle;
+
+  /**
    * Constructs a new {@link PipelineManager} instance. Note that this intended for use as a
    * singleton service in the application: only one instance running at a time.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param jobRecordStore the {@link PipelineJobRecordStore} for the overall application
+   * @param s3TaskManagerHandle a handle to the S3 task manager for reporting on cleanup operations;
+   *     may be {@code null}, and if so will not report the number of remaining threads when waiting
+   *     for pipeline shutdown
    */
-  public PipelineManager(MetricRegistry appMetrics, PipelineJobRecordStore jobRecordStore) {
+  public PipelineManager(
+      MetricRegistry appMetrics,
+      PipelineJobRecordStore jobRecordStore,
+      S3TaskManager s3TaskManagerHandle) {
     this.appMetrics = appMetrics;
     this.jobRecordStore = jobRecordStore;
     this.jobExecutor = createJobExecutor();
     this.jobsEnqueuedHandles = new ConcurrentHashMap<>();
     this.jobMonitorsExecutor = Executors.newCachedThreadPool();
     this.jobRegistry = new HashMap<>();
+    this.s3TaskManagerHandle = s3TaskManagerHandle;
 
     /*
      * Bootstrap the SchedulerJob and VolunteerJob, which are responsible for ensuring that all of
@@ -156,6 +180,7 @@ public final class PipelineManager implements AutoCloseable {
   private static ListeningScheduledExecutorService createJobExecutor() {
     ScheduledThreadPoolExecutor jobExecutorInner =
         new ScheduledThreadPoolExecutor(JOB_EXECUTOR_THREADS);
+    jobExecutorThreadPoolHandle = jobExecutorInner;
     jobExecutorInner.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     return MoreExecutors.listeningDecorator(jobExecutorInner);
   }
@@ -277,7 +302,7 @@ public final class PipelineManager implements AutoCloseable {
         jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
         jobsEnqueuedHandles.remove(jobRecordId);
       }
-      LOGGER.error("Handle job failure in Pipeline: " + exception.getMessage(), exception);
+      LOGGER.error("Job failure in Pipeline: " + exception.getMessage(), exception);
     }
   }
 
@@ -338,6 +363,8 @@ public final class PipelineManager implements AutoCloseable {
       LOGGER.info("Shut down job executor, cancelling existing jobs.");
     }
 
+    LOGGER.info("Attempting to shut down interruptable jobs...");
+
     /*
      * Try to stop all jobs that are either not running yet or are interruptible. Note: VolunteerJob
      * might still be trying to submit jobs over on its thread, so we synchronize to keep things
@@ -349,6 +376,7 @@ public final class PipelineManager implements AutoCloseable {
           .parallelStream()
           .forEach(
               j -> {
+                LOGGER.info("  Attempting to cancel " + j.job.getType());
                 /*
                  * Note: There's a race condition here, where the job may have completed just before
                  * we try to cancel it, but that's okay because Future.cancel(...) is basically a
@@ -358,17 +386,38 @@ public final class PipelineManager implements AutoCloseable {
               });
     }
 
+    LOGGER.info("Cancelled all interruptable jobs.");
+
+    // Clean up any pending S3 operations and shut down the S3 manager (will be null if not a CCW
+    // pipeline)
+    if (s3TaskManagerHandle != null) {
+      s3TaskManagerHandle.shutdownSafely();
+    }
+
     /*
      * Wait for everything to halt.
      */
     boolean allStopped = jobExecutor.isTerminated();
     Optional<Instant> lastWaitMessage = Optional.empty();
     while (!allStopped) {
-      if (!lastWaitMessage.isPresent()
-          || Duration.between(Instant.now(), lastWaitMessage.get()).toMinutes() >= 10) {
+      if (lastWaitMessage.isEmpty()
+          || Duration.between(lastWaitMessage.get(), Instant.now()).toMinutes() >= 1) {
         LOGGER.info(
             "Waiting for jobs to stop, which may take A WHILE. "
-                + "(Message will repeat every ten minutes, until complete.)");
+                + "(Message will repeat every minute, until complete.)");
+
+        // Debug jobs still running; can help understand what the app is doing
+        Collection<PipelineJob<?>> runningJobs = jobRegistry.values();
+        if (runningJobs.size() > 0) {
+          LOGGER.debug("  Jobs running: ");
+          for (PipelineJob<?> job : runningJobs) {
+            LOGGER.debug("    {}", job.getType());
+          }
+        }
+        if (jobExecutorThreadPoolHandle != null) {
+          int numLeft = jobExecutorThreadPoolHandle.getActiveCount();
+          LOGGER.info("  Waiting on {} threads to resolve in the job executor...", numLeft);
+        }
         lastWaitMessage = Optional.of(Instant.now());
       }
       try {
@@ -544,9 +593,19 @@ public final class PipelineManager implements AutoCloseable {
          * since it won't get called in the first place).
          */
         handleJobCancellation(jobRecord.getId());
+        LOGGER.info("Job cancelled: " + jobRecord.getJobType());
+      } else if (jobThrowable instanceof InterruptedException) {
+        // If our job has been interrupted, we are already shutting down, so just ignore it.
+        LOGGER.info("Job interrupted: " + jobRecord.getJobType());
+      } else {
+        /* If the job failed and wasnt cancelled, it threw some other exception mid-stream,
+         * and now we must die as we almost certainly cannot continue with the tainted batch sitting in Incoming.
+         * This will call the proper shutdown procedures and exit gracefully.
+         * FUTURE: We may be able to more fault-tolerant by moving the failed batch
+         * into the Failed folder when this happens and continuing to run
+         */
+        PipelineApplication.shutdown();
       }
-      LOGGER.error(
-          "OnFailure Job Pipeline failed with: " + jobThrowable.getMessage(), jobThrowable);
     }
   }
 }

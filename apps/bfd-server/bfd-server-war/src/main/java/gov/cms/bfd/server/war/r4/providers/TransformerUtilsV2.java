@@ -18,10 +18,8 @@ import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimColumn;
 import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimColumn;
 import gov.cms.bfd.model.rif.HHAClaimLine;
-import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimColumn;
 import gov.cms.bfd.model.rif.HospiceClaimLine;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -3870,28 +3868,6 @@ public final class TransformerUtilsV2 {
       Optional<String> npiOrgName,
       Optional<Instant> lastupdated) {
     addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated);
-  }
-
-  /**
-   * Transforms the common group level data elements between the {@link InpatientClaim} {@link
-   * HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
-   * fields from {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim}
-   * are listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceClaimColumn} and {@link
-   * SNFClaimColumn}).
-   *
-   * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
-   * @param item the {@link ItemComponent} to modify
-   * @param deductibleCoinsuranceCd REV_CNTR_DDCTBL_COINSRNC_CD
-   */
-  static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
-      ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
-    if (deductibleCoinsuranceCd.isPresent()) {
-      item.getRevenue()
-          .addExtension(
-              createExtensionCoding(
-                  eob, CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD, deductibleCoinsuranceCd));
-    }
   }
 
   /**
