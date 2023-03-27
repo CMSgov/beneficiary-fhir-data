@@ -10,7 +10,8 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.jupiter.api.Test;
 
 /** Verifies that authentication works as expected. */
-public final class AuthenticationIT {
+public final class AuthenticationIT extends ServerBaseTest {
+
   /**
    * Verifies that authentication works for an SSL client certificate in the server's trust store.
    */

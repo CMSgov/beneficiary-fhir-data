@@ -123,7 +123,7 @@ public final class DatabaseTestUtils {
     String usernameDefault = null;
     String passwordDefault = null;
 
-    if (url != "" && url.endsWith("tc")) {
+    if (url.endsWith("tc")) {
       // Build the actual DB connection properties to use.
       username = System.getProperty("its.db.username", usernameDefault);
       if (username != null && username.trim().isEmpty())
@@ -382,17 +382,16 @@ public final class DatabaseTestUtils {
             .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
 
     container.start();
+    LOGGER.info("Container started");
 
+    // TODO: Do we need to do this multiple times? if the container is running, just leave it
+    // migrated
+    LOGGER.info("Setting up container and running migrations...");
     JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
     DataSource dataSource =
         initUnpooledDataSourceForPostgresql(
             jdbcContainer.getJdbcUrl(), jdbcContainer.getUsername(), jdbcContainer.getPassword());
-
-    boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
-    if (!migrationSuccess) {
-      throw new RuntimeException("Schema migration failed during test setup");
-    }
-
+    LOGGER.info("Ran migrations on container.");
     return dataSource;
   }
 
@@ -548,13 +547,11 @@ public final class DatabaseTestUtils {
       String passwordKey,
       String connectionsMaxText,
       MetricRegistry metricRegistry) {
-    /*
-     * Note: Eventually, we may add support for other test DB types, but
-     * right now only in-memory HSQL DBs are supported.
-     */
     if (url.endsWith(":hsqldb:mem")) {
       return createTestDatabaseForHsql(
           connectionsMaxText, metricRegistry, urlKey, usernameKey, passwordKey);
+    } else if (url.endsWith(":tc")) {
+      return initUnpooledDataSourceForTestContainerWithPostgres(usernameKey, passwordKey);
     } else {
       throw new RuntimeException("Unsupported test URL: " + url);
     }

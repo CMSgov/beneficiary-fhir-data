@@ -11,7 +11,8 @@
 	
 	<!-- Set to 'debug' to log FHIR test client request and response summaries,
 		or to 'trace' to log the full requests and responses. -->
-	<logger name="gov.cms.bfd.server.war.ServerTestUtils" level="info" />
+	<logger name="gov.cms.bfd.server.war.ServerTestUtils" level="debug" />
+	<logger name="gov.cms.bfd.DatabaseTestUtils" level="debug" />
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

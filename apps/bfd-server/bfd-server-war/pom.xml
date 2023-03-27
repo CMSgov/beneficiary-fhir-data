@@ -405,6 +405,32 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<!-- Copy the key/trust stores over to target for easier access in the tests. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-server-resources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/server-work</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/../dev/ssl-stores</directory>
+									<includes>
+										<include>server-keystore.jks</include>
+										<include>server-truststore.jks</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
@@ -439,7 +465,6 @@
 				<executions>
 					<execution>
 						<id>server-start</id>
-						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -468,14 +493,14 @@
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 
-                                                        <environmentVariables>
-                                                                <TZ>UTC</TZ>
-                                                        </environmentVariables>
+							<environmentVariables>
+								<TZ>UTC</TZ>
+							</environmentVariables>
 						</configuration>
 					</execution>
 					<execution>
 						<id>server-stop</id>
-						<phase>post-integration-test</phase>
+						<!--phase>post-integration-test</phase-->
 						<goals>
 							<goal>exec</goal>
 						</goals>
