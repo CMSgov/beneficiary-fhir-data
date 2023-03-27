@@ -88,6 +88,7 @@
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.2</junit.version>
 		<javadoc.version>3.5.0</javadoc.version>
+		<testcontainers.version>1.17.6</testcontainers.version>
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
