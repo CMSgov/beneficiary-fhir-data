@@ -139,12 +139,12 @@ public final class RifLoader {
    */
   private static BlockingThreadPoolExecutor createLoadExecutor(LoadAppOptions options) {
     final int threadPoolSize = options.getLoaderThreads();
-    final int workQueueSize = options.getLoaderThreads() * options.getWorkQueueSizeMultiple();
+    final int taskQueueSize = options.getLoaderThreads() * options.getTaskQueueSizeMultiple();
 
     LOGGER.info(
         "Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
         options.getLoaderThreads(),
-        workQueueSize,
+        taskQueueSize,
         options.getRecordBatchSize());
 
     /*
@@ -155,7 +155,7 @@ public final class RifLoader {
      * the task queue is full.
      */
     BlockingThreadPoolExecutor loadExecutor =
-        new BlockingThreadPoolExecutor(threadPoolSize, workQueueSize, 100, TimeUnit.MILLISECONDS);
+        new BlockingThreadPoolExecutor(threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
     return loadExecutor;
   }
 
@@ -268,10 +268,10 @@ public final class RifLoader {
 
     // Collect records into batches and submit each to batchProcessor.
     try {
-      if (options.getRecordBatchSize() > 1)
+      if (options.getRecordBatchSize() > 1) {
         BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
             .forEach(batchProcessor);
-      else
+      } else {
         dataToLoad
             .getRecords()
             .map(
@@ -281,6 +281,7 @@ public final class RifLoader {
                   return ittyBittyBatch;
                 })
             .forEach(batchProcessor);
+      }
     } catch (Exception e) {
       LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
       timerDataSetFile.stop();
@@ -631,7 +632,7 @@ public final class RifLoader {
             newBeneficiaryRecord.getHicnUnhashed(), oldBeneficiaryRecord.get().getHicnUnhashed())) {
       newBeneficiaryRecord.setHicn(oldBeneficiaryRecord.get().getHicn());
     } else {
-      hashBeneficiaryHicn(idHasher, rifRecordEvent);
+      hashBeneficiaryHicn(rifRecordEvent);
     }
     if (oldBeneficiaryRecord.isPresent()
         && Objects.equals(
@@ -639,7 +640,7 @@ public final class RifLoader {
             oldBeneficiaryRecord.get().getMedicareBeneficiaryId())) {
       newBeneficiaryRecord.setMbiHash(oldBeneficiaryRecord.get().getMbiHash());
     } else {
-      hashBeneficiaryMbi(idHasher, rifRecordEvent);
+      hashBeneficiaryMbi(rifRecordEvent);
     }
 
     if (rifRecordEvent.getRecordAction() == RecordAction.UPDATE) {
@@ -1248,10 +1249,9 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
-   * @param idHasher the {@link DatabaseIdHasher} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryHicn(DatabaseIdHasher idHasher, RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryHicn(RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
 
     Timer.Context timerHashing =
@@ -1281,10 +1281,9 @@ public final class RifLoader {
    *
    * <p>All other {@link RifRecordEvent}s are left unmodified.
    *
-   * @param idHasher the {@link DatabaseIdHasher} to use
    * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
    */
-  private void hashBeneficiaryMbi(DatabaseIdHasher idHasher, RifRecordEvent<?> rifRecordEvent) {
+  private void hashBeneficiaryMbi(RifRecordEvent<?> rifRecordEvent) {
     if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
 
     Timer.Context timerHashing =

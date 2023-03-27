@@ -55,8 +55,8 @@ public final class LoadAppOptions implements Serializable {
    */
   private final int recordBatchSize;
 
-  /** The maximum size (per thread) of the work queue used to process batches. */
-  private final int workQueueSizeMultiple;
+  /** The maximum size (per thread) of the task queue used to process batches. */
+  private final int taskQueueSizeMultiple;
 
   /**
    * Constructs a new {@link LoadAppOptions} instance.
@@ -66,7 +66,7 @@ public final class LoadAppOptions implements Serializable {
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
    * @param filterNon2023Benes the filter non 2023 benes
    * @param recordBatchSize the load batch size
-   * @param workQueueSizeMultiple the work queue size multiple
+   * @param taskQueueSizeMultiple the task queue size multiple
    */
   public LoadAppOptions(
       IdHasher.Config idHasherConfig,
@@ -74,16 +74,16 @@ public final class LoadAppOptions implements Serializable {
       boolean idempotencyRequired,
       boolean filterNon2023Benes,
       int recordBatchSize,
-      int workQueueSizeMultiple) {
+      int taskQueueSizeMultiple) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
-    if (workQueueSizeMultiple < 1) throw new IllegalArgumentException();
+    if (taskQueueSizeMultiple < 1) throw new IllegalArgumentException();
 
     this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
     this.filteringNonNullAndNon2023Benes = filterNon2023Benes;
     this.recordBatchSize = recordBatchSize;
-    this.workQueueSizeMultiple = workQueueSizeMultiple;
+    this.taskQueueSizeMultiple = taskQueueSizeMultiple;
   }
 
   /**
@@ -139,12 +139,12 @@ public final class LoadAppOptions implements Serializable {
   }
 
   /**
-   * Gets the {@link #workQueueSizeMultiple}.
+   * Gets the {@link #taskQueueSizeMultiple}.
    *
    * @return the size
    */
-  public int getWorkQueueSizeMultiple() {
-    return workQueueSizeMultiple;
+  public int getTaskQueueSizeMultiple() {
+    return taskQueueSizeMultiple;
   }
 
   @Override
@@ -162,8 +162,8 @@ public final class LoadAppOptions implements Serializable {
     builder.append(filteringNonNullAndNon2023Benes);
     builder.append(", recordBatchSize=");
     builder.append(recordBatchSize);
-    builder.append(", workQueueSizeMultiple=");
-    builder.append(workQueueSizeMultiple);
+    builder.append(", taskQueueSizeMultiple=");
+    builder.append(taskQueueSizeMultiple);
     builder.append("]");
     return builder.toString();
   }

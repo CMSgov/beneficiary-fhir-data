@@ -480,7 +480,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
     int rifRecordBatchSize =
         readEnvIntOptional(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE).orElse(DEFAULT_RIF_JOB_BATCH_SIZE);
-    int rifWorkQueueSizeMultiple =
+    int rifTaskQueueSizeMultiple =
         readEnvIntOptional(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
             .orElse(DEFAULT_RIF_JOB_QUEUE_SIZE_MULTIPLE);
 
@@ -498,7 +498,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             idempotencyRequired,
             filteringNonNullAndNon2023Benes,
             rifRecordBatchSize,
-            rifWorkQueueSizeMultiple);
+            rifTaskQueueSizeMultiple);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
