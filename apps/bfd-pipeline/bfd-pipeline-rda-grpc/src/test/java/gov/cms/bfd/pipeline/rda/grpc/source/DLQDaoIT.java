@@ -74,8 +74,9 @@ public class DLQDaoIT {
                   allRecords, dao.readAllMessageErrors(), ComparatorForSorting);
             } finally {
               // clean up database and ensure we deleted everything
-              dao.deleteAllMessageErrors();
+              var deletedCount = dao.deleteMessageErrors(allRecords);
               assertTrue(dao.readAllMessageErrors().isEmpty());
+              assertEquals(allRecords.size(), deletedCount);
             }
           }
         });
@@ -116,7 +117,7 @@ public class DLQDaoIT {
               noMatches = dao.findAllMessageErrorsByClaimTypeAndStatus(ignoredClaimType, OBSOLETE);
               assertTrue(noMatches.isEmpty());
             } finally {
-              dao.deleteAllMessageErrors();
+              dao.deleteMessageErrors(allRecordsBefore);
             }
           }
         });
@@ -172,7 +173,7 @@ public class DLQDaoIT {
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);
             } finally {
-              dao.deleteAllMessageErrors();
+              dao.deleteMessageErrors(allRecordsBefore);
             }
           }
         });
@@ -231,7 +232,7 @@ public class DLQDaoIT {
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);
             } finally {
-              dao.deleteAllMessageErrors();
+              dao.deleteMessageErrors(allRecordsBefore);
             }
           }
         });

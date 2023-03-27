@@ -137,13 +137,27 @@ class DLQDao implements AutoCloseable {
   /**
    * Helper method to clear the table at end of a test.
    *
-   * @return number of records deleted
+   * @param errorsToDelete list of records to delete from database
+   * @return number of records actually deleted
    */
   @VisibleForTesting
   @CanIgnoreReturnValue
-  int deleteAllMessageErrors() {
+  int deleteMessageErrors(List<MessageError> errorsToDelete) {
     return transactionManager.executeFunction(
-        em -> em.createQuery("delete from MessageError error").executeUpdate());
+        em -> {
+          int totalDeleted = 0;
+          for (MessageError messageError : errorsToDelete) {
+            totalDeleted +=
+                em.createQuery(
+                        "delete from MessageError errors"
+                            + " where sequenceNumber = :sequenceNumber"
+                            + " and claimType = :claimType")
+                    .setParameter("sequenceNumber", messageError.getSequenceNumber())
+                    .setParameter("claimType", messageError.getClaimType())
+                    .executeUpdate();
+          }
+          return totalDeleted;
+        });
   }
 
   /**
