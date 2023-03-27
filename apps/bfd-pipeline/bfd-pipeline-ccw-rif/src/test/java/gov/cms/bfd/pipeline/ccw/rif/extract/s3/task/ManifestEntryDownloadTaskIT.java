@@ -41,7 +41,7 @@ public final class ManifestEntryDownloadTaskIT {
 
   /** Sets the minio test container. */
   @BeforeAll
-  public static void setupMinioTestContainer() {
+  public static void setupMinioS3Client() {
     s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
   }
 
