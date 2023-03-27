@@ -10,13 +10,10 @@ import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.MinioTestContainer;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
@@ -26,6 +23,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -41,10 +39,10 @@ import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -54,25 +52,14 @@ import org.opentest4j.TestAbortedException;
  * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
-public final class PipelineApplicationIT {
+public final class PipelineApplicationIT extends MinioTestContainer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MinioTestContainer.class);
+
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client;
-
-  /** Sets the minio test container. */
-  @BeforeAll
-  public static void setupMinioTestContainer() {
-    MinioTestContainer.getInstance();
-    s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-  }
-
-  /** Tear down minio test container. */
-  @AfterAll
-  public static void tearDownMinioTestContainer() {
-    MinioTestContainer.getInstance().stopContainer();
-  }
+  private static AmazonS3 s3Client = createS3MinioClient();
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
@@ -84,6 +71,7 @@ public final class PipelineApplicationIT {
   @Test
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
+    LOGGER.info("s3Client: " + s3Client.toString());
     ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
     String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();

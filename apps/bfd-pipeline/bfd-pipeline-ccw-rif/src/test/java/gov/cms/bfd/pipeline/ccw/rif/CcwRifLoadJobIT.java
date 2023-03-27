@@ -7,38 +7,29 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.MinioTestContainer;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
-public final class CcwRifLoadJobIT {
+public final class CcwRifLoadJobIT extends MinioTestContainer {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client;
-
-  /** Sets the minio test container. */
-  @BeforeAll
-  public static void setupMinioTestContainer() {
-    MinioTestContainer.getInstance();
-    s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-  }
+  private static AmazonS3 s3Client = createS3MinioClient();
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
