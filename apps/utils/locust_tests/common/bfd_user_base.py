@@ -194,6 +194,7 @@ class BFDUserBase(FastHttpUser):
                     if name not in self.url_pools:
                         self.url_pools[name] = []
                     self.url_pools[name].append(next_url)
+                response.close()
 
     def run_task(
         self,
