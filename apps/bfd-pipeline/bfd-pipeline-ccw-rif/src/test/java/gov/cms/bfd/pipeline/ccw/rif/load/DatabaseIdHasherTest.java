@@ -18,11 +18,13 @@ import static org.mockito.Mockito.verify;
 import gov.cms.bfd.model.rif.IdHash;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.sql.SQLException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,6 +98,7 @@ public class DatabaseIdHasherTest {
 
     assertEquals(4L, dbHasher.getMetrics().getLookups());
     assertEquals(1L, dbHasher.getMetrics().getMisses());
+    assertEquals(0L, dbHasher.getMetrics().getRetries());
   }
 
   /** Verifies that {@link RuntimeException}s are not wrapped but just passed through unchanged. */
@@ -108,5 +111,38 @@ public class DatabaseIdHasherTest {
     final var actualException =
         assertThrows(RuntimeException.class, () -> dbHasher.computeIdentifierHash(identifier));
     assertSame(expectedException, actualException);
+  }
+
+  /**
+   * Verifies that a constraint violation exception triggers a retry. Just doing one retry to keep
+   * test time reasonable.
+   */
+  @Test
+  void shouldRetryOnConstraintViolationException() {
+    final var identifier = "123456";
+    final var expectedHash = idHasher.computeIdentifierHash(identifier);
+    final var expectedRecord = new IdHash(identifier, expectedHash);
+
+    final var constraintViolation =
+        new ConstraintViolationException("oops", new SQLException("testing"), "id");
+
+    // never find the record in the database using query
+    doReturn(List.of()).when(query).getResultList();
+
+    // first persist fails, second succeeds, so there will be one retry
+    doThrow(new RuntimeException(constraintViolation))
+        .doNothing()
+        .when(entityManager)
+        .persist(any());
+
+    assertEquals(expectedHash, dbHasher.computeIdentifierHash(identifier));
+    verify(query, times(2)).setParameter(IdParamName, identifier);
+    verify(query, times(2)).setMaxResults(1);
+    verify(query, times(2)).getResultList();
+    verify(entityManager, times(2)).persist(refEq(expectedRecord));
+
+    assertEquals(1L, dbHasher.getMetrics().getLookups());
+    assertEquals(1L, dbHasher.getMetrics().getMisses());
+    assertEquals(1L, dbHasher.getMetrics().getRetries());
   }
 }

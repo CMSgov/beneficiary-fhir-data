@@ -45,6 +45,7 @@
 		</dependency>
 
 		<dependency>
+			<!-- Compile Time only dependency to simplify creation of simple POJOs -->
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>

@@ -127,7 +127,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * mean that more {@link RifRecordEvent}s will be held in memory simultaneously.
    *
    * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
-   * the performance boost from batch size drops off quickly.
+   * the performance boost from larger batch sizes drops off quickly.
    */
   public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE";
 
@@ -139,11 +139,13 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * The name of the environment variable that should be used to provide the work queue size for the
    * RIF loader's thread pool. This number is multiplied by the number of worker threads to obtain
-   * the actual queue size. Lower numbers are more memory efficient.
+   * the actual queue size. Lower sizes are more memory efficient but larger sizes could provide a
+   * performance improvement in some circumstances.
    *
    * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
-   * smaller is better. The default value provides some slack for database slow downs without
-   * wasting too much RAM with large objects waiting to be sent to the database.
+   * smaller is better. The default value provides some slack for handling intermittent database
+   * slow downs without wasting too much RAM with large numbers of objects waiting to be sent to the
+   * database.
    */
   public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE =
       "RIF_JOB_QUEUE_SIZE_MULTIPLE";

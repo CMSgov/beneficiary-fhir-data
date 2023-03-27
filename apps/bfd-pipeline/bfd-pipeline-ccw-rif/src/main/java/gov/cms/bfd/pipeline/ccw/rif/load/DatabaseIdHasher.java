@@ -31,12 +31,12 @@ public class DatabaseIdHasher {
   @VisibleForTesting static final String IdParamName = "id";
 
   /**
-   * Maximum number of retry attempts the cache will make when trying to a record to the database if
-   * constraint violations are detected. Should not be necessary since the cache will prevent
-   * multiple threads in this processing trying to insert the same hash simultaneously but added in
-   * case some other process is doing so.
+   * Maximum number of retry attempts the cache will make when trying to add a record to the
+   * database if constraint violations are detected. Generally should not be needed since the {@link
+   * Cache} will prevent multiple threads trying to insert the same hash simultaneously but included
+   * in case some other process is doing so or multiple instances are being used at once.
    */
-  private static final int MaxRetries = 2;
+  private static final int MaxRetries = 3;
 
   /** Used to create {@link EntityManager}s. */
   private final EntityManagerFactory entityManagerFactory;
@@ -46,13 +46,14 @@ public class DatabaseIdHasher {
   @Getter(AccessLevel.PACKAGE)
   private final Metrics metrics;
   /**
-   * Used to hold recently used hash values in memory as well as to manage when to insert a record.
+   * Used to hold recently used hash values in memory as well as to synchronize writing records to
+   * the database.
    */
   private final Cache<String, String> cache;
 
   /**
-   * Creates an instance with the given maximum size and using the provided {@link IdHasher} to
-   * compute values that are not present in the database.
+   * Creates an instance with the given maximum size for in-memory cache and using the provided
+   * {@link IdHasher} to compute values that are not present in the database.
    *
    * @param appMetrics {@link MeterRegistry} to use for reporting metrics
    * @param entityManagerFactory used to create {@link EntityManager}s
@@ -81,8 +82,7 @@ public class DatabaseIdHasher {
    * database update and others will wait for that operation to complete then they will return the
    * value from the first thread.
    *
-   * <p>The database operations take place within the provided {@link EntityManager}s current
-   * transaction.
+   * <p>The database operations take place within their own transactions.
    *
    * @param identifier any ID to be hashed
    * @return a one-way cryptographic hash of the specified ID value, exactly 64 characters long
@@ -157,7 +157,7 @@ public class DatabaseIdHasher {
   static class ReadResult {
     /** The hash value. */
     private final String hash;
-    /** Flag indicating if the record is one that we have inserted during the call. */
+    /** Flag indicating if a new record was inserted during the call. */
     private final boolean inserted;
   }
 
@@ -168,7 +168,7 @@ public class DatabaseIdHasher {
     private final Counter lookups;
     /**
      * Tracks number of calls to {@link DatabaseIdHasher#computeIdentifierHash} in which identifier
-     * was not present in the cache.
+     * was not present in the cache or database.
      */
     private final Counter misses;
     /** Tracks number of times database read/write had to be reattempted to arrive at a result. */
@@ -180,14 +180,10 @@ public class DatabaseIdHasher {
      * @param appMetrics {@link MeterRegistry} to hold the metrics
      */
     Metrics(MeterRegistry appMetrics) {
-      lookups =
-          appMetrics.counter(
-              MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "lookups"));
-      misses =
-          appMetrics.counter(MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "misses"));
-      retries =
-          appMetrics.counter(
-              MetricRegistry.name(DatabaseIdHasher.class.getSimpleName(), "retries"));
+      final String baseName = DatabaseIdHasher.class.getSimpleName();
+      lookups = appMetrics.counter(MetricRegistry.name(baseName, "lookups"));
+      misses = appMetrics.counter(MetricRegistry.name(baseName, "misses"));
+      retries = appMetrics.counter(MetricRegistry.name(baseName, "retries"));
     }
 
     /** Increment number of lookups metric. */
