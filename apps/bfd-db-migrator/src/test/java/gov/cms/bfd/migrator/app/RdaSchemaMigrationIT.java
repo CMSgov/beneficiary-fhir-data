@@ -46,7 +46,7 @@ import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.tool.schema.Action;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests to ensure basic functioning of the RDA API related JPA entity classes. */
@@ -68,8 +68,8 @@ public class RdaSchemaMigrationIT {
    *
    * @throws IOException the io exception
    */
-  @BeforeAll
-  public static void setUp() throws IOException {
+  @BeforeEach
+  public void setUp() throws IOException {
 
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
     appRunBuilder.redirectErrorStream(true);
@@ -141,7 +141,7 @@ public class RdaSchemaMigrationIT {
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "1");
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
 
     return appRunBuilder;
   }

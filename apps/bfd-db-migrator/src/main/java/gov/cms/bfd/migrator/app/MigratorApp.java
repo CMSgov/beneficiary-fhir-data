@@ -86,9 +86,14 @@ public final class MigratorApp {
         createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
 
     // run migration
-    boolean migrationSuccess =
-        DatabaseSchemaManager.createOrUpdateSchema(
-            pooledDataSource, appConfig.getFlywayScriptLocationOverride());
+    boolean migrationSuccess;
+    try {
+      migrationSuccess =
+          DatabaseSchemaManager.createOrUpdateSchema(
+              pooledDataSource, appConfig.getFlywayScriptLocationOverride());
+    } finally {
+      pooledDataSource.close();
+    }
 
     if (!migrationSuccess) {
       LOGGER.error("Migration failed, shutting down");
@@ -98,10 +103,15 @@ public final class MigratorApp {
     // Hibernate suggests not reusing data sources for validations
     pooledDataSource = createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
 
-    // Run hibernate validation after the migrations have succeeded
-    HibernateValidator validator =
-        new HibernateValidator(pooledDataSource, hibernateValidationModelPackages);
-    boolean validationSuccess = validator.runHibernateValidation();
+    boolean validationSuccess;
+    try {
+      // Run hibernate validation after the migrations have succeeded
+      HibernateValidator validator =
+          new HibernateValidator(pooledDataSource, hibernateValidationModelPackages);
+      validationSuccess = validator.runHibernateValidation();
+    } finally {
+      pooledDataSource.close();
+    }
 
     if (!validationSuccess) {
       LOGGER.error("Validation failed, shutting down");
