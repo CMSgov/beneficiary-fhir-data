@@ -231,6 +231,15 @@ module "bfd_pipeline_slo_alarms" {
   warning_ok_sns_override = var.warning_ok_sns_override
 }
 
+module "bfd_pipeline_manager" {
+  source = "./modules/bfd_pipeline_manager"
+
+  account_id      = local.account_id
+  etl_bucket_id   = aws_s3_bucket.this.id
+  env_kms_key_id  = data.aws_kms_key.cmk.key_id
+  mgmt_kms_key_id = data.aws_kms_key.mgmt_cmk.key_id
+}
+
 # TODO: Remove post BFD-2554
 moved {
   from = module.bfd_pipeline_slis
