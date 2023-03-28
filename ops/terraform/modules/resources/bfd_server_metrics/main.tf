@@ -10,8 +10,8 @@ locals {
     coverage_all       = "*/fhir/Coverage*"
     patient_all        = "*/fhir/Patient*"
     eob_all            = "*/fhir/ExplanationOfBenefit*"
-    claim_all          = "*/fhir/Claim*"
-    claim_response_all = "*/fhir/ClaimResponse*"
+    claim_all          = "*/fhir/Claim/*"
+    claim_response_all = "*/fhir/ClaimResponse/*"
   }
 
   endpoint_patterns = {
