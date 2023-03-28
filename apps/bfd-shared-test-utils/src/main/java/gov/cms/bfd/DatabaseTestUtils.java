@@ -58,11 +58,17 @@ public final class DatabaseTestUtils {
   /** The password used for HSQL locally. */
   static final String HSQL_SERVER_PASSWORD = "test";
 
+  /** The default database type to use for the integration tests when nothing is provided. */
+  public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
+
+  /** The default test container image to use when nothing is provided. */
+  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:14.6-alpine";
+
   /** The username used for test container database username. */
-  static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
+  public static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
 
   /** The password used for test container database password. */
-  static final String TEST_CONTAINER_DATABASE_PASSWORD = "bfdtest";
+  public static final String TEST_CONTAINER_DATABASE_PASSWORD = "bfdtest";
 
   /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
   private static DatabaseTestUtils SINGLETON;
@@ -119,36 +125,40 @@ public final class DatabaseTestUtils {
     Optional<Properties> bfdServerTestDatabaseProperties = readTestDatabaseProperties();
 
     String url, username, password;
-    url = System.getProperty("its.db.url", "");
+    url = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
     String usernameDefault = null;
     String passwordDefault = null;
 
-    if (url.endsWith("tc")) {
-      // Build the actual DB connection properties to use.
-      username = System.getProperty("its.db.username", usernameDefault);
-      if (username != null && username.trim().isEmpty())
-        username = TEST_CONTAINER_DATABASE_USERNAME;
-      password = System.getProperty("its.db.password", passwordDefault);
-      if (password != null && password.trim().isEmpty())
-        password = TEST_CONTAINER_DATABASE_PASSWORD;
-    } else if (bfdServerTestDatabaseProperties.isPresent()) {
+    if (bfdServerTestDatabaseProperties.isPresent()) {
+      LOGGER.info("Found server test properties, using those...");
       url = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.url");
       username = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.username");
       password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
-    } else {
+    } else if (url.contains("hsql")) {
       /*
-       * Build default DB connection properties that use HSQL, just as they're configured in the
+       * Build DB connection properties that use HSQL, just as they're configured in the
        * parent POM.
        */
-      String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
+      // String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
 
       // Build the actual DB connection properties to use.
-      url = System.getProperty("its.db.url", urlDefault);
+      // url = System.getProperty("its.db.url", urlDefault);
 
       username = System.getProperty("its.db.username", usernameDefault);
       if (username != null && username.trim().isEmpty()) username = usernameDefault;
       password = System.getProperty("its.db.password", passwordDefault);
       if (password != null && password.trim().isEmpty()) password = passwordDefault;
+    } else {
+      LOGGER.info("Setting up test container data source");
+      // Build the test container postgres db by default
+      username = System.getProperty("its.db.username", TEST_CONTAINER_DATABASE_USERNAME);
+      if (username == null || username.trim().isBlank()) {
+        username = TEST_CONTAINER_DATABASE_USERNAME;
+      }
+      password = System.getProperty("its.db.password", TEST_CONTAINER_DATABASE_PASSWORD);
+      if (password == null || password.trim().isBlank()) {
+        password = TEST_CONTAINER_DATABASE_PASSWORD;
+      }
     }
 
     return initUnpooledDataSource(url, username, password);
@@ -373,7 +383,9 @@ public final class DatabaseTestUtils {
   private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
       String username, String password) {
 
-    String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
+    String testContainerDatabaseImage =
+            System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+    LOGGER.info("Starting container, using image {}", testContainerDatabaseImage);
     container =
         new PostgreSQLContainer(testContainerDatabaseImage)
             .withDatabaseName("fhirdb")
@@ -384,8 +396,6 @@ public final class DatabaseTestUtils {
     container.start();
     LOGGER.info("Container started");
 
-    // TODO: Do we need to do this multiple times? if the container is running, just leave it
-    // migrated
     LOGGER.info("Setting up container and running migrations...");
     JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
     DataSource dataSource =

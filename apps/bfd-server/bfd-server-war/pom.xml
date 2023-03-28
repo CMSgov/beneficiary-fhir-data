@@ -454,10 +454,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch a Java web server hosting the BFD Server prior to running this
-					project's integration tests, and stop it after the integration tests. The
-					server will serve HTTPS on a random port, and the FHIR server will be hosted
-					at the root ("/") context. Alternatively, for manual testing, manually run
+				<!-- Launch a Java web server hosting the BFD Server; only used when called
+					manually for quick testing locally. The server will serve HTTPS on a random port,
+					and the FHIR server will be hosted at the root ("/") context. Run
 					`mvn package org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start
 					the server. -->
 				<groupId>org.codehaus.mojo</groupId>
@@ -489,10 +488,6 @@
 								<argument>-s</argument>
 								<argument>${local.pac.claimSourceTypes}</argument>
 							</arguments>
-
-							<!-- Don't start/stop the server if the ITs are being skipped. -->
-							<skip>${skipITs}</skip>
-
 							<environmentVariables>
 								<TZ>UTC</TZ>
 							</environmentVariables>
@@ -500,7 +495,6 @@
 					</execution>
 					<execution>
 						<id>server-stop</id>
-						<!--phase>post-integration-test</phase-->
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -511,9 +505,6 @@
 								<argument>-t</argument>
 								<argument>${project.build.directory}</argument>
 							</arguments>
-
-							<!-- Don't start/stop the server if the ITs are being skipped. -->
-							<skip>${skipITs}</skip>
 						</configuration>
 					</execution>
 					<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction

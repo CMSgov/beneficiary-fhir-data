@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 /** Verifies that access.json is written to as expected. */
-public class AccessJsonIT extends ServerBaseTest {
+public class AccessJsonIT extends ServerRequiredTest {
   /** Verifies that access.json is written to within BFD-server-war via API call. */
   @Test
   public void VerifyAccessJson() throws IOException {

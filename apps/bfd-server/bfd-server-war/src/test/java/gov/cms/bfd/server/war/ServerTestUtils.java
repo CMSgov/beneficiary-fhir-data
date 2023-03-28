@@ -4,9 +4,30 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HHAClaimLine;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.HospiceClaimLine;
+import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.model.rif.LoadedBatch;
+import gov.cms.bfd.model.rif.LoadedFile;
+import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.SNFClaim;
+import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
@@ -15,6 +36,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
+import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -27,10 +50,13 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -43,6 +69,8 @@ import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Table;
+import javax.sql.DataSource;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
@@ -504,5 +532,142 @@ public final class ServerTestUtils {
       fhirClient.registerInterceptor(extraParamsInterceptor);
     }
     return fhirClient;
+  }
+
+  /**
+   * Runs a <code>TRUNCATE</code> for all tables in the supplied database.
+   *
+   * @param dataSource the data source
+   */
+  public void truncateTablesInDataSource(DataSource dataSource) {
+    List<Class<?>> entityTypes =
+        Arrays.asList(
+            PartDEvent.class,
+            SNFClaimLine.class,
+            SNFClaim.class,
+            OutpatientClaimLine.class,
+            OutpatientClaim.class,
+            InpatientClaimLine.class,
+            InpatientClaim.class,
+            HospiceClaimLine.class,
+            HospiceClaim.class,
+            HHAClaimLine.class,
+            HHAClaim.class,
+            DMEClaimLine.class,
+            DMEClaim.class,
+            CarrierClaimLine.class,
+            CarrierClaim.class,
+            BeneficiaryHistory.class,
+            MedicareBeneficiaryIdHistory.class,
+            BeneficiaryMonthly.class,
+            Beneficiary.class,
+            LoadedBatch.class,
+            LoadedFile.class,
+            SkippedRifRecord.class);
+
+    try (Connection connection = dataSource.getConnection(); ) {
+      // Disable auto-commit and remember the default schema name.
+      connection.setAutoCommit(false);
+      Optional<String> defaultSchemaName = Optional.ofNullable(connection.getSchema());
+      if (defaultSchemaName.isEmpty()) {
+        throw new BadCodeMonkeyException("Unable to determine default schema name.");
+      }
+
+      // Loop over every @Entity type.
+      for (Class<?> entityType : entityTypes) {
+        Optional<Table> entityTableAnnotation =
+            Optional.ofNullable(entityType.getAnnotation(Table.class));
+
+        // First, make sure we found an @Table annotation.
+        if (entityTableAnnotation.isEmpty()) {
+          throw new BadCodeMonkeyException(
+              "Unable to determine table metadata for entity: " + entityType.getCanonicalName());
+        }
+
+        // Then, make sure we have a table name specified.
+        if (entityTableAnnotation.get().name() == null
+            || entityTableAnnotation.get().name().isEmpty()) {
+          throw new BadCodeMonkeyException(
+              "Unable to determine table name for entity: " + entityType.getCanonicalName());
+        }
+        String tableNameSpecifier = normalizeTableName(entityTableAnnotation.get().name());
+
+        // Then, switch to the appropriate schema.
+        if (entityTableAnnotation.get().schema() != null
+            && !entityTableAnnotation.get().schema().isEmpty()) {
+          String schemaNameSpecifier =
+              normalizeSchemaName(connection, entityTableAnnotation.get().schema());
+          connection.setSchema(schemaNameSpecifier);
+        } else {
+          connection.setSchema(defaultSchemaName.get());
+        }
+
+        /*
+         * Finally, run the TRUNCATE. On Postgres the cascade option is required due to the
+         * presence of FK constraints.
+         */
+        String truncateTableSql = String.format("TRUNCATE TABLE %s", tableNameSpecifier);
+        if (DatabaseUtils.isPostgresConnection(connection)) {
+          truncateTableSql = truncateTableSql + " CASCADE";
+        }
+        connection.createStatement().execute(truncateTableSql);
+
+        connection.setSchema(defaultSchemaName.get());
+      }
+
+      connection.commit();
+      LOGGER.info("Removed all application data from database.");
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * For compatibility with HSQLDB and Postgresql, all schema names must have case preserved but any
+   * quotes in the name must be removed.
+   *
+   * @param connection the connection
+   * @param schemaNameSpecifier name of a schema from a hibernate annotation
+   * @return value compatible with call to {@link Connection#setSchema(String)}
+   * @throws SQLException the sql exception
+   */
+  private String normalizeSchemaName(Connection connection, String schemaNameSpecifier)
+      throws SQLException {
+    String sql = schemaNameSpecifier.replaceAll("`", "");
+    if (DatabaseUtils.isHsqlConnection((connection))) {
+      sql = sql.toUpperCase();
+    }
+    return sql;
+  }
+
+  /**
+   * Table names that use mixed case use quotes and have their original case preserved but those
+   * without quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
+   *
+   * @param tableNameSpecifier name of a table from a hibernate annotation
+   * @return value compatible with call to {@link java.sql.Statement#execute(String)}
+   */
+  private String normalizeTableName(String tableNameSpecifier) {
+    if (tableNameSpecifier.startsWith("`")) {
+      tableNameSpecifier = tableNameSpecifier.replaceAll("`", "");
+    } else {
+      tableNameSpecifier = tableNameSpecifier.toUpperCase();
+    }
+    return tableNameSpecifier;
+  }
+
+  /**
+   * Validates if the test's db url is valid for testing; i.e. is this a local database we can
+   * properly prune between tests. This is primarily to avoid calling truncate on a database we
+   * shouldnt.
+   *
+   * @param dbUrl the db url to validate
+   * @return if the it test db url is a local database that can be safely truncated
+   */
+  public static boolean isValidServerDatabase(String dbUrl) {
+    boolean isTestContainer = dbUrl.endsWith("tc");
+    boolean isLocalDb = dbUrl.contains("localhost") || dbUrl.contains("127.0.0.1");
+    boolean isHsqlDb = dbUrl.contains("hsql");
+    return !dbUrl.isBlank() && (isTestContainer || isLocalDb || isHsqlDb);
   }
 }

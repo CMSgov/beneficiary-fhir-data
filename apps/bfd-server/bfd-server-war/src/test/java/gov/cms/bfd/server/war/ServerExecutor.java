@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war;
 
+import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_IMAGE_DEFAULT;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import gov.cms.bfd.ProcessOutputConsumer;
 import java.io.IOException;
@@ -33,13 +35,20 @@ public class ServerExecutor {
   /** The Server process handle. */
   private static Process serverProcess;
 
+  /** Keeps track of the STDOUT of the process for debugging. */
+  private static ProcessOutputConsumer appRunConsumer;
+
   /**
    * Starts the BFD server for IT tests. If already running, does nothing.
    *
+   * @param dbUrl the db url
+   * @param dbUsername the db username
+   * @param dbPass the db pass
    * @return if the server is running
    * @throws IOException if there is an issue setting up the server
    */
-  public static boolean startServer() throws IOException {
+  public static boolean startServer(String dbUrl, String dbUsername, String dbPass)
+      throws IOException {
     if (serverProcess == null) {
 
       String javaHome = System.getProperty("java.home", "");
@@ -64,7 +73,8 @@ public class ServerExecutor {
       LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
 
       ProcessBuilder appRunBuilder =
-          new ProcessBuilder(createCommandForServerLauncherApp(workDirectory));
+          new ProcessBuilder(
+              createCommandForServerLauncherApp(workDirectory, dbUrl, dbUsername, dbPass));
       appRunBuilder.environment().put("BFD_PORT", serverPort);
       appRunBuilder.environment().put("BFD_KEYSTORE", keyStore);
       appRunBuilder.environment().put("BFD_TRUSTSTORE", trustStore);
@@ -72,25 +82,33 @@ public class ServerExecutor {
       appRunBuilder.environment().put("BFD_JAVA_HOME", javaHome);
       serverProcess = appRunBuilder.start();
 
-      ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(serverProcess);
+      appRunConsumer = new ProcessOutputConsumer(serverProcess);
       Thread appRunConsumerThread = new Thread(appRunConsumer);
       appRunConsumerThread.start();
 
       // Await start/finish of application
+      String failureMessage = "Failed startup of context";
+      String successMessage = "Started Jetty.";
       try {
-        String successMessage = "Started Jetty.";
         Awaitility.await()
-            .atMost(10, TimeUnit.MINUTES)
-            .until(() -> appRunConsumer.getStdoutContents().contains(successMessage));
+            .atMost(2, TimeUnit.MINUTES)
+            .until(
+                () ->
+                    appRunConsumer.getStdoutContents().contains(successMessage)
+                        || appRunConsumer.getStdoutContents().contains(failureMessage));
       } catch (ConditionTimeoutException e) {
         throw new RuntimeException(
-            "Error: Server failed to start within 120 seconds.STDOUT:\n"
+            "Error: Server failed to start within 120 seconds. STDOUT:\n"
                 + appRunConsumer.getStdoutContents(),
             e);
       }
       // Fail fast if we didn't start the server correctly
-      LOGGER.info(appRunConsumer.getStdoutContents());
-      assertFalse(serverProcess.getOutputStream().toString().contains("Failed startup of context"));
+      assertFalse(
+          "Server failed to start due to an error. STDOUT: " + appRunConsumer.getStdoutContents(),
+          appRunConsumer.getStdoutContents().contains(failureMessage));
+      assertTrue(
+          "Did not find the server start message in STDOUT: " + appRunConsumer.getStdoutContents(),
+          appRunConsumer.getStdoutContents().contains(successMessage));
     }
     // do nothing if we've already got a server started
 
@@ -101,9 +119,13 @@ public class ServerExecutor {
    * Create command for the server launcher script to be run.
    *
    * @param workDirectory the work directory
+   * @param dbUrl the db url
+   * @param dbUsername the db username
+   * @param dbPassword the db password
    * @return the command array for the migrator app
    */
-  private static String[] createCommandForServerLauncherApp(String workDirectory) {
+  private static String[] createCommandForServerLauncherApp(
+      String workDirectory, String dbUrl, String dbUsername, String dbPassword) {
     try {
       Path assemblyDirectory =
           Files.list(Paths.get(workDirectory))
@@ -114,10 +136,8 @@ public class ServerExecutor {
 
       String gcLog = workDirectory + "/gc.log";
       String maxHeapArg = System.getProperty("its.bfdServer.jvmargs", "-Xmx4g");
-      String dbUrl = System.getProperty("its.db.url", "");
-      String dbUsername = System.getProperty("its.db.username", null);
-      String dbPassword = System.getProperty("its.db.password", null);
-      String containerImageType = System.getProperty("its.testcontainer.db.image", null);
+      String containerImageType =
+          System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
       String v2Enabled = "true";
       String pacEnabled = "true";
       String pacOldMbiHashEnabled = "false";
@@ -150,11 +170,22 @@ public class ServerExecutor {
     }
   }
 
+  /**
+   * Checks if the server is running.
+   *
+   * @return true if the server is running
+   */
+  public static boolean isRunning() {
+    return serverProcess != null && serverProcess.isAlive();
+  }
+
   /** Stops the server process. */
   public static void stopServer() {
     if (serverProcess != null && serverProcess.isAlive()) {
-      LOGGER.info("Destroyed server process.");
       serverProcess.destroy();
+      LOGGER.info("Destroyed server process.");
+      // TODO: Remove or change to DEBUG
+      LOGGER.info("Server STDOUT: {}", appRunConsumer.getStdoutContents());
     } else {
       LOGGER.warn("Tried to destroy server process but was not running.");
     }
@@ -184,7 +215,11 @@ public class ServerExecutor {
     if (findPaths.stream().findFirst().isPresent()) {
       return findPaths.stream().findFirst().get();
     } else {
-      throw new IOException("Unable to find path at " + startingDirectory);
+      throw new IOException(
+          "Unable to find path ending with '"
+              + filenameEndsWith
+              + "' within : "
+              + startingDirectory);
     }
   }
 
