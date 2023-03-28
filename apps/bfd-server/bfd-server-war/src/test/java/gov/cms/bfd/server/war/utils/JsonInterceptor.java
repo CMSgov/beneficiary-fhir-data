@@ -28,18 +28,12 @@ public class JsonInterceptor implements IClientInterceptor {
      * re-purposed and used here to save responses from the fhirClient.
      */
     theResponse.bufferEntity();
-    InputStream respEntity = null;
-    try {
-      respEntity = theResponse.readEntity();
+    try (InputStream respEntity = theResponse.readEntity(); ) {
       final byte[] bytes;
-      try {
-        bytes = IOUtils.toByteArray(respEntity);
-      } catch (IllegalStateException e) {
-        throw new InternalErrorException(e);
-      }
+      bytes = IOUtils.toByteArray(respEntity);
       response = new String(bytes, "UTF-8");
-    } finally {
-      IOUtils.closeQuietly(respEntity);
+    } catch (IllegalStateException e) {
+      throw new InternalErrorException(e);
     }
   }
 
