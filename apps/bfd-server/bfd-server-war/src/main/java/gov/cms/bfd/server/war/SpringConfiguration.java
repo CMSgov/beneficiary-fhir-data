@@ -116,6 +116,7 @@ public class SpringConfiguration {
    * @param metricRegistry the {@link MetricRegistry} for the application
    * @return the {@link DataSource} that provides the application's database connection
    */
+  @Bean
   public DataSource dataSource(
       @Value("${" + PROP_DB_URL + "}") String url,
       @Value("${" + PROP_DB_USERNAME + "}") String username,
