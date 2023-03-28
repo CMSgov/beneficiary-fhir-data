@@ -81,6 +81,7 @@ public final class DatabaseUtils {
 
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);
+    poolingDataSource.setMaxLifetime((60 * 6) * 1000);
 
     /*
      * FIXME Temporary setting for BB-1233 to find the source of any possible leaks

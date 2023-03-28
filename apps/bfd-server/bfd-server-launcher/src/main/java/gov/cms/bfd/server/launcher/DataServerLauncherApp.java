@@ -9,6 +9,7 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -324,7 +325,8 @@ public final class DataServerLauncherApp {
          * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
          * accessible to the filter.
          */
-        Long outputSizeInBytes = response.getHttpOutput().getWritten();
+        HttpServletResponse servletResponse = (HttpServletResponse) response;
+        Long outputSizeInBytes = Long.parseLong(servletResponse.getHeader("Content-Length"));
         BfdMDC.put(
             BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
 
