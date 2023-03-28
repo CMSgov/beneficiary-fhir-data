@@ -9,10 +9,10 @@ spec:
   serviceAccount: bfd
   restartPolicy: Never
   containers:
-  - name: bfd-cbc-build
-  image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+    - name: bfd-cbc-build
+  image: "public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6"
   command:
-  - cat
+    - cat
   tty: true
   imagePullPolicy: IfNotPresent
 """
