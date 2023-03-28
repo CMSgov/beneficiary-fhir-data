@@ -32,8 +32,16 @@ spec:
             steps {
                 script {
                     def queueMsg = readJSON text: params.sqs_body
-                    def messageAsJson = writeJSON json: queueMsg, returnText: true
-                    echo messageAsJson
+                    def jobToRun = queueMsg.job
+                    def parameters = queueMsg.collect {
+                        param, paramValue -> if (value instanceof Boolean) {
+                            booleanParam(name: param, value: paramValue)
+                        } else {
+                            string(value: param, value: paramValue)
+                        }
+                    }
+                    echo jobToRun
+                    echo parameters
                 }
             }
         }
