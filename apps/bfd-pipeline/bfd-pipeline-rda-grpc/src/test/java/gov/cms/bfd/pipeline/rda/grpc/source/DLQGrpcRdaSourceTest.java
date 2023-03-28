@@ -20,6 +20,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -28,8 +29,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
-import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,11 +45,14 @@ public class DLQGrpcRdaSourceTest {
   /** Arbitrary rda api version being used for tests. */
   private static final String TEST_RDA_VERSION = "0.0.1";
 
+  /** Max age for message errors table. */
+  private static final int MAX_DQL_AGE_DAYS = 100;
+
   /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Long, Long> mockSink;
 
-  /** Mock {@link EntityManager} to use in testing. */
-  @Mock private EntityManager mockManager;
+  /** Mock {@link TransactionManager} to use in testing. */
+  @Mock private TransactionManager mockManager;
 
   /** Mock {@link ManagedChannel} to use in testing. */
   @Mock private ManagedChannel mockChannel;
@@ -59,8 +63,8 @@ public class DLQGrpcRdaSourceTest {
   /** Mock {@link GrpcStreamCaller} to use in testing. */
   @Mock private GrpcStreamCaller<Long> mockCaller;
 
-  /** Mock {@link DLQGrpcRdaSource.DLQDao} to use in testing. */
-  @Mock private DLQGrpcRdaSource.DLQDao mockDao;
+  /** Mock {@link DLQDao} to use in testing. */
+  @Mock private DLQDao mockDao;
 
   /** Mock {@link RdaVersion} to use in testing. */
   @Mock private RdaVersion rdaVersion;
@@ -74,7 +78,11 @@ public class DLQGrpcRdaSourceTest {
     meters = new SimpleMeterRegistry();
     lenient().doReturn(false).when(rdaVersion).allows(anyString());
     lenient().doReturn(true).when(rdaVersion).allows(TEST_RDA_VERSION);
-    doReturn(mockChannel).when(mockConfig).createChannel();
+    lenient()
+        .doReturn(Optional.of(MAX_DQL_AGE_DAYS))
+        .when(mockConfig)
+        .getMessageErrorExpirationDays();
+    lenient().doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
   /** Testing value to use for the first FISS error sequence number. */
@@ -151,6 +159,59 @@ public class DLQGrpcRdaSourceTest {
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
     assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
+
+    // should have triggered DLQ cleanup method
+    verify(mockDao).deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+  }
+
+  /**
+   * Ensure that {@link DLQGrpcRdaSource#deleteExpiredDlqRecords} calls the dao method and returns
+   * its result.
+   */
+  @Test
+  void deleteExpiredDlqRecordsShouldCallDaoAndReturnResult() {
+    final var claimType = "fiss";
+    final var source =
+        new DLQGrpcRdaSource<>(
+            mockManager,
+            Objects::equals,
+            mockChannel,
+            mockCaller,
+            mockConfig::createCallOptions,
+            meters,
+            claimType,
+            rdaVersion,
+            Optional.of(MAX_DQL_AGE_DAYS),
+            mockDao);
+    doReturn(18)
+        .when(mockDao)
+        .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+    assertEquals(18, source.deleteExpiredDlqRecords(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS));
+  }
+
+  /**
+   * Ensure that {@link DLQGrpcRdaSource#deleteExpiredDlqRecords} calls the dao method and returns
+   * its result and captures any exception it throws.
+   */
+  @Test
+  void deleteExpiredDlqRecordsShouldCallDaoAndCaptureException() {
+    final var claimType = "fiss";
+    final var source =
+        new DLQGrpcRdaSource<>(
+            mockManager,
+            Objects::equals,
+            mockChannel,
+            mockCaller,
+            mockConfig::createCallOptions,
+            meters,
+            claimType,
+            rdaVersion,
+            Optional.of(MAX_DQL_AGE_DAYS),
+            mockDao);
+    doThrow(new RuntimeException("can't stop me!"))
+        .when(mockDao)
+        .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+    assertEquals(0, source.deleteExpiredDlqRecords(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS));
   }
 
   /** Checks that the logic lambda was successfully and correctly invoked for MCS claims. */

@@ -122,6 +122,8 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))
         .message(protobufObjectWriter.print(change))
         .status(MessageError.Status.UNRESOLVED)
+        .createdDate(clock.instant())
+        .updatedDate(clock.instant())
         .build();
   }
 }

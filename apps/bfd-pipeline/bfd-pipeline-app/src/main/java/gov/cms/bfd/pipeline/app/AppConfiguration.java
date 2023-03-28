@@ -4,6 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -259,6 +260,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * error without causing the job to stop processing prematurely.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "RDA_JOB_ERROR_LIMIT";
+
+  /**
+   * The name of the environment variable that should be used to indicate the maximum number of days
+   * that processed records can remain in the {@link MessageError} table.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS = "RDA_JOB_ERROR_EXPIRE_DAYS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -661,6 +668,8 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             .authenticationToken(
                 readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN)
                     .orElse(DEFAULT_RDA_GRPC_AUTH_TOKEN))
+            .messageErrorExpirationDays(
+                readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
             .build();
     final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
     mockServerConfig.serverMode(
