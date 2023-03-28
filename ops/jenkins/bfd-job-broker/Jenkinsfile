@@ -33,7 +33,7 @@ spec:
                 script {
                     def queueMsg = readJSON text: params.sqs_body
                     def jobToRun = queueMsg.job
-                    def parameters = queueMsg.collect {
+                    def parameters = queueMsg.parameters.collect {
                         param, paramValue -> if (paramValue instanceof Boolean) {
                             booleanParam(name: param, value: paramValue)
                         } else {
