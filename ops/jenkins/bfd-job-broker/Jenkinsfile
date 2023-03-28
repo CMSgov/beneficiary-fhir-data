@@ -1,0 +1,41 @@
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  restartPolicy: Never
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: IfNotPresent
+"""
+        }
+    }
+    parameters {
+        string(
+            name: 'sqs_body',
+            description: 'The body of the SQS message invoking this Pipeline. Automatically populated'
+        )
+    }
+    options {
+        skipDefaultCheckout()
+    }
+    stages {
+        stage('Run Pipeline Job from Queue') {
+            steps {
+                script {
+                    def queueMsg = readJSON text: params.sqs_body
+                    def messageAsJson = writeJSON json: queueMsg returnText: true
+                    echo messageAsJson
+                }
+            }
+        }
+    }
+}
