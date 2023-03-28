@@ -37,7 +37,7 @@ spec:
                         param, paramValue -> if (value instanceof Boolean) {
                             booleanParam(name: param, value: paramValue)
                         } else {
-                            string(value: param, value: paramValue)
+                            string(name: param, value: paramValue)
                         }
                     }
                     echo jobToRun
