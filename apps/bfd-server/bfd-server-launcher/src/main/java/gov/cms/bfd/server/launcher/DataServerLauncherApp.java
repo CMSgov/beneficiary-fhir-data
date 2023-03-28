@@ -9,7 +9,6 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -325,31 +324,6 @@ public final class DataServerLauncherApp {
          * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
          * accessible to the filter.
          */
-        HttpServletResponse servletResponse = (HttpServletResponse) response;
-        Long outputSizeInBytes = Long.parseLong(servletResponse.getHeader("Content-Length"));
-        BfdMDC.put(
-            BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
-
-        // Record the response duration.
-        Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
-        if (requestStartMilliseconds != null) {
-          Long responseDurationInMilliseconds =
-              System.currentTimeMillis() - requestStartMilliseconds;
-          BfdMDC.put(
-              BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
-              Long.toString(responseDurationInMilliseconds));
-
-          if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
-            Long responseDurationPerKB =
-                ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
-            BfdMDC.put(
-                BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
-          } else {
-            BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-          }
-        } else {
-          BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-        }
 
         /*
          * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
