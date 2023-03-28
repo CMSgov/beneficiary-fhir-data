@@ -210,10 +210,10 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config = {
-    min             = local.env_config.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
+    min             = local.env_config.env == "prod-sbx" ? length(local.azs) : length(local.azs)
     max             = 8 * length(local.azs)
     max_warm        = 4 * length(local.azs)
-    desired         = local.env_config.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
+    desired         = local.env_config.env == "prod-sbx" ? length(local.azs) : length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
