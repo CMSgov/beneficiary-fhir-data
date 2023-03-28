@@ -44,7 +44,7 @@ spec:
             }
           }
 
-          build job: jobToRun, parameters: parameters, waitForStart: true
+          build job: jobToRun, parameters: parameters, wait: false
         }
       }
     }
