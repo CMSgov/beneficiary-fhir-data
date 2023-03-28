@@ -40,8 +40,8 @@ spec:
                             string(name: param, value: paramValue)
                         }
                     }
-                    echo jobToRun
-                    echo parameters
+
+                    build job: jobToRun, parameters: parameters
                 }
             }
         }
