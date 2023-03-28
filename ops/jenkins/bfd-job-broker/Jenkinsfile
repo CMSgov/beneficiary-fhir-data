@@ -32,7 +32,7 @@ spec:
             steps {
                 script {
                     def queueMsg = readJSON text: params.sqs_body
-                    def messageAsJson = writeJSON json: queueMsg returnText: true
+                    def messageAsJson = writeJSON json: queueMsg, returnText: true
                     echo messageAsJson
                 }
             }
