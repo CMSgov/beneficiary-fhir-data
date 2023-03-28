@@ -7,7 +7,11 @@ export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
 export DATABASE_URL='{{ data_pipeline_db_url }}'
 export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
+
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
+export RIF_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
+export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
+
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
 export FILTERING_NON_NULL_AND_NON_2023_BENES='{{ data_pipeline_filtering_non_null_and_non_2023_benes }}'
 
