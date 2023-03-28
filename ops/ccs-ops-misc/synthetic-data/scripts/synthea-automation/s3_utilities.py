@@ -73,35 +73,30 @@ def download_synthea_files(target_dir):
             raise Exception( "Unexpected error in download_synthea_files: " + e.__str__())
 
 '''
-Function to download proprietary Mitre shell script files from an S3 bucket; the scripts
-drive the synthea generation process. The scripts are listed in an array of filenames
-so this function loops over names in the code_script_files array. Since the files will
-be run as shell script(s), unix file permissions are set to enable them to be executed.
+Function to download proprietary Mitre shell script file from an S3 bucket; the script
+drives the synthea generation process. Since the file will be run as a shell script, 
+unix file permissions are set to enable it to be executed.
 
-Param: target_dir : unix filesystem directory where downloaded S3 file(s) are written to.
+Param: target_dir : unix filesystem directory where downloaded S3 file is written to.
 
 Raises a python exception if failure to download file.
 '''
-def download_synthea_scripts(target_dir):
+def download_synthea_script(target_dir):
     '''
-    Mitre shell script files that need to be downloaded; used to generated synthetic data.
+    Mitre shell script file that needs to be downloaded; used to generated synthetic data.
     '''
-    code_script_files = [
-        'national_bfd.sh',
-        'national_bfd_v2.sh'
-        ]
-
-    for fn in code_script_files:
-        output_fn = target_dir + fn
-        try:
-            s3_client.download_file(mitre_synthea_bucket, fn, output_fn)
-            os.chmod(os.fspath(output_fn), 0o744)
-        except ClientError as e:
-            if e.response['Error']['Code'] == "404":
-                print(f"The S3 object does not exist: {fn}")
-            raise e
-        except Exception as e:
-            raise Exception( "Unexpected error in download_synthea_scripts: " + e.__str__())
+    code_script_file = 'national_bfd.sh'
+    
+    output_fn = target_dir + code_script_file
+    try:
+        s3_client.download_file(mitre_synthea_bucket, code_script_file, output_fn)
+        os.chmod(os.fspath(output_fn), 0o744)
+    except ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print(f"The S3 object does not exist: {fn}")
+        raise e
+    except Exception as e:
+        raise Exception( "Unexpected error in download_synthea_script: " + e.__str__())
 
 '''
 Function to download the Mitre BFD end_state.properties file from an S3 bucket;
@@ -421,7 +416,7 @@ def main(args):
         case "download_file":
             download_synthea_files(target_dir)
         case "download_script":
-            download_synthea_scripts(target_dir)
+            download_synthea_script(target_dir)
         case "download_prop":
             download_end_state_props_file(target_dir)
         case "upload_prop":
