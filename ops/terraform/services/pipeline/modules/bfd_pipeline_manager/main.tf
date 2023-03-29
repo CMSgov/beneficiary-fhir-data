@@ -1,0 +1,59 @@
+locals {
+  env    = terraform.workspace
+  region = data.aws_region.current.name
+
+  kms_key_arn = var.aws_env_kms_key_arn
+  kms_key_id  = var.aws_env_kms_key_id
+
+  mgmt_kms_key_id  = var.aws_mgmt_kms_key_id
+  mgmt_kms_key_arn = var.aws_mgmt_kms_key_arn
+
+  lambda_full_name = "bfd-${local.env}-pipeline-manager"
+
+  jenkins_job_queue_arn  = data.aws_sqs_queue.jenkins_job_queue.arn
+  jenkins_job_queue_name = data.aws_sqs_queue.jenkins_job_queue.name
+}
+
+resource "aws_lambda_permission" "this" {
+  statement_id   = "${local.lambda_full_name}-allow-s3"
+  action         = "lambda:InvokeFunction"
+  function_name  = aws_lambda_function.this.arn
+  principal      = "s3.amazonaws.com"
+  source_arn     = data.aws_s3_bucket.etl.arn
+  source_account = var.account_id
+}
+
+resource "aws_lambda_function" "this" {
+  function_name = local.lambda_full_name
+
+  description = join("", [
+    "Invoked whenever a new file appears in either the root or Synthetic Done/ and Incoming/ paths ",
+    "of the ${local.env} BFD ETL S3 Bucket (${data.aws_s3_bucket.etl.id}), this Lambda runs the ",
+    "bfd-deploy-pipeline-terraservice Jenkins job through the bfd-mgmt-run-jenkins-job SQS queue ",
+    "specifiying whether the BFD Pipeline instance should run to load data when data arrives or ",
+    "stop running when data has finished loading"
+  ])
+
+  tags = {
+    Name = local.lambda_full_name
+  }
+
+  kms_key_arn      = local.kms_key_arn
+  filename         = data.archive_file.lambda_src.output_path
+  source_code_hash = data.archive_file.lambda_src.output_base64sha256
+  architectures    = ["x86_64"]
+  handler          = "pipeline_manager.handler"
+  memory_size      = 128
+  package_type     = "Zip"
+  runtime          = "python3.9"
+  timeout          = 300
+
+  environment {
+    variables = {
+      ETL_BUCKET_ID          = data.aws_s3_bucket.etl.id
+      JENKINS_JOB_QUEUE_NAME = local.jenkins_job_queue_name
+    }
+  }
+
+  role = aws_iam_role.this.arn
+}
