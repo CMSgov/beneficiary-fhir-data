@@ -355,7 +355,7 @@ public final class MigratorAppIT {
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "1");
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
     Path testFilePath =
         Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");
     String testFileDir = testFilePath.toAbsolutePath().toString();
