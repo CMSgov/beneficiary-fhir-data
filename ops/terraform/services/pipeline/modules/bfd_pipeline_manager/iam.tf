@@ -51,8 +51,8 @@ resource "aws_iam_policy" "logs" {
 EOF
 }
 
-resource "aws_iam_policy" "sqs" {
-  name = "${local.lambda_full_name}-sqs"
+resource "aws_iam_policy" "jenkins_sqs" {
+  name = "${local.lambda_full_name}-jenkins-sqs"
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to send messages to the ",
     "${local.jenkins_job_queue_name} SQS queue"
@@ -73,6 +73,36 @@ resource "aws_iam_policy" "sqs" {
       "Effect": "Allow",
       "Action": ["kms:GenerateDataKey*"],
       "Resource": ["${local.mgmt_kms_key_arn}"]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "this_sqs" {
+  name = "${local.lambda_full_name}-sqs"
+  description = join("", [
+    "Permissions for the ${local.lambda_full_name} Lambda to send, receive, and delete messages ",
+    "from the ${aws_sqs_queue.this.name} SQS queue"
+  ])
+  policy = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage",
+        "sqs:DeleteMessage",
+        "sqs:ReceiveMessage"
+      ],
+      "Resource": ["${aws_sqs_queue.this.arn}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["kms:GenerateDataKey*", "kms:Decrypt"],
+      "Resource": ["${local.kms_key_arn}"]
     }
   ]
 }
@@ -102,6 +132,7 @@ EOF
   managed_policy_arns = [
     aws_iam_policy.s3.arn,
     aws_iam_policy.logs.arn,
-    aws_iam_policy.sqs.arn
+    aws_iam_policy.jenkins_sqs.arn,
+    aws_iam_policy.this_sqs.arn
   ]
 }

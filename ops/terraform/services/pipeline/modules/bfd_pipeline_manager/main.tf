@@ -52,10 +52,16 @@ resource "aws_lambda_function" "this" {
       DEPLOYED_GIT_BRANCH      = var.deployed_git_branch
       JENKINS_TARGET_JOB_NAME  = local.jenkins_target_job_name
       JENKINS_JOB_RUNNER_QUEUE = local.jenkins_job_queue_name
-      ONGOING_LOAD_QUEUE       = ""
+      ONGOING_LOAD_QUEUE       = aws_sqs_queue.this.name
       ETL_BUCKET_ID            = data.aws_s3_bucket.etl.id
     }
   }
 
   role = aws_iam_role.this.arn
+}
+
+resource "aws_sqs_queue" "this" {
+  name                       = local.lambda_full_name
+  visibility_timeout_seconds = 0
+  kms_master_key_id          = local.kms_key_arn
 }
