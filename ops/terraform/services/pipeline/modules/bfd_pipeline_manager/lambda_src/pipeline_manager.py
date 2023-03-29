@@ -1,13 +1,21 @@
+import json
 import os
 import re
+import sys
+from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import unquote
 
 import boto3
 from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
+BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
+DEPLOYED_GIT_BRANCH = os.environ.get("DEPLOYED_GIT_BRANCH", "")
+JENKINS_TARGET_JOB_NAME = os.environ.get("JENKINS_TARGET_JOB_NAME", "")
+JENKINS_JOB_RUNNER_QUEUE = os.environ.get("JENKINS_JOB_RUNNER_QUEUE", "")
+ONGOING_LOAD_QUEUE = os.environ.get("ONGOING_LOAD_QUEUE", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
@@ -18,14 +26,32 @@ BOTO_CONFIG = Config(
     },
 )
 
+try:
+    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
+    etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
+    sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)
+    jenkins_job_runner_queue = sqs_resource.get_queue_by_name(QueueName=JENKINS_JOB_RUNNER_QUEUE)
+    ongoing_load_queue = sqs_resource.get_queue_by_name(QueueName=ONGOING_LOAD_QUEUE)
+except Exception as exc:
+    print(
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
+        f" {exc}"
+    )
+    sys.exit(0)
+
+
+class PipelineLoadType(str, Enum):
+    NON_SYNTHETIC = ""
+    SYNTHETIC = "Synthetic"
+
 
 class PipelineDataStatus(str, Enum):
     """Represents the possible states of data: either data is available to load, or has been loaded
     by the ETL pipeline. The value of each enum is the parent directory of the incoming file,
     indicating status"""
 
-    INCOMING = "incoming"
-    DONE = "done"
+    INCOMING = "Incoming"
+    DONE = "Done"
 
 
 class RifFileType(str, Enum):
@@ -44,12 +70,76 @@ class RifFileType(str, Enum):
     SNF = "snf"
 
 
-def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
+@dataclass
+class OngoingLoadQueueMessage:
+    load_type: PipelineLoadType
+    load_group: str
+
+
+@dataclass
+class JenkinsJobRunnerQueueMessage:
+    job: str
+    parameters: "JenkinsTerraserviceJobParameters"
+
+
+@dataclass
+class JenkinsTerraserviceJobParameters:
+    env: str
+    create_ccw_pipeline_instance: bool
+
+
+def _check_ongoing_load_queue(timeout: int = 1) -> list[OngoingLoadQueueMessage]:
+    responses = ongoing_load_queue.receive_messages(WaitTimeSeconds=timeout)
+
+    def load_json_safe(json_str: str) -> Optional[dict[str, str]]:
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            return None
+        except TypeError:
+            return None
+
+    raw_messages = [load_json_safe(response.body) for response in responses]
+    filtered_messages = [
+        OngoingLoadQueueMessage(
+            load_type=PipelineLoadType(message["load_type"]), load_group=message["load_group"]
+        )
+        for message in raw_messages
+        if message is not None and "load_type" in message and "load_group" in message
+    ]
+
+    return filtered_messages
+
+
+def _post_ongoing_load_message(load_type: PipelineLoadType, group_timestamp: str):
+    ongoing_load_queue.send_message(
+        MessageBody=json.dumps(
+            asdict(OngoingLoadQueueMessage(load_type=load_type, load_group=group_timestamp))
+        )
+    )
+
+
+def _post_jenkins_job_message(create_ccw_instance: bool):
+    jenkins_job_runner_queue.send_message(
+        MessageBody=json.dumps(
+            asdict(
+                JenkinsJobRunnerQueueMessage(
+                    job=f"{JENKINS_TARGET_JOB_NAME}/{DEPLOYED_GIT_BRANCH}",
+                    parameters=JenkinsTerraserviceJobParameters(
+                        env=BFD_ENVIRONMENT, create_ccw_pipeline_instance=create_ccw_instance
+                    ),
+                )
+            )
+        )
+    )
+
+
+def _is_pipeline_load_complete(group_timestamp: str) -> bool:
     done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
     # Returns the file names of all text files within the "done" folder for the current bucket
     finished_rifs = [
         str(object.key).removeprefix(done_prefix)
-        for object in bucket.objects.filter(Prefix=done_prefix)
+        for object in etl_bucket.objects.filter(Prefix=done_prefix)
         if str(object.key).endswith(".txt") or str(object.key).endswith(".csv")
     ]
 
@@ -66,9 +156,9 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     )
 
 
-def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
+def _is_incoming_folder_empty(group_timestamp: str) -> bool:
     incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group_timestamp}/"
-    incoming_objects = list(bucket.objects.filter(Prefix=incoming_key_prefix))
+    incoming_objects = list(etl_bucket.objects.filter(Prefix=incoming_key_prefix))
 
     return len(incoming_objects) == 0
 
@@ -76,16 +166,6 @@ def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
 def handler(event: Any, context: Any):
     if not all([REGION, ETL_BUCKET_ID]):
         print("Not all necessary environment variables were defined, exiting...")
-        return
-
-    try:
-        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
-        etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
-    except Exception as exc:
-        print(
-            "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
-            f" {exc}"
-        )
         return
 
     try:
