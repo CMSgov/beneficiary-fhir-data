@@ -222,15 +222,21 @@ def handler(event: Any, context: Any):
     status_group_str = "|".join([e.value for e in PipelineDataStatus])
     rif_types_group_str = "|".join([e.value for e in RifFileType])
     # The incoming file's key should match an expected format, as follows:
-    # "<Incoming/Done>/<ISO date format>/<file name>".
+    # "<Synthetic/>/<Incoming/Done>/<ISO date format>/<file name>".
     if match := re.search(
-        rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$",
-        decoded_file_key,
-        re.IGNORECASE,
+        pattern=(
+            rf"^({PipelineLoadType.SYNTHETIC.capitalize()}){{0,1}}/{{0,1}}"
+            rf"({status_group_str})/"
+            rf"([\d\-:TZ]+)/"
+            rf".*({rif_types_group_str}).*$"
+        ),
+        string=decoded_file_key,
+        flags=re.IGNORECASE,
     ):
-        pipeline_data_status = PipelineDataStatus(match.group(1).lower())
-        group_timestamp = match.group(2)
-        rif_file_type = RifFileType(match.group(3).lower())
+        pipeline_load_type = PipelineLoadType(match.group(1) or "")
+        pipeline_data_status = PipelineDataStatus(match.group(2))
+        group_timestamp = match.group(3)
+        rif_file_type = RifFileType(match.group(4).lower())
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             pass
