@@ -373,17 +373,15 @@ public final class DatabaseTestUtils {
   private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
       String username, String password) {
 
-    if (container == null || !container.isRunning()) {
-      String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
-      container =
-          new PostgreSQLContainer(testContainerDatabaseImage)
-              .withDatabaseName("fhirdb")
-              .withUsername(username)
-              .withPassword(password)
-              .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
+    String testContainerDatabaseImage = System.getProperty("its.testcontainer.db.image", "");
+    container =
+        new PostgreSQLContainer(testContainerDatabaseImage)
+            .withDatabaseName("fhirdb")
+            .withUsername(username)
+            .withPassword(password)
+            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
 
-      container.start();
-    }
+    container.start();
 
     JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
     DataSource dataSource =
@@ -438,7 +436,11 @@ public final class DatabaseTestUtils {
         Flyway.configure()
             .dataSource(unpooledDataSource)
             .schemas(FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]))
+            .baselineOnMigrate(true)
+            .baselineVersion("0")
             .connectRetries(2)
+            .cleanDisabled(false)
+            .placeholders(DatabaseTestSchemaManager.createScriptPlaceholdersMap(unpooledDataSource))
             .load();
     LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
     flyway.clean();
