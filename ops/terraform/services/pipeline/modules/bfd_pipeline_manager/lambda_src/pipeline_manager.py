@@ -74,6 +74,8 @@ class RifFileType(str, Enum):
 class OngoingLoadQueueMessage:
     load_type: PipelineLoadType
     load_group: str
+    message_id: Optional[str] = None
+    receipt_handle: Optional[str] = None
 
 
 @dataclass
@@ -99,12 +101,18 @@ def _check_ongoing_load_queue(timeout: int = 1) -> list[OngoingLoadQueueMessage]
         except TypeError:
             return None
 
-    raw_messages = [load_json_safe(response.body) for response in responses]
+    raw_messages = [
+        (response.message_id, response.receipt_handle, load_json_safe(response.body))
+        for response in responses
+    ]
     filtered_messages = [
         OngoingLoadQueueMessage(
-            load_type=PipelineLoadType(message["load_type"]), load_group=message["load_group"]
+            load_type=PipelineLoadType(message["load_type"]),
+            load_group=message["load_group"],
+            message_id=message_id,
+            receipt_handle=message_receipt,
         )
-        for message in raw_messages
+        for message_id, message_receipt, message in raw_messages
         if message is not None and "load_type" in message and "load_group" in message
     ]
 
@@ -116,6 +124,12 @@ def _post_ongoing_load_message(load_type: PipelineLoadType, group_timestamp: str
         MessageBody=json.dumps(
             asdict(OngoingLoadQueueMessage(load_type=load_type, load_group=group_timestamp))
         )
+    )
+
+
+def _remove_ongoing_load_message(message_id: str, message_receipt: str):
+    ongoing_load_queue.delete_messages(
+        Entries=[{"Id": message_id, "ReceiptHandle": message_receipt}]
     )
 
 
