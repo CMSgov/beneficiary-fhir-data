@@ -8,22 +8,17 @@ variable "etl_bucket_id" {
   type        = string
 }
 
-variable "aws_env_kms_key_arn" {
-  description = "The fully qualified KMS key ARN for the current environment"
-  type        = string
-}
-
-variable "aws_env_kms_key_id" {
+variable "env_kms_key_id" {
   description = "The ID of the current environment's KMS key to use"
   type        = string
 }
 
-variable "aws_mgmt_kms_key_arn" {
-  description = "The fully qualified KMS key ARN for the mgmt environment"
+variable "mgmt_kms_key_id" {
+  description = "The ID of the mgmt environment's KMS key to use"
   type        = string
 }
 
-variable "aws_mgmt_kms_key_id" {
-  description = "The ID of the mgmt environment's KMS key to use"
+variable "deployed_git_branch" {
+  description = "The Git branch from which this module was deployed"
   type        = string
 }

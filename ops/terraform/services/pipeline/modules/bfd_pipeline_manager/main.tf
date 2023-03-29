@@ -2,11 +2,8 @@ locals {
   env    = terraform.workspace
   region = data.aws_region.current.name
 
-  kms_key_arn = var.aws_env_kms_key_arn
-  kms_key_id  = var.aws_env_kms_key_id
-
-  mgmt_kms_key_id  = var.aws_mgmt_kms_key_id
-  mgmt_kms_key_arn = var.aws_mgmt_kms_key_arn
+  kms_key_arn      = data.aws_kms_key.env_cmk.arn
+  mgmt_kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
 
   lambda_full_name = "bfd-${local.env}-pipeline-manager"
 
@@ -50,8 +47,12 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      ETL_BUCKET_ID          = data.aws_s3_bucket.etl.id
-      JENKINS_JOB_QUEUE_NAME = local.jenkins_job_queue_name
+      BFD_ENVIRONMENT          = local.env
+      DEPLOYED_GIT_BRANCH      = var.deployed_git_branch
+      JENKINS_TARGET_JOB_NAME  = "bfd-deploy-pipeline-terraservice"
+      JENKINS_JOB_RUNNER_QUEUE = local.jenkins_job_queue_name
+      ONGOING_LOAD_QUEUE       = ""
+      ETL_BUCKET_ID            = data.aws_s3_bucket.etl.id
     }
   }
 

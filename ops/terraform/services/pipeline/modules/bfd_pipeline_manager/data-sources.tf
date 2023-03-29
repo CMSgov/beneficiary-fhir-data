@@ -1,5 +1,13 @@
 data "aws_region" "current" {}
 
+data "aws_kms_key" "env_cmk" {
+  key_id = var.env_kms_key_id
+}
+
+data "aws_kms_key" "mgmt_cmk" {
+  key_id = var.mgmt_kms_key_id
+}
+
 data "aws_s3_bucket" "etl" {
   bucket = var.etl_bucket_id
 }
