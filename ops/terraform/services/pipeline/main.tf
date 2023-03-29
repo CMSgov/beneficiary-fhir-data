@@ -209,3 +209,13 @@ module "bfd_pipeline_slis" {
   aws_kms_key_id  = local.kms_key_id
   etl_bucket_id   = aws_s3_bucket.this.id
 }
+
+module "bfd_pipeline_manager" {
+  source = "./modules/bfd_pipeline_manager"
+
+  account_id          = local.account_id
+  etl_bucket_id       = aws_s3_bucket.this.id
+  env_kms_key_id      = data.aws_kms_key.cmk.key_id
+  mgmt_kms_key_id     = data.aws_kms_key.mgmt_cmk.key_id
+  deployed_git_branch = var.deployed_git_branch
+}

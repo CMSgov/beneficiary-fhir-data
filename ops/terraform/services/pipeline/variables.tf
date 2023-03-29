@@ -27,3 +27,9 @@ variable "jdbc_suffix" {
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
 }
+
+variable "deployed_git_branch" {
+  default     = null
+  description = "The Git branch from which this module was deployed"
+  type        = string
+}
