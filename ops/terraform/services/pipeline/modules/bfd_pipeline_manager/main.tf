@@ -7,8 +7,8 @@ locals {
 
   lambda_full_name = "bfd-${local.env}-pipeline-manager"
 
-  jenkins_job_queue_arn  = data.aws_sqs_queue.jenkins_job_queue.arn
-  jenkins_job_queue_name = data.aws_sqs_queue.jenkins_job_queue.name
+  jenkins_job_queue_arn   = data.aws_sqs_queue.jenkins_job_queue.arn
+  jenkins_job_queue_name  = data.aws_sqs_queue.jenkins_job_queue.name
   jenkins_target_job_name = "bfd-deploy-pipeline-terraservice"
 }
 
