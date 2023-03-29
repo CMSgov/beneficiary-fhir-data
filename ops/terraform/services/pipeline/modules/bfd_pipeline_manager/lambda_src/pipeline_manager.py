@@ -134,12 +134,18 @@ def _post_jenkins_job_message(create_ccw_instance: bool):
     )
 
 
-def _is_pipeline_load_complete(group_timestamp: str) -> bool:
-    done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
+def _is_pipeline_load_complete(load_type: PipelineLoadType, group_timestamp: str) -> bool:
+    done_prefix = "/".join(
+        # Filters out any falsey elements, which will remove any empty strings from the joined
+        # string
+        filter(
+            None, [load_type.capitalize(), PipelineDataStatus.DONE.capitalize(), group_timestamp]
+        )
+    )
     # Returns the file names of all text files within the "done" folder for the current bucket
     finished_rifs = [
         str(object.key).removeprefix(done_prefix)
-        for object in etl_bucket.objects.filter(Prefix=done_prefix)
+        for object in etl_bucket.objects.filter(Prefix=f"{done_prefix}/")
         if str(object.key).endswith(".txt") or str(object.key).endswith(".csv")
     ]
 
@@ -156,15 +162,30 @@ def _is_pipeline_load_complete(group_timestamp: str) -> bool:
     )
 
 
-def _is_incoming_folder_empty(group_timestamp: str) -> bool:
-    incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group_timestamp}/"
-    incoming_objects = list(etl_bucket.objects.filter(Prefix=incoming_key_prefix))
+def _is_incoming_folder_empty(load_type: PipelineLoadType, group_timestamp: str) -> bool:
+    incoming_key_prefix = "/".join(
+        filter(
+            None,
+            [load_type.capitalize(), PipelineDataStatus.INCOMING.capitalize(), group_timestamp],
+        )
+    )
+    incoming_objects = list(etl_bucket.objects.filter(Prefix=f"{incoming_key_prefix}/"))
 
     return len(incoming_objects) == 0
 
 
 def handler(event: Any, context: Any):
-    if not all([REGION, ETL_BUCKET_ID]):
+    if not all(
+        [
+            REGION,
+            BFD_ENVIRONMENT,
+            DEPLOYED_GIT_BRANCH,
+            JENKINS_TARGET_JOB_NAME,
+            JENKINS_JOB_RUNNER_QUEUE,
+            ONGOING_LOAD_QUEUE,
+            ETL_BUCKET_ID,
+        ]
+    ):
         print("Not all necessary environment variables were defined, exiting...")
         return
 
