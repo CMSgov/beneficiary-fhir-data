@@ -235,14 +235,13 @@ def handler(event: Any, context: Any):
         pipeline_load_type = PipelineLoadType(match.group(1) or "")
         pipeline_data_status = PipelineDataStatus(match.group(2))
         group_timestamp = match.group(3)
-        rif_file_type = RifFileType(match.group(4).lower())
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             # check queue for any ongoing load corresponding to the current load
-            ongoing_loads = _check_ongoing_load_queue(timeout=5)
+            ongoing_loads = _check_ongoing_load_queue(timeout=30)
             if any(
-                x.load_group == group_timestamp and x.load_type == pipeline_load_type
-                for x in ongoing_loads
+                msg.load_group == group_timestamp and msg.load_type == pipeline_load_type
+                for msg in ongoing_loads
             ):
                 print(
                     f"The group {group_timestamp} has already been handled, and the CCW pipeline"
@@ -251,12 +250,14 @@ def handler(event: Any, context: Any):
                 return
 
             # no messages in queue correspond to the current load, this must be a new load. Post a
-            # message to the Jenkins job queue to start the deploy job
+            # message to the Jenkins job queue to start the deploy job indicating that the CCW
+            # instance should be started/created
             print(
                 f"No ongoing load messages were found in {ONGOING_LOAD_QUEUE} queue, the BFD CCW"
                 " Pipeline instance must not be running. Posting a message to the"
                 f" {JENKINS_JOB_RUNNER_QUEUE} queue to start the {JENKINS_TARGET_JOB_NAME} Jenkins"
-                f" job for environment {BFD_ENVIRONMENT} and branch {DEPLOYED_GIT_BRANCH}..."
+                " job indicating the BFD CCW Pipeline instance should be started for environment"
+                f" {BFD_ENVIRONMENT} and branch {DEPLOYED_GIT_BRANCH}..."
             )
             _post_jenkins_job_message(create_ccw_instance=True)
             print(f"Message posted successfully")
@@ -271,5 +272,57 @@ def handler(event: Any, context: Any):
                 load_type=pipeline_load_type, group_timestamp=group_timestamp
             )
             print(f"Message posted successfully")
-        elif pipeline_data_status == PipelineDataStatus.DONE:
-            pass
+        elif (
+            pipeline_data_status == PipelineDataStatus.DONE
+            and _is_pipeline_load_complete(
+                load_type=pipeline_load_type, group_timestamp=group_timestamp
+            )
+            and _is_incoming_folder_empty(
+                load_type=pipeline_load_type, group_timestamp=group_timestamp
+            )
+        ):
+            # remove the message(s) in the ongoing load queue corresponding to the current group
+            print(
+                f"S3 Event and location of group {group_timestamp}'s data in S3 indicates data load"
+                f" for group {group_timestamp} has completed. Cleaning up messages in"
+                f" {ONGOING_LOAD_QUEUE} queue corresponding to group {group_timestamp}..."
+            )
+            # this might seem odd -- assuming the "locking" logic for the INCOMING case above is
+            # sound, there should only be one single message per-group; unfortunately, AWS SQS isn't
+            # _quite_ realtime enough for this to be the case, and it is possible that if this
+            # Lambda is invoked concurrently quickly enough (such as in the case where multiple
+            # files are uploaded simultaneously) that multiple SQS messages get posted for a single
+            # group. there's not much we can do about this other than ensure we delete _all_
+            # possible messages
+            group_load_msgs = [
+                msg
+                for msg in _check_ongoing_load_queue(timeout=30)
+                if msg.load_type == pipeline_load_type and msg.load_group == group_timestamp
+            ]
+            for msg in group_load_msgs:
+                assert msg.message_id and msg.receipt_handle
+                _remove_ongoing_load_message(
+                    message_id=msg.message_id, message_receipt=msg.receipt_handle
+                )
+            print(f"Cleanup successful")
+
+            # now, check if the ongoing load queue is empty. we only want to stop the CCW pipeline
+            # instance if there are no more data loads for it to handle.
+            if list(_check_ongoing_load_queue(timeout=30)):
+                print(
+                    f"There are still ongoing loads queued up for the BFD CCW Pipeline to process."
+                    f" Stopping..."
+                )
+                return
+
+            # if, and only if, there are no messages remaining in the ongoing load queue we post a
+            # message to the Jenkins job queue to start the deploy job, but this time specifying
+            # that the CCW instance should be destroyed
+            print(
+                f" Posting a message to {JENKINS_JOB_RUNNER_QUEUE} queue to start the"
+                f" {JENKINS_TARGET_JOB_NAME} Jenkins job indicating the BFD CCW Pipeline instance"
+                f" should be stopped for environment {BFD_ENVIRONMENT} and branch"
+                f" {DEPLOYED_GIT_BRANCH}..."
+            )
+            _post_jenkins_job_message(create_ccw_instance=False)
+            print(f"Message posted successfully")
