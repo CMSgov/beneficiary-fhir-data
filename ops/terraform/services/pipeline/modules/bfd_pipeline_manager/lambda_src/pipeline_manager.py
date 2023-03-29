@@ -34,8 +34,7 @@ try:
     ongoing_load_queue = sqs_resource.get_queue_by_name(QueueName=ONGOING_LOAD_QUEUE)
 except Exception as exc:
     print(
-        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
-        f" {exc}"
+        f"Unrecoverable exception occurred when attempting to create boto3 clients/resources: {exc}"
     )
     sys.exit(0)
 
@@ -239,6 +238,38 @@ def handler(event: Any, context: Any):
         rif_file_type = RifFileType(match.group(4).lower())
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
-            pass
+            # check queue for any ongoing load corresponding to the current load
+            ongoing_loads = _check_ongoing_load_queue(timeout=5)
+            if any(
+                x.load_group == group_timestamp and x.load_type == pipeline_load_type
+                for x in ongoing_loads
+            ):
+                print(
+                    f"The group {group_timestamp} has already been handled, and the CCW pipeline"
+                    " instance should be running. Stopping..."
+                )
+                return
+
+            # no messages in queue correspond to the current load, this must be a new load. Post a
+            # message to the Jenkins job queue to start the deploy job
+            print(
+                f"No ongoing load messages were found in {ONGOING_LOAD_QUEUE} queue, the BFD CCW"
+                " Pipeline instance must not be running. Posting a message to the"
+                f" {JENKINS_JOB_RUNNER_QUEUE} queue to start the {JENKINS_TARGET_JOB_NAME} Jenkins"
+                f" job for environment {BFD_ENVIRONMENT} and branch {DEPLOYED_GIT_BRANCH}..."
+            )
+            _post_jenkins_job_message(create_ccw_instance=True)
+            print(f"Message posted successfully")
+
+            # post a message to the ongoing load queue to stop further, unnecessary, deployments
+            print(
+                f"Posting message to {ONGOING_LOAD_QUEUE} queue indicating there is an ongoing data"
+                f" load and that the {JENKINS_TARGET_JOB_NAME} Jenkins job has been started to"
+                " create a CCW Pipeline instance..."
+            )
+            _post_ongoing_load_message(
+                load_type=pipeline_load_type, group_timestamp=group_timestamp
+            )
+            print(f"Message posted successfully")
         elif pipeline_data_status == PipelineDataStatus.DONE:
             pass
