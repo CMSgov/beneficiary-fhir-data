@@ -71,6 +71,11 @@ class RifFileType(str, Enum):
 
 @dataclass
 class OngoingLoadQueueMessage:
+    """Represents a message in the ongoing load queue that acts as a sentinel indicating a
+    particular group is currently being loaded. This Lambda checks for the existence of these
+    messages in the queue, and will only start/stop the CCW pipeline instance depending on the
+    existence of such messages"""
+
     load_type: PipelineLoadType
     load_group: str
     message_id: Optional[str] = None
@@ -79,12 +84,17 @@ class OngoingLoadQueueMessage:
 
 @dataclass
 class JenkinsJobRunnerQueueMessage:
+    """Represents the message that should be posted to the Jenkins job runner queue to invoke a
+    Jenkins job"""
+
     job: str
     parameters: "JenkinsTerraserviceJobParameters"
 
 
 @dataclass
 class JenkinsTerraserviceJobParameters:
+    """Represents the parameters for the BFD Pipeline Deploy Terraservice Jenkins Pipeline/job"""
+
     env: str
     create_ccw_pipeline_instance: bool
 
