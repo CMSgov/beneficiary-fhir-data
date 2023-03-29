@@ -25,11 +25,11 @@ resource "aws_lambda_function" "this" {
   function_name = local.lambda_full_name
 
   description = join("", [
-    "Invoked whenever a new file appears in either the root or Synthetic Done/ and Incoming/ paths ",
-    "of the ${local.env} BFD ETL S3 Bucket (${data.aws_s3_bucket.etl.id}), this Lambda runs the ",
-    "${local.jenkins_target_job_name} Jenkins job through the ${local.jenkins_job_queue_name} SQS ",
-    "queue specifiying whether the BFD Pipeline instance should run to load data when data arrives ",
-    "or stop running when data has finished loading"
+    "Invoked whenever a new file appears in either the root or Synthetic Done/ and Incoming/ ",
+    "paths of the ${local.env} BFD ETL S3 Bucket (${data.aws_s3_bucket.etl.id}), this Lambda runs ",
+    "the ${local.jenkins_target_job_name} Jenkins job through the ${local.jenkins_job_queue_name} ",
+    "SQS queue specifiying whether the BFD Pipeline instance should run to load data when data ",
+    "arrives or stop running when data has finished loading"
   ])
 
   tags = {
