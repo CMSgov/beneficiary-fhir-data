@@ -5,7 +5,7 @@ import sys
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Optional
-from urllib.parse import unquote
+from urllib.parse import quote_plus, unquote
 
 import boto3
 from botocore.config import Config
@@ -143,11 +143,12 @@ def _remove_ongoing_load_message(message_id: str, message_receipt: str):
 
 
 def _post_jenkins_job_message(create_ccw_instance: bool):
+    encoded_branch_name = quote_plus(DEPLOYED_GIT_BRANCH)
     jenkins_job_runner_queue.send_message(
         MessageBody=json.dumps(
             asdict(
                 JenkinsJobRunnerQueueMessage(
-                    job=f"{JENKINS_TARGET_JOB_NAME}/{DEPLOYED_GIT_BRANCH}",
+                    job=f"{JENKINS_TARGET_JOB_NAME}/{encoded_branch_name}",
                     parameters=JenkinsTerraserviceJobParameters(
                         env=BFD_ENVIRONMENT, create_ccw_pipeline_instance=create_ccw_instance
                     ),
