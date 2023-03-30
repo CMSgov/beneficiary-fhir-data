@@ -42,7 +42,7 @@ resource "aws_s3_bucket_acl" "this" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
+resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
   bucket = aws_s3_bucket.this.id
 
   lambda_function {
