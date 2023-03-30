@@ -44,12 +44,13 @@ spec:
     stage('Deploy Pipeline Terraservice') {
       steps {
         script {
-          def lockResource = params.env == 'prod-sbx' ? 'env_prod_sbx' : "env_${params.env}"
+          def trimmedEnv = params.env.trim()
           def amiOverride = (params.ami_override?.trim()) ? [ami_id_override: params.ami_override.trim()] : []
+          def lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
           lock(resource: lockResource) {
             awsAuth.assumeRole()
             terraform.deployTerraservice(
-              env: params.env.trim(),
+              env: trimmedEnv,
               directory: 'ops/terraform/services/pipeline',
               tfVars: [
                 create_ccw_pipeline: params.create_ccw_pipeline_instance,
