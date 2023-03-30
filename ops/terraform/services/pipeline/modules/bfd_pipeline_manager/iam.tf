@@ -71,7 +71,7 @@ resource "aws_iam_policy" "jenkins_sqs" {
     },
     {
       "Effect": "Allow",
-      "Action": ["kms:GenerateDataKey*"],
+      "Action": ["kms:GenerateDataKey*", "kms:Decrypt"],
       "Resource": ["${local.mgmt_kms_key_arn}"]
     }
   ]
