@@ -48,7 +48,8 @@ spec:
               directory: 'ops/terraform/services/pipeline',
               tfVars: [
                 create_ccw_pipeline: params.create_ccw_pipeline_instance,
-                create_rda_pipeline: params.create_rda_pipeline_instance
+                create_rda_pipeline: params.create_rda_pipeline_instance,
+                deployed_git_branch: env.BRANCH_NAME
               ]
             )
           }
