@@ -11,7 +11,7 @@ variable "force_etl_user_creation" {
 }
 
 variable "create_ccw_pipeline" {
-  default     = true
+  default     = false
   description = "Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default."
   type        = bool
 }
