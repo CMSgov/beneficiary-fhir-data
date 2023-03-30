@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -61,8 +61,6 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -92,7 +90,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * differences to those responses are included in your PR, by clearing out any incidental noise,
  * e.g. timestamps.
  */
-public final class EndpointJsonResponseComparatorIT {
+public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
 
   /** Test to use for an ignored field. */
   private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
@@ -180,24 +178,6 @@ public final class EndpointJsonResponseComparatorIT {
             (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadOutpatient),
         arguments("eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadPde),
         arguments("eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadSnf));
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
-   * that any existing data is deleted from the tables before running the test suite.
-   */
-  @BeforeAll
-  public static void cleanupDatabaseBeforeTestSuite() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @AfterEach
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

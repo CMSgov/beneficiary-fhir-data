@@ -86,7 +86,7 @@ public final class PipelineTestUtils {
    */
   private PipelineTestUtils() {
     MetricRegistry testMetrics = new MetricRegistry();
-    DatabaseSchemaManager.createOrUpdateSchema(DatabaseTestUtils.initUnpooledDataSource());
+    DatabaseSchemaManager.createOrUpdateSchema(DatabaseTestUtils.get().getUnpooledDataSource());
 
     // Create a testing specific pooled data source from the existing unpooled data source
     HikariDataSource pooledDataSource = new HikariDataSource();

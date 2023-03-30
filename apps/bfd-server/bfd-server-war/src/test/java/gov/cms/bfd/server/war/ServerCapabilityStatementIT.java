@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
  * "for free" with our use of the HAPI framework. These tests are just here to verify that it works
  * as expected, since it's so critical for clients.
  */
-public final class ServerCapabilityStatementIT {
+public final class ServerCapabilityStatementIT extends ServerRequiredTest {
   /**
    * Verifies that the server responds as expected to the <code>GET [base]/_metadata</code>
    * endpoint.

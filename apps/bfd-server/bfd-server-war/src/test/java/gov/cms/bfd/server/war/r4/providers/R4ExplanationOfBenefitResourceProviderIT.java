@@ -32,6 +32,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -67,33 +68,13 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the {@link R4ExplanationOfBenefitResourceProvider}. */
-public final class R4ExplanationOfBenefitResourceProviderIT {
+public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequiredTest {
 
   /** Parameter name for excluding SAMHSA. */
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
-   * that any existing data is deleted from the tables before running the test suite.
-   */
-  @BeforeAll
-  public static void cleanupDatabaseBeforeTestSuite() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @AfterEach
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
