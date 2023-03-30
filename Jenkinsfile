@@ -258,7 +258,8 @@ try {
 							env: bfdEnv,
 							directory: "ops/terraform/services/pipeline",
 							tfVars: [
-								ami_id_override: amiIds.bfdPipelineAmiId
+								ami_id_override: amiIds.bfdPipelineAmiId,
+								deployed_git_branch: env.BRANCH_NAME
 							]
 						)
 					}
@@ -393,7 +394,8 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/pipeline",
 								tfVars: [
-									ami_id_override: amiIds.bfdPipelineAmiId
+									ami_id_override: amiIds.bfdPipelineAmiId,
+									deployed_git_branch: env.BRANCH_NAME
 								]
 							)
 						}
@@ -510,7 +512,8 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/pipeline",
 								tfVars: [
-									ami_id_override: amiIds.bfdPipelineAmiId
+									ami_id_override: amiIds.bfdPipelineAmiId,
+									deployed_git_branch: env.BRANCH_NAME
 								]
 							)
 						}
