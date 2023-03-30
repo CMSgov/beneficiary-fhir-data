@@ -210,17 +210,17 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config = {
-    min             = local.env_config.env == "prod-sbx" ? length(local.azs) : length(local.azs)
+    min             = local.env_config.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
     max             = 8 * length(local.azs)
     max_warm        = 4 * length(local.azs)
-    desired         = local.env_config.env == "prod-sbx" ? length(local.azs) : length(local.azs)
+    desired         = local.env_config.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    instance_type = "c6i.4xlarge"
+    instance_type = "c6i.2xlarge"
     volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
