@@ -40,7 +40,7 @@ spec:
             if (paramValue instanceof Boolean) {
               booleanParam(name: param, value: paramValue)
             } else {
-              string(name: param, value: paramValue)
+              string(name: param, value: "${paramValue}")
             }
           }
 
