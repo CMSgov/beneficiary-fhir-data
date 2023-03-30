@@ -871,10 +871,6 @@ checkJavaFormat
 					of the build. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<reportFormat>plain</reportFormat>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>

@@ -160,9 +160,9 @@ public class ServerExecutor {
       args.add(String.format("-DbfdServer.db.url=%s", dbUrl));
       args.add(String.format("-DbfdServer.db.username=%s", dbUsername));
       args.add(String.format("-DbfdServer.db.password=%s", dbPassword));
-      args.add(String.format("-Dits.db.url=%s", dbUrl));
-      args.add(String.format("-Dits.db.username=%s", dbUsername));
-      args.add(String.format("-Dits.db.password=%s", dbPassword));
+      // args.add(String.format("-Dits.db.url=%s", dbUrl));
+      // args.add(String.format("-Dits.db.username=%s", dbUsername));
+      // args.add(String.format("-Dits.db.password=%s", dbPassword));
       args.add("-DbfdServer.db.schema.apply=true");
       args.add(String.format("-DbfdServer.include.fake.drug.code=%s", includeFakeDrugCode));
       args.add(String.format("-DbfdServer.include.fake.org.name=%s", includeFakeOrgName));
