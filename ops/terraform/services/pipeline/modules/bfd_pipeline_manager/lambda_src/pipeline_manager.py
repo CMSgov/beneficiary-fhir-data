@@ -159,17 +159,21 @@ def _post_jenkins_job_message(create_ccw_instance: bool):
 
 
 def _is_pipeline_load_complete(load_type: PipelineLoadType, group_timestamp: str) -> bool:
-    done_prefix = "/".join(
-        # Filters out any falsey elements, which will remove any empty strings from the joined
-        # string
-        filter(
-            None, [load_type.capitalize(), PipelineDataStatus.DONE.capitalize(), group_timestamp]
+    done_prefix = (
+        "/".join(
+            # Filters out any falsey elements, which will remove any empty strings from the joined
+            # string
+            filter(
+                None,
+                [load_type.capitalize(), PipelineDataStatus.DONE.capitalize(), group_timestamp],
+            )
         )
+        + "/"
     )
     # Returns the file names of all text files within the "done" folder for the current bucket
     finished_rifs = [
         str(object.key).removeprefix(done_prefix)
-        for object in etl_bucket.objects.filter(Prefix=f"{done_prefix}/")
+        for object in etl_bucket.objects.filter(Prefix=done_prefix)
         if str(object.key).endswith(".txt") or str(object.key).endswith(".csv")
     ]
 
@@ -187,13 +191,16 @@ def _is_pipeline_load_complete(load_type: PipelineLoadType, group_timestamp: str
 
 
 def _is_incoming_folder_empty(load_type: PipelineLoadType, group_timestamp: str) -> bool:
-    incoming_key_prefix = "/".join(
-        filter(
-            None,
-            [load_type.capitalize(), PipelineDataStatus.INCOMING.capitalize(), group_timestamp],
+    incoming_key_prefix = (
+        "/".join(
+            filter(
+                None,
+                [load_type.capitalize(), PipelineDataStatus.INCOMING.capitalize(), group_timestamp],
+            )
         )
+        + "/"
     )
-    incoming_objects = list(etl_bucket.objects.filter(Prefix=f"{incoming_key_prefix}/"))
+    incoming_objects = list(etl_bucket.objects.filter(Prefix=incoming_key_prefix))
 
     return len(incoming_objects) == 0
 
@@ -249,7 +256,7 @@ def handler(event: Any, context: Any):
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             # check queue for any ongoing load corresponding to the current load
-            ongoing_loads = _check_ongoing_load_queue(timeout=30)
+            ongoing_loads = _check_ongoing_load_queue(timeout=5)
             if any(
                 msg.load_group == group_timestamp and msg.load_type == pipeline_load_type
                 for msg in ongoing_loads
@@ -307,7 +314,7 @@ def handler(event: Any, context: Any):
             # possible messages
             group_load_msgs = [
                 msg
-                for msg in _check_ongoing_load_queue(timeout=30)
+                for msg in _check_ongoing_load_queue(timeout=5)
                 if msg.load_type == pipeline_load_type and msg.load_group == group_timestamp
             ]
             for msg in group_load_msgs:
@@ -319,7 +326,7 @@ def handler(event: Any, context: Any):
 
             # now, check if the ongoing load queue is empty. we only want to stop the CCW pipeline
             # instance if there are no more data loads for it to handle.
-            if list(_check_ongoing_load_queue(timeout=30)):
+            if list(_check_ongoing_load_queue(timeout=5)):
                 print(
                     f"There are still ongoing loads queued up for the BFD CCW Pipeline to process."
                     f" Stopping..."
