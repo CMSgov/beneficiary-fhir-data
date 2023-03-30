@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.DatabaseTestUtils.DEFAULT_IT_DATABASE;
+import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_PASSWORD;
+import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_USERNAME;
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_PASSWORD;
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_USERNAME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.DatabaseTestUtils;
 import java.io.IOException;
 import javax.sql.DataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -34,18 +37,22 @@ public class ServerRequiredTest {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(dbUrl),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise) OR an in-memory hsql db.");
+      // Initialize the database/datasource, so we can just pass a connection string to the server
       if (dataSource == null) {
         dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
       }
       String resolvedDbUrl = dbUrl;
       String dbUsername = System.getProperty("its.db.username", null);
       String dbPassword = System.getProperty("its.db.password", null);
-      // If we're using a test container, get the test container's 'real' database url to set up the
-      // server with
+      // Grab the previously set-up local database url to pass to the test server
       if (dataSource instanceof PGSimpleDataSource && dbUrl.endsWith("tc")) {
         resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
         dbUsername = TEST_CONTAINER_DATABASE_USERNAME;
         dbPassword = TEST_CONTAINER_DATABASE_PASSWORD;
+      } else if (dataSource instanceof JDBCDataSource && dbUrl.contains("hsql")) {
+        resolvedDbUrl = ((JDBCDataSource) dataSource).getUrl();
+        dbUsername = HSQL_SERVER_USERNAME;
+        dbPassword = HSQL_SERVER_PASSWORD;
       }
 
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);

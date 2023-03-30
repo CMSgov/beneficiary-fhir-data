@@ -50,7 +50,7 @@ public class ServerExecutor {
   public static boolean startServer(String dbUrl, String dbUsername, String dbPass)
       throws IOException {
     if (serverProcess == null) {
-
+      LOGGER.info("Starting IT server with DB: {}", dbUrl);
       String javaHome = System.getProperty("java.home", "");
       String targetPath = "target";
       String workDirectory = "target/server-work";
@@ -134,32 +134,35 @@ public class ServerExecutor {
               .orElse(Path.of(""));
       Path scriptPath = findFirstPathMatchWithFilenameEnd(assemblyDirectory.toString(), ".sh", 1);
 
+      // TODO/FUTURE: Inherit these from system properties with defaults? The script did
       String gcLog = workDirectory + "/gc.log";
       String maxHeapArg = System.getProperty("its.bfdServer.jvmargs", "-Xmx4g");
       String containerImageType =
           System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
       String v2Enabled = "true";
       String pacEnabled = "true";
-      String pacOldMbiHashEnabled = "false";
+      String pacOldMbiHashEnabled = "true";
       String pacClaimSourceTypes = "fiss,mcs";
       String includeFakeDrugCode = "true";
       String includeFakeOrgName = "true";
       Random rand = new Random();
       String bfdServerId = "" + rand.nextInt(10240);
-      LOGGER.info("Server Id: {}", bfdServerId);
 
       List<String> args = new ArrayList<>();
       args.add(scriptPath.toAbsolutePath().toString());
       args.add(maxHeapArg);
       args.add(String.format("-Xlog:gc*:%s:time,level,tags", gcLog));
       args.add(String.format("-Dbfd-server-%s", bfdServerId));
-      args.add(String.format("-DbfdServer.db.url=%s", dbUrl));
       args.add(String.format("-DbfdServer.v2.enabled=%s", v2Enabled));
       args.add(String.format("-DbfdServer.pac.enabled=%s", pacEnabled));
       args.add(String.format("-DbfdServer.pac.oldMbiHash.enabled=%s", pacOldMbiHashEnabled));
       args.add(String.format("-DbfdServer.pac.claimSourceTypes=%s", pacClaimSourceTypes));
+      args.add(String.format("-DbfdServer.db.url=%s", dbUrl));
       args.add(String.format("-DbfdServer.db.username=%s", dbUsername));
       args.add(String.format("-DbfdServer.db.password=%s", dbPassword));
+      args.add(String.format("-Dits.db.url=%s", dbUrl));
+      args.add(String.format("-Dits.db.username=%s", dbUsername));
+      args.add(String.format("-Dits.db.password=%s", dbPassword));
       args.add("-DbfdServer.db.schema.apply=true");
       args.add(String.format("-DbfdServer.include.fake.drug.code=%s", includeFakeDrugCode));
       args.add(String.format("-DbfdServer.include.fake.org.name=%s", includeFakeOrgName));

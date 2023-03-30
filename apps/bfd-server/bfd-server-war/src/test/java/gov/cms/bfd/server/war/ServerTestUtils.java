@@ -616,6 +616,7 @@ public final class ServerTestUtils {
       }
 
       connection.commit();
+      // TODO: REMOVE
       LOGGER.info("Removed all application data from database.");
     } catch (SQLException e) {
       throw new RuntimeException(e);

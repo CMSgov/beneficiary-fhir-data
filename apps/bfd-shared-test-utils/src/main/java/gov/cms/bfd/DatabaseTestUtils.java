@@ -54,9 +54,9 @@ public final class DatabaseTestUtils {
   public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("public", "PUBLIC", "rda", "RDA");
 
   /** The username used for HSQL locally. */
-  static final String HSQL_SERVER_USERNAME = "test";
+  public static final String HSQL_SERVER_USERNAME = "test";
   /** The password used for HSQL locally. */
-  static final String HSQL_SERVER_PASSWORD = "test";
+  public static final String HSQL_SERVER_PASSWORD = "test";
 
   /** The default database type to use for the integration tests when nothing is provided. */
   public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
@@ -114,7 +114,7 @@ public final class DatabaseTestUtils {
    *
    * @return the datasource
    */
-  public static DataSource initUnpooledDataSource() {
+  private static DataSource initUnpooledDataSource() {
     /*
      * This is pretty hacky, but when this class is being used as part of the BFD Server tests, we
      * have to check for the DB connection properties that the BFD Server may have written out when
@@ -130,26 +130,27 @@ public final class DatabaseTestUtils {
     String passwordDefault = null;
 
     if (bfdServerTestDatabaseProperties.isPresent()) {
-      LOGGER.info("Found server test properties, using those...");
+      LOGGER.info("Setting up data source using server properties ({})", url);
       url = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.url");
       username = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.username");
       password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
     } else if (url.contains("hsql")) {
+      LOGGER.info("Setting up HSQL data source");
       /*
        * Build DB connection properties that use HSQL, just as they're configured in the
        * parent POM.
        */
-      // String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
+      String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
 
       // Build the actual DB connection properties to use.
-      // url = System.getProperty("its.db.url", urlDefault);
+      url = System.getProperty("its.db.url", urlDefault);
 
       username = System.getProperty("its.db.username", usernameDefault);
       if (username != null && username.trim().isEmpty()) username = usernameDefault;
       password = System.getProperty("its.db.password", passwordDefault);
       if (password != null && password.trim().isEmpty()) password = passwordDefault;
     } else {
-      LOGGER.info("Setting up test container data source");
+      LOGGER.info("Setting up postgres test container data source");
       // Build the test container postgres db by default
       username = System.getProperty("its.db.username", TEST_CONTAINER_DATABASE_USERNAME);
       if (username == null || username.trim().isBlank()) {
