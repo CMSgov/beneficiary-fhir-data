@@ -62,4 +62,40 @@ resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
     id                  = "${module.bfd_pipeline_slis.lambda_name}-done"
     lambda_function_arn = module.bfd_pipeline_slis.lambda_arn
   }
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "Incoming/"
+    id                  = "${module.bfd_pipeline_manager.lambda_name}-incoming"
+    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+  }
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "Done/"
+    id                  = "${module.bfd_pipeline_manager.lambda_name}-done"
+    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+  }
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "Synthetic/Incoming/"
+    id                  = "${module.bfd_pipeline_manager.lambda_name}-synthetic-incoming"
+    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+  }
+
+  lambda_function {
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix       = "Synthetic/Done/"
+    id                  = "${module.bfd_pipeline_manager.lambda_name}-synthetic-done"
+    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+  }
 }
