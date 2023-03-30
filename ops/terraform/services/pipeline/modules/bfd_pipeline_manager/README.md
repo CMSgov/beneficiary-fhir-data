@@ -16,9 +16,10 @@ then determine if the BFD CCW Pipeline should be started or not. This depends on
   for that file's "group", the `bfd-deploy-pipeline-terraservice` Jenkins pipeline is started using
   the `bfd-job-broker` with the arguments set to _create_ the CCW Pipeline instance
 - Else, if the file was uploaded to either of the `Done` folders, there is no files in the
-  corresponding `Incoming` folder, and all non-optional RIF files are present in the `Done` folder,
-  the `bfd-deploy-pipeline-terraservice` Jenkins pipeline is started using the `bfd-job-broker` with
-  the arguments set to _destroy_ the CCW Pipeline instance
+  corresponding `Incoming` folder, all non-optional RIF files are present in the `Done` folder,
+  _and_ there are no ongoing loads _at all_ (including other groups), the
+  `bfd-deploy-pipeline-terraservice` Jenkins pipeline is started using the `bfd-job-broker` with the
+  arguments set to _destroy_ the CCW Pipeline instance
 
 In short, this Lambda indirectly invokes a Jenkins pipeline that will either _create_ or _destroy_
 the CCW Pipeline instance for the current `env`, thus ensuring the CCW Pipeline instance is only
