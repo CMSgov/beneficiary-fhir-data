@@ -37,4 +37,21 @@ public class RandomClaimGeneratorConfig {
    * When positive this number indicates the maximum number of unique claim id values to generate.
    */
   private final int maxUniqueClaimIds;
+
+  /**
+   * When true this causes the random error generation feature to always use the current timestamp
+   * instead of using {@link #seed}.
+   */
+  private final boolean useTimestampForErrorSeed;
+
+  /**
+   * Gets the appropriate seed value for the random error generation feature. Uses either {@link
+   * #seed} or the current time as seed value depending on the {@link #useTimestampForErrorSeed}
+   * setting.
+   *
+   * @return random number generator seed value
+   */
+  public long getRandomErrorSeed() {
+    return useTimestampForErrorSeed ? clock.millis() : seed;
+  }
 }

@@ -222,7 +222,11 @@ public class RdaServerApp {
     private RandomClaimGeneratorConfig adjustErrorSeed(int delta) {
       final var oldSeed = randomClaimConfig.getSeed();
       final var adjustedSeed = oldSeed + delta;
-      return randomClaimConfig.toBuilder().seed(adjustedSeed).build();
+      return randomClaimConfig
+          .toBuilder()
+          .seed(adjustedSeed)
+          .useTimestampForErrorSeed(true)
+          .build();
     }
   }
 }
