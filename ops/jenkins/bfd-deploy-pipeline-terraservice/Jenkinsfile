@@ -26,7 +26,8 @@ spec:
     )
     string(
       name: 'ami_override',
-      description: 'BFD Pipeline override AMI ID. Optional, defaults to latest Pipeline AMI from `master`'
+      description: 'BFD Pipeline override AMI ID. Optional, defaults to latest Pipeline AMI from '
+                   + '`master`'
     )
     booleanParam(
       name: 'create_ccw_pipeline_instance',
@@ -45,7 +46,9 @@ spec:
       steps {
         script {
           def trimmedEnv = params.env.trim()
-          def amiOverride = (params.ami_override?.trim()) ? [ami_id_override: params.ami_override.trim()] : []
+          def amiOverride = (params.ami_override?.trim())
+                            ? [ami_id_override: params.ami_override.trim()]
+                            : []
           def lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
           lock(resource: lockResource) {
             awsAuth.assumeRole()
