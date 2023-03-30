@@ -8,7 +8,7 @@ export DATABASE_URL='{{ data_pipeline_db_url }}'
 export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 # NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
-export LOADER_THREADS='{{ ansible_processor_vcpus * rif_thread_multiple }}'
+export LOADER_THREADS='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
 export RIF_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
 export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
 
