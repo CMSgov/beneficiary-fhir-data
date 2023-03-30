@@ -1,0 +1,59 @@
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer 'bfd-cbc-build'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  restartPolicy: Never
+  containers:
+    - name: bfd-cbc-build
+      image: "public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6"
+      command:
+        - cat
+      tty: true
+      imagePullPolicy: IfNotPresent
+"""
+    }
+  }
+
+  parameters {
+    string(
+      name: 'env',
+      description: 'The BFD Environment to deploy the Terraservice to'
+    )
+    booleanParam(
+      name: 'create_ccw_pipeline_instance',
+      defaultValue: false,
+      description: 'Whether or not the BFD CCW Pipeline instance should be created to load data'
+    )
+    booleanParam(
+      name: 'create_rda_pipeline_instance',
+      defaultValue: true,
+      description: 'Whether or not the BFD RDA Pipeline instance should be created to load data'
+    )
+  }
+
+  stages {
+    stage('Deploy Pipeline Terraservice') {
+      steps {
+        script {
+          def lockResource = params.env == 'prod-sbx' ? 'env_prod_sbx' : "env_${params.env}"
+          lock(resource: lockResource) {
+            awsAuth.assumeRole()
+            terraform.deployTerraservice(
+              env: params.env,
+              directory: 'ops/terraform/services/pipeline',
+              tfVars: [
+                create_ccw_pipeline: params.create_ccw_pipeline_instance,
+                create_rda_pipeline: params.create_rda_pipeline_instance
+              ]
+            )
+          }
+        }
+      }
+    }
+  }
+}
