@@ -12,3 +12,9 @@ variable "aws_kms_key_arn" {
   description = "The fully qualified KMS key ARN"
   type        = string
 }
+
+variable "aws_kms_key_id" {
+  description = "The ID of the KMS key to use"
+  type        = string
+}
+
