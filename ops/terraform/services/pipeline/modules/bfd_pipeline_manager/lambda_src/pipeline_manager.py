@@ -344,3 +344,9 @@ def handler(event: Any, context: Any):
             )
             _post_jenkins_job_message(create_ccw_instance=False)
             print(f"Message posted successfully")
+        else:
+            print(
+                f"The location of data in S3 bucket {ETL_BUCKET_ID} for the current group"
+                f" ({group_timestamp}) does not indicate that the data load has finished."
+                " Stopping..."
+            )
