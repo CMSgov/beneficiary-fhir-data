@@ -385,8 +385,8 @@ public final class DatabaseTestUtils {
       String username, String password) {
 
     String testContainerDatabaseImage =
-            System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
-    LOGGER.info("Starting container, using image {}", testContainerDatabaseImage);
+        System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+    LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
     container =
         new PostgreSQLContainer(testContainerDatabaseImage)
             .withDatabaseName("fhirdb")
@@ -395,14 +395,13 @@ public final class DatabaseTestUtils {
             .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
 
     container.start();
-    LOGGER.info("Container started");
 
-    LOGGER.info("Setting up container and running migrations...");
+    LOGGER.debug("Container started, running migrations...");
     JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
     DataSource dataSource =
         initUnpooledDataSourceForPostgresql(
             jdbcContainer.getJdbcUrl(), jdbcContainer.getUsername(), jdbcContainer.getPassword());
-    LOGGER.info("Ran migrations on container.");
+    LOGGER.debug("Ran migrations on container.");
     return dataSource;
   }
 

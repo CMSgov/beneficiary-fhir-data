@@ -535,11 +535,12 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Runs a <code>TRUNCATE</code> for all tables in the supplied database.
+   * Runs a <code>TRUNCATE</code> for all tables in the supplied database. Obviously, only use this
+   * on test/local databases.
    *
    * @param dataSource the data source
    */
-  public void truncateTablesInDataSource(DataSource dataSource) {
+  public void truncateNonRdaTablesInDataSource(DataSource dataSource) {
     List<Class<?>> entityTypes =
         Arrays.asList(
             PartDEvent.class,
@@ -616,16 +617,14 @@ public final class ServerTestUtils {
       }
 
       connection.commit();
-      // TODO: REMOVE
-      LOGGER.info("Removed all application data from database.");
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
 
   /**
-   * For compatibility with HSQLDB and Postgresql, all schema names must have case preserved but any
-   * quotes in the name must be removed.
+   * Normalizes the schema names to work with both HSQL and postgres by preserving case and removing
+   * quotes.
    *
    * @param connection the connection
    * @param schemaNameSpecifier name of a schema from a hibernate annotation
@@ -642,8 +641,8 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Table names that use mixed case use quotes and have their original case preserved but those
-   * without quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
+   * Normalizes the table names to work with both HSQL and Hibernate by upper-casing table names
+   * without quotes and preserving case for other table names.
    *
    * @param tableNameSpecifier name of a table from a hibernate annotation
    * @return value compatible with call to {@link java.sql.Statement#execute(String)}
@@ -659,11 +658,11 @@ public final class ServerTestUtils {
 
   /**
    * Validates if the test's db url is valid for testing; i.e. is this a local database we can
-   * properly prune between tests. This is primarily to avoid calling truncate on a database we
-   * shouldnt.
+   * properly purge between tests. This is primarily to avoid calling truncate on a database you
+   * shouldn't and ruining your entire career.
    *
    * @param dbUrl the db url to validate
-   * @return if the it test db url is a local database that can be safely truncated
+   * @return if the db url is a local database that can be safely truncated and is not empty
    */
   public static boolean isValidServerDatabase(String dbUrl) {
     boolean isTestContainer = dbUrl.endsWith("tc");

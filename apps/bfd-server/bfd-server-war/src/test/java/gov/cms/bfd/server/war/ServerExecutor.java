@@ -21,36 +21,37 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.shaded.org.awaitility.core.ConditionTimeoutException;
 
 /**
- * Sets up and starts/stops the server for the integration tests.
- *
- * <p>IDEALLY our ITs would not spin the entire server up; this can/should be used in high-level
- * end-to-end tests. THe ITs really should be mocking all external resources and testing the
- * integration of internal classes, while our end-to-end tests create test doubles and spin a server
- * up like this. Those tests may belong in server-launcher or somewhere else.
+ * Sets up and starts/stops the server for the end-to-end tests (or e2e tests masquerading as
+ * integration tests).
  */
 public class ServerExecutor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerExecutor.class);
 
-  /** The Server process handle. */
+  /**
+   * The BFD server process handle which the server runs within. We keep it around for cleanup when
+   * the tests are done.
+   */
   private static Process serverProcess;
 
-  /** Keeps track of the STDOUT of the process for debugging. */
+  /** Keeps track of the server's STDOUT capture hook, to aid in debugging. */
   private static ProcessOutputConsumer appRunConsumer;
 
   /**
-   * Starts the BFD server for IT tests. If already running, does nothing.
+   * Starts the BFD server for tests. If already running, does nothing.
    *
    * @param dbUrl the db url
    * @param dbUsername the db username
-   * @param dbPass the db pass
-   * @return if the server is running
-   * @throws IOException if there is an issue setting up the server
+   * @param dbPassword the db password
+   * @return {@code true} if the server is running, if {@code false} the server failed to start up
+   * @throws IOException if there is an issue setting up the server relating to accessing files
    */
-  public static boolean startServer(String dbUrl, String dbUsername, String dbPass)
+  public static boolean startServer(String dbUrl, String dbUsername, String dbPassword)
       throws IOException {
     if (serverProcess == null) {
       LOGGER.info("Starting IT server with DB: {}", dbUrl);
+
+      // Set up the paths we require for the server war dependencies
       String javaHome = System.getProperty("java.home", "");
       String targetPath = "target";
       String workDirectory = "target/server-work";
@@ -59,10 +60,13 @@ public class ServerExecutor {
       String serverLauncher =
           findFirstPathMatchWithFilenameEnd(workDirectory, ".jar", 2).toString();
       String serverPortsFile = workDirectory + "/server-ports.properties";
+      // These two files are copied into server-work during build time by maven for convenience
+      // from:
+      // bfd-server/dev/ssl-stores
       String keyStore = workDirectory + "/server-keystore.jks";
       String trustStore = workDirectory + "/server-truststore.jks";
 
-      // Validate the paths and properties needed exist
+      // Validate the paths and properties needed to run the server war exist
       if (!validateRequiredServerSetup(
           javaHome, warArtifactLocation, serverLauncher, serverPortsFile, keyStore, trustStore)) {
         return false;
@@ -74,7 +78,7 @@ public class ServerExecutor {
 
       ProcessBuilder appRunBuilder =
           new ProcessBuilder(
-              createCommandForServerLauncherApp(workDirectory, dbUrl, dbUsername, dbPass));
+              createCommandForServerLauncherApp(workDirectory, dbUrl, dbUsername, dbPassword));
       appRunBuilder.environment().put("BFD_PORT", serverPort);
       appRunBuilder.environment().put("BFD_KEYSTORE", keyStore);
       appRunBuilder.environment().put("BFD_TRUSTSTORE", trustStore);
@@ -86,7 +90,7 @@ public class ServerExecutor {
       Thread appRunConsumerThread = new Thread(appRunConsumer);
       appRunConsumerThread.start();
 
-      // Await start/finish of application
+      // Await start/finish of application startup by grepping the stdOut for keywords
       String failureMessage = "Failed startup of context";
       String successMessage = "Started Jetty.";
       try {
@@ -116,13 +120,13 @@ public class ServerExecutor {
   }
 
   /**
-   * Create command for the server launcher script to be run.
+   * Create a command for the server launcher script to be run with.
    *
-   * @param workDirectory the work directory
+   * @param workDirectory the server-work directory
    * @param dbUrl the db url
    * @param dbUsername the db username
    * @param dbPassword the db password
-   * @return the command array for the migrator app
+   * @return the command array for the server app
    */
   private static String[] createCommandForServerLauncherApp(
       String workDirectory, String dbUrl, String dbUsername, String dbPassword) {
@@ -134,11 +138,11 @@ public class ServerExecutor {
               .orElse(Path.of(""));
       Path scriptPath = findFirstPathMatchWithFilenameEnd(assemblyDirectory.toString(), ".sh", 1);
 
-      // TODO/FUTURE: Inherit these from system properties with defaults? The script did
       String gcLog = workDirectory + "/gc.log";
       String maxHeapArg = System.getProperty("its.bfdServer.jvmargs", "-Xmx4g");
       String containerImageType =
           System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+      // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
       String v2Enabled = "true";
       String pacEnabled = "true";
       String pacOldMbiHashEnabled = "true";
@@ -146,7 +150,8 @@ public class ServerExecutor {
       String includeFakeDrugCode = "true";
       String includeFakeOrgName = "true";
       Random rand = new Random();
-      String bfdServerId = "" + rand.nextInt(10240);
+      // Copied this from the startup script, but may not be needed
+      String bfdServerId = String.valueOf(rand.nextInt(10240));
 
       List<String> args = new ArrayList<>();
       args.add(scriptPath.toAbsolutePath().toString());
@@ -160,10 +165,6 @@ public class ServerExecutor {
       args.add(String.format("-DbfdServer.db.url=%s", dbUrl));
       args.add(String.format("-DbfdServer.db.username=%s", dbUsername));
       args.add(String.format("-DbfdServer.db.password=%s", dbPassword));
-      // args.add(String.format("-Dits.db.url=%s", dbUrl));
-      // args.add(String.format("-Dits.db.username=%s", dbUsername));
-      // args.add(String.format("-Dits.db.password=%s", dbPassword));
-      args.add("-DbfdServer.db.schema.apply=true");
       args.add(String.format("-DbfdServer.include.fake.drug.code=%s", includeFakeDrugCode));
       args.add(String.format("-DbfdServer.include.fake.org.name=%s", includeFakeOrgName));
       args.add(String.format("-Dits.testcontainer.db.image=%s", containerImageType));
@@ -187,21 +188,22 @@ public class ServerExecutor {
     if (serverProcess != null && serverProcess.isAlive()) {
       serverProcess.destroy();
       LOGGER.info("Destroyed server process.");
-      // TODO: Remove or change to DEBUG
-      LOGGER.info("Server STDOUT: {}", appRunConsumer.getStdoutContents());
+      // If one wishes to see what the server did, this will log the server process STDOut
+      LOGGER.debug("Server STDOUT: {}", appRunConsumer.getStdoutContents());
     } else {
       LOGGER.warn("Tried to destroy server process but was not running.");
     }
   }
 
   /**
-   * Find first path match with filename end path.
+   * Find the first file's Path within the starting directory, traversing X depth into the
+   * directory, which ends with the given value.
    *
-   * @param startingDirectory the starting directory
-   * @param filenameEndsWith the filename ends with
-   * @param depth the depth
-   * @return the path
-   * @throws IOException the io exception
+   * @param startingDirectory the starting directory to search in
+   * @param filenameEndsWith the filename ending to seearch for; includes extension
+   * @param depth the depth (number of directories down) to search
+   * @return the path of the found file
+   * @throws IOException if the filename ending matched no files within the path and depth provided
    */
   private static Path findFirstPathMatchWithFilenameEnd(
       String startingDirectory, String filenameEndsWith, int depth) throws IOException {
@@ -227,9 +229,9 @@ public class ServerExecutor {
   }
 
   /**
-   * Validate required server setup variables and paths.
+   * Validate required server setup variables and paths exist.
    *
-   * @param javaHome the java home
+   * @param javaHome the java home to use for the server launch
    * @param warArtifactLocation the war artifact location
    * @param serverLauncherLocation the server launcher location
    * @param serverPortsFileLocation the server ports file location
@@ -259,23 +261,22 @@ public class ServerExecutor {
         || !keyStoreExists
         || !trustStoreExists) {
       LOGGER.error("Could not setup server; could not find required path.");
-      LOGGER.error("   target: {}", targetIsDir);
-      LOGGER.error("   target/server-work: {}", serverWorkExists);
-      LOGGER.error("   launcher directory: {}", launcherDirExists);
-      LOGGER.error("   server port file: {}", serverPortFileExists);
-      LOGGER.error("   keystore: {}", keyStoreExists);
-      LOGGER.error("   trust store: {}", trustStoreExists);
+      LOGGER.error("   found target: {}", targetIsDir);
+      LOGGER.error("   found target/server-work: {}", serverWorkExists);
+      LOGGER.error("   found launcher directory: {}", launcherDirExists);
+      LOGGER.error("   found server port file: {}", serverPortFileExists);
+      LOGGER.error("   found keystore: {}", keyStoreExists);
+      LOGGER.error("   found trust store: {}", trustStoreExists);
       return false;
     }
 
     if (!Files.exists(Paths.get(javaHome + "/bin/java"))) {
-      // if java path couldnt be found, blow up
-      LOGGER.error("Test setup could not find java at: " + javaHome + "/bin/java");
+      LOGGER.error("Test setup could not find java at: {}/bin/java", javaHome);
       return false;
     }
 
     if (!Files.exists(Paths.get(warArtifactLocation))) {
-      LOGGER.error("Test setup could not find artifact war at: " + warArtifactLocation);
+      LOGGER.error("Test setup could not find artifact war at: {}", warArtifactLocation);
       return false;
     }
 
