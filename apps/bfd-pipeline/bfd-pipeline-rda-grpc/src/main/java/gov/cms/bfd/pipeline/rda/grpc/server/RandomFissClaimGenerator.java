@@ -33,7 +33,6 @@ import gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation;
 import gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissRevenueLine;
 import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
-import java.time.Clock;
 import java.util.List;
 
 /**
@@ -134,29 +133,22 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   private static final List<FissNonBillRevCode> FissNonBillRevCodeEnums =
       enumValues(FissNonBillRevCode.values());
 
-  /**
-   * Creates an instance with the specified seed.
-   *
-   * @param seed seed for the PRNG
-   */
-  public RandomFissClaimGenerator(long seed) {
-    super(seed, false, Clock.systemUTC());
-  }
+  /** Max length of a FISS claim id. */
+  private static final int FissClaimIdLength = 32;
+  /** Max length of a MBI. */
+  private static final int MbiLength = 11;
+  /** Field length used when forcing a transformation error in a claim. */
+  @VisibleForTesting static final int ForcedErrorFieldLength = 50;
 
   /**
-   * Creates an instance for use in unit tests. Setting optionalOverride to true causes all optional
-   * fields to be added to the claim. This is useful in some tests.
+   * Creates an instance with the specified settings.
    *
-   * @param seed seed for the PRNG
-   * @param optionalOverride true if all optional fields should be populated
-   * @param clock the clock
+   * @param config configuration settings
    */
-  @VisibleForTesting
-  RandomFissClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    super(seed, optionalOverride, clock);
+  RandomFissClaimGenerator(RandomClaimGeneratorConfig config) {
+    super(config);
   }
 
-  /** {@inheritDoc} */
   @Override
   public FissClaim createRandomClaim() {
     FissClaim.Builder claim = FissClaim.newBuilder();
@@ -169,6 +161,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
           addRandomPayers(claim);
           addRandomAudits(claim);
           addRandomRevenueLines(claim);
+          adjustFieldsBasedOnConfigOverrides(claim);
         });
     return claim.build();
   }
@@ -179,9 +172,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
    * @param claim The claim object to add random base field values to
    */
   private void addRandomFieldValues(FissClaim.Builder claim) {
-    always("rdaClaimKey", () -> claim.setRdaClaimKey(randomDigit(6, 9)));
-    always("dcn", () -> claim.setDcn(randomDigit(5, 8)));
-    always("intermediaryNb", () -> claim.setIntermediaryNb(randomDigit(1, 5)));
+    always(
+        "rdaClaimKey",
+        () -> claim.setRdaClaimKey(randomDigit(FissClaimIdLength, FissClaimIdLength)));
+    always("dcn", () -> claim.setDcn(randomDigit(23, 23)));
+    always("intermediaryNb", () -> claim.setIntermediaryNb(randomDigit(5, 5)));
     always("hicNo", () -> claim.setHicNo(randomDigit(12, 12)));
     always("currStatus", () -> claim.setCurrStatusEnum(randomEnum(FissClaimStatusEnums)));
     oneOf(
@@ -220,7 +215,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
         });
     optional("admDiagCode", () -> claim.setAdmDiagCode(randomLetter(1, 7)));
     optional("npiNumber", () -> claim.setNpiNumber(randomDigit(10, 10)));
-    optional("mbi", () -> claim.setMbi(randomAlphaNumeric(11, 11)));
+    optional("mbi", () -> claim.setMbi(randomAlphaNumeric(MbiLength, MbiLength)));
     optional("fedTaxNb", () -> claim.setFedTaxNb(randomDigit(10, 10)));
     optional("pracLocAddr1", () -> claim.setPracLocAddr1(randomAlphaNumeric(1, 100)));
     optional("pracAddr2", () -> claim.setPracLocAddr2(randomAlphaNumeric(1, 100)));
@@ -645,5 +640,28 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
             claim.addFissRevenueLines(revenue.build());
           }
         });
+  }
+
+  /**
+   * Replace field values if necessary based on the overrides specified in the {@link
+   * RandomClaimGeneratorConfig}.
+   *
+   * @param claim claim to be updated
+   */
+  private void adjustFieldsBasedOnConfigOverrides(FissClaim.Builder claim) {
+    if (getMaxUniqueClaimIds() > 0) {
+      claim.setRdaClaimKey(randomDigitStringInRange(FissClaimIdLength, getMaxUniqueClaimIds()));
+    }
+    if (getMaxUniqueMbis() > 0) {
+      claim.setMbi(randomDigitStringInRange(MbiLength, getMaxUniqueMbis()));
+    }
+    if (shouldInsertErrorIntoCurrentClaim()) {
+      // update a random field with a string that is too long
+      oneOf(
+          "random-error",
+          () -> claim.setDcn(randomDigit(ForcedErrorFieldLength, ForcedErrorFieldLength)),
+          () ->
+              claim.setIntermediaryNb(randomDigit(ForcedErrorFieldLength, ForcedErrorFieldLength)));
+    }
   }
 }
