@@ -14,6 +14,8 @@ resource "aws_iam_policy" "s3" {
       "Action": ["s3:GetObject", "s3:ListBucket"],
       "Resource": [
         "${data.aws_s3_bucket.etl.arn}",
+        "${data.aws_s3_bucket.etl.arn}/Synthetic/Done/*",
+        "${data.aws_s3_bucket.etl.arn}/Synthetic/Incoming/*"
         "${data.aws_s3_bucket.etl.arn}/Done/*",
         "${data.aws_s3_bucket.etl.arn}/Incoming/*"
       ]
