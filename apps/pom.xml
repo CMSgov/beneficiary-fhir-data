@@ -149,6 +149,10 @@
 
 		<!-- Functional-reactive programming api for concurrent claim ingestion. -->
 		<reactor.version>3.5.1</reactor.version>
+
+		<!-- Default number of threads that we can overridden as needed in module poms. -->
+		<compile.thread.count>4</compile.thread.count>
+		<tests.thread.count>4</tests.thread.count>
 	</properties>
 
 	<dependencyManagement>
@@ -601,6 +605,15 @@ checkJavaFormat
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
 						<trimStackTrace>false</trimStackTrace>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<!-- default to 1 x num cores threads (same as -T 1C) -->
+						<threadCountClasses>5</threadCountClasses>
+						<threadCountMethods>10</threadCountMethods>
+						<useUnlimitedThreads>true</useUnlimitedThreads>
+						<parallel>all</parallel>
+						<!--
+						<forkCount>1C</forkCount>
+						<reuseForks>true</reuseForks>
+						 -->
 					</configuration>
 				</plugin>
 				<plugin>
