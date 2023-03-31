@@ -56,6 +56,11 @@ public abstract class MinioTestContainer {
     return SharedS3Utilities.createS3MinioClient(Regions.AP_EAST_1, minioConfig);
   }
 
+  /** support manual stop of {@link DockerComposeContainer} testcontainer. */
+  public static void forceStop() {
+    MINIO_CONTAINER.stop();
+  }
+
   /**
    * Creates a Docker compose file that will be used to create the MinIO Docker container.
    *
