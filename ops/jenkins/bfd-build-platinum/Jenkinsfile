@@ -10,6 +10,24 @@
 def goldAmiId
 def platinumAmiId
 
+def buildPlatinum(String platinumId = '', String goldId = '') {
+    // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
+    withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
+        // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+        dir('ops/ansible/playbooks-ccs') {
+            env.goldAmi = goldAmiId
+            echo "THE GOLD AMI ID BEING BUILT WITH IS: ${env.goldAmi}"
+
+            sh '''
+            packer build -color=false -var vault_password_file="$vaultPasswordFile" \
+            -var source_ami="${goldAmi}" \
+            -var subnet_id=subnet-092c2a68bd18b34d1 \
+            ../../packer/build_bfd-platinum.json
+            '''
+        }
+    }
+}
+
 pipeline {
     agent {
         kubernetes {
@@ -37,6 +55,16 @@ spec:
         }
     }
 
+    parameters {
+        string(name: 'GOLD_AMI_ID',
+            defaultValue: '',
+            description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.')
+
+        booleanParam(name: 'FORCE_PLATINUM',
+                    defaultValue: false,
+                    description: 'Forces a new platinum build regardless of the current Gold AMI ID source.')
+  }
+
     // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
     triggers {
         cron('30 11 * * *')
@@ -48,14 +76,13 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    // Query for the latest gold AMI ID
-                    goldAmiId = sh(
-                    returnStdout: true,
-                    script: "aws ec2 describe-images --filters \
-                    'Name=name,Values=amzn2legacy*' \
-                    'Name=state,Values=available' --region us-east-1 --output json | \
-                    jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-                    ).trim()
+                    // Use a custom gold AMI ID or Query for the latest gold AMI ID
+                    maxRuntime = params.GOLD_AMI_ID.length() > 0 ? params.GOLD_AMI_ID
+                                              : sh(returnStdout: true, script: "aws ec2 describe-images --filters \
+                                                'Name=name,Values=amzn2legacy*' \
+                                                'Name=state,Values=available' --region us-east-1 --output json | \
+                                                jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+                                                ).trim()
 
                     // Query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
                     platinumAmiId = sh(
@@ -76,26 +103,19 @@ spec:
                 script {
                     awsAuth.assumeRole()
 
-                    if (platinumAmiId.length() != 0) {
-                        // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
-                        echo "Using latest platinum AMI image: ${platinumAmiId}"
-                    } else if (platinumAmiId.length() == 0) {
-                        // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
-                        echo 'Deploying and tagging new platinum AMI'
+                    if (!params.FORCE_PLATINUM) {
+                        if (platinumAmiId.length() != 0) {
+                            // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
+                            echo "Using latest platinum AMI image: ${platinumAmiId}"
+                        } else if (platinumAmiId.length() == 0 || ) {
+                            // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
+                            echo 'Deploying and tagging new platinum AMI'
 
-                        // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
-                        withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-                            // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-                            dir('ops/ansible/playbooks-ccs') {
-                                env.goldAmi = goldAmiId
-                                sh '''
-                                packer build -color=false -var vault_password_file="$vaultPasswordFile" \
-                                -var source_ami="${goldAmi}" \
-                                -var subnet_id=subnet-092c2a68bd18b34d1 \
-                                ../../packer/build_bfd-platinum.json
-                                '''
-                            }
-                        }
+                            buildPlatinum(platinumAmiId, goldAmiId)
+                    } else {
+                        echo 'Force deploying and tagging new platinum AMI'
+
+                        buildPlatinum(platinumAmiId, goldAmiId)
                     }
                 }
             }
