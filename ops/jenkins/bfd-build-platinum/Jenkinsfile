@@ -16,7 +16,7 @@ def buildPlatinum(String platinumId = '', String goldId = '') {
         // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
         dir('ops/ansible/playbooks-ccs') {
             env.goldAmi = goldId
-            echo "Using latest platinum AMI image: ${env.goldAmi}"
+            echo "Using the folllowing gold image: ${env.goldAmi}"
 
             sh '''
             packer build -color=false -var vault_password_file="$vaultPasswordFile" \
