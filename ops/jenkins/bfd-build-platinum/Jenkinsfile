@@ -15,8 +15,9 @@ def buildPlatinum(String platinumId = '', String goldId = '') {
     withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
         // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
         dir('ops/ansible/playbooks-ccs') {
-            env.goldAmi = goldAmiId
-            echo "THE GOLD AMI ID BEING BUILT WITH IS: ${env.goldAmi}"
+            env.goldAmi = goldId
+            echo "DEPLOYING WITH GOLD AMI ID: "
+            echo env.goldAmi
 
             sh '''
             packer build -color=false -var vault_password_file="$vaultPasswordFile" \
@@ -77,7 +78,7 @@ spec:
                     awsAuth.assumeRole()
 
                     // Use a custom gold AMI ID or Query for the latest gold AMI ID
-                    maxRuntime = params.GOLD_AMI_ID.length() > 0 ? params.GOLD_AMI_ID
+                    goldAmiId = params.GOLD_AMI_ID.length() > 0 ? params.GOLD_AMI_ID
                                               : sh(returnStdout: true, script: "aws ec2 describe-images --filters \
                                                 'Name=name,Values=amzn2legacy*' \
                                                 'Name=state,Values=available' --region us-east-1 --output json | \
