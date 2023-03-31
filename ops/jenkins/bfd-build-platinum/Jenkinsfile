@@ -62,7 +62,7 @@ spec:
 
         booleanParam(name: 'FORCE_PLATINUM',
                     defaultValue: false,
-                    description: 'Forces a new platinum build regardless of the current Gold AMI ID source.')
+                    description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
     }
 
     // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
