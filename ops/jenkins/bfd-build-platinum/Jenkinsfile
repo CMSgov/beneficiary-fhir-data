@@ -107,7 +107,7 @@ spec:
                         if (platinumAmiId.length() != 0) {
                             // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                             echo "Using latest platinum AMI image: ${platinumAmiId}"
-                        } else if (platinumAmiId.length() == 0 || ) {
+                        } else if (platinumAmiId.length() == 0) {
                             // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
                             echo 'Deploying and tagging new platinum AMI'
 
