@@ -1,10 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +29,8 @@ import lombok.ToString;
  * increasing order by sequence number.
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
-  /** The client for interacting with AWS S3 buckets and files. */
-  private final AmazonS3 s3Client;
-  /** The bucket to use for S3 interactions. */
-  private final String bucketName;
-  /** The directory path to save files to. */
-  private final String directoryPath;
+  /** Used to access data from S3 bucket. */
+  private final S3Dao s3Dao;
   /** A function for getting the message factory to transform the response. */
   private final Function<String, MessageSource<T>> actualFactory;
   /** A function for obtaining the sequence number. */
@@ -49,31 +41,24 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   /**
    * Instantiates a new S3 bucket message source factory.
    *
-   * @param s3Client the s3 client to do operations with
-   * @param bucketName the bucket name to look for files in
-   * @param directoryPath the directory path to download files to
+   * @param s3Dao used to access data from S3 bucket
    * @param filePrefix the file prefix
    * @param fileSuffix the file suffix
    * @param actualFactory the source factory creation function
    * @param sequenceNumberGetter the function to get the sequence number
    */
   public S3BucketMessageSourceFactory(
-      AmazonS3 s3Client,
-      String bucketName,
-      String directoryPath,
+      S3Dao s3Dao,
       String filePrefix,
       String fileSuffix,
       Function<String, MessageSource<T>> actualFactory,
       Function<T, Long> sequenceNumberGetter) {
-    this.s3Client = s3Client;
-    this.bucketName = bucketName;
-    this.directoryPath = directoryPath;
+    this.s3Dao = s3Dao;
     this.actualFactory = actualFactory;
     this.sequenceNumberGetter = sequenceNumberGetter;
     matchPattern =
         Pattern.compile(
-            String.format(
-                "^%s%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", directoryPath, filePrefix, fileSuffix),
+            String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
             Pattern.CASE_INSENSITIVE);
   }
 
@@ -130,19 +115,17 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   @VisibleForTesting
   List<FileEntry> listFiles(long startingSequenceNumber) {
     List<FileEntry> entries = new ArrayList<>();
-    List<S3ObjectSummary> summaries = getObjectListing().getObjectSummaries();
-    for (S3ObjectSummary summary : summaries) {
-      Matcher matcher = matchPattern.matcher(summary.getKey());
+    List<String> fileNames = s3Dao.readFileNames();
+    for (String fileName : fileNames) {
+      Matcher matcher = matchPattern.matcher(fileName);
       if (matcher.matches()) {
         FileEntry entry;
         if (matcher.group(1) != null) {
           entry =
               new FileEntry(
-                  summary.getKey(),
-                  Long.parseLong(matcher.group(2)),
-                  Long.parseLong(matcher.group(3)));
+                  fileName, Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
         } else {
-          entry = new FileEntry(summary.getKey(), RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
+          entry = new FileEntry(fileName, RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
         }
         if (entry.maxSequenceNumber >= startingSequenceNumber) {
           entries.add(entry);
@@ -151,19 +134,6 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     }
     entries.sort(FileEntry::compareTo);
     return entries;
-  }
-
-  /**
-   * Gets the object listing.
-   *
-   * @return the object listing
-   */
-  private ObjectListing getObjectListing() {
-    if (Strings.isNullOrEmpty(directoryPath)) {
-      return s3Client.listObjects(bucketName);
-    } else {
-      return s3Client.listObjects(bucketName, directoryPath);
-    }
   }
 
   /**

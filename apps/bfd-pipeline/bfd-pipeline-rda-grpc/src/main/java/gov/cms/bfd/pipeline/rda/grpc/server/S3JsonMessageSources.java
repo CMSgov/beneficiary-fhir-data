@@ -1,10 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.google.common.base.Strings;
+import com.google.common.io.ByteSource;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +20,8 @@ public class S3JsonMessageSources {
   /** S3 suffix for files. */
   private static final String FILE_SUFFIX = "ndjson";
 
-  /** The client for interacting with AWS S3 buckets and files. */
-  private final AmazonS3 s3Client;
-  /** The bucket to use for S3 interactions. */
-  @Getter private final String bucketName;
-  /** The directory path to save files to. */
-  @Getter private final String directoryPath;
+  /** Used to access data from S3 bucket. */
+  private final S3Dao s3Dao;
   /** S3 key prefix for Fiss files. */
   private final String fissPrefix;
   /** S3 key prefix for MCS files. */
@@ -36,14 +31,10 @@ public class S3JsonMessageSources {
    * Creates an instance using the specified S3, bucket, and optional directory within the bucket. A
    * path is only added if the directoryPath is non-empty.
    *
-   * @param s3Client the S3 client to use
-   * @param bucketName the bucket files are stored in
-   * @param directoryPath the path within the bucket
+   * @param s3Dao the S3 cache to use
    */
-  public S3JsonMessageSources(AmazonS3 s3Client, String bucketName, String directoryPath) {
-    this.s3Client = s3Client;
-    this.bucketName = bucketName;
-    this.directoryPath = normalizeDirectoryPath(directoryPath);
+  public S3JsonMessageSources(S3Dao s3Dao) {
+    this.s3Dao = s3Dao;
     fissPrefix = FISS_OBJECT_KEY_PREFIX;
     mcsPrefix = MCS_OBJECT_KEY_PREFIX;
   }
@@ -56,13 +47,7 @@ public class S3JsonMessageSources {
    */
   public MessageSource.Factory<FissClaimChange> fissClaimChangeFactory() {
     return new S3BucketMessageSourceFactory<>(
-        s3Client,
-        bucketName,
-        directoryPath,
-        fissPrefix,
-        FILE_SUFFIX,
-        this::readFissClaimChanges,
-        FissClaimChange::getSeq);
+        s3Dao, fissPrefix, FILE_SUFFIX, this::readFissClaimChanges, FissClaimChange::getSeq);
   }
 
   /**
@@ -73,13 +58,7 @@ public class S3JsonMessageSources {
    */
   public MessageSource.Factory<McsClaimChange> mcsClaimChangeFactory() {
     return new S3BucketMessageSourceFactory<>(
-        s3Client,
-        bucketName,
-        directoryPath,
-        mcsPrefix,
-        FILE_SUFFIX,
-        this::readMcsClaimChanges,
-        McsClaimChange::getSeq);
+        s3Dao, mcsPrefix, FILE_SUFFIX, this::readMcsClaimChanges, McsClaimChange::getSeq);
   }
 
   /**
@@ -110,8 +89,7 @@ public class S3JsonMessageSources {
    * @return a valid object key for FISS claims data
    */
   public String createFissObjectKey() {
-    return S3BucketMessageSourceFactory.createValidObjectKey(
-        directoryPath + fissPrefix, FILE_SUFFIX);
+    return S3BucketMessageSourceFactory.createValidObjectKey(fissPrefix, FILE_SUFFIX);
   }
 
   /**
@@ -135,8 +113,7 @@ public class S3JsonMessageSources {
    * @return a valid object key for FISS claims data
    */
   public String createMcsObjectKey() {
-    return S3BucketMessageSourceFactory.createValidObjectKey(
-        directoryPath + mcsPrefix, FILE_SUFFIX);
+    return S3BucketMessageSourceFactory.createValidObjectKey(mcsPrefix, FILE_SUFFIX);
   }
 
   /**
@@ -164,23 +141,14 @@ public class S3JsonMessageSources {
   private <T> MessageSource<T> createMessageSource(
       String ndjsonObjectKey, JsonMessageSource.Parser<T> parser) {
     LOGGER.info(
-        "creating S3JsonMessageSource from S3: bucket={} key={}", bucketName, ndjsonObjectKey);
-    return new S3JsonMessageSource<>(s3Client.getObject(bucketName, ndjsonObjectKey), parser);
-  }
-
-  /**
-   * Normalizes the directory path string by adding a backslash at the end if one does not exist and
-   * ensuring the path is never null.
-   *
-   * @param directoryPath the directory path to normalize
-   * @return the normalized string
-   */
-  private static String normalizeDirectoryPath(String directoryPath) {
-    if (Strings.isNullOrEmpty(directoryPath)) {
-      directoryPath = "";
-    } else if (!directoryPath.endsWith("/")) {
-      directoryPath = directoryPath + "/";
+        "creating S3JsonMessageSource from S3: bucket={} key={}",
+        s3Dao.getS3BucketName(),
+        ndjsonObjectKey);
+    ByteSource byteSource = s3Dao.downloadFile(ndjsonObjectKey);
+    if (byteSource == null) {
+      throw new RuntimeException(
+          String.format("unable to download file from S3 bucket: key=%s", ndjsonObjectKey));
     }
-    return directoryPath;
+    return new JsonMessageSource<>(byteSource, parser);
   }
 }

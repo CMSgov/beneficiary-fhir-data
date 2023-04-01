@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
+import gov.cms.bfd.pipeline.rda.grpc.server.S3Dao;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -22,6 +23,7 @@ import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
+import java.io.File;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -59,13 +61,11 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     running = new AtomicInteger();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
     return Optional.of(new PipelineJobSchedule(config.runInterval.toMillis(), ChronoUnit.MILLIS));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     return true;
@@ -161,9 +161,13 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     private final long randomSeed;
     /** The maximum number of claims to be returned when operating in {@code Random} mode. */
     private final int randomMaxClaims;
+    /** Name of a directory in which to store cached files from S3. */
+    private final String s3CacheDirectory;
 
     /** The S3 connection details when operating in {@code S3} mode. */
     @EqualsAndHashCode.Exclude private final S3JsonMessageSources s3Sources;
+
+    @EqualsAndHashCode.Exclude private final S3Dao s3Dao;
 
     /** Indicates the source the server will return data from. */
     public enum ServerMode {
@@ -175,7 +179,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
 
     /** Instantiates a new config. */
     public Config() {
-      this(ServerMode.Random, DEFAULT_SERVER_NAME, null, null, null, null, null, null);
+      this(ServerMode.Random, DEFAULT_SERVER_NAME, null, null, null, null, null, null, null);
     }
 
     /**
@@ -189,6 +193,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      * @param s3Region the s3 region
      * @param s3Bucket the s3 bucket
      * @param s3Directory the s3 directory
+     * @param s3CacheDirectory the s3 cache directory
      */
     @Builder
     private Config(
@@ -199,7 +204,8 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         Integer randomMaxClaims,
         Regions s3Region,
         String s3Bucket,
-        String s3Directory) {
+        String s3Directory,
+        String s3CacheDirectory) {
       Preconditions.checkNotNull(serverMode, "serverMode is required");
       if (serverMode == ServerMode.S3) {
         Preconditions.checkArgument(
@@ -212,13 +218,18 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       this.runInterval = runInterval == null ? DEFAULT_RUN_INTERVAL : runInterval;
       this.randomSeed = randomSeed == null ? DEFAULT_SEED : randomSeed;
       this.randomMaxClaims = randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims;
+      this.s3CacheDirectory = s3CacheDirectory;
       if (Strings.isNullOrEmpty(s3Bucket)) {
         s3Sources = null;
+        s3Dao = null;
       } else {
         final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
         final String directory = s3Directory == null ? "" : s3Directory;
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket, directory);
+        final File cacheDirectory =
+            Strings.isNullOrEmpty(s3CacheDirectory) ? null : new File(s3CacheDirectory);
+        s3Dao = new S3Dao(s3Client, s3Bucket, directory, cacheDirectory);
+        s3Sources = new S3JsonMessageSources(s3Dao);
       }
     }
 
@@ -246,9 +257,11 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      */
     private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
       if (serverMode == ServerMode.S3) {
+        assert s3Sources != null;
+        assert s3Dao != null;
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Sources.getBucketName());
+            s3Dao.getS3BucketName());
         return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
       } else {
         LOGGER.info(
@@ -270,9 +283,11 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      */
     private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
       if (serverMode == ServerMode.S3) {
+        assert s3Sources != null;
+        assert s3Dao != null;
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Sources.getBucketName());
+            s3Dao.getS3BucketName());
         return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
       } else {
         LOGGER.info(
