@@ -31,11 +31,6 @@ def buildPlatinum(String platinumId = '', String goldId = '') {
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '') {
-    // buildStatus of NULL means success
-    if (!buildStatus) {
-        buildStatus = 'SUCCESS'
-    }
-
     // build colors
     def colorMap = [:]
     colorMap['SUCCESS']  = '#00FF00'
@@ -159,9 +154,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                         } finally {
-                            if (currentBuild.result != 'SUCCESS'){
-                                sendNotifications(currentBuild.currentResult, currentStage)
-                            }
+                        sendNotifications(currentBuild.currentResult, currentStage)
                         }
                     }
                 }
@@ -203,9 +196,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                         } finally {
-                            if (currentBuild.result != 'SUCCESS'){
-                                sendNotifications(currentBuild.currentResult, currentStage)
-                            }
+                        sendNotifications(currentBuild.currentResult, currentStage)
                         }
                     }
                 }
