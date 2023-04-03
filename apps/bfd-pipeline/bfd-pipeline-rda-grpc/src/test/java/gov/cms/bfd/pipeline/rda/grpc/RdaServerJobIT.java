@@ -34,11 +34,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the RDA server. */
-@NotThreadSafe
 public class RdaServerJobIT extends MinioTestContainer {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
