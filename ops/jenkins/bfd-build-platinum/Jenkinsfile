@@ -29,7 +29,7 @@ def buildPlatinum(String platinumId = '', String goldId = '') {
     }
 }
 
-// send notifications to slack, email, etc
+// send notifications to slack
 def sendNotifications(String buildStatus = '', String stageName = '') {
     // build colors
     def colorMap = [:]
