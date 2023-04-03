@@ -103,9 +103,6 @@ resource "aws_iam_user" "jenkins_user" {
   force_destroy = false
   name          = "bfd-${local.env}-jenkins"
   path          = "/"
-  tags = {
-    Note = "NoRotate"
-  }
 }
 
 resource "aws_iam_access_key" "jenkins_user_key" {
