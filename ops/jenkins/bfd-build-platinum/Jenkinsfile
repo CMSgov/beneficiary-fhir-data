@@ -166,9 +166,9 @@ spec:
             }
 
             stage('Build Platinum AMI') {
-                currentStage = env.STAGE_NAME
                 steps {
                     script {
+                        currentStage = env.STAGE_NAME
                         try {
                         awsAuth.assumeRole()
 
