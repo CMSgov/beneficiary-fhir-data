@@ -66,7 +66,7 @@ public abstract class MinioTestContainer {
    *
    * @throws IOException if file cannot be created.
    */
-  private static void createYamlFle() {
+  private static void createYamlFile() {
     String dockerFileName = System.getProperty("java.io.tmpdir") + "/docker-compose.yml";
     // build a docker compose file that we can feed to testcontainers; done this
     // way as MinioTestContainer may be called from anywhere so a static resource
