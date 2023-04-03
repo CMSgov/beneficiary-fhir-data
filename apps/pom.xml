@@ -605,15 +605,11 @@ checkJavaFormat
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
 						<trimStackTrace>false</trimStackTrace>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-						<!-- default to 1 x num cores threads (same as -T 1C) -->
-						<threadCountClasses>5</threadCountClasses>
-						<threadCountMethods>10</threadCountMethods>
+						<!-- run ITs w/multiple threads -->
 						<useUnlimitedThreads>true</useUnlimitedThreads>
 						<parallel>all</parallel>
-						<!--
-						<forkCount>1C</forkCount>
-						<reuseForks>true</reuseForks>
-						 -->
+						<threadCountClasses>8</threadCountClasses>
+						<threadCountMethods>10</threadCountMethods>
 					</configuration>
 				</plugin>
 				<plugin>
