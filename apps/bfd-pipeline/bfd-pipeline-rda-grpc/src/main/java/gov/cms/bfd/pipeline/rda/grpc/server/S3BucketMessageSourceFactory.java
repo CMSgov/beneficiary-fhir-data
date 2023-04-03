@@ -30,7 +30,7 @@ import lombok.ToString;
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
   /** Used to access data from S3 bucket. */
-  private final S3Dao s3Dao;
+  private final S3DirectoryDao s3Dao;
   /** A function for getting the message factory to transform the response. */
   private final Function<String, MessageSource<T>> actualFactory;
   /** A function for obtaining the sequence number. */
@@ -48,7 +48,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * @param sequenceNumberGetter the function to get the sequence number
    */
   public S3BucketMessageSourceFactory(
-      S3Dao s3Dao,
+      S3DirectoryDao s3Dao,
       String filePrefix,
       String fileSuffix,
       Function<String, MessageSource<T>> actualFactory,

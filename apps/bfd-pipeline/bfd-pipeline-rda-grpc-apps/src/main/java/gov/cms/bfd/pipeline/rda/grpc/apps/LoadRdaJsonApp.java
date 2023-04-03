@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
@@ -26,6 +27,8 @@ import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.Duration;
@@ -93,8 +96,11 @@ public class LoadRdaJsonApp {
       if (fileLocation.startsWith(AMAZON_S3_PROTOCOL)) {
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(config.s3Region);
         final String directory = fileLocation.replace(AMAZON_S3_PROTOCOL, "");
-        final S3JsonMessageSources s3Sources =
-            new S3JsonMessageSources(s3Client, config.s3Bucket, directory);
+        final Path s3CacheDirectory =
+            Files.createTempDirectory(LoadRdaJsonApp.class.getSimpleName());
+        final S3DirectoryDao s3Dao =
+            new S3DirectoryDao(s3Client, config.s3Bucket, directory, s3CacheDirectory);
+        final S3JsonMessageSources s3Sources = new S3JsonMessageSources(s3Dao);
         checkConnectivity("FISS", s3Sources.fissClaimChangeFactory());
         checkConnectivity("MCS", s3Sources.mcsClaimChangeFactory());
 

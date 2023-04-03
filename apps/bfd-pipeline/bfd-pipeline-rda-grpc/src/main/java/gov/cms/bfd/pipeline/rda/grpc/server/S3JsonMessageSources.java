@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.io.ByteSource;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class S3JsonMessageSources {
   private static final String FILE_SUFFIX = "ndjson";
 
   /** Used to access data from S3 bucket. */
-  private final S3Dao s3Dao;
+  private final S3DirectoryDao s3Dao;
   /** S3 key prefix for Fiss files. */
   private final String fissPrefix;
   /** S3 key prefix for MCS files. */
@@ -33,7 +34,7 @@ public class S3JsonMessageSources {
    *
    * @param s3Dao the S3 cache to use
    */
-  public S3JsonMessageSources(S3Dao s3Dao) {
+  public S3JsonMessageSources(S3DirectoryDao s3Dao) {
     this.s3Dao = s3Dao;
     fissPrefix = FISS_OBJECT_KEY_PREFIX;
     mcsPrefix = MCS_OBJECT_KEY_PREFIX;
@@ -144,11 +145,17 @@ public class S3JsonMessageSources {
         "creating S3JsonMessageSource from S3: bucket={} key={}",
         s3Dao.getS3BucketName(),
         ndjsonObjectKey);
-    ByteSource byteSource = s3Dao.downloadFile(ndjsonObjectKey);
-    if (byteSource == null) {
+    try {
+      ByteSource byteSource = s3Dao.downloadFile(ndjsonObjectKey);
+      if (byteSource == null) {
+        throw new RuntimeException(
+            String.format("failed to download file from S3 bucket: key=%s", ndjsonObjectKey));
+      }
+      return new JsonMessageSource<>(byteSource, parser);
+    } catch (IOException ex) {
       throw new RuntimeException(
-          String.format("unable to download file from S3 bucket: key=%s", ndjsonObjectKey));
+          String.format("error while downloading file from S3 bucket: key=%s", ndjsonObjectKey),
+          ex);
     }
-    return new JsonMessageSource<>(byteSource, parser);
   }
 }

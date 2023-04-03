@@ -12,14 +12,17 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
-import com.google.common.io.Files;
+import com.google.common.io.MoreFiles;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -44,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * Methods are provided for clearing obsolete files as well as clearing entire disk cache.
  */
 @Slf4j
-public class S3Dao {
+public class S3DirectoryDao {
   /** Prefix added to file name to indicate it is a data file. */
   private static final String DataFilePrefix = "s3-";
   /** Suffix added to file name to indicate it is a data file. */
@@ -54,6 +57,10 @@ public class S3Dao {
   /** Arbitrary prefix used to generate temp file name when a file is downloaded. */
   private static final String TempPrefix = "s3d";
 
+  /**
+   * Base regex to match validate S3 keys. The {@link #s3DirectoryPath} is added to the start of
+   * this string to build the final regex.
+   */
   private static final String S3FileNameRegex = "[_a-z0-9][.-_a-z0-9_]+";
 
   /** The client for interacting with AWS S3 buckets and files. */
@@ -62,31 +69,27 @@ public class S3Dao {
   @Getter private final String s3BucketName;
   /** The directory path within bucket to mirror. */
   @Getter private final String s3DirectoryPath;
-  /** The local directory containing mirrored files. */
-  private final File cacheDirectory;
 
+  /** Used to determine if an S3 key is valid. */
   private final Pattern validKeyRegex;
 
+  /** The local directory containing mirrored files. Initialized on first use. */
+  private final Path cacheDirectory;
+
   /**
-   * Creates an instance. If no cache directory is specified a temp directory will be created.
+   * Creates an instance.
    *
    * @param s3Client used to access S3
    * @param s3BucketName the bucket to read from
    * @param s3DirectoryPath the directory inside the bucket to read from
    * @param cacheDirectory the local directory to store cached files in
    */
-  public S3Dao(
-      AmazonS3 s3Client, String s3BucketName, String s3DirectoryPath, File cacheDirectory) {
+  public S3DirectoryDao(
+      AmazonS3 s3Client, String s3BucketName, String s3DirectoryPath, Path cacheDirectory) {
     this.s3Client = Preconditions.checkNotNull(s3Client);
     this.s3BucketName = Preconditions.checkNotNull(s3BucketName);
     this.s3DirectoryPath = normalizeDirectoryPath(s3DirectoryPath);
-    if (cacheDirectory == null) {
-      cacheDirectory = Files.createTempDir();
-    }
-    this.cacheDirectory = cacheDirectory;
-    if (!cacheDirectory.isDirectory()) {
-      throw new IllegalArgumentException("cacheDirectory does not exist: " + cacheDirectory);
-    }
+    this.cacheDirectory = Preconditions.checkNotNull(cacheDirectory);
     validKeyRegex =
         Pattern.compile(this.s3DirectoryPath + S3FileNameRegex, Pattern.CASE_INSENSITIVE);
   }
@@ -110,10 +113,10 @@ public class S3Dao {
    *
    * @param fileName simple file name as returned in previous call to {@link #readFileNames}
    * @return null or a valid {@link ByteSource} for reading the file
-   * @throws RuntimeException various exceptions might be thrown by the Java or AWS API
+   * @throws IOException various exceptions might be thrown by the Java or AWS API
    */
   @Nullable
-  public ByteSource downloadFile(String fileName) {
+  public ByteSource downloadFile(String fileName) throws IOException {
     final var s3Key = s3DirectoryPath + fileName;
     var s3MetaData = s3Client.getObjectMetadata(s3BucketName, s3Key);
     if (s3MetaData == null) {
@@ -122,15 +125,15 @@ public class S3Dao {
     }
 
     String eTag = s3MetaData.getETag();
-    var dataFile = dataFileHandle(fileName, eTag);
-    if (dataFile.isFile()) {
-      return Files.asByteSource(dataFile);
+    var dataFile = dataFilePath(fileName, eTag);
+    if (Files.isRegularFile(dataFile)) {
+      return MoreFiles.asByteSource(dataFile);
     }
 
     final var tempDataFile = createTempFile();
     try {
       final var downloadRequest = new GetObjectRequest(s3BucketName, s3Key);
-      s3MetaData = s3Client.getObject(downloadRequest, tempDataFile);
+      s3MetaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
       if (s3MetaData == null) {
         log.debug("file does not exist in S3 or download failed: {}", s3Key);
         return null;
@@ -140,23 +143,21 @@ public class S3Dao {
       eTag = s3MetaData.getETag();
 
       // In linux renaming a file in a local (not network shared) directory is atomic and will
-      // replace
-      // any existing file with same name. It is possible (though unlikely) for the rename to fail,
-      // in
-      // which case we return null and delete the temp file.
-      dataFile = dataFileHandle(fileName, eTag);
-      if (tempDataFile.renameTo(dataFile)) {
-        // success!
-        return Files.asByteSource(dataFile);
-      } else {
-        log.debug(
-            "renaming temp file failed: from={} to={}", tempDataFile.getName(), dataFile.getName());
-        return null;
+      // replace any existing file with same name. It is possible (though unlikely) for the
+      // rename to fail, in which case we return null and delete the temp file.
+      dataFile = dataFilePath(fileName, eTag);
+
+      try {
+        Files.move(tempDataFile, dataFile);
+      } catch (FileAlreadyExistsException ex) {
+        // It is possible for two processes or threads to perform this rename at the same time.
+        // If that happens both files would be identical so we can simply use the one that
+        // already existed when we attempted our rename.
       }
+      return MoreFiles.asByteSource(dataFile);
     } finally {
-      // Ensure temp file is always deleted if not renamed.
-      //noinspection ResultOfMethodCallIgnored
-      tempDataFile.delete();
+      // Ensure temp file is deleted if the rename was not performed.
+      Files.deleteIfExists(tempDataFile);
     }
   }
 
@@ -167,9 +168,13 @@ public class S3Dao {
    * @return the {@link File} for the new temporary file
    */
   @Nonnull
-  private File createTempFile() {
+  private Path createTempFile() {
     try {
-      return File.createTempFile(TempPrefix, null, cacheDirectory);
+      Path result;
+      synchronized (this) {
+        result = cacheDirectory;
+      }
+      return Files.createTempFile(result, TempPrefix, null);
     } catch (RuntimeException ex) {
       throw ex;
     } catch (Exception ex) {
@@ -183,13 +188,14 @@ public class S3Dao {
    *
    * @return number of files deleted
    */
-  public int deleteObsoleteFiles() {
+  public int deleteObsoleteFiles() throws IOException {
     int deletedCount = 0;
     var allowedFiles = readFileHandlesFromS3();
     var actualFiles = readFileHandlesFromDirectory();
-    for (File file : actualFiles) {
-      if (isDataFile(file) && !allowedFiles.contains(file)) {
-        if (file.delete()) {
+    for (String file : actualFiles) {
+      Path path = Path.of(file);
+      if (isDataFile(path) && !allowedFiles.contains(file)) {
+        if (Files.deleteIfExists(path)) {
           deletedCount += 1;
         }
       }
@@ -202,26 +208,16 @@ public class S3Dao {
    *
    * @return number of files deleted
    */
-  public int deleteAllFiles() {
+  public int deleteAllFiles() throws IOException {
     int deletedCount = 0;
     var actualFiles = readFileHandlesFromDirectory();
-    for (File file : actualFiles) {
-      if (isDataFile(file) && file.delete()) {
+    for (String file : actualFiles) {
+      Path path = Path.of(file);
+      if (isDataFile(path) && Files.deleteIfExists(path)) {
         deletedCount += 1;
       }
     }
     return deletedCount;
-  }
-
-  /**
-   * Test a {@link S3ObjectSummary} to determine if it is valid for use with this DAO. Determination
-   * is based on compatibility of its key.
-   *
-   * @param summary {@link S3ObjectSummary} to test
-   * @return true if the object key is valid
-   */
-  public boolean isValidS3Object(S3ObjectSummary summary) {
-    return isValidS3Key(summary.getKey());
   }
 
   /**
@@ -241,6 +237,17 @@ public class S3Dao {
       s3Client.putObject(s3BucketName, objectKey, input, metadata);
     }
     waitForObjectToExist(s3Client, s3BucketName, objectKey);
+  }
+
+  /**
+   * Test a {@link S3ObjectSummary} to determine if it is valid for use with this DAO. Determination
+   * is based on compatibility of its key.
+   *
+   * @param summary {@link S3ObjectSummary} to test
+   * @return true if the object key is valid
+   */
+  public boolean isValidS3Object(S3ObjectSummary summary) {
+    return isValidS3Key(summary.getKey());
   }
 
   /**
@@ -274,10 +281,11 @@ public class S3Dao {
    *
    * @return the set
    */
-  private Set<File> readFileHandlesFromS3() {
+  private Set<String> readFileHandlesFromS3() {
     return readS3ObjectListing().getObjectSummaries().stream()
         .filter(this::isValidS3Object)
-        .map(this::dataFileHandle)
+        .map(this::dataFilePath)
+        .map(Path::toString)
         .collect(ImmutableSet.toImmutableSet());
   }
 
@@ -286,17 +294,14 @@ public class S3Dao {
    *
    * @return the set
    */
-  private Set<File> readFileHandlesFromDirectory() {
-    var files = new HashSet<File>();
-    File[] fileListing = cacheDirectory.listFiles();
-    if (fileListing != null) {
-      for (File file : fileListing) {
-        if (file.isFile() && isDataFile(file)) {
-          files.add(file);
-        }
-      }
+  private Set<String> readFileHandlesFromDirectory() throws IOException {
+    try (Stream<Path> filesStream = Files.list(cacheDirectory)) {
+      return filesStream
+          .filter(Files::isRegularFile)
+          .filter(this::isDataFile)
+          .map(Path::toString)
+          .collect(ImmutableSet.toImmutableSet());
     }
-    return files;
   }
 
   /**
@@ -346,33 +351,35 @@ public class S3Dao {
    * @param eTag eTag value from S3 for the file
    * @return file handle
    */
-  private File dataFileHandle(String fileName, String eTag) {
-    return new File(
-        cacheDirectory, DataFilePrefix + fileName + EtagSeparator + eTag + DataFileSuffix);
+  private Path dataFilePath(String fileName, String eTag) {
+    String cacheFileName = DataFilePrefix + fileName + EtagSeparator + eTag + DataFileSuffix;
+    Path result;
+    synchronized (this) {
+      result = cacheDirectory;
+    }
+    return Path.of(result.toString(), cacheFileName);
   }
 
   /**
-   * Convert a {@link S3ObjectSummary} into a {@link File} referencing a file in our directory.
+   * Convert a {@link S3ObjectSummary} into a {@link Path} referencing a file in our directory.
    *
    * @param summary {@link S3ObjectSummary} for object to store in cache
    * @return file handle
    */
-  private File dataFileHandle(S3ObjectSummary summary) {
+  private Path dataFilePath(S3ObjectSummary summary) {
     final var fileName = convertS3KeyToFileName(summary.getKey());
-    final var eTag = summary.getETag();
-    return new File(
-        cacheDirectory, DataFilePrefix + fileName + EtagSeparator + eTag + DataFileSuffix);
+    return dataFilePath(fileName, summary.getETag());
   }
 
   /**
    * Verifies that the given {@link File} is one created by us to store an S3 object.
    *
-   * @param file file to check
+   * @param path file to check
    * @return true if file has a valid data file name
    */
-  private boolean isDataFile(File file) {
-    return file.isFile()
-        && file.getName().startsWith(DataFilePrefix)
-        && file.getName().endsWith(DataFileSuffix);
+  private boolean isDataFile(Path path) {
+    return Files.isRegularFile(path)
+        && path.getFileName().startsWith(DataFilePrefix)
+        && path.getFileName().endsWith(DataFileSuffix);
   }
 }

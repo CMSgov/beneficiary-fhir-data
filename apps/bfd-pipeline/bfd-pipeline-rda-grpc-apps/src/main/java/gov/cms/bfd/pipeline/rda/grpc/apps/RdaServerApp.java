@@ -2,12 +2,14 @@ package gov.cms.bfd.pipeline.rda.grpc.apps;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
@@ -15,8 +17,11 @@ import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +90,8 @@ public class RdaServerApp {
     @Nullable private final File fissClaimFile;
     /** The mcs claim file for the RDI Server. */
     @Nullable private final File mcsClaimFile;
+    /** The data access object used to access files in S3 when operating in {@code S3} mode. */
+    @EqualsAndHashCode.Exclude private S3DirectoryDao s3Dao;
     /** The s3 file client for the RDI Server. */
     @Nullable private final S3JsonMessageSources s3Sources;
 
@@ -118,11 +125,18 @@ public class RdaServerApp {
                 .orElse(SharedS3Utilities.REGION_DEFAULT);
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
         final String s3Directory = config.stringOption("s3Directory").orElse("");
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory);
+        final String s3CacheDirectory = config.stringOption("s3CacheDirectory").orElse("");
+        final Path cacheDirectory =
+            Strings.isNullOrEmpty(s3CacheDirectory)
+                ? Files.createTempDirectory(RdaServerApp.class.getSimpleName())
+                : Path.of(s3CacheDirectory);
+        s3Dao = new S3DirectoryDao(s3Client, s3Bucket.get(), s3Directory, cacheDirectory);
+        s3Sources = new S3JsonMessageSources(s3Dao);
         checkS3Connectivity("FISS", s3Sources.fissClaimChangeFactory());
         checkS3Connectivity("MCS", s3Sources.mcsClaimChangeFactory());
       } else {
         s3Sources = null;
+        s3Dao = null;
       }
     }
 
@@ -166,7 +180,7 @@ public class RdaServerApp {
       } else if (s3Sources != null) {
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Sources.getBucketName());
+            s3Dao.getS3BucketName());
         return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
       } else {
         final var adjustedConfig = adjustErrorSeed(FISS_RANDOM_SEED_DELTA);
@@ -198,7 +212,7 @@ public class RdaServerApp {
       } else if (s3Sources != null) {
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Sources.getBucketName());
+            s3Dao.getS3BucketName());
         return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
       } else {
         final var adjustedConfig = adjustErrorSeed(MCS_RANDOM_SEED_DELTA);

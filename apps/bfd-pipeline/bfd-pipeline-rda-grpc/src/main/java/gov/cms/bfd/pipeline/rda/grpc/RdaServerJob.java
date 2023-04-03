@@ -13,7 +13,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
-import gov.cms.bfd.pipeline.rda.grpc.server.S3Dao;
+import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -23,16 +23,18 @@ import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
-import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +125,6 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   }
 
   /** Configuration for the server job. */
-  @Getter
   @EqualsAndHashCode
   public static class Config implements Serializable {
     private static final long serialVersionUID = 9653997632697744L;
@@ -161,13 +162,26 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     private final long randomSeed;
     /** The maximum number of claims to be returned when operating in {@code Random} mode. */
     private final int randomMaxClaims;
+    /** AWS region containing our S3 bucket. */
+    @Nullable private final Regions s3Region;
+    /** Name of our S3 bucket. */
+    @Nullable private final String s3Bucket;
+    /** Optional directory name within our S3 bucket. */
+    @Nullable private final String s3Directory;
     /** Name of a directory in which to store cached files from S3. */
-    private final String s3CacheDirectory;
+    @Nullable private final String s3CacheDirectory;
 
-    /** The S3 connection details when operating in {@code S3} mode. */
-    @EqualsAndHashCode.Exclude private final S3JsonMessageSources s3Sources;
+    /**
+     * The data access object used to access files in S3 when operating in {@code S3} mode. Created
+     * on demand by {@link #initializeS3}.
+     */
+    @EqualsAndHashCode.Exclude private S3DirectoryDao s3Dao;
 
-    @EqualsAndHashCode.Exclude private final S3Dao s3Dao;
+    /**
+     * The S3 connection details when operating in {@code S3} mode. Created on demand by {@link
+     * #initializeS3}.
+     */
+    @EqualsAndHashCode.Exclude private S3JsonMessageSources s3Sources;
 
     /** Indicates the source the server will return data from. */
     public enum ServerMode {
@@ -202,10 +216,10 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         Duration runInterval,
         Long randomSeed,
         Integer randomMaxClaims,
-        Regions s3Region,
-        String s3Bucket,
-        String s3Directory,
-        String s3CacheDirectory) {
+        @Nullable Regions s3Region,
+        @Nullable String s3Bucket,
+        @Nullable String s3Directory,
+        @Nullable String s3CacheDirectory) {
       Preconditions.checkNotNull(serverMode, "serverMode is required");
       if (serverMode == ServerMode.S3) {
         Preconditions.checkArgument(
@@ -218,17 +232,49 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       this.runInterval = runInterval == null ? DEFAULT_RUN_INTERVAL : runInterval;
       this.randomSeed = randomSeed == null ? DEFAULT_SEED : randomSeed;
       this.randomMaxClaims = randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims;
+      this.s3Region = s3Region;
+      this.s3Bucket = s3Bucket;
+      this.s3Directory = s3Directory;
       this.s3CacheDirectory = s3CacheDirectory;
-      if (Strings.isNullOrEmpty(s3Bucket)) {
-        s3Sources = null;
-        s3Dao = null;
-      } else {
+    }
+
+    /**
+     * Get an initialized {@link S3DirectoryDao}.
+     *
+     * @return the result
+     * @throws IOException if initialization fails
+     */
+    public synchronized S3DirectoryDao getS3Dao() throws IOException {
+      initializeS3();
+      return s3Dao;
+    }
+
+    /**
+     * Get an initialized {@link S3JsonMessageSources}.
+     *
+     * @return the result
+     * @throws IOException if initialization fails
+     */
+    public synchronized S3JsonMessageSources getS3Sources() throws IOException {
+      initializeS3();
+      return s3Sources;
+    }
+
+    /**
+     * Initialize resources used to communicate with S3.
+     *
+     * @throws IOException if initialization fails
+     */
+    private synchronized void initializeS3() throws IOException {
+      if (s3Dao == null || s3Sources == null) {
         final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
         final String directory = s3Directory == null ? "" : s3Directory;
-        final File cacheDirectory =
-            Strings.isNullOrEmpty(s3CacheDirectory) ? null : new File(s3CacheDirectory);
-        s3Dao = new S3Dao(s3Client, s3Bucket, directory, cacheDirectory);
+        final Path cacheDirectory =
+            Strings.isNullOrEmpty(s3CacheDirectory)
+                ? Files.createTempDirectory("RdaServerJob")
+                : Path.of(s3CacheDirectory);
+        s3Dao = new S3DirectoryDao(s3Client, s3Bucket, directory, cacheDirectory);
         s3Sources = new S3JsonMessageSources(s3Dao);
       }
     }
@@ -255,10 +301,10 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      * @return the message source for the generated claims
      * @throws Exception any error that occurs during claim generation
      */
-    private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
+    private synchronized MessageSource<FissClaimChange> createFissClaims(long sequenceNumber)
+        throws Exception {
       if (serverMode == ServerMode.S3) {
-        assert s3Sources != null;
-        assert s3Dao != null;
+        initializeS3();
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
             s3Dao.getS3BucketName());
@@ -281,10 +327,10 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      * @return the message source for the generated claims
      * @throws Exception any error that occurs during claim generation
      */
-    private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
+    private synchronized MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber)
+        throws Exception {
       if (serverMode == ServerMode.S3) {
-        assert s3Sources != null;
-        assert s3Dao != null;
+        initializeS3();
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
             s3Dao.getS3BucketName());

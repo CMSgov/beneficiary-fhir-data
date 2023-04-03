@@ -10,7 +10,7 @@ public class S3JsonMessageSourcesTest {
   /** Verifies that if object keys are constructed correctly. */
   @Test
   public void testPathConstructionWithNoDirectory() {
-    S3Dao s3Dao = mock(S3Dao.class);
+    S3DirectoryDao s3Dao = mock(S3DirectoryDao.class);
     S3JsonMessageSources sources = new S3JsonMessageSources(s3Dao);
     assertEquals("fiss.ndjson", sources.createFissObjectKey());
     assertEquals("fiss-1-100.ndjson", sources.createFissObjectKey(1, 100));

@@ -25,7 +25,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class S3BucketMessageSourceFactoryTest {
   /** Used to control which files are in S3 bucket during tests. */
-  private @Mock S3Dao s3Dao;
+  private @Mock S3DirectoryDao s3Dao;
 
   /** Verifies that the fiss and mcs factories can list the file keys from the mock S3 bucket. */
   @Test
@@ -137,8 +137,8 @@ public class S3BucketMessageSourceFactoryTest {
   }
 
   /**
-   * Configures the mock {@link S3Dao} to return the specified file names when {@link
-   * S3Dao#readFileNames} is called.
+   * Configures the mock {@link S3DirectoryDao} to return the specified file names when {@link
+   * S3DirectoryDao#readFileNames} is called.
    *
    * @param filenames file names to return
    */
