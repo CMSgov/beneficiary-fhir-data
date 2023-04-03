@@ -159,7 +159,9 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                         } finally {
-                        sendNotifications(currentBuild.currentResult, currentStage)
+                            if (currentBuild.result != 'SUCCESS'){
+                                sendNotifications(currentBuild.currentResult, currentStage)
+                            }
                         }
                     }
                 }
@@ -201,7 +203,9 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                         } finally {
-                        sendNotifications(currentBuild.currentResult, currentStage)
+                            if (currentBuild.result != 'SUCCESS'){
+                                sendNotifications(currentBuild.currentResult, currentStage)
+                            }
                         }
                     }
                 }
