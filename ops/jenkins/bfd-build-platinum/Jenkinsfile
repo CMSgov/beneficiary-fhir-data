@@ -72,67 +72,64 @@ def sendNotifications(String buildStatus = '', String stageName = '') {
 
     // send Slack messages
     slackSend(color: buildColor, message: slackMsg)
-
-// future notifications can go here. (email, other channels, etc)
 }
 
-    pipeline {
-        agent {
-            kubernetes {
-                defaultContainer 'bfd-cbc-build'
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
                 yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  serviceAccount: bfd
-  containers:
-  - name: bfd-cbc-build
-    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
-    command:
-    - cat
-    tty: true
-    imagePullPolicy: Always
-    resources:
-      requests:
-        memory: '16384Mi'
-        cpu: '8000m'
-      limits:
-        memory: '16384Mi'
-        cpu: '8000m'
-"""
-            }
+                apiVersion: v1
+                kind: Pod
+                spec:
+                serviceAccount: bfd
+                containers:
+                - name: bfd-cbc-build
+                    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+                    command:
+                    - cat
+                    tty: true
+                    imagePullPolicy: Always
+                    resources:
+                    requests:
+                        memory: '16384Mi'
+                        cpu: '8000m'
+                    limits:
+                        memory: '16384Mi'
+                        cpu: '8000m'
+                """
         }
+    }
 
-        parameters {
-            string(name: 'GOLD_AMI_ID',
-            defaultValue: '',
-            description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.')
+    parameters {
+        string(name: 'GOLD_AMI_ID',
+        defaultValue: '',
+        description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.')
 
-            booleanParam(name: 'FORCE_PLATINUM',
-                    defaultValue: false,
-                    description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
-        }
+        booleanParam(name: 'FORCE_PLATINUM',
+        defaultValue: false,
+        description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
+    }
 
-        // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
-        triggers {
-            cron('30 11 * * *')
-        }
+    // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
+    triggers {
+        cron('30 11 * * *')
+    }
 
-        stages {
-            stage('Find AMIs') {
-                steps {
-                    script {
-                        currentStage = env.STAGE_NAME
-                        try {
+    stages {
+        stage('Find AMIs') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
                         awsAuth.assumeRole()
 
                         // Use a custom gold AMI ID or Query for the latest gold AMI ID
-                        goldAmiId = params.GOLD_AMI_ID.length() > 0 ? params.GOLD_AMI_ID
-                                                    : sh(returnStdout: true, script: "aws ec2 describe-images --filters \
-                                                        'Name=name,Values=amzn2legacy*' \
-                                                        'Name=state,Values=available' --region us-east-1 --output json | \
-                                                        jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-                                                        ).trim()
+                        goldAmiId = params.GOLD_AMI_ID.length() > 0 ? params.GOLD_AMI_ID : sh(returnStdout: true, 
+                        script: "aws ec2 describe-images --filters \
+                        'Name=name,Values=amzn2legacy*' \
+                        'Name=state,Values=available' --region us-east-1 --output json | \
+                        jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'").trim()
 
                         // Query the latest platinum AMI Id where the sourceAmiId tag is set to the Gold AMI ID
                         platinumAmiId = sh(
@@ -144,11 +141,11 @@ spec:
                             --query 'Images[*].[ImageId]' \
                             --output text"
                             ).trim()
-                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         sendNotifications(currentBuild.currentResult, currentStage)
                         throw e
-                        } catch (ex) {
+                    } catch (ex) {
                         currentBuild.result = 'FAILURE'
                         sendNotifications(currentBuild.currentResult, currentStage)
                         throw ex
@@ -157,13 +154,12 @@ spec:
             }
         }
 
-            stage('Build Platinum AMI') {
-                steps {
-                    script {
-                        currentStage = env.STAGE_NAME
-                        try {
+        stage('Build Platinum AMI') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
                         awsAuth.assumeRole()
-
                         if (!params.FORCE_PLATINUM) {
                             if (platinumAmiId.length() != 0) {
                                 // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
@@ -186,17 +182,17 @@ spec:
                             // Set current stage that the build succeeded
                             sendNotifications('SUCCESS NEW PLATINUM', currentStage)
                         }
-                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         sendNotifications(currentBuild.currentResult, currentStage)
                         throw e
-                        } catch (ex) {
+                    } catch (ex) {
                         currentBuild.result = 'FAILURE'
                         sendNotifications(currentBuild.currentResult, currentStage)
                         throw ex
                     }
                 }
-            }
+             }
         }
     }
 }
