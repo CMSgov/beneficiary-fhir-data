@@ -79,25 +79,25 @@ pipeline {
         kubernetes {
             defaultContainer 'bfd-cbc-build'
             yaml """
-        apiVersion: v1
-        kind: Pod
-        spec:
-        serviceAccount: bfd
-        containers:
-        - name: bfd-cbc-build
-            image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
-            command:
-            - cat
-            tty: true
-            imagePullPolicy: Always
-            resources:
-            requests:
-                memory: '16384Mi'
-                cpu: '8000m'
-            limits:
-                memory: '16384Mi'
-                cpu: '8000m'
-        """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
         }
     }
 
