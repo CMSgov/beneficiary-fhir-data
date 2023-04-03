@@ -46,9 +46,6 @@ def sendNotifications(String buildStatus = '', String stageName = '') {
     def msg = ''
     switch (buildStatus) {
         case 'UNSTABLE':
-        case 'SUCCESS':
-            msg = 'COMPLETED SUCCESSFULLY'
-            break
         case 'SUCCESS LATEST IMAGE':
             msg = 'COMPLETED SUCCESSFULLY WITH THE LATEST PLATINUM IMAGE'
             break
@@ -156,7 +153,8 @@ spec:
                         } finally {
                         if (currentBuild.result != 'SUCCESS') {
                             sendNotifications(currentBuild.currentResult, currentStage)
-                        }                        }
+                        }                        
+                        }
                     }
                 }
             }
