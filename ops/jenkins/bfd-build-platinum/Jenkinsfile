@@ -192,7 +192,7 @@ pipeline {
                         throw ex
                     }
                 }
-             }
+            }
         }
     }
 }
