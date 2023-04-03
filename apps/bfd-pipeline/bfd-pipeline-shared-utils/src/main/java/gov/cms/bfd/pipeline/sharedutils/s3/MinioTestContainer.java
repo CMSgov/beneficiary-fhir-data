@@ -35,7 +35,7 @@ public abstract class MinioTestContainer {
   private static final S3MinioConfig minioConfig;
 
   static {
-    createYamlFle();
+    createYamlFile();
     LOGGER.info("starting MinioTestContainer in testcontainers");
     MINIO_CONTAINER =
         new DockerComposeContainer<>(yamlFile).withExposedService("minio-service", DEFAULT_PORT);
