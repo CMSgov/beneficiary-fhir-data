@@ -170,21 +170,21 @@ spec:
                                 echo "Using latest platinum AMI image: ${platinumAmiId}"
 
                                 // Set current stage that the build succeeded
-                                currentBuild.result = 'SUCCESS LATEST IMAGE'
+                                sendNotifications('SUCCESS LATEST IMAGE', currentStage)
                             } else if (platinumAmiId.length() == 0) {
                                 // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
                                 echo 'Deploying and tagging new platinum AMI'
                                 buildPlatinum(platinumAmiId, goldAmiId)
 
                                 // Set current stage that the build succeeded
-                                currentBuild.result = 'SUCCESS NEW PLATINUM'
+                                sendNotifications('SUCCESS NEW PLATINUM', currentStage)
                             }
                         } else {
                             echo 'Force deploying and tagging new platinum AMI'
                             buildPlatinum(platinumAmiId, goldAmiId)
 
                             // Set current stage that the build succeeded
-                            currentBuild.result = 'SUCCESS NEW PLATINUM'
+                            sendNotifications('SUCCESS NEW PLATINUM', currentStage)
                         }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
