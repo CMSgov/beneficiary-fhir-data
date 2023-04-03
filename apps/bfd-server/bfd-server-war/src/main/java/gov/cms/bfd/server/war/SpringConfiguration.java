@@ -116,7 +116,7 @@ public class SpringConfiguration {
    * @param metricRegistry the {@link MetricRegistry} for the application
    * @return the {@link DataSource} that provides the application's database connection
    */
-  @Bean
+  @Bean(destroyMethod = "close")
   public DataSource dataSource(
       @Value("${" + PROP_DB_URL + "}") String url,
       @Value("${" + PROP_DB_USERNAME + "}") String username,
@@ -171,7 +171,6 @@ public class SpringConfiguration {
    * @return the {@link LocalContainerEntityManagerFactoryBean}, which ensures that other beans can
    *     safely request injection of {@link EntityManager} instances
    */
-  @Bean(destroyMethod = "close")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
     LocalContainerEntityManagerFactoryBean containerEmfBean =
         new LocalContainerEntityManagerFactoryBean();
