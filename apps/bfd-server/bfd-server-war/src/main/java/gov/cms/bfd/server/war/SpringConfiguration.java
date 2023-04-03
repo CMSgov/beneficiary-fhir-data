@@ -428,6 +428,7 @@ public class SpringConfiguration {
    * @param includeFakeOrgName if true, the {@link NPIOrgLookup} will include a fake org name for
    *     testing purposes.
    * @return the {@link NPIOrgLookup} for the application.
+   * @throws IOException if there is an error accessing the resource
    */
   @Bean
   public NPIOrgLookup npiOrgLookup(
