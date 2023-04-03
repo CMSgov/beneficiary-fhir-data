@@ -9,6 +9,7 @@
 // These variables are accessible throughout this file (except inside methods and classes).
 def goldAmiId
 def platinumAmiId
+def currentStage
 
 def buildPlatinum(String platinumId = '', String goldId = '') {
     // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
@@ -28,6 +29,58 @@ def buildPlatinum(String platinumId = '', String goldId = '') {
     }
 }
 
+// send notifications to slack, email, etc
+def sendNotifications(String buildStatus = '', String stageName = ''){
+    // buildStatus of NULL means success
+    if (!buildStatus) {
+        buildStatus = 'SUCCESS'
+    }
+
+    // build colors
+    def colorMap = [:]
+    colorMap['STARTED']  = '#0000FF'
+    colorMap['SUCCESS']  = '#00FF00'
+    colorMap['ABORTED']  = '#6A0DAD'
+    colorMap['UNSTABLE'] = '#FFFF00'
+    colorMap['FAILED']   = '#FF0000'
+    def buildColor = colorMap[buildStatus]
+    buildColor = buildColor ?: '#FF0000' // default to red
+
+    // prettyfi messages
+    def msg = ''
+    switch (buildStatus){
+        case 'UNSTABLE':
+        case 'SUCCESS LATEST IMAGE':
+            msg = 'COMPLETED SUCCESSFULLY WITH THE LATEST PLATINUM IMAGE'
+            break
+        case 'SUCCESS NEW PLATINUM':
+            msg = 'COMPLETED SUCCESSFULLY WITH A NEW PLATINUM IMAGE'
+            break
+        case 'FAILED':
+        case 'FAILURE':
+            msg = "FAILED ON ${stageName.toUpperCase()} STAGE"
+            break
+        default:
+            msg = "${buildStatus.toUpperCase()}"
+            break
+    }
+
+    // build slack message
+    def slackMsg = ''
+    if (buildStatus == 'UNSTABLE'){
+        slackMsg = "UNSTABLE BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+    } else {
+        slackMsg = "BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+    }
+    slackMsg+="\tJob '${env.JOB_NAME}' \n"
+
+    // send Slack messages
+    slackSend(color: buildColor, message: slackMsg)
+
+// future notifications can go here. (email, other channels, etc)
+}
+
+try {
 pipeline {
     agent {
         kubernetes {
@@ -55,23 +108,24 @@ spec:
         }
     }
 
-    parameters {
-        string(name: 'GOLD_AMI_ID',
+        parameters {
+            string(name: 'GOLD_AMI_ID',
             defaultValue: '',
             description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.')
 
-        booleanParam(name: 'FORCE_PLATINUM',
+            booleanParam(name: 'FORCE_PLATINUM',
                     defaultValue: false,
                     description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
-    }
+        }
 
-    // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
-    triggers {
-        cron('30 11 * * *')
-    }
+        // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
+        triggers {
+            cron('30 11 * * *')
+        }
 
     stages {
         stage('Find AMIs') {
+            currentStage = env.STAGE_NAME
             steps {
                 script {
                     awsAuth.assumeRole()
@@ -99,26 +153,44 @@ spec:
         }
 
         stage('Build Platinum AMI') {
+            currentStage = env.STAGE_NAME
             steps {
                 script {
                     awsAuth.assumeRole()
 
                     if (!params.FORCE_PLATINUM) {
-                        if (platinumAmiId.length() != 0) {
-                            // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
-                            echo "Using latest platinum AMI image: ${platinumAmiId}"
-                        } else if (platinumAmiId.length() == 0) {
-                            // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
-                            echo 'Deploying and tagging new platinum AMI'
+                            if (platinumAmiId.length() != 0) {
+                                // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
+                                echo "Using latest platinum AMI image: ${platinumAmiId}"
 
-                            buildPlatinum(platinumAmiId, goldAmiId)
-                        }
+                                // Send notifications that the build succeeded
+                                sendNotifications('SUCCESS LATEST IMAGE', currentStage)
+                        } else if (platinumAmiId.length() == 0) {
+                                // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
+                                echo 'Deploying and tagging new platinum AMI'
+                                buildPlatinum(platinumAmiId, goldAmiId)
+
+                                // Send notifications that the build succeeded
+                                sendNotifications('SUCCESS NEW PLATINUM', currentStage)
+                            }
                     } else {
-                        echo 'Force deploying and tagging new platinum AMI'
-                        buildPlatinum(platinumAmiId, goldAmiId)
+                            echo 'Force deploying and tagging new platinum AMI'
+                            buildPlatinum(platinumAmiId, goldAmiId)
+
+                            // Send notifications that the build succeeded
+                            sendNotifications('SUCCESS NEW PLATINUM', currentStage)
                     }
                 }
             }
         }
     }
+}
+} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
+    currentBuild.result = "ABORTED"
+    throw e
+} catch (ex) {
+    currentBuild.result = "FAILURE"
+    throw ex
+} finally {
+    sendNotifications(currentBuild.currentResult, currentStage)
 }
