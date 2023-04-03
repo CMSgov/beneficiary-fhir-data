@@ -119,7 +119,7 @@
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
 			<version>${testcontainers.version}</version>
-    	</dependency>
+		</dependency>
 	</dependencies>
 
 	<build>
