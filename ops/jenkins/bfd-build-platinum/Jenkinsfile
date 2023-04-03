@@ -146,15 +146,12 @@ spec:
                             ).trim()
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
+                        sendNotifications(currentBuild.currentResult, currentStage)
                         throw e
                         } catch (ex) {
                         currentBuild.result = 'FAILURE'
+                        sendNotifications(currentBuild.currentResult, currentStage)
                         throw ex
-                        } finally {
-                        if (currentBuild.result != 'SUCCESS') {
-                            sendNotifications(currentBuild.currentResult, currentStage)
-                        }                        
-                        }
                     }
                 }
             }
@@ -171,22 +168,22 @@ spec:
                                 // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                                 echo "Using latest platinum AMI image: ${platinumAmiId}"
 
-                                // Send notifications that the build succeeded
-                                sendNotifications('SUCCESS LATEST IMAGE', currentStage)
+                                // Set current stage that the build succeeded
+                                currentBuild.result = 'SUCCESS LATEST IMAGE'
                             } else if (platinumAmiId.length() == 0) {
                                 // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
                                 echo 'Deploying and tagging new platinum AMI'
                                 buildPlatinum(platinumAmiId, goldAmiId)
 
-                                // Send notifications that the build succeeded
-                                sendNotifications('SUCCESS NEW PLATINUM', currentStage)
+                                // Set current stage that the build succeeded
+                                currentBuild.result = 'SUCCESS NEW PLATINUM'
                             }
                         } else {
                             echo 'Force deploying and tagging new platinum AMI'
                             buildPlatinum(platinumAmiId, goldAmiId)
 
-                            // Send notifications that the build succeeded
-                            sendNotifications('SUCCESS NEW PLATINUM', currentStage)
+                            // Set current stage that the build succeeded
+                            currentBuild.result = 'SUCCESS NEW PLATINUM'
                         }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
@@ -195,9 +192,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                         } finally {
-                        if (currentBuild.result != 'SUCCESS') {
-                            sendNotifications(currentBuild.currentResult, currentStage)
-                        }
+                            sendNotifications(currentBuild.result, currentStage)
                         }
                     }
                 }
