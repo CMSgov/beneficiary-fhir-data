@@ -38,8 +38,9 @@ def sendNotifications(String buildStatus = '', String stageName = ''){
 
     // build colors
     def colorMap = [:]
-    colorMap['STARTED']  = '#0000FF'
     colorMap['SUCCESS']  = '#00FF00'
+    colorMap['SUCCESS LATEST IMAGE']  = '#00FF00'
+    colorMap['SUCCESS NEW PLATINUM']  = '#00FF00'
     colorMap['ABORTED']  = '#6A0DAD'
     colorMap['UNSTABLE'] = '#FFFF00'
     colorMap['FAILED']   = '#FF0000'
@@ -50,6 +51,9 @@ def sendNotifications(String buildStatus = '', String stageName = ''){
     def msg = ''
     switch (buildStatus){
         case 'UNSTABLE':
+        case 'SUCCESS':
+            msg = 'COMPLETED SUCCESSFULLY'
+            break
         case 'SUCCESS LATEST IMAGE':
             msg = 'COMPLETED SUCCESSFULLY WITH THE LATEST PLATINUM IMAGE'
             break
