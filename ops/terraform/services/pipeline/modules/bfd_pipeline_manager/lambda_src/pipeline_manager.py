@@ -242,7 +242,7 @@ def handler(event: Any, context: Any):
     # "<Synthetic/>/<Incoming/Done>/<ISO date format>/<file name>".
     if match := re.search(
         pattern=(
-            rf"^({PipelineLoadType.SYNTHETIC.capitalize()}){{0,1}}/{{0,1}}"
+            rf"^({PipelineLoadType.SYNTHETIC.value}){{0,1}}/{{0,1}}"
             rf"({status_group_str})/"
             rf"([\d\-:TZ]+)/"
             rf".*({rif_types_group_str}).*$"
