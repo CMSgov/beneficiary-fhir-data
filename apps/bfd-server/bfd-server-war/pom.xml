@@ -405,6 +405,32 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<!-- Copy the key/trust stores over to target for easier access in the tests. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-server-resources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/server-work</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/../dev/ssl-stores</directory>
+									<includes>
+										<include>server-keystore.jks</include>
+										<include>server-truststore.jks</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
@@ -428,10 +454,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch a Java web server hosting the BFD Server prior to running this
-					project's integration tests, and stop it after the integration tests. The
-					server will serve HTTPS on a random port, and the FHIR server will be hosted
-					at the root ("/") context. Alternatively, for manual testing, manually run
+				<!-- Launch a Java web server hosting the BFD Server; only used when called
+					manually for quick testing locally. The server will serve HTTPS on a random port,
+					and the FHIR server will be hosted at the root ("/") context. Run
 					`mvn package org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start
 					the server. -->
 				<groupId>org.codehaus.mojo</groupId>
@@ -439,7 +464,6 @@
 				<executions>
 					<execution>
 						<id>server-start</id>
-						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -464,18 +488,13 @@
 								<argument>-s</argument>
 								<argument>${local.pac.claimSourceTypes}</argument>
 							</arguments>
-
-							<!-- Don't start/stop the server if the ITs are being skipped. -->
-							<skip>${skipITs}</skip>
-
-                                                        <environmentVariables>
-                                                                <TZ>UTC</TZ>
-                                                        </environmentVariables>
+							<environmentVariables>
+								<TZ>UTC</TZ>
+							</environmentVariables>
 						</configuration>
 					</execution>
 					<execution>
 						<id>server-stop</id>
-						<phase>post-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -486,9 +505,6 @@
 								<argument>-t</argument>
 								<argument>${project.build.directory}</argument>
 							</arguments>
-
-							<!-- Don't start/stop the server if the ITs are being skipped. -->
-							<skip>${skipITs}</skip>
 						</configuration>
 					</execution>
 					<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction

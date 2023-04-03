@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -17,8 +18,8 @@ import java.util.stream.Collectors;
  * <p>To keep the randomly generated values stable, each field should be set using it's own path,
  * defined by the propertyName of {@link #always(String, Runnable)}, {@link #optional(String,
  * Runnable)}, {@link #oneOf(String, Runnable...)}, and {@link #optionalOneOf(String, Runnable...)}.
- * The {@link Random} object is specific to each field path and is seeded using the {@link #seed},
- * {@link #sequence}, and currently stored {@link #path}.
+ * The {@link Random} object is specific to each field path and is seeded using the {@link
+ * RandomClaimGeneratorConfig#seed}, {@link #sequence}, and currently stored {@link #path}.
  *
  * @param <T> The type of claim this generate generates.
  */
@@ -35,42 +36,38 @@ abstract class AbstractRandomClaimGenerator<T> {
   /** The maximum number of days in the past that a random date value can be generated for. */
   private static final int MAX_DAYS_AGO = 180;
 
-  /** The base seed value used for all generated random values. */
-  private final long seed;
+  /** Our configuration settings. */
+  private final RandomClaimGeneratorConfig config;
 
   /**
-   * Denotes if all {@link #optional(String, Runnable)} or {@link #optionalOneOf(String,
-   * Runnable...)} should be executed regardless of random results.
+   * Plain {@link Random} used to generate random number for deciding whether to insert an invalid
+   * field into a generated claim.
    */
-  private final boolean optionalOverride;
-  /** The {@link Clock} object to use with generating time based values. */
-  private final Clock clock;
+  private final Random errorGenerationRandom;
 
   /** The sequence number of the generated claim, which regulates randomness between claims. */
-  private int sequence;
+  private long sequence;
 
   /**
    * A path that will be used to randomly generate values.
    *
    * <p>The path should be updated for each value being generated, ensuring each field has a
-   * different random, but stable, value. The path is used along with the {@link #seed} and {@link
-   * #sequence} to seed the {@link Random} object used to generate field values.
+   * different random, but stable, value. The path is used along with the {@link
+   * RandomClaimGeneratorConfig#seed} and {@link #sequence} to seed the {@link Random} object used
+   * to generate field values.
    */
   private final Stack<String> path;
 
   /**
    * Constructs an instance.
    *
-   * @param seed numeric seed value for the PRNG
-   * @param optionalOverride when true optionals will always be generated (used for tests)
-   * @param clock Clock to generate current time/date values (needed for tests)
+   * @param config configuration settings
    */
-  AbstractRandomClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    this.seed = seed;
-    this.optionalOverride = optionalOverride;
-    this.clock = clock;
-    this.sequence = 0;
-    this.path = new Stack<>();
+  AbstractRandomClaimGenerator(RandomClaimGeneratorConfig config) {
+    this.config = config;
+    errorGenerationRandom = new Random(config.getRandomErrorSeed());
+    sequence = 0;
+    path = new Stack<>();
   }
 
   /**
@@ -80,8 +77,17 @@ abstract class AbstractRandomClaimGenerator<T> {
    *
    * @param sequence The sequence number to start generating claims from.
    */
-  public void setSequence(int sequence) {
+  public void setSequence(long sequence) {
     this.sequence = sequence;
+  }
+
+  /**
+   * Increments the current sequence value. Can be used to skip an arbitrary number of claims.
+   *
+   * @param delta value to add to current sequence number
+   */
+  public void incrementSequence(long delta) {
+    sequence += delta;
   }
 
   /**
@@ -109,6 +115,35 @@ abstract class AbstractRandomClaimGenerator<T> {
    * @return the claim type
    */
   public abstract T createRandomClaim();
+
+  /**
+   * Determines whether or not the currently generated claim should have a transformation error
+   * added to it. Used by derived classes to insert claim specific invalid fields.
+   *
+   * @return true if current claim should have a transformation error added to it
+   */
+  protected boolean shouldInsertErrorIntoCurrentClaim() {
+    return config.getRandomErrorRate() > 0
+        && errorGenerationRandom.nextInt(config.getRandomErrorRate()) == 0;
+  }
+
+  /**
+   * Gets the maximum number of unique MBIs.
+   *
+   * @return the maximum number of unique MBIs
+   */
+  protected int getMaxUniqueMbis() {
+    return config.getMaxUniqueMbis();
+  }
+
+  /**
+   * Gets the maximum number of unique claim ids.
+   *
+   * @return the maximum number of unique claim ids
+   */
+  protected int getMaxUniqueClaimIds() {
+    return config.getMaxUniqueClaimIds();
+  }
 
   /**
    * RDA API enums always define a special value that the protobuf API intends as a special
@@ -148,6 +183,18 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
+   * Generates a random integer in the range {@code [0,rangeLimit)}. The string is left padded to
+   * length if necessary.
+   *
+   * @param minLength minimum length of resulting string
+   * @param rangeLimit max value (exclusive) of the integer
+   * @return the string
+   */
+  public String randomDigitStringInRange(int minLength, int rangeLimit) {
+    return createContext().randomDigitStringInRange(minLength, rangeLimit);
+  }
+
+  /**
    * Returns a random string of letters.
    *
    * @param minLength The minimum length of the string of letters.
@@ -177,7 +224,8 @@ abstract class AbstractRandomClaimGenerator<T> {
    */
   protected String randomDate() {
     RandomValueContext ctx = createContext();
-    final LocalDate date = LocalDate.now(clock).minusDays(ctx.randomInteger(MAX_DAYS_AGO));
+    final LocalDate date =
+        LocalDate.now(config.getClock()).minusDays(ctx.randomInteger(MAX_DAYS_AGO));
     return date.toString();
   }
 
@@ -204,8 +252,8 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
-   * Creates a {@link RandomValueContext} using the current {@link #seed}, {@link #sequence}, and
-   * {@link #path} attributes that can be used to generate random values.
+   * Creates a {@link RandomValueContext} using the current {@link RandomClaimGeneratorConfig#seed},
+   * {@link #sequence}, and {@link #path} attributes that can be used to generate random values.
    *
    * @return The created {@link RandomValueContext}.
    */
@@ -214,8 +262,8 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
-   * Creates a {@link RandomValueContext} using the current {@link #seed}, {@link #sequence}, and
-   * {@link #path} attributes that can be used to generate random values.
+   * Creates a {@link RandomValueContext} using the current {@link RandomClaimGeneratorConfig#seed},
+   * {@link #sequence}, and {@link #path} attributes that can be used to generate random values.
    *
    * @param prefix An optional (nullable) prefix that can be used for accessory random values, such
    *     as determining if an optional() value should be added.
@@ -225,7 +273,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     String prefixString = prefix != null && !prefix.isBlank() ? prefix + "." : "";
     String propertyPath =
         prefixString + path.stream().filter(Objects::nonNull).collect(Collectors.joining("."));
-    return new RandomValueContext(seed + sequence + propertyPath.hashCode());
+    return new RandomValueContext(config.getSeed() + sequence + propertyPath.hashCode());
   }
 
   /**
@@ -278,7 +326,7 @@ abstract class AbstractRandomClaimGenerator<T> {
 
     boolean shouldRun = createContext("Optional").randomBoolean();
 
-    if (optionalOverride || shouldRun) {
+    if (config.isOptionalOverride() || shouldRun) {
       action.run();
     }
 
@@ -326,7 +374,7 @@ abstract class AbstractRandomClaimGenerator<T> {
     boolean shouldRun = createContext("Optional").randomBoolean();
     final int index = createContext("OneOf").randomInteger(actions.length);
 
-    if (optionalOverride || shouldRun) {
+    if (config.isOptionalOverride() || shouldRun) {
       actions[index].run();
     }
 
@@ -339,7 +387,7 @@ abstract class AbstractRandomClaimGenerator<T> {
    * @return A reference to the internal {@link Clock} used by this instance.
    */
   protected Clock getClock() {
-    return clock;
+    return config.getClock();
   }
 
   /**
@@ -404,6 +452,19 @@ abstract class AbstractRandomClaimGenerator<T> {
         sb.append(randomChar(characters));
       }
       return sb.toString();
+    }
+
+    /**
+     * Generates a random integer in the range {@code [0,rangeLimit)}. The string is left padded to
+     * length if necessary.
+     *
+     * @param minLength minimum length of resulting string
+     * @param rangeLimit max value (exclusive) of the integer
+     * @return the string
+     */
+    public String randomDigitStringInRange(int minLength, int rangeLimit) {
+      var rawNumber = Integer.toString(random.nextInt(rangeLimit));
+      return Strings.padStart(rawNumber, minLength, '0');
     }
 
     /**
