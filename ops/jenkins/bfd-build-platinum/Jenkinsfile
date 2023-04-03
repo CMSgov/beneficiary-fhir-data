@@ -84,8 +84,8 @@ def sendNotifications(String buildStatus = '', String stageName = ''){
 // future notifications can go here. (email, other channels, etc)
 }
 
-try {
 pipeline {
+    try {
     agent {
         kubernetes {
             defaultContainer 'bfd-cbc-build'
