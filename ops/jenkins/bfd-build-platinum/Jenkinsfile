@@ -128,9 +128,9 @@ spec:
 
         stages {
             stage('Find AMIs') {
-                currentStage = env.STAGE_NAME
                 steps {
                     script {
+                        currentStage = env.STAGE_NAME
                         try {
                         awsAuth.assumeRole()
 
