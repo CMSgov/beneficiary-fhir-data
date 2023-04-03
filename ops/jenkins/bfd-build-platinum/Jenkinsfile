@@ -188,15 +188,15 @@ spec:
                         }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
+                        sendNotifications(currentBuild.currentResult, currentStage)
                         throw e
                         } catch (ex) {
                         currentBuild.result = 'FAILURE'
+                        sendNotifications(currentBuild.currentResult, currentStage)
                         throw ex
-                        } finally {
-                            sendNotifications(currentBuild.result, currentStage)
-                        }
                     }
                 }
             }
         }
     }
+}
