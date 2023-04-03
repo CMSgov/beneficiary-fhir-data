@@ -171,7 +171,7 @@ public class SpringConfiguration {
    * @return the {@link LocalContainerEntityManagerFactoryBean}, which ensures that other beans can
    *     safely request injection of {@link EntityManager} instances
    */
-  @Bean
+  @Bean(destroyMethod = "close")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
     LocalContainerEntityManagerFactoryBean containerEmfBean =
         new LocalContainerEntityManagerFactoryBean();
