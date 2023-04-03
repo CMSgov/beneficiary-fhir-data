@@ -1,10 +1,14 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -13,6 +17,68 @@ import org.slf4j.LoggerFactory;
 /** Unit tests for {@link RifLoader}. */
 public final class RifLoaderTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderTest.class);
+
+  /**
+   * Runs a couple of fake HICNs through {@link RifLoader#computeHicnHash} to verify that the
+   * expected result is produced.
+   */
+  @Test
+  public void computeHicnHash() {
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
+    options =
+        new LoadAppOptions(
+            new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
+            options.getLoaderThreads(),
+            options.isIdempotencyRequired(),
+            false,
+            100,
+            3);
+    LOGGER.info("salt/pepper: {}", Arrays.toString(options.getIdHasherConfig().getHashPepper()));
+    LOGGER.info("hash iterations: {}", options.getIdHasherConfig().getHashIterations());
+    IdHasher hasher = new IdHasher(options.getIdHasherConfig());
+
+    /*
+     * These are the two samples from `dev/design-decisions-readme.md` that
+     * the frontend and backend both have tests to verify the result of.
+     */
+    assertEquals(
+        "d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a",
+        RifLoader.computeHicnHash(hasher, "123456789A"));
+    assertEquals(
+        "6357f16ebd305103cf9f2864c56435ad0de5e50f73631159772f4a4fcdfe39a5",
+        RifLoader.computeHicnHash(hasher, "987654321E"));
+  }
+
+  /**
+   * Runs a couple of fake MBIs through {@link RifLoader#computeMbiHash} to verify that the expected
+   * result is produced.
+   */
+  @Test
+  public void computeMbiHash() {
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
+    options =
+        new LoadAppOptions(
+            new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
+            options.getLoaderThreads(),
+            options.isIdempotencyRequired(),
+            false,
+            100,
+            3);
+    LOGGER.info("salt/pepper: {}", Arrays.toString(options.getIdHasherConfig().getHashPepper()));
+    LOGGER.info("hash iterations: {}", options.getIdHasherConfig().getHashIterations());
+
+    IdHasher hasher = new IdHasher(options.getIdHasherConfig());
+    /*
+     * These are the two samples from `dev/design-decisions-readme.md` that
+     * the frontend and backend both have tests to verify the result of.
+     */
+    assertEquals(
+        "ec49dc08f8dd8b4e189f623ab666cfc8b81f201cc94fe6aef860a4c3bd57f278",
+        RifLoader.computeMbiHash(hasher, "3456789"));
+    assertEquals(
+        "742086db6bf338dedda6175ea3af8ca5e85b81fda9cc7078004a4d3e4792494b",
+        RifLoader.computeMbiHash(hasher, "2456689"));
+  }
 
   /**
    * Runs a couple of fake HICNs through {@link RifLoader#computeHicnHash} to verify that the

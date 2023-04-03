@@ -94,10 +94,10 @@ public final class RifLoader {
 
   /** The load options. */
   private final LoadAppOptions options;
+  /** The hasher for ids. */
+  private final IdHasher idHasher;
   /** The shared application state. */
   private final PipelineApplicationState appState;
-  /** ID hasher that caches values in database. */
-  private final DatabaseIdHasher idHasher;
 
   /** The maximum amount of time in hours we will wait for a job to complete loading its batches. */
   private final int MAX_BATCH_WAIT_TIME_HOURS = 72;
@@ -118,16 +118,7 @@ public final class RifLoader {
     this.options = options;
     this.appState = appState;
 
-    // A single cache can serve all threads efficiently so we base the cache on the product of cache
-    // size and thread count.
-    final int maxCacheSize =
-        options.getLoaderThreads() * options.getIdHasherConfig().getCacheSize();
-    idHasher =
-        new DatabaseIdHasher(
-            appState.getMeters(),
-            appState.getEntityManagerFactory(),
-            new IdHasher(options.getIdHasherConfig()),
-            maxCacheSize);
+    idHasher = new IdHasher(options.getIdHasherConfig());
     fatalFailure = new AtomicBoolean();
   }
 
@@ -1382,7 +1373,7 @@ public final class RifLoader {
    * @param hicn the Medicare beneficiary HICN to be hashed
    * @return a one-way cryptographic hash of the specified HICN value, exactly 64 characters long
    */
-  static String computeHicnHash(DatabaseIdHasher idHasher, String hicn) {
+  static String computeHicnHash(IdHasher idHasher, String hicn) {
     return idHasher.computeIdentifierHash(hicn);
   }
 
@@ -1393,7 +1384,7 @@ public final class RifLoader {
    * @param mbi the Medicare beneficiary id to be hashed
    * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
    */
-  static String computeMbiHash(DatabaseIdHasher idHasher, String mbi) {
+  static String computeMbiHash(IdHasher idHasher, String mbi) {
     return idHasher.computeIdentifierHash(mbi);
   }
 
