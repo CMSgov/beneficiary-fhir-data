@@ -312,7 +312,6 @@ def handler(event: Any, context: Any):
             )
             _post_jenkins_job_message(create_ccw_instance=True)
             print("Message posted successfully")
-
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
             and _is_pipeline_load_complete(
