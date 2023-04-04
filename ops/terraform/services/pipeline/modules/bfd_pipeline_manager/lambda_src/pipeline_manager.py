@@ -106,7 +106,7 @@ class JenkinsTerraserviceJobParameters:
     create_ccw_pipeline_instance: bool
 
 
-def _check_ongoing_load_queue(timeout: int = 1) -> list[OngoingLoadQueueMessage]:
+def _get_ongoing_load_queue_messages(timeout: int = 1) -> list[OngoingLoadQueueMessage]:
     responses = ongoing_load_queue.receive_messages(WaitTimeSeconds=timeout)
 
     def load_json_safe(json_str: str) -> Optional[dict[str, str]]:
@@ -265,7 +265,7 @@ def handler(event: Any, context: Any):
             # check queue for any ongoing load corresponding to the current load
             if any(
                 msg.load_group == group_timestamp and msg.load_type == pipeline_load_type
-                for msg in _check_ongoing_load_queue(timeout=5)
+                for msg in _get_ongoing_load_queue_messages(timeout=5)
             ):
                 print(
                     f"The group {group_timestamp} has already been handled, and the CCW pipeline"
@@ -292,7 +292,7 @@ def handler(event: Any, context: Any):
             # to the job queue.
             if any(
                 msg.load_group != group_timestamp or msg.load_type != pipeline_load_type
-                for msg in _check_ongoing_load_queue(timeout=5)
+                for msg in _get_ongoing_load_queue_messages(timeout=5)
             ):
                 print(
                     "There are other data loads either queued up or being currently loaded by the"
@@ -336,7 +336,7 @@ def handler(event: Any, context: Any):
             # possible messages
             group_load_msgs = [
                 msg
-                for msg in _check_ongoing_load_queue(timeout=5)
+                for msg in _get_ongoing_load_queue_messages(timeout=5)
                 if msg.load_type == pipeline_load_type and msg.load_group == group_timestamp
             ]
             for msg in group_load_msgs:
@@ -348,7 +348,7 @@ def handler(event: Any, context: Any):
 
             # now, check if the ongoing load queue is empty. we only want to stop the CCW pipeline
             # instance if there are no more data loads for it to handle.
-            if _check_ongoing_load_queue(timeout=5):
+            if _get_ongoing_load_queue_messages(timeout=5):
                 print(
                     "There are still ongoing loads queued up for the BFD CCW Pipeline to process."
                     " Stopping..."
