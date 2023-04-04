@@ -40,6 +40,13 @@ except Exception as exc:
 
 
 class PipelineLoadType(str, Enum):
+    """Represents the possible types of data loads: either the data load is non-synthetic, meaning
+    that it contains production data and was placed within the root-level Incoming/Done folders of
+    the ETL bucket, or it is synthetic, meaning that it contains non-production, testing data and
+    was placed within the Incoming/Done folders within the Synthetic folder of the ETL bucket. The
+    value of each enum represents the name of the Incoming/Done folders' parent directory, with
+    empty string indicating that those paths have no parent"""
+
     NON_SYNTHETIC = ""
     SYNTHETIC = "Synthetic"
 
