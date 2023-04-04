@@ -12,10 +12,11 @@ are created in the `env`'s corresponding S3 pipeline/ETL bucket at specific path
 Objects uploaded to or moved to these paths in the ETL bucket will invoke this Lambda, which will
 then determine if the BFD CCW Pipeline should be started or not. This depends on a few factors:
 
-- If the file was uploaded to either of the `Incoming` folders, and there is no _ongoing_ data load
-  for that file's "group", the `bfd-deploy-pipeline-terraservice` Jenkins pipeline is started using
-  the `bfd-job-broker` with the arguments set to _create_ the CCW Pipeline instance
-- Else, if the file was uploaded to either of the `Done` folders, there is no files in the
+- If the file was uploaded to either of the `Incoming` folders, and there are no _ongoing_ or
+  _queued_ data loads _at all_ (including other groups), the `bfd-deploy-pipeline-terraservice`
+  Jenkins pipeline is started using the `bfd-job-broker` with the arguments set to _create_ the CCW
+  Pipeline instance
+- Else, if the file was uploaded to either of the `Done` folders, there are no files in the
   corresponding `Incoming` folder, all non-optional RIF files are present in the `Done` folder,
   _and_ there are no ongoing loads _at all_ (including other groups), the
   `bfd-deploy-pipeline-terraservice` Jenkins pipeline is started using the `bfd-job-broker` with the
@@ -24,8 +25,8 @@ then determine if the BFD CCW Pipeline should be started or not. This depends on
 In short, this Lambda indirectly invokes a Jenkins pipeline that will either _create_ or _destroy_
 the CCW Pipeline instance for the current `env`, thus ensuring the CCW Pipeline instance is only
 running when there is data queued up for load into that `env`. As a side effect of using Terraform
-to do this management, the `pipeline` Terraservice will be _continuously deployed_ whenever the CCW
-Pipeline instance needs to start or stop.
+to do this management, the `pipeline` Terraservice will be _deployed_ whenever the CCW Pipeline
+instance needs to start or stop.
 
 Note that the branch from which this Lambda/module was deployed from remains consistent, such that
 whatever branch this module was deployed from will be the branch variant of the

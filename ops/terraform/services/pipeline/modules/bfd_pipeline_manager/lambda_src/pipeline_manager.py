@@ -256,10 +256,9 @@ def handler(event: Any, context: Any):
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             # check queue for any ongoing load corresponding to the current load
-            ongoing_loads = _check_ongoing_load_queue(timeout=5)
             if any(
                 msg.load_group == group_timestamp and msg.load_type == pipeline_load_type
-                for msg in ongoing_loads
+                for msg in _check_ongoing_load_queue(timeout=5)
             ):
                 print(
                     f"The group {group_timestamp} has already been handled, and the CCW pipeline"
@@ -267,9 +266,36 @@ def handler(event: Any, context: Any):
                 )
                 return
 
-            # no messages in queue correspond to the current load, this must be a new load. Post a
-            # message to the Jenkins job queue to start the deploy job indicating that the CCW
-            # instance should be started/created
+            # post a message to the ongoing load queue to stop further, unnecessary, deployments
+            print(
+                f"Posting message to {ONGOING_LOAD_QUEUE} queue indicating there is an ongoing"
+                f" data load for group {group_timestamp}"
+            )
+            _post_ongoing_load_message(
+                load_type=pipeline_load_type, group_timestamp=group_timestamp
+            )
+            print(f"Message posted successfully")
+
+            # we only want to deploy the Pipeline terraservice, creating the CCW pipeline instance,
+            # if the pipeline is not already running. there's a possibility the CCW pipeline
+            # instance gets recreated if the Pipeline terraservice definition has been updated
+            # between two separate, but concurrent, data loads, and if the CCW instance is recreated
+            # in the middle of a load it could cause data integrity issues. we avoid this by
+            # ensuring the queue is empty, excluding messages for this current load, before posting
+            # to the job queue.
+            if any(
+                msg.load_group != group_timestamp or msg.load_type != pipeline_load_type
+                for msg in _check_ongoing_load_queue(timeout=5)
+            ):
+                print(
+                    "There are other data loads either queued up or being currently loaded by the"
+                    " BFD CCW Pipeline, so it does not need to be started. Stopping..."
+                )
+                return
+
+            # no messages in queue correspond to the current load, and there are no ongoing/queued
+            # loads. there must be no CCW pipeline running. post a message to the Jenkins job queue
+            # to start the deploy job indicating that the CCW instance should be started/created
             print(
                 f"No ongoing load messages were found in {ONGOING_LOAD_QUEUE} queue, the BFD CCW"
                 " Pipeline instance must not be running. Posting a message to the"
@@ -280,16 +306,6 @@ def handler(event: Any, context: Any):
             _post_jenkins_job_message(create_ccw_instance=True)
             print(f"Message posted successfully")
 
-            # post a message to the ongoing load queue to stop further, unnecessary, deployments
-            print(
-                f"Posting message to {ONGOING_LOAD_QUEUE} queue indicating there is an ongoing data"
-                f" load and that the {JENKINS_TARGET_JOB_NAME} Jenkins job has been started to"
-                " create a CCW Pipeline instance..."
-            )
-            _post_ongoing_load_message(
-                load_type=pipeline_load_type, group_timestamp=group_timestamp
-            )
-            print(f"Message posted successfully")
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
             and _is_pipeline_load_complete(
