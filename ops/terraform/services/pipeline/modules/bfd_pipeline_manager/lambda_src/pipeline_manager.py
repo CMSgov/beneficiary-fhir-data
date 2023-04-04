@@ -222,8 +222,8 @@ def handler(event: Any, context: Any):
 
     try:
         record: dict[str, Any] = event["Records"][0]
-    except KeyError as exc:
-        print(f"The incoming event was invalid: {exc}")
+    except KeyError as ex:
+        print(f"The incoming event was invalid: {ex}")
         return
     except IndexError:
         print("Invalid event notification, no records found")
@@ -231,8 +231,8 @@ def handler(event: Any, context: Any):
 
     try:
         file_key: str = record["s3"]["object"]["key"]
-    except KeyError as exc:
-        print(f"No bucket file found in event notification: {exc}")
+    except KeyError as ex:
+        print(f"No bucket file found in event notification: {ex}")
         return
 
     decoded_file_key = unquote(file_key)
@@ -274,7 +274,7 @@ def handler(event: Any, context: Any):
             _post_ongoing_load_message(
                 load_type=pipeline_load_type, group_timestamp=group_timestamp
             )
-            print(f"Message posted successfully")
+            print("Message posted successfully")
 
             # we only want to deploy the Pipeline terraservice, creating the CCW pipeline instance,
             # if the pipeline is not already running. there's a possibility the CCW pipeline
@@ -304,7 +304,7 @@ def handler(event: Any, context: Any):
                 f" {BFD_ENVIRONMENT} and branch {DEPLOYED_GIT_BRANCH}..."
             )
             _post_jenkins_job_message(create_ccw_instance=True)
-            print(f"Message posted successfully")
+            print("Message posted successfully")
 
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
@@ -338,14 +338,14 @@ def handler(event: Any, context: Any):
                 _remove_ongoing_load_message(
                     message_id=msg.message_id, message_receipt=msg.receipt_handle
                 )
-            print(f"Cleanup successful")
+            print("Cleanup successful")
 
             # now, check if the ongoing load queue is empty. we only want to stop the CCW pipeline
             # instance if there are no more data loads for it to handle.
-            if list(_check_ongoing_load_queue(timeout=5)):
+            if _check_ongoing_load_queue(timeout=5):
                 print(
-                    f"There are still ongoing loads queued up for the BFD CCW Pipeline to process."
-                    f" Stopping..."
+                    "There are still ongoing loads queued up for the BFD CCW Pipeline to process."
+                    " Stopping..."
                 )
                 return
 
@@ -359,7 +359,7 @@ def handler(event: Any, context: Any):
                 f" {DEPLOYED_GIT_BRANCH}..."
             )
             _post_jenkins_job_message(create_ccw_instance=False)
-            print(f"Message posted successfully")
+            print("Message posted successfully")
         else:
             print(
                 f"The location of data in S3 bucket {ETL_BUCKET_ID} for the current group"
