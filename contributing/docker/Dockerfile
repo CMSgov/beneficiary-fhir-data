@@ -27,8 +27,8 @@ RUN yum update -y --security && \
       traceroute \
       mtr
 
-# Install Java 11 and Maven
-RUN amazon-linux-extras install java-openjdk11 && \
+# Install Java 17 and Maven
+RUN amazon-linux-extras install java-17-amazon-corretto-devel && \
     curl -O ${MVN_MIRROR}/maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz && \
     tar xvzf apache-maven-${MVN_VER}-bin.tar.gz && \
     mv apache-maven-${MVN_VER} /opt/maven && \
