@@ -67,13 +67,18 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
     this.knownKeys = CacheBuilder.newBuilder().maximumSize(keyCacheSize).build();
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public MessageSource<TChange> skip(long numberToSkip) throws Exception {
+    sequenceNumber += numberToSkip;
+    source.skip(numberToSkip);
+    return this;
+  }
+
   @Override
   public boolean hasNext() throws Exception {
     return source.hasNext();
   }
 
-  /** {@inheritDoc} */
   @Override
   public TChange next() throws Exception {
     final Timestamp timestamp =
@@ -86,7 +91,6 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
     return changeFactory.create(timestamp, changeType, sequenceNumber++, claim);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     source.close();
@@ -107,12 +111,15 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
         clock,
         startingSequenceNumber,
         KEY_CACHE_SIZE,
-        FissClaim::getDcn,
+        FissClaim::getRdaClaimKey,
         (timestamp, type, seq, claim) ->
             FissClaimChange.newBuilder()
                 .setTimestamp(timestamp)
                 .setChangeType(type)
                 .setSeq(seq)
+                .setDcn(claim.getDcn())
+                .setRdaClaimKey(claim.getRdaClaimKey())
+                .setIntermediaryNb(claim.getIntermediaryNb())
                 .setClaim(claim)
                 .setSource(
                     RecordSource.newBuilder()

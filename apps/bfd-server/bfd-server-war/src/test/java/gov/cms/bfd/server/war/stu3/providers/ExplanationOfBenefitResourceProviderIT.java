@@ -35,6 +35,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -59,30 +60,10 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link ExplanationOfBenefitResourceProvider}. */
-public final class ExplanationOfBenefitResourceProviderIT {
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
-   * that any existing data is deleted from the tables before running the test suite.
-   */
-  @BeforeAll
-  public static void cleanupDatabaseBeforeTestSuite() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @AfterEach
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
+public final class ExplanationOfBenefitResourceProviderIT extends ServerRequiredTest {
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link

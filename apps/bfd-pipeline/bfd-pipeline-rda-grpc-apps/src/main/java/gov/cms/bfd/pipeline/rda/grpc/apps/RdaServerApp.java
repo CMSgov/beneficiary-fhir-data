@@ -4,6 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -26,7 +27,20 @@ import org.slf4j.LoggerFactory;
  * 5003.
  */
 public class RdaServerApp {
+  /** Used for logging. */
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaServerApp.class);
+
+  /**
+   * Adjustment applied to {@link RandomClaimGeneratorConfig#seed} for FISS claims so that FISS and
+   * MCS jobs use a different seed.
+   */
+  private static final int FISS_RANDOM_SEED_DELTA = 12345;
+
+  /**
+   * Adjustment applied to {@link RandomClaimGeneratorConfig#seed} for MCS claims so that FISS and
+   * MCS jobs use a different seed.
+   */
+  private static final int MCS_RANDOM_SEED_DELTA = 67890;
 
   /**
    * Starts a RDA API server listening on localhost at a specific port. Configuration is controlled
@@ -62,8 +76,8 @@ public class RdaServerApp {
   private static class Config {
     /** The port to use for the RDI Server. */
     private final int port;
-    /** The seed value for the RDI Server. */
-    private final long seed;
+    /** The {@link RandomClaimGeneratorConfig} to use for random claim generation. */
+    private final RandomClaimGeneratorConfig randomClaimConfig;
     /** The max number to send for the RDI Server. */
     private final int maxToSend;
 
@@ -83,8 +97,16 @@ public class RdaServerApp {
     private Config(String[] args) throws Exception {
       final ConfigLoader config =
           ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
+      final var defaultRandomSeed = System.currentTimeMillis();
       port = config.intValue("port", 5003);
-      seed = config.longOption("seed").orElseGet(System::currentTimeMillis);
+      randomClaimConfig =
+          RandomClaimGeneratorConfig.builder()
+              .seed(config.longOption("random.seed").orElse(defaultRandomSeed))
+              .optionalOverride(config.booleanValue("random.verbose", false))
+              .randomErrorRate(config.intOption("random.errorRate").orElse(0))
+              .maxUniqueMbis(config.intOption("random.max.mbi").orElse(0))
+              .maxUniqueClaimIds(config.intOption("random.max.claimId").orElse(0))
+              .build();
       maxToSend = config.intValue("maxToSend", 5_000);
       fissClaimFile = config.readableFileOption("fissFile").orElse(null);
       mcsClaimFile = config.readableFileOption("mcsFile").orElse(null);
@@ -147,11 +169,14 @@ public class RdaServerApp {
             s3Sources.getBucketName());
         return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
       } else {
+        final var adjustedConfig = adjustErrorSeed(FISS_RANDOM_SEED_DELTA);
         LOGGER.info(
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
-            seed);
-        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
+            adjustedConfig.getSeed());
+        return new RandomFissClaimSource(adjustedConfig, maxToSend)
+            .toClaimChanges()
+            .skip(sequenceNumber);
       }
     }
 
@@ -176,12 +201,32 @@ public class RdaServerApp {
             s3Sources.getBucketName());
         return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
       } else {
+        final var adjustedConfig = adjustErrorSeed(MCS_RANDOM_SEED_DELTA);
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
-            seed);
-        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
+            adjustedConfig.getSeed());
+        return new RandomMcsClaimSource(adjustedConfig, maxToSend)
+            .toClaimChanges()
+            .skip(sequenceNumber);
       }
+    }
+
+    /**
+     * Add a small number to the configured random error seed so that different claim types will not
+     * generate errors on the exact same sequence number.
+     *
+     * @param delta amount to add to configured seed
+     * @return config with the modified seed value
+     */
+    private RandomClaimGeneratorConfig adjustErrorSeed(int delta) {
+      final var oldSeed = randomClaimConfig.getSeed();
+      final var adjustedSeed = oldSeed + delta;
+      return randomClaimConfig
+          .toBuilder()
+          .seed(adjustedSeed)
+          .useTimestampForErrorSeed(true)
+          .build();
     }
   }
 }

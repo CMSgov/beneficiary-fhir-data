@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -44,12 +44,10 @@ import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
-public final class PatientResourceProviderIT {
+public final class PatientResourceProviderIT extends ServerRequiredTest {
 
   /** Constant used for setting up tests with include identifiers = true. */
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
@@ -59,24 +57,6 @@ public final class PatientResourceProviderIT {
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
   /** Constant for setting up tests with include identifiers without mbi. */
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
-   * that any existing data is deleted from the tables before running the test suite.
-   */
-  @BeforeAll
-  public static void cleanupDatabaseBeforeTestSuite() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @AfterEach
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
 
   /**
    * Verifies that {@link PatientResourceProvider#read} works as expected for a {@link Patient} that

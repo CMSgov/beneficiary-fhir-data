@@ -281,3 +281,17 @@ def get_pac_hashed_mbis(uri: str) -> List:
     # will be at the beginning of the result set and BFDUserBase will pop items
     # off of the end of the list
     return [str(r[0]) for r in reversed(_execute(uri, mbi_query))]
+
+
+def get_pac_hashed_mbis_smoketest(uri: str) -> list[str]:
+    """Gets the top LIMIT MBI hashes from the rda table's MBI cache for use with the PACA smoketests
+
+    Args:
+        uri (str): The database connection string
+
+    Returns:
+        list[str]: A list of MBI hashes
+    """
+    smoketest_mbi_query = f"select hash from rda.mbi_cache limit {LIMIT}"
+
+    return [str(r[0]) for r in _execute(uri, smoketest_mbi_query)]

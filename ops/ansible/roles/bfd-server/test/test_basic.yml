@@ -18,14 +18,14 @@
         data_server_ssl_client_certificates:
           - alias: client_foo
             certificate: files/client-trusted.cer
-        data_server_db_url: jdbc:postgresql://db:5432/fhirdb
+        data_server_db_url: jdbc:postgresql://db:5432/fhirdb?logServerErrorDetail=false
         data_server_ssl_client_certificate_test: files/client-unsecured.pem
         data_server_db_username: bfd
         data_server_db_password: bfd
         test_client_cert: "{{ lookup('file', playbook_dir + '/' + 'files/client-unsecured-cert.pem') }}"
         test_client_key: "{{ lookup('file', playbook_dir + '/' + 'files/client-unsecured-key.pem') }}"
         # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
-        data_server_appserver_jvmargs: '-Xmx1024m -XX:MaxMetaspaceSize=1024m -DbfdServer.db.schema.apply=true'
+        data_server_appserver_jvmargs: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m'
         data_server_dir: &data_server_dir /usr/local/bfd-server
         data_server_v2_enabled: true
 

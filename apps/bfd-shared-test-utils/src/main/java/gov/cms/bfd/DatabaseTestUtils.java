@@ -1,5 +1,7 @@
 package gov.cms.bfd;
 
+import static java.util.Collections.singletonMap;
+
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.FileReader;
@@ -28,6 +30,9 @@ import org.hsqldb.server.ServerAcl.AclFormatException;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -49,9 +54,21 @@ public final class DatabaseTestUtils {
   public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("public", "PUBLIC", "rda", "RDA");
 
   /** The username used for HSQL locally. */
-  static final String HSQL_SERVER_USERNAME = "test";
+  public static final String HSQL_SERVER_USERNAME = "test";
   /** The password used for HSQL locally. */
-  static final String HSQL_SERVER_PASSWORD = "test";
+  public static final String HSQL_SERVER_PASSWORD = "test";
+
+  /** The default database type to use for the integration tests when nothing is provided. */
+  public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
+
+  /** The default test container image to use when nothing is provided. */
+  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:14.6-alpine";
+
+  /** The username used for test container database username. */
+  public static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
+
+  /** The password used for test container database password. */
+  public static final String TEST_CONTAINER_DATABASE_PASSWORD = "bfdtest";
 
   /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
   private static DatabaseTestUtils SINGLETON;
@@ -61,6 +78,9 @@ public final class DatabaseTestUtils {
    * #initUnpooledDataSource()}.
    */
   private final DataSource unpooledDataSource;
+
+  /** Generic container for postgressql. */
+  private static GenericContainer container = null;
 
   /**
    * Constructs a new {@link DatabaseTestUtils} instance. Marked <code>private</code>; use {@link
@@ -94,7 +114,7 @@ public final class DatabaseTestUtils {
    *
    * @return the datasource
    */
-  public static DataSource initUnpooledDataSource() {
+  private static DataSource initUnpooledDataSource() {
     /*
      * This is pretty hacky, but when this class is being used as part of the BFD Server tests, we
      * have to check for the DB connection properties that the BFD Server may have written out when
@@ -105,18 +125,22 @@ public final class DatabaseTestUtils {
     Optional<Properties> bfdServerTestDatabaseProperties = readTestDatabaseProperties();
 
     String url, username, password;
+    url = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
+    String usernameDefault = null;
+    String passwordDefault = null;
+
     if (bfdServerTestDatabaseProperties.isPresent()) {
+      LOGGER.info("Setting up data source using server properties ({})", url);
       url = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.url");
       username = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.username");
       password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
-    } else {
+    } else if (url.contains("hsql")) {
+      LOGGER.info("Setting up HSQL data source");
       /*
-       * Build default DB connection properties that use HSQL, just as they're configured in the
+       * Build DB connection properties that use HSQL, just as they're configured in the
        * parent POM.
        */
       String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
-      String usernameDefault = null;
-      String passwordDefault = null;
 
       // Build the actual DB connection properties to use.
       url = System.getProperty("its.db.url", urlDefault);
@@ -125,6 +149,17 @@ public final class DatabaseTestUtils {
       if (username != null && username.trim().isEmpty()) username = usernameDefault;
       password = System.getProperty("its.db.password", passwordDefault);
       if (password != null && password.trim().isEmpty()) password = passwordDefault;
+    } else {
+      LOGGER.info("Setting up postgres test container data source");
+      // Build the test container postgres db by default
+      username = System.getProperty("its.db.username", TEST_CONTAINER_DATABASE_USERNAME);
+      if (username == null || username.trim().isBlank()) {
+        username = TEST_CONTAINER_DATABASE_USERNAME;
+      }
+      password = System.getProperty("its.db.password", TEST_CONTAINER_DATABASE_PASSWORD);
+      if (password == null || password.trim().isBlank()) {
+        password = TEST_CONTAINER_DATABASE_PASSWORD;
+      }
     }
 
     return initUnpooledDataSource(url, username, password);
@@ -234,6 +269,8 @@ public final class DatabaseTestUtils {
       dataSource = initUnpooledDataSourceForHsqlServer(url, username, password);
     } else if (url.startsWith("jdbc:postgresql:")) {
       dataSource = initUnpooledDataSourceForPostgresql(url, username, password);
+    } else if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "tc")) {
+      dataSource = initUnpooledDataSourceForTestContainerWithPostgres(username, password);
     } else {
       throw new RuntimeException("Unsupported test DB URL: " + url);
     }
@@ -320,11 +357,51 @@ public final class DatabaseTestUtils {
     if (username != null) dataSource.setUser(username);
     if (password != null) dataSource.setPassword(password);
 
+    // In order to store and retrieve JSON in postgresql without adding any additional maven
+    // dependencies  we can set this property to allow String values to be transparently
+    // converted to/from jsonb values.
+    try {
+      dataSource.setProperty("stringtype", "unspecified");
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
     boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
     if (!migrationSuccess) {
       throw new RuntimeException("Schema migration failed during test setup");
     }
 
+    return dataSource;
+  }
+
+  /**
+   * Initiates a Test Container PostgreSQL {@link DataSource} for the test DB.
+   *
+   * @param username the username for the test database to connect to
+   * @param password the password for the test database to connect to
+   * @return a PostgreSQL {@link DataSource} for the test DB
+   */
+  private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
+      String username, String password) {
+
+    String testContainerDatabaseImage =
+        System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+    LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
+    container =
+        new PostgreSQLContainer(testContainerDatabaseImage)
+            .withDatabaseName("fhirdb")
+            .withUsername(username)
+            .withPassword(password)
+            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
+
+    container.start();
+
+    LOGGER.debug("Container started, running migrations...");
+    JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
+    DataSource dataSource =
+        initUnpooledDataSourceForPostgresql(
+            jdbcContainer.getJdbcUrl(), jdbcContainer.getUsername(), jdbcContainer.getPassword());
+    LOGGER.debug("Ran migrations on container.");
     return dataSource;
   }
 
@@ -368,20 +445,27 @@ public final class DatabaseTestUtils {
         Flyway.configure()
             .dataSource(unpooledDataSource)
             .schemas(FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]))
+            .baselineOnMigrate(true)
+            .baselineVersion("0")
             .connectRetries(2)
+            .cleanDisabled(false)
+            .placeholders(DatabaseTestSchemaManager.createScriptPlaceholdersMap(unpooledDataSource))
             .load();
     LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
     flyway.clean();
     // Drop any created types since flyway's clean doesnt do this
-    try (Connection connection = getUnpooledDataSource().getConnection(); ) {
-      try (Statement statement = connection.createStatement()) {
-        statement.executeUpdate("DROP TYPE JSONB");
-        statement.executeUpdate("DROP TYPE JSON");
+    // Make sure we are not using test containers locally.
+    if (!url.startsWith("jdbc:postgresql://localhost")) {
+      try (Connection connection = getUnpooledDataSource().getConnection(); ) {
+        try (Statement statement = connection.createStatement()) {
+          statement.executeUpdate("DROP TYPE JSONB");
+          statement.executeUpdate("DROP TYPE JSON");
+        }
+        connection.commit();
+      } catch (SQLException e) {
+        LOGGER.error("SQL Exception when cleaning DB: ", e);
+        return false;
       }
-      connection.commit();
-    } catch (SQLException e) {
-      LOGGER.error("SQL Exception when cleaning DB: ", e);
-      return false;
     }
     return true;
   }
@@ -473,13 +557,11 @@ public final class DatabaseTestUtils {
       String passwordKey,
       String connectionsMaxText,
       MetricRegistry metricRegistry) {
-    /*
-     * Note: Eventually, we may add support for other test DB types, but
-     * right now only in-memory HSQL DBs are supported.
-     */
     if (url.endsWith(":hsqldb:mem")) {
       return createTestDatabaseForHsql(
           connectionsMaxText, metricRegistry, urlKey, usernameKey, passwordKey);
+    } else if (url.endsWith(":tc")) {
+      return initUnpooledDataSourceForTestContainerWithPostgres(usernameKey, passwordKey);
     } else {
       throw new RuntimeException("Unsupported test URL: " + url);
     }
