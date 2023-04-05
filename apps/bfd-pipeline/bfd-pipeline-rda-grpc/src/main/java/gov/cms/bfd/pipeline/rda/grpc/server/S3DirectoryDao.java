@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * Methods are provided for clearing obsolete files as well as clearing entire disk cache.
  */
 @Slf4j
-public class S3DirectoryDao {
+public class S3DirectoryDao implements AutoCloseable {
   /** Prefix added to file name to indicate it is a data file. */
   private static final String DataFilePrefix = "s3-";
   /** Suffix added to file name to indicate it is a data file. */
@@ -160,6 +160,9 @@ public class S3DirectoryDao {
       Files.deleteIfExists(tempDataFile);
     }
   }
+
+  @Override
+  public void close() throws Exception {}
 
   /**
    * Create a uniquely named temporary file in our directory for use when downloading a new file.

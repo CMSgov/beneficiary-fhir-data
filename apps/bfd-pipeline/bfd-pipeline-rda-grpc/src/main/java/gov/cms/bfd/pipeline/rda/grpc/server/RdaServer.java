@@ -29,7 +29,7 @@ public class RdaServer {
    * @return a running RDA API Server object
    * @throws IOException if the server cannot bind at runtime
    */
-  public static Server startLocal(LocalConfig config) throws IOException {
+  public static Server startLocal(LocalConfig config) throws Exception {
     final ServerBuilder<?> serverBuilder =
         config.hasHostname()
             ? NettyServerBuilder.forAddress(
@@ -49,7 +49,7 @@ public class RdaServer {
    * @return a running RDA API Server object
    * @throws IOException if the server cannot bind properly
    */
-  public static Server startInProcess(InProcessConfig config) throws IOException {
+  public static Server startInProcess(InProcessConfig config) throws Exception {
     return InProcessServerBuilder.forName(config.getServerName())
         .addService(config.createService())
         .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
@@ -127,14 +127,8 @@ public class RdaServer {
   /** Configuration for the RDA server. */
   @Getter
   private abstract static class BaseConfig {
-    /** Version for the RdaService to report when getVersion is called. */
-    private final RdaService.Version version;
-
-    /** Factory used to create {@link MessageSource} objects on demand. */
-    private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
-
-    /** Factory used to create {@link MessageSource} objects on demand. */
-    private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
+    /** Configuration used to create an {@link RdaService}. */
+    private final RdaMessageSourceFactory.Config serviceConfig;
 
     /**
      * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
@@ -142,23 +136,30 @@ public class RdaServer {
     private final Set<String> authorizedTokens;
 
     /**
-     * Instantiates a new configuration.
+     * Instantiates a new configuration. If {@code serviceConfig} is not null it is used otherwise
+     * the other parameters are used to build a config.
      *
-     * @param version the version
-     * @param fissSourceFactory the fiss source factory
-     * @param mcsSourceFactory the mcs source factory
+     * @param version optional version
+     * @param fissSourceFactory optional fiss source factory
+     * @param mcsSourceFactory optional mcs source factory
+     * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      */
     BaseConfig(
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        RdaMessageSourceFactory.Config serviceConfig,
         Set<String> authorizedTokens) {
-      this.version = version != null ? version : RdaService.Version.builder().build();
-      this.fissSourceFactory =
-          fissSourceFactory != null ? fissSourceFactory : EmptyMessageSource.factory();
-      this.mcsSourceFactory =
-          mcsSourceFactory != null ? mcsSourceFactory : EmptyMessageSource.factory();
+      if (serviceConfig == null) {
+        serviceConfig =
+            RdaMessageSourceFactory.Config.builder()
+                .version(version)
+                .fissSourceFactory(fissSourceFactory)
+                .mcsSourceFactory(mcsSourceFactory)
+                .build();
+      }
+      this.serviceConfig = serviceConfig;
       this.authorizedTokens = authorizedTokens;
     }
 
@@ -167,13 +168,8 @@ public class RdaServer {
      *
      * @return properly configured RdaService instance
      */
-    public RdaService createService() {
-      return RdaService.Config.builder()
-          .version(version)
-          .fissSourceFactory(fissSourceFactory)
-          .mcsSourceFactory(mcsSourceFactory)
-          .build()
-          .createService();
+    public RdaService createService() throws Exception {
+      return new RdaService(serviceConfig.createMessageSourceFactory());
     }
   }
 
@@ -190,11 +186,13 @@ public class RdaServer {
     private final int port;
 
     /**
-     * Creates a new configuration.
+     * Creates a new configuration. If {@code serviceConfig} is not null it is used otherwise the
+     * other parameters are used to build a config.
      *
-     * @param version the version
-     * @param fissSourceFactory the fiss source factory
-     * @param mcsSourceFactory the mcs source factory
+     * @param version optional version
+     * @param fissSourceFactory optional fiss source factory
+     * @param mcsSourceFactory optional mcs source factory
+     * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      * @param hostname the hostname
      * @param port the port
@@ -204,10 +202,11 @@ public class RdaServer {
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
         String hostname,
         int port) {
-      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
       this.hostname = Strings.isNullOrEmpty(hostname) ? "localhost" : hostname;
       this.port = port;
     }
@@ -243,11 +242,13 @@ public class RdaServer {
     private final String serverName;
 
     /**
-     * Instantiates a new configuration.
+     * Instantiates a new configuration. If {@code serviceConfig} is not null it is used otherwise
+     * the other parameters are used to build a config.
      *
-     * @param version the version
-     * @param fissSourceFactory the fiss source factory
-     * @param mcsSourceFactory the mcs source factory
+     * @param version optional version
+     * @param fissSourceFactory optional fiss source factory
+     * @param mcsSourceFactory optional mcs source factory
+     * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      * @param serverName the server name
      */
@@ -256,9 +257,10 @@ public class RdaServer {
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
         String serverName) {
-      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
       this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;
     }
 

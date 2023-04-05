@@ -26,8 +26,8 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class RdaServiceTest {
 
-  /** The mocked configuration. */
-  @Mock private RdaService.Config mockConfig;
+  /** The mocked RdaMessageSourceFactory. */
+  @Mock private RdaMessageSourceFactory mockRdaMessageSourceFactory;
   /** The mocked RDA version. */
   @Mock private RdaService.Version mockVersion;
   /** The mocked api version data. */
@@ -38,16 +38,12 @@ public class RdaServiceTest {
   @Mock private StreamObserver<FissClaimChange> mockFissObserver;
   /** The mocked Fiss responder. */
   @Mock private RdaService.Responder<FissClaimChange> mockFissResponder;
-  /** The mocked Fiss factory. */
-  @Mock private MessageSource.Factory<FissClaimChange> mockFissFactory;
   /** The mocked source. */
   @Mock private MessageSource<FissClaimChange> mockFissSource;
   /** The mocked MCS observer. */
   @Mock private StreamObserver<McsClaimChange> mockMcsObserver;
   /** The mocked MCS responder. */
   @Mock private RdaService.Responder<McsClaimChange> mockMcsResponder;
-  /** The mocked MCS factory. */
-  @Mock private MessageSource.Factory<McsClaimChange> mockMcsFactory;
   /** The mocked MCS source. */
   @Mock private MessageSource<McsClaimChange> mockMcsSource;
   /** The mocked MCS request. */
@@ -67,19 +63,17 @@ public class RdaServiceTest {
   void init() throws Exception {
     doReturn(mockApiVersion).when(mockVersion).toApiVersion();
 
-    doReturn(mockVersion).when(mockConfig).getVersion();
+    doReturn(mockVersion).when(mockRdaMessageSourceFactory).getVersion();
 
     // resource - We’re creating a mock, not invoking the method
-    //noinspection resource
-    doReturn(mockFissSource).when(mockFissFactory).apply(SINCE_VALUE + 1);
-
-    doReturn(mockFissFactory).when(mockConfig).getFissSourceFactory();
+    doReturn(mockFissSource)
+        .when(mockRdaMessageSourceFactory)
+        .createFissMessageSource(SINCE_VALUE + 1);
 
     // resource - We’re creating a mock, not invoking the method
-    //noinspection resource
-    doReturn(mockMcsSource).when(mockMcsFactory).apply(SINCE_VALUE + 1);
-
-    doReturn(mockMcsFactory).when(mockConfig).getMcsSourceFactory();
+    doReturn(mockMcsSource)
+        .when(mockRdaMessageSourceFactory)
+        .createMcsMessageSource(SINCE_VALUE + 1);
   }
 
   /**
@@ -88,7 +82,7 @@ public class RdaServiceTest {
    */
   @Test
   void shouldInvokeApiVersionResponseObserverMethods() {
-    RdaService service = new RdaService(mockConfig);
+    RdaService service = new RdaService(mockRdaMessageSourceFactory);
     service.getVersion(request, mockAPIObserver);
 
     verify(mockAPIObserver, times(1)).onNext(mockApiVersion);
@@ -108,7 +102,7 @@ public class RdaServiceTest {
 
     ArgumentCaptor<StatusException> captor = ArgumentCaptor.forClass(StatusException.class);
 
-    RdaService service = new RdaService(mockConfig);
+    RdaService service = new RdaService(mockRdaMessageSourceFactory);
     service.getVersion(request, mockAPIObserver);
 
     verify(mockAPIObserver, times(1)).onError(captor.capture());
@@ -123,7 +117,7 @@ public class RdaServiceTest {
   void shouldSendFissResponses() {
     doReturn(SINCE_VALUE).when(mockRequest).getSince();
 
-    RdaService serviceSpy = spy(new RdaService(mockConfig));
+    RdaService serviceSpy = spy(new RdaService(mockRdaMessageSourceFactory));
 
     doReturn(mockFissResponder)
         .when(serviceSpy)
@@ -145,7 +139,7 @@ public class RdaServiceTest {
 
     doReturn(SINCE_VALUE).when(mockRequest).getSince();
 
-    RdaService serviceSpy = spy(new RdaService(mockConfig));
+    RdaService serviceSpy = spy(new RdaService(mockRdaMessageSourceFactory));
 
     doThrow(originalException).when(mockFissResponder).sendResponses();
 
@@ -171,7 +165,7 @@ public class RdaServiceTest {
   void shouldSendMcsResponses() {
     doReturn(SINCE_VALUE).when(mockRequest).getSince();
 
-    RdaService serviceSpy = spy(new RdaService(mockConfig));
+    RdaService serviceSpy = spy(new RdaService(mockRdaMessageSourceFactory));
 
     doReturn(mockMcsResponder).when(serviceSpy).createMcsResponder(mockMcsObserver, mockMcsSource);
 
@@ -191,7 +185,7 @@ public class RdaServiceTest {
 
     doReturn(SINCE_VALUE).when(mockRequest).getSince();
 
-    RdaService serviceSpy = spy(new RdaService(mockConfig));
+    RdaService serviceSpy = spy(new RdaService(mockRdaMessageSourceFactory));
 
     doThrow(originalException).when(mockMcsResponder).sendResponses();
 

@@ -13,6 +13,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaS3JsonMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
@@ -27,6 +28,8 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -118,9 +121,12 @@ public class RdaServerJobIT {
     AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
     Bucket bucket = null;
     S3DirectoryDao s3Dao = null;
+    Path cacheDirectoryPath = null;
     try {
       bucket = createTestBucket(s3Client);
       final String directoryPath = "files-go-here";
+      cacheDirectoryPath = Files.createTempDirectory("test");
+      s3Dao = new S3DirectoryDao(s3Client, bucket.getName(), directoryPath, cacheDirectoryPath);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
@@ -128,9 +134,8 @@ public class RdaServerJobIT {
               .s3Bucket(bucket.getName())
               .s3Directory(directoryPath)
               .build();
-      s3Dao = config.getS3Dao();
-      final String fissObjectKey = config.getS3Sources().createFissObjectKey();
-      final String mcsObjectKey = config.getS3Sources().createMcsObjectKey();
+      final String fissObjectKey = RdaS3JsonMessageSourceFactory.createValidFissKeyForTesting();
+      final String mcsObjectKey = RdaS3JsonMessageSourceFactory.createValidMcsKeyForTesting();
       s3Dao.uploadJsonToBucket(fissObjectKey, fissClaimsSource);
       s3Dao.uploadJsonToBucket(mcsObjectKey, mcsClaimsSource);
 
@@ -174,6 +179,10 @@ public class RdaServerJobIT {
       deleteTestBucket(s3Client, bucket);
       if (s3Dao != null) {
         s3Dao.deleteAllFiles();
+        s3Dao.close();
+      }
+      if (cacheDirectoryPath != null) {
+        Files.deleteIfExists(cacheDirectoryPath);
       }
     }
   }

@@ -1,32 +1,18 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
-import static java.lang.String.format;
-
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
-import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
-import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import gov.cms.mpsm.rda.v1.FissClaimChange;
-import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -86,10 +72,8 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       final Server server =
           RdaServer.startInProcess(
               RdaServer.InProcessConfig.builder()
+                  .serviceConfig(config.messageSourceFactoryConfig)
                   .serverName(config.serverName)
-                  .version(config.createVersion())
-                  .fissSourceFactory(config::createFissClaims)
-                  .mcsSourceFactory(config::createMcsClaims)
                   .build());
       try {
         running.incrementAndGet();
@@ -158,30 +142,8 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      */
     private final String serverName;
 
-    /** The starting PRNG seed when operating in {@code Random} mode. */
-    private final long randomSeed;
-    /** The maximum number of claims to be returned when operating in {@code Random} mode. */
-    private final int randomMaxClaims;
-    /** AWS region containing our S3 bucket. */
-    @Nullable private final Regions s3Region;
-    /** Name of our S3 bucket. */
-    @Nullable private final String s3Bucket;
-    /** Optional directory name within our S3 bucket. */
-    @Nullable private final String s3Directory;
-    /** Name of a directory in which to store cached files from S3. */
-    @Nullable private final String s3CacheDirectory;
-
-    /**
-     * The data access object used to access files in S3 when operating in {@code S3} mode. Created
-     * on demand by {@link #initializeS3}.
-     */
-    @EqualsAndHashCode.Exclude private S3DirectoryDao s3Dao;
-
-    /**
-     * The S3 connection details when operating in {@code S3} mode. Created on demand by {@link
-     * #initializeS3}.
-     */
-    @EqualsAndHashCode.Exclude private S3JsonMessageSources s3Sources;
+    /** Message source config used when creating the {@link RdaServer}. */
+    private final RdaMessageSourceFactory.Config messageSourceFactoryConfig;
 
     /** Indicates the source the server will return data from. */
     public enum ServerMode {
@@ -230,120 +192,18 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       this.serverMode = serverMode;
       this.serverName = serverName;
       this.runInterval = runInterval == null ? DEFAULT_RUN_INTERVAL : runInterval;
-      this.randomSeed = randomSeed == null ? DEFAULT_SEED : randomSeed;
-      this.randomMaxClaims = randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims;
-      this.s3Region = s3Region;
-      this.s3Bucket = s3Bucket;
-      this.s3Directory = s3Directory;
-      this.s3CacheDirectory = s3CacheDirectory;
-    }
-
-    /**
-     * Get an initialized {@link S3DirectoryDao}.
-     *
-     * @return the result
-     * @throws IOException if initialization fails
-     */
-    public synchronized S3DirectoryDao getS3Dao() throws IOException {
-      initializeS3();
-      return s3Dao;
-    }
-
-    /**
-     * Get an initialized {@link S3JsonMessageSources}.
-     *
-     * @return the result
-     * @throws IOException if initialization fails
-     */
-    public synchronized S3JsonMessageSources getS3Sources() throws IOException {
-      initializeS3();
-      return s3Sources;
-    }
-
-    /**
-     * Initialize resources used to communicate with S3.
-     *
-     * @throws IOException if initialization fails
-     */
-    private synchronized void initializeS3() throws IOException {
-      if (s3Dao == null || s3Sources == null) {
-        final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
-        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
-        final String directory = s3Directory == null ? "" : s3Directory;
-        final Path cacheDirectory =
-            Strings.isNullOrEmpty(s3CacheDirectory)
-                ? Files.createTempDirectory("RdaServerJob")
-                : Path.of(s3CacheDirectory);
-        s3Dao = new S3DirectoryDao(s3Client, s3Bucket, directory, cacheDirectory);
-        s3Sources = new S3JsonMessageSources(s3Dao);
-      }
-    }
-
-    /**
-     * Creates an RDA service version.
-     *
-     * @return the version
-     */
-    private RdaService.Version createVersion() {
-      RdaService.Version.VersionBuilder versionBuilder = RdaService.Version.builder();
-      if (serverMode == ServerMode.S3) {
-        versionBuilder.version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION));
-      } else {
-        versionBuilder.version(format("Random:%d:%s", randomSeed, RDA_PROTO_VERSION));
-      }
-      return versionBuilder.build();
-    }
-
-    /**
-     * Creates randomly generated Fiss claims.
-     *
-     * @param sequenceNumber the sequence number
-     * @return the message source for the generated claims
-     * @throws Exception any error that occurs during claim generation
-     */
-    private synchronized MessageSource<FissClaimChange> createFissClaims(long sequenceNumber)
-        throws Exception {
-      if (serverMode == ServerMode.S3) {
-        initializeS3();
-        LOGGER.info(
-            "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Dao.getS3BucketName());
-        return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
-      } else {
-        LOGGER.info(
-            "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
-            randomMaxClaims,
-            randomSeed);
-        return new RandomFissClaimSource(randomSeed, randomMaxClaims)
-            .toClaimChanges()
-            .skip(sequenceNumber);
-      }
-    }
-
-    /**
-     * Creates randomly generated MCS claims.
-     *
-     * @param sequenceNumber the sequence number
-     * @return the message source for the generated claims
-     * @throws Exception any error that occurs during claim generation
-     */
-    private synchronized MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber)
-        throws Exception {
-      if (serverMode == ServerMode.S3) {
-        initializeS3();
-        LOGGER.info(
-            "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Dao.getS3BucketName());
-        return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
-      } else {
-        LOGGER.info(
-            "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
-            randomMaxClaims,
-            randomSeed);
-        return new RandomMcsClaimSource(randomSeed, randomMaxClaims)
-            .toClaimChanges()
-            .skip(sequenceNumber);
-      }
+      messageSourceFactoryConfig =
+          RdaMessageSourceFactory.Config.builder()
+              .randomClaimConfig(
+                  RandomClaimGeneratorConfig.builder()
+                      .seed(randomSeed == null ? DEFAULT_SEED : randomSeed)
+                      .build())
+              .randomMaxClaims(randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims)
+              .s3Region(s3Region)
+              .s3Bucket(s3Bucket)
+              .s3Directory(s3Directory)
+              .s3CacheDirectory(s3CacheDirectory)
+              .build();
     }
   }
 }
