@@ -1,12 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.waitForObjectToExist;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -16,6 +14,7 @@ import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -27,7 +26,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -130,14 +128,9 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return null or a valid {@link ByteSource} for reading the file
    * @throws IOException various exceptions might be thrown by the Java or AWS API
    */
-  @Nullable
   public ByteSource downloadFile(String fileName) throws IOException {
     final String s3Key = s3DirectoryPath + fileName;
     var s3MetaData = s3Client.getObjectMetadata(s3BucketName, s3Key);
-    if (s3MetaData == null) {
-      log.info("file does not exist in S3: {}", s3Key);
-      return null;
-    }
 
     String eTag = s3MetaData.getETag();
     Path dataFile = dataFilePath(fileName, eTag);
@@ -160,8 +153,13 @@ public class S3DirectoryDao implements AutoCloseable {
           tempDataFile.getFileName());
       s3MetaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
       if (s3MetaData == null) {
-        log.info("file does not exist in S3: fileName={} s3Key={}", fileName, s3Key);
-        return null;
+        // We need to handle this unlikely scenario.  Given that we did not specify any constraints
+        // it probably should not be possible.  If it did happen though it's better to get a
+        // reasonable exception rather than an NPE.
+        var message =
+            String.format("file no longer exists in S3: fileName=%s s3Key=%s", fileName, s3Key);
+        log.error(message);
+        throw new FileNotFoundException(message);
       }
 
       // it's possible that we received a different version than we expected
@@ -243,6 +241,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return number of files deleted
    * @throws IOException pass through from any failed operation
    */
+  @CanIgnoreReturnValue
   public int deleteObsoleteFiles() throws IOException {
     int deletedCount = 0;
     var allowedFiles = readFileHandlesFromS3();
@@ -275,25 +274,6 @@ public class S3DirectoryDao implements AutoCloseable {
       }
     }
     return deletedCount;
-  }
-
-  /**
-   * Uploads a JSON resource to an S3 bucket and waits for it to be fully available. Intended for
-   * use in integration tests.
-   *
-   * @param fileName simple file name for the object
-   * @param bytes a {@link ByteSource} referencing the json text
-   * @throws IOException if there is an issue opening the input byte source stream
-   */
-  public void uploadJsonToBucket(String fileName, ByteSource bytes) throws IOException {
-    var objectKey = s3DirectoryPath + fileName;
-    try (InputStream input = bytes.openStream()) {
-      ObjectMetadata metadata = new ObjectMetadata();
-      metadata.setContentType("application/json");
-      metadata.setContentLength(bytes.size());
-      s3Client.putObject(s3BucketName, objectKey, input, metadata);
-    }
-    waitForObjectToExist(s3Client, s3BucketName, objectKey);
   }
 
   /**
@@ -408,13 +388,10 @@ public class S3DirectoryDao implements AutoCloseable {
    * @param eTag eTag value from S3 for the file
    * @return file handle
    */
-  private Path dataFilePath(String fileName, String eTag) {
+  @VisibleForTesting
+  Path dataFilePath(String fileName, String eTag) {
     String cacheFileName = DataFilePrefix + fileName + EtagSeparator + eTag + DataFileSuffix;
-    Path result;
-    synchronized (this) {
-      result = cacheDirectory;
-    }
-    return Path.of(result.toString(), cacheFileName);
+    return Path.of(cacheDirectory.toString(), cacheFileName);
   }
 
   /**

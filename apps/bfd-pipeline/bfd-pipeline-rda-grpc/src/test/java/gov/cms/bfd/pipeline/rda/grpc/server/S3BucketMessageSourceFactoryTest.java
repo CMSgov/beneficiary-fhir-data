@@ -30,7 +30,6 @@ public class S3BucketMessageSourceFactoryTest {
   /** Verifies that the fiss and mcs factories can list the file keys from the mock S3 bucket. */
   @Test
   public void listFilesTest() {
-    final String directoryPath = "/my_directory/";
     setFilesInS3Dao(
         "mcs-215-275.ndjson.gz",
         "fiss.ndjson",

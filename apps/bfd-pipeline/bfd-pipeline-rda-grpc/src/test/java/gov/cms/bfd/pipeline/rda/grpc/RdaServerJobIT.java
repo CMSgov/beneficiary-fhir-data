@@ -135,7 +135,7 @@ public class RdaServerJobIT {
     Path cacheDirectoryPath = null;
     try {
       bucket = createTestBucket(s3Client);
-      final String directoryPath = "files-go-here";
+      final String directoryPath = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
       s3Dao =
           new S3DirectoryDao(s3Client, bucket.getName(), directoryPath, cacheDirectoryPath, true);
@@ -149,8 +149,9 @@ public class RdaServerJobIT {
               .build();
       final String fissObjectKey = RdaS3JsonMessageSourceFactory.createValidFissKeyForTesting();
       final String mcsObjectKey = RdaS3JsonMessageSourceFactory.createValidMcsKeyForTesting();
-      s3Dao.uploadJsonToBucket(fissObjectKey, fissClaimsSource);
-      s3Dao.uploadJsonToBucket(mcsObjectKey, mcsClaimsSource);
+      uploadJsonToBucket(
+          s3Client, bucket.getName(), directoryPath + fissObjectKey, fissClaimsSource);
+      uploadJsonToBucket(s3Client, bucket.getName(), directoryPath + mcsObjectKey, mcsClaimsSource);
 
       final RdaServerJob job = new RdaServerJob(config);
       final ExecutorService exec = Executors.newCachedThreadPool();

@@ -12,6 +12,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
@@ -212,6 +213,20 @@ public final class SharedS3Utilities {
       s3Client.putObject(bucketName, objectKey, input, metadata);
     }
     waitForObjectToExist(s3Client, bucketName, objectKey);
+  }
+
+  /**
+   * Delete an object from an S3 bucket and waits for it to be unavailable.
+   *
+   * @param s3Client the {@link AmazonS3} client to use
+   * @param bucketName the name of the bucket containing the object
+   * @param objectKey the key for the object
+   */
+  public static void deleteObjectFromBucket(
+      AmazonS3 s3Client, String bucketName, String objectKey) {
+    var deleteRequest = new DeleteObjectRequest(bucketName, objectKey);
+    s3Client.deleteObject(deleteRequest);
+    waitForObjectToNotExist(s3Client, bucketName, objectKey);
   }
 
   /**

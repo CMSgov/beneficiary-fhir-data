@@ -133,10 +133,6 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
         ndjsonObjectKey);
     try {
       ByteSource byteSource = s3Dao.downloadFile(ndjsonObjectKey);
-      if (byteSource == null) {
-        throw new RuntimeException(
-            String.format("failed to download file from S3 bucket: key=%s", ndjsonObjectKey));
-      }
       return new JsonMessageSource<>(byteSource, parser);
     } catch (IOException ex) {
       throw new RuntimeException(
