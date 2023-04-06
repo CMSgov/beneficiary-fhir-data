@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -642,6 +644,26 @@ public class DataTransformer {
       String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Long> copier) {
     if (exists.getAsBoolean()) {
       return copyLongString(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Base64 encodes the value of a String field and passes it to the consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value the string value to encode
+   * @param copier Consumer to receive the encoded string
+   * @return this
+   */
+  public DataTransformer copyBase64String(
+      String fieldName, boolean nullable, String value, Consumer<String> copier) {
+    if (nonNull(fieldName, value, nullable)) {
+      copier.accept(
+          Base64.getEncoder()
+              .withoutPadding()
+              .encodeToString(value.getBytes(StandardCharsets.UTF_8)));
     }
     return this;
   }

@@ -357,6 +357,25 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /**
+   * Tests the {@link DataTransformer#copyBase64String(String, boolean, String, Consumer)} method.
+   */
+  @Test
+  public void testCopyBase64() {
+    transformer
+        .copyBase64String("not-present-required", false, null, copied::add)
+        .copyBase64String("not-present-nullable", true, null, copied::add)
+        .copyBase64String(
+            "present-required", false, "a longer decoded string value  1", copied::add)
+        .copyBase64String("present-nullable", true, "decoded string", copied::add);
+    assertEquals(
+        ImmutableList.of("YSBsb25nZXIgZGVjb2RlZCBzdHJpbmcgdmFsdWUgIDE", "ZGVjb2RlZCBzdHJpbmc"),
+        copied);
+    assertEquals(
+        ImmutableList.of(new DataTransformer.ErrorMessage("not-present-required", "is null")),
+        transformer.getErrors());
+  }
+
   /** Tests the {@link DataTransformer#copyTimestamp(String, boolean, String, Consumer)} method. */
   @Test
   public void testCopyTimestamp() {
