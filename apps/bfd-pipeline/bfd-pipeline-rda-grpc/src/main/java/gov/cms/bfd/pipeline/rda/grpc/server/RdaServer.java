@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,17 +30,26 @@ public class RdaServer {
    * @return a running RDA API Server object
    * @throws IOException if the server cannot bind at runtime
    */
-  public static Server startLocal(LocalConfig config) throws Exception {
+  public static ServerState startLocal(LocalConfig config) throws Exception {
     final ServerBuilder<?> serverBuilder =
         config.hasHostname()
             ? NettyServerBuilder.forAddress(
                 new InetSocketAddress(config.getHostname(), config.getPort()))
             : ServerBuilder.forPort(config.getPort());
-    return serverBuilder
-        .addService(config.createService())
-        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
-        .build()
-        .start();
+    final var messageSourceFactory = config.getServiceConfig().createMessageSourceFactory();
+    try {
+      final var server =
+          serverBuilder
+              .addService(config.createService(messageSourceFactory))
+              .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
+              .build()
+              .start();
+      return new ServerState(server, messageSourceFactory);
+    } catch (Exception ex) {
+      // clean up if an exception was thrown since the caller would not be able to
+      messageSourceFactory.close();
+      throw ex;
+    }
   }
 
   /**
@@ -49,12 +59,21 @@ public class RdaServer {
    * @return a running RDA API Server object
    * @throws IOException if the server cannot bind properly
    */
-  public static Server startInProcess(InProcessConfig config) throws Exception {
-    return InProcessServerBuilder.forName(config.getServerName())
-        .addService(config.createService())
-        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
-        .build()
-        .start();
+  public static ServerState startInProcess(InProcessConfig config) throws Exception {
+    final var messageSourceFactory = config.getServiceConfig().createMessageSourceFactory();
+    try {
+      final var server =
+          InProcessServerBuilder.forName(config.getServerName())
+              .addService(config.createService(messageSourceFactory))
+              .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
+              .build()
+              .start();
+      return new ServerState(server, messageSourceFactory);
+    } catch (Exception ex) {
+      // clean up if an exception was thrown since the caller would not be able to
+      messageSourceFactory.close();
+      throw ex;
+    }
   }
 
   /**
@@ -67,12 +86,13 @@ public class RdaServer {
    */
   public static void runWithLocalServer(LocalConfig config, ThrowableConsumer<Integer> action)
       throws Exception {
-    final Server server = startLocal(config);
-    try {
-      action.accept(server.getPort());
-    } finally {
-      server.shutdown();
-      server.awaitTermination(3, TimeUnit.MINUTES);
+    try (ServerState state = startLocal(config)) {
+      try {
+        action.accept(state.server.getPort());
+      } finally {
+        state.server.shutdown();
+        state.server.awaitTermination(3, TimeUnit.MINUTES);
+      }
     }
   }
 
@@ -87,19 +107,20 @@ public class RdaServer {
    */
   public static void runWithInProcessServer(
       InProcessConfig config, ThrowableConsumer<ManagedChannel> action) throws Exception {
-    final Server server = startInProcess(config);
-    try {
-      final ManagedChannel channel =
-          InProcessChannelBuilder.forName(config.getServerName()).build();
+    try (ServerState state = startInProcess(config)) {
       try {
-        action.accept(channel);
+        final ManagedChannel channel =
+            InProcessChannelBuilder.forName(config.getServerName()).build();
+        try {
+          action.accept(channel);
+        } finally {
+          channel.shutdown();
+          channel.awaitTermination(3, TimeUnit.MINUTES);
+        }
       } finally {
-        channel.shutdown();
-        channel.awaitTermination(3, TimeUnit.MINUTES);
+        state.server.shutdown();
+        state.server.awaitTermination(3, TimeUnit.MINUTES);
       }
-    } finally {
-      server.shutdown();
-      server.awaitTermination(3, TimeUnit.MINUTES);
     }
   }
 
@@ -115,12 +136,13 @@ public class RdaServer {
    */
   public static void runWithInProcessServerNoParam(InProcessConfig config, ThrowableAction test)
       throws Exception {
-    final Server server = startInProcess(config);
-    try {
-      test.act();
-    } finally {
-      server.shutdown();
-      server.awaitTermination(3, TimeUnit.MINUTES);
+    try (ServerState state = startInProcess(config)) {
+      try {
+        test.act();
+      } finally {
+        state.server.shutdown();
+        state.server.awaitTermination(3, TimeUnit.MINUTES);
+      }
     }
   }
 
@@ -164,12 +186,13 @@ public class RdaServer {
     }
 
     /**
-     * Creates a configured rda service.
+     * Creates a configured rda service with the provided {@link RdaMessageSourceFactory}.
      *
+     * @param messageSourceFactory source of claims
      * @return properly configured RdaService instance
      */
-    public RdaService createService() throws Exception {
-      return new RdaService(serviceConfig.createMessageSourceFactory());
+    public RdaService createService(RdaMessageSourceFactory messageSourceFactory) {
+      return new RdaService(messageSourceFactory);
     }
   }
 
@@ -284,6 +307,23 @@ public class RdaServer {
      */
     public void runWithNoParam(ThrowableAction action) throws Exception {
       runWithInProcessServerNoParam(this, action);
+    }
+  }
+
+  /**
+   * An {@link AutoCloseable} containing the {@link Server} that has been started. Closing this
+   * after the server has terminated will clean up any resources used by the {@link RdaService}.
+   */
+  @AllArgsConstructor
+  public static class ServerState implements AutoCloseable {
+    /** The server that has been started. */
+    @Getter private final Server server;
+    /** The state that needs to be closed once server has terminated. */
+    private final AutoCloseable state;
+
+    @Override
+    public void close() throws Exception {
+      state.close();
     }
   }
 }

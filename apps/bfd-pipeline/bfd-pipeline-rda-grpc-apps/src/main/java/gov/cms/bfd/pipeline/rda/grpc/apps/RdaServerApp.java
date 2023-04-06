@@ -6,7 +6,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import io.grpc.Server;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,14 +35,15 @@ public class RdaServerApp {
   public static void main(String[] args) throws Exception {
     final Config config = new Config(args);
     log.info("Starting server on port {}.", config.port);
-    Server server =
-        RdaServer.startLocal(
-            RdaServer.LocalConfig.builder()
-                .port(config.port)
-                .serviceConfig(config.serviceConfig)
-                .build());
-    server.awaitTermination();
-    log.info("server stopping.");
+    final var serverConfig =
+        RdaServer.LocalConfig.builder()
+            .port(config.port)
+            .serviceConfig(config.serviceConfig)
+            .build();
+    try (RdaServer.ServerState state = RdaServer.startLocal(serverConfig)) {
+      state.getServer().awaitTermination();
+      log.info("server stopping.");
+    }
   }
 
   /** Configuration details for the RDI server. */

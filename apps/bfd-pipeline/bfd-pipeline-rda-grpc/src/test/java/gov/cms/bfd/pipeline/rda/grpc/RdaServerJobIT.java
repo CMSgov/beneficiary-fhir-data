@@ -126,13 +126,15 @@ public class RdaServerJobIT {
       bucket = createTestBucket(s3Client);
       final String directoryPath = "files-go-here";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao = new S3DirectoryDao(s3Client, bucket.getName(), directoryPath, cacheDirectoryPath);
+      s3Dao =
+          new S3DirectoryDao(s3Client, bucket.getName(), directoryPath, cacheDirectoryPath, true);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
               .serverName(SERVER_NAME)
               .s3Bucket(bucket.getName())
               .s3Directory(directoryPath)
+              .s3CacheDirectory(cacheDirectoryPath.toString())
               .build();
       final String fissObjectKey = RdaS3JsonMessageSourceFactory.createValidFissKeyForTesting();
       final String mcsObjectKey = RdaS3JsonMessageSourceFactory.createValidMcsKeyForTesting();
@@ -178,11 +180,7 @@ public class RdaServerJobIT {
     } finally {
       deleteTestBucket(s3Client, bucket);
       if (s3Dao != null) {
-        s3Dao.deleteAllFiles();
         s3Dao.close();
-      }
-      if (cacheDirectoryPath != null) {
-        Files.deleteIfExists(cacheDirectoryPath);
       }
     }
   }

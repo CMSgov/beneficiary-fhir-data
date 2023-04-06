@@ -149,12 +149,14 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
       final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
       final String directory = s3Directory == null ? "" : s3Directory;
+      final boolean useTempDirectoryForCache = Strings.isNullOrEmpty(s3CacheDirectory);
       final Path cacheDirectory =
-          Strings.isNullOrEmpty(s3CacheDirectory)
+          useTempDirectoryForCache
               ? java.nio.file.Files.createTempDirectory("s3cache")
               : Path.of(s3CacheDirectory);
       final S3DirectoryDao s3Dao =
-          new S3DirectoryDao(s3Client, s3Bucket, directory, cacheDirectory);
+          new S3DirectoryDao(
+              s3Client, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
       log.info(
           "serving claims using {} with data from S3 bucket {}",
           RdaS3JsonMessageSourceFactory.class.getSimpleName(),

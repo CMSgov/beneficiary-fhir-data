@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
+import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,19 +78,31 @@ public class S3DirectoryDao implements AutoCloseable {
   private final Path cacheDirectory;
 
   /**
+   * When this is true the close method will try to delete all files from the {@link
+   * #cacheDirectory} and then delete the directory itself.
+   */
+  private final boolean deleteOnExit;
+
+  /**
    * Creates an instance.
    *
    * @param s3Client used to access S3
    * @param s3BucketName the bucket to read from
    * @param s3DirectoryPath the directory inside the bucket to read from
    * @param cacheDirectory the local directory to store cached files in
+   * @param deleteOnExit causes close to delete all cached files and directory when true
    */
   public S3DirectoryDao(
-      AmazonS3 s3Client, String s3BucketName, String s3DirectoryPath, Path cacheDirectory) {
+      AmazonS3 s3Client,
+      String s3BucketName,
+      String s3DirectoryPath,
+      Path cacheDirectory,
+      boolean deleteOnExit) {
     this.s3Client = Preconditions.checkNotNull(s3Client);
     this.s3BucketName = Preconditions.checkNotNull(s3BucketName);
     this.s3DirectoryPath = normalizeDirectoryPath(s3DirectoryPath);
     this.cacheDirectory = Preconditions.checkNotNull(cacheDirectory);
+    this.deleteOnExit = deleteOnExit;
     validKeyRegex =
         Pattern.compile(this.s3DirectoryPath + S3FileNameRegex, Pattern.CASE_INSENSITIVE);
   }
@@ -161,8 +174,23 @@ public class S3DirectoryDao implements AutoCloseable {
     }
   }
 
+  /**
+   * Deletes cache directory and all of its files if {@link #deleteOnExit} is true. Intended for use
+   * when the cache directory is a temp directory.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @throws Exception pass through
+   */
   @Override
-  public void close() throws Exception {}
+  public void close() throws Exception {
+    if (deleteOnExit) {
+      var closer = new MultiCloser();
+      closer.close(this::deleteAllFiles);
+      closer.close(() -> Files.deleteIfExists(cacheDirectory));
+      closer.finish();
+    }
+  }
 
   /**
    * Create a uniquely named temporary file in our directory for use when downloading a new file.
@@ -381,8 +409,9 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return true if file has a valid data file name
    */
   private boolean isDataFile(Path path) {
+    final var fileName = path.getFileName().toString();
     return Files.isRegularFile(path)
-        && path.getFileName().startsWith(DataFilePrefix)
-        && path.getFileName().endsWith(DataFileSuffix);
+        && fileName.startsWith(DataFilePrefix)
+        && fileName.endsWith(DataFileSuffix);
   }
 }

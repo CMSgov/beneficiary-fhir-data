@@ -11,7 +11,6 @@ import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import io.grpc.Server;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -69,28 +68,32 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   public PipelineJobOutcome call() throws Exception {
     try {
       LOGGER.info("starting server with name {} and mode {}", config.serverName, config.serverMode);
-      final Server server =
-          RdaServer.startInProcess(
-              RdaServer.InProcessConfig.builder()
-                  .serviceConfig(config.messageSourceFactoryConfig)
-                  .serverName(config.serverName)
-                  .build());
-      try {
-        running.incrementAndGet();
+      final var serverConfig =
+          RdaServer.InProcessConfig.builder()
+              .serviceConfig(config.messageSourceFactoryConfig)
+              .serverName(config.serverName)
+              .build();
+      try (RdaServer.ServerState state = RdaServer.startInProcess(serverConfig)) {
         try {
-          LOGGER.info("server started - sleeping...");
-          Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException ex) {
-          LOGGER.info("sleep interrupted");
+          running.incrementAndGet();
+          try {
+            LOGGER.info("server started - sleeping...");
+            Thread.sleep(Long.MAX_VALUE);
+          } catch (InterruptedException ex) {
+            LOGGER.info("sleep interrupted");
+          }
+        } finally {
+          running.decrementAndGet();
+          LOGGER.info("telling server to shut down");
+          state.getServer().shutdown();
+          LOGGER.info(
+              "waiting up to {} for server to finish shutting down", SERVER_SHUTDOWN_TIMEOUT);
+          state
+              .getServer()
+              .awaitTermination(SERVER_SHUTDOWN_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
         }
-      } finally {
-        running.decrementAndGet();
-        LOGGER.info("telling server to shut down");
-        server.shutdown();
-        LOGGER.info("waiting up to {} for server to finish shutting down", SERVER_SHUTDOWN_TIMEOUT);
-        server.awaitTermination(SERVER_SHUTDOWN_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+        LOGGER.info("server shutdown complete");
       }
-      LOGGER.info("server shutdown complete");
     } catch (Exception ex) {
       LOGGER.error("server terminated by an exception: message={}", ex.getMessage(), ex);
     }
