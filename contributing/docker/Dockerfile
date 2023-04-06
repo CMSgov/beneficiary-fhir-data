@@ -1,7 +1,7 @@
 FROM amazonlinux:2
-# You may install a specific maven version using `docker build --build-arg MVN_VER="3.8.6" ...`
+# You may install a specific maven version using `docker build --build-arg MVN_VER="3.9.1" ...`
 # See https://maven.apache.org/download.cgi to find the latest version and available mirrors.
-ARG MVN_VER="3.8.6"
+ARG MVN_VER="3.9.1"
 ARG MVN_MIRROR="https://dlcdn.apache.org/"
 ENV LANG en_US.UTF-8
 
@@ -25,10 +25,10 @@ RUN yum update -y --security && \
       python3 \
       python3-pip \
       traceroute \
-      mtr
-
+      mtr 
+      
 # Install Java 17 and Maven
-RUN amazon-linux-extras install java-17-amazon-corretto-devel && \
+RUN yum install -y java-17-amazon-corretto-devel && \
     curl -O ${MVN_MIRROR}/maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz && \
     tar xvzf apache-maven-${MVN_VER}-bin.tar.gz && \
     mv apache-maven-${MVN_VER} /opt/maven && \
