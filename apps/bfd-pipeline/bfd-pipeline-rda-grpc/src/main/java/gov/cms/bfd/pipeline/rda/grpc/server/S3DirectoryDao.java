@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -62,7 +64,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * Base regex to match validate S3 keys. The {@link #s3DirectoryPath} is added to the start of
    * this string to build the final regex.
    */
-  private static final String S3FileNameRegex = "[_a-z0-9][.-_a-z0-9_]+";
+  private static final String S3FileNameRegex = "[_a-z0-9][-_.a-z0-9]+";
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final AmazonS3 s3Client;
@@ -130,25 +132,35 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   @Nullable
   public ByteSource downloadFile(String fileName) throws IOException {
-    final var s3Key = s3DirectoryPath + fileName;
+    final String s3Key = s3DirectoryPath + fileName;
     var s3MetaData = s3Client.getObjectMetadata(s3BucketName, s3Key);
     if (s3MetaData == null) {
-      log.debug("file does not exist in S3: {}", s3Key);
+      log.info("file does not exist in S3: {}", s3Key);
       return null;
     }
 
     String eTag = s3MetaData.getETag();
-    var dataFile = dataFilePath(fileName, eTag);
+    Path dataFile = dataFilePath(fileName, eTag);
     if (Files.isRegularFile(dataFile)) {
-      return MoreFiles.asByteSource(dataFile);
+      log.info(
+          "serving existing file from cache: fileName={} s3Key={} cachedFile={}",
+          fileName,
+          s3Key,
+          dataFile.getFileName());
+      return createByteSourceForCachedFile(fileName, dataFile);
     }
 
-    final var tempDataFile = createTempFile();
+    final Path tempDataFile = createTempFile();
     try {
       final var downloadRequest = new GetObjectRequest(s3BucketName, s3Key);
+      log.info(
+          "downloading file from S3: fileName={} s3Key={} tempFile={}",
+          fileName,
+          s3Key,
+          tempDataFile.getFileName());
       s3MetaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
       if (s3MetaData == null) {
-        log.debug("file does not exist in S3 or download failed: {}", s3Key);
+        log.info("file does not exist in S3: fileName={} s3Key={}", fileName, s3Key);
         return null;
       }
 
@@ -161,13 +173,23 @@ public class S3DirectoryDao implements AutoCloseable {
       dataFile = dataFilePath(fileName, eTag);
 
       try {
+        log.info(
+            "adding downloaded file to cache: fileName={} s3Key={} cacheFile={}",
+            fileName,
+            s3Key,
+            dataFile.getFileName());
         Files.move(tempDataFile, dataFile);
       } catch (FileAlreadyExistsException ex) {
         // It is possible for two processes or threads to perform this rename at the same time.
         // If that happens both files would be identical so we can simply use the one that
         // already existed when we attempted our rename.
       }
-      return MoreFiles.asByteSource(dataFile);
+      log.info(
+          "serving downloaded file from cache: fileName={} s3Key={} cachedFile={}",
+          fileName,
+          s3Key,
+          dataFile.getFileName());
+      return createByteSourceForCachedFile(fileName, dataFile);
     } finally {
       // Ensure temp file is deleted if the rename was not performed.
       Files.deleteIfExists(tempDataFile);
@@ -185,6 +207,7 @@ public class S3DirectoryDao implements AutoCloseable {
   @Override
   public void close() throws Exception {
     if (deleteOnExit) {
+      log.info("deleting cache: directory={}", cacheDirectory);
       var closer = new MultiCloser();
       closer.close(this::deleteAllFiles);
       closer.close(() -> Files.deleteIfExists(cacheDirectory));
@@ -218,6 +241,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * bucket/directory.
    *
    * @return number of files deleted
+   * @throws IOException pass through from any failed operation
    */
   public int deleteObsoleteFiles() throws IOException {
     int deletedCount = 0;
@@ -238,7 +262,9 @@ public class S3DirectoryDao implements AutoCloseable {
    * Deletes all files in our directory.
    *
    * @return number of files deleted
+   * @throws IOException pass through from any failed operation
    */
+  @CanIgnoreReturnValue
   public int deleteAllFiles() throws IOException {
     int deletedCount = 0;
     var actualFiles = readFileHandlesFromDirectory();
@@ -413,5 +439,28 @@ public class S3DirectoryDao implements AutoCloseable {
     return Files.isRegularFile(path)
         && fileName.startsWith(DataFilePrefix)
         && fileName.endsWith(DataFileSuffix);
+  }
+
+  /**
+   * Creates a {@link ByteSource} for reading the cached file. If the file is a gzip file (name ends
+   * with .gz) the file will be automatically decompressed when a stream is opened. Otherwise the
+   * bytes will be returned as they appear in the file.
+   *
+   * @param fileName file name from the S3 object key
+   * @param path location of the cached file
+   * @return the byte source
+   */
+  private ByteSource createByteSourceForCachedFile(String fileName, Path path) {
+    var byteSource = MoreFiles.asByteSource(path);
+    if (fileName.endsWith(".gz")) {
+      return new ByteSource() {
+        @Nonnull
+        @Override
+        public InputStream openStream() throws IOException {
+          return new GZIPInputStream(byteSource.openStream());
+        }
+      };
+    }
+    return byteSource;
   }
 }
