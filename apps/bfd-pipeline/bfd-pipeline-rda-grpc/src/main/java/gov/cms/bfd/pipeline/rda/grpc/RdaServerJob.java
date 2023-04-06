@@ -15,7 +15,6 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import lombok.Builder;
@@ -73,27 +72,23 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
               .serviceConfig(config.messageSourceFactoryConfig)
               .serverName(config.serverName)
               .build();
-      try (RdaServer.ServerState state = RdaServer.startInProcess(serverConfig)) {
-        try {
-          running.incrementAndGet();
-          try {
-            LOGGER.info("server started - sleeping...");
-            Thread.sleep(Long.MAX_VALUE);
-          } catch (InterruptedException ex) {
-            LOGGER.info("sleep interrupted");
-          }
-        } finally {
-          running.decrementAndGet();
-          LOGGER.info("telling server to shut down");
-          state.getServer().shutdown();
-          LOGGER.info(
-              "waiting up to {} for server to finish shutting down", SERVER_SHUTDOWN_TIMEOUT);
-          state
-              .getServer()
-              .awaitTermination(SERVER_SHUTDOWN_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-        }
-        LOGGER.info("server shutdown complete");
-      }
+      RdaServer.runWithInProcessServerNoParam(
+          serverConfig,
+          () -> {
+            try {
+              running.incrementAndGet();
+              try {
+                LOGGER.info("server started - sleeping...");
+                Thread.sleep(Long.MAX_VALUE);
+              } catch (InterruptedException ex) {
+                LOGGER.info("sleep interrupted");
+              }
+            } finally {
+              running.decrementAndGet();
+              LOGGER.info("telling server to shut down");
+            }
+          });
+      LOGGER.info("server shutdown complete");
     } catch (Exception ex) {
       LOGGER.error("server terminated by an exception: message={}", ex.getMessage(), ex);
     }
