@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /**
  * Ensure that every request-response pair adds data to the logging {@link BfdMDC} which will be
@@ -162,31 +161,8 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    */
   private void handleResponse(ServletRequest request, ServletResponse response) {
     if (response instanceof HttpServletResponse) {
-      ContentCachingResponseWrapper servletResponse = (ContentCachingResponseWrapper) response;
-      Long outputSizeInBytes = Long.valueOf(servletResponse.getContentAsByteArray().length);
+      HttpServletResponse servletResponse = (HttpServletResponse) response;
 
-      BfdMDC.put(
-          BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
-
-      // Record the response duration.
-      Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
-      if (requestStartMilliseconds != null) {
-        Long responseDurationInMilliseconds = System.currentTimeMillis() - requestStartMilliseconds;
-        BfdMDC.put(
-            BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
-            Long.toString(responseDurationInMilliseconds));
-
-        if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
-          Long responseDurationPerKB =
-              ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
-          BfdMDC.put(
-              BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
-        } else {
-          BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-        }
-      } else {
-        BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-      }
       BfdMDC.put(
           BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
           Integer.toString(servletResponse.getStatus()));
