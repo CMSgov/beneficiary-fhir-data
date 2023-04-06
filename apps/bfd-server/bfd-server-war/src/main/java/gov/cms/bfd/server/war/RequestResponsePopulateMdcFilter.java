@@ -53,8 +53,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
 
     handleRequest(request);
     try {
-      ContentCachingResponseWrapper servletResponse = (ContentCachingResponseWrapper) response;
-      chain.doFilter(request, servletResponse);
+      chain.doFilter(request, response);
     } finally {
       handleResponse(request, response);
     }
