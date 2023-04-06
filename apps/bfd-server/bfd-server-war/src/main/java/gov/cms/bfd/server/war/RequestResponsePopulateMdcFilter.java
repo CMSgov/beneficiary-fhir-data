@@ -53,8 +53,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
 
     handleRequest(request);
     try {
-      final ContentCachingResponseWrapper servletResponse =
-          (ContentCachingResponseWrapper) response;
+      ContentCachingResponseWrapper servletResponse = (ContentCachingResponseWrapper) response;
       chain.doFilter(request, servletResponse);
     } finally {
       handleResponse(request, response);
@@ -164,8 +163,7 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    */
   private void handleResponse(ServletRequest request, ServletResponse response) {
     if (response instanceof HttpServletResponse) {
-      final ContentCachingResponseWrapper servletResponse =
-          (ContentCachingResponseWrapper) response;
+      ContentCachingResponseWrapper servletResponse = (ContentCachingResponseWrapper) response;
       Long outputSizeInBytes = Long.valueOf(servletResponse.getContentAsByteArray().length);
 
       BfdMDC.put(
