@@ -1,5 +1,6 @@
 locals {
   env            = terraform.workspace
+  environment    = coalesce(local.seed_env, local.env)
   service        = "common"
   legacy_service = "admin"
   layer          = "data"

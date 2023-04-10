@@ -30,7 +30,7 @@ resource "aws_security_group" "aurora_cluster" {
     },
   ]
 
-  tags = { Name = "bfd-${local.env}-aurora-cluster" }
+  tags = { Name = "bfd-${local.env}-aurora-cluster", Environment = local.environment }
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
@@ -52,8 +52,9 @@ resource "aws_rds_cluster" "aurora_cluster" {
   preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
+
   # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
-  tags = { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
+  tags = { "Environment" = local.environment, "cpm backup" = "Weekly Monthly", "Layer" = "data" }
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password
