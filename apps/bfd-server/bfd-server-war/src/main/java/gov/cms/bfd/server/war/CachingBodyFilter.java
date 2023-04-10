@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.war;
 
 import java.io.IOException;
+
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,7 +35,24 @@ public class CachingBodyFilter implements Filter {
         new ContentCachingResponseWrapper((HttpServletResponse) res);
     try {
       chain.doFilter(reqWrapper, resWrapper);
-      resWrapper.copyBodyToResponse();
+      if (reqWrapper.isAsyncStarted()) {
+        reqWrapper.getAsyncContext().addListener(new AsyncListener() {
+            public void onComplete(AsyncEvent asyncEvent) throws IOException {
+              resWrapper.copyBodyToResponse();
+            }
+      
+            public void onTimeout(AsyncEvent asyncEvent) throws IOException {
+            }
+      
+            public void onError(AsyncEvent asyncEvent) throws IOException {
+            }
+      
+            public void onStartAsync(AsyncEvent asyncEvent) throws IOException {
+            }
+        })
+      } else {
+        resWrapper.copyBodyToResponse();
+      }
     } catch (IOException | ServletException e) {
       LOGGER_MISC.error("Error extracting body", e);
     }
