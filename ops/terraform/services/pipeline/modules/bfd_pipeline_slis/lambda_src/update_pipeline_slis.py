@@ -8,10 +8,9 @@ from typing import Any, Type
 from urllib.parse import unquote
 
 import boto3
+from backoff_retry import backoff_retry
 from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
-
-from backoff_retry import backoff_retry
 from cw_metrics import (
     MetricDataQuery,
     gen_all_dimensioned_metrics,
@@ -448,7 +447,7 @@ def handler(event: Any, context: Any):
                         metrics=gen_all_dimensioned_metrics(
                             metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                             dimensions=[rif_type_dimension, group_timestamp_dimension],
-                            value=load_time_delta.seconds,
+                            value=int(load_time_delta.total_seconds()),
                             timestamp=event_timestamp,
                             unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
                         ),
@@ -529,7 +528,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
                             dimensions=[group_timestamp_dimension],
                             timestamp=event_timestamp,
-                            value=full_load_time_delta.seconds,
+                            value=int(full_load_time_delta.total_seconds()),
                             unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
                         ),
                     ),
