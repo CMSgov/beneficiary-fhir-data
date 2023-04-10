@@ -284,7 +284,7 @@ public class RDATestUtils {
             .dcn(FISS_CLAIM_B_DCN)
             .intermediaryNb("99999")
             .hicNo("hicnumbe2")
-            .currStatus('\0')
+            .currStatus('0')
             .currLoc1('r')
             .currLoc2("Somdb")
             .medaProvId("meda12346")

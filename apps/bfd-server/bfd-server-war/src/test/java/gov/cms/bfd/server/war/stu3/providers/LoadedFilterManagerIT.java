@@ -15,6 +15,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.commons.LoadedFileFilter;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import java.time.Instant;
@@ -23,14 +24,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link LoadedFilterManager}. */
-public final class LoadedFilterManagerIT {
+public final class LoadedFilterManagerIT extends ServerRequiredTest {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
@@ -38,24 +37,6 @@ public final class LoadedFilterManagerIT {
   private static final long SAMPLE_BENE = 567834L;
   /** An invalid bene id. */
   private static final long INVALID_BENE = 1L;
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
-   * that any existing data is deleted from the tables before running the test suite.
-   */
-  @BeforeAll
-  public static void cleanupDatabaseBeforeTestSuite() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @AfterEach
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
-  }
 
   /**
    * Ensures there is no filter result found when searching the filter for an invalid bene, even

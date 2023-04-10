@@ -116,7 +116,6 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 6. In order to run bfd locally using test containers for integration tests, Docker for Desktop (https://www.docker.com/products/docker-desktop/) or Podman must be installed. Docker for desktop is recommended
    since test containers will automatically detect and launch containers for integration tests.  
    TODO: Podman is supported as well.
-   bfd-server integration tests are still currently using HSQL for integration tests.
    If you rather use HSQL instead of test containers, add the parameter -Dits.db.url=jdbc:bfd-test:hsqldb:mem to your mvn clean install command. 
   
    Run mvn install with the following to run integration tests with test containers.
