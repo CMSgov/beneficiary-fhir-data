@@ -1,8 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -62,6 +64,9 @@ public class S3DirectoryDao implements AutoCloseable {
    * string to build the final regex.
    */
   private static final String S3FileNameRegex = "[_a-z0-9][-_.a-z0-9]+";
+
+  /** Value returned by {@link AmazonS3Exception#getStatusCode} to indicate object not found. */
+  private static final int AWS_FOT_FOUND_STATUS_CODE = 404;
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final AmazonS3 s3Client;
@@ -128,53 +133,43 @@ public class S3DirectoryDao implements AutoCloseable {
    * @throws IOException various exceptions might be thrown by the Java or AWS API
    */
   public ByteSource downloadFile(String fileName) throws IOException {
-    // S3 will throw if key does not exist
     final String s3Key = s3DirectoryPath + fileName;
-    var s3MetaData = s3Client.getObjectMetadata(s3BucketName, s3Key);
+    var s3MetaData = readS3ObjectMetaData(fileName, s3Key);
 
     String eTag = s3MetaData.getETag();
-    Path dataFile = cacheFilePath(fileName, eTag);
-    if (Files.isRegularFile(dataFile)) {
+    Path cacheFile = cacheFilePath(fileName, eTag);
+    if (Files.isRegularFile(cacheFile)) {
       log.info(
           "serving existing file from cache: fileName={} s3Key={} cachedFile={}",
           fileName,
           s3Key,
-          dataFile.getFileName());
-      return createByteSourceForCachedFile(fileName, dataFile);
+          cacheFile.getFileName());
+      return createByteSourceForCachedFile(fileName, cacheFile);
     }
 
     final Path tempDataFile = Files.createTempFile(cacheDirectory, TempPrefix, null);
     try {
-      final var downloadRequest = new GetObjectRequest(s3BucketName, s3Key);
       log.info(
           "downloading file from S3: fileName={} s3Key={} tempFile={}",
           fileName,
           s3Key,
           tempDataFile.getFileName());
-      s3MetaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
-      if (s3MetaData == null) {
-        // Handle an inconsistency between getObjectMetaData (throws if key not found) and
-        // getObject (returns null if key not found).  This case would only happen if key was
-        // deleted between our getObjectMetaData and getObject calls.
-        var message =
-            String.format("file no longer exists in S3: fileName=%s s3Key=%s", fileName, s3Key);
-        log.error(message);
-        throw new FileNotFoundException(message);
-      }
+      s3MetaData = downloadS3Object(fileName, s3Key, tempDataFile);
 
-      // It is possible that we received a different version than we expected.
+      // It is possible that the eTag changed between the time we fetched meta data and the
+      // time we downloaded the object.
       eTag = s3MetaData.getETag();
-      dataFile = cacheFilePath(fileName, eTag);
+      cacheFile = cacheFilePath(fileName, eTag);
 
       try {
         log.info(
             "adding downloaded file to cache: fileName={} s3Key={} cacheFile={}",
             fileName,
             s3Key,
-            dataFile.getFileName());
+            cacheFile.getFileName());
         // In linux renaming a file in a local (not network shared) directory is atomic and will
         // replace any existing file with same name.
-        Files.move(tempDataFile, dataFile);
+        Files.move(tempDataFile, cacheFile);
       } catch (FileAlreadyExistsException ex) {
         // It is possible for two processes or threads to perform this rename at the same time.
         // If that happens both files would be identical so we can simply ignore this exception
@@ -184,8 +179,8 @@ public class S3DirectoryDao implements AutoCloseable {
           "serving downloaded file from cache: fileName={} s3Key={} cachedFile={}",
           fileName,
           s3Key,
-          dataFile.getFileName());
-      return createByteSourceForCachedFile(fileName, dataFile);
+          cacheFile.getFileName());
+      return createByteSourceForCachedFile(fileName, cacheFile);
     } finally {
       // Ensure temp file is deleted if the rename was not performed for any reason.
       Files.deleteIfExists(tempDataFile);
@@ -408,5 +403,56 @@ public class S3DirectoryDao implements AutoCloseable {
       };
     }
     return byteSource;
+  }
+
+  /**
+   * Read {@link ObjectMetadata} for the given S3 key. Recognize the possible case of object not
+   * found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   *
+   * @param fileName the simple file name for the object
+   * @param s3Key the S3 object key
+   * @return the meta data
+   * @throws IOException eith {@link FileNotFoundException} or an AWS runtime exception
+   */
+  private ObjectMetadata readS3ObjectMetaData(String fileName, String s3Key) throws IOException {
+    try {
+      return s3Client.getObjectMetadata(s3BucketName, s3Key);
+    } catch (AmazonS3Exception ex) {
+      if (ex.getStatusCode() == AWS_FOT_FOUND_STATUS_CODE) {
+        var fileNotFound = new FileNotFoundException(fileName);
+        fileNotFound.addSuppressed(ex);
+        throw fileNotFound;
+      } else {
+        throw ex;
+      }
+    }
+  }
+
+  /**
+   * Download S3 object and return its {@link ObjectMetadata}. Recognize the possible case of object
+   * not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   *
+   * @param fileName the simple file name for the object
+   * @param s3Key the S3 object key
+   * @param tempDataFile where to store the downloaded object
+   * @return the meta data
+   * @throws IOException eith {@link FileNotFoundException} or an AWS runtime exception
+   */
+  private ObjectMetadata downloadS3Object(String fileName, String s3Key, Path tempDataFile)
+      throws IOException {
+    try {
+      final var downloadRequest = new GetObjectRequest(s3BucketName, s3Key);
+      var metaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
+      if (metaData == null) {
+        throw new FileNotFoundException(fileName);
+      }
+      return metaData;
+    } catch (AmazonS3Exception ex) {
+      if (ex.getStatusCode() == AWS_FOT_FOUND_STATUS_CODE) {
+        throw new FileNotFoundException(convertS3KeyToFileName(s3Key));
+      } else {
+        throw ex;
+      }
+    }
   }
 }

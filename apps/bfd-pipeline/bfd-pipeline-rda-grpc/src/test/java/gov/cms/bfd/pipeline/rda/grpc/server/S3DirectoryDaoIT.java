@@ -8,11 +8,13 @@ import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.uploadJsonTo
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.google.common.io.ByteSource;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -201,6 +203,32 @@ public class S3DirectoryDaoIT {
     Files.delete(s3Dao.cacheFilePath("a.txt", aTag1));
     Files.delete(s3Dao.cacheFilePath("b.txt", bTag1));
     Files.delete(cacheDirectoryPath);
+  }
+
+  /**
+   * Verify that S3 object not found throws {@link FileNotFoundException}.
+   *
+   * @throws Exception pass through if anything fails
+   */
+  @Test
+  public void testGetObjectMetaDataForMissingFile() throws Exception {
+    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
+    Bucket s3Bucket = null;
+    try {
+      s3Bucket = createTestBucket(s3Client);
+      final String s3Directory = "";
+      try (var s3Dao =
+          new S3DirectoryDao(
+              s3Client, s3Bucket.getName(), s3Directory, Files.createTempDirectory("test"), true)) {
+        assertThrows(
+            FileNotFoundException.class,
+            () -> {
+              s3Dao.downloadFile("a.txt");
+            });
+      }
+    } finally {
+      deleteTestBucket(s3Client, s3Bucket);
+    }
   }
 
   /**
