@@ -11,7 +11,7 @@ def goldAmiId
 def platinumAmiId
 def currentStage
 
-def buildPlatinum(String platinumId = '', String goldId = '') {
+def buildPlatinum(String goldId = '') {
     // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
     withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
         // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
@@ -45,6 +45,7 @@ def sendNotifications(String buildStatus = '', String stageName = '') {
     def msg = ''
     switch (buildStatus) {
         case 'UNSTABLE':
+        case 'SUCCESS':
         case 'SUCCESS LATEST IMAGE':
             msg = 'COMPLETED SUCCESSFULLY WITH THE LATEST PLATINUM IMAGE'
             break
@@ -159,27 +160,27 @@ spec:
                     currentStage = env.STAGE_NAME
                     try {
                         awsAuth.assumeRole()
-                        if (!params.FORCE_PLATINUM) {
-                            if (platinumAmiId.length() != 0) {
+                        if (params.FORCE_PLATINUM) {
+                            echo 'Force deploying and tagging new platinum AMI'
+                            buildPlatinum(goldAmiId)
+
+                            // Set current stage that the build succeeded
+                            sendNotifications('SUCCESS NEW PLATINUM', currentStage)
+                        } else {
+                            if (platinumAmiId.length() == 0) {
+                                // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
+                                echo 'Deploying and tagging new platinum AMI'
+                                buildPlatinum(goldAmiId)
+
+                                // Set current stage that the build succeeded
+                                sendNotifications('SUCCESS NEW PLATINUM', currentStage)
+                            } else if (platinumAmiId.length() != 0) {
                                 // Use latest images if sourceAmiId tag is set to the latest gold AMI ID
                                 echo "Using latest platinum AMI image: ${platinumAmiId}"
 
                                 // Set current stage that the build succeeded
                                 sendNotifications('SUCCESS LATEST IMAGE', currentStage)
-                            } else if (platinumAmiId.length() == 0) {
-                                // Build base platinum if latest Platinum AMI has no sourceAmiId tag/sourceAmiId != gold AMI ID
-                                echo 'Deploying and tagging new platinum AMI'
-                                buildPlatinum(platinumAmiId, goldAmiId)
-
-                                // Set current stage that the build succeeded
-                                sendNotifications('SUCCESS NEW PLATINUM', currentStage)
                             }
-                        } else {
-                            echo 'Force deploying and tagging new platinum AMI'
-                            buildPlatinum(platinumAmiId, goldAmiId)
-
-                            // Set current stage that the build succeeded
-                            sendNotifications('SUCCESS NEW PLATINUM', currentStage)
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
