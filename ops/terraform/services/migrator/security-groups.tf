@@ -2,10 +2,12 @@
 
 resource "aws_security_group" "this" {
   count       = local.migrator_instance_count
-  description = "${local.service} application security group in ${local.env}"
-  name        = "bfd-${local.env}-${local.service}-app"
-  tags        = { Name = "bfd-${local.env}-${local.service}-app" }
+  description = "app security group for ${local.stack}"
+  name        = "${local.stack}-app"
   vpc_id      = data.aws_vpc.main.id
+  tags = {
+    Name = "${local.stack}-app"
+  }
 
   # NOTE: This application does not currently listen on any ports, so no ingress rules are needed.
 
@@ -23,7 +25,7 @@ resource "aws_security_group_rule" "rds" {
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  description              = "Allow ${local.service} access in ${local.env}"
+  description              = "Allow ${local.stack} access in ${local.env}"
   security_group_id        = data.aws_security_group.rds.id
   source_security_group_id = aws_security_group.this[0].id
 }

@@ -1,6 +1,7 @@
 ---
 # env:prod
 # COMMON CONFIGURATION
+/bfd/prod/common/nonsensitive/project_base_name: prod
 /bfd/prod/common/nonsensitive/enterprise_tools_security_group: bfd-prod-enterprise-tools
 /bfd/prod/common/nonsensitive/env_name_std: prod
 /bfd/prod/common/nonsensitive/key_pair: bfd-prod
@@ -15,6 +16,7 @@
 /bfd/prod/common/nonsensitive/rds_instance_class: db.r5.12xlarge
 /bfd/prod/common/nonsensitive/rds_instance_count: 4
 /bfd/prod/common/nonsensitive/rds_master_username: bfduser
+/bfd/prod/common/nonsensitive/rds_deletion_protection: true
 /bfd/prod/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
 /bfd/prod/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/prod/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private

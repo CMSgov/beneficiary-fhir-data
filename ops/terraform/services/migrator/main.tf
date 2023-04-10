@@ -1,43 +1,29 @@
 locals {
-  env     = terraform.workspace
-  service = "migrator"
-  layer   = "data"
+  legacy_service = "admin"
+  layer          = "data"
+  service        = "migrator"
+  stack          = "${local.base_stack}-${local.service}"
 
-  default_tags = {
-    Environment    = local.env
-    Layer          = local.layer
-    Name           = "bfd-${local.env}-${local.service}"
-    application    = "bfd"
-    business       = "oeda"
-    role           = local.service
-    stack          = local.env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/migrator"
-  }
+  # Two-step map creation and redefinition creates `config` and `secret` maps of simplified parameter names to values
+  nonsensitive_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))
+  nonsensitive_config = { for key, value in local.nonsensitive_map : split("/", key)[5] => value }
 
-  nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
-  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
-  nonsensitive_map           = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))
-  nonsensitive_config        = { for key, value in local.nonsensitive_map : split("/", key)[5] => value }
-
-  # SSM Lookup
-  enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
-  instance_type                   = local.nonsensitive_config["instance_type"]
-  key_pair                        = local.nonsensitive_common_config["key_pair"]
-  kms_key_alias                   = local.nonsensitive_common_config["kms_key_alias"]
-  queue_name                      = local.nonsensitive_config["sqs_queue_name"]
-  rds_cluster_identifier          = local.nonsensitive_common_config["rds_cluster_identifier"]
-  volume_size                     = local.nonsensitive_config["volume_size"]
-  vpc_name                        = local.nonsensitive_common_config["vpc_name"]
+  # General SSM lookups
+  # kms_key_alias          = local.nonsensitive_common_config["kms_key_alias"]
+  # vpc_name               = local.nonsensitive_common_config["vpc_name"]
+  instance_type          = local.nonsensitive_config["instance_type"]
+  key_pair               = local.nonsensitive_common_config["key_pair"]
+  queue_name             = local.nonsensitive_config["sqs_queue_name"]
+  rds_cluster_identifier = local.nonsensitive_common_config["rds_cluster_identifier"]
+  volume_size            = local.nonsensitive_config["volume_size"]
 
   # Data source lookups
-  mgmt_kms_key_arn      = data.aws_kms_key.mgmt_cmk.arn
-  kms_key_arn           = data.aws_kms_key.cmk.arn
-  kms_key_id            = data.aws_kms_key.cmk.key_id
+  mgmt_kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
+  kms_key_arn      = data.aws_kms_key.cmk.arn
+  # kms_key_id            = data.aws_kms_key.cmk.key_id
   vpn_security_group_id = data.aws_security_group.vpn.id
   ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   rds_writer_endpoint   = data.external.rds.result["Endpoint"]
-  account_id            = data.aws_caller_identity.current.account_id
 
   # Deploy Time Configuration
   ami_id                                      = data.aws_ami.main.image_id

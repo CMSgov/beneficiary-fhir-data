@@ -10,8 +10,8 @@ data "aws_iam_policy" "cloudwatch_agent_xray_policy" {
 }
 
 resource "aws_iam_policy" "sqs" {
-  name        = "bfd-${local.env}-${local.service}-sqs"
-  description = "Permissions to specific SQS queue for ${local.service} in ${local.env}"
+  name        = "${local.stack}-sqs"
+  description = "SQS perms for ${local.stack}"
   policy      = <<-EOF
   {
       "Version": "2012-10-17",
@@ -40,8 +40,8 @@ resource "aws_iam_policy" "sqs" {
 }
 
 resource "aws_iam_policy" "ssm" {
-  name        = "bfd-${local.env}-${local.service}-ssm-parameters"
-  description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service}, /bfd/mgmt/common/sensitive/user SSM hierarchies"
+  name        = "${local.stack}-ssm-parameters"
+  description = "SSM perms for ${local.stack}"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -76,9 +76,9 @@ EOF
 }
 
 resource "aws_iam_role" "this" {
-  name        = "bfd-${local.env}-${local.service}"
+  name        = local.stack
   path        = "/"
-  description = "Role for instance profile use for ${local.service} in ${local.env}"
+  description = "Instance profile role for ${local.stack}"
 
   assume_role_policy = <<-EOF
   {
@@ -103,6 +103,6 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_instance_profile" "this" {
-  name = "bfd-${local.env}-${local.service}"
+  name = local.stack
   role = aws_iam_role.this.name
 }

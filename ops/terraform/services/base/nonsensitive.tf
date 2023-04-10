@@ -3,12 +3,13 @@ locals {
   common_nonsensitive_override_raw = {
     "/bfd/${local.env}/common/nonsensitive/rds_snapshot_identifier"    = local.is_ephemeral_env ? data.aws_db_cluster_snapshot.seed[0].id : null
     "/bfd/${local.env}/common/nonsensitive/ephemeral_environment_seed" = local.is_ephemeral_env ? var.ephemeral_environment_seed : null
+    "/bfd/${local.env}/common/nonsensitive/ephemeral_poc"              = local.is_ephemeral_env ? var.ephemeral_poc : null
   }
 
   # NOTE: null values are illegal, so we must strip them out if they should exist
   common_nonsensitive_override = { for key, value in local.common_nonsensitive_override_raw : key => value if value != null }
 
-  kms_key_alias = local.is_ephemeral_env ? "alias/bfd-${local.seed_env}-cmk" : "alias/bfd-${local.env}-cmk"
+  kms_key_alias = "alias/bfd-${local.data_env}-cmk"
 
   # NOTE: When instantiating an ephemeral environment, `local.common_nonsensitive_ssm` will be empty.
   #       The var.epehemeral_environment_seed **must** be provided on the first run of terraform!
@@ -19,10 +20,10 @@ locals {
   )
 
   # Normal precedence. Values stored in YAML files.
-  yaml_file = contains(local.established_envs, local.env) ? "${local.env}.yaml" : "ephemeral.yaml"
+  yaml_file = local.is_ephemeral_env ? "ephemeral.yaml" : "${local.env}.yaml"
   yaml = yamldecode(templatefile("${path.module}/values/${local.yaml_file}", {
     env      = local.env
-    seed_env = local.seed_env
+    data_env = local.data_env
   }))
   common_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "common") && value != "UNDEFINED" }
   migrator_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") && value != "UNDEFINED" }
@@ -52,7 +53,8 @@ data "aws_ssm_parameters_by_path" "common_nonsensitive" {
 }
 
 resource "aws_ssm_parameter" "common_nonsensitive" {
-  for_each = local.common_nonsensitive
+  # manage rds_snapshot_identifier separately so we can implement a lifecycle rule
+  for_each = { for k, v in local.common_nonsensitive : k => v if k != "/bfd/${local.env}/common/nonsensitive/rds_snapshot_identifier" }
 
   name      = each.key
   overwrite = true

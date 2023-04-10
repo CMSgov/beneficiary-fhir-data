@@ -1,6 +1,7 @@
 ---
 # env:test
 # COMMON CONFIGURATION
+/bfd/test/common/nonsensitive/project_base_name: test
 /bfd/test/common/nonsensitive/enterprise_tools_security_group: bfd-test-enterprise-tools
 /bfd/test/common/nonsensitive/env_name_std: test
 /bfd/test/common/nonsensitive/key_pair: bfd-test
@@ -15,6 +16,7 @@
 /bfd/test/common/nonsensitive/rds_instance_class: db.r5.12xlarge
 /bfd/test/common/nonsensitive/rds_instance_count: 3
 /bfd/test/common/nonsensitive/rds_master_username: bfduser
+/bfd/test/common/nonsensitive/rds_deletion_protection: true
 /bfd/test/common/nonsensitive/rds_security_group: bfd-test-aurora-cluster
 /bfd/test/common/nonsensitive/vpc_name: bfd-test-vpc
 /bfd/test/common/nonsensitive/vpn_security_group: bfd-test-vpn-private
