@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war;
 
 import java.io.IOException;
-
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
@@ -36,20 +35,20 @@ public class CachingBodyFilter implements Filter {
     try {
       chain.doFilter(reqWrapper, resWrapper);
       if (reqWrapper.isAsyncStarted()) {
-        reqWrapper.getAsyncContext().addListener(new AsyncListener() {
-            public void onComplete(AsyncEvent asyncEvent) throws IOException {
-              resWrapper.copyBodyToResponse();
-            }
-      
-            public void onTimeout(AsyncEvent asyncEvent) throws IOException {
-            }
-      
-            public void onError(AsyncEvent asyncEvent) throws IOException {
-            }
-      
-            public void onStartAsync(AsyncEvent asyncEvent) throws IOException {
-            }
-        })
+        reqWrapper
+            .getAsyncContext()
+            .addListener(
+                new AsyncListener() {
+                  public void onComplete(AsyncEvent asyncEvent) throws IOException {
+                    resWrapper.copyBodyToResponse();
+                  }
+
+                  public void onTimeout(AsyncEvent asyncEvent) throws IOException {}
+
+                  public void onError(AsyncEvent asyncEvent) throws IOException {}
+
+                  public void onStartAsync(AsyncEvent asyncEvent) throws IOException {}
+                });
       } else {
         resWrapper.copyBodyToResponse();
       }
