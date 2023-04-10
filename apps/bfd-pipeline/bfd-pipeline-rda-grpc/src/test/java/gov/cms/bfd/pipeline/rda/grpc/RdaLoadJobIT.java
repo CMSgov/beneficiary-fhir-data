@@ -37,6 +37,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -302,9 +303,12 @@ public class RdaLoadJobIT {
   @Nullable
   private FissClaim findMatchingFissClaim(
       ImmutableList<FissClaimChange> expectedClaims, RdaFissClaim resultClaim) {
+    final String decodedClaimId =
+        new String(
+            Base64.getDecoder().decode(resultClaim.getClaimId().getBytes(StandardCharsets.UTF_8)));
     return expectedClaims.stream()
         .map(FissClaimChange::getClaim)
-        .filter(claim -> claim.getRdaClaimKey().equals(resultClaim.getClaimId()))
+        .filter(claim -> claim.getRdaClaimKey().equals(decodedClaimId))
         .findAny()
         .orElse(null);
   }
