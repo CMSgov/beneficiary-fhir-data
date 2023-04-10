@@ -257,7 +257,7 @@ public class LoadRdaJsonApp {
     private RdaMessageSourceFactory.Config createMessageSourceFactoryConfig() {
       return RdaMessageSourceFactory.Config.builder()
           .version(RdaService.Version.builder().version(RdaService.RDA_PROTO_VERSION).build())
-          .fissClaimJson(fissFile.map(com.google.common.io.Files::asByteSource).orElse(null))
+          .fissClaimJson(fissFile.map(Files::asByteSource).orElse(null))
           .mcsClaimJson(mcsFile.map(Files::asByteSource).orElse(null))
           .s3Bucket(s3Bucket.orElse(null))
           .s3Region(s3Region.orElse(null))

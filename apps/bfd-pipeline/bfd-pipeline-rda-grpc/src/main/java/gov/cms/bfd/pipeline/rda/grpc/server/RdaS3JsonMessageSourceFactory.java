@@ -77,7 +77,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
   }
 
   /**
-   * Creates a valid S3 key for tests that update data into an S3 bucket for testing.
+   * Creates a valid S3 key for tests that upload data into an S3 bucket for testing.
    *
    * @return valid FISS claim data key
    */
@@ -87,7 +87,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
   }
 
   /**
-   * Creates a valid S3 key for tests that update data into an S3 bucket for testing.
+   * Creates a valid S3 key for tests that upload data into an S3 bucket for testing.
    *
    * @return valid MCS claim data key
    */
@@ -118,7 +118,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
   }
 
   /**
-   * Creates a message source from the object at the specified key location and parser.
+   * Creates a message source from the object with the specified key and parser.
    *
    * @param <T> the type parameter
    * @param ndjsonObjectKey the key of the object to read

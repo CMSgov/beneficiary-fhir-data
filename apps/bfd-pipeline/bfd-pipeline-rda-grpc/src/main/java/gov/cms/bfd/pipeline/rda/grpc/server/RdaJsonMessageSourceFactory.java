@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 
 /**
  * Implementation of {@link RdaMessageSourceFactory} that uses predefined value for version and
- * reads claims from predefined {@link ByteSource}s containing NDJson data.
+ * reads claims from predefined {@link ByteSource}s containing NDJSON data.
  */
 @AllArgsConstructor
 public class RdaJsonMessageSourceFactory implements RdaMessageSourceFactory {

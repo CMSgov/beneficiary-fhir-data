@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,10 +25,11 @@ import lombok.Singular;
 /** Class for creating a local RDA server for testing purposes. */
 public class RdaServer {
   /**
-   * Creates a local RDA API server for testing.
+   * Creates a local RDA API server for testing. Caller must close the result object to clean up
+   * resources once the server has been terminated.
    *
    * @param config {@link LocalConfig} for the server
-   * @return a running RDA API Server object
+   * @return a running RDA API Server object and closeable state
    * @throws IOException if the server cannot bind at runtime
    */
   public static ServerState startLocal(LocalConfig config) throws Exception {
@@ -53,10 +55,11 @@ public class RdaServer {
   }
 
   /**
-   * Creates an in-process (no network connections involved) RDA API server for testing.
+   * Creates an in-process (no network connections involved) RDA API server for testing. Caller must
+   * close the result object to clean up resources once the server has been terminated.
    *
    * @param config {@link InProcessConfig} for the server
-   * @return a running RDA API Server object
+   * @return a running RDA API Server object and closeable state
    * @throws IOException if the server cannot bind properly
    */
   public static ServerState startInProcess(InProcessConfig config) throws Exception {
@@ -168,10 +171,10 @@ public class RdaServer {
      * @param authorizedTokens the authorized tokens
      */
     BaseConfig(
-        RdaService.Version version,
-        MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-        RdaMessageSourceFactory.Config serviceConfig,
+        @Nullable RdaService.Version version,
+        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaMessageSourceFactory.Config serviceConfig,
         Set<String> authorizedTokens) {
       if (serviceConfig == null) {
         serviceConfig =
@@ -222,10 +225,10 @@ public class RdaServer {
      */
     @Builder
     private LocalConfig(
-        RdaService.Version version,
-        MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-        RdaMessageSourceFactory.Config serviceConfig,
+        @Nullable RdaService.Version version,
+        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
         String hostname,
         int port) {
@@ -273,16 +276,16 @@ public class RdaServer {
      * @param mcsSourceFactory optional mcs source factory
      * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
-     * @param serverName the server name
+     * @param serverName optional server name
      */
     @Builder
     private InProcessConfig(
-        RdaService.Version version,
-        MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-        RdaMessageSourceFactory.Config serviceConfig,
+        @Nullable RdaService.Version version,
+        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
-        String serverName) {
+        @Nullable String serverName) {
       super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
       this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;
     }

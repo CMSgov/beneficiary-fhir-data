@@ -55,45 +55,45 @@ public class S3DirectoryDaoIT {
           s3Dao.readFileNames().stream().sorted().collect(Collectors.toList()));
 
       // no files in cache yet because we have not downloaded the files
-      assertDoesNotExist(s3Dao.dataFilePath("a.txt", aTag1));
-      assertDoesNotExist(s3Dao.dataFilePath("b.txt", bTag1));
+      assertDoesNotExist(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertDoesNotExist(s3Dao.cacheFilePath("b.txt", bTag1));
 
-      // verify the file contents
+      // download and verify the file contents
       assertEquals(
           "AAA-1", s3Dao.downloadFile("a.txt").asCharSource(StandardCharsets.UTF_8).read());
       assertEquals(
           "BBB-1", s3Dao.downloadFile("b.txt").asCharSource(StandardCharsets.UTF_8).read());
 
       // now that we've download the files we should see them in the cache
-      assertFileExists(s3Dao.dataFilePath("a.txt", aTag1));
-      assertFileExists(s3Dao.dataFilePath("b.txt", bTag1));
+      assertFileExists(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
       // update one of the files so it has new contents and new eTag
       String aTag2 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-2");
       assertNotEquals(aTag2, aTag1);
 
-      // verify the updated file contents
+      // download and verify the updated file contents
       assertEquals(
           "AAA-2", s3Dao.downloadFile("a.txt").asCharSource(StandardCharsets.UTF_8).read());
       assertEquals(
           "BBB-1", s3Dao.downloadFile("b.txt").asCharSource(StandardCharsets.UTF_8).read());
 
       // now we have two files for a.txt
-      assertFileExists(s3Dao.dataFilePath("a.txt", aTag1));
-      assertFileExists(s3Dao.dataFilePath("a.txt", aTag2));
-      assertFileExists(s3Dao.dataFilePath("b.txt", bTag1));
+      assertFileExists(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(s3Dao.cacheFilePath("a.txt", aTag2));
+      assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
       // delete obsolete files and verify the first version of a.txt is now gone
       assertEquals(1, s3Dao.deleteObsoleteFiles());
-      assertDoesNotExist(s3Dao.dataFilePath("a.txt", aTag1));
-      assertFileExists(s3Dao.dataFilePath("a.txt", aTag2));
-      assertFileExists(s3Dao.dataFilePath("b.txt", bTag1));
+      assertDoesNotExist(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(s3Dao.cacheFilePath("a.txt", aTag2));
+      assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
       // delete all files and verify that they no longer exist
       assertEquals(2, s3Dao.deleteAllFiles());
-      assertDoesNotExist(s3Dao.dataFilePath("a.txt", aTag1));
-      assertDoesNotExist(s3Dao.dataFilePath("a.txt", aTag2));
-      assertDoesNotExist(s3Dao.dataFilePath("b.txt", bTag1));
+      assertDoesNotExist(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertDoesNotExist(s3Dao.cacheFilePath("a.txt", aTag2));
+      assertDoesNotExist(s3Dao.cacheFilePath("b.txt", bTag1));
     } finally {
       deleteTestBucket(s3Client, s3Bucket);
       if (s3Dao != null) {
@@ -134,8 +134,8 @@ public class S3DirectoryDaoIT {
           "BBB-1", s3Dao.downloadFile("b.txt").asCharSource(StandardCharsets.UTF_8).read());
 
       // now that we've download the files we should see them in the cache
-      assertFileExists(s3Dao.dataFilePath("a.txt", aTag1));
-      assertFileExists(s3Dao.dataFilePath("b.txt", bTag1));
+      assertFileExists(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
     } finally {
       deleteTestBucket(s3Client, s3Bucket);
@@ -145,8 +145,8 @@ public class S3DirectoryDaoIT {
     }
 
     // close should have deleted the files and the directory
-    assertDoesNotExist(s3Dao.dataFilePath("a.txt", aTag1));
-    assertDoesNotExist(s3Dao.dataFilePath("b.txt", bTag1));
+    assertDoesNotExist(s3Dao.cacheFilePath("a.txt", aTag1));
+    assertDoesNotExist(s3Dao.cacheFilePath("b.txt", bTag1));
     assertDoesNotExist(cacheDirectoryPath);
   }
 
@@ -182,8 +182,8 @@ public class S3DirectoryDaoIT {
           "BBB-1", s3Dao.downloadFile("b.txt").asCharSource(StandardCharsets.UTF_8).read());
 
       // now that we've download the files we should see them in the cache
-      assertFileExists(s3Dao.dataFilePath("a.txt", aTag1));
-      assertFileExists(s3Dao.dataFilePath("b.txt", bTag1));
+      assertFileExists(s3Dao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
     } finally {
       deleteTestBucket(s3Client, s3Bucket);
@@ -192,19 +192,19 @@ public class S3DirectoryDaoIT {
       }
     }
 
-    // close should have deleted the files and the directory
-    assertFileExists(s3Dao.dataFilePath("a.txt", aTag1));
-    assertFileExists(s3Dao.dataFilePath("b.txt", bTag1));
+    // close should NOT have deleted the files or the directory
+    assertFileExists(s3Dao.cacheFilePath("a.txt", aTag1));
+    assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
     assertDirectoryExists(cacheDirectoryPath);
 
     // clean up
-    Files.delete(s3Dao.dataFilePath("a.txt", aTag1));
-    Files.delete(s3Dao.dataFilePath("b.txt", bTag1));
+    Files.delete(s3Dao.cacheFilePath("a.txt", aTag1));
+    Files.delete(s3Dao.cacheFilePath("b.txt", bTag1));
     Files.delete(cacheDirectoryPath);
   }
 
   /**
-   * Upload the string as a "file" to the s3 bucket and return the 3Tag assigned to it by S3.
+   * Upload the string as a "file" to the s3 bucket and return the ETag assigned to it by S3.
    *
    * @param s3Client the {@link AmazonS3} client to use
    * @param bucket the bucket to receive the file

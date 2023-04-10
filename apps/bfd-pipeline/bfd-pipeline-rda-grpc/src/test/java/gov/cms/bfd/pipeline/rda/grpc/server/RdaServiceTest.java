@@ -65,12 +65,10 @@ public class RdaServiceTest {
 
     doReturn(mockVersion).when(mockRdaMessageSourceFactory).getVersion();
 
-    // resource - We’re creating a mock, not invoking the method
     doReturn(mockFissSource)
         .when(mockRdaMessageSourceFactory)
         .createFissMessageSource(SINCE_VALUE + 1);
 
-    // resource - We’re creating a mock, not invoking the method
     doReturn(mockMcsSource)
         .when(mockRdaMessageSourceFactory)
         .createMcsMessageSource(SINCE_VALUE + 1);

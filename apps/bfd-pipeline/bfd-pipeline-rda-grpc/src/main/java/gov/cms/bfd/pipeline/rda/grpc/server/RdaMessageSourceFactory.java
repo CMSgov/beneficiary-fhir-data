@@ -61,9 +61,9 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
         RandomClaimGeneratorConfig.builder().build();
     /** The maximum number of claims to be returned when operating in {@code Random} mode. */
     private final int randomMaxClaims;
-    /** The fiss claim data for the RDA Server. */
+    /** NDJSON fiss claim data for the RDA Server. */
     @Nullable private final ByteSource fissClaimJson;
-    /** The mcs claim data for the RDI Server. */
+    /** NDJSON mcs claim data for the RDI Server. */
     @Nullable private final ByteSource mcsClaimJson;
     /** AWS region containing our S3 bucket. */
     @Nullable private final Regions s3Region;
@@ -71,7 +71,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @Nullable private final String s3Bucket;
     /** Optional directory name within our S3 bucket. */
     @Nullable private final String s3Directory;
-    /** Name of a directory in which to store cached files from S3. */
+    /** Name of a local directory in which to store cached files from S3. */
     @Nullable private final String s3CacheDirectory;
     /** Optional hard coded version. */
     @Nullable private final RdaService.Version version;

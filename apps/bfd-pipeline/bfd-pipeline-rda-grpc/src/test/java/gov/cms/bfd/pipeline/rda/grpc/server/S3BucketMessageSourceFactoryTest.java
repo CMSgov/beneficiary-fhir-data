@@ -191,19 +191,16 @@ public class S3BucketMessageSourceFactoryTest {
       currentValue = minSeq - 1;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean hasNext() throws Exception {
       return currentValue < maxValue;
     }
 
-    /** {@inheritDoc} */
     @Override
     public Long next() throws Exception {
       return ++currentValue;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {
       closed = true;

@@ -29,7 +29,8 @@ public interface MessageSource<T> extends AutoCloseable {
   T next() throws Exception;
 
   /**
-   * Used when creating random or json based sources to skip past some records.
+   * Used when creating random or json based sources to skip past some records to reach a specific
+   * desired sequence number record.
    *
    * @param numberToSkip number of records to skip past
    * @return this source after skipping the records

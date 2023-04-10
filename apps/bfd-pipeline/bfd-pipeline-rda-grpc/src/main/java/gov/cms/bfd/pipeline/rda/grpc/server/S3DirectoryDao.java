@@ -13,7 +13,6 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,32 +48,32 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class S3DirectoryDao implements AutoCloseable {
-  /** Prefix added to file name to indicate it is a data file. */
+  /** Prefix added to cache file name to indicate it is a data file. */
   private static final String DataFilePrefix = "s3-";
-  /** Suffix added to file name to indicate it is a data file. */
+  /** Suffix added to cache file name to indicate it is a data file. */
   private static final String DataFileSuffix = ".dat";
-  /** Inserted between file name and suffix when building a data file name. */
+  /** Inserted between cache file name and suffix when building a data file name. */
   public static final String EtagSeparator = "-";
   /** Arbitrary prefix used to generate temp file name when a file is downloaded. */
   private static final String TempPrefix = "s3d";
 
   /**
-   * Base regex to match validate S3 keys. The {@link #s3DirectoryPath} is added to the start of
-   * this string to build the final regex.
+   * Base regex to match valid S3 keys. The {@link #s3DirectoryPath} is added to the start of this
+   * string to build the final regex.
    */
   private static final String S3FileNameRegex = "[_a-z0-9][-_.a-z0-9]+";
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final AmazonS3 s3Client;
-  /** The S3 bucket to to mirror. */
+  /** The S3 bucket containing source files. */
   @Getter private final String s3BucketName;
-  /** The directory path within bucket to mirror. */
+  /** The directory path within bucket containing source files. */
   @Getter private final String s3DirectoryPath;
 
   /** Used to determine if an S3 key is valid. */
   private final Pattern validKeyRegex;
 
-  /** The local directory containing mirrored files. Initialized on first use. */
+  /** The local directory containing downloaded files. Initialized on first use. */
   private final Path cacheDirectory;
 
   /**
@@ -122,18 +121,19 @@ public class S3DirectoryDao implements AutoCloseable {
    * Look for an object in our S3 bucket/directory that corresponds to the given simple file name
    * (as returned by {@link #readFileNames}. If one is found downloads it and returns a {@link
    * ByteSource} that can be used to read the file. If no such object exists or the object could not
-   * be successfully downloaded, this method will return null.
+   * be successfully downloaded, this method will throw an exception.
    *
    * @param fileName simple file name as returned in previous call to {@link #readFileNames}
-   * @return null or a valid {@link ByteSource} for reading the file
+   * @return {@link ByteSource} for reading the file from local directory
    * @throws IOException various exceptions might be thrown by the Java or AWS API
    */
   public ByteSource downloadFile(String fileName) throws IOException {
+    // S3 will throw if key does not exist
     final String s3Key = s3DirectoryPath + fileName;
     var s3MetaData = s3Client.getObjectMetadata(s3BucketName, s3Key);
 
     String eTag = s3MetaData.getETag();
-    Path dataFile = dataFilePath(fileName, eTag);
+    Path dataFile = cacheFilePath(fileName, eTag);
     if (Files.isRegularFile(dataFile)) {
       log.info(
           "serving existing file from cache: fileName={} s3Key={} cachedFile={}",
@@ -143,7 +143,7 @@ public class S3DirectoryDao implements AutoCloseable {
       return createByteSourceForCachedFile(fileName, dataFile);
     }
 
-    final Path tempDataFile = createTempFile();
+    final Path tempDataFile = Files.createTempFile(cacheDirectory, TempPrefix, null);
     try {
       final var downloadRequest = new GetObjectRequest(s3BucketName, s3Key);
       log.info(
@@ -153,22 +153,18 @@ public class S3DirectoryDao implements AutoCloseable {
           tempDataFile.getFileName());
       s3MetaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
       if (s3MetaData == null) {
-        // We need to handle this unlikely scenario.  Given that we did not specify any constraints
-        // it probably should not be possible.  If it did happen though it's better to get a
-        // reasonable exception rather than an NPE.
+        // Handle an inconsistency between getObjectMetaData (throws if key not found) and
+        // getObject (returns null if key not found).  This case would only happen if key was
+        // deleted between our getObjectMetaData and getObject calls.
         var message =
             String.format("file no longer exists in S3: fileName=%s s3Key=%s", fileName, s3Key);
         log.error(message);
         throw new FileNotFoundException(message);
       }
 
-      // it's possible that we received a different version than we expected
+      // It is possible that we received a different version than we expected.
       eTag = s3MetaData.getETag();
-
-      // In linux renaming a file in a local (not network shared) directory is atomic and will
-      // replace any existing file with same name. It is possible (though unlikely) for the
-      // rename to fail, in which case we return null and delete the temp file.
-      dataFile = dataFilePath(fileName, eTag);
+      dataFile = cacheFilePath(fileName, eTag);
 
       try {
         log.info(
@@ -176,11 +172,13 @@ public class S3DirectoryDao implements AutoCloseable {
             fileName,
             s3Key,
             dataFile.getFileName());
+        // In linux renaming a file in a local (not network shared) directory is atomic and will
+        // replace any existing file with same name.
         Files.move(tempDataFile, dataFile);
       } catch (FileAlreadyExistsException ex) {
         // It is possible for two processes or threads to perform this rename at the same time.
-        // If that happens both files would be identical so we can simply use the one that
-        // already existed when we attempted our rename.
+        // If that happens both files would be identical so we can simply ignore this exception
+        // and use the one that already existed when we attempted our rename.
       }
       log.info(
           "serving downloaded file from cache: fileName={} s3Key={} cachedFile={}",
@@ -189,7 +187,7 @@ public class S3DirectoryDao implements AutoCloseable {
           dataFile.getFileName());
       return createByteSourceForCachedFile(fileName, dataFile);
     } finally {
-      // Ensure temp file is deleted if the rename was not performed.
+      // Ensure temp file is deleted if the rename was not performed for any reason.
       Files.deleteIfExists(tempDataFile);
     }
   }
@@ -214,27 +212,6 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Create a uniquely named temporary file in our directory for use when downloading a new file.
-   * Any exceptions are mapped to {@link RuntimeException}s.
-   *
-   * @return the {@link File} for the new temporary file
-   */
-  @Nonnull
-  private Path createTempFile() {
-    try {
-      Path result;
-      synchronized (this) {
-        result = cacheDirectory;
-      }
-      return Files.createTempFile(result, TempPrefix, null);
-    } catch (RuntimeException ex) {
-      throw ex;
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
-    }
-  }
-
-  /**
    * Deletes any files in our directory that do not correspond to an object in our S3
    * bucket/directory.
    *
@@ -244,11 +221,11 @@ public class S3DirectoryDao implements AutoCloseable {
   @CanIgnoreReturnValue
   public int deleteObsoleteFiles() throws IOException {
     int deletedCount = 0;
-    var allowedFiles = readFileHandlesFromS3();
-    var actualFiles = readFileHandlesFromDirectory();
+    var allowedFiles = readCacheFileNamesFromS3();
+    var actualFiles = readCacheFileNamesFromDirectory();
     for (String file : actualFiles) {
       Path path = Path.of(file);
-      if (isDataFile(path) && !allowedFiles.contains(file)) {
+      if (isCacheFile(path) && !allowedFiles.contains(file)) {
         if (Files.deleteIfExists(path)) {
           deletedCount += 1;
         }
@@ -266,25 +243,14 @@ public class S3DirectoryDao implements AutoCloseable {
   @CanIgnoreReturnValue
   public int deleteAllFiles() throws IOException {
     int deletedCount = 0;
-    var actualFiles = readFileHandlesFromDirectory();
+    var actualFiles = readCacheFileNamesFromDirectory();
     for (String file : actualFiles) {
       Path path = Path.of(file);
-      if (isDataFile(path) && Files.deleteIfExists(path)) {
+      if (isCacheFile(path) && Files.deleteIfExists(path)) {
         deletedCount += 1;
       }
     }
     return deletedCount;
-  }
-
-  /**
-   * Test a {@link S3ObjectSummary} to determine if it is valid for use with this DAO. Determination
-   * is based on compatibility of its key.
-   *
-   * @param summary {@link S3ObjectSummary} to test
-   * @return true if the object key is valid
-   */
-  public boolean isValidS3Object(S3ObjectSummary summary) {
-    return isValidS3Key(summary.getKey());
   }
 
   /**
@@ -300,9 +266,10 @@ public class S3DirectoryDao implements AutoCloseable {
 
   /**
    * Produce a {@link List} containing an equivalent simple file name for every valid object in our
-   * S3 bucket/directory.
+   * S3 bucket/directory. The simple file name is everything after the S3 directory portion of the
+   * object key.
    *
-   * @return the set
+   * @return the list
    */
   private List<String> readFileNamesFromS3() {
     return readS3ObjectListing().getObjectSummaries().stream()
@@ -313,15 +280,15 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Produce a {@link Set} containing a file handle equivalent to every valid object in our S3
+   * Produce a {@link Set} containing an equivalent cache file name for every valid object in our S3
    * bucket/directory.
    *
    * @return the set
    */
-  private Set<String> readFileHandlesFromS3() {
+  private Set<String> readCacheFileNamesFromS3() {
     return readS3ObjectListing().getObjectSummaries().stream()
-        .filter(this::isValidS3Object)
-        .map(this::dataFilePath)
+        .filter(summary -> isValidS3Key(summary.getKey()))
+        .map(this::cacheFilePath)
         .map(Path::toString)
         .collect(ImmutableSet.toImmutableSet());
   }
@@ -331,11 +298,11 @@ public class S3DirectoryDao implements AutoCloseable {
    *
    * @return the set
    */
-  private Set<String> readFileHandlesFromDirectory() throws IOException {
+  private Set<String> readCacheFileNamesFromDirectory() throws IOException {
     try (Stream<Path> filesStream = Files.list(cacheDirectory)) {
       return filesStream
           .filter(Files::isRegularFile)
-          .filter(this::isDataFile)
+          .filter(this::isCacheFile)
           .map(Path::toString)
           .collect(ImmutableSet.toImmutableSet());
     }
@@ -381,37 +348,39 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Convert a simple file name plus the file's eTag value into a {@link File} referencing a file in
-   * our directory.
+   * Convert a simple file name plus the file's eTag value into a {@link Path} referencing a file in
+   * our cache directory.
    *
    * @param fileName simple file name as exposed to clients
    * @param eTag eTag value from S3 for the file
    * @return file handle
    */
   @VisibleForTesting
-  Path dataFilePath(String fileName, String eTag) {
+  Path cacheFilePath(String fileName, String eTag) {
     String cacheFileName = DataFilePrefix + fileName + EtagSeparator + eTag + DataFileSuffix;
     return Path.of(cacheDirectory.toString(), cacheFileName);
   }
 
   /**
-   * Convert a {@link S3ObjectSummary} into a {@link Path} referencing a file in our directory.
+   * Convert a {@link S3ObjectSummary} into a {@link Path} referencing a file in our cache
+   * directory.
    *
    * @param summary {@link S3ObjectSummary} for object to store in cache
    * @return file handle
    */
-  private Path dataFilePath(S3ObjectSummary summary) {
+  private Path cacheFilePath(S3ObjectSummary summary) {
     final var fileName = convertS3KeyToFileName(summary.getKey());
-    return dataFilePath(fileName, summary.getETag());
+    return cacheFilePath(fileName, summary.getETag());
   }
 
   /**
-   * Verifies that the given {@link File} is one created by us to store an S3 object.
+   * Verifies that the given {@link Path} is one created by us to store an S3 object in our cache
+   * directory.
    *
    * @param path file to check
    * @return true if file has a valid data file name
    */
-  private boolean isDataFile(Path path) {
+  private boolean isCacheFile(Path path) {
     final var fileName = path.getFileName().toString();
     return Files.isRegularFile(path)
         && fileName.startsWith(DataFilePrefix)
@@ -419,7 +388,7 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Creates a {@link ByteSource} for reading the cached file. If the file is a gzip file (name ends
+   * Creates a {@link ByteSource} for reading a cached file. If the file is a gzip file (name ends
    * with .gz) the file will be automatically decompressed when a stream is opened. Otherwise the
    * bytes will be returned as they appear in the file.
    *

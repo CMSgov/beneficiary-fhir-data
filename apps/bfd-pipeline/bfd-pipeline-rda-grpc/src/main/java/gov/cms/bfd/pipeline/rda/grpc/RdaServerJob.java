@@ -157,33 +157,32 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     }
 
     /**
-     * Instantiates a new config.
+     * Instantiates a new config. S3 bucket is required when {@link #serverMode} is {@link
+     * ServerMode#S3}.
      *
      * @param serverMode the server mode
-     * @param serverName the server name
-     * @param runInterval the run interval
-     * @param randomSeed the random seed
-     * @param randomMaxClaims the random max claims
-     * @param s3Region the s3 region
-     * @param s3Bucket the s3 bucket
-     * @param s3Directory the s3 directory
-     * @param s3CacheDirectory the s3 cache directory
+     * @param serverName optional server name
+     * @param runInterval optional run interval
+     * @param randomSeed optional random seed
+     * @param randomMaxClaims optional random max claims
+     * @param s3Region optional s3 region
+     * @param s3Bucket optional s3 bucket
+     * @param s3Directory optional s3 directory
+     * @param s3CacheDirectory optional s3 cache directory
      */
     @Builder
     private Config(
         ServerMode serverMode,
-        String serverName,
-        Duration runInterval,
-        Long randomSeed,
-        Integer randomMaxClaims,
+        @Nullable String serverName,
+        @Nullable Duration runInterval,
+        @Nullable Long randomSeed,
+        @Nullable Integer randomMaxClaims,
         @Nullable Regions s3Region,
         @Nullable String s3Bucket,
         @Nullable String s3Directory,
         @Nullable String s3CacheDirectory) {
       Preconditions.checkNotNull(serverMode, "serverMode is required");
       if (serverMode == ServerMode.S3) {
-        Preconditions.checkArgument(
-            !Strings.isNullOrEmpty(serverName), "serverName is required in S3 mode");
         Preconditions.checkArgument(
             !Strings.isNullOrEmpty(s3Bucket), "S3 bucket is required in S3 mode");
       }
