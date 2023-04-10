@@ -8,14 +8,13 @@ import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /** Implementation of {@link FieldTransformer} for use with fields needing to be Base64 encoded. */
 public class Base64FieldTransformer implements FieldTransformer {
   /**
    * {@inheritDoc}
    *
-   * <p>Generate code to call {@link DataTransformer#copyBase64String(String, boolean, Supplier,
+   * <p>Generate code to call {@link DataTransformer#copyBase64String(String, boolean, String,
    * Consumer)}.
    *
    * @param mapping The mapping that contains the field.
