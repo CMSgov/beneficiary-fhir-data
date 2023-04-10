@@ -14,8 +14,8 @@ public class Base64FieldTransformer implements FieldTransformer {
   /**
    * {@inheritDoc}
    *
-   * <p>Generate code to call {@link DataTransformer#copyBase64String(String, boolean, String,
-   * Consumer)}.
+   * <p>Generate code to call {@link DataTransformer#copyBase64String(String, boolean, int, int,
+   * String, Consumer)}.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column
@@ -35,10 +35,12 @@ public class Base64FieldTransformer implements FieldTransformer {
       Setter setter) {
     return CodeBlock.builder()
         .addStatement(
-            "$L.copyBase64String($L, $L, $L, $L)",
+            "$L.copyBase64String($L, $L, $L, $L, $L, $L)",
             TRANSFORMER_VAR,
             TransformerUtil.createFieldNameForErrorReporting(mapping, column),
             column.isNullable(),
+            column.computeMinLength(mapping.getMinStringLength()),
+            column.computeLength(),
             getter.createGetCall(transformation),
             setter.createSetRef(column))
         .build();

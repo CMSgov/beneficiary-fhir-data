@@ -118,7 +118,8 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
 
     // Base64 encode the claim key so it matches any existing claim records in the database
     DataTransformer dt = new DataTransformer();
-    dt.copyBase64String("rdaClaimKey", false, change.getClaim().getRdaClaimKey(), builder::claimId);
+    dt.copyBase64String(
+        "rdaClaimKey", false, 1, 43, change.getClaim().getRdaClaimKey(), builder::claimId);
 
     return builder
         .sequenceNumber(change.getSeq())

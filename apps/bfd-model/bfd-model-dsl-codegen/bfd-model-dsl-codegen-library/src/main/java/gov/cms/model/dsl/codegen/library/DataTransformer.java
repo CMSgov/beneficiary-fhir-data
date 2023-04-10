@@ -653,13 +653,20 @@ public class DataTransformer {
    *
    * @param fieldName name of the field from which the value originates
    * @param nullable true if null is a valid value
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
    * @param value the string value to encode
    * @param copier Consumer to receive the encoded string
    * @return this
    */
   public DataTransformer copyBase64String(
-      String fieldName, boolean nullable, String value, Consumer<String> copier) {
-    if (nonNull(fieldName, value, nullable)) {
+      String fieldName,
+      boolean nullable,
+      int minLength,
+      int maxLength,
+      String value,
+      Consumer<String> copier) {
+    if (validateString(fieldName, nullable, minLength, maxLength, value)) {
       copier.accept(
           Base64.getEncoder()
               .withoutPadding()

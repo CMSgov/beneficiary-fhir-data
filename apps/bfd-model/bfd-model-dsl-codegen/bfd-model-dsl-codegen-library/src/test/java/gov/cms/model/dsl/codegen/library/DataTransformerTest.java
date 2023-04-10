@@ -358,16 +358,17 @@ public class DataTransformerTest {
   }
 
   /**
-   * Tests the {@link DataTransformer#copyBase64String(String, boolean, String, Consumer)} method.
+   * Tests the {@link DataTransformer#copyBase64String(String, boolean, int, int, String, Consumer)}
+   * method.
    */
   @Test
   public void testCopyBase64() {
     transformer
-        .copyBase64String("not-present-required", false, null, copied::add)
-        .copyBase64String("not-present-nullable", true, null, copied::add)
+        .copyBase64String("not-present-required", false, 1, 43, null, copied::add)
+        .copyBase64String("not-present-nullable", true, 1, 43, null, copied::add)
         .copyBase64String(
-            "present-required", false, "a longer decoded string value  1", copied::add)
-        .copyBase64String("present-nullable", true, "decoded string", copied::add);
+            "present-required", false, 1, 43, "a longer decoded string value  1", copied::add)
+        .copyBase64String("present-nullable", true, 1, 43, "decoded string", copied::add);
     assertEquals(
         ImmutableList.of("YSBsb25nZXIgZGVjb2RlZCBzdHJpbmcgdmFsdWUgIDE", "ZGVjb2RlZCBzdHJpbmc"),
         copied);

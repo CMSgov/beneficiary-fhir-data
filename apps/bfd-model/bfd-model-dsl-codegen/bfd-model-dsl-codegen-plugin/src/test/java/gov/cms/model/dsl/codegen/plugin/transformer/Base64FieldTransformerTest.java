@@ -11,10 +11,10 @@ import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import org.junit.jupiter.api.Test;
 
 /** Unit test for {@link Base64FieldTransformer}. */
-public class Bas64FieldTransformerTest {
+class Base64FieldTransformerTest {
   /** Verifies that required fields use {@code copyBase64String}. */
   @Test
-  public void testRequiredField() {
+  void testRequiredField() {
     ColumnBean column =
         ColumnBean.builder().name("rdaClaimKey").nullable(false).sqlType("varchar(43)").build();
     TransformationBean transformation =
@@ -33,7 +33,7 @@ public class Bas64FieldTransformerTest {
         generator.generateCodeBlock(
             mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
     assertEquals(
-        "transformer.copyBase64String(namePrefix + gov.cms.test.Entity.Fields.rdaClaimKey, false, from.getRdaClaimKey(), to::setRdaClaimKey);\n",
+        "transformer.copyBase64String(namePrefix + gov.cms.test.Entity.Fields.rdaClaimKey, false, 1, 43, from.getRdaClaimKey(), to::setRdaClaimKey);\n",
         block.toString());
   }
 }
