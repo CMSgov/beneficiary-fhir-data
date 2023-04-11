@@ -15,7 +15,7 @@
                 "stacked": false,
                 "region": "us-east-1",
                 "stat": "Maximum",
-                "period": 300,
+                "period": 60,
                 "title": "Full Data Load Times in Seconds"
             }
         },
@@ -53,9 +53,11 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "m1 > m2", "label": "Ongoing Data Load?", "id": "e1", "stat": "Maximum", "period": 60 } ],
-                    [ "bfd-${env}/bfd-pipeline", "time/data-first-available", { "id": "m1", "visible": false } ],
-                    [ ".", "time/data-fully-loaded", { "id": "m2", "visible": false } ]
+                  [ { "expression": "e2 > e3", "label": "Ongoing Data Load?", "id": "e1", "stat": "Maximum", "period": 60, "region": "us-east-1" } ],
+                  [ { "expression": "FILL(m1, REPEAT)", "label": "Expression2", "id": "e2", "visible": false } ],
+                  [ { "expression": "FILL(m2, REPEAT)", "label": "Expression3", "id": "e3", "visible": false } ],
+                  [ "bfd-${env}/bfd-pipeline", "time/data-first-available", { "id": "m1", "visible": false, "region": "us-east-1" } ],
+                  [ ".", "time/data-fully-loaded", { "id": "m2", "visible": false, "region": "us-east-1" } ]
                 ],
                 "view": "gauge",
                 "stacked": false,
@@ -79,18 +81,18 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "EPOCH(TIME_SERIES(1))", "label": "Expression1", "id": "e1", "stat": "Maximum", "period": 900, "region": "us-east-1", "visible": false } ],
-                    [ { "expression": "FILL(m1, REPEAT)", "label": "Expression2", "id": "e2", "region": "us-east-1", "period": 900, "visible": false } ],
-                    [ { "expression": "FILL(m2, REPEAT)", "label": "Expression3", "id": "e3", "region": "us-east-1", "period": 900, "visible": false } ],
+                    [ { "expression": "EPOCH(TIME_SERIES(1))", "label": "Expression1", "id": "e1", "stat": "Maximum", "period": 60, "region": "us-east-1", "visible": false } ],
+                    [ { "expression": "FILL(m1, REPEAT)", "label": "Expression2", "id": "e2", "region": "us-east-1", "period": 60, "visible": false } ],
+                    [ { "expression": "FILL(m2, REPEAT)", "label": "Expression3", "id": "e3", "region": "us-east-1", "period": 60, "visible": false } ],
                     [ "bfd-${env}/bfd-pipeline", "time/data-first-available", { "id": "m1", "region": "us-east-1", "visible": false } ],
                     [ "bfd-${env}/bfd-pipeline", "time/data-fully-loaded", { "id": "m2", "region": "us-east-1", "visible": false } ],
-                    [ { "expression": "IF(e2>e3, e1-e2, 0)", "label": "Ongoing Data Load Time", "id": "e4", "period": 900, "region": "us-east-1" } ]
+                    [ { "expression": "IF(e2>e3, e1-e2, 0)", "label": "Ongoing Data Load Time", "id": "e4", "period": 60, "region": "us-east-1" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "us-east-1",
                 "stat": "Maximum",
-                "period": 900,
+                "period": 60,
                 "yAxis": {
                     "left": {
                         "label": "Seconds",
@@ -151,7 +153,7 @@
                 "view": "timeSeries",
                 "region": "us-east-1",
                 "stat": "Maximum",
-                "period": 900,
+                "period": 60,
                 "title": "Weekly Data Load Status",
                 "yAxis": {
                     "left": {
