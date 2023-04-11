@@ -12,6 +12,11 @@ import java.util.function.Consumer;
 /** Implementation of {@link FieldTransformer} for use with fields needing to be Base64 encoded. */
 public class Base64FieldTransformer implements FieldTransformer {
   /**
+   * Name for the {@link TransformationBean#findTransformerOption} that defines the decoded length.
+   */
+  public static final String DECODED_LENGTH_OPT = "decodedLength";
+
+  /**
    * {@inheritDoc}
    *
    * <p>Generate code to call {@link DataTransformer#copyBase64String(String, boolean, int, int,
@@ -33,14 +38,19 @@ public class Base64FieldTransformer implements FieldTransformer {
       TransformationBean transformation,
       Getter getter,
       Setter setter) {
+    int columnLength = column.computeLength();
+
     return CodeBlock.builder()
         .addStatement(
-            "$L.copyBase64String($L, $L, $L, $L, $L, $L)",
+            "$L.copyBase64String($L, $L, $L, $L, $L, $L, $L)",
             TRANSFORMER_VAR,
             TransformerUtil.createFieldNameForErrorReporting(mapping, column),
             column.isNullable(),
             column.computeMinLength(mapping.getMinStringLength()),
             column.computeLength(),
+            transformation
+                .transformerOption(DECODED_LENGTH_OPT)
+                .orElse(String.valueOf(columnLength)),
             getter.createGetCall(transformation),
             setter.createSetRef(column))
         .build();

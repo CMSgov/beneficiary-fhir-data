@@ -305,7 +305,8 @@ public class RdaLoadJobIT {
       ImmutableList<FissClaimChange> expectedClaims, RdaFissClaim resultClaim) {
     final String decodedClaimId =
         new String(
-            Base64.getDecoder().decode(resultClaim.getClaimId().getBytes(StandardCharsets.UTF_8)));
+            Base64.getUrlDecoder()
+                .decode(resultClaim.getClaimId().getBytes(StandardCharsets.UTF_8)));
     return expectedClaims.stream()
         .map(FissClaimChange::getClaim)
         .filter(claim -> claim.getRdaClaimKey().equals(decodedClaimId))

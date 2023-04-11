@@ -88,6 +88,8 @@ mappings:
     transformations:
       - from: claimKey
         transformer: Base64
+        transformerOptions:
+          decodedLength: 32
       - from: dcn
         optionalComponents: None
       - from: seq

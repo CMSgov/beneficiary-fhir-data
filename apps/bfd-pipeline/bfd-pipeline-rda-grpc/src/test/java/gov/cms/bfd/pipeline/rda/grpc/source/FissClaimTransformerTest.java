@@ -59,7 +59,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneOffset;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -665,7 +664,7 @@ public class FissClaimTransformerTest {
       List<DataTransformer.ErrorMessage> expectedErrors =
           List.of(
               new DataTransformer.ErrorMessage(
-                  "claimId", "invalid length: expected=[1,43] actual=0"),
+                  "claimId", "invalid length: expected=[1,32] actual=0"),
               new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=0"),
               new DataTransformer.ErrorMessage(
                   "intermediaryNb", "invalid length: expected=[1,5] actual=0"),
@@ -698,7 +697,7 @@ public class FissClaimTransformerTest {
   public void testClaimClaimId() {
     new ClaimFieldTester()
         .verifyBase64FieldCopiedCorrectly(
-            FissClaim.Builder::setRdaClaimKey, RdaFissClaim::getClaimId, "claimId", 43);
+            FissClaim.Builder::setRdaClaimKey, RdaFissClaim::getClaimId, "claimId", 32);
   }
 
   /**
@@ -2653,10 +2652,7 @@ public class FissClaimTransformerTest {
               .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
               .setSeq(MIN_SEQUENCE_NUM)
               .setDcn(claim.getDcn())
-              .setRdaClaimKey(
-                  Base64.getEncoder()
-                      .withoutPadding()
-                      .encodeToString(claim.getRdaClaimKey().getBytes()))
+              .setRdaClaimKey(claim.getRdaClaimKey())
               .setIntermediaryNb(claim.getIntermediaryNb())
               .setClaim(claim);
       return transformer.transformClaim(changeBuilder.build());

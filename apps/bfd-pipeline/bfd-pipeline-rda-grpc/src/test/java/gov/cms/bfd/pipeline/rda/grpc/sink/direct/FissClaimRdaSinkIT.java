@@ -283,7 +283,7 @@ public class FissClaimRdaSinkIT {
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());
             String decodedClaimId =
                 new String(
-                    Base64.getDecoder()
+                    Base64.getUrlDecoder()
                         .decode(error.getClaimId().getBytes(StandardCharsets.UTF_8)));
             assertEquals(claim.getClaimId(), decodedClaimId);
             assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());

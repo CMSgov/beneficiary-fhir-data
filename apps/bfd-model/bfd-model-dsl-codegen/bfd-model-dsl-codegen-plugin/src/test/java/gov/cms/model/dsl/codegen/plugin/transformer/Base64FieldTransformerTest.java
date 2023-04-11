@@ -20,6 +20,7 @@ class Base64FieldTransformerTest {
     TransformationBean transformation =
         TransformationBean.builder()
             .optionalComponents(TransformationBean.OptionalComponents.None)
+            .transformerOption("decodedLength", "32")
             .from("rdaClaimKey")
             .build();
     MappingBean mapping =
@@ -33,7 +34,7 @@ class Base64FieldTransformerTest {
         generator.generateCodeBlock(
             mapping, column, transformation, GrpcGetter.Instance, StandardSetter.Instance);
     assertEquals(
-        "transformer.copyBase64String(namePrefix + gov.cms.test.Entity.Fields.rdaClaimKey, false, 1, 43, from.getRdaClaimKey(), to::setRdaClaimKey);\n",
+        "transformer.copyBase64String(namePrefix + gov.cms.test.Entity.Fields.rdaClaimKey, false, 1, 43, 32, from.getRdaClaimKey(), to::setRdaClaimKey);\n",
         block.toString());
   }
 }

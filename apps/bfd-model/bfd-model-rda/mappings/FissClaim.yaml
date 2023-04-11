@@ -491,6 +491,8 @@ mappings:
   - from: rdaClaimKey
     to: claimId
     transformer: Base64
+    transformerOptions:
+      decodedLength: 32
     optionalComponents: None
   - from: dcn
     optionalComponents: None
