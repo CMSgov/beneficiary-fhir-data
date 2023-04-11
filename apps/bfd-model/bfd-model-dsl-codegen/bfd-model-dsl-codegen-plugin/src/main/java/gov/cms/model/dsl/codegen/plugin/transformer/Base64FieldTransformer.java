@@ -20,7 +20,7 @@ public class Base64FieldTransformer implements FieldTransformer {
    * {@inheritDoc}
    *
    * <p>Generate code to call {@link DataTransformer#copyBase64String(String, boolean, int, int,
-   * String, Consumer)}.
+   * int, String, Consumer)}.
    *
    * @param mapping The mapping that contains the field.
    * @param column model object describing the database column

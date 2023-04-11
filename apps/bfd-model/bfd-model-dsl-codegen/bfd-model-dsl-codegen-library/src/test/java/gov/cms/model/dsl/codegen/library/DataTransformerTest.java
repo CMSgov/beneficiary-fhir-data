@@ -358,8 +358,8 @@ public class DataTransformerTest {
   }
 
   /**
-   * Tests the {@link DataTransformer#copyBase64String(String, boolean, int, int, String, Consumer)}
-   * method.
+   * Tests the {@link DataTransformer#copyBase64String(String, boolean, int, int, int, String,
+   * Consumer)} method.
    */
   @Test
   public void testCopyBase64() {
