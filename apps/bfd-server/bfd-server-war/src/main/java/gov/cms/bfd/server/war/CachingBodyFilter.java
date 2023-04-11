@@ -25,10 +25,8 @@ public class CachingBodyFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
-    ContentCachingRequestWrapper reqWrapper =
-        new ContentCachingRequestWrapper((HttpServletRequest) request);
-    ContentCachingResponseWrapper resWrapper =
-        new ContentCachingResponseWrapper((HttpServletResponse) response);
+    ContentCachingRequestWrapper reqWrapper = new ContentCachingRequestWrapper(request);
+    ContentCachingResponseWrapper resWrapper = new ContentCachingResponseWrapper(response);
     try {
       chain.doFilter(reqWrapper, resWrapper);
       if (!resWrapper.isCommitted() && resWrapper.getStatus() == HttpStatus.SC_OK) {

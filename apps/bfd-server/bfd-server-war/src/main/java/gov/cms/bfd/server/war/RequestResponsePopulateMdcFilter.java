@@ -160,25 +160,27 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @param response the {@link ServletResponse} to record the standard {@link BfdMDC} entries for
    */
   private void handleResponse(ServletRequest request, ServletResponse response) {
-    HttpServletResponse servletResponse = (HttpServletResponse) response;
-    BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
-        Integer.toString(servletResponse.getStatus()));
+    if (response instanceof HttpServletResponse) {
+      HttpServletResponse servletResponse = (HttpServletResponse) response;
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
+          Integer.toString(servletResponse.getStatus()));
 
-    // Record the response headers.
-    Collection<String> headerNames = servletResponse.getHeaderNames();
-    for (String headerName : headerNames) {
-      Collection<String> headerValues = servletResponse.getHeaders(headerName);
-      if (headerValues.isEmpty())
-        BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
-      else if (headerValues.size() == 1)
-        BfdMDC.put(
-            BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
-            headerValues.iterator().next());
-      else
-        BfdMDC.put(
-            BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
-            headerValues.toString());
+      // Record the response headers.
+      Collection<String> headerNames = servletResponse.getHeaderNames();
+      for (String headerName : headerNames) {
+        Collection<String> headerValues = servletResponse.getHeaders(headerName);
+        if (headerValues.isEmpty())
+          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
+        else if (headerValues.size() == 1)
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.iterator().next());
+        else
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.toString());
+      }
     }
   }
 
