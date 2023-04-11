@@ -8,8 +8,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -19,15 +17,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CachingBodyFilter implements Filter {
 
-  /** Logger that logs. */
-  private static final Logger LOGGER_MISC = LoggerFactory.getLogger(CachingBodyFilter.class);
-
-  /**
-   * {@inheritDoc}
-   *
-   * @throws ServletException
-   * @throws IOException
-   */
+  /** {@inheritDoc} */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
