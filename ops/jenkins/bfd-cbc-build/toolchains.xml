@@ -7,7 +7,7 @@
             <vendor>openjdk</vendor>
         </provides>
         <configuration>
-            <jdkHome>/usr/lib/jvm/java-17-amazon-corretto.x86_64</jdkHome>
+            <jdkHome>/usr/lib/jvm/java-17-amazon-corretto</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
