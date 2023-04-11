@@ -102,7 +102,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
 
     metric {
       metric_name = "time/data-fully-loaded"
-      namespace   = "bfd-prod/bfd-pipeline"
+      namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
     }
@@ -114,7 +114,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
 
     metric {
       metric_name = "time/data-first-available"
-      namespace   = "bfd-prod/bfd-pipeline"
+      namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
     }
