@@ -216,3 +216,7 @@ module "bfd_pipeline_dashboard" {
 
   source = "./modules/bfd_pipeline_dashboard"
 }
+
+module "bfd_pipeline_slo_alarms" {
+  source = "./modules/bfd_pipeline_slo_alarms"
+}
