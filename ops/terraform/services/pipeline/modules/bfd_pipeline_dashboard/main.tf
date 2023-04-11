@@ -45,7 +45,12 @@ resource "aws_cloudwatch_dashboard" "this" {
   dashboard_body = templatefile(
     "${path.module}/templates/pipeline_dashboard.json.tftpl",
     merge({
-      env = var.env
+      env                         = var.env
+      current_week_monday_9am_est = local.current_week_monday_9am_est
+      next_monday_9am_est         = local.next_monday_9am_est
+      next_next_monday_9am_est    = local.next_next_monday_9am_est
+      prev_monday_9am_est         = local.prev_monday_9am_est
+      prev_prev_monday_9am_est    = local.prev_prev_monday_9am_est
     }, local.client_ssls)
   )
 }
