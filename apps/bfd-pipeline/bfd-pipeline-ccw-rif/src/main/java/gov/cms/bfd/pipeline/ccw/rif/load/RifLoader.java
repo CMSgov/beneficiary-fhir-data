@@ -330,17 +330,54 @@ public final class RifLoader {
       Consumer<RifRecordLoadResult> resultHandler) {
     loadExecutor.submit(
         () -> {
-          try {
-            List<RifRecordLoadResult> processResults;
-            try (TransactionManager transactionManager =
-                new TransactionManager(appState.getEntityManagerFactory())) {
-              processResults =
-                  transactionManager.executeFunction(
-                      entityManager -> process(recordsBatch, loadedFileId, entityManager));
-            }
-            processResults.forEach(resultHandler::accept);
+          RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
+          MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
+          RifFileType rifFileType = fileEvent.getFile().getFileType();
+
+          // Only one of each failure/success Timer.Contexts will be applied.
+          Timer.Context timerBatchSuccess =
+              appState
+                  .getMetrics()
+                  .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches"))
+                  .time();
+          Timer.Context timerBatchTypeSuccess =
+              fileEventMetrics
+                  .timer(
+                      MetricRegistry.name(
+                          getClass().getSimpleName(), "recordBatches", rifFileType.name()))
+                  .time();
+          Timer.Context timerBundleFailure =
+              appState
+                  .getMetrics()
+                  .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
+                  .time();
+
+          // Execute the transaction and capture any exception it might throw as a RifLoadFailure
+          RifLoadFailure failure = null;
+          List<RifRecordLoadResult> processResults = List.of();
+          try (TransactionManager transactionManager =
+              new TransactionManager(appState.getEntityManagerFactory())) {
+            processResults =
+                transactionManager.executeFunction(
+                    entityManager -> process(recordsBatch, loadedFileId, entityManager));
           } catch (Throwable e) {
-            LOGGER.error("Error caught when processing async batch!", e);
+            LOGGER.warn("Failed to load '{}' record.", rifFileType, e);
+            failure = new RifLoadFailure(recordsBatch, e);
+          }
+
+          if (failure == null) {
+            // Update the metrics now that things have been pushed.
+            timerBatchSuccess.stop();
+            timerBatchTypeSuccess.stop();
+            processResults.forEach(resultHandler::accept);
+          } else {
+            // Update metrics for a failure and halt the pipeline.
+            timerBundleFailure.stop();
+            fileEventMetrics
+                .meter(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
+                .mark(1);
+
+            LOGGER.error("Error caught when processing async batch!", failure);
             // Cannot use errorHandler here, as it will cause a long wait before shutdown
             fatalFailure.set(true);
           }
@@ -354,9 +391,11 @@ public final class RifLoader {
    * @param loadedFileId the loaded file id
    * @param entityManager the {@link EntityManager} for the current transaction
    * @return the {@link RifRecordLoadResult}s that model the results of the operation
+   * @throws IOException can be thrown by {@link org.apache.commons.csv.CSVPrinter}
    */
   private List<RifRecordLoadResult> process(
-      List<RifRecordEvent<?>> recordsBatch, long loadedFileId, EntityManager entityManager) {
+      List<RifRecordEvent<?>> recordsBatch, long loadedFileId, EntityManager entityManager)
+      throws IOException {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
     MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
     RifFileType rifFileType = fileEvent.getFile().getFileType();
@@ -370,61 +409,61 @@ public final class RifLoader {
       }
     }
 
-    // Only one of each failure/success Timer.Contexts will be applied.
-    Timer.Context timerBatchSuccess =
-        appState
-            .getMetrics()
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches"))
-            .time();
-    Timer.Context timerBatchTypeSuccess =
-        fileEventMetrics
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(), "recordBatches", rifFileType.name()))
-            .time();
-    Timer.Context timerBundleFailure =
-        appState
-            .getMetrics()
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
-            .time();
-
     // TODO: refactor the following to be less of an indented mess
-    try {
-      List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
+    List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
 
-      /*
-       * Dev Note: All timestamps of records in the batch and the LoadedBatch must be the same for data consistency.
-       * The timestamp from the LoadedBatchBuilder is used.
-       */
-      LoadedBatchBuilder loadedBatchBuilder =
-          new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
+    /*
+     * Dev Note: All timestamps of records in the batch and the LoadedBatch must be the same for data consistency.
+     * The timestamp from the LoadedBatchBuilder is used.
+     */
+    LoadedBatchBuilder loadedBatchBuilder =
+        new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
 
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
-        RecordAction recordAction = rifRecordEvent.getRecordAction();
-        RifRecordBase record = rifRecordEvent.getRecord();
+    for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
+      RecordAction recordAction = rifRecordEvent.getRecordAction();
+      RifRecordBase record = rifRecordEvent.getRecord();
 
-        LOGGER.trace("Loading '{}' record.", rifFileType);
+      LOGGER.trace("Loading '{}' record.", rifFileType);
 
-        // Set lastUpdated to the same value for the whole batch
-        record.setLastUpdated(Optional.of(loadedBatchBuilder.getTimestamp()));
+      // Set lastUpdated to the same value for the whole batch
+      record.setLastUpdated(Optional.of(loadedBatchBuilder.getTimestamp()));
 
-        // Associate the beneficiary with this file loaded
-        loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId());
+      // Associate the beneficiary with this file loaded
+      loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId());
 
-        LoadStrategy strategy = selectStrategy(recordAction);
-        LoadAction loadAction;
+      LoadStrategy strategy = selectStrategy(recordAction);
+      LoadAction loadAction;
 
-        if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
-          // Check to see if record already exists.
-          Timer.Context timerIdempotencyQuery =
-              fileEventMetrics
-                  .timer(MetricRegistry.name(getClass().getSimpleName(), "idempotencyQueries"))
-                  .time();
-          Object recordId =
-              appState.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(record);
-          Objects.requireNonNull(recordId);
-          Object recordInDb = entityManager.find(record.getClass(), recordId);
-          timerIdempotencyQuery.close();
+      if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
+        // Check to see if record already exists.
+        Timer.Context timerIdempotencyQuery =
+            fileEventMetrics
+                .timer(MetricRegistry.name(getClass().getSimpleName(), "idempotencyQueries"))
+                .time();
+        Object recordId =
+            appState.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(record);
+        Objects.requireNonNull(recordId);
+        Object recordInDb = entityManager.find(record.getClass(), recordId);
+        timerIdempotencyQuery.close();
+
+        // Log if we have a non-2023 enrollment year INSERT
+        if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
+          LOGGER.info(
+              "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
+              ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
+        }
+
+        if (recordInDb == null) {
+          loadAction = LoadAction.INSERTED;
+          tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+          entityManager.persist(record);
+          // FIXME Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
+        } else {
+          loadAction = LoadAction.DID_NOTHING;
+        }
+      } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
+        if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
+          loadAction = LoadAction.INSERTED;
 
           // Log if we have a non-2023 enrollment year INSERT
           if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
@@ -432,89 +471,57 @@ public final class RifLoader {
                 "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
                 ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
           }
-
-          if (recordInDb == null) {
-            loadAction = LoadAction.INSERTED;
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-            entityManager.persist(record);
-            // FIXME Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
-          } else {
-            loadAction = LoadAction.DID_NOTHING;
-          }
-        } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
-          if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
-            loadAction = LoadAction.INSERTED;
-
-            // Log if we have a non-2023 enrollment year INSERT
-            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-              LOGGER.info(
-                  "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
-                  ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
-            }
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-            entityManager.persist(record);
-          } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
-            loadAction = LoadAction.UPDATED;
-            // Skip this record if the year is not 2023 and its an update.
-            if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-              /*
-               * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
-               * it in the DB.
-               */
-              StringBuffer rifData = new StringBuffer();
-              try (CSVPrinter csvPrinter = new CSVPrinter(rifData, RifParsingUtils.CSV_FORMAT)) {
-                for (CSVRecord csvRow : rifRecordEvent.getRawCsvRecords()) {
-                  csvPrinter.printRecord(csvRow);
-                }
+          tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+          entityManager.persist(record);
+        } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
+          loadAction = LoadAction.UPDATED;
+          // Skip this record if the year is not 2023 and its an update.
+          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
+            /*
+             * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
+             * it in the DB.
+             */
+            StringBuffer rifData = new StringBuffer();
+            try (CSVPrinter csvPrinter = new CSVPrinter(rifData, RifParsingUtils.CSV_FORMAT)) {
+              for (CSVRecord csvRow : rifRecordEvent.getRawCsvRecords()) {
+                csvPrinter.printRecord(csvRow);
               }
-
-              // Save the skipped record to the DB.
-              SkippedRifRecord skippedRifRecord =
-                  new SkippedRifRecord(
-                      rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
-                      SkipReasonCode.DELAYED_BACKDATED_ENROLLMENT_BFD_1566,
-                      rifRecordEvent.getFileEvent().getFile().getFileType().name(),
-                      rifRecordEvent.getRecordAction(),
-                      ((Beneficiary) record).getBeneficiaryId(),
-                      rifData.toString());
-              entityManager.persist(skippedRifRecord);
-              LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
-            } else {
-              tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-              entityManager.merge(record);
             }
+
+            // Save the skipped record to the DB.
+            SkippedRifRecord skippedRifRecord =
+                new SkippedRifRecord(
+                    rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
+                    SkipReasonCode.DELAYED_BACKDATED_ENROLLMENT_BFD_1566,
+                    rifRecordEvent.getFileEvent().getFile().getFileType().name(),
+                    rifRecordEvent.getRecordAction(),
+                    ((Beneficiary) record).getBeneficiaryId(),
+                    rifData.toString());
+            entityManager.persist(skippedRifRecord);
+            LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
           } else {
-            throw new BadCodeMonkeyException(
-                String.format(
-                    "Unhandled %s: '%s'.", RecordAction.class, rifRecordEvent.getRecordAction()));
+            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+            entityManager.merge(record);
           }
-        } else throw new BadCodeMonkeyException();
+        } else {
+          throw new BadCodeMonkeyException(
+              String.format(
+                  "Unhandled %s: '%s'.", RecordAction.class, rifRecordEvent.getRecordAction()));
+        }
+      } else throw new BadCodeMonkeyException();
 
-        LOGGER.trace("Loaded '{}' record.", rifFileType);
+      LOGGER.trace("Loaded '{}' record.", rifFileType);
 
-        fileEventMetrics
-            .meter(MetricRegistry.name(getClass().getSimpleName(), "records", loadAction.name()))
-            .mark(1);
-
-        loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
-      }
-      LoadedBatch loadedBatch = loadedBatchBuilder.build();
-      entityManager.persist(loadedBatch);
-
-      // Update the metrics now that things have been pushed.
-      timerBatchSuccess.stop();
-      timerBatchTypeSuccess.stop();
-
-      return loadResults;
-    } catch (Throwable t) {
-      timerBundleFailure.stop();
       fileEventMetrics
-          .meter(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
+          .meter(MetricRegistry.name(getClass().getSimpleName(), "records", loadAction.name()))
           .mark(1);
-      LOGGER.warn("Failed to load '{}' record.", rifFileType, t);
 
-      throw new RifLoadFailure(recordsBatch, t);
+      loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
     }
+    LoadedBatch loadedBatch = loadedBatchBuilder.build();
+    entityManager.persist(loadedBatch);
+
+    return loadResults;
   }
 
   /**
