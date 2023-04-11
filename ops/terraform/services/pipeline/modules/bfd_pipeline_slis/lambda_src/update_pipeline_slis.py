@@ -447,7 +447,7 @@ def handler(event: Any, context: Any):
                         metrics=gen_all_dimensioned_metrics(
                             metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                             dimensions=[rif_type_dimension, group_timestamp_dimension],
-                            value=int(load_time_delta.total_seconds()),
+                            value=round(load_time_delta.total_seconds()),
                             timestamp=event_timestamp,
                             unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
                         ),
@@ -528,7 +528,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
                             dimensions=[group_timestamp_dimension],
                             timestamp=event_timestamp,
-                            value=int(full_load_time_delta.total_seconds()),
+                            value=round(full_load_time_delta.total_seconds()),
                             unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
                         ),
                     ),
