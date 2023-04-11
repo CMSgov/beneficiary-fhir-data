@@ -184,12 +184,10 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
             headerValues.toString());
     }
 
-    if (!(response instanceof ContentCachingResponseWrapper)) {
-      try {
-        resWrapper.copyBodyToResponse();
-      } catch (IOException e) {
-        LOGGER_MISC.error("Error extracting body", e);
-      }
+    try {
+      resWrapper.copyBodyToResponse();
+    } catch (IOException e) {
+      LOGGER_MISC.error("Error extracting body", e);
     }
   }
 
