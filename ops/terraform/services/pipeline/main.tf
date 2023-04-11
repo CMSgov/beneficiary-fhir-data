@@ -209,3 +209,7 @@ module "bfd_pipeline_slis" {
   aws_kms_key_id  = local.kms_key_id
   etl_bucket_id   = aws_s3_bucket.this.id
 }
+
+module "bfd_pipeline_dashboard" {
+  source = "./modules/bfd_pipeline_dashboard"
+}
