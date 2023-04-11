@@ -31,7 +31,8 @@ public final class RifLoaderTest {
             options.getLoaderThreads(),
             options.isIdempotencyRequired(),
             false,
-            100);
+            100,
+            3);
     LOGGER.info("salt/pepper: {}", Arrays.toString(options.getIdHasherConfig().getHashPepper()));
     LOGGER.info("hash iterations: {}", options.getIdHasherConfig().getHashIterations());
     IdHasher hasher = new IdHasher(options.getIdHasherConfig());
@@ -61,7 +62,8 @@ public final class RifLoaderTest {
             options.getLoaderThreads(),
             options.isIdempotencyRequired(),
             false,
-            100);
+            100,
+            3);
     LOGGER.info("salt/pepper: {}", Arrays.toString(options.getIdHasherConfig().getHashPepper()));
     LOGGER.info("hash iterations: {}", options.getIdHasherConfig().getHashIterations());
 
