@@ -13,6 +13,7 @@ RUN yum update -y --security && \
     awscli \
     gcc \
     git \
+    jq \
     openssl-devel
 
 FROM base as prereqs
