@@ -142,6 +142,9 @@ try {
 					// Grab the commit that triggered the build.
 					checkout scm
 
+					// Address limitations resulting from CVE-2022-24767
+					sh 'git config --global --add safe.directory "$WORKSPACE"'
+
 					// Load the child Jenkinsfiles.
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
