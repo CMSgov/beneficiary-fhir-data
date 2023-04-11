@@ -908,8 +908,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   metric_name = local.metrics.claim_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
+  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  ok_actions    = null
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -932,56 +932,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   metric_name = local.metrics.claim_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_latency_per_kb_mean_15m_alert" {
-  alarm_name          = "${local.app}-${var.env}-slo-claim-with-resources-latency-per-kb-mean-15m-alert"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "700"
-
-  alarm_description = join("", [
-    "/v*/fhir/Claim response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT SLO threshold of 700 ms/KB for ${local.app} in ${var.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.claim_resources_latency_by_kb
-  namespace   = local.namespace
-
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_latency_per_kb_mean_15m_warning" {
-  alarm_name          = "${local.app}-${var.env}-slo-claim-with-resources-latency-per-kb-mean-15m-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "600"
-
-  alarm_description = join("", [
-    "/v*/fhir/Claim response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING SLO threshold of 600 ms/KB for ${local.app} in ${var.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.claim_resources_latency_by_kb
-  namespace   = local.namespace
-
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
+  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  ok_actions    = null
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -1014,42 +966,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_bulk_latency_99
     client_ssl = data.external.client_ssls_by_partner["claim_resources_latency"].result[each.key]
   }
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_bulk_latency_per_kb_99p_15m_warning" {
-  for_each = setintersection(
-    toset(keys(local.partners.bulk)),
-    toset(keys(data.external.client_ssls_by_partner["claim_resources_latency_by_kb"].result))
-  )
-
-  alarm_name                            = "${local.app}-${var.env}-slo-claim-with-resources-bulk-latency-per-kb-99p-15m-warning-${each.key}"
-  comparison_operator                   = "GreaterThanThreshold"
-  evaluation_periods                    = "1"
-  period                                = "900"
-  extended_statistic                    = "p99"
-  evaluate_low_sample_count_percentiles = "ignore"
-  threshold                             = "700"
-
-  alarm_description = join("", [
-    "/v*/fhir/Claim responses with resources returned 99% 15 minute BULK latency ",
-    "per KB exceeded WARNING SLO threshold of 480 ms/KB for partner ${each.key} for ${local.app} ",
-    "in ${var.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.claim_resources_latency_by_kb
-  namespace   = local.namespace
-  dimensions = {
-    client_ssl = data.external.client_ssls_by_partner["claim_resources_latency_by_kb"].result[each.key]
-  }
-
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
+  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  ok_actions    = null
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -1072,8 +990,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   metric_name = local.metrics.claimresponse_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
+  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  ok_actions    = null
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -1096,56 +1014,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   metric_name = local.metrics.claimresponse_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_latency_per_kb_mean_15m_alert" {
-  alarm_name          = "${local.app}-${var.env}-slo-claimresponse-with-resources-latency-per-kb-mean-15m-alert"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "1100"
-
-  alarm_description = join("", [
-    "/v*/fhir/ClaimResponse response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT SLO threshold of 1100 ms/KB for ${local.app} in ${var.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.claimresponse_resources_latency_by_kb
-  namespace   = local.namespace
-
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_latency_per_kb_mean_15m_warning" {
-  alarm_name          = "${local.app}-${var.env}-slo-claimresponse-with-resources-latency-per-kb-mean-15m-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "1000"
-
-  alarm_description = join("", [
-    "/v*/fhir/ClaimResponse response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING SLO threshold of 1000 ms/KB for ${local.app} in ${var.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.claimresponse_resources_latency_by_kb
-  namespace   = local.namespace
-
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
+  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  ok_actions    = null
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -1178,42 +1048,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_la
     client_ssl = data.external.client_ssls_by_partner["claimresponse_resources_latency"].result[each.key]
   }
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_latency_per_kb_99p_15m_warning" {
-  for_each = setintersection(
-    toset(keys(local.partners.bulk)),
-    toset(keys(data.external.client_ssls_by_partner["claimresponse_resources_latency_by_kb"].result))
-  )
-
-  alarm_name                            = "${local.app}-${var.env}-slo-claimresponse-with-resources-bulk-latency-per-kb-99p-15m-warning-${each.key}"
-  comparison_operator                   = "GreaterThanThreshold"
-  evaluation_periods                    = "1"
-  period                                = "900"
-  extended_statistic                    = "p99"
-  evaluate_low_sample_count_percentiles = "ignore"
-  threshold                             = "1100"
-
-  alarm_description = join("", [
-    "/v*/fhir/ClaimResponse responses with resources returned 99% 15 minute BULK latency ",
-    "per KB exceeded WARNING SLO threshold of 480 ms/KB for partner ${each.key} for ${local.app} ",
-    "in ${var.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.claimresponse_resources_latency_by_kb
-  namespace   = local.namespace
-  dimensions = {
-    client_ssl = data.external.client_ssls_by_partner["claimresponse_resources_latency_by_kb"].result[each.key]
-  }
-
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
+  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  ok_actions    = null
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
