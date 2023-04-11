@@ -38,11 +38,13 @@ public final class ManifestEntryDownloadTaskIT {
   private static AmazonS3 s3Client;
   /** The S3 task manager. */
   private S3TaskManager s3TaskManager;
+  /** Dummy S3 bucket name. */
+  private static final String DUMMY_S3_BUCKET_NAME = "foo";
 
   /** Sets the minio test container. */
   @BeforeAll
   public static void setupMinioS3Client() {
-    s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    s3Client = S3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME));
   }
 
   /**
