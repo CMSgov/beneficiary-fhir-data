@@ -10,6 +10,7 @@ RUN yum update -y --security && \
     yum clean metadata && \
     yum -y groupinstall "Development Tools" && \
     yum install -y \
+    ansible \
     awscli \
     gcc \
     git \
