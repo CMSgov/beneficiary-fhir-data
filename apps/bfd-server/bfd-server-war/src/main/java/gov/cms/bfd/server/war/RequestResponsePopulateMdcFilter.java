@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /**
  * Ensure that every request-response pair adds data to the logging {@link BfdMDC} which will be
@@ -161,17 +160,15 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @param response the {@link ServletResponse} to record the standard {@link BfdMDC} entries for
    */
   private void handleResponse(ServletRequest request, ServletResponse response) {
-    ContentCachingResponseWrapper resWrapper =
-        new ContentCachingResponseWrapper((HttpServletResponse) response);
-
+    HttpServletResponse servletResponse = (HttpServletResponse) response;
     BfdMDC.put(
         BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
-        Integer.toString(resWrapper.getStatus()));
+        Integer.toString(servletResponse.getStatus()));
 
     // Record the response headers.
-    Collection<String> headerNames = resWrapper.getHeaderNames();
+    Collection<String> headerNames = servletResponse.getHeaderNames();
     for (String headerName : headerNames) {
-      Collection<String> headerValues = resWrapper.getHeaders(headerName);
+      Collection<String> headerValues = servletResponse.getHeaders(headerName);
       if (headerValues.isEmpty())
         BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
       else if (headerValues.size() == 1)
@@ -182,12 +179,6 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
         BfdMDC.put(
             BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
             headerValues.toString());
-    }
-
-    try {
-      resWrapper.copyBodyToResponse();
-    } catch (IOException e) {
-      LOGGER_MISC.error("Error extracting body", e);
     }
   }
 
