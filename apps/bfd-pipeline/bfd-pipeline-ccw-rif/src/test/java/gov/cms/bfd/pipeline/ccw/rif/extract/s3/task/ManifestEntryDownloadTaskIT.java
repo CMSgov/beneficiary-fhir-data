@@ -51,7 +51,6 @@ public final class ManifestEntryDownloadTaskIT {
   @SuppressWarnings("deprecation")
   @Test
   public void testMD5ChkSum() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
