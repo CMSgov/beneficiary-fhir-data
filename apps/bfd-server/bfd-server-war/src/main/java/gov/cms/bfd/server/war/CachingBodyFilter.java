@@ -22,8 +22,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 public class CachingBodyFilter implements Filter {
 
   /** Logger that logs. */
-  private static final Logger LOGGER_MISC =
-      LoggerFactory.getLogger(RequestResponsePopulateMdcFilter.class);
+  private static final Logger LOGGER_MISC = LoggerFactory.getLogger(CachingBodyFilter.class);
 
   /** {@inheritDoc} */
   @Override
@@ -32,28 +31,31 @@ public class CachingBodyFilter implements Filter {
         new ContentCachingRequestWrapper((HttpServletRequest) req);
     ContentCachingResponseWrapper resWrapper =
         new ContentCachingResponseWrapper((HttpServletResponse) res);
-    try {
-      chain.doFilter(reqWrapper, resWrapper);
-      if (reqWrapper.isAsyncStarted()) {
-        reqWrapper
-            .getAsyncContext()
-            .addListener(
-                new AsyncListener() {
-                  public void onComplete(AsyncEvent asyncEvent) throws IOException {
-                    resWrapper.copyBodyToResponse();
-                  }
+    if (!(res instanceof ContentCachingResponseWrapper)) {
 
-                  public void onTimeout(AsyncEvent asyncEvent) throws IOException {}
+      try {
+        chain.doFilter(reqWrapper, resWrapper);
+        if (reqWrapper.isAsyncStarted()) {
+          reqWrapper
+              .getAsyncContext()
+              .addListener(
+                  new AsyncListener() {
+                    public void onComplete(AsyncEvent asyncEvent) throws IOException {
+                      resWrapper.copyBodyToResponse();
+                    }
 
-                  public void onError(AsyncEvent asyncEvent) throws IOException {}
+                    public void onTimeout(AsyncEvent asyncEvent) throws IOException {}
 
-                  public void onStartAsync(AsyncEvent asyncEvent) throws IOException {}
-                });
-      } else {
-        resWrapper.copyBodyToResponse();
+                    public void onError(AsyncEvent asyncEvent) throws IOException {}
+
+                    public void onStartAsync(AsyncEvent asyncEvent) throws IOException {}
+                  });
+        } else {
+          resWrapper.copyBodyToResponse();
+        }
+      } catch (IOException | ServletException e) {
+        LOGGER_MISC.error("Error extracting body", e);
       }
-    } catch (IOException | ServletException e) {
-      LOGGER_MISC.error("Error extracting body", e);
     }
   }
 
