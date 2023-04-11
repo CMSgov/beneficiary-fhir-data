@@ -77,6 +77,19 @@ View the relevant CloudWatch dashboard below for more information:
 * <${local.dashboard_url}|bfd-${local.env}-pipeline>
     * This dashboard visualizes SLOs and other important Pipeline metrics
   EOF 
+
+  data_load_ingestion_time_slo_configs = {
+    slo_ingestion_time_warning = {
+      type      = "warning"
+      period    = 60
+      threshold = 24 * 60 * 60 # 24 hours
+    }
+    slo_ingestion_time_alert = {
+      type      = "alert"
+      period    = 60
+      threshold = 36 * 60 * 60 # 36 hours
+    }
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
@@ -152,6 +165,78 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
     expression  = "IF(e9 > e7 && e4 > e9, 1, 0)"
     id          = "e3"
     label       = "Has ongoing load exceeded Monday 9 AM EST/EDT?"
+    return_data = true
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
+  for_each = local.data_load_ingestion_time_slo_configs
+
+  alarm_name          = "${local.app}-${local.env}-${replace(each.key, "_", "-")}"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = 1
+  evaluation_periods  = 1
+  threshold           = each.value.threshold
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alert_arn
+  ok_actions    = local.alert_ok_arn
+
+  alarm_description = join("", [
+    "BFD Pipeline in ${local.env} environment failed to load data within a ",
+    "${each.value.threshold / 60 / 60} hour period",
+    "\n\n${local.dashboard_message_fragment}"
+  ])
+
+  metric_query {
+    id          = "m1"
+    return_data = false
+
+    metric {
+      metric_name = "time/data-first-available"
+      namespace   = local.metric_namespace
+      period      = 60
+      stat        = "Maximum"
+    }
+  }
+
+  metric_query {
+    id          = "m2"
+    return_data = false
+
+    metric {
+      metric_name = "time/data-fully-loaded"
+      namespace   = local.metric_namespace
+      period      = 60
+      stat        = "Maximum"
+    }
+  }
+
+  metric_query {
+    expression  = "EPOCH(m1)"
+    id          = "e1"
+    label       = "Expression1"
+    return_data = false
+  }
+
+  metric_query {
+    expression  = "FILL(m1, REPEAT)"
+    id          = "e2"
+    label       = "Expression2"
+    return_data = false
+  }
+
+  metric_query {
+    expression  = "FILL(m2, REPEAT)"
+    id          = "e3"
+    label       = "Expression3"
+    return_data = false
+  }
+
+  metric_query {
+    expression  = "IF(e2>e3, e1-e2, 0)"
+    id          = "e4"
+    label       = "Ongoing Data Load Time"
     return_data = true
   }
 }
