@@ -47,7 +47,7 @@ public class Base64FieldTransformer implements FieldTransformer {
             TransformerUtil.createFieldNameForErrorReporting(mapping, column),
             column.isNullable(),
             column.computeMinLength(mapping.getMinStringLength()),
-            column.computeLength(),
+            columnLength,
             transformation
                 .transformerOption(DECODED_LENGTH_OPT)
                 .orElse(String.valueOf(columnLength)),
