@@ -219,4 +219,9 @@ module "bfd_pipeline_dashboard" {
 
 module "bfd_pipeline_slo_alarms" {
   source = "./modules/bfd_pipeline_slo_alarms"
+
+  alert_sns_override      = var.alert_sns_override
+  alert_ok_sns_override   = var.alert_ok_sns_override
+  warning_sns_override    = var.warning_sns_override
+  warning_ok_sns_override = var.warning_ok_sns_override
 }
