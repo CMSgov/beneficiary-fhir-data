@@ -38,7 +38,6 @@ cat <<EOF > extra_vars.json
 {
   "data_pipeline_db_url": "${writer_endpoint}",
   "data_pipeline_jvm_args": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:+PreserveFramePointer",
-  "data_pipeline_loader_threads": "{{ ansible_processor_vcpus * 25 }}",
   "data_pipeline_new_relic_app_name": "BFD Pipeline %{ if pipeline_instance == "rda" ~} %{ else ~} ${pipeline_instance} %{ endif ~} ({{ env_name_std }})",
   "data_pipeline_s3_bucket": "${pipeline_bucket}",
   "data_pipeline_tmp_dir": "{{ data_pipeline_dir }}/tmp",
