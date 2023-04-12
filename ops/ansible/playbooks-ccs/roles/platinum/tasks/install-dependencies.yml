@@ -3,8 +3,6 @@
 # Builds a 'Platinum' AMI (updates) and installs program specific dependencies
 # from a base Gold Image in the CCS AWS Environment
 ##
-- name: Enable java11 repository
-  command: amazon-linux-extras enable java-openjdk11
 - name: Install dependencies
   vars:
     ansible_python_interpreter: /usr/bin/python
@@ -17,7 +15,7 @@
       - ansible
       - gcc
       - git
-      - java-11-openjdk-devel
+      - java-17-amazon-corretto-devel
       - libffi-devel
       - openssl-devel
       - selinux-policy

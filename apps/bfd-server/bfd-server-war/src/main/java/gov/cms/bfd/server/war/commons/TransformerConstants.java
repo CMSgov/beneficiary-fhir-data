@@ -23,7 +23,7 @@ import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
  * Contains all of the shared constants used to transform CCW JPA entities (e.g. {@link
  * Beneficiary}) into FHIR resources (e.g. {@link Patient}).
  *
- * <h3>Naming Conventions</h3>
+ * <h2>Naming Conventions</h2>
  *
  * <p>This is a monster list of constants. To keep it somewhat manageable, the following naming
  * conventions must be used for the constants:

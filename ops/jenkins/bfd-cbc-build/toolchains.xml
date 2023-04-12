@@ -3,11 +3,11 @@
     <toolchain>
         <type>jdk</type>
         <provides>
-            <version>11</version>
+            <version>17</version>
             <vendor>openjdk</vendor>
         </provides>
         <configuration>
-            <jdkHome>/usr/local/openjdk-11</jdkHome>
+            <jdkHome>/usr/lib/jvm/java-17-amazon-corretto</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>

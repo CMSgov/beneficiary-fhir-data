@@ -125,39 +125,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<configuration>
-						<configLocation>checkstyle.xml</configLocation>
-						<!-- Only look in source directories, basically ignores generated code -->
-						<sourceDirectories>
-							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
-						</sourceDirectories>
-					</configuration>
-					<version>${checkstyle.plugin.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>${checkstyle.version}</version>
-						</dependency>
-					</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>verify</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.5.0</version>
