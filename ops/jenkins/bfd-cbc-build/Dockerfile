@@ -1,10 +1,10 @@
-ARG PACKER_VERSION
 ARG JAVA_VERSION
 ARG MAVEN_VERSION
+ARG PACKER_VERSION
+ARG YQ_VERSION
 
 FROM maven:${MAVEN_VERSION}-amazoncorretto-${JAVA_VERSION} AS base
 
-# TODO: install pip3 from a known requirements.txt file instead
 RUN yum update -y --security && \
     amazon-linux-extras install epel -y && \
     yum clean metadata && \
@@ -44,11 +44,14 @@ COPY tfenv-install.sh /root/tfenv-install.sh
 RUN chmod +x /root/tfenv-install.sh && \
     /root/tfenv-install.sh "${TFENV_REPO_HASH}" "${TFENV_VERSIONS}"
 
-# declaring `packer` stage here allows us to inject `PACKER_VERSION` unlike `COPY --from` below
+# declaring `packer` and `yq` stages here allows us to inject specific versions for `COPY --from` use in `dist` below
 FROM hashicorp/packer:${PACKER_VERSION} as packer
+FROM mikefarah/yq:${YQ_VERSION} as yq
 
 FROM prereqs as dist
 ENV PATH="/root/.tfenv/bin:${PATH}"
+# COPY yq binary
+COPY --from=yq /usr/bin/yq /usr/bin/yq
 # COPY tfenv files
 COPY --from=tfenv /root/.tfenv /root/.tfenv
 # Copy packer files
