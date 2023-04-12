@@ -4,6 +4,7 @@ locals {
   layer            = "data"
   established_envs = ["test", "prod-sbx", "prod"]
   create_etl_user  = local.is_prod || var.force_etl_user_creation
+  create_dashboard = contains(local.established_envs, local.env) || var.force_dashboard_creation
   jdbc_suffix      = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
@@ -211,5 +212,7 @@ module "bfd_pipeline_slis" {
 }
 
 module "bfd_pipeline_dashboard" {
+  count = local.create_dashboard ? 1 : 0
+
   source = "./modules/bfd_pipeline_dashboard"
 }
