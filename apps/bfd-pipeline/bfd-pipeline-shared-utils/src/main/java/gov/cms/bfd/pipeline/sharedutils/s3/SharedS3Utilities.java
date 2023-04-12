@@ -107,13 +107,15 @@ public final class SharedS3Utilities {
    */
   public static Bucket createTestBucket(AmazonS3 s3Client) {
     String username = System.getProperty("user.name");
+
     if (Strings.isNullOrEmpty(username)) {
       username = "anonymous";
     } else {
-      username = username.replaceAll("[@\\\\]", "-");
+      username = username.toLowerCase().replaceAll("[@\\\\]", "-");
     }
     final int randomId = ThreadLocalRandom.current().nextInt(100000);
-    final String bucketName = String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username, randomId);
+    final String bucketName =
+        String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username.toLowerCase(), randomId);
 
     // if not running S3 inside minio (i.e., vs. real AWS S3 buckets), then we need
     // to be observant of CMS security constraints; inside minio, not so much!

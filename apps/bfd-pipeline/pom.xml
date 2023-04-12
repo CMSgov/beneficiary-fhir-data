@@ -16,11 +16,11 @@
 	</description>
 
 	<modules>
+		<module>bfd-pipeline-shared-utils</module>
+		<module>bfd-pipeline-shared-test-utils</module>
 		<module>bfd-pipeline-ccw-rif</module>
 		<module>bfd-pipeline-rda-grpc</module>
 		<module>bfd-pipeline-rda-grpc-apps</module>
-		<module>bfd-pipeline-shared-utils</module>
-		<module>bfd-pipeline-shared-test-utils</module>
 		<module>bfd-pipeline-app</module>
 		<module>bfd-pipeline-rda-bridge</module>
 	</modules>
@@ -58,6 +58,12 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-shared-utils</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-test-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
