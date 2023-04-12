@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -104,17 +103,11 @@ public final class TaskExecutor extends ScheduledThreadPoolExecutor {
          * Tasks submitted to TaskExecutor get wrapped in a ScheduledFutureTask, which this branch
          * covers.
          */
-
-        Field timeField = task.getClass().getDeclaredField("time");
-        timeField.setAccessible(true);
-        return "" + timeField.get(task);
+        return String.format("%s - %s", task.getClass(), System.identityHashCode(task));
       } else {
         return String.format("(unknown: %s)", task);
       }
-    } catch (NoSuchFieldException
-        | SecurityException
-        | IllegalArgumentException
-        | IllegalAccessException e) {
+    } catch (SecurityException | IllegalArgumentException e) {
       return String.format("(unknown: %s)", task);
     }
   }
