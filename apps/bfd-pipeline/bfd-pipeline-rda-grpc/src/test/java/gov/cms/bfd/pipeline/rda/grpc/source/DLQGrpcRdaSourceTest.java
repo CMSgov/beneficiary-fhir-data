@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import utils.TestUtils;
 
 /** Tests for the {@link DLQGrpcRdaSource} class. */
 @ExtendWith(MockitoExtension.class)
@@ -135,11 +134,14 @@ public class DLQGrpcRdaSourceTest {
             new DLQGrpcRdaSource<>(
                 mockManager,
                 Objects::equals,
-                mockConfig,
+                mockChannel,
                 mockCaller,
+                mockConfig::createCallOptions,
                 meters,
                 claimType,
-                rdaVersion));
+                rdaVersion,
+                Optional.of(MAX_DQL_AGE_DAYS),
+                mockDao));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -153,8 +155,6 @@ public class DLQGrpcRdaSourceTest {
         .when(mockDao)
         .findAllMessageErrorsByClaimTypeAndStatus(
             MessageError.ClaimType.FISS, MessageError.Status.UNRESOLVED);
-
-    TestUtils.setField(sourceSpy, "dao", mockDao);
 
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
@@ -228,11 +228,14 @@ public class DLQGrpcRdaSourceTest {
             new DLQGrpcRdaSource<>(
                 mockManager,
                 Objects::equals,
-                mockConfig,
+                mockChannel,
                 mockCaller,
+                mockConfig::createCallOptions,
                 meters,
                 claimType,
-                rdaVersion));
+                rdaVersion,
+                Optional.of(MAX_DQL_AGE_DAYS),
+                mockDao));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -246,8 +249,6 @@ public class DLQGrpcRdaSourceTest {
         .when(mockDao)
         .findAllMessageErrorsByClaimTypeAndStatus(
             MessageError.ClaimType.MCS, MessageError.Status.UNRESOLVED);
-
-    TestUtils.setField(sourceSpy, "dao", mockDao);
 
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
@@ -322,16 +323,20 @@ public class DLQGrpcRdaSourceTest {
     // Create our spy for the class we're testing, so we can mock sibling methods
     // Using Object::equals for sequence predicate, effectively making the "message"
     // be treated as the sequence number, for testing simplicity
+
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
                 mockManager,
                 Objects::equals,
-                mockConfig,
+                mockChannel,
                 mockCaller,
+                mockConfig::createCallOptions,
                 meters,
                 claimType,
-                rdaVersion));
+                rdaVersion,
+                Optional.of(MAX_DQL_AGE_DAYS),
+                mockDao));
 
     doNothing().when(sourceSpy).setUptimeToReceiving();
 
@@ -380,9 +385,6 @@ public class DLQGrpcRdaSourceTest {
     doReturn(1L)
         .when(mockDao)
         .updateState(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS, MessageError.Status.RESOLVED);
-
-    // Force our mock dao into the source object using reflection hackery
-    TestUtils.setField(sourceSpy, "dao", mockDao);
 
     AbstractGrpcRdaSource.ProcessResult expectedResult = new AbstractGrpcRdaSource.ProcessResult();
     // Only a claim that was could be successfully written to the DB is considered processed, thus
