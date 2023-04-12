@@ -21,11 +21,11 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -41,8 +41,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
-public final class SyntheaRifLoadJobIT {
+public final class SyntheaRifLoadJobIT extends MinioTestContainer {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
+
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client = createS3MinioClient();
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -89,7 +92,6 @@ public final class SyntheaRifLoadJobIT {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
@@ -223,7 +225,6 @@ public final class SyntheaRifLoadJobIT {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.

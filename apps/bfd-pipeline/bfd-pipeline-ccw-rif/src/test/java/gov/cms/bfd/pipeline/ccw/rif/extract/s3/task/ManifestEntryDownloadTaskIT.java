@@ -25,6 +25,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,18 @@ import org.slf4j.LoggerFactory;
 public final class ManifestEntryDownloadTaskIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client;
   /** The S3 task manager. */
   private S3TaskManager s3TaskManager;
+  /** Dummy S3 bucket name. */
+  private static final String DUMMY_S3_BUCKET_NAME = "foo";
+
+  /** Sets the minio test container. */
+  @BeforeAll
+  public static void setupMinioS3Client() {
+    s3Client = S3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME));
+  }
 
   /**
    * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value.
@@ -42,7 +53,6 @@ public final class ManifestEntryDownloadTaskIT {
   @SuppressWarnings("deprecation")
   @Test
   public void testMD5ChkSum() throws Exception {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
