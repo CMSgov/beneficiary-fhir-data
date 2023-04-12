@@ -16,6 +16,12 @@ variable "force_dashboard_creation" {
   type        = bool
 }
 
+variable "force_slo_alarms_creation" {
+  default     = false
+  description = "Forces the creation of BFD Pipeline SLO CloudWatch Alarms; note alarms are created by-default for established environments"
+  type        = bool
+}
+
 variable "create_ccw_pipeline" {
   default     = true
   description = "Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default."
