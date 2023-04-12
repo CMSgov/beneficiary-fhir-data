@@ -61,7 +61,7 @@
 		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
 		<!-- The version of Java that we'll use for everything. -->
-		<javaSourceVersion>11</javaSourceVersion>
+		<javaSourceVersion>17</javaSourceVersion>
 
 		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
 			they are reproducible bit-by-bit no matter when/where they are generated.
@@ -501,8 +501,8 @@
 					<configuration>
 						<toolchains>
 							<jdk>
-								<!-- Use a Java 11 JDK, by default. -->
-								<version>11</version>
+								<!-- Use a Java 17 JDK, by default. -->
+								<version>${javaSourceVersion}</version>
 							</jdk>
 						</toolchains>
 					</configuration>

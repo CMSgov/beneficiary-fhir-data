@@ -54,7 +54,7 @@
 - name: Create Empty App Server SSL Truststore Working Copy
   command: "{{ item }}"
   with_items:
-    - "keytool -genkeypair -alias fake -dname cn=fake -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
+    - "keytool -genkeypair -alias fake -dname cn=fake -keyalg RSA -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
     - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit -keypass changeit"
   changed_when: false
   become: true
