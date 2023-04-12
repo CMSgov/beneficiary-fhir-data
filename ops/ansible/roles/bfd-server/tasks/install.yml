@@ -4,7 +4,7 @@
     ansible_python_interpreter: /usr/bin/python
   yum:
     pkg:
-      - java-11-openjdk-devel
+      - java-17-amazon-corretto-devel
       - iptables
   become: true
 
