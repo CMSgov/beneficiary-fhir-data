@@ -10,6 +10,12 @@ variable "force_etl_user_creation" {
   type        = string
 }
 
+variable "force_dashboard_creation" {
+  default     = false
+  description = "Forces the creation of BFD Pipeline CloudWatch Dashboards; note dashboards are created by-default for established environments"
+  type        = bool
+}
+
 variable "create_ccw_pipeline" {
   default     = true
   description = "Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default."
