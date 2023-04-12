@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -31,7 +32,19 @@ public class CachingBodyFilter implements Filter {
     try {
       chain.doFilter(reqWrapper, resWrapper);
     } catch (IOException | ServletException e) {
-      LOGGER_MISC.error("Error extracting body", e);
+      LOGGER_MISC.error("Error extracting body", e.getStackTrace().toString());
     }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {
+    // Nothing to do here.
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void destroy() {
+    // Nothing to do here.
   }
 }
