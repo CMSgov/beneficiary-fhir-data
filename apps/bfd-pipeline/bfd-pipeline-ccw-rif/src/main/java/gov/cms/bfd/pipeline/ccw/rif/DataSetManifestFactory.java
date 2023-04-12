@@ -71,7 +71,7 @@ public class DataSetManifestFactory {
    * @throws SAXException (any errors encountered will be bubbled up).
    * @return the {@link DataSetManifest}
    */
-  public static DataSetManifest parseManifest(InputStream manifestStream)
+  public DataSetManifest parseManifest(InputStream manifestStream)
       throws JAXBException, SAXException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
