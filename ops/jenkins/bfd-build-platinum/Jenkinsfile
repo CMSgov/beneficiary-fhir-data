@@ -45,12 +45,11 @@ def sendNotifications(String buildStatus = '', String stageName = '') {
     def msg = ''
     switch (buildStatus) {
         case 'UNSTABLE':
-        case 'SUCCESS':
         case 'SUCCESS LATEST IMAGE':
-            msg = 'COMPLETED SUCCESSFULLY WITH THE LATEST PLATINUM IMAGE'
+            msg = 'COMPLETED SUCCESSFULLY: NO NEW IMAGE BUILD REQUIRED...USING THE LATEST PLATINUM IMAGE.'
             break
         case 'SUCCESS NEW PLATINUM':
-            msg = 'COMPLETED SUCCESSFULLY WITH A NEW PLATINUM IMAGE'
+            msg = 'COMPLETED SUCCESSFULLY: BUILT A NEW PLATINUM IMAGE'
             break
         case 'FAILED':
         case 'FAILURE':
