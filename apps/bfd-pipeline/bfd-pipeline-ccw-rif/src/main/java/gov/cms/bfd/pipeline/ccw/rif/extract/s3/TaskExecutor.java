@@ -103,7 +103,7 @@ public final class TaskExecutor extends ScheduledThreadPoolExecutor {
          * Tasks submitted to TaskExecutor get wrapped in a ScheduledFutureTask, which this branch
          * covers.
          */
-        return task.getClass().toString();
+        return String.format("%s - %s", task.getClass(), task.hashCode());
       } else {
         return String.format("(unknown: %s)", task);
       }
