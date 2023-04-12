@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.ProcessOutputConsumer;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -216,24 +215,14 @@ public final class ServerProcess implements AutoCloseable {
    * @param process the {@link Process} to signal
    */
   static void sendSigterm(Process process) {
-    /*
-     * We have to use reflection and external commands here to work around this ridiculous JDK bug:
-     * https://bugs.openjdk.java.net/browse/JDK-5101298.
-     */
     if (process.getClass().getName().equals("java.lang.ProcessImpl")) {
       try {
-        Field pidField = process.getClass().getDeclaredField("pid");
-        pidField.setAccessible(true);
-
-        int processPid = pidField.getInt(process);
-
-        ProcessBuilder killBuilder = new ProcessBuilder("/bin/kill", "-s", "TERM", "" + processPid);
+        ProcessBuilder killBuilder =
+            new ProcessBuilder("/bin/kill", "-s", "TERM", "" + process.pid());
         int killBuilderExitCode = killBuilder.start().waitFor();
         if (killBuilderExitCode != 0) process.destroy();
-      } catch (NoSuchFieldException
-          | SecurityException
+      } catch (SecurityException
           | IllegalArgumentException
-          | IllegalAccessException
           | InterruptedException
           | IOException e) {
         process.destroy();

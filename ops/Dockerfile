@@ -43,7 +43,6 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 #       with the dependencies encoded in the BFD platinum image
 #       instructions.
 RUN yum update -y --security && \
-    amazon-linux-extras enable java-openjdk11 && \
     yum clean metadata && \
     amazon-linux-extras install epel -y && \
     yum -y groupinstall "Development Tools" && \
@@ -52,7 +51,7 @@ RUN yum update -y --security && \
     ansible \
     gcc \
     git \
-    java-11-openjdk-devel \
+    java-17-amazon-corretto-devel \
     libffi-devel \
     openssl-devel \
     selinux-policy \

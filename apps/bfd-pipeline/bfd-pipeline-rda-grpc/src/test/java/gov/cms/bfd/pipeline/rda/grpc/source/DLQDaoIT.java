@@ -37,7 +37,8 @@ public class DLQDaoIT {
   /** Expiration age in days for deleting expired records. */
   private final int maxAgeDays = 100;
   /** Precomputed value for threshold of record expiration. */
-  private final Instant oldestUpdateDateToKeep = clock.instant().minus(maxAgeDays, ChronoUnit.DAYS);
+  private final Instant oldestUpdateDateToKeep =
+      clock.instant().truncatedTo(ChronoUnit.MICROS).minus(maxAgeDays, ChronoUnit.DAYS);
 
   /**
    * Verifies that basic insert, read, and delete operations work properly since they are used in
@@ -137,7 +138,11 @@ public class DLQDaoIT {
         List.of(recordToUpdate, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     final var updatedRecord =
-        recordToUpdate.toBuilder().status(RESOLVED).updatedDate(clock.instant()).build();
+        recordToUpdate
+            .toBuilder()
+            .status(RESOLVED)
+            .updatedDate(clock.instant().truncatedTo(ChronoUnit.MICROS))
+            .build();
     final var allRecordsAfter =
         List.of(updatedRecord, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
@@ -168,7 +173,8 @@ public class DLQDaoIT {
                     // the created date should be unchanged
                     assertEquals(recordToUpdate.getCreatedDate(), rec.getCreatedDate());
                     // the update date should have been updated
-                    assertEquals(clock.instant(), rec.getUpdatedDate());
+                    assertEquals(
+                        clock.instant().truncatedTo(ChronoUnit.MICROS), rec.getUpdatedDate());
                   });
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);

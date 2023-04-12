@@ -67,7 +67,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 ```
 
 ### Initializing the Repository
-1. Install JDK 11. You'll need Java 11 to run BFD. You can install OpenJDK 11 however you prefer.
+1. Install JDK 17. You'll need Java 17 to run BFD. You can install OpenJDK 17 however you prefer, however [Corretto 17](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/macos-install.html) is recommended.
 1. Install Maven 3 (Ideally 3.90+ for [build caching](./apps/.mvn/extensions.xml)). Project tasks are handled by Apache Maven. Install it however you prefer.
 1. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following (change the jdkHome appropriately):
     ```xml
@@ -302,7 +302,7 @@ The following instructions are to be executed from within the Eclipse IDE applic
 
 #### Eclipse JDK
 
-Verify Eclipse is using the correct Java 11 JDK.
+Verify Eclipse is using the correct Java 17 JDK.
 
 1. Open **Window > Preferences**.
 1. Select **Java > Installed JREs**.
