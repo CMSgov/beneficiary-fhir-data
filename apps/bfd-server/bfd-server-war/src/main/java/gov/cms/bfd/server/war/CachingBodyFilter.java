@@ -5,7 +5,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -28,11 +27,8 @@ public class CachingBodyFilter extends OncePerRequestFilter {
     ContentCachingResponseWrapper resWrapper = new ContentCachingResponseWrapper(response);
     try {
       chain.doFilter(reqWrapper, resWrapper);
-      if (!resWrapper.isCommitted() && resWrapper.getStatus() == HttpStatus.SC_OK) {
-        resWrapper.copyBodyToResponse();
-      }
     } catch (IOException | ServletException e) {
-      LOGGER_MISC.error("Error extracting body", e.getStackTrace().toString());
+      LOGGER_MISC.error("Error extracting body", e);
     }
   }
 }
