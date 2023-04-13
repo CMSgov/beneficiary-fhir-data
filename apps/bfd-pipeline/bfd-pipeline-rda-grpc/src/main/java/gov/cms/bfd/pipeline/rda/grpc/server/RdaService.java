@@ -25,38 +25,36 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   /** The RDA server version to use when serving messages. */
   public static final String RDA_PROTO_VERSION = "0.13.0";
 
-  /** The configuration for the server. */
-  private final Config config;
+  /** The source of claims for the server. */
+  private final RdaMessageSourceFactory messageSourceFactory;
 
   /**
    * Instantiates a new Rda service.
    *
-   * @param config the config
+   * @param messageSourceFactory used to create sources of claims
    */
-  public RdaService(Config config) {
-    this.config = config;
+  public RdaService(RdaMessageSourceFactory messageSourceFactory) {
+    this.messageSourceFactory = messageSourceFactory;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getVersion(Empty request, StreamObserver<ApiVersion> responseObserver) {
     try {
-      LOGGER.info("getVersion called: response={}", config.getVersion());
-      responseObserver.onNext(config.getVersion().toApiVersion());
+      LOGGER.info("getVersion called: response={}", messageSourceFactory.getVersion());
+      responseObserver.onNext(messageSourceFactory.getVersion().toApiVersion());
       responseObserver.onCompleted();
     } catch (Exception ex) {
       responseObserver.onError(Status.fromThrowable(ex).asException());
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getFissClaims(
       ClaimRequest request, StreamObserver<FissClaimChange> responseObserver) {
     LOGGER.info("start getFissClaims call with since={}", request.getSince());
     try {
       MessageSource<FissClaimChange> generator =
-          config.getFissSourceFactory().apply(request.getSince() + 1);
+          messageSourceFactory.createFissMessageSource(request.getSince() + 1);
       Responder<FissClaimChange> responder = createFissResponder(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
@@ -78,13 +76,12 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     return new Responder<>(observer, source);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void getMcsClaims(ClaimRequest request, StreamObserver<McsClaimChange> responseObserver) {
     LOGGER.info("start getMcsClaims call with since={}", request.getSince());
     try {
       MessageSource<McsClaimChange> generator =
-          config.getMcsSourceFactory().apply(request.getSince() + 1);
+          messageSourceFactory.createMcsMessageSource(request.getSince() + 1);
       Responder<McsClaimChange> responder = createMcsResponder(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
@@ -191,29 +188,6 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
           .setCommitId(commitId)
           .setBuildTime(buildTime)
           .build();
-    }
-  }
-
-  /** Configuration class for the service. */
-  @Value
-  @Builder
-  public static class Config {
-    /** The fiss stream source factory. */
-    @Builder.Default
-    MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
-    /** The MCS stream source factory. */
-    @Builder.Default
-    MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
-    /** The version information. */
-    @Builder.Default Version version = Version.builder().build();
-
-    /**
-     * Creates a new RDA service with this configuration.
-     *
-     * @return the rda service
-     */
-    public RdaService createService() {
-      return new RdaService(this);
     }
   }
 }

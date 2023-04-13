@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -23,38 +25,58 @@ import lombok.Singular;
 /** Class for creating a local RDA server for testing purposes. */
 public class RdaServer {
   /**
-   * Creates a local RDA API server for testing.
+   * Creates a local RDA API server for testing. Caller must close the result object to clean up
+   * resources once the server has been terminated.
    *
    * @param config {@link LocalConfig} for the server
-   * @return a running RDA API Server object
+   * @return a running RDA API Server object and closeable state
    * @throws IOException if the server cannot bind at runtime
    */
-  public static Server startLocal(LocalConfig config) throws IOException {
+  public static ServerState startLocal(LocalConfig config) throws Exception {
     final ServerBuilder<?> serverBuilder =
         config.hasHostname()
             ? NettyServerBuilder.forAddress(
                 new InetSocketAddress(config.getHostname(), config.getPort()))
             : ServerBuilder.forPort(config.getPort());
-    return serverBuilder
-        .addService(config.createService())
-        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
-        .build()
-        .start();
+    final var messageSourceFactory = config.getServiceConfig().createMessageSourceFactory();
+    try {
+      final var server =
+          serverBuilder
+              .addService(config.createService(messageSourceFactory))
+              .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
+              .build()
+              .start();
+      return new ServerState(server, messageSourceFactory);
+    } catch (Exception ex) {
+      // clean up if an exception was thrown since the caller would not be able to
+      messageSourceFactory.close();
+      throw ex;
+    }
   }
 
   /**
-   * Creates an in-process (no network connections involved) RDA API server for testing.
+   * Creates an in-process (no network connections involved) RDA API server for testing. Caller must
+   * close the result object to clean up resources once the server has been terminated.
    *
    * @param config {@link InProcessConfig} for the server
-   * @return a running RDA API Server object
+   * @return a running RDA API Server object and closeable state
    * @throws IOException if the server cannot bind properly
    */
-  public static Server startInProcess(InProcessConfig config) throws IOException {
-    return InProcessServerBuilder.forName(config.getServerName())
-        .addService(config.createService())
-        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
-        .build()
-        .start();
+  public static ServerState startInProcess(InProcessConfig config) throws Exception {
+    final var messageSourceFactory = config.getServiceConfig().createMessageSourceFactory();
+    try {
+      final var server =
+          InProcessServerBuilder.forName(config.getServerName())
+              .addService(config.createService(messageSourceFactory))
+              .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
+              .build()
+              .start();
+      return new ServerState(server, messageSourceFactory);
+    } catch (Exception ex) {
+      // clean up if an exception was thrown since the caller would not be able to
+      messageSourceFactory.close();
+      throw ex;
+    }
   }
 
   /**
@@ -67,12 +89,13 @@ public class RdaServer {
    */
   public static void runWithLocalServer(LocalConfig config, ThrowableConsumer<Integer> action)
       throws Exception {
-    final Server server = startLocal(config);
-    try {
-      action.accept(server.getPort());
-    } finally {
-      server.shutdown();
-      server.awaitTermination(3, TimeUnit.MINUTES);
+    try (ServerState state = startLocal(config)) {
+      try {
+        action.accept(state.server.getPort());
+      } finally {
+        state.server.shutdown();
+        state.server.awaitTermination(3, TimeUnit.MINUTES);
+      }
     }
   }
 
@@ -87,19 +110,20 @@ public class RdaServer {
    */
   public static void runWithInProcessServer(
       InProcessConfig config, ThrowableConsumer<ManagedChannel> action) throws Exception {
-    final Server server = startInProcess(config);
-    try {
-      final ManagedChannel channel =
-          InProcessChannelBuilder.forName(config.getServerName()).build();
+    try (ServerState state = startInProcess(config)) {
       try {
-        action.accept(channel);
+        final ManagedChannel channel =
+            InProcessChannelBuilder.forName(config.getServerName()).build();
+        try {
+          action.accept(channel);
+        } finally {
+          channel.shutdown();
+          channel.awaitTermination(3, TimeUnit.MINUTES);
+        }
       } finally {
-        channel.shutdown();
-        channel.awaitTermination(3, TimeUnit.MINUTES);
+        state.server.shutdown();
+        state.server.awaitTermination(3, TimeUnit.MINUTES);
       }
-    } finally {
-      server.shutdown();
-      server.awaitTermination(3, TimeUnit.MINUTES);
     }
   }
 
@@ -115,26 +139,21 @@ public class RdaServer {
    */
   public static void runWithInProcessServerNoParam(InProcessConfig config, ThrowableAction test)
       throws Exception {
-    final Server server = startInProcess(config);
-    try {
-      test.act();
-    } finally {
-      server.shutdown();
-      server.awaitTermination(3, TimeUnit.MINUTES);
+    try (ServerState state = startInProcess(config)) {
+      try {
+        test.act();
+      } finally {
+        state.server.shutdown();
+        state.server.awaitTermination(3, TimeUnit.MINUTES);
+      }
     }
   }
 
   /** Configuration for the RDA server. */
   @Getter
   private abstract static class BaseConfig {
-    /** Version for the RdaService to report when getVersion is called. */
-    private final RdaService.Version version;
-
-    /** Factory used to create {@link MessageSource} objects on demand. */
-    private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
-
-    /** Factory used to create {@link MessageSource} objects on demand. */
-    private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
+    /** Configuration used to create an {@link RdaService}. */
+    private final RdaMessageSourceFactory.Config serviceConfig;
 
     /**
      * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
@@ -142,38 +161,41 @@ public class RdaServer {
     private final Set<String> authorizedTokens;
 
     /**
-     * Instantiates a new configuration.
+     * Instantiates a new configuration. If {@code serviceConfig} is not null it is used otherwise
+     * the other parameters are used to build a config.
      *
-     * @param version the version
-     * @param fissSourceFactory the fiss source factory
-     * @param mcsSourceFactory the mcs source factory
+     * @param version optional version
+     * @param fissSourceFactory optional fiss source factory
+     * @param mcsSourceFactory optional mcs source factory
+     * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      */
     BaseConfig(
-        RdaService.Version version,
-        MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaService.Version version,
+        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaMessageSourceFactory.Config serviceConfig,
         Set<String> authorizedTokens) {
-      this.version = version != null ? version : RdaService.Version.builder().build();
-      this.fissSourceFactory =
-          fissSourceFactory != null ? fissSourceFactory : EmptyMessageSource.factory();
-      this.mcsSourceFactory =
-          mcsSourceFactory != null ? mcsSourceFactory : EmptyMessageSource.factory();
+      if (serviceConfig == null) {
+        serviceConfig =
+            RdaMessageSourceFactory.Config.builder()
+                .version(version)
+                .fissSourceFactory(fissSourceFactory)
+                .mcsSourceFactory(mcsSourceFactory)
+                .build();
+      }
+      this.serviceConfig = serviceConfig;
       this.authorizedTokens = authorizedTokens;
     }
 
     /**
-     * Creates a configured rda service.
+     * Creates a configured rda service with the provided {@link RdaMessageSourceFactory}.
      *
+     * @param messageSourceFactory source of claims
      * @return properly configured RdaService instance
      */
-    public RdaService createService() {
-      return RdaService.Config.builder()
-          .version(version)
-          .fissSourceFactory(fissSourceFactory)
-          .mcsSourceFactory(mcsSourceFactory)
-          .build()
-          .createService();
+    public RdaService createService(RdaMessageSourceFactory messageSourceFactory) {
+      return new RdaService(messageSourceFactory);
     }
   }
 
@@ -190,24 +212,27 @@ public class RdaServer {
     private final int port;
 
     /**
-     * Creates a new configuration.
+     * Creates a new configuration. If {@code serviceConfig} is not null it is used otherwise the
+     * other parameters are used to build a config.
      *
-     * @param version the version
-     * @param fissSourceFactory the fiss source factory
-     * @param mcsSourceFactory the mcs source factory
+     * @param version optional version
+     * @param fissSourceFactory optional fiss source factory
+     * @param mcsSourceFactory optional mcs source factory
+     * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      * @param hostname the hostname
      * @param port the port
      */
     @Builder
     private LocalConfig(
-        RdaService.Version version,
-        MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaService.Version version,
+        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
         String hostname,
         int port) {
-      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
       this.hostname = Strings.isNullOrEmpty(hostname) ? "localhost" : hostname;
       this.port = port;
     }
@@ -243,22 +268,25 @@ public class RdaServer {
     private final String serverName;
 
     /**
-     * Instantiates a new configuration.
+     * Instantiates a new configuration. If {@code serviceConfig} is not null it is used otherwise
+     * the other parameters are used to build a config.
      *
-     * @param version the version
-     * @param fissSourceFactory the fiss source factory
-     * @param mcsSourceFactory the mcs source factory
+     * @param version optional version
+     * @param fissSourceFactory optional fiss source factory
+     * @param mcsSourceFactory optional mcs source factory
+     * @param serviceConfig optional config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
-     * @param serverName the server name
+     * @param serverName optional server name
      */
     @Builder
     private InProcessConfig(
-        RdaService.Version version,
-        MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaService.Version version,
+        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @Nullable RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
-        String serverName) {
-      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+        @Nullable String serverName) {
+      super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
       this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;
     }
 
@@ -282,6 +310,23 @@ public class RdaServer {
      */
     public void runWithNoParam(ThrowableAction action) throws Exception {
       runWithInProcessServerNoParam(this, action);
+    }
+  }
+
+  /**
+   * An {@link AutoCloseable} containing the {@link Server} that has been started. Closing this
+   * after the server has terminated will clean up any resources used by the {@link RdaService}.
+   */
+  @AllArgsConstructor
+  public static class ServerState implements AutoCloseable {
+    /** The server that has been started. */
+    @Getter private final Server server;
+    /** The state that needs to be closed once server has terminated. */
+    private final AutoCloseable state;
+
+    @Override
+    public void close() throws Exception {
+      state.close();
     }
   }
 }
