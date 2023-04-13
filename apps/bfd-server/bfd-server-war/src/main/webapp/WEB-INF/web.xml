@@ -21,17 +21,6 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-	<!-- Ensures that metrics on status codes, active requests, and request 
-		duration are collected. See http://metrics.dropwizard.io/2.2.0/manual/webapps/. -->
-	<filter>
-    	<filter-name>instrumentedFilter</filter-name>
-    	<filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>instrumentedFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
 	<!-- Expose the application's metrics and health checks via HTTP/HTTPS.
 		See https://metrics.dropwizard.io/4.0.0/manual/servlets.html for details. -->
 	<servlet>
