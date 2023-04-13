@@ -99,13 +99,13 @@ public class FissClaimStreamCallerIT {
               assertTrue(results.hasNext());
 
               RdaFissClaim claim = transform(results.next());
-              assertEquals("63843470id", claim.getClaimId());
+              assertEquals("NjM4NDM0NzBpZA", claim.getClaimId());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
-              assertEquals("2643602id", claim.getClaimId());
+              assertEquals("MjY0MzYwMmlk", claim.getClaimId());
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(2), claim.getSequenceNumber());
               assertFalse(results.hasNext());

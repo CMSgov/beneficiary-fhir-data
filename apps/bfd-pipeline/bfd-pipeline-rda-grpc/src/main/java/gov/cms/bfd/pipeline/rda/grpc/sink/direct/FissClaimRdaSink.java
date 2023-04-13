@@ -114,9 +114,15 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   MessageError createMessageError(
       String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)
       throws IOException {
-    return MessageError.builder()
+    MessageError.MessageErrorBuilder builder = MessageError.builder();
+
+    // Base64 encode the claim key so it matches any existing claim records in the database
+    DataTransformer dt = new DataTransformer();
+    dt.copyBase64String(
+        "rdaClaimKey", false, 1, 43, 32, change.getClaim().getRdaClaimKey(), builder::claimId);
+
+    return builder
         .sequenceNumber(change.getSeq())
-        .claimId(change.getClaim().getRdaClaimKey())
         .claimType(MessageError.ClaimType.FISS)
         .apiSource(apiVersion)
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))

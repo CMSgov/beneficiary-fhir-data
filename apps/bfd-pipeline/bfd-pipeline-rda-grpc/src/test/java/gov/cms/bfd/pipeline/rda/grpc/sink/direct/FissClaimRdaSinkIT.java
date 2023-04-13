@@ -23,10 +23,12 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -279,7 +281,11 @@ public class FissClaimRdaSinkIT {
 
             assertEquals(Long.valueOf(3), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());
-            assertEquals(claim.getClaimId(), error.getClaimId());
+            String decodedClaimId =
+                new String(
+                    Base64.getUrlDecoder()
+                        .decode(error.getClaimId().getBytes(StandardCharsets.UTF_8)));
+            assertEquals(claim.getClaimId(), decodedClaimId);
             assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());
           }
         });

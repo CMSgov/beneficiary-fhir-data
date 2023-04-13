@@ -86,6 +86,7 @@ public class FissClaimTransformer {
   public FissClaim transformMessageToFissClaim(gov.cms.mpsm.rda.v1.fiss.FissClaim from,
       DataTransformer transformer, Instant now, String namePrefix) {
     final FissClaim to = new FissClaim();
+    transformer.copyBase64String(namePrefix + FissClaim.Fields.claimKey, false, 1, 43, 32, from.getClaimKey(), to::setClaimKey);
     transformer.copyString(namePrefix + FissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn);
     transformer.copyLong(from.getSeq(), to::setSequenceNumber);
     transformer.copyEnumAsCharacter(namePrefix + FissClaim.Fields.currStatus, FissClaim_currStatus_Extractor.getEnumString(from), to::setCurrStatus);
