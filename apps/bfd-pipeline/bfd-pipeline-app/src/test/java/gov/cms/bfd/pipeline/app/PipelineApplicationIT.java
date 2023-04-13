@@ -23,8 +23,8 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -41,6 +41,8 @@ import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -50,9 +52,14 @@ import org.opentest4j.TestAbortedException;
  * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
-public final class PipelineApplicationIT {
+public final class PipelineApplicationIT extends MinioTestContainer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MinioTestContainer.class);
+
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
+
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client = createS3MinioClient();
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
@@ -64,6 +71,7 @@ public final class PipelineApplicationIT {
   @Test
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
+    LOGGER.info("s3Client: " + s3Client.toString());
     ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
     String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();
@@ -131,8 +139,6 @@ public final class PipelineApplicationIT {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
-
     Bucket bucket = null;
     Process appProcess = null;
     try {
@@ -187,7 +193,6 @@ public final class PipelineApplicationIT {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
     Bucket bucket = null;
     Process appProcess = null;
     try {

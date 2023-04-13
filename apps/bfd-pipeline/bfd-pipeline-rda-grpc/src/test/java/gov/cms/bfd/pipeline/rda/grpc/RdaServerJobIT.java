@@ -21,6 +21,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.CallOptions;
@@ -36,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the RDA server. */
-public class RdaServerJobIT {
+public class RdaServerJobIT extends MinioTestContainer {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
   /** The Fiss claim source. */
