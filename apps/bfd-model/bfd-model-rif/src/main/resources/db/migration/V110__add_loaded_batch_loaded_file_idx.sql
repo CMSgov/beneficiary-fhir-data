@@ -5,6 +5,4 @@
  This may correct the issue by having postgres not do a sequential scan on loaded_batches with an index.
  */
  
-CREATE INDEX CONCURRENTLY IF NOT EXISTS loaded_batches_loaded_file_id_idx
-    ON public.loaded_batches USING btree
-    (loaded_file_id DESC NULLS LAST);
+${logic.psql-only} create index concurrently if not exists loaded_batches_loaded_file_id_idx on public.loaded_batches using btree (loaded_file_id DESC NULLS LAST);
