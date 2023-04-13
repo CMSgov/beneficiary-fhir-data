@@ -1,35 +1,29 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.google.common.io.Files;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
-import gov.cms.mpsm.rda.v1.FissClaimChange;
-import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
-import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -52,10 +46,8 @@ import org.slf4j.LoggerFactory;
  * needed.
  */
 public class LoadRdaJsonApp {
-
+  /** Used for logging. */
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadRdaJsonApp.class);
-  /** The protocol for S3, used for checking file location in logic. */
-  private static final String AMAZON_S3_PROTOCOL = "s3://";
 
   /**
    * Main method to load the System Properties for the Config, start the log4jReporter, start the
@@ -74,6 +66,11 @@ public class LoadRdaJsonApp {
     options.addSystemProperties();
     final Config config = new Config(options.build());
 
+    if (!config.isAtLeastOneSourceDefined()) {
+      System.err.println("One of file.fiss, file.mcs, or s3.bucket must be defined.");
+      System.exit(1);
+    }
+
     final MetricRegistry metrics = new MetricRegistry();
     final Slf4jReporter reporter =
         Slf4jReporter.forRegistry(metrics)
@@ -85,29 +82,15 @@ public class LoadRdaJsonApp {
     try {
       LOGGER.info("starting RDA API local server");
 
-      MessageSource.Factory<FissClaimChange> fissFactory;
-      MessageSource.Factory<McsClaimChange> mcsFactory;
+      var serviceConfig = config.createMessageSourceFactoryConfig();
 
-      String fileLocation = config.fileLocation.orElse("");
-
-      if (fileLocation.startsWith(AMAZON_S3_PROTOCOL)) {
-        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(config.s3Region);
-        final String directory = fileLocation.replace(AMAZON_S3_PROTOCOL, "");
-        final S3JsonMessageSources s3Sources =
-            new S3JsonMessageSources(s3Client, config.s3Bucket, directory);
-        checkConnectivity("FISS", s3Sources.fissClaimChangeFactory());
-        checkConnectivity("MCS", s3Sources.mcsClaimChangeFactory());
-
-        fissFactory = config.createFissS3Source(s3Sources);
-        mcsFactory = config.createMcsS3Source(s3Sources);
-      } else {
-        fissFactory = config::createFissClaimsSource;
-        mcsFactory = config::createMcsClaimsSource;
+      try (var messageSourceFactory = serviceConfig.createMessageSourceFactory()) {
+        checkConnectivity("FISS", messageSourceFactory::createFissMessageSource);
+        checkConnectivity("MCS", messageSourceFactory::createMcsMessageSource);
       }
 
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(fissFactory)
-          .mcsSourceFactory(mcsFactory)
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {
@@ -144,10 +127,11 @@ public class LoadRdaJsonApp {
    *
    * @param claimType The type of claims the tested source serves
    * @param factory A {@link MessageSource.Factory} for creating message sources.
+   * @param <TMessage> the type of objects returned by the message sources
    * @throws Exception If there was an issue connecting to the message source.
    */
-  private static void checkConnectivity(String claimType, MessageSource.Factory<?> factory)
-      throws Exception {
+  private static <TMessage> void checkConnectivity(
+      String claimType, MessageSource.Factory<TMessage> factory) throws Exception {
     try (MessageSource<?> source = factory.apply(0)) {
       LOGGER.info("checking for {} claims: {}", claimType, source.hasNext());
     }
@@ -180,17 +164,17 @@ public class LoadRdaJsonApp {
     /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
     /** The RDA Version for the data to load. */
-    private final RdaVersion rdaVersion;
-    /** The location where the files are, this could be a local directory or S3 path. */
-    private final Optional<String> fileLocation;
+    private final String rdaVersion;
     /** The name of the FISS file to read from at the source. */
-    private final Optional<String> fissFile;
+    private final Optional<File> fissFile;
     /** The name of the MCS file to read from at the source. */
-    private final Optional<String> mcsFile;
+    private final Optional<File> mcsFile;
     /** The S3 region to use if the source is an S3 connection. */
-    private final Regions s3Region;
+    private final Optional<Regions> s3Region;
     /** The S3 bucket to use if the source is an S3 connection. */
-    private final String s3Bucket;
+    private final Optional<String> s3Bucket;
+    /** Optional directory name within our S3 bucket. */
+    private final Optional<String> s3Directory;
 
     /**
      * Constructor to load the Configuration options for the private fields above.
@@ -211,15 +195,22 @@ public class LoadRdaJsonApp {
       writeThreads = options.intValue("job.writeThreads", 1);
       batchSize = options.intValue("job.batchSize", 100);
       runSchemaMigration = options.booleanValue("job.migration", false);
-      rdaVersion = RdaVersion.builder().versionString(options.stringValue("rda.version")).build();
-      fileLocation = options.stringOption("file.location");
-      fissFile = options.stringOption("file.fiss");
-      mcsFile = options.stringOption("file.mcs");
-      s3Region =
-          options
-              .enumOption("s3.region", Regions::fromName)
-              .orElse(SharedS3Utilities.REGION_DEFAULT);
-      s3Bucket = options.stringOption("s3.bucket").orElse("");
+      rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
+      fissFile = options.readableFileOption("file.fiss");
+      mcsFile = options.readableFileOption("file.mcs");
+      s3Region = options.enumOption("s3.region", Regions::fromName);
+      s3Bucket = options.stringOption("s3.bucket");
+      s3Directory = options.stringOption("s3.directory");
+    }
+
+    /**
+     * We do not want to load random data so at least one source of data must have been defined for
+     * the application to be able to proceed.
+     *
+     * @return true if at least one source of data is defined
+     */
+    private boolean isAtLeastOneSourceDefined() {
+      return fissFile.isPresent() || mcsFile.isPresent() || s3Bucket.isPresent();
     }
 
     /**
@@ -245,7 +236,7 @@ public class LoadRdaJsonApp {
               .writeThreads(writeThreads)
               .batchSize(batchSize)
               .sinkTypePreference(sinkTypePreference)
-              .rdaVersion(rdaVersion)
+              .rdaVersion(RdaVersion.builder().versionString(rdaVersion).build())
               .build();
       final RdaSourceConfig grpcConfig =
           RdaSourceConfig.builder()
@@ -259,93 +250,19 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * Creates a source factory for making sources connecting to S3 for FISS claims.
+     * Creates a {@link RdaMessageSourceFactory.Config} based on our configuration.
      *
-     * @param s3Sources The {@link S3JsonMessageSources} to use for creating S3 connection sources.
-     * @return The created {@link MessageSource.Factory} for creating an S3 connection source.
+     * @return the config
      */
-    private MessageSource.Factory<FissClaimChange> createFissS3Source(
-        S3JsonMessageSources s3Sources) {
-      return sequenceNumber -> {
-        MessageSource<FissClaimChange> source;
-
-        if (fissFile.isPresent()) {
-          source = s3Sources.readFissClaimChanges(fissFile.get());
-        } else {
-          // If the file wasn't specified, FISS claims aren't desired
-          source = new EmptyMessageSource<>();
-        }
-
-        return source;
-      };
-    }
-
-    /**
-     * Creates a source factory for making sources connecting to S3 for MCS claims.
-     *
-     * @param s3Sources The {@link S3JsonMessageSources} to use for creating S3 connection sources.
-     * @return The created {@link MessageSource.Factory} for creating an S3 connection source.
-     */
-    private MessageSource.Factory<McsClaimChange> createMcsS3Source(
-        S3JsonMessageSources s3Sources) {
-      return sequenceNumber -> {
-        MessageSource<McsClaimChange> source;
-
-        if (mcsFile.isPresent()) {
-          source = s3Sources.readMcsClaimChanges(mcsFile.get());
-        } else {
-          // If the file wasn't specified, MCS claims aren't desired
-          source = new EmptyMessageSource<>();
-        }
-
-        return source;
-      };
-    }
-
-    /**
-     * Creates the FissClaims from the fissFile.
-     *
-     * @param sequenceNumber for each FissClaim
-     * @return objects that produce FissClaim objects
-     */
-    private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {
-      return createClaimsSourceForFile(fissFile, JsonMessageSource::parseFissClaimChange);
-    }
-
-    /**
-     * Creates the McsClaims from the mcsFile.
-     *
-     * @param sequenceNumber for each McsClaim
-     * @return objects that produce McsClaim objects
-     */
-    private MessageSource<McsClaimChange> createMcsClaimsSource(long sequenceNumber) {
-      return createClaimsSourceForFile(mcsFile, JsonMessageSource::parseMcsClaimChange);
-    }
-
-    /**
-     * Creates the claims for the RDA app.
-     *
-     * @param <T> generic message source to be used by both Fiss and Mcs claims
-     * @param jsonFile the claim source json file
-     * @param parser the claim parser
-     * @return objects that produce claim objects
-     */
-    private <T> MessageSource<T> createClaimsSourceForFile(
-        Optional<String> jsonFile, JsonMessageSource.Parser<T> parser) {
-      MessageSource<T> source;
-
-      if (jsonFile.isPresent()) {
-        String fileName = jsonFile.get();
-        String location = fileLocation.orElse("./");
-        File file = Paths.get(location, fileName).toFile();
-
-        source = new JsonMessageSource<>(file, parser);
-      } else {
-        // If no file specified, this type isn't needed.
-        source = new EmptyMessageSource<>();
-      }
-
-      return source;
+    private RdaMessageSourceFactory.Config createMessageSourceFactoryConfig() {
+      return RdaMessageSourceFactory.Config.builder()
+          .version(RdaService.Version.builder().version(RdaService.RDA_PROTO_VERSION).build())
+          .fissClaimJson(fissFile.map(Files::asByteSource).orElse(null))
+          .mcsClaimJson(mcsFile.map(Files::asByteSource).orElse(null))
+          .s3Bucket(s3Bucket.orElse(null))
+          .s3Region(s3Region.orElse(null))
+          .s3Directory(s3Directory.orElse(null))
+          .build();
     }
 
     /**
@@ -358,10 +275,9 @@ public class LoadRdaJsonApp {
     private List<PipelineJob<?>> createPipelineJobs(
         RdaLoadOptions jobConfig, PipelineApplicationState appState) {
       final var mbiCache = jobConfig.createComputedMbiCache(appState);
-      final List<PipelineJob<?>> answer = new ArrayList<>();
-      fissFile.ifPresent(f -> answer.add(jobConfig.createFissClaimsLoadJob(appState, mbiCache)));
-      mcsFile.ifPresent(f -> answer.add(jobConfig.createMcsClaimsLoadJob(appState, mbiCache)));
-      return answer;
+      return List.of(
+          jobConfig.createFissClaimsLoadJob(appState, mbiCache),
+          jobConfig.createMcsClaimsLoadJob(appState, mbiCache));
     }
   }
 }

@@ -44,8 +44,8 @@ public class MessageError {
   @EqualsAndHashCode.Include
   private ClaimType claimType;
 
-  /** Either dcn (FISS) or idrClmHdIcn (MCS). */
-  @Column(name = "claim_id", length = 32, nullable = false)
+  /** Either claimId (FISS) or idrClmHdIcn (MCS). */
+  @Column(name = "claim_id", length = 43, nullable = false)
   @EqualsAndHashCode.Include
   private String claimId;
 

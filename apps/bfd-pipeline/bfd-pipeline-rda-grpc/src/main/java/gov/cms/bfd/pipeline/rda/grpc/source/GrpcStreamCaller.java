@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.protobuf.Empty;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.mpsm.rda.v1.ApiVersion;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
@@ -25,6 +26,11 @@ import org.slf4j.Logger;
  *     FissClaimChange or McsClaimChange in real code
  */
 public abstract class GrpcStreamCaller<TResponse> {
+  /** Maximum number of call attempts in {@link #callVersionService}. */
+  private static final int MAX_CALL_ATTEMPTS = 3;
+
+  /** Delay between retries in {@link #callVersionService}. */
+  private static final long CALL_RETRY_DELAY_MILLIS = 15_000;
 
   /** The passed-in logger. */
   protected final Logger logger;
@@ -55,7 +61,9 @@ public abstract class GrpcStreamCaller<TResponse> {
       throws Exception;
 
   /**
-   * Make a call to the server's {@code getVersion()} service and return the version component.
+   * Make a call to the server's {@code getVersion()} service and return the version component. Will
+   * retry several times if the call fails. Retries allow the job to handle with a race condition
+   * with the start of {@link RdaServerJob} and/or temporary downtime in the real API server.
    *
    * @param channel an already open channel to the server
    * @param callOptions the call options
@@ -63,6 +71,49 @@ public abstract class GrpcStreamCaller<TResponse> {
    * @throws Exception if an IO issue occurs
    */
   public String callVersionService(ManagedChannel channel, CallOptions callOptions)
+      throws Exception {
+    Preconditions.checkNotNull(channel);
+    RuntimeException error = null;
+    for (int tryNumber = 1; tryNumber <= MAX_CALL_ATTEMPTS; ++tryNumber) {
+      try {
+        var version = callVersionServiceImpl(channel, callOptions);
+        if (tryNumber > 1) {
+          logger.info("callVersionService successful on attempt {}", tryNumber);
+        }
+        return version;
+      } catch (RuntimeException ex) {
+        error = ex;
+      }
+      logger.info(
+          "callVersionService attempt {} failed with {} message {}.",
+          tryNumber,
+          error.getClass().getSimpleName(),
+          error.getMessage());
+      if (tryNumber < MAX_CALL_ATTEMPTS) {
+        // wait before next connection attempt
+        try {
+          logger.info("callVersionService waiting before next attempt");
+          Thread.sleep(CALL_RETRY_DELAY_MILLIS);
+        } catch (InterruptedException ex) {
+          // If we are interrupted while sleeping just exit loop to let original
+          // exception be thrown immediately.
+          break;
+        }
+      }
+    }
+    // all retries failed so throw the last exception
+    throw error;
+  }
+
+  /**
+   * Make a call to the server's {@code getVersion()} service and return the version component.
+   *
+   * @param channel an already open channel to the server
+   * @param callOptions the call options
+   * @return version string from the server
+   * @throws Exception if an IO issue occurs
+   */
+  private String callVersionServiceImpl(ManagedChannel channel, CallOptions callOptions)
       throws Exception {
     Preconditions.checkNotNull(channel);
     logger.info("calling getVersion service");

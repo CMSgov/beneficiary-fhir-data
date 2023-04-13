@@ -105,7 +105,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
   /**
    * Invokes the RDA API to download data and store it in the database. Since errors during the call
    * are not exceptional (RDA API downtime for upgrade, network hiccups, etc) we catch any
-   * exceptions and return normally. If we let the exception pass through the scheduler will no
+   * exceptions and return normally. If we let the exception pass through the scheduler will not
    * re-schedule us.
    */
   @Override
@@ -117,16 +117,12 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
-      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.PRE_PROCESSOR)) {
-        source.retrieveAndProcessObjects(1, sink);
-      }
-
-      int processedCount;
+      int processedCount = 0;
       try {
-        processedCount = callRdaServiceAndStoreRecords();
+        processedCount += executePreJobTasks();
+        processedCount += callRdaServiceAndStoreRecords();
       } catch (ProcessingException ex) {
-        processedCount = ex.getProcessedCount();
+        processedCount += ex.getProcessedCount();
       }
       return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
     } finally {
@@ -147,6 +143,28 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
         RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
       return source.performSmokeTest(sink);
+    }
+  }
+
+  /**
+   * Executes the {@link #preJobTaskFactory}. Any {@link ProcessingException}s are passed through
+   * unchanged but any other exceptions are wrapped in a {@link ProcessingException}.
+   *
+   * @throws ProcessingException if the task throws an exception
+   * @return number of claims processed by the task
+   */
+  int executePreJobTasks() throws ProcessingException {
+    try {
+      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.PRE_PROCESSOR)) {
+        return source.retrieveAndProcessObjects(1, sink);
+      }
+    } catch (ProcessingException ex) {
+      logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+      throw ex;
+    } catch (Exception ex) {
+      logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+      throw new ProcessingException(ex, 0);
     }
   }
 
