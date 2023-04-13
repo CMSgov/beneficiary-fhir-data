@@ -1,12 +1,12 @@
 locals {
-  account_id       = data.aws_caller_identity.current.account_id
-  env              = terraform.workspace
-  layer            = "data"
-  established_envs = ["test", "prod-sbx", "prod"]
-  create_etl_user  = local.is_prod || var.force_etl_user_creation
-  create_dashboard = contains(local.established_envs, local.env) || var.force_dashboard_creation
+  account_id        = data.aws_caller_identity.current.account_id
+  env               = terraform.workspace
+  layer             = "data"
+  established_envs  = ["test", "prod-sbx", "prod"]
+  create_etl_user   = local.is_prod || var.force_etl_user_creation
+  create_dashboard  = contains(local.established_envs, local.env) || var.force_dashboard_creation
   create_slo_alarms = contains(local.established_envs, local.env) || var.force_slo_alarms_creation
-  jdbc_suffix      = var.jdbc_suffix
+  jdbc_suffix       = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
