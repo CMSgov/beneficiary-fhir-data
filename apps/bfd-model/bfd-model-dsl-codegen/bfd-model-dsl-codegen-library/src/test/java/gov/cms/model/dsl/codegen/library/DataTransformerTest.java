@@ -357,6 +357,35 @@ public class DataTransformerTest {
         transformer.getErrors());
   }
 
+  /**
+   * Tests the {@link DataTransformer#copyBase64String(String, boolean, int, int, int, String,
+   * Consumer)} method.
+   */
+  @Test
+  public void testCopyBase64() {
+    transformer
+        .copyBase64String("not-present-required", false, 1, 43, 32, null, copied::add)
+        .copyBase64String("not-present-nullable", true, 1, 43, 32, null, copied::add)
+        .copyBase64String(
+            "present-required-too-long",
+            false,
+            1,
+            43,
+            32,
+            "a decoded string that is too long",
+            copied::add)
+        .copyBase64String(
+            "present-required-valid", false, 1, 43, 32, "decoded string1", copied::add)
+        .copyBase64String("present-nullable", true, 1, 43, 32, "decoded string2", copied::add);
+    assertEquals(ImmutableList.of("ZGVjb2RlZCBzdHJpbmcx", "ZGVjb2RlZCBzdHJpbmcy"), copied);
+    assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("not-present-required", "is null"),
+            new DataTransformer.ErrorMessage(
+                "present-required-too-long", "invalid length: expected=[1,32] actual=33")),
+        transformer.getErrors());
+  }
+
   /** Tests the {@link DataTransformer#copyTimestamp(String, boolean, String, Consumer)} method. */
   @Test
   public void testCopyTimestamp() {

@@ -7,8 +7,11 @@ mappings:
       name: FissClaims
       schema: pre_adj
       primaryKeyColumns:
-        - dcn
+        - claimKey
       columns:
+        - name: claimKey
+          sqlType: varchar(43)
+          nullable: false
         - name: dcn
           sqlType: varchar(23)
           nullable: false
@@ -83,6 +86,10 @@ mappings:
           - SpecialFacility
           - Unrecognized
     transformations:
+      - from: claimKey
+        transformer: Base64
+        transformerOptions:
+          decodedLength: 32
       - from: dcn
         optionalComponents: None
       - from: seq

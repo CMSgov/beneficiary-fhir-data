@@ -1,10 +1,12 @@
 locals {
-  account_id       = data.aws_caller_identity.current.account_id
-  env              = terraform.workspace
-  layer            = "data"
-  established_envs = ["test", "prod-sbx", "prod"]
-  create_etl_user  = local.is_prod || var.force_etl_user_creation
-  jdbc_suffix      = var.jdbc_suffix
+  account_id        = data.aws_caller_identity.current.account_id
+  env               = terraform.workspace
+  layer             = "data"
+  established_envs  = ["test", "prod-sbx", "prod"]
+  create_etl_user   = local.is_prod || var.force_etl_user_creation
+  create_dashboard  = contains(local.established_envs, local.env) || var.force_dashboard_creation
+  create_slo_alarms = contains(local.established_envs, local.env) || var.force_slo_alarms_creation
+  jdbc_suffix       = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
@@ -208,4 +210,21 @@ module "bfd_pipeline_slis" {
   aws_kms_key_arn = local.kms_key_id
   aws_kms_key_id  = local.kms_key_id
   etl_bucket_id   = aws_s3_bucket.this.id
+}
+
+module "bfd_pipeline_dashboard" {
+  count = local.create_dashboard ? 1 : 0
+
+  source = "./modules/bfd_pipeline_dashboard"
+}
+
+module "bfd_pipeline_slo_alarms" {
+  count = local.create_slo_alarms ? 1 : 0
+
+  source = "./modules/bfd_pipeline_slo_alarms"
+
+  alert_sns_override      = var.alert_sns_override
+  alert_ok_sns_override   = var.alert_ok_sns_override
+  warning_sns_override    = var.warning_sns_override
+  warning_ok_sns_override = var.warning_ok_sns_override
 }

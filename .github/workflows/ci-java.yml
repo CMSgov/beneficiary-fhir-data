@@ -51,7 +51,7 @@ jobs:
       - name: 'Setup JDK'
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'corretto'
       - name: 'Generate maven toolchain config'
         run: |
@@ -60,7 +60,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>11</version>
+                <version>17</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>
@@ -89,7 +89,7 @@ jobs:
       - name: 'Setup JDK'
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'corretto'
       - name: 'Generate Maven Config'
         run: |
@@ -98,7 +98,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>11</version>
+                <version>17</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>

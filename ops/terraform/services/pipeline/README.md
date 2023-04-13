@@ -20,11 +20,17 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_alert_ok_sns_override"></a> [alert\_ok\_sns\_override](#input\_alert\_ok\_sns\_override) | Overrides the default, per-environment SNS topic used for Alert Alarms that transition from ALARM to OK | `string` | `null` | no |
+| <a name="input_alert_sns_override"></a> [alert\_sns\_override](#input\_alert\_sns\_override) | Overrides the default, per-environment SNS topic used for Alert SLO alarms | `string` | `null` | no |
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `master`. | `string` | `null` | no |
 | <a name="input_create_ccw_pipeline"></a> [create\_ccw\_pipeline](#input\_create\_ccw\_pipeline) | Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default. | `bool` | `true` | no |
 | <a name="input_create_rda_pipeline"></a> [create\_rda\_pipeline](#input\_create\_rda\_pipeline) | Creates a BFD Pipeline to run RDA jobs; CCW Rif jobs on the pipeline are disabled by default. | `bool` | `true` | no |
+| <a name="input_force_dashboard_creation"></a> [force\_dashboard\_creation](#input\_force\_dashboard\_creation) | Forces the creation of BFD Pipeline CloudWatch Dashboards; note dashboards are created by-default for established environments | `bool` | `false` | no |
 | <a name="input_force_etl_user_creation"></a> [force\_etl\_user\_creation](#input\_force\_etl\_user\_creation) | Force an etl service account creation; only `prod` typically creates an etl service account. | `string` | `false` | no |
+| <a name="input_force_slo_alarms_creation"></a> [force\_slo\_alarms\_creation](#input\_force\_slo\_alarms\_creation) | Forces the creation of BFD Pipeline SLO CloudWatch Alarms; note alarms are created by-default for established environments | `bool` | `false` | no |
 | <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
+| <a name="input_warning_ok_sns_override"></a> [warning\_ok\_sns\_override](#input\_warning\_ok\_sns\_override) | Overrides the default, per-environment SNS topic used for Warning Alarms that transition from ALARM to OK | `string` | `null` | no |
+| <a name="input_warning_sns_override"></a> [warning\_sns\_override](#input\_warning\_sns\_override) | Overrides the default, per-environment SNS topic used for Warning SLO alarms | `string` | `null` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
@@ -70,6 +76,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ami.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_kms_key.mgmt_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_rds_cluster.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_security_group.enterprise_tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
