@@ -12,7 +12,8 @@ ALTER TABLE rda.message_errors ALTER COLUMN claim_id ${logic.alter-column-type} 
 
 -- Truncate FISS claims and associated meta data, the key they use is invalid now
 
-TRUNCATE TABLE rda.fiss_claims CASCADE;
+${logic.psql-only} TRUNCATE rda.fiss_claims CASCADE;
+
 DELETE FROM rda.claim_message_meta_data WHERE claim_type = 'F';
 
 -- Reset the progress table so we can re-ingest all FISS claims with the new key.
