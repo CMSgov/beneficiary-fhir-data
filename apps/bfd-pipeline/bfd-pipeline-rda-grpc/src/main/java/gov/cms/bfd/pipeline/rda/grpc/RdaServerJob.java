@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaServerJob.class);
-  /** The amount of time in minutes the server has to shut down without timing out. */
-  private static final Duration SERVER_SHUTDOWN_TIMEOUT = Duration.ofMinutes(5);
 
   /** The server configuration. */
   private final Config config;

@@ -84,18 +84,6 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * Produce a JsonMessageSource that parses the NDJSON contents of the reader. The reader will be
-   * closed when this MessageSource is closed.
-   *
-   * @param reader a reader that returns NDJSON text containing message objects
-   * @param parser the parser to convert a line of JSON into an object
-   */
-  public JsonMessageSource(BufferedReader reader, Parser<T> parser) {
-    this.reader = reader;
-    this.parser = parser;
-  }
-
-  /**
    * This method fits the signature of Parser&lt;FissClaim&gt;.
    *
    * @param jsonString JSON to be parsed
