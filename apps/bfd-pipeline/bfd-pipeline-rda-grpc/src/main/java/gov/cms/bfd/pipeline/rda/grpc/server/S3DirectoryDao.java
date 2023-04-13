@@ -66,7 +66,7 @@ public class S3DirectoryDao implements AutoCloseable {
   private static final String S3FileNameRegex = "[_a-z0-9][-_.a-z0-9]+";
 
   /** Value returned by {@link AmazonS3Exception#getStatusCode} to indicate object not found. */
-  private static final int AWS_FOT_FOUND_STATUS_CODE = 404;
+  private static final int AWS_NOT_FOUND_STATUS_CODE = 404;
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final AmazonS3 s3Client;
@@ -418,7 +418,7 @@ public class S3DirectoryDao implements AutoCloseable {
     try {
       return s3Client.getObjectMetadata(s3BucketName, s3Key);
     } catch (AmazonS3Exception ex) {
-      if (ex.getStatusCode() == AWS_FOT_FOUND_STATUS_CODE) {
+      if (ex.getStatusCode() == AWS_NOT_FOUND_STATUS_CODE) {
         var fileNotFound = new FileNotFoundException(fileName);
         fileNotFound.addSuppressed(ex);
         throw fileNotFound;
@@ -448,7 +448,7 @@ public class S3DirectoryDao implements AutoCloseable {
       }
       return metaData;
     } catch (AmazonS3Exception ex) {
-      if (ex.getStatusCode() == AWS_FOT_FOUND_STATUS_CODE) {
+      if (ex.getStatusCode() == AWS_NOT_FOUND_STATUS_CODE) {
         throw new FileNotFoundException(convertS3KeyToFileName(s3Key));
       } else {
         throw ex;
