@@ -103,6 +103,12 @@ public class TransformerUtil {
   public static final String UintToShortTransformName = "UintToShort";
 
   /**
+   * Fixed name for {@code transformer} field of {@link TransformationBean} to indicate {@link
+   * Base64FieldTransformer} should be used.
+   */
+  public static final String Base64TransformerName = "Base64";
+
+  /**
    * Regex used to detect special values in the {@code from} field of a {@link TransformationBean}
    * that indicate there is no corresponding {@link FieldTransformer}.
    */
@@ -161,6 +167,9 @@ public class TransformerUtil {
   private static final TimestampFieldTransformer TimestampInstance =
       new TimestampFieldTransformer();
 
+  /** Shared instance of {@link Base64FieldTransformer}. */
+  private static final Base64FieldTransformer Base64Instance = new Base64FieldTransformer();
+
   /**
    * {@link Map} used internally to recognized standard {@link TransformationBean} {@code
    * transformer} values and their corresponding {@link FieldTransformer} instances.
@@ -184,7 +193,9 @@ public class TransformerUtil {
           LongStringTransformName,
           LongStringInstance,
           UintToShortTransformName,
-          UintToShortInstance);
+          UintToShortInstance,
+          Base64TransformerName,
+          Base64Instance);
 
   /**
    * {@link Map} used internally to recognized standard {@link TransformationBean} {@code from}

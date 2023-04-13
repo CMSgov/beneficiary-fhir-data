@@ -1,5 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin.transformer;
 
+import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.Base64TransformerName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.EnumValueTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.IdHashTransformName;
 import static gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil.IndexFromName;
@@ -143,6 +144,9 @@ public class TransformerUtilTest {
 
     transformation.setTransformer(UintToShortTransformName);
     assertTransformerInstanceOf(column, transformation, UintToShortFieldTransformer.class);
+
+    transformation.setTransformer(Base64TransformerName);
+    assertTransformerInstanceOf(column, transformation, Base64FieldTransformer.class);
   }
 
   /** Verify the java and/or sql type can be used to map the expected {@link FieldTransformer}. */
