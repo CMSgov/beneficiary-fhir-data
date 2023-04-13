@@ -9,7 +9,9 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -107,6 +109,31 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   /**
+   * Verifies that a Base64 field transformation is working properly. This includes verifying that a
+   * value is properly copied and encoded from the message object to the entity object and that
+   * minimum and maximum length validations are performed. This method uses a minimum length of 1
+   * for the field.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
+   * @param maxLength maximum valid length for the string field
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyBase64FieldCopiedCorrectly(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          String fieldLabel,
+          int maxLength) {
+    return verifyBase64FieldCopiedCorrectlyImpl(setter, getter, fieldLabel, 1, maxLength, false);
+  }
+
+  /**
    * Verifies that a string field transformation is working properly. This includes verifying that a
    * value is properly copied from the message object to the entity object and that minimum and
    * maximum length validations are performed.
@@ -138,6 +165,55 @@ public abstract class ClaimTransformerFieldTester<
     final String wrappedFieldLabel = getLabel(fieldLabel);
     // limits the length os string tested for clob/text fields
     verifyStringFieldTransformationCorrect(
+        wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
+    // skip the minLength check if empty strings are being ignored and the minLength is 1
+    if (minLength > 0 && (minLength > 1 || !ignoreEmpty)) {
+      verifyStringFieldLengthLimitsEnforced(
+          wrappedSetter, wrappedFieldLabel, minLength, maxLength, minLength - 1);
+    }
+    if (maxLength < Integer.MAX_VALUE) {
+      verifyStringFieldLengthLimitsEnforced(
+          wrappedSetter, wrappedFieldLabel, minLength, maxLength, maxLength + 1);
+    }
+    if (ignoreEmpty) {
+      verifyFieldTransformationSucceeds(
+          claimBuilder -> wrappedSetter.accept(claimBuilder, ""), wrappedGetter, null);
+    }
+    return this;
+  }
+
+  /**
+   * Verifies that a Base64 field transformation is working properly. This includes verifying that a
+   * value is properly copied and encoded from the message object to the entity object and that
+   * minimum and maximum length validations are performed.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
+   * @param minLength minimum valid length for the string field
+   * @param maxLength maximum valid length for the string field
+   * @param ignoreEmpty when true indicates that empty strings do not generate errors for minLength
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      verifyBase64FieldCopiedCorrectlyImpl(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          String fieldLabel,
+          int minLength,
+          int maxLength,
+          boolean ignoreEmpty) {
+    final BiConsumer<TClaimBuilder, String> wrappedSetter =
+        (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
+    final Function<TClaimEntity, String> wrappedGetter =
+        claim -> getter.apply(getTestEntity(claim));
+    final String wrappedFieldLabel = getLabel(fieldLabel);
+    // limits the length os string tested for clob/text fields
+    verifyBase64FieldTransformationCorrect(
         wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
     // skip the minLength check if empty strings are being ignored and the minLength is 1
     if (minLength > 0 && (minLength > 1 || !ignoreEmpty)) {
@@ -461,6 +537,24 @@ public abstract class ClaimTransformerFieldTester<
     final var value = createString(maxLength);
     verifyFieldTransformationSucceeds(
         claimBuilder -> setter.accept(claimBuilder, value), getter, value);
+  }
+
+  /**
+   * Verifies the given Base64 field can be transformed as expected.
+   *
+   * @param setter the field's setter
+   * @param getter the field's getter
+   * @param maxLength the max length of the value to create
+   */
+  private void verifyBase64FieldTransformationCorrect(
+      BiConsumer<TClaimBuilder, String> setter,
+      Function<TClaimEntity, String> getter,
+      int maxLength) {
+    final var value = createString(maxLength);
+    final var encodedValue =
+        Base64.getEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    verifyFieldTransformationSucceeds(
+        claimBuilder -> setter.accept(claimBuilder, value), getter, encodedValue);
   }
 
   /**

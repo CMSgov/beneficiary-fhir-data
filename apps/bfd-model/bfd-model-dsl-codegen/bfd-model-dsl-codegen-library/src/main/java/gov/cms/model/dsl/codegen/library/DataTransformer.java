@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -642,6 +644,39 @@ public class DataTransformer {
       String fieldName, BooleanSupplier exists, Supplier<String> value, Consumer<Long> copier) {
     if (exists.getAsBoolean()) {
       return copyLongString(fieldName, false, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Base64 encodes the value of a String field and passes it to the consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value after it's encoded
+   * @param decodedLength maximum allowed length for non-null value before it's encoded
+   * @param value the string value to encode
+   * @param copier Consumer to receive the encoded string
+   * @return this
+   */
+  public DataTransformer copyBase64String(
+      String fieldName,
+      boolean nullable,
+      int minLength,
+      int maxLength,
+      int decodedLength,
+      String value,
+      Consumer<String> copier) {
+    if (validateString(fieldName, nullable, minLength, decodedLength, value)) {
+      String encodedValue =
+          Base64.getUrlEncoder()
+              .withoutPadding()
+              .encodeToString(value.getBytes(StandardCharsets.UTF_8));
+
+      if (validateString(fieldName + " (Base64)", false, minLength, maxLength, value)) {
+        copier.accept(encodedValue);
+      }
     }
     return this;
   }

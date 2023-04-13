@@ -224,6 +224,7 @@ The valid `transformer` names for use in a `transformation` are:
 | IntString          | Parses an integer string in `from` and copies the result to `to`.                                 |
 | LongString         | Parses a long string in `from` and copies the result to `to`.                                     |
 | UintToShort        | Copies a valid signed 16 bit integer from an unsigned long and copies it to `to` as a java short. |
+| Base64             | Base64 encodes a given string in the `from` and copies the results to `to`.                       |
 
 When `transformer` is omitted the transformation to use can be inferred from the `from` name.
 
@@ -238,6 +239,9 @@ When `transformer` is omitted and no transformer corresponds to the `from` name 
 Supported types for this inference are: char, string, int, numeric, or date.
 
 ### Transformer Options
+
+The `Base64` transformer accepts these options:
+- decodedLength: Length of the value before it is Base64 encoded, to be used for length validation checks.
 
 The `EnumValueIfPresent` transformer accepts these options:
 - enumName: Name of the enum (as defined in the mapping's `enumTypes` array) that defines the value.
