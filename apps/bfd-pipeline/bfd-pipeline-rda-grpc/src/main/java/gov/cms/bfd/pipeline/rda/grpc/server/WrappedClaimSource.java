@@ -69,10 +69,8 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
 
   @Override
   public MessageSource<TChange> skipTo(long startingSequenceNumber) throws Exception {
-    if (startingSequenceNumber > sequenceNumber) {
-      source.skipTo(startingSequenceNumber);
-      sequenceNumber = startingSequenceNumber;
-    }
+    sequenceNumber = startingSequenceNumber;
+    source.skipTo(startingSequenceNumber);
     return this;
   }
 

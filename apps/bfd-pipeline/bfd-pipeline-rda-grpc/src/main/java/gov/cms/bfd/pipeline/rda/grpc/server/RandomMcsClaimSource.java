@@ -1,19 +1,25 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import com.google.protobuf.Timestamp;
+import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
-import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import gov.cms.mpsm.rda.v1.RecordSource;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 
 /**
  * A ClaimSource implementation that generates and returns random McsClaim objects. The random
  * number seed and number of claims to return are specified in the constructor.
  */
-public class RandomMcsClaimSource implements MessageSource<McsClaim> {
+public class RandomMcsClaimSource implements MessageSource<McsClaimChange> {
   /** The claim generator. */
   private final RandomMcsClaimGenerator generator;
   /** The maximum number of claims to send. */
   private final long maxToSend;
+  /** Used to generate timestamps. */
+  private final Clock clock;
   /** The number of claim sent. */
   private long sent;
 
@@ -36,10 +42,11 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   public RandomMcsClaimSource(RandomClaimGeneratorConfig config, int maxToSend) {
     this.generator = new RandomMcsClaimGenerator(config);
     this.maxToSend = maxToSend;
+    clock = config.getClock();
   }
 
   @Override
-  public MessageSource<McsClaim> skipTo(long startingSequenceNumber) {
+  public RandomMcsClaimSource skipTo(long startingSequenceNumber) {
     sent += generator.skipTo(startingSequenceNumber);
     return this;
   }
@@ -50,23 +57,33 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   }
 
   @Override
-  public McsClaim next() {
+  public McsClaimChange next() {
     if (sent >= maxToSend) {
       throw new NoSuchElementException();
     }
     sent += 1;
-    return generator.randomClaim();
+
+    final Timestamp timestamp =
+        Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
+    final var claim = generator.randomClaim();
+    final var source =
+        RecordSource.newBuilder()
+            .setPhase("P1")
+            .setPhaseSeqNum(1)
+            .setExtractDate(LocalDate.now(clock).minusDays(2).toString())
+            .setTransmissionTimestamp(clock.instant().minus(1, ChronoUnit.DAYS).toString())
+            .build();
+    final var change =
+        McsClaimChange.newBuilder()
+            .setTimestamp(timestamp)
+            .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+            .setSeq(generator.getPreviousSequenceNumber())
+            .setClaim(claim)
+            .setSource(source)
+            .build();
+    return change;
   }
 
   @Override
   public void close() {}
-
-  /**
-   * Wraps the generator such that a message source is returned.
-   *
-   * @return the message source
-   */
-  public MessageSource<McsClaimChange> toClaimChanges() {
-    return WrappedClaimSource.wrapMcsClaims(this, generator.getClock(), RdaChange.MIN_SEQUENCE_NUM);
-  }
 }

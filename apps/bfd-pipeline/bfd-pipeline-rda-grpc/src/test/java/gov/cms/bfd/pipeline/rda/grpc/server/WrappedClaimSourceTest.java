@@ -77,12 +77,12 @@ public class WrappedClaimSourceTest {
             McsClaim.newBuilder().setIdrHic("g").build());
     final MessageSource<McsClaim> realSource = fromList(claims);
     final MessageSource<McsClaimChange> wrapped =
-        WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 1000L).skipTo(3);
+        WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 0L).skipTo(3);
 
     for (int index = 3; index < claims.size(); ++index) {
       assertTrue(wrapped.hasNext());
       McsClaimChange change = wrapped.next();
-      assertEquals(1000L + index, change.getSeq());
+      assertEquals(index, change.getSeq());
       assertSame(claims.get(index), change.getClaim());
     }
     assertFalse(wrapped.hasNext());
@@ -177,27 +177,23 @@ public class WrappedClaimSourceTest {
       final Iterator<T> iterator = claims.iterator();
 
       @Override
-      public MessageSource<T> skipTo(long startingSequenceNumber) {
-        while (iterator.hasNext() && startingSequenceNumber > 0) {
+      public MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
+        while (iterator.hasNext() && startingSequenceNumber-- > 0) {
           iterator.next();
-          startingSequenceNumber -= 1;
         }
         return this;
       }
 
-      /** {@inheritDoc} */
       @Override
       public boolean hasNext() throws Exception {
         return iterator.hasNext();
       }
 
-      /** {@inheritDoc} */
       @Override
       public T next() throws Exception {
         return iterator.next();
       }
 
-      /** {@inheritDoc} */
       @Override
       public void close() throws Exception {}
     };
