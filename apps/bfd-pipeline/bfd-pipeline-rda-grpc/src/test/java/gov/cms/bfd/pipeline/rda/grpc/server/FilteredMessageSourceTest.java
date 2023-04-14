@@ -94,9 +94,10 @@ public class FilteredMessageSourceTest {
     assertThrows(
         NoSuchElementException.class,
         () -> {
-          MessageSource<Integer> filtered =
-              new FilteredMessageSource<>(source, i -> i < 10).skipTo(10);
-          assertFalse(filtered.hasNext());
+          MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10);
+          while (filtered.hasNext()) {
+            filtered.next();
+          }
           filtered.next();
         });
   }

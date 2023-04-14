@@ -41,80 +41,102 @@ import org.junit.jupiter.api.Test;
 public class StandardGrpcRdaSourceIT {
   /** Example paid claim. */
   private static final String SOURCE_CLAIM_1 =
-      "{"
-          + "  \"rdaClaimKey\": \"63843470id\","
-          + "  \"dcn\": \"63843470\","
-          + "  \"intermediaryNb\": \"53412\","
-          + "  \"hicNo\": \"916689703543\","
-          + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
-          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
-          + "  \"currLoc2Unrecognized\": \"uma\","
-          + "  \"totalChargeAmount\": \"3.75\","
-          + "  \"currTranDtCymd\": \"2021-03-20\","
-          + "  \"principleDiag\": \"uec\","
-          + "  \"mbi\": \"c1ihk7q0g3i\","
-          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_INPATIENT\","
-          + "  \"fissProcCodes\": ["
-          + "    {"
-          + "      \"procCd\": \"uec\","
-          + "      \"procFlag\": \"nli\","
-          + "      \"rdaPosition\": 1"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"egkkkw\","
-          + "      \"procFlag\": \"hsw\","
-          + "      \"procDt\": \"2021-02-03\","
-          + "      \"rdaPosition\": 2"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"zhaj\","
-          + "      \"procDt\": \"2021-01-07\","
-          + "      \"rdaPosition\": 3"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"ods\","
-          + "      \"procDt\": \"2021-01-03\","
-          + "      \"rdaPosition\": 4"
-          + "    }"
-          + "  ],"
-          + "  \"medaProvId\": \"oducjgzt67joc\""
-          + "}";
+      """
+      {
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq": "1",
+        "changeType": "CHANGE_TYPE_UPDATE",
+        "rdaClaimKey": "63843470id",
+        "dcn": "63843470",
+        "intermediaryNb": "53412",
+        "claim": {
+          "rdaClaimKey": "63843470id",
+          "dcn": "63843470",
+          "intermediaryNb": "53412",
+          "hicNo": "916689703543",
+          "currStatusEnum": "CLAIM_STATUS_PAID",
+          "currLoc1Enum": "PROCESSING_TYPE_MANUAL",
+          "currLoc2Unrecognized": "uma",
+          "totalChargeAmount": "3.75",
+          "currTranDtCymd": "2021-03-20",
+          "principleDiag": "uec",
+          "mbi": "c1ihk7q0g3i",
+          "clmTypIndEnum": "CLAIM_TYPE_INPATIENT",
+          "fissProcCodes": [
+            {
+              "procCd": "uec",
+              "procFlag": "nli",
+              "rdaPosition": 1
+            },
+            {
+              "procCd": "egkkkw",
+              "procFlag": "hsw",
+              "procDt": "2021-02-03",
+              "rdaPosition": 2
+            },
+            {
+              "procCd": "zhaj",
+              "procDt": "2021-01-07",
+              "rdaPosition": 3
+            },
+            {
+              "procCd": "ods",
+              "procDt": "2021-01-03",
+              "rdaPosition": 4
+            }
+          ],
+          "medaProvId": "oducjgzt67joc"
+        }
+      }
+      """
+          .replaceAll("\n", "");
   /** Example rejected claim. */
   private static final String SOURCE_CLAIM_2 =
-      "{"
-          + "  \"rdaClaimKey\": \"2643602id\","
-          + "  \"dcn\": \"2643602\","
-          + "  \"intermediaryNb\": \"24153\","
-          + "  \"hicNo\": \"640930211775\","
-          + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
-          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
-          + "  \"currLoc2Unrecognized\": \"p6s\","
-          + "  \"totalChargeAmount\": \"55.91\","
-          + "  \"recdDtCymd\": \"2021-05-14\","
-          + "  \"currTranDtCymd\": \"2020-12-21\","
-          + "  \"principleDiag\": \"egnj\","
-          + "  \"npiNumber\": \"5764657700\","
-          + "  \"mbi\": \"0vtc7u321x0\","
-          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_OUTPATIENT\","
-          + "  \"fedTaxNb\": \"2845244764\","
-          + "  \"fissProcCodes\": ["
-          + "    {"
-          + "      \"procCd\": \"egnj\","
-          + "      \"procDt\": \"2021-05-13\","
-          + "      \"rdaPosition\": 1"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"vvqtwoz\","
-          + "      \"procDt\": \"2021-04-29\","
-          + "      \"rdaPosition\": 2"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"fipyd\","
-          + "      \"procFlag\": \"g\","
-          + "      \"rdaPosition\": 3"
-          + "    }"
-          + "  ]"
-          + "}";
+      """
+      {
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq": "2",
+        "changeType": "CHANGE_TYPE_UPDATE",
+        "rdaClaimKey": "2643602id",
+        "dcn": "2643602",
+        "intermediaryNb": "24153",
+        "claim": {
+          "rdaClaimKey": "2643602id",
+          "dcn": "2643602",
+          "intermediaryNb": "24153",
+          "hicNo": "640930211775",
+          "currStatusEnum": "CLAIM_STATUS_REJECT",
+          "currLoc1Enum": "PROCESSING_TYPE_OFFLINE",
+          "currLoc2Unrecognized": "p6s",
+          "totalChargeAmount": "55.91",
+          "recdDtCymd": "2021-05-14",
+          "currTranDtCymd": "2020-12-21",
+          "principleDiag": "egnj",
+          "npiNumber": "5764657700",
+          "mbi": "0vtc7u321x0",
+          "clmTypIndEnum": "CLAIM_TYPE_OUTPATIENT",
+          "fedTaxNb": "2845244764",
+          "fissProcCodes": [
+            {
+              "procCd": "egnj",
+              "procDt": "2021-05-13",
+              "rdaPosition": 1
+            },
+            {
+              "procCd": "vvqtwoz",
+              "procDt": "2021-04-29",
+              "rdaPosition": 2
+            },
+            {
+              "procCd": "fipyd",
+              "procFlag": "g",
+              "rdaPosition": 3
+            }
+          ]
+        }
+      }
+      """
+          .replaceAll("\n", "");
   /** Example of two claims separated by a line. */
   private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
   /** Expected paid claim. */
@@ -167,7 +189,7 @@ public class StandardGrpcRdaSourceIT {
           + "    \"rdaPosition\" : 3\n"
           + "  } ],\n"
           + "  \"revenueLines\" : [ ],\n"
-          + "  \"sequenceNumber\" : 0,\n"
+          + "  \"sequenceNumber\" : 1,\n"
           + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
   /** Example rejected claim. */
@@ -216,7 +238,7 @@ public class StandardGrpcRdaSourceIT {
           + "  } ],\n"
           + "  \"receivedDate\" : \"2021-05-14\",\n"
           + "  \"revenueLines\" : [ ],\n"
-          + "  \"sequenceNumber\" : 1,\n"
+          + "  \"sequenceNumber\" : 2,\n"
           + "  \"totalChargeAmount\" : 55.91\n"
           + "}";
 

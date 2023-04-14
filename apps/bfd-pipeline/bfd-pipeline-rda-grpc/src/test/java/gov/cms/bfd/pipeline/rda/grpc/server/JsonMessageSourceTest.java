@@ -22,8 +22,8 @@ public class JsonMessageSourceTest {
       """
       {
         "timestamp": "2022-01-25T15:02:35Z",
-        "seq":"1",
-        "changeType":"CHANGE_TYPE_UPDATE",
+        "seq": "1",
+        "changeType": "CHANGE_TYPE_UPDATE",
         "rdaClaimKey": "63843470id",
         "dcn": "63843470",
         "intermediaryNb": "24153",
@@ -59,14 +59,16 @@ public class JsonMessageSourceTest {
           ],
           "medaProvId": "oducjgzt67joc"
         }
-      """;
+      }
+      """
+          .replaceAll("\n", "");
   /** Sample claim 2, in json format. */
   private static final String CLAIM_2 =
       """
       {
         "timestamp": "2022-01-25T15:02:35Z",
-        "seq":"2",
-        "changeType":"CHANGE_TYPE_UPDATE",
+        "seq": "3",
+        "changeType": "CHANGE_TYPE_UPDATE",
         "rdaClaimKey": "2643602id",
         "dcn": "2643602",
         "intermediaryNb": "24153",
@@ -99,7 +101,9 @@ public class JsonMessageSourceTest {
             }
           ]
         }
-      """;
+      }
+      """
+          .replaceAll("\n", "");
 
   /**
    * Verifies that a {@link FissClaim} claim can be read by the {@link JsonMessageSource}, has the
@@ -209,7 +213,7 @@ public class JsonMessageSourceTest {
   public void skip() throws Exception {
     MessageSource<FissClaimChange> source =
         new JsonMessageSource<>(ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser())
-            .skipTo(1);
+            .skipTo(2);
     assertTrue(source.hasNext());
     FissClaimChange claim = source.next();
     assertEquals("2643602", claim.getDcn());

@@ -78,6 +78,7 @@ public class RandomMcsClaimSource implements MessageSource<McsClaimChange> {
             .setTimestamp(timestamp)
             .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
             .setSeq(generator.getPreviousSequenceNumber())
+            .setIcn(claim.getIdrClmHdIcn())
             .setClaim(claim)
             .setSource(source)
             .build();

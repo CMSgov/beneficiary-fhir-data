@@ -178,7 +178,9 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   private boolean advance() throws Exception {
     if (nextMessage == null) {
       final var line = reader.readLine();
-      nextMessage = parser.parseJson(line);
+      if (line != null) {
+        nextMessage = parser.parseJson(line);
+      }
     }
     return nextMessage != null;
   }

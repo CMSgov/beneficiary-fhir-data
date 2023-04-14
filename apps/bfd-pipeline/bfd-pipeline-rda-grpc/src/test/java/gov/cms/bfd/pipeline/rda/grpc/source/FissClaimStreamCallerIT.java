@@ -25,58 +25,62 @@ public class FissClaimStreamCallerIT {
   private static final String CLAIM_1 =
       """
       {
-          "timestamp": "2022-01-25T15:02:35Z",
-          "seq":"1",
-          "changeType":"CHANGE_TYPE_UPDATE",
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq": "1",
+        "changeType": "CHANGE_TYPE_UPDATE",
+        "dcn": "63843470",
+        "intermediaryNb": "53412",
+        "rdaClaimKey": "63843470id",
+        "claim": {
+          "rdaClaimKey": "63843470id",
           "dcn": "63843470",
           "intermediaryNb": "53412",
-          "rdaClaimKey": "63843470id",
-          "claim": {
-              "rdaClaimKey": "63843470id",
-              "dcn": "63843470",
-              "hicNo": "916689703543",
-              "currStatusEnum": "CLAIM_STATUS_PAID",
-              "currLoc1Enum": "PROCESSING_TYPE_MANUAL",
-              "currLoc2Unrecognized": "uma",
-              "totalChargeAmount": "3.75",
-              "currTranDtCymd": "2021-03-20",
-              "principleDiag": "uec",
-              "mbi": "c1ihk7q0g3i",
-              "fissProcCodes": [],
-              "medaProvId": "oducjgzt67joc",
-              "clmTypIndEnum": "CLAIM_TYPE_INPATIENT"
-          }
+          "hicNo": "916689703543",
+          "currStatusEnum": "CLAIM_STATUS_PAID",
+          "currLoc1Enum": "PROCESSING_TYPE_MANUAL",
+          "currLoc2Unrecognized": "uma",
+          "totalChargeAmount": "3.75",
+          "currTranDtCymd": "2021-03-20",
+          "principleDiag": "uec",
+          "mbi": "c1ihk7q0g3i",
+          "fissProcCodes": [],
+          "medaProvId": "oducjgzt67joc",
+          "clmTypIndEnum": "CLAIM_TYPE_INPATIENT"
+        }
       }
-      """;
+      """
+          .replaceAll("\n", "");
   /** Example rejected claim. */
   private static final String CLAIM_2 =
       """
       {
-          "timestamp": "2022-01-25T15:02:35Z",
-          "seq":"2",
-          "changeType":"CHANGE_TYPE_UPDATE",
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq": "2",
+        "changeType": "CHANGE_TYPE_UPDATE",
+        "dcn": "2643602",
+        "intermediaryNb": "24153",
+        "rdaClaimKey": "2643602id",
+        "claim": {
+          "rdaClaimKey": "2643602id",
           "dcn": "2643602",
           "intermediaryNb": "24153",
-          "rdaClaimKey": "2643602id",
-          "claim": {
-              "rdaClaimKey": "2643602id",
-              "dcn": "2643602",
-              "hicNo": "640930211775",
-              "currStatusEnum": "CLAIM_STATUS_REJECT",
-              "currLoc1Enum": "PROCESSING_TYPE_OFFLINE",
-              "currLoc2Unrecognized": "p6s",
-              "totalChargeAmount": "55.91",
-              "recdDtCymd": "2021-05-14",
-              "currTranDtCymd": "2020-12-21",
-              "principleDiag": "egnj",
-              "npiNumber": "5764657700",
-              "mbi": "0vtc7u321x0",
-              "fedTaxNb": "2845244764",
-              "fissProcCodes": [],
-              "clmTypIndEnum": "CLAIM_TYPE_OUTPATIENT"
-          }
+          "hicNo": "640930211775",
+          "currStatusEnum": "CLAIM_STATUS_REJECT",
+          "currLoc1Enum": "PROCESSING_TYPE_OFFLINE",
+          "currLoc2Unrecognized": "p6s",
+          "totalChargeAmount": "55.91",
+          "recdDtCymd": "2021-05-14",
+          "currTranDtCymd": "2020-12-21",
+          "principleDiag": "egnj",
+          "npiNumber": "5764657700",
+          "mbi": "0vtc7u321x0",
+          "fedTaxNb": "2845244764",
+          "fissProcCodes": [],
+          "clmTypIndEnum": "CLAIM_TYPE_OUTPATIENT"
+        }
       }
-      """;
+      """
+          .replaceAll("\n", "");
 
   /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
@@ -135,7 +139,7 @@ public class FissClaimStreamCallerIT {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
         .fissSourceFactory(
-            sequenceNumber -> new RandomFissClaimSource(1000L, 15).skipTo(sequenceNumber))
+            sequenceNumber -> new RandomFissClaimSource(1000L, 15).skipTo(sequenceNumber - 1))
         .build()
         .runWithChannelParam(
             channel -> {

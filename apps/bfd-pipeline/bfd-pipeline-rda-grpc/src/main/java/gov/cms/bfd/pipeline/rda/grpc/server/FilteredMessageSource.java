@@ -32,6 +32,11 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
   @Override
   public MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
     source.skipTo(startingSequenceNumber);
+    if (source.hasNext()) {
+      nextValue = source.next();
+    } else {
+      nextValue = null;
+    }
     return this;
   }
 
