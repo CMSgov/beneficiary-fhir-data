@@ -544,8 +544,10 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     }
 
     return new DatabaseOptions(
-        databaseOptions.getDatabaseUrl(), databaseOptions.getDatabaseUsername(),
-        databaseOptions.getDatabasePassword(), databaseMaxPoolSize.orElse(1));
+        databaseOptions.getDatabaseUrl(),
+        databaseOptions.getDatabaseUsername(),
+        databaseOptions.getDatabasePassword(),
+        databaseMaxPoolSize.orElse(1));
   }
 
   /**

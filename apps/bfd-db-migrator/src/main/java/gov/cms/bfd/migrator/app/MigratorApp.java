@@ -12,6 +12,7 @@ import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
+import gov.cms.bfd.sharedutils.database.DatabaseApplicationUrl;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.util.List;
@@ -179,7 +180,10 @@ public final class MigratorApp {
       DatabaseOptions dbOptions, MetricRegistry metrics) {
     HikariDataSource pooledDataSource = new HikariDataSource();
 
-    pooledDataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
+    String jdbcUrl =
+        DatabaseApplicationUrl.includeApplicationNameInDbUrl(dbOptions.getDatabaseUrl());
+    pooledDataSource.setJdbcUrl(jdbcUrl);
+
     pooledDataSource.setUsername(dbOptions.getDatabaseUsername());
     pooledDataSource.setPassword(dbOptions.getDatabasePassword());
     pooledDataSource.setMaximumPoolSize(dbOptions.getMaxPoolSize());

@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.database.DatabaseApplicationUrl;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
@@ -97,7 +98,8 @@ public final class PipelineApplicationState implements AutoCloseable {
       DatabaseOptions dbOptions, MetricRegistry metrics) {
     HikariDataSource pooledDataSource = new HikariDataSource();
 
-    pooledDataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
+    pooledDataSource.setJdbcUrl(
+        DatabaseApplicationUrl.includeApplicationNameInDbUrl(dbOptions.getDatabaseUrl()));
     pooledDataSource.setUsername(dbOptions.getDatabaseUsername());
     pooledDataSource.setPassword(dbOptions.getDatabasePassword());
     pooledDataSource.setMaximumPoolSize(dbOptions.getMaxPoolSize());

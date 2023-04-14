@@ -353,7 +353,7 @@ public final class DatabaseTestUtils {
   private static DataSource initUnpooledDataSourceForPostgresql(
       String url, String username, String password) {
     PGSimpleDataSource dataSource = new PGSimpleDataSource();
-    dataSource.setUrl(url);
+    dataSource.setUrl(DatabaseTestApplicationUrl.includeApplicationNameInDbUrl(url));
     if (username != null) dataSource.setUser(username);
     if (password != null) dataSource.setPassword(password);
 
@@ -474,7 +474,9 @@ public final class DatabaseTestUtils {
   public void cleanDataSource() {
     String url;
     try (Connection connection = getUnpooledDataSource().getConnection(); ) {
-      url = connection.getMetaData().getURL();
+      url =
+          DatabaseTestApplicationUrl.includeApplicationNameInDbUrl(
+              connection.getMetaData().getURL());
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
