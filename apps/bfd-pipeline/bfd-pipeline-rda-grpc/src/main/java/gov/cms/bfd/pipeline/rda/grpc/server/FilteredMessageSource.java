@@ -29,7 +29,12 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
     this.filter = filter;
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
+    source.skipTo(startingSequenceNumber);
+    return this;
+  }
+
   @Override
   public boolean hasNext() throws Exception {
     // allow for cases of hasNext() being called multiple times in a row
@@ -46,7 +51,6 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public T next() throws Exception {
     if (nextValue == null) {
@@ -57,7 +61,6 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
     return answer;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     source.close();

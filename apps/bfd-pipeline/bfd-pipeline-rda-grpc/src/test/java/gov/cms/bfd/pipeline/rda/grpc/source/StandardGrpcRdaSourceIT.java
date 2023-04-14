@@ -18,7 +18,6 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
-import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -405,11 +404,7 @@ public class StandardGrpcRdaSourceIT {
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
         .fissSourceFactory(
-            sequenceNumber ->
-                WrappedClaimSource.wrapFissClaims(
-                    new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
-                    clock,
-                    sequenceNumber - 1));
+            sequenceNumber -> new JsonMessageSource<>(claimsJson, JsonMessageSource.fissParser()));
   }
 
   /**

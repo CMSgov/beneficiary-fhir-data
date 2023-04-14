@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,67 +19,87 @@ import org.junit.jupiter.api.Test;
 public class JsonMessageSourceTest {
   /** Sample claim 1, in json format. */
   private static final String CLAIM_1 =
-      "{"
-          + "  \"dcn\": \"63843470\","
-          + "  \"hicNo\": \"916689703543\","
-          + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
-          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
-          + "  \"currLoc2Unrecognized\": \"uma\","
-          + "  \"totalChargeAmount\": \"3.75\","
-          + "  \"currTranDtCymd\": \"2021-03-20\","
-          + "  \"principleDiag\": \"uec\","
-          + "  \"mbi\": \"c1ihk7q0g3i57\","
-          + "  \"fissProcCodes\": ["
-          + "    {"
-          + "      \"procCd\": \"uec\","
-          + "      \"procFlag\": \"nli\""
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"egkkkw\","
-          + "      \"procFlag\": \"hsw\","
-          + "      \"procDt\": \"2021-02-03\""
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"zhaj\","
-          + "      \"procDt\": \"2021-01-07\""
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"ods\","
-          + "      \"procDt\": \"2021-01-03\""
-          + "    }"
-          + "  ],"
-          + "  \"medaProvId\": \"oducjgzt67joc\""
-          + "}";
+      """
+      {
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq":"1",
+        "changeType":"CHANGE_TYPE_UPDATE",
+        "rdaClaimKey": "63843470id",
+        "dcn": "63843470",
+        "intermediaryNb": "24153",
+        "claim": {
+          "rdaClaimKey": "63843470id",
+          "dcn": "63843470",
+          "hicNo": "916689703543",
+          "currStatusEnum": "CLAIM_STATUS_PAID",
+          "currLoc1Enum": "PROCESSING_TYPE_MANUAL",
+          "currLoc2Unrecognized": "uma",
+          "totalChargeAmount": "3.75",
+          "currTranDtCymd": "2021-03-20",
+          "principleDiag": "uec",
+          "mbi": "c1ihk7q0g3i57",
+          "fissProcCodes": [
+            {
+              "procCd": "uec",
+              "procFlag": "nli"
+            },
+            {
+              "procCd": "egkkkw",
+              "procFlag": "hsw",
+              "procDt": "2021-02-03"
+            },
+            {
+              "procCd": "zhaj",
+              "procDt": "2021-01-07"
+            },
+            {
+              "procCd": "ods",
+              "procDt": "2021-01-03"
+            }
+          ],
+          "medaProvId": "oducjgzt67joc"
+        }
+      """;
   /** Sample claim 2, in json format. */
   private static final String CLAIM_2 =
-      "{"
-          + "  \"dcn\": \"2643602\","
-          + "  \"hicNo\": \"640930211775\","
-          + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
-          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
-          + "  \"currLoc2Unrecognized\": \"p6s\","
-          + "  \"totalChargeAmount\": \"55.91\","
-          + "  \"recdDtCymd\": \"2021-05-14\","
-          + "  \"currTranDtCymd\": \"2020-12-21\","
-          + "  \"principleDiag\": \"egnj\","
-          + "  \"npiNumber\": \"5764657700\","
-          + "  \"mbi\": \"0vtc7u321x0se\","
-          + "  \"fedTaxNb\": \"2845244764\","
-          + "  \"fissProcCodes\": ["
-          + "    {"
-          + "      \"procCd\": \"egnj\","
-          + "      \"procDt\": \"2021-05-13\""
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"vvqtwoz\","
-          + "      \"procDt\": \"2021-04-29\""
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"fipyd\","
-          + "      \"procFlag\": \"g\""
-          + "    }"
-          + "  ]"
-          + "}";
+      """
+      {
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq":"2",
+        "changeType":"CHANGE_TYPE_UPDATE",
+        "rdaClaimKey": "2643602id",
+        "dcn": "2643602",
+        "intermediaryNb": "24153",
+        "claim": {
+          "rdaClaimKey": "2643602id",
+          "dcn": "2643602",
+          "hicNo": "640930211775",
+          "currStatusEnum": "CLAIM_STATUS_REJECT",
+          "currLoc1Enum": "PROCESSING_TYPE_OFFLINE",
+          "currLoc2Unrecognized": "p6s",
+          "totalChargeAmount": "55.91",
+          "recdDtCymd": "2021-05-14",
+          "currTranDtCymd": "2020-12-21",
+          "principleDiag": "egnj",
+          "npiNumber": "5764657700",
+          "mbi": "0vtc7u321x0se",
+          "fedTaxNb": "2845244764",
+          "fissProcCodes": [
+            {
+              "procCd": "egnj",
+              "procDt": "2021-05-13"
+            },
+            {
+              "procCd": "vvqtwoz",
+              "procDt": "2021-04-29"
+            },
+            {
+              "procCd": "fipyd",
+              "procFlag": "g"
+            }
+          ]
+        }
+      """;
 
   /**
    * Verifies that a {@link FissClaim} claim can be read by the {@link JsonMessageSource}, has the
@@ -89,11 +110,11 @@ public class JsonMessageSourceTest {
    */
   @Test
   public void singleClaimString() throws Exception {
-    JsonMessageSource<FissClaim> source =
-        new JsonMessageSource<>(CLAIM_1, JsonMessageSource::parseFissClaim);
+    JsonMessageSource<FissClaimChange> source =
+        new JsonMessageSource<>(CLAIM_1, JsonMessageSource.fissParser());
     assertTrue(source.hasNext());
-    FissClaim claim = source.next();
-    assertEquals("63843470", claim.getDcn());
+    var change = source.next();
+    assertEquals("63843470", change.getDcn());
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
     assertMultipleCallsToCloseOk(source);
@@ -108,15 +129,15 @@ public class JsonMessageSourceTest {
    */
   @Test
   public void twoClaimsString() throws Exception {
-    JsonMessageSource<FissClaim> source =
+    JsonMessageSource<FissClaimChange> source =
         new JsonMessageSource<>(
-            CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource::parseFissClaim);
+            CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource.fissParser());
     assertTrue(source.hasNext());
-    FissClaim claim = source.next();
-    assertEquals("63843470", claim.getDcn());
+    var change = source.next();
+    assertEquals("63843470", change.getDcn());
     assertTrue(source.hasNext());
-    claim = source.next();
-    assertEquals("2643602", claim.getDcn());
+    change = source.next();
+    assertEquals("2643602", change.getDcn());
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
     assertMultipleCallsToCloseOk(source);
@@ -131,15 +152,14 @@ public class JsonMessageSourceTest {
    */
   @Test
   public void claimsList() throws Exception {
-    JsonMessageSource<FissClaim> source =
-        new JsonMessageSource<>(
-            ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource::parseFissClaim);
+    JsonMessageSource<FissClaimChange> source =
+        new JsonMessageSource<>(ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser());
     assertTrue(source.hasNext());
-    FissClaim claim = source.next();
-    assertEquals("63843470", claim.getDcn());
+    var change = source.next();
+    assertEquals("63843470", change.getDcn());
     assertTrue(source.hasNext());
-    claim = source.next();
-    assertEquals("2643602", claim.getDcn());
+    change = source.next();
+    assertEquals("2643602", change.getDcn());
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
     assertMultipleCallsToCloseOk(source);
@@ -161,14 +181,14 @@ public class JsonMessageSourceTest {
         writer.write(System.lineSeparator());
         writer.write(CLAIM_2);
       }
-      try (JsonMessageSource<FissClaim> source =
-          new JsonMessageSource<>(jsonFile, JsonMessageSource::parseFissClaim)) {
+      try (JsonMessageSource<FissClaimChange> source =
+          new JsonMessageSource<>(jsonFile, JsonMessageSource.fissParser())) {
         assertTrue(source.hasNext());
-        FissClaim claim = source.next();
-        assertEquals("63843470", claim.getDcn());
+        var change = source.next();
+        assertEquals("63843470", change.getDcn());
         assertTrue(source.hasNext());
-        claim = source.next();
-        assertEquals("2643602", claim.getDcn());
+        change = source.next();
+        assertEquals("2643602", change.getDcn());
         assertFalse(source.hasNext());
         assertNextPastEndOfDataThrowsException(source);
         assertMultipleCallsToCloseOk(source);
@@ -179,7 +199,7 @@ public class JsonMessageSourceTest {
   }
 
   /**
-   * Verifies that when two {@link FissClaim} are loaded and {@link JsonMessageSource#skip} is
+   * Verifies that when two {@link FissClaim} are loaded and {@link JsonMessageSource#skipTo} is
    * called the number of specified messages are skipped and {@link JsonMessageSource#next} returns
    * the record past the skipped record.
    *
@@ -187,12 +207,11 @@ public class JsonMessageSourceTest {
    */
   @Test
   public void skip() throws Exception {
-    MessageSource<FissClaim> source =
-        new JsonMessageSource<>(
-                ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource::parseFissClaim)
-            .skip(1);
+    MessageSource<FissClaimChange> source =
+        new JsonMessageSource<>(ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser())
+            .skipTo(1);
     assertTrue(source.hasNext());
-    FissClaim claim = source.next();
+    FissClaimChange claim = source.next();
     assertEquals("2643602", claim.getDcn());
     assertFalse(source.hasNext());
   }

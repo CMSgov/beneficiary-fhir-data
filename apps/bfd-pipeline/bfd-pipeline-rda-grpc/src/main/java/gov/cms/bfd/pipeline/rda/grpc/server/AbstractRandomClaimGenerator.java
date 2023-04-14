@@ -71,6 +71,22 @@ abstract class AbstractRandomClaimGenerator<T> {
   }
 
   /**
+   * Used by {@link MessageSource#skipTo} to jump ahead in the sequence to a desired sequence
+   * number.
+   *
+   * @param startingSequenceNumber desired next sequence number
+   * @return the number skipped
+   */
+  public long skipTo(long startingSequenceNumber) {
+    long skipped = 0;
+    if (sequence < startingSequenceNumber) {
+      skipped = startingSequenceNumber - sequence;
+      sequence = startingSequenceNumber;
+    }
+    return skipped;
+  }
+
+  /**
    * Set the starting sequence value.
    *
    * <p>This value is used to alter the random values generated between two different claims.

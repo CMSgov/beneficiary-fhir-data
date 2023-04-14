@@ -72,7 +72,8 @@ public class RandomMcsClaimSourceTest {
    */
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 6).toClaimChanges().skip(3);
+    MessageSource<McsClaimChange> source =
+        new RandomMcsClaimSource(0, 6).toClaimChanges().skipTo(3);
     assertEquals(3L, source.next().getSeq());
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());

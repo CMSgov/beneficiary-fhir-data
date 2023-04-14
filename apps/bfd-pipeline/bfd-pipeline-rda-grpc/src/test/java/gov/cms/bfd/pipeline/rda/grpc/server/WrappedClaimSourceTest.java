@@ -59,7 +59,7 @@ public class WrappedClaimSourceTest {
   }
 
   /**
-   * Verifies that wrapping a source with many claims and calling {@link WrappedClaimSource#skip}
+   * Verifies that wrapping a source with many claims and calling {@link WrappedClaimSource#skipTo}
    * skips the expected number of claims as if skipping within the original source.
    *
    * @throws Exception indicates test failure
@@ -77,7 +77,7 @@ public class WrappedClaimSourceTest {
             McsClaim.newBuilder().setIdrHic("g").build());
     final MessageSource<McsClaim> realSource = fromList(claims);
     final MessageSource<McsClaimChange> wrapped =
-        WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 1000L).skip(3);
+        WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 1000L).skipTo(3);
 
     for (int index = 3; index < claims.size(); ++index) {
       assertTrue(wrapped.hasNext());
@@ -175,6 +175,15 @@ public class WrappedClaimSourceTest {
   private static <T> MessageSource<T> fromList(List<T> claims) {
     return new MessageSource<T>() {
       final Iterator<T> iterator = claims.iterator();
+
+      @Override
+      public MessageSource<T> skipTo(long startingSequenceNumber) {
+        while (iterator.hasNext() && startingSequenceNumber > 0) {
+          iterator.next();
+          startingSequenceNumber -= 1;
+        }
+        return this;
+      }
 
       /** {@inheritDoc} */
       @Override

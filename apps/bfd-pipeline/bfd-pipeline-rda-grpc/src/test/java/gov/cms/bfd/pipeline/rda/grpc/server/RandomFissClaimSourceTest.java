@@ -74,7 +74,7 @@ public class RandomFissClaimSourceTest {
   @Test
   public void sequenceNumbers() throws Exception {
     MessageSource<FissClaimChange> source =
-        new RandomFissClaimSource(0, 7).toClaimChanges().skip(4);
+        new RandomFissClaimSource(0, 7).toClaimChanges().skipTo(4);
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());
     assertEquals(6L, source.next().getSeq());

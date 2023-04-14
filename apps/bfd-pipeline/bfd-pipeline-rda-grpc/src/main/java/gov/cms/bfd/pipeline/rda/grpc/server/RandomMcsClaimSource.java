@@ -13,9 +13,9 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   /** The claim generator. */
   private final RandomMcsClaimGenerator generator;
   /** The maximum number of claims to send. */
-  private final int maxToSend;
+  private final long maxToSend;
   /** The number of claim sent. */
-  private int sent;
+  private long sent;
 
   /**
    * Creates a new instance.
@@ -34,16 +34,13 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
    * @param maxToSend the maximum number of claims to send
    */
   public RandomMcsClaimSource(RandomClaimGeneratorConfig config, int maxToSend) {
-    generator = new RandomMcsClaimGenerator(config);
-    sent = 0;
-    generator.setSequence(sent);
+    this.generator = new RandomMcsClaimGenerator(config);
     this.maxToSend = maxToSend;
   }
 
   @Override
-  public MessageSource<McsClaim> skip(long numberToSkip) throws Exception {
-    sent += numberToSkip;
-    generator.incrementSequence(numberToSkip);
+  public MessageSource<McsClaim> skipTo(long startingSequenceNumber) {
+    sent += generator.skipTo(startingSequenceNumber);
     return this;
   }
 

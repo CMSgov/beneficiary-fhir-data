@@ -13,9 +13,9 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
   /** The random claim generator. */
   private final RandomFissClaimGenerator generator;
   /** The maximum number of claims to send. */
-  private final int maxToSend;
+  private final long maxToSend;
   /** The number of sent claims. */
-  private int sent;
+  private long sent;
 
   /**
    * Creates a new instance.
@@ -34,16 +34,13 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
    * @param maxToSend the max number of claims to send
    */
   public RandomFissClaimSource(RandomClaimGeneratorConfig config, int maxToSend) {
-    generator = new RandomFissClaimGenerator(config);
-    sent = 0;
-    generator.setSequence(sent);
+    this.generator = new RandomFissClaimGenerator(config);
     this.maxToSend = maxToSend;
   }
 
   @Override
-  public MessageSource<FissClaim> skip(long numberToSkip) throws Exception {
-    sent += numberToSkip;
-    generator.incrementSequence(numberToSkip);
+  public MessageSource<FissClaim> skipTo(long startingSequenceNumber) {
+    sent += generator.skipTo(startingSequenceNumber);
     return this;
   }
 
