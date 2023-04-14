@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
@@ -134,8 +134,7 @@ public class JsonMessageSourceTest {
   @Test
   public void twoClaimsString() throws Exception {
     JsonMessageSource<FissClaimChange> source =
-        new JsonMessageSource<>(
-            CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource.fissParser());
+        new JsonMessageSource<>(List.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser());
     assertTrue(source.hasNext());
     var change = source.next();
     assertEquals("63843470", change.getDcn());
@@ -157,7 +156,7 @@ public class JsonMessageSourceTest {
   @Test
   public void claimsList() throws Exception {
     JsonMessageSource<FissClaimChange> source =
-        new JsonMessageSource<>(ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser());
+        new JsonMessageSource<>(List.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser());
     assertTrue(source.hasNext());
     var change = source.next();
     assertEquals("63843470", change.getDcn());
@@ -212,7 +211,7 @@ public class JsonMessageSourceTest {
   @Test
   public void skip() throws Exception {
     MessageSource<FissClaimChange> source =
-        new JsonMessageSource<>(ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser())
+        new JsonMessageSource<>(List.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser())
             .skipTo(2);
     assertTrue(source.hasNext());
     FissClaimChange claim = source.next();

@@ -137,8 +137,6 @@ public class StandardGrpcRdaSourceIT {
       }
       """
           .replaceAll("\n", "");
-  /** Example of two claims separated by a line. */
-  private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
@@ -426,7 +424,9 @@ public class StandardGrpcRdaSourceIT {
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
         .fissSourceFactory(
-            sequenceNumber -> new JsonMessageSource<>(claimsJson, JsonMessageSource.fissParser()));
+            sequenceNumber ->
+                new JsonMessageSource<>(
+                    List.of(SOURCE_CLAIM_1, SOURCE_CLAIM_2), JsonMessageSource.fissParser()));
   }
 
   /**
@@ -475,7 +475,6 @@ public class StandardGrpcRdaSourceIT {
               .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized int writeMessage(String dataVersion, FissClaimChange message)
         throws ProcessingException {
@@ -488,7 +487,6 @@ public class StandardGrpcRdaSourceIT {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void checkErrorCount() {
       // Do nothing
@@ -499,17 +497,14 @@ public class StandardGrpcRdaSourceIT {
       return object.getClaim().getRdaClaimKey();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void updateLastSequenceNumber(long lastSequenceNumber) {}
 
-    /** {@inheritDoc} */
     @Override
     public long getSequenceNumberForObject(FissClaimChange object) {
       return object.getSeq();
     }
 
-    /** {@inheritDoc} */
     @Nonnull
     @Override
     public Optional<RdaChange<RdaFissClaim>> transformMessage(
@@ -522,23 +517,19 @@ public class StandardGrpcRdaSourceIT {
       return Optional.of(change);
     }
 
-    /** {@inheritDoc} */
     @Override
     public int writeClaims(Collection<RdaChange<RdaFissClaim>> objects) throws ProcessingException {
       throw new UnsupportedOperationException();
     }
 
-    /** {@inheritDoc} */
     @Override
     public int getProcessedCount() throws ProcessingException {
       return 0;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void shutdown(Duration waitTime) throws ProcessingException {}
 
-    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {}
 

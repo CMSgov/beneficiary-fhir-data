@@ -19,6 +19,8 @@ import java.util.NoSuchElementException;
  * A {@link MessageSource} implementation that produces objects from NDJSON data. The grpc-java
  * library includes a JsonFormat class that can be used to convert gRPC message objects into JSON
  * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
+ *
+ * @param <T> the message type
  */
 public class JsonMessageSource<T> implements MessageSource<T> {
   /** The JSON parser. */

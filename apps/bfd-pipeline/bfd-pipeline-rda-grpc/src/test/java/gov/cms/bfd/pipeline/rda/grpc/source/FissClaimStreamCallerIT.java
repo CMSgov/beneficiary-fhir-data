@@ -16,6 +16,7 @@ import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the {@link FissClaimStreamCaller}. */
@@ -101,8 +102,7 @@ public class FissClaimStreamCallerIT {
         .serverName(getClass().getSimpleName())
         .fissSourceFactory(
             sequenceNumber ->
-                new JsonMessageSource<>(
-                    CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource.fissParser()))
+                new JsonMessageSource<>(List.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser()))
         .build()
         .runWithChannelParam(
             channel -> {
@@ -139,13 +139,13 @@ public class FissClaimStreamCallerIT {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
         .fissSourceFactory(
-            sequenceNumber -> new RandomFissClaimSource(1000L, 15).skipTo(sequenceNumber - 1))
+            sequenceNumber -> new RandomFissClaimSource(1000L, 15).skipTo(sequenceNumber))
         .build()
         .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller();
               final GrpcResponseStream<FissClaimChange> results =
-                  caller.callService(channel, CallOptions.DEFAULT, 10L);
+                  caller.callService(channel, CallOptions.DEFAULT, 9L);
               assertEquals(Long.valueOf(10), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(11), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
