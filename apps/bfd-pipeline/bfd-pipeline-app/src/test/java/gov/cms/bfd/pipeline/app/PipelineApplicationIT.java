@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -271,8 +272,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges())
-          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges())
+          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 100))
+          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 100))
           .build()
           .runWithPortParam(
               port -> {
@@ -315,8 +316,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Verifies that when there is an exception starting the server, the correct error is output and
-   * the process can exit successfully.
+   * Verifies that when there is an exception while running the RDA jobs they complete normally
+   * after logging their exception.
    *
    * @throws Exception indicates a test failure
    */
@@ -328,13 +329,15 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     try {
       RdaServer.LocalConfig.builder()
           .fissSourceFactory(
-              ignored ->
+              seq ->
                   new ExceptionMessageSource<>(
-                      new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+                          new RandomFissClaimSource(12345, 100), 25, IOException::new)
+                      .skipTo(seq))
           .mcsSourceFactory(
-              ignored ->
+              seq ->
                   new ExceptionMessageSource<>(
-                      new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+                          new RandomMcsClaimSource(12345, 100), 25, IOException::new)
+                      .skipTo(seq))
           .build()
           .runWithPortParam(
               port -> {
@@ -362,6 +365,18 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                           + appRunConsumer.getStdoutContents(),
                       e);
                 }
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer,
+                        "StatusRuntimeException: UNKNOWN",
+                        RdaFissClaimLoadJob.class));
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer,
+                        "StatusRuntimeException: UNKNOWN",
+                        RdaMcsClaimLoadJob.class));
 
                 // Stop the application.
                 sendSigterm(appProcess.get());
@@ -652,8 +667,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
-    // This is an arbitrary value for the RDA Version for these tests.
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_VERSION, "~0.0.1");
 
     return appRunBuilder;
   }
