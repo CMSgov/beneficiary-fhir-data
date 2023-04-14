@@ -8,6 +8,9 @@ import java.sql.SQLException;
 /** Utility class for database functions. */
 public final class DatabaseUtils {
 
+  /** Database application name constant value for jdbc url. */
+  public static final String DATABASE_APPLICATION_NAME = "bfdserver";
+
   /** Private constructor to prevent instantiation of utility class. */
   private DatabaseUtils() {}
 
@@ -87,5 +90,23 @@ public final class DatabaseUtils {
      * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
      */
     poolingDataSource.setLeakDetectionThreshold(60 * 1000);
+  }
+
+  /**
+   * Sets the db url to include the application name if its not a hsqldb.
+   *
+   * @param databaseUrl database url to use
+   * @return formatted string of url with application name
+   */
+  public static String includeApplicationNameInDbUrl(String databaseUrl) {
+    if (databaseUrl.contains("jdbc:postgresql://") && !databaseUrl.contains("ApplicationName=")) {
+      if (databaseUrl.contains("?")) {
+        return String.format("%s&ApplicationName=%s", databaseUrl, DATABASE_APPLICATION_NAME);
+      } else {
+        return String.format("%s?ApplicationName=%s", databaseUrl, DATABASE_APPLICATION_NAME);
+      }
+    }
+
+    return databaseUrl;
   }
 }

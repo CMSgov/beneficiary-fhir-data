@@ -29,7 +29,7 @@ public final class DataSourceComponents {
   public DataSourceComponents(DataSource dataSource) {
     if (dataSource instanceof JDBCDataSource) {
       JDBCDataSource hsqlDataSource = (JDBCDataSource) dataSource;
-      this.url = hsqlDataSource.getUrl();
+      this.url = DatabaseTestUtils.includeApplicationNameInDbUrl(hsqlDataSource.getUrl());
       this.username = hsqlDataSource.getUser();
       /*
        * HSQL's implementation doesn't expose the DataSource's password, which is dumb. Because
@@ -39,7 +39,7 @@ public final class DataSourceComponents {
       this.password = HSQL_SERVER_PASSWORD; // no getter available; hardcoded
     } else if (dataSource instanceof PGSimpleDataSource) {
       PGSimpleDataSource pgDataSource = (PGSimpleDataSource) dataSource;
-      this.url = pgDataSource.getUrl();
+      this.url = DatabaseTestUtils.includeApplicationNameInDbUrl(pgDataSource.getUrl());
       this.username = pgDataSource.getUser();
       this.password = pgDataSource.getPassword();
     } else {

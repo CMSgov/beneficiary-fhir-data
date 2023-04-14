@@ -70,6 +70,9 @@ public final class DatabaseTestUtils {
   /** The password used for test container database password. */
   public static final String TEST_CONTAINER_DATABASE_PASSWORD = "bfdtest";
 
+  /** Database application test name constant value. */
+  public static final String DATABASE_APPLICATION_TEST_NAME = "bfdtestserver";
+
   /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
   private static DatabaseTestUtils SINGLETON;
 
@@ -353,7 +356,7 @@ public final class DatabaseTestUtils {
   private static DataSource initUnpooledDataSourceForPostgresql(
       String url, String username, String password) {
     PGSimpleDataSource dataSource = new PGSimpleDataSource();
-    dataSource.setUrl(url);
+    dataSource.setUrl(includeApplicationNameInDbUrl(url));
     if (username != null) dataSource.setUser(username);
     if (password != null) dataSource.setPassword(password);
 
@@ -474,7 +477,7 @@ public final class DatabaseTestUtils {
   public void cleanDataSource() {
     String url;
     try (Connection connection = getUnpooledDataSource().getConnection(); ) {
-      url = connection.getMetaData().getURL();
+      url = includeApplicationNameInDbUrl(connection.getMetaData().getURL());
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -680,5 +683,23 @@ public final class DatabaseTestUtils {
      * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
      */
     poolingDataSource.setLeakDetectionThreshold(60 * 1000);
+  }
+
+  /**
+   * Sets the db url to include the application name if its not a hsqldb.
+   *
+   * @param databaseUrl database url to use
+   * @return formatted string of url with application name
+   */
+  public static String includeApplicationNameInDbUrl(String databaseUrl) {
+    if (databaseUrl.contains("jdbc:postgresql://") && !databaseUrl.contains("ApplicationName=")) {
+      if (databaseUrl.contains("?")) {
+        return String.format("%s&ApplicationName=%s", databaseUrl, DATABASE_APPLICATION_TEST_NAME);
+      } else {
+        return String.format("%s?ApplicationName=%s", databaseUrl, DATABASE_APPLICATION_TEST_NAME);
+      }
+    }
+
+    return databaseUrl;
   }
 }

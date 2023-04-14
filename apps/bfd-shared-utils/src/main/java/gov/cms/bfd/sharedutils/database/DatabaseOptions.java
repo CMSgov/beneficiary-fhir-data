@@ -26,7 +26,8 @@ public final class DatabaseOptions implements Serializable {
    */
   public DatabaseOptions(
       String databaseUrl, String databaseUsername, String databasePassword, int maxPoolSize) {
-    this.databaseUrl = databaseUrl;
+
+    this.databaseUrl = DatabaseUtils.includeApplicationNameInDbUrl(databaseUrl);
     this.databaseUsername = databaseUsername;
     this.databasePassword = databasePassword;
     this.maxPoolSize = maxPoolSize;
