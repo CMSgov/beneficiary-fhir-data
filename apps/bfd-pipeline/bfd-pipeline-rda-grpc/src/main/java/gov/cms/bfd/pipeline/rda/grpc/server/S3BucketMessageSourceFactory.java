@@ -85,8 +85,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   @Override
   public MessageSource<T> apply(long sequenceNumber) throws Exception {
     List<FileEntry> entries = listFiles(sequenceNumber);
-    return new MultiS3MessageSource(entries)
-        .filter(record -> sequenceNumberGetter.apply(record) >= sequenceNumber);
+    return new MultiS3MessageSource(entries).skipTo(sequenceNumber);
   }
 
   /**

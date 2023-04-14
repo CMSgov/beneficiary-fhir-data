@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import java.util.function.Predicate;
-
 /**
  * Interface for objects that produce FissClaim objects from some source (e.g. a file, an array, a
  * database, etc). Mirrors the Iterator protocol but allows for unwrapped exceptions to be passed
@@ -37,16 +35,6 @@ public interface MessageSource<T> extends AutoCloseable {
    * @throws Exception if there is an issue getting the next claim
    */
   MessageSource<T> skipTo(long startingSequenceNumber) throws Exception;
-
-  /**
-   * Filters objects from this source to only include objects for which the predicate returns true.
-   *
-   * @param predicate returns true for objects to keep and false for objects to skip
-   * @return filtered version of this source
-   */
-  default MessageSource<T> filter(Predicate<T> predicate) {
-    return new FilteredMessageSource<>(this, predicate);
-  }
 
   /**
    * Used to define lambdas that can create a {@link MessageSource} instance for a given starting
