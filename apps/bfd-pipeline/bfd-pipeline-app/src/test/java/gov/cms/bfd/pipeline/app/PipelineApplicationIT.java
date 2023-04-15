@@ -272,8 +272,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 100))
-          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 100))
+          .fissSourceFactory(seq -> new RandomFissClaimSource(12345, 100).skipTo(seq))
+          .mcsSourceFactory(seq -> new RandomMcsClaimSource(12345, 100).skipTo(seq))
           .build()
           .runWithPortParam(
               port -> {
@@ -368,15 +368,13 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
                 assertTrue(
                     hasJobRecordMatching(
-                        appRunConsumer,
-                        "StatusRuntimeException: UNKNOWN",
-                        RdaFissClaimLoadJob.class));
+                        appRunConsumer, "StatusRuntimeException", RdaFissClaimLoadJob.class),
+                    "FISS job terminated by grpc exception");
 
                 assertTrue(
                     hasJobRecordMatching(
-                        appRunConsumer,
-                        "StatusRuntimeException: UNKNOWN",
-                        RdaMcsClaimLoadJob.class));
+                        appRunConsumer, "StatusRuntimeException", RdaMcsClaimLoadJob.class),
+                    "MCS job terminated by grpc exception");
 
                 // Stop the application.
                 sendSigterm(appProcess.get());
@@ -664,6 +662,10 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "false");
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED, "true");
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "10");
+    appRunBuilder
+        .environment()
+        .put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, "0");
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, "0");
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
