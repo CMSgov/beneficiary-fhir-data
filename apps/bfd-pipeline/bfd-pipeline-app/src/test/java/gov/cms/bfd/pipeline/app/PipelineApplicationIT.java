@@ -272,8 +272,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(seq -> new RandomFissClaimSource(12345, 100).skipTo(seq))
-          .mcsSourceFactory(seq -> new RandomMcsClaimSource(12345, 100).skipTo(seq))
+          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 30))
+          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 30))
           .build()
           .runWithPortParam(
               port -> {
@@ -302,6 +302,16 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                       e);
                 }
 
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer, "processed 30 objects in", RdaFissClaimLoadJob.class),
+                    "FISS job processed all claims");
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer, "processed 30 objects in", RdaMcsClaimLoadJob.class),
+                    "MCS job processed all claims");
+
                 // Stop the application.
                 sendSigterm(appProcess.get());
                 appProcess.get().waitFor(1, TimeUnit.MINUTES);
@@ -329,15 +339,13 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     try {
       RdaServer.LocalConfig.builder()
           .fissSourceFactory(
-              seq ->
+              ignored ->
                   new ExceptionMessageSource<>(
-                          new RandomFissClaimSource(12345, 100), 25, IOException::new)
-                      .skipTo(seq))
+                      new RandomFissClaimSource(12345, 100), 25, IOException::new))
           .mcsSourceFactory(
-              seq ->
+              ignored ->
                   new ExceptionMessageSource<>(
-                          new RandomMcsClaimSource(12345, 100), 25, IOException::new)
-                      .skipTo(seq))
+                      new RandomMcsClaimSource(12345, 100), 25, IOException::new))
           .build()
           .runWithPortParam(
               port -> {
@@ -662,10 +670,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "false");
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED, "true");
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "10");
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, "0");
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, "0");
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
