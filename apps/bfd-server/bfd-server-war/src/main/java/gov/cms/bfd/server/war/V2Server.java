@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -26,6 +28,9 @@ import org.springframework.web.context.WebApplicationContext;
  * FHIR</a> framework to provide a fully functional FHIR API server that queries stored RIF data
  * from the CCW and converts it to the proper FHIR format "on the fly".
  */
+@WebServlet(
+    urlPatterns = {"/v2/fhir/*"},
+    displayName = "Beneficiary FHIR Data v2")
 public class V2Server extends RestfulServer {
 
   private static final long serialVersionUID = 1L;
@@ -119,5 +124,9 @@ public class V2Server extends RestfulServer {
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
     registerInterceptor(new TimerInterceptor());
+
+    // OpenAPI
+    OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
+    registerInterceptor(openApiInterceptor);
   }
 }
