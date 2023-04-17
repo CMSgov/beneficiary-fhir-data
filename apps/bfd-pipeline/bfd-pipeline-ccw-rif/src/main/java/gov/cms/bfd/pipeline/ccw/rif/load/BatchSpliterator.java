@@ -51,7 +51,8 @@ public final class BatchSpliterator<T> implements Spliterator<List<T>> {
   @Override
   public boolean tryAdvance(Consumer<? super List<T>> action) {
     final List<T> batch = new ArrayList<>(batchSize);
-    for (int i = 0; i < batchSize && base.tryAdvance(batch::add); i++) ;
+    for (int i = 0; i < batchSize && base.tryAdvance(batch::add); i++)
+      ;
     if (batch.isEmpty()) return false;
     action.accept(batch);
     return true;

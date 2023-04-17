@@ -5,7 +5,6 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
-import com.google.common.base.Strings;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,18 +28,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  */
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
-
-  /**
-   * Checks for BFD v2 Flag.
-   *
-   * @return {@code true} if V2 is enabled
-   */
-  private static boolean isV2Enabled() {
-    if (!Strings.isNullOrEmpty(System.getProperty("bfdServer.v2.enabled"))) {
-      return Boolean.parseBoolean(System.getProperty("bfdServer.v2.enabled"));
-    }
-    return false;
-  }
 
   /** {@inheritDoc} */
   @Override
@@ -70,15 +57,11 @@ public final class ServerInitializer implements WebApplicationInitializer {
     cxfServletReg.setLoadOnStartup(1);
     cxfServletReg.addMapping("/v1/fhir/*");
 
-    // Register the Blue Button R4 Server/Servlet if v2 is ENABLED!!
-
-    if (isV2Enabled()) {
-
-      V2Server r4Servlet = new V2Server();
-      cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
-      cxfServletReg.setLoadOnStartup(1);
-      cxfServletReg.addMapping("/v2/fhir/*");
-    }
+    // Register the Blue Button R4 Server/Servlet.
+    V2Server r4Servlet = new V2Server();
+    cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
+    cxfServletReg.setLoadOnStartup(1);
+    cxfServletReg.addMapping("/v2/fhir/*");
 
     /*
      * Register the MetricRegistry and HealthCheckRegistry into the ServletContext,
