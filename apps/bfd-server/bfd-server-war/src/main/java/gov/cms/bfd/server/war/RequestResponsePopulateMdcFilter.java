@@ -70,13 +70,14 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
     BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, "request_type"), request.getClass().getName());
 
     // Set the default Operation (will hopefully be customized further in specific handler methods).
-    Operation operation = new Operation(Operation.Endpoint.OTHER);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.OTHER);
 
     if (request instanceof HttpServletRequest) {
       HttpServletRequest servletRequest = (HttpServletRequest) request;
 
       // Record the basic request components.
-      operation = new Operation(Operation.Endpoint.matchByHttpUri(servletRequest));
+      operation =
+          new CanonicalOperation(CanonicalOperation.Endpoint.matchByHttpUri(servletRequest));
       BfdMDC.put(
           BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "http_method"),
           servletRequest.getMethod());

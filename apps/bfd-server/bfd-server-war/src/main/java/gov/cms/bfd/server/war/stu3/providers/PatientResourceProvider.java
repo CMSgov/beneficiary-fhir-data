@@ -25,7 +25,7 @@ import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
-import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -161,7 +161,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
     // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
@@ -342,7 +342,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      */
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
     // track all api hdrs
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
@@ -387,7 +387,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
 
-    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "coverageContractForYearMonth");
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
@@ -732,7 +732,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "identifier");
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.setOption(
