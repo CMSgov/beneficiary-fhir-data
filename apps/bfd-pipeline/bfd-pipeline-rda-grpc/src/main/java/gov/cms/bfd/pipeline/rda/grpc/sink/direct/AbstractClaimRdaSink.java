@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import lombok.Getter;
@@ -216,7 +217,6 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       metrics.calls.increment();
       updateLatencyMetrics(claims);
       mergeBatch(maxSeq, claims);
-      metrics.objectsMerged.increment(claims.size());
       logger.debug("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
@@ -396,7 +396,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     transactionManager.executeProcedure(
         entityManager -> {
           final Instant startTime = Instant.now();
+          List<Long> deletedSequenceNumbers = null;
           int insertCount = 0;
+          int mergeCount = 0;
+          int deleteCount = 0;
           try {
             for (RdaChange<TClaim> change : changes) {
               if (change.getType() != RdaChange.Type.DELETE) {
@@ -404,18 +407,32 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
                 entityManager.merge(metaData);
                 entityManager.merge(change.getClaim());
                 insertCount += getInsertCount(change.getClaim());
+                mergeCount += 1;
               } else {
-                throw new IllegalArgumentException(
-                    "RDA API DELETE changes are not currently supported");
+                if (deletedSequenceNumbers == null) {
+                  deletedSequenceNumbers = new ArrayList<>();
+                }
+                deletedSequenceNumbers.add(change.getSequenceNumber());
+                deleteCount += 1;
               }
             }
             if (autoUpdateLastSeq) {
               updateLastSequenceNumberImpl(entityManager, maxSeq);
             }
+            if (deletedSequenceNumbers != null) {
+              logger.warn(
+                  "batch contained {} sequence numbers with DELETE change type: seqs={}",
+                  deletedSequenceNumbers.size(),
+                  deletedSequenceNumbers.stream()
+                      .map(String::valueOf)
+                      .collect(Collectors.joining(",", "[", "]")));
+            }
           } finally {
             metrics.dbUpdateTime.record(Duration.between(startTime, Instant.now()));
             metrics.dbBatchSize.record(changes.size());
             metrics.insertCount.record(insertCount);
+            metrics.objectsMerged.increment(mergeCount);
+            metrics.deletesIgnored.increment(deleteCount);
           }
         });
   }
@@ -492,6 +509,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     private final Counter transformSuccesses;
     /** Number of objects which failed to be transformed. */
     private final Counter transformFailures;
+    /** Number of objects with changeType=DELETE. */
+    private final Counter deletesIgnored;
     /**
      * Milliseconds between change timestamp and current time, measures the latency between BFD
      * ingestion and when RDA ingestion.
@@ -527,6 +546,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       objectsWritten = appMetrics.counter(MetricRegistry.name(base, "writes", "total"));
       objectsPersisted = appMetrics.counter(MetricRegistry.name(base, "writes", "persisted"));
       objectsMerged = appMetrics.counter(MetricRegistry.name(base, "writes", "merged"));
+      deletesIgnored = appMetrics.counter(MetricRegistry.name(base, "writes", "deletes"));
       transformSuccesses = appMetrics.counter(MetricRegistry.name(base, "transform", "successes"));
       transformFailures = appMetrics.counter(MetricRegistry.name(base, "transform", "failures"));
       changeAgeMillis =

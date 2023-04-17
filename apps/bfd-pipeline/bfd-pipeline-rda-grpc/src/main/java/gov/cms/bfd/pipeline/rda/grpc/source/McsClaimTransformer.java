@@ -6,6 +6,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.McsClaimRdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
@@ -67,21 +68,26 @@ public class McsClaimTransformer extends AbstractClaimTransformer {
    */
   public RdaChange<RdaMcsClaim> transformClaim(McsClaimChange change)
       throws DataTransformer.TransformationException {
-    McsClaim from = change.getClaim();
 
     final DataTransformer transformer = new DataTransformer();
-    final RdaMcsClaim to = claimParser.transformMessage(from, transformer, clock.instant());
-    to.setSequenceNumber(change.getSeq());
-    final RdaChange.Source source = transformSource(change.getSource(), transformer);
-
-    final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
-    if (errors.size() > 0) {
-      String message =
-          String.format(
-              "failed with %d errors: seq=%d clmHdIcn=%s errors=%s",
-              errors.size(), change.getSeq(), from.getIdrClmHdIcn(), errors);
-      throw new DataTransformer.TransformationException(message, errors);
+    final RdaMcsClaim to;
+    if (change.getChangeType() == ChangeType.CHANGE_TYPE_DELETE) {
+      to = null;
+    } else {
+      final McsClaim from = change.getClaim();
+      to = claimParser.transformMessage(from, transformer, clock.instant());
+      to.setSequenceNumber(change.getSeq());
+      final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
+      if (errors.size() > 0) {
+        String message =
+            String.format(
+                "failed with %d errors: seq=%d clmHdIcn=%s errors=%s",
+                errors.size(), change.getSeq(), from.getIdrClmHdIcn(), errors);
+        throw new DataTransformer.TransformationException(message, errors);
+      }
     }
+
+    final RdaChange.Source source = transformSource(change.getSource(), transformer);
 
     return new RdaChange<>(
         change.getSeq(),

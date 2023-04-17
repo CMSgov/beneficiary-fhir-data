@@ -118,6 +118,7 @@ public class McsClaimRdaSinkTest {
             "McsClaimRdaSink.transform.failures",
             "McsClaimRdaSink.transform.successes",
             "McsClaimRdaSink.writes.batchSize",
+            "McsClaimRdaSink.writes.deletes",
             "McsClaimRdaSink.writes.elapsed",
             "McsClaimRdaSink.writes.merged",
             "McsClaimRdaSink.writes.persisted",
@@ -195,7 +196,7 @@ public class McsClaimRdaSinkTest {
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
     assertMeterReading(1, "calls", metrics.getCalls());
     assertMeterReading(0, "persists", metrics.getObjectsPersisted());
-    assertMeterReading(0, "merges", metrics.getObjectsMerged());
+    assertMeterReading(1, "merges", metrics.getObjectsMerged());
     assertMeterReading(0, "writes", metrics.getObjectsWritten());
     assertMeterReading(3, "transform successes", metrics.getTransformSuccesses());
     assertMeterReading(0, "transform failures", metrics.getTransformFailures());

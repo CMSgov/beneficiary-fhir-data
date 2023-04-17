@@ -4,8 +4,11 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.protobuf.Timestamp;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaFissAuditTrail;
 import gov.cms.bfd.model.rda.RdaFissClaim;
@@ -107,6 +110,31 @@ public class FissClaimTransformerTest {
     claimBuilder = FissClaim.newBuilder();
     claim = new RdaFissClaim();
     claim.setSequenceNumber(0L);
+  }
+
+  /**
+   * Verifies that claim is not transformed when the change message is a {@link
+   * ChangeType#CHANGE_TYPE_DELETE} but that other values of the {@link RdaChange} are populated.
+   */
+  @Test
+  public void deleteShouldSkipClaimTransformation() {
+    Instant now = clock.instant();
+    changeBuilder
+        .setSeq(MIN_SEQUENCE_NUM)
+        .setChangeType(ChangeType.CHANGE_TYPE_DELETE)
+        .setDcn("dcn")
+        .setRdaClaimKey("key")
+        .setTimestamp(
+            Timestamp.newBuilder()
+                .setSeconds(now.getEpochSecond())
+                .setNanos(now.getNano())
+                .build());
+    RdaChange<RdaFissClaim> changed = transformer.transformClaim(changeBuilder.build());
+    assertEquals(RdaChange.Type.DELETE, changed.getType());
+    assertEquals(MIN_SEQUENCE_NUM, changed.getSequenceNumber());
+    assertNull(changed.getClaim());
+    assertNotNull(changed.getSource());
+    assertEquals(now, changed.getTimestamp());
   }
 
   /**

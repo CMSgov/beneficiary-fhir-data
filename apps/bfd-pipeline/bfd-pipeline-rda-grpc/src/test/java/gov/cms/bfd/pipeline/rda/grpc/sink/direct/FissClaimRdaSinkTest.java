@@ -116,6 +116,7 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.transform.failures",
             "FissClaimRdaSink.transform.successes",
             "FissClaimRdaSink.writes.batchSize",
+            "FissClaimRdaSink.writes.deletes",
             "FissClaimRdaSink.writes.elapsed",
             "FissClaimRdaSink.writes.merged",
             "FissClaimRdaSink.writes.persisted",
@@ -165,15 +166,18 @@ public class FissClaimRdaSinkTest {
   @Test
   public void mergeSuccessful() throws Exception {
     final List<RdaChange<RdaFissClaim>> batch =
-        ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
+        ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("del"), createClaim("3"));
 
     final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
-    assertEquals(3, count);
+    assertEquals(4, count);
 
-    for (RdaChange<RdaFissClaim> change : batch) {
-      verify(entityManager).merge(change.getClaim());
-      verify(entityManager).merge(sink.createMetaData(change));
-    }
+    batch.stream()
+        .filter(change -> change.getType() != RdaChange.Type.DELETE)
+        .forEach(
+            change -> {
+              verify(entityManager).merge(change.getClaim());
+              verify(entityManager).merge(sink.createMetaData(change));
+            });
     // the merge transaction will be committed
     verify(transaction).commit();
 
@@ -181,13 +185,14 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(1, "calls", metrics.getCalls());
     assertMeterReading(0, "persists", metrics.getObjectsPersisted());
     assertMeterReading(3, "merges", metrics.getObjectsMerged());
-    assertMeterReading(3, "writes", metrics.getObjectsWritten());
-    assertMeterReading(3, "transform successes", metrics.getTransformSuccesses());
+    assertMeterReading(4, "writes", metrics.getObjectsWritten());
+    assertMeterReading(1, "deletes", metrics.getDeletesIgnored());
+    assertMeterReading(4, "transform successes", metrics.getTransformSuccesses());
     assertMeterReading(0, "transform failures", metrics.getTransformFailures());
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
-    assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
-    assertHistogramReading(3, "database batch size", metrics.getDbBatchSize());
+    assertGaugeReading(3, "lastSeq", metrics.getLatestSequenceNumber());
+    assertHistogramReading(4, "database batch size", metrics.getDbBatchSize());
     assertHistogramReading(3, "database insert count", metrics.getInsertCount());
     assertTimerCount(1, "database timer count", metrics.getDbUpdateTime());
   }
@@ -219,7 +224,7 @@ public class FissClaimRdaSinkTest {
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
     assertMeterReading(1, "calls", metrics.getCalls());
     assertMeterReading(0, "persists", metrics.getObjectsPersisted());
-    assertMeterReading(0, "merges", metrics.getObjectsMerged());
+    assertMeterReading(1, "merges", metrics.getObjectsMerged());
     assertMeterReading(0, "writes", metrics.getObjectsWritten());
     assertMeterReading(3, "transform successes", metrics.getTransformSuccesses());
     assertMeterReading(0, "transform failures", metrics.getTransformFailures());
@@ -336,13 +341,14 @@ public class FissClaimRdaSinkTest {
     final var messages = ImmutableList.<FissClaimChange>builder();
     for (RdaChange<RdaFissClaim> change : batch) {
       RdaFissClaim claim = change.getClaim();
-      var message =
-          FissClaimChange.newBuilder()
-              .setSeq(change.getSequenceNumber())
-              .setDcn(claim.getDcn())
-              .setRdaClaimKey(claim.getClaimId())
-              .setIntermediaryNb(claim.getIntermediaryNb())
-              .build();
+      var messageBuilder = FissClaimChange.newBuilder().setSeq(change.getSequenceNumber());
+      if (claim != null) {
+        messageBuilder
+            .setDcn(claim.getDcn())
+            .setRdaClaimKey(claim.getClaimId())
+            .setIntermediaryNb(claim.getIntermediaryNb());
+      }
+      var message = messageBuilder.build();
       doReturn(change).when(transformer).transformClaim(message);
       messages.add(message);
     }
@@ -356,14 +362,22 @@ public class FissClaimRdaSinkTest {
    * @return the rda fiss change
    */
   private RdaChange<RdaFissClaim> createClaim(String dcn) {
-    RdaFissClaim claim = new RdaFissClaim();
-    claim.setDcn(dcn);
-    claim.setClaimId(dcn + "id");
-    claim.setIntermediaryNb("inter");
-    claim.setApiSource(VERSION);
+    final RdaFissClaim claim;
+    final RdaChange.Type changeType;
+    if (dcn.startsWith("del")) {
+      claim = null;
+      changeType = RdaChange.Type.DELETE;
+    } else {
+      claim = new RdaFissClaim();
+      claim.setDcn(dcn);
+      claim.setClaimId(dcn + "id");
+      claim.setIntermediaryNb("inter");
+      claim.setApiSource(VERSION);
+      changeType = RdaChange.Type.INSERT;
+    }
     return new RdaChange<>(
         nextSeq++,
-        RdaChange.Type.INSERT,
+        changeType,
         claim,
         clock.instant().minusMillis(12),
         new RdaChange.Source(
