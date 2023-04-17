@@ -134,7 +134,8 @@ public class JsonMessageSourceTest {
   @Test
   public void twoClaimsString() throws Exception {
     JsonMessageSource<FissClaimChange> source =
-        new JsonMessageSource<>(List.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser());
+        new JsonMessageSource<>(
+            CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource.fissParser());
     assertTrue(source.hasNext());
     var change = source.next();
     assertEquals("63843470", change.getDcn());

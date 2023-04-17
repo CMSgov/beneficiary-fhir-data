@@ -10,8 +10,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 
 /**
- * A ClaimSource implementation that generates and returns random McsClaim objects. The random
- * number seed and number of claims to return are specified in the constructor.
+ * A ClaimSource implementation that generates and returns random {@link McsClaimChange} objects.
+ * The random number seed and number of claims to return are specified in the constructor.
  */
 public class RandomMcsClaimSource implements MessageSource<McsClaimChange> {
   /** The claim generator. */
