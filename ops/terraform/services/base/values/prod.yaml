@@ -1,7 +1,6 @@
 ---
 # env:prod
 # COMMON CONFIGURATION
-/bfd/prod/common/nonsensitive/project_base_name: prod
 /bfd/prod/common/nonsensitive/enterprise_tools_security_group: bfd-prod-enterprise-tools
 /bfd/prod/common/nonsensitive/env_name_std: prod
 /bfd/prod/common/nonsensitive/key_pair: bfd-prod

@@ -1,7 +1,6 @@
 ---
 # env:prod-sbx
 # COMMON CONFIGURATION
-/bfd/prod-sbx/common/nonsensitive/project_base_name: prod-sbx
 /bfd/prod-sbx/common/nonsensitive/enterprise_tools_security_group: bfd-prod-sbx-enterprise-tools
 /bfd/prod-sbx/common/nonsensitive/env_name_std: prod-sbx
 /bfd/prod-sbx/common/nonsensitive/key_pair: bfd-prod-sbx

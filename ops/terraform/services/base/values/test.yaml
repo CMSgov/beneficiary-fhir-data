@@ -1,7 +1,6 @@
 ---
 # env:test
 # COMMON CONFIGURATION
-/bfd/test/common/nonsensitive/project_base_name: test
 /bfd/test/common/nonsensitive/enterprise_tools_security_group: bfd-test-enterprise-tools
 /bfd/test/common/nonsensitive/env_name_std: test
 /bfd/test/common/nonsensitive/key_pair: bfd-test
