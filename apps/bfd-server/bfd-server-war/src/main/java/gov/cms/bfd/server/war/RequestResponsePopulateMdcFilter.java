@@ -163,7 +163,6 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
   private void handleResponse(ServletRequest request, ServletResponse response) {
     if (response instanceof HttpServletResponse) {
       HttpServletResponse servletResponse = (HttpServletResponse) response;
-
       BfdMDC.put(
           BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
           Integer.toString(servletResponse.getStatus()));
