@@ -490,7 +490,6 @@
 								<argument>-u</argument>
 								<argument>${its.db.url}</argument>
 								<argument>-e</argument>
-								<argument>${local.v2.enabled}</argument>
 								<argument>-p</argument>
 								<argument>${local.pac.enabled}</argument>
 								<argument>-o</argument>
