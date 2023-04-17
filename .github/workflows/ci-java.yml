@@ -109,15 +109,15 @@ jobs:
           EOF
 
       - name: 'Run Maven Build on FDA Drug Utility'
-        run: mvn --batch-mode --threads 1C -Dmaven.build.cache.enabled=false install
+        run: mvn --batch-mode -Dmaven.build.cache.enabled=false install
         working-directory: ./apps/bfd-data-fda
 
       - name: 'Run Maven Build on NPI Org Utility'
-        run: mvn --batch-mode --threads 1C -Dmaven.build.cache.enabled=false install
+        run: mvn --batch-mode -Dmaven.build.cache.enabled=false install
         working-directory: ./apps/bfd-data-npi
 
       - name: 'Run Maven Build'
-        run: mvn --quiet --batch-mode --threads 1C -Dmaven.build.cache.enabled=false verify
+        run: mvn --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
         working-directory: ./apps
       
       - name: Login to GitHub Container Registry
