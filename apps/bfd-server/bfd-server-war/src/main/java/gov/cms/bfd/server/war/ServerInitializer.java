@@ -57,7 +57,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
     cxfServletReg.setLoadOnStartup(1);
     cxfServletReg.addMapping("/v1/fhir/*");
 
-    // Register the Blue Button R4 Server/Servlet if v2 is ENABLED!!
+    // Register the Blue Button R4 Server/Servlet.
     V2Server r4Servlet = new V2Server();
     cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
     cxfServletReg.setLoadOnStartup(1);
