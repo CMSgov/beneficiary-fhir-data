@@ -908,7 +908,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   metric_name = local.metrics.claim_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
   ok_actions    = null
 
   datapoints_to_alarm = "1"
@@ -932,7 +932,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   metric_name = local.metrics.claim_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
   ok_actions    = null
 
   datapoints_to_alarm = "1"
@@ -966,7 +966,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_bulk_latency_99
     client_ssl = data.external.client_ssls_by_partner["claim_resources_latency"].result[each.key]
   }
 
-  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
   ok_actions    = null
 
   datapoints_to_alarm = "1"
@@ -990,7 +990,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   metric_name = local.metrics.claimresponse_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
   ok_actions    = null
 
   datapoints_to_alarm = "1"
@@ -1014,7 +1014,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   metric_name = local.metrics.claimresponse_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
   ok_actions    = null
 
   datapoints_to_alarm = "1"
@@ -1048,7 +1048,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_la
     client_ssl = data.external.client_ssls_by_partner["claimresponse_resources_latency"].result[each.key]
   }
 
-  alarm_actions = data.aws_sns_topic.bfd_test_sns.arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
   ok_actions    = null
 
   datapoints_to_alarm = "1"
