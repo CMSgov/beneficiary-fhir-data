@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war;
 
+import java.io.EOFException;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,8 +32,10 @@ public class CachingBodyFilter extends OncePerRequestFilter {
       if (!resWrapper.isCommitted() && resWrapper.getStatus() == HttpStatus.SC_OK) {
         resWrapper.resetBuffer();
         resWrapper.getOutputStream().write(1024);
-        resWrapper.copyBodyToResponse();
       }
+      resWrapper.copyBodyToResponse();
+    } catch (EOFException e) {
+      LOGGER_MISC.info("End of stream", e);
     } catch (IOException | ServletException e) {
       LOGGER_MISC.error("Error extracting body", e.getStackTrace().toString());
     }
