@@ -18,7 +18,7 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -131,7 +131,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
       throw new InvalidRequestException("Missing required coverage ID");
     }
 
-    Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
@@ -214,7 +214,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Coverage?");
 
-    Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "beneficiary");
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
     operation.setOption(
