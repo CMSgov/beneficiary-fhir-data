@@ -6,7 +6,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -24,20 +23,16 @@ public class CachingBodyFilter extends OncePerRequestFilter {
   /** {@inheritDoc} */
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
+      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
     ContentCachingRequestWrapper reqWrapper = new ContentCachingRequestWrapper(request);
     ContentCachingResponseWrapper resWrapper = new ContentCachingResponseWrapper(response);
+    reqWrapper.getParameterMap(); // needed for caching!!
     try {
       chain.doFilter(reqWrapper, resWrapper);
-      if (!resWrapper.isCommitted() && resWrapper.getStatus() == HttpStatus.SC_OK) {
-        resWrapper.resetBuffer();
-        resWrapper.getOutputStream().write(1024);
-      }
       resWrapper.copyBodyToResponse();
     } catch (EOFException e) {
-      LOGGER_MISC.info("End of stream", e);
-    } catch (IOException | ServletException e) {
-      LOGGER_MISC.error("Error extracting body", e.getStackTrace().toString());
+      LOGGER_MISC.info("End of stream", "" + e);
     }
   }
 }
