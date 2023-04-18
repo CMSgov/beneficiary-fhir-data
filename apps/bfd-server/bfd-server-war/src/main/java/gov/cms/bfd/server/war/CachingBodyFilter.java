@@ -3,7 +3,7 @@ package gov.cms.bfd.server.war;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +22,15 @@ public class CachingBodyFilter extends OncePerRequestFilter {
   /** Logger that logs. */
   private static final Logger LOGGER = LoggerFactory.getLogger(CachingBodyFilter.class);
 
+  /** Log http access. */
+  private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
+  /** Used to compute the MDC key. */
+  private static final String MDC_PREFIX = "http_access";
+  /** Prefix for requests. */
+  private static final String REQUEST_PREFIX = "request";
+  /** Prefix for responses. */
+  private static final String RESPONSE_PREFIX = "response";
+
   /** {@inheritDoc} */
   @Override
   protected void doFilterInternal(
@@ -32,28 +41,32 @@ public class CachingBodyFilter extends OncePerRequestFilter {
     reqWrapper.getParameterMap(); // needed for caching!!
     try {
       chain.doFilter(reqWrapper, resWrapper);
-      logResponse(reqWrapper, resWrapper);
+      resWrapper.copyBodyToResponse();
     } catch (EOFException e) {
       LOGGER.info("End of stream", "" + e);
+    } catch (IOException e) {
+      LOGGER.info("Tried closing stream", "" + e);
     } finally {
-      resWrapper.copyBodyToResponse();
-    }
-  }
-
-  private void logResponse(
-      ContentCachingRequestWrapper request, ContentCachingResponseWrapper response)
-      throws UnsupportedEncodingException {
-    try {
-      /*
-       * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
-       * CustomRequestLog to write the payload size to the access.log:
-       * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
-       *
-       * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
-       * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
-       * accessible to the filter.
-       */
-      Long outputSizeInBytes = Long.valueOf(response.getContentSize());
+      BfdMDC.put(
+          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
+          Integer.toString(resWrapper.getStatus()));
+      // Record the response headers.
+      Collection<String> headerNames = resWrapper.getHeaderNames();
+      for (String headerName : headerNames) {
+        Collection<String> headerValues = resWrapper.getHeaders(headerName);
+        if (headerValues.isEmpty())
+          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
+        else if (headerValues.size() == 1)
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.iterator().next());
+        else
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.toString());
+      }
+      String contentLength = response.getHeader("Content-Length");
+      Long outputSizeInBytes = Long.valueOf(contentLength);
       BfdMDC.put(
           BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
 
@@ -76,13 +89,7 @@ public class CachingBodyFilter extends OncePerRequestFilter {
       } else {
         BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
       }
-
-      /*
-       * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
-       * automatically included with it is!
-       */
-      LOGGER.info("response complete");
-    } finally {
+      LOGGER_HTTP_ACCESS.info("response complete");
       BfdMDC.clear();
     }
   }

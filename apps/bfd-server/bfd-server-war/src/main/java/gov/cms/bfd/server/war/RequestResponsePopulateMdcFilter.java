@@ -3,7 +3,6 @@ package gov.cms.bfd.server.war;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -15,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,29 +159,19 @@ public final class RequestResponsePopulateMdcFilter implements Filter {
    * @param response the {@link ServletResponse} to record the standard {@link BfdMDC} entries for
    */
   private void handleResponse(ServletRequest request, ServletResponse response) {
-    if (response instanceof HttpServletResponse) {
-      HttpServletResponse servletResponse = (HttpServletResponse) response;
-
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
-          Integer.toString(servletResponse.getStatus()));
-
-      // Record the response headers.
-      Collection<String> headerNames = servletResponse.getHeaderNames();
-      for (String headerName : headerNames) {
-        Collection<String> headerValues = servletResponse.getHeaders(headerName);
-        if (headerValues.isEmpty())
-          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
-        else if (headerValues.size() == 1)
-          BfdMDC.put(
-              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
-              headerValues.iterator().next());
-        else
-          BfdMDC.put(
-              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
-              headerValues.toString());
-      }
-    }
+    /*
+     * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
+     * CustomRequestLog to write the payload size to the access.log:
+     * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
+     *
+     * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
+     * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
+     * accessible to the filter.
+     */
+    /*
+     * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
+     * automatically included with it is!
+     */
   }
 
   /** {@inheritDoc} */
