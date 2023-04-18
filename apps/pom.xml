@@ -80,7 +80,7 @@
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
 		<aws-java-sdk-bom.version>1.12.410</aws-java-sdk-bom.version>
-		<spring-data-jpa.version>2.7.10</spring-data-jpa.version>
+		<spring-data-jpa.version>2.7.11</spring-data-jpa.version>
 		<spring-framework.version>5.3.23</spring-framework.version>
 
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
@@ -137,9 +137,6 @@
 		<its.db.username/>
 		<its.db.password/>
 		<its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
-
-		<!-- Whether the V2 endpoints should be enabled -->
-		<local.v2.enabled>true</local.v2.enabled>
 
 		<!-- Whether the partially adjudicated claims endpoints should be enabled -->
 		<local.pac.enabled>true</local.pac.enabled>

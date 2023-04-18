@@ -22,7 +22,6 @@ This application has the following configuration parameters:
 * `bfdServer.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
     * `jdbc:hsqldb:mem:test`
     * `jdbc:postgresql://example.com:5432/fhir`
-* `bfdServer.v2.enabled`: Enabled V2 of the BFD API. Supports "true" or "false".
 * `bfdServer.db.username`: The JDBC username to use with the database.
 * `bfdServer.db.password`: The JDBC password to use with the database.
 

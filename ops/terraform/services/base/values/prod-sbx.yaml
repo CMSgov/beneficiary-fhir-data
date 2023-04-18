@@ -62,7 +62,6 @@
 /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
-/bfd/${env}/server/nonsensitive/data_server_v2_enabled: true
 /bfd/${env}/server/nonsensitive/pac_resources_enabled: true
 /bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
 ## SERVER+MTLS CONFIGURATION

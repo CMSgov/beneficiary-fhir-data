@@ -5,7 +5,6 @@ export BFD_PORT='{{ data_server_appserver_https_port }}'
 export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.jks'
 export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.jks'
 export BFD_WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
-export V2_ENABLED='{{ data_server_v2_enabled }}'
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
@@ -14,7 +13,6 @@ DB_URL='{{ data_server_db_url }}'
 DB_USERNAME='{{ data_server_db_username }}'
 DB_PASSWORD='{{ data_server_db_password }}'
 DB_CONNECTIONS_MAX='{{ data_server_db_connections_max }}'
-BFD_V2_ENABLED='{{ data_server_v2_enabled }}'
 BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
 BFD_PAC_CLAIM_SOURCE_TYPES='{{ pac_claim_source_types }}'
 
@@ -150,7 +148,6 @@ bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   "-DbfdServer.db.username=${DB_USERNAME}" \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
-  "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
   "-DbfdServer.pac.enabled=${BFD_PAC_ENABLED}" \
   "-DbfdServer.pac.claimSourceTypes=${BFD_PAC_CLAIM_SOURCE_TYPES}" \
   "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
