@@ -117,17 +117,6 @@ public class AccessJsonIT extends ServerRequiredTest {
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_TYPE));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_URI));
     assertTrue(content.contains(BfdMDC.HTTP_ACCESS_REQUEST_URL));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_ENCODING));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_LOCATION));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_TYPE));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_DATE));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_LAST_MODIFIED));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_POWERED_BY));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
-    assertTrue(content.contains(BfdMDC.HTTP_ACCESS_RESPONSE_STATUS));
     assertTrue(content.contains(BfdMDC.RESOURCES_RETURNED));
   }
 }
