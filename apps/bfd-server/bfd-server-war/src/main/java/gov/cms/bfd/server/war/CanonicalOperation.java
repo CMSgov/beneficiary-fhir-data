@@ -26,29 +26,29 @@ import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
  * <p>Also handles the publishing of those canonical names to the places they need to be published,
  * via the {@link #publishOperationName()} method.
  */
-public final class Operation {
+public final class CanonicalOperation {
   /** The operational endpoint. */
   private final Endpoint endpoint;
   /**
    * A mode, query parameter, HTTP header, etc. that meaningfully impacts the behavior of the
-   * operation such that {@link Operation}s with different values for it should be tracked
+   * operation such that {@link CanonicalOperation}s with different values for it should be tracked
    * separately in our monitoring tools.
    */
   private final SortedMap<String, String> options;
 
   /**
-   * Constructs a new {@link Operation}.
+   * Constructs a new {@link CanonicalOperation}.
    *
    * @param endpoint the {@link Endpoint} constant for the HTTP endpoint/handler that will process
    *     the request
    */
-  public Operation(Endpoint endpoint) {
+  public CanonicalOperation(Endpoint endpoint) {
     this.endpoint = endpoint;
     this.options = new TreeMap<String, String>();
   }
 
   /**
-   * Gets the canonical name for the HTTP request represented by this {@link Operation}.
+   * Gets the canonical name for the HTTP request represented by this {@link CanonicalOperation}.
    *
    * @return the canonical name
    */
@@ -59,9 +59,9 @@ public final class Operation {
   }
 
   /**
-   * Sets an {@link Operation} option: a mode, query parameter, HTTP header, etc. that meaningfully
-   * impacts the behavior of the operation such that {@link Operation}s with different values for it
-   * should be tracked separately in our monitoring tools.
+   * Sets an {@link CanonicalOperation} option: a mode, query parameter, HTTP header, etc. that
+   * meaningfully impacts the behavior of the operation such that {@link CanonicalOperation}s with
+   * different values for it should be tracked separately in our monitoring tools.
    *
    * @param key the key/name of the option (case-sensitive)
    * @param value the value of the option (case-sensitive), note that any square brackets will be

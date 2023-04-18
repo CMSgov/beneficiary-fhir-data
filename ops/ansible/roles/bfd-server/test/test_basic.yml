@@ -27,7 +27,6 @@
         # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
         data_server_appserver_jvmargs: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m'
         data_server_dir: &data_server_dir /usr/local/bfd-server
-        data_server_v2_enabled: true
 
     - name: Ensure Service Is Running
       service:

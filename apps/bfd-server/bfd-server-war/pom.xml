@@ -284,6 +284,11 @@
             <scope>test</scope>
         </dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server-openapi</artifactId>
+			<version>${hapi-fhir.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Logging backend for tests.  -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -490,7 +495,6 @@
 								<argument>-u</argument>
 								<argument>${its.db.url}</argument>
 								<argument>-e</argument>
-								<argument>${local.v2.enabled}</argument>
 								<argument>-p</argument>
 								<argument>${local.pac.enabled}</argument>
 								<argument>-o</argument>

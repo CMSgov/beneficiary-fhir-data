@@ -158,7 +158,6 @@ public class ServerExecutor {
       args.add(maxHeapArg);
       args.add(String.format("-Xlog:gc*:%s:time,level,tags", gcLog));
       args.add(String.format("-Dbfd-server-%s", bfdServerId));
-      args.add(String.format("-DbfdServer.v2.enabled=%s", v2Enabled));
       args.add(String.format("-DbfdServer.pac.enabled=%s", pacEnabled));
       args.add(String.format("-DbfdServer.pac.oldMbiHash.enabled=%s", pacOldMbiHashEnabled));
       args.add(String.format("-DbfdServer.pac.claimSourceTypes=%s", pacClaimSourceTypes));
