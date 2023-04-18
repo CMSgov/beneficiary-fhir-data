@@ -69,7 +69,7 @@ public final class DatabaseUtils {
     }
     if (connectionsMax < 1) {
       // Assign a reasonable default value, if none was specified.
-      connectionsMax = Runtime.getRuntime().availableProcessors() * 2;
+      connectionsMax = Runtime.getRuntime().availableProcessors() * 8;
       LOGGER.info("Setting up datasource from default with {} max connections.", connectionsMax);
     }
 
