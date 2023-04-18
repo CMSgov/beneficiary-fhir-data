@@ -4,9 +4,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Utility class for database functions. */
 public final class DatabaseUtils {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUtils.class);
 
   /** Private constructor to prevent instantiation of utility class. */
   private DatabaseUtils() {}
@@ -59,12 +63,14 @@ public final class DatabaseUtils {
     int connectionsMax;
     try {
       connectionsMax = Integer.parseInt(connectionsMaxText);
+      LOGGER.info("Setting up datasource from setting with {} max connections.", connectionsMax);
     } catch (NumberFormatException e) {
       connectionsMax = -1;
     }
     if (connectionsMax < 1) {
       // Assign a reasonable default value, if none was specified.
-      connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
+      connectionsMax = Runtime.getRuntime().availableProcessors() * 2;
+      LOGGER.info("Setting up datasource from default with {} max connections.", connectionsMax);
     }
 
     poolingDataSource.setMaximumPoolSize(connectionsMax);
