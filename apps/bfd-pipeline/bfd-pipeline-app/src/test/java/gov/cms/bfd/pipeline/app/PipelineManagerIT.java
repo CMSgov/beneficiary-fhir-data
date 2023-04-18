@@ -65,7 +65,6 @@ public final class PipelineManagerIT {
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
   }
-  ;
 
   /**
    * Verifies that {@link PipelineManager} automatically runs {@link MockJob} and {@link

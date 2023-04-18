@@ -67,7 +67,6 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
   }
-  ;
 
   /**
    * Tests {@link CcwRifLoadJob} when run using data in the Synthetic/Incoming folder(s). Data
