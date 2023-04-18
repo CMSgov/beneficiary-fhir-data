@@ -41,7 +41,6 @@ RUN useradd dev && \
 
 # Prepare dev's environment
 USER dev
-ENV BFD_V2_ENABLED true
 ENV BFD_PAC_ENABLED true
 ENV MAVEN_HOME /opt/maven
 ENV PATH="${PATH}:${MAVEN_HOME}/bin"
