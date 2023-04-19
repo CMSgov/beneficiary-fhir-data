@@ -32,19 +32,15 @@ public class McsTransformer extends AbstractTransformer {
   /** Maps the mbi number to its benficiary data. */
   private final Map<String, BeneficiaryData> mbiMap;
 
-  /**
-   * Transforms the given {@link Parser.Data} into RDA {@link McsClaimChange} data.
-   *
-   * @param data The parsed {@link Parser.Data} to transform into RDA {@link McsClaimChange} data
-   * @return The RDA {@link McsClaimChange} object generated from the given data
-   */
+  /** {@inheritDoc} */
   @Override
   public Optional<MessageOrBuilder> transform(
       WrappedMessage message,
       WrappedCounter sequenceNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
-      int sampleId) {
+      int sampleId,
+      String fileName) {
     McsClaimChange claimToReturn;
 
     int lineNumber = getLineNumber(data, Mcs.LINE_NUM);

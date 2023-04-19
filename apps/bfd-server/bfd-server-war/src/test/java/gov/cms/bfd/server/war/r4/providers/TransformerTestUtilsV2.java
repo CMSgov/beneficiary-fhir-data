@@ -1344,7 +1344,10 @@ public final class TransformerTestUtilsV2 {
         components.stream()
             .filter(
                 cmp ->
-                    cmp.getDiagnosis().castToCodeableConcept(cmp.getDiagnosis()).getCoding()
+                    cmp
+                            .getDiagnosis()
+                            .castToCodeableConcept(cmp.getDiagnosis())
+                            .getCoding()
                             .stream()
                             .filter(c -> code.equals(c.getCode()))
                             .count()

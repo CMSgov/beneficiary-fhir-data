@@ -37,6 +37,10 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
+data "aws_kms_key" "mgmt_cmk" {
+  key_id = "alias/bfd-mgmt-cmk"
+}
+
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"

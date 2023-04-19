@@ -17,11 +17,14 @@ public abstract class AbstractTransformer {
   /**
    * Abstract function for the transform method.
    *
+   * <p>The implementation would parse the given {@link Parser.Data} into an associated claim object
+   *
    * @param wrappedMessage the wrappedMessage
    * @param sequenceNumber the sequenceNumber
    * @param data the data
    * @param mbiSampler the samples of mbis
    * @param sampleId the samples of Ids
+   * @param fileName the name of the file the claim came from
    * @return {@link MessageOrBuilder}
    */
   public abstract Optional<MessageOrBuilder> transform(
@@ -29,7 +32,8 @@ public abstract class AbstractTransformer {
       WrappedCounter sequenceNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
-      int sampleId);
+      int sampleId,
+      String fileName);
 
   /**
    * Returns the computed result of {@link Supplier} if value is null, otherwise returns value.

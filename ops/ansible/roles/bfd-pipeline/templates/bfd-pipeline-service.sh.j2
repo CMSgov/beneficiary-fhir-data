@@ -7,7 +7,11 @@ export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
 export DATABASE_URL='{{ data_pipeline_db_url }}'
 export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
-export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
+# NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
+export LOADER_THREADS='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
+export RIF_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
+export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
+
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
 export FILTERING_NON_NULL_AND_NON_2023_BENES='{{ data_pipeline_filtering_non_null_and_non_2023_benes }}'
 
@@ -41,6 +45,9 @@ export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
 export RDA_JOB_WRITE_THREADS='{{ data_pipeline_rda_job_write_threads }}'
 {% if data_pipeline_rda_process_dlq is defined %}
 export RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
+{% endif %}
+{% if data_pipeline_rda_version is defined %}
+export RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
 {% endif %}
 {% if data_pipeline_rda_job_starting_fiss_seq_num is defined %}
 export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'

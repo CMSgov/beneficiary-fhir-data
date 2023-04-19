@@ -66,7 +66,8 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             "ssm:*",
             "lambda:*",
             "glue:*",
-            "firehose:*"
+            "firehose:*",
+            "athena:*"
           ],
           "Effect" : "Allow",
           "Resource" : "*",
@@ -96,4 +97,30 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
       ],
       "Version" : "2012-10-17"
   })
+}
+
+resource "aws_iam_user" "jenkins_user" {
+  force_destroy = false
+  name          = "bfd-${local.env}-jenkins"
+  path          = "/"
+}
+
+resource "aws_iam_access_key" "jenkins_user_key" {
+  user = aws_iam_user.jenkins_user.name
+}
+
+resource "aws_iam_group" "jenkins_user_group" {
+  name = "bfd-${local.env}-jenkins"
+  path = "/"
+}
+
+resource "aws_iam_group_membership" "jenkins_user_group_membership" {
+  group = aws_iam_group.jenkins_user_group.name
+  name  = "bfd-${local.env}-jenkins"
+  users = [aws_iam_user.jenkins_user.name]
+}
+
+resource "aws_iam_group_policy_attachment" "jenkins_user_group_attachment" {
+  group      = aws_iam_group.jenkins_user_group.id
+  policy_arn = aws_iam_policy.jenkins_permission_boundary.arn
 }

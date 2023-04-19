@@ -1,0 +1,42 @@
+{
+    "id": 1,
+    "name": "Adjustment Deletion Code",
+    "description": "This field distinguishes original from adjusted or deleted PDE records so CMS can adjust claims and make accurate payment for revised PDE records.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "adjstmt_dltn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "adjustmentDeletionCode",
+    "ccwMapping": [
+        "ADJSTMT_DLTN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/adjstmt_dltn_cd'"
+            ],
+            "additional": [
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/adjstmt_dltn_cd'",
+                "eob.information[N].category.coding[N].display = 'Adjustment Deletion Code'",
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -10,7 +10,7 @@
 /bfd/prod-sbx/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 /bfd/prod-sbx/common/nonsensitive/rds_aurora_family: aurora-postgresql14
 /bfd/prod-sbx/common/nonsensitive/rds_backup_retention_period: 8 # in days
-/bfd/prod-sbx/common/nonsensitive/rds_iam_database_authentication_enabled: false
+/bfd/prod-sbx/common/nonsensitive/rds_iam_database_authentication_enabled: true
 /bfd/prod-sbx/common/nonsensitive/rds_cluster_identifier: bfd-prod-sbx-aurora-cluster
 /bfd/prod-sbx/common/nonsensitive/rds_instance_class: db.r5.2xlarge
 /bfd/prod-sbx/common/nonsensitive/rds_instance_count: 2
@@ -41,6 +41,9 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
 /bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
+/bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 7
+/bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 5
+/bfd/${env}/pipeline/ccw/nonsensitive/rif_thread_multiple: 3
 ## PIPELINE+RDA
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_mode: 'S3'
@@ -52,14 +55,13 @@
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_write_threads: 5
-/bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_process_dlq: false
+/bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_process_dlq: true
 /bfd/${env}/pipeline/rda/nonsensitive/instance_type: m6i.large
 
 # SERVER CONFIGURATION
 /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
-/bfd/${env}/server/nonsensitive/data_server_v2_enabled: true
 /bfd/${env}/server/nonsensitive/pac_resources_enabled: true
 /bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
 ## SERVER+MTLS CONFIGURATION

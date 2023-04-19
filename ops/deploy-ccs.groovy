@@ -40,6 +40,11 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the BFD DB Migrator service, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdMigratorAmiId
+
+	/**
+	 * The ID of the AMI that will run the bfd-server-load service's controller, or <code>null</code> if such an AMI does not yet exist.
+	 */
+	String bfdServerLoadAmiId
 }
 
 /**
@@ -54,76 +59,39 @@ def findAmis() {
 		platinumAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk17-platinum-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
 		bfdPipelineAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-etl-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk17-etl-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
 		bfdServerAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-fhir-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk17-fhir-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
 		bfdMigratorAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk11-db-migrator-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk17-db-migrator-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
-	)
-}
-
-/**
- * <p>
- * Builds the base "platinum" AMI to use for new instances/AMIs.
- * </p>
- * <p>
- * Why "platinum"? Because it's essentially a respin of the CCS environment's "gold master", with
- * updates and additional tooling and configuration applied.
- * </p>
- *
- * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that already exist
- * @return a new {@link AmiIds} instance detailing the shiny new AMI that is now available for use, and any other that were already available
- * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
- */
-def buildPlatinumAmi(AmiIds amiIds) {
-	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-		env.goldAmi = sh(
+		bfdServerLoadAmiId: sh(
 			returnStdout: true,
-			script: '''
-aws ec2 describe-images --filters \
-'Name=name,Values="amzn2legacy*"' \
-'Name=state,Values=available' --region us-east-1 --output json | \
-jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'
-'''
-		).trim()
-		// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-		dir('ops/ansible/playbooks-ccs') {
-			sh '''
-packer build -color=false -var vault_password_file="$vaultPasswordFile" \
- -var source_ami="$goldAmi" \
--var subnet_id=subnet-092c2a68bd18b34d1 \
-../../packer/build_bfd-platinum.json
-'''
-		}
-		return new AmiIds(
-			platinumAmiId: extractAmiIdFromPackerManifest(
-				readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")
-			),
-			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
-			bfdServerAmiId: amiIds.bfdServerAmiId,
-			bfdMigratorAmiId: amiIds.bfdMigratorAmiId,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=server-load-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		)
-	}
+	)
 }
 
 /**
@@ -169,6 +137,8 @@ packer build -color=false \
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
 					bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
+					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
 			)
 		}
 	}

@@ -24,7 +24,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -203,7 +203,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
 
-    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("by", "id");
     operation.publishOperationName();
@@ -320,7 +320,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
-    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
     operation.setOption(
         "types",

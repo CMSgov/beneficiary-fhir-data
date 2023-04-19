@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import static gov.cms.bfd.pipeline.rda.grpc.server.AbstractRandomClaimGeneratorTest.countDistinctFieldValues;
+import static gov.cms.bfd.pipeline.rda.grpc.server.AbstractRandomClaimGeneratorTest.maxFieldLength;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -9,6 +12,9 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /** Tests the {@link RandomMcsClaimGenerator}. */
@@ -23,7 +29,13 @@ public class RandomMcsClaimGeneratorTest {
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
     final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
-    final RandomMcsClaimGenerator generator = new RandomMcsClaimGenerator(1, true, july1);
+    final RandomMcsClaimGenerator generator =
+        new RandomMcsClaimGenerator(
+            RandomClaimGeneratorConfig.builder()
+                .seed(1)
+                .optionalOverride(true)
+                .clock(july1)
+                .build());
     final McsClaim claim = generator.randomClaim();
     final String json = JsonFormat.printer().print(claim);
     assertEquals(claim.getIdrDtlCnt(), claim.getMcsDetailsList().size());
@@ -32,7 +44,7 @@ public class RandomMcsClaimGeneratorTest {
     }
     assertEquals(
         "{\n"
-            + "  \"idrClmHdIcn\": \"212941\",\n"
+            + "  \"idrClmHdIcn\": \"212941673334303\",\n"
             + "  \"idrContrId\": \"2\",\n"
             + "  \"idrHic\": \"922470\",\n"
             + "  \"idrDtlCnt\": 3,\n"
@@ -56,32 +68,32 @@ public class RandomMcsClaimGeneratorTest {
             + "  \"idrClaimReceiptDate\": \"2021-03-31\",\n"
             + "  \"idrClaimMbi\": \"978t9bxjj24\",\n"
             + "  \"mcsDiagnosisCodes\": [{\n"
-            + "    \"idrClmHdIcn\": \"212941\",\n"
+            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
             + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD10\",\n"
             + "    \"idrDiagCode\": \"v4j\",\n"
             + "    \"rdaPosition\": 1\n"
             + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941\",\n"
+            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
             + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD9\",\n"
             + "    \"idrDiagCode\": \"bsr\",\n"
             + "    \"rdaPosition\": 2\n"
             + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941\",\n"
+            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
             + "    \"idrDiagCode\": \"kn\",\n"
             + "    \"idrDiagIcdTypeUnrecognized\": \"r\",\n"
             + "    \"rdaPosition\": 3\n"
             + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941\",\n"
+            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
             + "    \"idrDiagCode\": \"1p34\",\n"
             + "    \"idrDiagIcdTypeUnrecognized\": \"j\",\n"
             + "    \"rdaPosition\": 4\n"
             + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941\",\n"
+            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
             + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD10\",\n"
             + "    \"idrDiagCode\": \"jb0m2\",\n"
             + "    \"rdaPosition\": 5\n"
             + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941\",\n"
+            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
             + "    \"idrDiagCode\": \"k\",\n"
             + "    \"idrDiagIcdTypeUnrecognized\": \"s\",\n"
             + "    \"rdaPosition\": 6\n"
@@ -371,5 +383,59 @@ public class RandomMcsClaimGeneratorTest {
             + "  }]\n"
             + "}",
         json);
+  }
+
+  /** Verifies that the overrides in the {@link RandomClaimGeneratorConfig} are enforced. */
+  @Test
+  public void testFieldOverrides() {
+    final int maxClaimIds = 18;
+    final int maxMbis = 14;
+    final var normalConfig = RandomClaimGeneratorConfig.builder().seed(1).build();
+    final var normalGenerator = new RandomMcsClaimGenerator(normalConfig);
+    final var normalClaims =
+        IntStream.range(1, 100)
+            .mapToObj(i -> normalGenerator.randomClaim())
+            .collect(Collectors.toList());
+
+    // We expect to normally get many more unique values than the overrides will use.
+    assertThat(
+        countDistinctFieldValues(normalClaims, McsClaim::getIdrClaimMbi),
+        Matchers.greaterThan((long) maxClaimIds));
+    assertThat(
+        countDistinctFieldValues(normalClaims, McsClaim::getIdrClmHdIcn),
+        Matchers.greaterThan((long) maxMbis));
+
+    // We expect these ids to normally fall within their normal field length.
+    assertThat(
+        maxFieldLength(normalClaims, McsClaim::getIdrContrId),
+        Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
+    assertThat(
+        maxFieldLength(normalClaims, McsClaim::getIdrHic),
+        Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
+
+    final var overrideConfig =
+        normalConfig.toBuilder()
+            .maxUniqueClaimIds(maxClaimIds)
+            .maxUniqueMbis(maxMbis)
+            .randomErrorRate(10)
+            .build();
+    final var overrideGenerator = new RandomMcsClaimGenerator(overrideConfig);
+    final var overrideClaims =
+        IntStream.range(1, 100)
+            .mapToObj(i -> overrideGenerator.randomClaim())
+            .collect(Collectors.toList());
+
+    // We expect to get exactly the specified number of unique ids.
+    assertEquals(maxClaimIds, countDistinctFieldValues(overrideClaims, McsClaim::getIdrClmHdIcn));
+    assertEquals(maxMbis, countDistinctFieldValues(overrideClaims, McsClaim::getIdrClaimMbi));
+
+    // We expect these ids to sometimes have a value with the forced error length when we are
+    // forcing errors.
+    assertEquals(
+        RandomMcsClaimGenerator.ForcedErrorFieldLength,
+        maxFieldLength(overrideClaims, McsClaim::getIdrContrId));
+    assertEquals(
+        RandomMcsClaimGenerator.ForcedErrorFieldLength,
+        maxFieldLength(overrideClaims, McsClaim::getIdrHic));
   }
 }

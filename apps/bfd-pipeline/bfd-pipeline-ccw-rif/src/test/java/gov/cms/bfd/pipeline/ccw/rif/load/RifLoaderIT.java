@@ -68,7 +68,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,8 +130,10 @@ public final class RifLoaderIT {
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
     // Validate bene monthly
+
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -149,10 +150,8 @@ public final class RifLoaderIT {
       assertBeneficiaryMonthly(beneficiaryFromDb, 2022);
 
       // Validate HICN and MBI
-      String expectedMbiHash =
-          RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
-      String expectedHicn =
-          RifLoader.computeHicnHash(new IdHasher(options.getIdHasherConfig()), "543217066U");
+      String expectedMbiHash = RifLoader.computeMbiHash(idHasher, "3456789");
+      String expectedHicn = RifLoader.computeHicnHash(idHasher, "543217066U");
       assertEquals(
           expectedMbiHash,
           beneficiaryFromDb.getMbiHash().orElse(null),
@@ -189,6 +188,7 @@ public final class RifLoaderIT {
     // Validate bene monthly
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -205,10 +205,8 @@ public final class RifLoaderIT {
       assertBeneficiaryMonthly(beneficiaryFromDb, 2022);
 
       // Validate HICN and MBI
-      String expectedMbiHash =
-          RifLoader.computeMbiHash(new IdHasher(options.getIdHasherConfig()), "3456789");
-      String expectedHicn =
-          RifLoader.computeHicnHash(new IdHasher(options.getIdHasherConfig()), "543217066U");
+      String expectedMbiHash = RifLoader.computeMbiHash(idHasher, "3456789");
+      String expectedHicn = RifLoader.computeHicnHash(idHasher, "543217066U");
       assertEquals(
           expectedMbiHash,
           beneficiaryFromDb.getMbiHash().orElse(null),
@@ -245,9 +243,9 @@ public final class RifLoaderIT {
     Stream<RifFile> editedSample = editSamples(samplesStream, fileEditor);
 
     // Load the edited sample to verify that it fails, as expected.
-    AssertionFailedError thrown =
+    IllegalStateException thrown =
         assertThrows(
-            AssertionFailedError.class,
+            IllegalStateException.class,
             () -> {
               loadSample(
                   "SAMPLE_A, bene only, UPDATE",
@@ -255,7 +253,7 @@ public final class RifLoaderIT {
                   editedSample);
             });
 
-    assertTrue(thrown.getMessage().contains("Load errors encountered"));
+    assertTrue(thrown.getMessage().contains("Fatal error during rif file processing"));
   }
 
   /** Ensures that loading a single file results in a loaded file in the loaded batches. */
@@ -1523,6 +1521,7 @@ public final class RifLoaderIT {
    */
   private static void assertAreInDatabase(
       LoadAppOptions options, EntityManagerFactory entityManagerFactory, Stream<Object> records) {
+    IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -1534,14 +1533,12 @@ public final class RifLoaderIT {
         if (record instanceof BeneficiaryHistory) {
           BeneficiaryHistory beneficiaryHistoryToFind = (BeneficiaryHistory) record;
           beneficiaryHistoryToFind.setHicn(
-              RifLoader.computeHicnHash(
-                  new IdHasher(options.getIdHasherConfig()), beneficiaryHistoryToFind.getHicn()));
+              RifLoader.computeHicnHash(idHasher, beneficiaryHistoryToFind.getHicn()));
           beneficiaryHistoryToFind.setMbiHash(
               beneficiaryHistoryToFind.getMedicareBeneficiaryId().isPresent()
                   ? Optional.of(
                       RifLoader.computeMbiHash(
-                          new IdHasher(options.getIdHasherConfig()),
-                          beneficiaryHistoryToFind.getMedicareBeneficiaryId().get()))
+                          idHasher, beneficiaryHistoryToFind.getMedicareBeneficiaryId().get()))
                   : Optional.empty());
 
           CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();

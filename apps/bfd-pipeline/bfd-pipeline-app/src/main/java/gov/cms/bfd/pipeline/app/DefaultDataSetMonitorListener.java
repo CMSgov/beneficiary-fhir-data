@@ -95,7 +95,15 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
       RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
-      rifLoader.process(rifFileRecords, errorHandler, resultHandler);
+      try {
+        rifLoader.process(rifFileRecords, errorHandler, resultHandler);
+      } catch (Exception e) {
+        LOGGER.error("Exception while processing RIF file");
+        // Stop the metrics to help avoid zombie threads
+        dataSetFileMetricsReporter.stop();
+        timerDataSet.stop();
+        throw e;
+      }
 
       dataSetFileMetricsReporter.stop();
       dataSetFileMetricsReporter.report();

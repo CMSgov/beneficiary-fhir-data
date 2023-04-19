@@ -1,5 +1,5 @@
 # declaring flyway as a COPY source in al2 image
-FROM flyway/flyway:8 as flyway
+FROM flyway/flyway:9 as flyway
 RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.placeholders.type.text=text >> /flyway/conf/flyway.conf \
     && echo flyway.placeholders.logic.tablespaces-escape=-- >> /flyway/conf/flyway.conf \
@@ -20,7 +20,10 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.schemas=public >> /flyway/conf/flyway.conf \
     && echo flyway.url=jdbc:postgresql://db:5432/fhirdb >> /flyway/conf/flyway.conf \
     && echo flyway.password=bfd >> /flyway/conf/flyway.conf \
-    && echo flyway.user=bfd >> /flyway/conf/flyway.conf
+    && echo flyway.user=bfd >> /flyway/conf/flyway.conf \
+    && echo flyway.baselineOnMigrate=true >> /flyway/conf/flyway.conf \
+    && echo flyway.baselineVersion=0 >> /flyway/conf/flyway.conf \
+    && echo flyway.postgresql.transactional.lock=false >> /flyway/conf/flyway.conf
 
 FROM amazonlinux:2 as al2
 ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz"
@@ -40,7 +43,6 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 #       with the dependencies encoded in the BFD platinum image
 #       instructions.
 RUN yum update -y --security && \
-    amazon-linux-extras enable java-openjdk11 && \
     yum clean metadata && \
     amazon-linux-extras install epel -y && \
     yum -y groupinstall "Development Tools" && \
@@ -49,7 +51,7 @@ RUN yum update -y --security && \
     ansible \
     gcc \
     git \
-    java-11-openjdk-devel \
+    java-17-amazon-corretto-devel \
     libffi-devel \
     openssl-devel \
     selinux-policy \
@@ -71,10 +73,12 @@ RUN curl -o python3.tgz $PYTHON3_TAR_SOURCE && \
     cd $(basename $PYTHON3_TAR_SOURCE .tgz) && \
     ./configure && make && make altinstall
 
-RUN ln -s /usr/local/bin/python3.9 /usr/bin/python3 && \
-    ln -s /usr/local/bin/pip3.9 /usr/bin/pip3
+RUN ln -fs /usr/local/bin/python3.9 /usr/bin/python3 && \
+    ln -fs /usr/local/bin/pip3.9 /usr/bin/pip3
 
 RUN /usr/bin/python3 -m pip install --upgrade pip
+
+RUN rm -rf $(basename $PYTHON3_TAR_SOURCE .tgz) python3.tgz
 
 RUN systemctl set-default multi-user.target
 STOPSIGNAL SIGRTMIN+3

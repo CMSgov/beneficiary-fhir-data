@@ -90,7 +90,6 @@
                 <version>${project.version}</version>
                 <configuration>
                     <mappingPath>${project.basedir}/mappings</mappingPath>
-                    <outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>

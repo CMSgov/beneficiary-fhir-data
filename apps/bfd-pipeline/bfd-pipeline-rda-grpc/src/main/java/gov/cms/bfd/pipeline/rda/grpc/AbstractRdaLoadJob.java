@@ -5,6 +5,7 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
@@ -104,7 +105,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
   /**
    * Invokes the RDA API to download data and store it in the database. Since errors during the call
    * are not exceptional (RDA API downtime for upgrade, network hiccups, etc) we catch any
-   * exceptions and return normally. If we let the exception pass through the scheduler will no
+   * exceptions and return normally. If we let the exception pass through the scheduler will not
    * re-schedule us.
    */
   @Override
@@ -116,16 +117,12 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       return NOTHING_TO_DO;
     }
     try {
-      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
-          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.PRE_PROCESSOR)) {
-        source.retrieveAndProcessObjects(1, sink);
-      }
-
-      int processedCount;
+      int processedCount = 0;
       try {
-        processedCount = callRdaServiceAndStoreRecords();
+        processedCount += executePreJobTasks();
+        processedCount += callRdaServiceAndStoreRecords();
       } catch (ProcessingException ex) {
-        processedCount = ex.getProcessedCount();
+        processedCount += ex.getProcessedCount();
       }
       return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
     } finally {
@@ -146,6 +143,28 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
         RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.NONE)) {
       return source.performSmokeTest(sink);
+    }
+  }
+
+  /**
+   * Executes the {@link #preJobTaskFactory}. Any {@link ProcessingException}s are passed through
+   * unchanged but any other exceptions are wrapped in a {@link ProcessingException}.
+   *
+   * @throws ProcessingException if the task throws an exception
+   * @return number of claims processed by the task
+   */
+  int executePreJobTasks() throws ProcessingException {
+    try {
+      try (RdaSource<TResponse, TClaim> source = preJobTaskFactory.call();
+          RdaSink<TResponse, TClaim> sink = sinkFactory.apply(SinkTypePreference.PRE_PROCESSOR)) {
+        return source.retrieveAndProcessObjects(1, sink);
+      }
+    } catch (ProcessingException ex) {
+      logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+      throw ex;
+    } catch (Exception ex) {
+      logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+      throw new ProcessingException(ex, 0);
     }
   }
 
@@ -259,6 +278,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
     /** Indicates the preferred sink type to create for created jobs. */
     private final SinkTypePreference sinkTypePreference;
 
+    /** Indicates the RDA Version (range) that the job is allows to process. */
+    private final RdaVersion rdaVersion;
+
     /**
      * Instantiates a new config.
      *
@@ -268,7 +290,8 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      * @param startingFissSeqNum the starting fiss seq num
      * @param startingMcsSeqNum the starting MCS seq num
      * @param processDLQ if the job should process the DLQ
-     * @param sinkTypePreference The {@link SinkTypePreference} to use for created jobs.
+     * @param sinkTypePreference The {@link SinkTypePreference} to use for created jobs
+     * @param rdaVersion The required {@link RdaVersion} in order to ingest data
      */
     @Builder
     private Config(
@@ -278,7 +301,8 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
         @Nullable Long startingFissSeqNum,
         @Nullable Long startingMcsSeqNum,
         boolean processDLQ,
-        SinkTypePreference sinkTypePreference) {
+        SinkTypePreference sinkTypePreference,
+        RdaVersion rdaVersion) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
       this.writeThreads = writeThreads == 0 ? 1 : writeThreads;
@@ -286,6 +310,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       this.startingMcsSeqNum = startingMcsSeqNum;
       this.processDLQ = processDLQ;
       this.sinkTypePreference = sinkTypePreference;
+      this.rdaVersion = rdaVersion;
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
@@ -320,6 +345,15 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      */
     public boolean shouldProcessDLQ() {
       return processDLQ;
+    }
+
+    /**
+     * Returns the RDA API version that jobs using this config can ingest data from.
+     *
+     * @return The RDA API version that jobs using this config can ingest data from.
+     */
+    public RdaVersion getRdaVersion() {
+      return rdaVersion;
     }
   }
 

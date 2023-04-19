@@ -46,7 +46,7 @@ import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.tool.schema.Action;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests to ensure basic functioning of the RDA API related JPA entity classes. */
@@ -68,8 +68,8 @@ public class RdaSchemaMigrationIT {
    *
    * @throws IOException the io exception
    */
-  @BeforeAll
-  public static void setUp() throws IOException {
+  @BeforeEach
+  public void setUp() throws IOException {
 
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
     appRunBuilder.redirectErrorStream(true);
@@ -141,7 +141,7 @@ public class RdaSchemaMigrationIT {
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "1");
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
 
     return appRunBuilder;
   }
@@ -173,18 +173,21 @@ public class RdaSchemaMigrationIT {
   public void fissClaimEntities() {
     final RdaFissClaim claim =
         RdaFissClaim.builder()
-            .dcn("1")
+            .claimId("1")
+            .dcn("d1")
+            .intermediaryNb("i1")
             .hicNo("h1")
             .currStatus('1')
             .currLoc1('A')
             .currLoc2("1A")
             .pracLocCity("city name can be very long indeed")
             .sequenceNumber(3L)
+            .clmTypInd("1")
             .build();
 
     final RdaFissProcCode procCode0 =
         RdaFissProcCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 1)
             .procCode("P")
             .procFlag("F")
@@ -194,7 +197,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissProcCode procCode1 =
         RdaFissProcCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 2)
             .procCode("P")
             .procFlag("G")
@@ -204,7 +207,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissDiagnosisCode diagCode0 =
         RdaFissDiagnosisCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 1)
             .diagCd2("cd2")
             .diagPoaInd("Q")
@@ -213,7 +216,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissDiagnosisCode diagCode1 =
         RdaFissDiagnosisCode.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 2)
             .diagCd2("cd2")
             .diagPoaInd("R")
@@ -222,7 +225,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissPayer payer0 =
         RdaFissPayer.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 1)
             .payerType(RdaFissPayer.PayerType.BeneZ)
             .estAmtDue(new BigDecimal("1.23"))
@@ -231,7 +234,7 @@ public class RdaSchemaMigrationIT {
 
     final RdaFissPayer payer1 =
         RdaFissPayer.builder()
-            .dcn(claim.getDcn())
+            .claimId(claim.getClaimId())
             .rdaPosition((short) 2)
             .payerType(RdaFissPayer.PayerType.Insured)
             .estAmtDue(new BigDecimal("4.56"))
@@ -246,7 +249,7 @@ public class RdaSchemaMigrationIT {
 
     List<RdaFissClaim> claims =
         entityManager
-            .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
+            .createQuery("select c from RdaFissClaim c where c.claimId = '1'", RdaFissClaim.class)
             .getResultList();
     assertEquals(1, claims.size());
 
@@ -272,7 +275,7 @@ public class RdaSchemaMigrationIT {
     entityManager.getTransaction().commit();
     resultClaim =
         entityManager
-            .createQuery("select c from RdaFissClaim c where c.dcn = '1'", RdaFissClaim.class)
+            .createQuery("select c from RdaFissClaim c where c.claimId = '1'", RdaFissClaim.class)
             .getResultList()
             .get(0);
     assertEquals("1:H", summarizeFissProcCodes(resultClaim));
@@ -355,11 +358,14 @@ public class RdaSchemaMigrationIT {
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final RdaFissClaim claim =
             RdaFissClaim.builder()
+                .claimId(mbi + "id" + claimNumber)
                 .dcn(mbi + "d" + claimNumber)
+                .intermediaryNb(String.format("%03d%02d", mbiNumber, claimNumber))
                 .hicNo(mbi + "h" + claimNumber)
                 .currStatus('1')
                 .currLoc1('A')
                 .currLoc2("1A")
+                .clmTypInd("1")
                 .sequenceNumber(seqNo++)
                 .mbiRecord(mbiRecord)
                 .build();

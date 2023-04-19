@@ -13,7 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.Test;
 
 /** Verifies that the metrics {@link AdminServlet} works as expected (as configured in web.xml). */
-public final class MetricsAdminServletIT {
+public final class MetricsAdminServletIT extends ServerRequiredTest {
   /**
    * Verifies that the <code>/metrics/ping</code> endpoint works as expected.
    *

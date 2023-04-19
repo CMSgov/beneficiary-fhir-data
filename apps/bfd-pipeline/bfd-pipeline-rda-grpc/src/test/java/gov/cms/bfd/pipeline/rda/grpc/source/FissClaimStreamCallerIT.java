@@ -25,7 +25,9 @@ public class FissClaimStreamCallerIT {
   /** Example paid claim. */
   private static final String CLAIM_1 =
       "{"
+          + "  \"rdaClaimKey\": \"63843470id\","
           + "  \"dcn\": \"63843470\","
+          + "  \"intermediaryNb\": \"53412\","
           + "  \"hicNo\": \"916689703543\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
@@ -35,12 +37,15 @@ public class FissClaimStreamCallerIT {
           + "  \"principleDiag\": \"uec\","
           + "  \"mbi\": \"c1ihk7q0g3i\","
           + "  \"fissProcCodes\": [],"
-          + "  \"medaProvId\": \"oducjgzt67joc\""
+          + "  \"medaProvId\": \"oducjgzt67joc\","
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_INPATIENT\""
           + "}";
   /** Example rejected claim. */
   private static final String CLAIM_2 =
       "{"
+          + "  \"rdaClaimKey\": \"2643602id\","
           + "  \"dcn\": \"2643602\","
+          + "  \"intermediaryNb\": \"24153\","
           + "  \"hicNo\": \"640930211775\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
@@ -52,7 +57,8 @@ public class FissClaimStreamCallerIT {
           + "  \"npiNumber\": \"5764657700\","
           + "  \"mbi\": \"0vtc7u321x0\","
           + "  \"fedTaxNb\": \"2845244764\","
-          + "  \"fissProcCodes\": []"
+          + "  \"fissProcCodes\": [],"
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_OUTPATIENT\""
           + "}";
 
   /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
@@ -93,11 +99,13 @@ public class FissClaimStreamCallerIT {
               assertTrue(results.hasNext());
 
               RdaFissClaim claim = transform(results.next());
+              assertEquals("NjM4NDM0NzBpZA", claim.getClaimId());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
+              assertEquals("MjY0MzYwMmlk", claim.getClaimId());
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(2), claim.getSequenceNumber());
               assertFalse(results.hasNext());

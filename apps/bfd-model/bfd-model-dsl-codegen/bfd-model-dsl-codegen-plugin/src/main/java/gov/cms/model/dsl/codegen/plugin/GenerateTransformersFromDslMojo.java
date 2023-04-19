@@ -261,7 +261,8 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
                   .map(
                       transformer ->
                           transformer.generateFieldSpecs(mapping, column, transformation))
-                  .orElse(Collections.emptyList()).stream();
+                  .orElse(Collections.emptyList())
+                  .stream();
             })
         .collect(ImmutableList.toImmutableList());
   }
@@ -285,7 +286,8 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
                   .map(
                       transformer ->
                           transformer.generateFieldInitializers(mapping, column, transformation))
-                  .orElse(Collections.emptyList()).stream();
+                  .orElse(Collections.emptyList())
+                  .stream();
             })
         .collect(ImmutableList.toImmutableList());
   }
@@ -592,7 +594,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
           loop.addStatement(
               "itemTo.set$L($L.get$L())",
               TransformerUtil.capitalize(elementField.getTo()),
-              FieldTransformer.SOURCE_VAR,
+              FieldTransformer.DEST_VAR,
               TransformerUtil.capitalize(elementField.getTo()));
         }
       }

@@ -8,6 +8,7 @@ import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -96,11 +97,12 @@ public class DirectRdaLoadApp {
    */
   private static Optional<PipelineJob<?>> createPipelineJob(
       RdaLoadOptions jobConfig, PipelineApplicationState appState, String claimType) {
+    final var mbiCache = jobConfig.createComputedMbiCache(appState);
     switch (claimType.toLowerCase()) {
       case "fiss":
-        return Optional.of(jobConfig.createFissClaimsLoadJob(appState));
+        return Optional.of(jobConfig.createFissClaimsLoadJob(appState, mbiCache));
       case "mcs":
-        return Optional.of(jobConfig.createMcsClaimsLoadJob(appState));
+        return Optional.of(jobConfig.createMcsClaimsLoadJob(appState, mbiCache));
       default:
         return Optional.empty();
     }
@@ -137,6 +139,8 @@ public class DirectRdaLoadApp {
             .runInterval(Duration.ofDays(1))
             .batchSize(options.intValue("job.batchSize", 1))
             .writeThreads(options.intValue("job.writeThreads", 1))
+            .rdaVersion(
+                RdaVersion.builder().versionString(options.stringValue("rda.version")).build())
             .sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
     options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
     options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);

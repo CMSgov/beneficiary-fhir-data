@@ -14,7 +14,7 @@ This RFC proposes BFD's adoption of:
 ## Status
 [Status]: #status
 
-* Status: Approved
+* Status: Implemented
 * Implementation JIRA Ticket(s):
     * [BFD-1639](https://jira.cms.gov/browse/BFD-1639)
 

@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -10,7 +11,9 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
+import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
@@ -89,6 +92,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
+   * depends on number of cores, cpu speed, i/o throughput, and database performance.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
 
@@ -114,6 +120,41 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * removed as soon as is reasonable.
    */
   public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES = true;
+
+  /**
+   * The name of the environment variable that should be used to provide the number of {@link
+   * RifRecordEvent}s that will be included in each processing batch. Note that larger batch sizes
+   * mean that more {@link RifRecordEvent}s will be held in memory simultaneously.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
+   * the performance boost from larger batch sizes drops off quickly.
+   */
+  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE";
+
+  /**
+   * The default number of {@link RifRecordEvent}s that will be included in each processing batch.
+   */
+  private static final int DEFAULT_RIF_JOB_BATCH_SIZE = 25;
+
+  /**
+   * The name of the environment variable that should be used to provide the work queue size for the
+   * RIF loader's thread pool. This number is multiplied by the number of worker threads to obtain
+   * the actual queue size. Lower sizes are more memory efficient but larger sizes could provide a
+   * performance improvement in some circumstances.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
+   * smaller is better. The default value provides some slack for handling intermittent database
+   * slow downs without wasting too much RAM with large numbers of objects waiting to be sent to the
+   * database.
+   */
+  public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE =
+      "RIF_JOB_QUEUE_SIZE_MULTIPLE";
+
+  /**
+   * The default value for the {@link #ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE} environment
+   * variable.
+   */
+  public static final int DEFAULT_RIF_JOB_QUEUE_SIZE_MULTIPLE = 2;
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
@@ -220,6 +261,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "RDA_JOB_ERROR_LIMIT";
 
   /**
+   * The name of the environment variable that should be used to indicate the maximum number of days
+   * that processed records can remain in the {@link MessageError} table.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS = "RDA_JOB_ERROR_EXPIRE_DAYS";
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingFissSeqNum()} ()} value.
    */
@@ -239,6 +286,14 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * runs.
    */
   public static final String ENV_VAR_KEY_PROCESS_DLQ = "RDA_JOB_PROCESS_DLQ";
+
+  /**
+   * The name of the string environment variable that can be set to override the RDA API Version
+   * that the running job should be configured to ingest data for. The job will normally use the
+   * default value hardcoded in the code, but this env variable can be used for special
+   * circumstances.
+   */
+  public static final String ENV_VAR_KEY_RDA_VERSION = "RDA_JOB_RDA_VERSION";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -345,13 +400,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
           System::getenv);
 
   /**
-   * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
-   * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
-   * simultaneously.
-   */
-  private static final int RECORD_BATCH_SIZE = 100;
-
-  /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
    */
@@ -436,6 +484,11 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     boolean filteringNonNullAndNon2023Benes =
         readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES)
             .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
+    int rifRecordBatchSize =
+        readEnvIntOptional(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE).orElse(DEFAULT_RIF_JOB_BATCH_SIZE);
+    int rifTaskQueueSizeMultiple =
+        readEnvIntOptional(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
+            .orElse(DEFAULT_RIF_JOB_QUEUE_SIZE_MULTIPLE);
 
     MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
     DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(loaderThreads);
@@ -450,7 +503,8 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             loaderThreads,
             idempotencyRequired,
             filteringNonNullAndNon2023Benes,
-            RECORD_BATCH_SIZE);
+            rifRecordBatchSize,
+            rifTaskQueueSizeMultiple);
 
     CcwRifLoadOptions ccwRifLoadOptions =
         readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
@@ -578,6 +632,13 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingMcsSeqNum);
     readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    // Default to the hardcoded RDA version in RdaService, restricted to major version
+    jobConfig.rdaVersion(
+        RdaVersion.builder()
+            .versionString(
+                readEnvStringOptional(ENV_VAR_KEY_RDA_VERSION)
+                    .orElse("^" + RdaService.RDA_PROTO_VERSION))
+            .build());
     jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
     final RdaSourceConfig grpcConfig =
         RdaSourceConfig.builder()
@@ -606,6 +667,8 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             .authenticationToken(
                 readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN)
                     .orElse(DEFAULT_RDA_GRPC_AUTH_TOKEN))
+            .messageErrorExpirationDays(
+                readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
             .build();
     final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
     mockServerConfig.serverMode(

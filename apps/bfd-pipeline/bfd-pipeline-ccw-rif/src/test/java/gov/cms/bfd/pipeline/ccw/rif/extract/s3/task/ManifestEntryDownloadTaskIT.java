@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.CancellationException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +37,22 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 public final class ManifestEntryDownloadTaskIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
+  /** only need a single instance of the S3 client. */
+  private static AmazonS3 s3Client;
   /** The S3 task manager. */
   private S3TaskManager s3TaskManager;
+  /** Dummy S3 bucket name. */
+  private static final String DUMMY_S3_BUCKET_NAME = "foo";
+
+  /** Sets the minio test container. */
+  @BeforeAll
+  public static void setupMinioS3Client() {
+    s3Client = S3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME));
+  }
 
   /**
-   * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value.
+   * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated
+   * MD5ChkSum value.
    */
   @SuppressWarnings("deprecation")
   @Test
@@ -51,14 +63,13 @@ public final class ManifestEntryDownloadTaskIT {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
       ExtractionOptions options = new ExtractionOptions(bucket);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
-      DataSetManifest manifest =
-          new DataSetManifest(
-              Instant.now(),
-              0,
-              false,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
-              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
+      DataSetManifest manifest = new DataSetManifest(
+          Instant.now(),
+          0,
+          false,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 
       // upload beneficiary sample file to S3 bucket created above
       DataSetTestUtilities.putObject(s3Client, bucket, manifest);
@@ -71,35 +82,31 @@ public final class ManifestEntryDownloadTaskIT {
 
       // download file from S3 that was just uploaded above
 
-      GetObjectRequest getObjectRequest =
-          GetObjectRequest.builder()
-              .bucket(bucket)
-              .key(
-                  String.format(
-                      "%s/%s/%s",
-                      CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-                      manifest.getEntries().get(0).getParentManifest().getTimestampText(),
-                      manifest.getEntries().get(0).getName()))
-              .build();
+      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+          .bucket(bucket)
+          .key(
+              String.format(
+                  "%s/%s/%s",
+                  CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+                  manifest.getEntries().get(0).getParentManifest().getTimestampText(),
+                  manifest.getEntries().get(0).getName()))
+          .build();
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-      s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              new ExtractionOptions(options.getS3BucketName()));
+      s3TaskManager = new S3TaskManager(
+          PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+          new ExtractionOptions(options.getS3BucketName()));
       LOGGER.info(
           "Downloading '{}' to '{}'...",
           getObjectRequest.key(),
           localTempFile.toAbsolutePath().toString());
 
-      DownloadFileRequest downloadFileRequest =
-          DownloadFileRequest.builder()
-              .getObjectRequest(getObjectRequest)
-              .addTransferListener(LoggingTransferListener.create())
-              .destination(localTempFile.toFile())
-              .build();
+      DownloadFileRequest downloadFileRequest = DownloadFileRequest.builder()
+          .getObjectRequest(getObjectRequest)
+          .addTransferListener(LoggingTransferListener.create())
+          .destination(localTempFile.toFile())
+          .build();
 
-      FileDownload downloadFile =
-          s3TaskManager.getS3TransferManager().downloadFile(downloadFileRequest);
+      FileDownload downloadFile = s3TaskManager.getS3TransferManager().downloadFile(downloadFileRequest);
       CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
 
       InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
@@ -125,7 +132,8 @@ public final class ManifestEntryDownloadTaskIT {
       // Shouldn't happen, as our apps don't use thread interrupts.
       throw new BadCodeMonkeyException(e);
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (bucket != null)
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 }

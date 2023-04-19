@@ -1,11 +1,16 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -15,6 +20,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -23,24 +29,29 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
-import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import utils.TestUtils;
 
 /** Tests for the {@link DLQGrpcRdaSource} class. */
 @ExtendWith(MockitoExtension.class)
 public class DLQGrpcRdaSourceTest {
 
+  /** Arbitrary rda api version being used for tests. */
+  private static final String TEST_RDA_VERSION = "0.0.1";
+
+  /** Max age for message errors table. */
+  private static final int MAX_DQL_AGE_DAYS = 100;
+
   /** Mock {@link RdaSink} to use in testing. */
   @Mock private RdaSink<Long, Long> mockSink;
 
-  /** Mock {@link EntityManager} to use in testing. */
-  @Mock private EntityManager mockManager;
+  /** Mock {@link TransactionManager} to use in testing. */
+  @Mock private TransactionManager mockManager;
 
   /** Mock {@link ManagedChannel} to use in testing. */
   @Mock private ManagedChannel mockChannel;
@@ -51,8 +62,11 @@ public class DLQGrpcRdaSourceTest {
   /** Mock {@link GrpcStreamCaller} to use in testing. */
   @Mock private GrpcStreamCaller<Long> mockCaller;
 
-  /** Mock {@link DLQGrpcRdaSource.DLQDao} to use in testing. */
-  @Mock private DLQGrpcRdaSource.DLQDao mockDao;
+  /** Mock {@link DLQDao} to use in testing. */
+  @Mock private DLQDao mockDao;
+
+  /** Mock {@link RdaVersion} to use in testing. */
+  @Mock private RdaVersion rdaVersion;
 
   /** {@link MetricRegistry} to use in testing. */
   private MeterRegistry meters;
@@ -61,7 +75,13 @@ public class DLQGrpcRdaSourceTest {
   @BeforeEach
   public void setUp() {
     meters = new SimpleMeterRegistry();
-    doReturn(mockChannel).when(mockConfig).createChannel();
+    lenient().doReturn(false).when(rdaVersion).allows(anyString());
+    lenient().doReturn(true).when(rdaVersion).allows(TEST_RDA_VERSION);
+    lenient()
+        .doReturn(Optional.of(MAX_DQL_AGE_DAYS))
+        .when(mockConfig)
+        .getMessageErrorExpirationDays();
+    lenient().doReturn(mockChannel).when(mockConfig).createChannel();
   }
 
   /** Testing value to use for the first FISS error sequence number. */
@@ -112,7 +132,16 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
+                mockManager,
+                Objects::equals,
+                mockChannel,
+                mockCaller,
+                mockConfig::createCallOptions,
+                meters,
+                claimType,
+                rdaVersion,
+                Optional.of(MAX_DQL_AGE_DAYS),
+                mockDao));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -127,11 +156,62 @@ public class DLQGrpcRdaSourceTest {
         .findAllMessageErrorsByClaimTypeAndStatus(
             MessageError.ClaimType.FISS, MessageError.Status.UNRESOLVED);
 
-    TestUtils.setField(sourceSpy, "dao", mockDao);
-
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
     assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
+
+    // should have triggered DLQ cleanup method
+    verify(mockDao).deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+  }
+
+  /**
+   * Ensure that {@link DLQGrpcRdaSource#deleteExpiredDlqRecords} calls the dao method and returns
+   * its result.
+   */
+  @Test
+  void deleteExpiredDlqRecordsShouldCallDaoAndReturnResult() {
+    final var claimType = "fiss";
+    final var source =
+        new DLQGrpcRdaSource<>(
+            mockManager,
+            Objects::equals,
+            mockChannel,
+            mockCaller,
+            mockConfig::createCallOptions,
+            meters,
+            claimType,
+            rdaVersion,
+            Optional.of(MAX_DQL_AGE_DAYS),
+            mockDao);
+    doReturn(18)
+        .when(mockDao)
+        .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+    assertEquals(18, source.deleteExpiredDlqRecords(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS));
+  }
+
+  /**
+   * Ensure that {@link DLQGrpcRdaSource#deleteExpiredDlqRecords} calls the dao method and returns
+   * its result and captures any exception it throws.
+   */
+  @Test
+  void deleteExpiredDlqRecordsShouldCallDaoAndCaptureException() {
+    final var claimType = "fiss";
+    final var source =
+        new DLQGrpcRdaSource<>(
+            mockManager,
+            Objects::equals,
+            mockChannel,
+            mockCaller,
+            mockConfig::createCallOptions,
+            meters,
+            claimType,
+            rdaVersion,
+            Optional.of(MAX_DQL_AGE_DAYS),
+            mockDao);
+    doThrow(new RuntimeException("can't stop me!"))
+        .when(mockDao)
+        .deleteExpiredMessageErrors(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS);
+    assertEquals(0, source.deleteExpiredDlqRecords(MAX_DQL_AGE_DAYS, MessageError.ClaimType.FISS));
   }
 
   /** Checks that the logic lambda was successfully and correctly invoked for MCS claims. */
@@ -146,7 +226,16 @@ public class DLQGrpcRdaSourceTest {
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
+                mockManager,
+                Objects::equals,
+                mockChannel,
+                mockCaller,
+                mockConfig::createCallOptions,
+                meters,
+                claimType,
+                rdaVersion,
+                Optional.of(MAX_DQL_AGE_DAYS),
+                mockDao));
 
     doReturn(mockLogic)
         .when(sourceSpy)
@@ -161,11 +250,58 @@ public class DLQGrpcRdaSourceTest {
         .findAllMessageErrorsByClaimTypeAndStatus(
             MessageError.ClaimType.MCS, MessageError.Status.UNRESOLVED);
 
-    TestUtils.setField(sourceSpy, "dao", mockDao);
-
     int actualProcessed = sourceSpy.retrieveAndProcessObjects(5, mockSink);
 
     assertEquals(MOCK_PROCESS_COUNT, actualProcessed);
+  }
+
+  /**
+   * Verifies that {@link AbstractGrpcRdaSource#checkApiVersion(String)} is called, and that any
+   * thrown exception is thrown up the stack.
+   */
+  @Test
+  public void shouldThrowExceptionIfRdaVersionCheckThrows() throws Exception {
+    final String claimType = "fiss";
+    IllegalStateException expectedException = new IllegalStateException("Bad");
+
+    DLQGrpcRdaSource<Long, Long> sourceSpy =
+        spy(
+            new DLQGrpcRdaSource<>(
+                mockManager,
+                Objects::equals,
+                mockConfig,
+                mockCaller,
+                meters,
+                claimType,
+                rdaVersion));
+
+    final CallOptions mockCallOptions = mock(CallOptions.class);
+
+    // Set up config mocks, needs to return fake call options and channel
+    doReturn(mockCallOptions).when(mockConfig).createCallOptions();
+
+    // Always return fake version for caller's version call
+    doReturn(TEST_RDA_VERSION).when(mockCaller).callVersionService(mockChannel, mockCallOptions);
+
+    lenient().doNothing().when(sourceSpy).checkApiVersion(anyString());
+
+    doThrow(expectedException).when(sourceSpy).checkApiVersion(TEST_RDA_VERSION);
+
+    try {
+      // We're testing the lambda logic in this test, so have to grab it first from the method that
+      // returns it
+      AbstractGrpcRdaSource.Processor logic =
+          sourceSpy.dlqProcessingLogic(
+              mockSink,
+              MessageError.ClaimType.FISS,
+              Set.of(FISS_ERROR_ONE_SEQ, FISS_ERROR_TWO_SEQ));
+
+      AbstractGrpcRdaSource.ProcessResult actualResult = logic.process();
+
+      fail("Expected exception not thrown");
+    } catch (Exception actualException) {
+      assertSame(expectedException, actualException, "Unexpected exception: " + actualException);
+    }
   }
 
   /**
@@ -187,19 +323,31 @@ public class DLQGrpcRdaSourceTest {
     // Create our spy for the class we're testing, so we can mock sibling methods
     // Using Object::equals for sequence predicate, effectively making the "message"
     // be treated as the sequence number, for testing simplicity
+
     DLQGrpcRdaSource<Long, Long> sourceSpy =
         spy(
             new DLQGrpcRdaSource<>(
-                mockManager, Objects::equals, mockConfig, mockCaller, meters, claimType));
+                mockManager,
+                Objects::equals,
+                mockChannel,
+                mockCaller,
+                mockConfig::createCallOptions,
+                meters,
+                claimType,
+                rdaVersion,
+                Optional.of(MAX_DQL_AGE_DAYS),
+                mockDao));
 
     doNothing().when(sourceSpy).setUptimeToReceiving();
 
     // unchecked - This is fine for a mock.
     //noinspection unchecked
-    doReturn(1).when(sourceSpy).submitBatchToSink(eq("v1"), eq(mockSink), any(Map.class));
+    doReturn(1)
+        .when(sourceSpy)
+        .submitBatchToSink(eq(TEST_RDA_VERSION), eq(mockSink), any(Map.class));
 
     // Always return fake version for caller's version call
-    doReturn("v1").when(mockCaller).callVersionService(mockChannel, mockCallOptions);
+    doReturn(TEST_RDA_VERSION).when(mockCaller).callVersionService(mockChannel, mockCallOptions);
 
     // Create a stream that returns a sequence in the DLQ (5)
     // unchecked - This is fine for a mock.
@@ -237,9 +385,6 @@ public class DLQGrpcRdaSourceTest {
     doReturn(1L)
         .when(mockDao)
         .updateState(FISS_ERROR_ONE_SEQ, MessageError.ClaimType.FISS, MessageError.Status.RESOLVED);
-
-    // Force our mock dao into the source object using reflection hackery
-    TestUtils.setField(sourceSpy, "dao", mockDao);
 
     AbstractGrpcRdaSource.ProcessResult expectedResult = new AbstractGrpcRdaSource.ProcessResult();
     // Only a claim that was could be successfully written to the DB is considered processed, thus

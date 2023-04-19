@@ -51,7 +51,7 @@ javaHome=""
 maxHeapArg="-Xmx4g"
 visualVm=""
 targetDirectory=
-dbUrl="jdbc:bfd-test:hsqldb:mem"
+dbUrl="jdbc:bfd-test:tc"
 v2Enabled="true"
 pacEnabled="true"
 pacOldMbiHashEnabled="false"
@@ -195,7 +195,6 @@ BFD_PORT="${serverPortHttps}" \
 	"-Xlog:gc*:${gcLog}:time,level,tags" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
-	"-DbfdServer.v2.enabled=${v2Enabled}" \
 	"-DbfdServer.pac.enabled=${pacEnabled}" \
 	"-DbfdServer.pac.oldMbiHash.enabled=${pacOldMbiHashEnabled}" \
 	"-DbfdServer.pac.claimSourceTypes=${pacClaimSourceTypes}" \

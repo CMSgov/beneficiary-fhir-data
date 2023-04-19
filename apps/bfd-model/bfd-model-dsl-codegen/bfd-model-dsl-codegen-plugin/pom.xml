@@ -90,7 +90,6 @@
             <!-- Add YAML support to jackson -->
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>${jackson-dataformat-yaml.version}</version>
         </dependency>
 
         <dependency>

@@ -44,7 +44,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
       int errorLimit) {
     super(appState, RdaApiProgress.ClaimType.FISS, autoUpdateLastSeq, errorLimit);
     this.transformer =
-        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
+        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(transactionManager));
   }
 
   /**
@@ -61,7 +61,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   /** {@inheritDoc} */
   @Override
   public String getClaimIdForMessage(FissClaimChange object) {
-    return object.getClaim().getDcn();
+    return object.getClaim().getRdaClaimKey();
   }
 
   /** {@inheritDoc} */
@@ -96,7 +96,7 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return RdaClaimMessageMetaData.builder()
         .sequenceNumber(change.getSequenceNumber())
         .claimType(RdaApiProgress.ClaimType.FISS)
-        .claimId(claim.getDcn())
+        .claimId(claim.getClaimId())
         .mbiRecord(claim.getMbiRecord())
         .claimState(String.valueOf(claim.getCurrStatus()))
         .lastUpdated(claim.getLastUpdated())
@@ -114,14 +114,22 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
   MessageError createMessageError(
       String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)
       throws IOException {
-    return MessageError.builder()
+    MessageError.MessageErrorBuilder builder = MessageError.builder();
+
+    // Base64 encode the claim key so it matches any existing claim records in the database
+    DataTransformer dt = new DataTransformer();
+    dt.copyBase64String(
+        "rdaClaimKey", false, 1, 43, 32, change.getClaim().getRdaClaimKey(), builder::claimId);
+
+    return builder
         .sequenceNumber(change.getSeq())
-        .claimId(change.getClaim().getDcn())
         .claimType(MessageError.ClaimType.FISS)
         .apiSource(apiVersion)
         .errors(AbstractJsonConverter.convertObjectToJsonString(errors))
         .message(protobufObjectWriter.print(change))
         .status(MessageError.Status.UNRESOLVED)
+        .createdDate(clock.instant())
+        .updatedDate(clock.instant())
         .build();
   }
 }

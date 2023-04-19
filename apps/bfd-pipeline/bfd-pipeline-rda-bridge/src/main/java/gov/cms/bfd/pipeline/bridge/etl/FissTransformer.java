@@ -14,6 +14,7 @@ import gov.cms.mpsm.rda.v1.RecordSource;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
@@ -36,19 +37,15 @@ public class FissTransformer extends AbstractTransformer {
   /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
 
-  /**
-   * Transforms the given {@link Parser.Data} into RDA {@link FissClaimChange} data.
-   *
-   * @param data The parsed {@link Parser.Data} to transform into RDA {@link FissClaimChange} data
-   * @return The RDA {@link FissClaimChange} object generated from the given data
-   */
+  /** {@inheritDoc} */
   @Override
   public Optional<MessageOrBuilder> transform(
       WrappedMessage message,
       WrappedCounter sequenceNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
-      int sampleId) {
+      int sampleId,
+      String fileName) {
     FissClaimChange claimToReturn;
 
     int lineNumber = getLineNumber(data, Fiss.CLM_LINE_NUM);
@@ -66,7 +63,7 @@ public class FissTransformer extends AbstractTransformer {
         // If the line number is 1, it's a new claim, return the old, store the new
         claimToReturn = storedClaim;
         message.setLineNumber(1);
-        message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
+        message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId, fileName));
       } else {
         // If it's not the next claim or a new one starting at 1, then something is wrong.
         throw new IllegalStateException(
@@ -75,6 +72,7 @@ public class FissTransformer extends AbstractTransformer {
                 message.getLineNumber(), lineNumber));
       }
     } else {
+      // This would be the first run of a claim, create a new claim and store it
       if (lineNumber != 1) {
         throw new IllegalStateException(
             String.format(
@@ -82,7 +80,7 @@ public class FissTransformer extends AbstractTransformer {
       }
 
       message.setLineNumber(lineNumber);
-      message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId));
+      message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId, fileName));
       claimToReturn = null;
     }
 
@@ -114,6 +112,7 @@ public class FissTransformer extends AbstractTransformer {
    * @param data The {@link Parser.Data} to pull claim data for building the claim
    * @param mbiSampler The {@link DataSampler} of the mbis
    * @param sampleId The sample of ids
+   * @param fileName The name of the file the data was extracted from
    * @return A new claim built from parsing the given {@link Parser.Data}
    */
   @VisibleForTesting
@@ -121,25 +120,30 @@ public class FissTransformer extends AbstractTransformer {
       WrappedCounter sequenceNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
-      int sampleId) {
+      int sampleId,
+      String fileName) {
     String beneId = data.get(Fiss.BENE_ID).orElse("");
 
     mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
+    final String claimId = getClaimId(data);
     final String dcn =
-        ifNull(data.get(Fiss.FI_DOC_CLM_CNTL_NUM).orElse(null), () -> convertDcn(data));
+        ifNull(data.get(Fiss.FI_DOC_CLM_CNTL_NUM).orElse(null), () -> convertDcn(claimId));
 
     FissClaim.Builder claimBuilder =
         FissClaim.newBuilder()
+            .setRdaClaimKey(claimId)
             .setDcn(dcn)
             .setMbi(mbiMap.get(beneId).getMbi())
             .setHicNo(mbiMap.get(beneId).getHicNo())
+            .setClmTypIndEnum(getClaimTypeEnum(fileName))
             // Not generated
             .setCurrLoc1Unrecognized("?")
             .setCurrLoc2Unrecognized("?")
             .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING)
             .setCurrTranDtCymd("1970-01-01")
             .setFedTaxNb("XX-XXXXXXX")
+            .setIntermediaryNb("?")
             .setRecdDtCymd("1970-01-01");
 
     // Build beneZ payer object
@@ -195,12 +199,15 @@ public class FissTransformer extends AbstractTransformer {
     addDiagCodes(claimBuilder, data);
     addProcCodes(claimBuilder, data);
 
+    FissClaim claim = claimBuilder.build();
     return FissClaimChange.newBuilder()
         .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
         .setSeq(sequenceNumber.inc())
-        .setClaim(claimBuilder.build())
+        .setClaim(claim)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setDcn(dcn)
+        .setRdaClaimKey(claim.getRdaClaimKey())
+        .setIntermediaryNb(claim.getIntermediaryNb())
         .setSource(
             RecordSource.newBuilder()
                 // Hardcoding values for test data, this data is only used in production for
@@ -214,17 +221,62 @@ public class FissTransformer extends AbstractTransformer {
   }
 
   /**
-   * Fallback method for creating a claim identifier from the CLM_ID field.
+   * Determines the {@link FissClaimTypeIndicator} to use based on the provided fileName of the file
+   * the data was extracted from.
+   *
+   * @param fileName The file name of the file the data was extracted from.
+   * @return The corresponding {@link FissClaimTypeIndicator} for the extracted file
+   */
+  private FissClaimTypeIndicator getClaimTypeEnum(String fileName) {
+    FissClaimTypeIndicator indicator;
+
+    switch (fileName.trim()) {
+      case "inpatient":
+        indicator = FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT;
+        break;
+      case "outpatient":
+        indicator = FissClaimTypeIndicator.CLAIM_TYPE_OUTPATIENT;
+        break;
+      case "home":
+      case "hha":
+        // Home and HHA are synonymous in this context
+        indicator = FissClaimTypeIndicator.CLAIM_TYPE_HOME_HEALTH;
+        break;
+      case "hospice":
+        indicator = FissClaimTypeIndicator.CLAIM_TYPE_HOSPICE;
+        break;
+      case "snf":
+        indicator = FissClaimTypeIndicator.CLAIM_TYPE_SNF;
+        break;
+      default:
+        indicator = FissClaimTypeIndicator.UNRECOGNIZED;
+    }
+
+    return indicator;
+  }
+
+  /**
+   * Fallback method for creating a claim identifier from the CLM_ID field. Uses a hash to generate
+   * a string of the appropriate length.
+   *
+   * @param claimId The value returned by {@link #getClaimId}
+   * @return The generated claim identifier
+   */
+  @VisibleForTesting
+  String convertDcn(String claimId) {
+    return "-" + DigestUtils.sha256Hex(claimId).substring(0, 22);
+  }
+
+  /**
+   * Get the value for use as a {@link FissClaim#getRdaClaimKey} value. Requires that the record
+   * contain a CLM_ID field value.
    *
    * @param data The data to pull from for claim data
    * @return The generated claim identifier
    */
-  @VisibleForTesting
-  String convertDcn(Parser.Data<String> data) {
-    String claimId =
-        data.get(Fiss.CLM_ID)
-            .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
-    return "-" + DigestUtils.sha256Hex(claimId).substring(0, 22);
+  private static String getClaimId(Parser.Data<String> data) {
+    return data.get(Fiss.CLM_ID)
+        .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
   }
 
   /**

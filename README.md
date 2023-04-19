@@ -67,8 +67,8 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 ```
 
 ### Initializing the Repository
-1. Install JDK 11. You'll need Java 11 to run BFD. You can install OpenJDK 11 however you prefer.
-1. Install Maven 3. Project tasks are handled by Apache Maven. Install it however you prefer.
+1. Install JDK 17. You'll need Java 17 to run BFD. You can install OpenJDK 17 however you prefer, however [Corretto 17](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/macos-install.html) is recommended.
+1. Install Maven 3 (Ideally 3.90+ for [build caching](./apps/.mvn/extensions.xml)). Project tasks are handled by Apache Maven. Install it however you prefer.
 1. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following (change the jdkHome appropriately):
     ```xml
     <?xml version="1.0" encoding="UTF8"?>
@@ -113,11 +113,25 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
       minio/minio server /data --console-address ":9001"
     ```
-6. Run mvn install with the following 
+6. In order to run bfd locally using test containers for integration tests, Docker for Desktop (https://www.docker.com/products/docker-desktop/) or Podman must be installed. Docker for desktop is recommended
+   since test containers will automatically detect and launch containers for integration tests.  
+   TODO: Podman is supported as well.
+   If you rather use HSQL instead of test containers, add the parameter -Dits.db.url=jdbc:bfd-test:hsqldb:mem to your mvn clean install command. 
+  
+   Run mvn install with the following to run integration tests with test containers.
     ```
      mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
     ```
+   If you want to run integration tests with HSQL only, run mvn install with the following
+    ```
+     mvn -Dits.db.url=jdbc:bfd-test:hsqldb:mem -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+    ```
    You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
+   
+   If you want to disable the maven cache on the maven run, run mvn install with the following
+   ```
+     mvn  -Dmaven.build.cache.enabled=false -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+    ```
 
 ### Loading Beneficiary
 1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
@@ -288,7 +302,7 @@ The following instructions are to be executed from within the Eclipse IDE applic
 
 #### Eclipse JDK
 
-Verify Eclipse is using the correct Java 11 JDK.
+Verify Eclipse is using the correct Java 17 JDK.
 
 1. Open **Window > Preferences**.
 1. Select **Java > Installed JREs**.

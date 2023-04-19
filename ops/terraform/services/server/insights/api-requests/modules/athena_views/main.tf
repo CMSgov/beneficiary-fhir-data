@@ -14,7 +14,8 @@ EOF
     view => templatefile(
       filepath,
       {
-        env = var.env
+        # replace '-' with '_' in `prod-sbx` to avoid athena errors
+        env = replace(var.env, "-", "_")
       }
     )
   }

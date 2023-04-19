@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
 import gov.cms.mpsm.rda.v1.mcs.McsAudit;
@@ -23,7 +24,6 @@ import gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService;
 import gov.cms.mpsm.rda.v1.mcs.McsTypeOfService;
-import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -98,6 +98,13 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   private static final List<McsLocationActivityCode> McsLocationActivityCodeEnums =
       enumValues(McsLocationActivityCode.values());
 
+  /** Max length of a FISS claim id. */
+  private static final int McsClaimIdLength = 15;
+  /** Max length of a MBI. */
+  private static final int MbiLength = 11;
+  /** Field length used when forcing a transformation error in a claim. */
+  @VisibleForTesting static final int ForcedErrorFieldLength = 50;
+
   static {
     // MCS status codes are special since the STATUS_CODE_NOT_USED is considered invalid by the
     // transformer. This block preserves the natural ordering of the enum values while removing the
@@ -108,27 +115,14 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
   }
 
   /**
-   * Creates an instance with the specified seed.
+   * Creates an instance with the specified settings.
    *
-   * @param seed seed for the PRNG
+   * @param config configuration settings
    */
-  public RandomMcsClaimGenerator(long seed) {
-    super(seed, false, Clock.systemUTC());
+  public RandomMcsClaimGenerator(RandomClaimGeneratorConfig config) {
+    super(config);
   }
 
-  /**
-   * Creates an instance for use in unit tests. Setting optionalOverride to true causes all optional
-   * fields to be added to the claim. This is useful in some tests.
-   *
-   * @param seed seed for the PRNG
-   * @param optionalOverride true if all optional fields should be populated
-   * @param clock clock to generate current time/date values (needed for tests)
-   */
-  public RandomMcsClaimGenerator(long seed, boolean optionalOverride, Clock clock) {
-    super(seed, optionalOverride, clock);
-  }
-
-  /** {@inheritDoc} */
   @Override
   public McsClaim createRandomClaim() {
     final int detailCount = 1 + randomInt(MAX_DETAILS);
@@ -137,7 +131,9 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     always(
         "mcs",
         () -> {
-          always("idrClmHdIcn", () -> claim.setIdrClmHdIcn(randomDigit(5, 8)));
+          always(
+              "idrClmHdIcn",
+              () -> claim.setIdrClmHdIcn(randomDigit(McsClaimIdLength, McsClaimIdLength)));
           final String idrClmHdIcn = claim.getIdrClmHdIcn();
 
           addRandomFieldValues(claim, detailCount);
@@ -147,8 +143,8 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
           addDetails(claim, detailCount);
           addLocations(claim);
           adjustServiceDatesFromDetails(claim);
+          adjustFieldsBasedOnConfigOverrides(claim);
         });
-
     return claim.build();
   }
 
@@ -196,7 +192,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
         () -> claim.setIdrBillProvStatusCdUnrecognized(randomLetter(1, 1)));
     optional("idrTotBilledAmt", () -> claim.setIdrTotBilledAmt(randomAmount()));
     optional("idrClaimReceiptDate", () -> claim.setIdrClaimReceiptDate(randomDate()));
-    optional("idrClaimMbi", () -> claim.setIdrClaimMbi(randomAlphaNumeric(11, 11)));
+    optional("idrClaimMbi", () -> claim.setIdrClaimMbi(randomAlphaNumeric(MbiLength, MbiLength)));
     // IdrHdrFromDos will be set later
     // IdrHdrToDos will be set later
     oneOf(
@@ -510,6 +506,28 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
     if (minDate.isPresent() && maxDate.isPresent()) {
       claim.setIdrHdrFromDos(minDate.get());
       claim.setIdrHdrToDos(maxDate.get());
+    }
+  }
+
+  /**
+   * Replace field values if necessary based on the overrides specified in the {@link
+   * RandomClaimGeneratorConfig}.
+   *
+   * @param claim claim to be updated
+   */
+  private void adjustFieldsBasedOnConfigOverrides(McsClaim.Builder claim) {
+    if (getMaxUniqueClaimIds() > 0) {
+      claim.setIdrClmHdIcn(randomDigitStringInRange(McsClaimIdLength, getMaxUniqueClaimIds()));
+    }
+    if (getMaxUniqueMbis() > 0 && !claim.getIdrClaimMbi().isEmpty()) {
+      claim.setIdrClaimMbi(randomDigitStringInRange(MbiLength, getMaxUniqueMbis()));
+    }
+    if (shouldInsertErrorIntoCurrentClaim()) {
+      // update a random field with a string that is too long
+      oneOf(
+          "random-error",
+          () -> claim.setIdrContrId(randomDigit(ForcedErrorFieldLength, ForcedErrorFieldLength)),
+          () -> claim.setIdrHic(randomDigit(ForcedErrorFieldLength, ForcedErrorFieldLength)));
     }
   }
 }

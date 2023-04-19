@@ -133,7 +133,7 @@ public final class S3TaskManager {
    * already-submitted tasks to complete.
    */
   public void shutdownSafely() {
-    LOGGER.debug("Shutting down...");
+    LOGGER.info("Shutting down S3 resources...");
 
     /*
      * Prevent any new move tasks from being submitted, while allowing those
@@ -160,12 +160,14 @@ public final class S3TaskManager {
         this.downloadTasksExecutor.awaitTermination(30, TimeUnit.MINUTES);
         LOGGER.info("All in-progress downloads are complete.");
       }
+
+      s3TransferManager.shutdownNow();
     } catch (InterruptedException e) {
       // We're not expecting interrupts here, so go boom.
       throw new BadCodeMonkeyException(e);
     }
 
-    LOGGER.debug("Shut down.");
+    LOGGER.info("S3 resources completely shut down.");
   }
 
   /**

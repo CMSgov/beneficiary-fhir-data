@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import static gov.cms.bfd.pipeline.rda.grpc.server.AbstractRandomClaimGeneratorTest.countDistinctFieldValues;
+import static gov.cms.bfd.pipeline.rda.grpc.server.AbstractRandomClaimGeneratorTest.maxFieldLength;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -8,6 +11,9 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for the {@link RandomFissClaimGenerator}. */
@@ -23,12 +29,18 @@ public class RandomFissClaimGeneratorTest {
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
     final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
-    final RandomFissClaimGenerator generator = new RandomFissClaimGenerator(1, true, july1);
+    final RandomFissClaimGenerator generator =
+        new RandomFissClaimGenerator(
+            RandomClaimGeneratorConfig.builder()
+                .seed(1)
+                .optionalOverride(true)
+                .clock(july1)
+                .build());
     final FissClaim claim = generator.randomClaim();
     final String json = JsonFormat.printer().print(claim);
     assertEquals(
         "{\n"
-            + "  \"dcn\": \"793471\",\n"
+            + "  \"dcn\": \"79347185903055953987254\",\n"
             + "  \"hicNo\": \"618367226005\",\n"
             + "  \"currStatusEnum\": \"CLAIM_STATUS_ROUTING\",\n"
             + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\",\n"
@@ -386,8 +398,142 @@ public class RandomFissClaimGeneratorTest {
             + "  \"medicalRecordNo\": \"x08jk412t\",\n"
             + "  \"stmtCovFromCymdText\": \"2021-03-17\",\n"
             + "  \"stmtCovToCymdText\": \"2021-04-23\",\n"
-            + "  \"admDateCymdText\": \"2021-04-18\"\n"
+            + "  \"admDateCymdText\": \"2021-04-18\",\n"
+            + "  \"fissRevenueLines\": [{\n"
+            + "    \"rdaPosition\": 1,\n"
+            + "    \"nonBillRevCodeEnum\": \"NON_BILL_S\",\n"
+            + "    \"revCd\": \"dvd\",\n"
+            + "    \"revUnitsBilled\": 19,\n"
+            + "    \"revServUnitCnt\": 23,\n"
+            + "    \"servDtCymd\": \"2021-04-24\",\n"
+            + "    \"servDtCymdText\": \"2021-04-24\",\n"
+            + "    \"hcpcCd\": \"w\",\n"
+            + "    \"hcpcInd\": \"d\",\n"
+            + "    \"hcpcModifier\": \"h\",\n"
+            + "    \"hcpcModifier2\": \"f\",\n"
+            + "    \"hcpcModifier3\": \"5\",\n"
+            + "    \"hcpcModifier4\": \"1\",\n"
+            + "    \"hcpcModifier5\": \"2\",\n"
+            + "    \"acoRedRarc\": \"z\",\n"
+            + "    \"acoRedCarc\": \"q\",\n"
+            + "    \"acoRedCagc\": \"3x\"\n"
+            + "  }, {\n"
+            + "    \"rdaPosition\": 2,\n"
+            + "    \"nonBillRevCodeUnrecognized\": \"7\",\n"
+            + "    \"revCd\": \"2h\",\n"
+            + "    \"revUnitsBilled\": 21,\n"
+            + "    \"revServUnitCnt\": 28,\n"
+            + "    \"servDtCymd\": \"2021-04-09\",\n"
+            + "    \"servDtCymdText\": \"2021-04-09\",\n"
+            + "    \"hcpcCd\": \"s0h3\",\n"
+            + "    \"hcpcInd\": \"b\",\n"
+            + "    \"hcpcModifier\": \"z9\",\n"
+            + "    \"hcpcModifier2\": \"j\",\n"
+            + "    \"hcpcModifier3\": \"5\",\n"
+            + "    \"hcpcModifier4\": \"t\",\n"
+            + "    \"hcpcModifier5\": \"p\",\n"
+            + "    \"acoRedRarc\": \"vp3\",\n"
+            + "    \"acoRedCarc\": \"hb\",\n"
+            + "    \"acoRedCagc\": \"pt\"\n"
+            + "  }, {\n"
+            + "    \"rdaPosition\": 3,\n"
+            + "    \"nonBillRevCodeEnum\": \"NON_BILL_R\",\n"
+            + "    \"revCd\": \"b6g\",\n"
+            + "    \"revUnitsBilled\": 21,\n"
+            + "    \"revServUnitCnt\": 8,\n"
+            + "    \"servDtCymd\": \"2021-03-09\",\n"
+            + "    \"servDtCymdText\": \"2021-03-09\",\n"
+            + "    \"hcpcCd\": \"96\",\n"
+            + "    \"hcpcInd\": \"s\",\n"
+            + "    \"hcpcModifier\": \"9\",\n"
+            + "    \"hcpcModifier2\": \"s\",\n"
+            + "    \"hcpcModifier3\": \"r\",\n"
+            + "    \"hcpcModifier4\": \"b\",\n"
+            + "    \"hcpcModifier5\": \"2\",\n"
+            + "    \"acoRedRarc\": \"knp\",\n"
+            + "    \"acoRedCarc\": \"x0j\",\n"
+            + "    \"acoRedCagc\": \"6d\"\n"
+            + "  }, {\n"
+            + "    \"rdaPosition\": 4,\n"
+            + "    \"nonBillRevCodeEnum\": \"NON_BILL_S\",\n"
+            + "    \"revCd\": \"8\",\n"
+            + "    \"revUnitsBilled\": 11,\n"
+            + "    \"revServUnitCnt\": 32,\n"
+            + "    \"servDtCymd\": \"2021-01-10\",\n"
+            + "    \"servDtCymdText\": \"2021-01-10\",\n"
+            + "    \"hcpcCd\": \"4jh\",\n"
+            + "    \"hcpcInd\": \"5\",\n"
+            + "    \"hcpcModifier\": \"r3\",\n"
+            + "    \"hcpcModifier2\": \"sn\",\n"
+            + "    \"hcpcModifier3\": \"nw\",\n"
+            + "    \"hcpcModifier4\": \"b6\",\n"
+            + "    \"hcpcModifier5\": \"76\",\n"
+            + "    \"acoRedRarc\": \"g3f\",\n"
+            + "    \"acoRedCarc\": \"43\",\n"
+            + "    \"acoRedCagc\": \"hx\"\n"
+            + "  }],\n"
+            + "  \"drgCd\": \"t\",\n"
+            + "  \"groupCode\": \"n\",\n"
+            + "  \"clmTypIndUnrecognized\": \"w\",\n"
+            + "  \"recdDtCymdText\": \"2021-02-07\",\n"
+            + "  \"currTranDtCymdText\": \"2021-01-20\",\n"
+            + "  \"rdaClaimKey\": \"19669840573147667643640083677381\",\n"
+            + "  \"intermediaryNb\": \"09142\"\n"
             + "}",
         json);
+  }
+
+  /** Verifies that the overrides in the {@link RandomClaimGeneratorConfig} are enforced. */
+  @Test
+  public void testFieldOverrides() {
+    final int maxClaimIds = 18;
+    final int maxMbis = 14;
+    final var normalConfig = RandomClaimGeneratorConfig.builder().seed(1).build();
+    final var normalGenerator = new RandomFissClaimGenerator(normalConfig);
+    final var normalClaims =
+        IntStream.range(1, 100)
+            .mapToObj(i -> normalGenerator.randomClaim())
+            .collect(Collectors.toList());
+
+    // We expect to normally get many more unique values than the overrides will use.
+    assertThat(
+        countDistinctFieldValues(normalClaims, FissClaim::getRdaClaimKey),
+        Matchers.greaterThan((long) maxClaimIds));
+    assertThat(
+        countDistinctFieldValues(normalClaims, FissClaim::getMbi),
+        Matchers.greaterThan((long) maxMbis));
+
+    // We expect these ids to normally fall within their normal field length.
+    assertThat(
+        maxFieldLength(normalClaims, FissClaim::getDcn),
+        Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
+    assertThat(
+        maxFieldLength(normalClaims, FissClaim::getIntermediaryNb),
+        Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
+
+    final var overrideConfig =
+        normalConfig.toBuilder()
+            .maxUniqueClaimIds(maxClaimIds)
+            .maxUniqueMbis(maxMbis)
+            .randomErrorRate(10)
+            .build();
+    final var overrideGenerator = new RandomFissClaimGenerator(overrideConfig);
+    final var overrideClaims =
+        IntStream.range(1, 100)
+            .mapToObj(i -> overrideGenerator.randomClaim())
+            .collect(Collectors.toList());
+
+    // We expect to get exactly the specified number of unique ids.
+    assertEquals(maxClaimIds, countDistinctFieldValues(overrideClaims, FissClaim::getRdaClaimKey));
+    assertEquals(maxMbis, countDistinctFieldValues(overrideClaims, FissClaim::getMbi));
+
+    // We expect these ids to sometimes have a value with the forced error length when we are
+    // forcing errors.
+    assertEquals(
+        RandomMcsClaimGenerator.ForcedErrorFieldLength,
+        maxFieldLength(overrideClaims, FissClaim::getDcn));
+    assertEquals(
+        RandomMcsClaimGenerator.ForcedErrorFieldLength,
+        maxFieldLength(overrideClaims, FissClaim::getIntermediaryNb));
   }
 }

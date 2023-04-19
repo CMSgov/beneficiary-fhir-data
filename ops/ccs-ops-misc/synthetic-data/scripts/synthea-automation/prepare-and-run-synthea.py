@@ -172,11 +172,11 @@ def run_synthea(synthea_folder_filepath, benes_to_generate, future_months):
     logfile_path = f'{synthea_folder_filepath}synthea-' + time.strftime("%Y_%m_%d-%I_%M_%S_%p") + '.log'
     synthea_failed = False
     if future_months > 0:
-        print(f'Running synthea ({synthea_folder_filepath}national_bfd_v2.sh) with {benes_to_generate} benes and {future_months} future months...')
-        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd_v2.sh {benes_to_generate} {future_months}')
+        print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes and {future_months} future months...')
+        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate} {future_months}')
     else:
         print(f'Running synthea ({synthea_folder_filepath}national_bfd.sh) with {benes_to_generate} benes...')
-        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate}')
+        process_cmd = shlex.split(f'{synthea_folder_filepath}national_bfd.sh {benes_to_generate} 0')
     with subprocess.Popen(process_cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1) as p, \
         open(logfile_path, 'w') as f:
         for line in p.stdout:

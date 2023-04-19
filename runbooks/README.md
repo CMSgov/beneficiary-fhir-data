@@ -2,7 +2,11 @@
 Table of Contents
 =================
 
-* [How to Re-run a Failed BFD Pipeline Load](./how-to-rerun-failed-pipeline-load.md#how-to-re-run-a-failed-bfd-pipeline-load)
+* [Recreating server-regression QuickSight Dashboards](./how-to-create-server-regression-dashboards.md#recreating-server-regression-quicksight-dashboards)
+   * [Glossary](./how-to-create-server-regression-dashboards.md#glossary)
+   * [FAQ](./how-to-create-server-regression-dashboards.md#faq)
+      * [Will the hash in each of the Dataset SQL queries below ever change? What is it used for?](./how-to-create-server-regression-dashboards.md#will-the-hash-in-each-of-the-dataset-sql-queries-below-ever-change-what-is-it-used-for)
+   * [Instructions](./how-to-create-server-regression-dashboards.md#instructions)
 
 * [How to Investigate Firehose Ingestion Processing Failures](./how-to-investigate-firehose-ingestion-processing-failures.md#how-to-investigate-firehose-ingestion-processing-failures)
    * [Glossary](./how-to-investigate-firehose-ingestion-processing-failures.md#glossary)
@@ -11,8 +15,6 @@ Table of Contents
       * [Has there ever been processing failures?](./how-to-investigate-firehose-ingestion-processing-failures.md#has-there-ever-been-processing-failures)
    * [Prerequisites](./how-to-investigate-firehose-ingestion-processing-failures.md#prerequisites)
    * [Instructions](./how-to-investigate-firehose-ingestion-processing-failures.md#instructions)
-
-* [How to Create BFD Insights QuickSight Dashboards](./how-to-create-bfd-insights-quicksight.md#how-to-create-bfd-insights-quicksight-dashboards)
 
 * [How to Recover from migrator Failures](./how-to-recover-from-migrator-failures.md#how-to-recover-from-migrator-failures)
    * [Failures](./how-to-recover-from-migrator-failures.md#failures)
@@ -35,6 +37,44 @@ Table of Contents
    * [Load the target table from the staging table.](./how-to-load-cloudwatch-historical-data.md#load-the-target-table-from-the-staging-table)
    * [Verify the load.](./how-to-load-cloudwatch-historical-data.md#verify-the-load)
 
+* [How to Create BFD Insights QuickSight Dashboards](./how-to-create-bfd-insights-quicksight.md#how-to-create-bfd-insights-quicksight-dashboards)
+
+* [How to Mark SNYK Findings as Ignored](./how-to-mark-snyk-findings-ignored.md#how-to-mark-snyk-findings-as-ignored)
+
+* [How to Run Synthea Automation](./how-to-run-synthea-automation.md#how-to-run-synthea-automation)
+   * [Prod Load Additional Steps](./how-to-run-synthea-automation.md#prod-load-additional-steps)
+   * [Troubleshooting (High Level)](./how-to-run-synthea-automation.md#troubleshooting-high-level)
+
+* [How to Resolve SNYK-bot PRs](./how-to-resolve-snyk-bot-prs.md#how-to-resolve-snyk-bot-prs)
+
+* [How to Add or Remove Users' SSH Access](./how-to-add-or-remove-user-SSH-access.md#how-to-add-or-remove-users-ssh-access)
+   * [Prerequisites](./how-to-add-or-remove-user-SSH-access.md#prerequisites)
+   * [Instructions](./how-to-add-or-remove-user-SSH-access.md#instructions)
+      * [How to Add a New User's SSH Key and Configure Access](./how-to-add-or-remove-user-SSH-access.md#how-to-add-a-new-users-ssh-key-and-configure-access)
+      * [How to Remove a User's SSH Access](./how-to-add-or-remove-user-SSH-access.md#how-to-remove-a-users-ssh-access)
+
+* [How to Resolve SNYK Report Findings](./how-to-resolve-snyk-report-findings.md#how-to-resolve-snyk-report-findings)
+
+* [How to Detach BFD Server Instances for Development or Debugging](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#how-to-detach-bfd-server-instances-for-development-or-debugging)
+   * [Scale Out to Avoid Potential Performance Degradation](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#scale-out-to-avoid-potential-performance-degradation)
+   * [Detach the Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#detach-the-instance)
+   * [Scale In After Detaching an Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#scale-in-after-detaching-an-instance)
+   * [Patching Regularly When Instances Endure Beyond ~1 Day](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#patching-regularly-when-instances-endure-beyond-1-day)
+   * [Terminating the Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#terminating-the-instance)
+
+* [How to Clone an RDS Cluster with Terraform](./how-to-clone-rds-cluster-with-terraform.md#how-to-clone-an-rds-cluster-with-terraform)
+   * [Software Requirements](./how-to-clone-rds-cluster-with-terraform.md#software-requirements)
+   * [Configuring an Ephemeral Environment](./how-to-clone-rds-cluster-with-terraform.md#configuring-an-ephemeral-environment)
+      * [Initial Setup](./how-to-clone-rds-cluster-with-terraform.md#initial-setup)
+      * [Deploy the base terraservice](./how-to-clone-rds-cluster-with-terraform.md#deploy-the-base-terraservice)
+      * [Optional: Make any necessary adjustments to the environment definition via SSM](./how-to-clone-rds-cluster-with-terraform.md#optional-make-any-necessary-adjustments-to-the-environment-definition-via-ssm)
+      * [Deploy the common terraservice](./how-to-clone-rds-cluster-with-terraform.md#deploy-the-common-terraservice)
+      * [Using your cloned RDS Cluster](./how-to-clone-rds-cluster-with-terraform.md#using-your-cloned-rds-cluster)
+
+* [How to Re-run a Failed BFD Pipeline Load](./how-to-rerun-failed-pipeline-load.md#how-to-re-run-a-failed-bfd-pipeline-load)
+
+* [How to Perform a BFD Deployment](./how-to-do-a-deployment.md#how-to-perform-a-bfd-deployment)
+
 * [How to Run the Regression and Load Test Suites](./how-to-run-load-and-regression-locust-tests.md#how-to-run-the-regression-and-load-test-suites)
    * [Glossary](./how-to-run-load-and-regression-locust-tests.md#glossary)
    * [FAQ](./how-to-run-load-and-regression-locust-tests.md#faq)
@@ -46,40 +86,6 @@ Table of Contents
       * [How to Run the Regression Suite On a Detached Instance Against any BFD Server SDLC Environment](./how-to-run-load-and-regression-locust-tests.md#how-to-run-the-regression-suite-on-a-detached-instance-against-any-bfd-server-sdlc-environment)
       * [How to Run a Scaling Load Test Using the bfd-run-server-load Jenkins Job](./how-to-run-load-and-regression-locust-tests.md#how-to-run-a-scaling-load-test-using-the-bfd-run-server-load-jenkins-job)
       * [How to Run a Static Load Test Using the bfd-run-server-load Jenkins Job](./how-to-run-load-and-regression-locust-tests.md#how-to-run-a-static-load-test-using-the-bfd-run-server-load-jenkins-job)
-
-* [How to Run Synthea Automation](./how-to-run-synthea-automation.md#how-to-run-synthea-automation)
-   * [Prod Load Additional Steps](./how-to-run-synthea-automation.md#prod-load-additional-steps)
-   * [Troubleshooting (High Level)](./how-to-run-synthea-automation.md#troubleshooting-high-level)
-
-* [How to Perform a BFD Deployment](./how-to-do-a-deployment.md#how-to-perform-a-bfd-deployment)
-
-* [How to Mark SNYK Findings as Ignored](./how-to-mark-snyk-findings-ignored.md#how-to-mark-snyk-findings-as-ignored)
-
-* [How to Detach BFD Server Instances for Development or Debugging](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#how-to-detach-bfd-server-instances-for-development-or-debugging)
-   * [Scale Out to Avoid Potential Performance Degradation](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#scale-out-to-avoid-potential-performance-degradation)
-   * [Detach the Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#detach-the-instance)
-   * [Scale In After Detaching an Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#scale-in-after-detaching-an-instance)
-   * [Patching Regularly When Instances Endure Beyond ~1 Day](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#patching-regularly-when-instances-endure-beyond-1-day)
-   * [Terminating the Instance](./how-to-detach-bfd-server-instances-for-development-or-debugging.md#terminating-the-instance)
-
-* [How to Resolve SNYK Report Findings](./how-to-resolve-snyk-report-findings.md#how-to-resolve-snyk-report-findings)
-
-* [Recreating server-regression QuickSight Dashboards](./how-to-create-server-regression-dashboards.md#recreating-server-regression-quicksight-dashboards)
-   * [Glossary](./how-to-create-server-regression-dashboards.md#glossary)
-   * [FAQ](./how-to-create-server-regression-dashboards.md#faq)
-      * [Will the hash in each of the Dataset SQL queries below ever change? What is it used for?](./how-to-create-server-regression-dashboards.md#will-the-hash-in-each-of-the-dataset-sql-queries-below-ever-change-what-is-it-used-for)
-   * [Instructions](./how-to-create-server-regression-dashboards.md#instructions)
-
-* [How to Resolve SNYK-bot PRs](./how-to-resolve-snyk-bot-prs.md#how-to-resolve-snyk-bot-prs)
-
-* [How to Clone an RDS Cluster with Terraform](./how-to-clone-rds-cluster-with-terraform.md#how-to-clone-an-rds-cluster-with-terraform)
-   * [Software Requirements](./how-to-clone-rds-cluster-with-terraform.md#software-requirements)
-   * [Configuring an Ephemeral Environment](./how-to-clone-rds-cluster-with-terraform.md#configuring-an-ephemeral-environment)
-      * [Initial Setup](./how-to-clone-rds-cluster-with-terraform.md#initial-setup)
-      * [Deploy the base terraservice](./how-to-clone-rds-cluster-with-terraform.md#deploy-the-base-terraservice)
-      * [Optional: Make any necessary adjustments to the environment definition via SSM](./how-to-clone-rds-cluster-with-terraform.md#optional-make-any-necessary-adjustments-to-the-environment-definition-via-ssm)
-      * [Deploy the common terraservice](./how-to-clone-rds-cluster-with-terraform.md#deploy-the-common-terraservice)
-      * [Using your cloned RDS Cluster](./how-to-clone-rds-cluster-with-terraform.md#using-your-cloned-rds-cluster)
 
 
 

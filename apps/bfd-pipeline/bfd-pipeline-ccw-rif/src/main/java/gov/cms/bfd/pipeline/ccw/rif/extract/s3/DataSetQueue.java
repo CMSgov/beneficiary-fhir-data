@@ -46,21 +46,26 @@ public final class DataSetQueue {
 
   /**
    * The {@link DataSetManifest}s waiting to be processed, ordered by their {@link
-   * DataSetManifestId} in ascending order such that the first element represents the {@link
+   * DataSetManifestId} in ascending order such that the first element represents
+   * the {@link
    * DataSetManifest} that should be processed next.
    */
   private final SortedSet<DataSetManifest> manifestsToProcess;
 
   /**
-   * Tracks the {@link DataSetManifest#getId()} values of the most recently processed data sets, to
+   * Tracks the {@link DataSetManifest#getId()} values of the most recently
+   * processed data sets, to
    * ensure that the same data set isn't processed more than once.
    */
   private final Set<DataSetManifestId> recentlyProcessedManifests;
 
   /**
-   * Tracks the {@link DataSetManifestId}s of data sets that are known to be invalid. Typically,
-   * these are data sets from a new schema version that aren't supported yet. This may seem
-   * unnecessary (i.e. "don't let admins push things until they're supported"), but it's proven to
+   * Tracks the {@link DataSetManifestId}s of data sets that are known to be
+   * invalid. Typically,
+   * these are data sets from a new schema version that aren't supported yet. This
+   * may seem
+   * unnecessary (i.e. "don't let admins push things until they're supported"),
+   * but it's proven to
    * be very useful, operationally.
    */
   private final Set<DataSetManifestId> knownInvalidManifests;
@@ -71,8 +76,8 @@ public final class DataSetQueue {
   /**
    * Constructs a new {@link DataSetQueue} instance.
    *
-   * @param appMetrics the {@link MetricRegistry} for the overall application
-   * @param options the {@link ExtractionOptions} to use
+   * @param appMetrics    the {@link MetricRegistry} for the overall application
+   * @param options       the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    */
   public DataSetQueue(
@@ -87,8 +92,10 @@ public final class DataSetQueue {
   }
 
   /**
-   * Updates {@link #manifestsToProcess}, listing the manifests available in S3 right now, then
-   * adding those that weren't found before and removing those that are no longer pending.
+   * Updates {@link #manifestsToProcess}, listing the manifests available in S3
+   * right now, then
+   * adding those that weren't found before and removing those that are no longer
+   * pending.
    */
   public void updatePendingDataSets() {
     // Find the pending manifests.
@@ -106,23 +113,21 @@ public final class DataSetQueue {
         manifestsToProcess.stream().map(DataSetManifest::getId).collect(Collectors.toSet()));
     // Add manifests from Incoming
     newManifests.forEach(
-        manifestId ->
-            addManifestToList(
-                manifestId, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)));
+        manifestId -> addManifestToList(
+            manifestId, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)));
     // Add manifests from Synthetic/Incoming
     newManifests.forEach(
-        manifestId ->
-            addManifestToList(
-                manifestId,
-                manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)));
+        manifestId -> addManifestToList(
+            manifestId,
+            manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)));
 
     /*
      * Any manifests that weren't found have presumably been processed and
      * we should clean up the state that relates to them, to prevent memory
      * leaks.
      */
-    for (Iterator<DataSetManifest> manifestsToProcessIterator = manifestsToProcess.iterator();
-        manifestsToProcessIterator.hasNext(); ) {
+    for (Iterator<DataSetManifest> manifestsToProcessIterator = manifestsToProcess
+        .iterator(); manifestsToProcessIterator.hasNext();) {
       DataSetManifestId manifestId = manifestsToProcessIterator.next().getId();
       if (!manifestIdsPendingNow.contains(manifestId)) {
         manifestsToProcessIterator.remove();
@@ -134,19 +139,22 @@ public final class DataSetQueue {
   }
 
   /**
-   * Adds a manifest to the list of manifests to load if it meets filtering criteria and is not a
+   * Adds a manifest to the list of manifests to load if it meets filtering
+   * criteria and is not a
    * future manifest.
    *
-   * @param manifestId the manifest id
+   * @param manifestId    the manifest id
    * @param manifestS3Key the manifest s3 key
    */
   private void addManifestToList(
       DataSetManifest.DataSetManifestId manifestId, String manifestS3Key) {
-    DataSetManifest manifest;
-
-    // If the keyspace we're scanning doesnt exist, bail early
-    HeadObjectRequest headObjectRequest =
-        HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(manifestS3Key).build();
+    /*
+     * If the keyspace we're scanning doesnt exist, bail early (This can happen if
+     * we're loading synthetic data,
+     * as it checks the regular incoming folder for the manifest first.)
+     */
+    HeadObjectRequest headObjectRequest = HeadObjectRequest.builder().bucket(options.getS3BucketName())
+        .key(manifestS3Key).build();
     try {
       s3TaskManager.getS3Client().headObject(headObjectRequest);
     } catch (NoSuchBucketException e) {
@@ -157,6 +165,7 @@ public final class DataSetQueue {
       return;
     }
 
+    DataSetManifest manifest;
     try {
       manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
     } catch (JAXBException | SAXException e) {
@@ -191,12 +200,14 @@ public final class DataSetQueue {
   /**
    * Lists the pending manifests.
    *
-   * @return the {@link DataSetManifestId}s for the manifests that are found in S3 under the {@value
-   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
+   * @return the {@link DataSetManifestId}s for the manifests that are found in S3
+   *         under the {@value
+   *         CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in
+   *         expected processing order.
    */
   private Set<DataSetManifestId> listPendingManifests() {
-    Timer.Context timerS3Scanning =
-        appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Scanning")).time();
+    Timer.Context timerS3Scanning = appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Scanning"))
+        .time();
     LOGGER.debug("Scanning for data sets in S3...");
     Set<DataSetManifestId> manifestIds = new HashSet<>();
 
@@ -205,8 +216,8 @@ public final class DataSetQueue {
      * (In the results, we'll be looking for the oldest manifest file, if
      * any.)
      */
-    ListObjectsV2Request.Builder s3BucketListRequestBuilder =
-        ListObjectsV2Request.builder().bucket(options.getS3BucketName());
+    ListObjectsV2Request.Builder s3BucketListRequestBuilder = ListObjectsV2Request.builder()
+        .bucket(options.getS3BucketName());
     if (options.getS3ListMaxKeys().isPresent()) {
       s3BucketListRequestBuilder.maxKeys(options.getS3ListMaxKeys().get());
     }
@@ -216,23 +227,21 @@ public final class DataSetQueue {
      * pages, looking for manifests.
      */
     AtomicInteger completedManifestsCount = new AtomicInteger();
-    Consumer<S3Object> addToManifest =
-        s3Object -> {
-          if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3Object.key()).matches()) {
-            /*
-             * We've got an object that *looks like* it might be a
-             * manifest file. But we need to parse the key to ensure
-             * that it starts with a valid timestamp.
-             */
-            DataSetManifestId manifestId =
-                DataSetManifestId.parseManifestIdFromS3Key(s3Object.key());
-            if (manifestId != null) {
-              manifestIds.add(manifestId);
-            }
-          } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(s3Object.key()).matches()) {
-            completedManifestsCount.incrementAndGet();
-          }
-        };
+    Consumer<S3Object> addToManifest = s3Object -> {
+      if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3Object.key()).matches()) {
+        /*
+         * We've got an object that *looks like* it might be a
+         * manifest file. But we need to parse the key to ensure
+         * that it starts with a valid timestamp.
+         */
+        DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Object.key());
+        if (manifestId != null) {
+          manifestIds.add(manifestId);
+        }
+      } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(s3Object.key()).matches()) {
+        completedManifestsCount.incrementAndGet();
+      }
+    };
     SharedS3Utilities.onListObjectsV2Stream(
         s3TaskManager.getS3Client(), s3BucketListRequestBuilder.build(), addToManifest);
 
@@ -245,34 +254,42 @@ public final class DataSetQueue {
   }
 
   /**
-   * Reads the {@link DataSetManifest} that was contained in the specified S3 object.
+   * Reads the {@link DataSetManifest} that was contained in the specified S3
+   * object.
    *
-   * @param s3Client the {@link S3Client} client to use
-   * @param options the {@link ExtractionOptions} to use
-   * @param manifestToProcessKey the {@link S3Object#key()} of the S3 object for the manifest to be
-   *     read
-   * @return the {@link DataSetManifest} that was contained in the specified S3 object
-   * @throws JAXBException Any {@link JAXBException}s that are encountered will be bubbled up. These
-   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
-   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
-   *     production, and care should be taken to account for its possibility.
-   * @throws SAXException Any {@link SAXException}s that are encountered will be bubbled up. These
-   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
-   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
-   *     production, and care should be taken to account for its possibility.
+   * @param s3Client             the {@link S3Client} client to use
+   * @param options              the {@link ExtractionOptions} to use
+   * @param manifestToProcessKey the {@link S3Object#key()} of the S3 object for
+   *                             the manifest to be
+   *                             read
+   * @return the {@link DataSetManifest} that was contained in the specified S3
+   *         object
+   * @throws JAXBException Any {@link JAXBException}s that are encountered will be
+   *                       bubbled up. These
+   *                       generally indicate that the {@link DataSetManifest}
+   *                       could not be parsed because its content
+   *                       was invalid in some way. Note: As of 2017-03-24, this
+   *                       has been observed multiple times in
+   *                       production, and care should be taken to account for its
+   *                       possibility.
+   * @throws SAXException  Any {@link SAXException}s that are encountered will be
+   *                       bubbled up. These
+   *                       generally indicate that the {@link DataSetManifest}
+   *                       could not be parsed because its content
+   *                       was invalid in some way. Note: As of 2017-03-24, this
+   *                       has been observed multiple times in
+   *                       production, and care should be taken to account for its
+   *                       possibility.
    */
   public static DataSetManifest readManifest(
       S3Client s3Client, ExtractionOptions options, String manifestToProcessKey)
       throws JAXBException, SAXException {
-    GetObjectRequest getObjectRequest =
-        GetObjectRequest.builder()
-            .bucket(options.getS3BucketName())
-            .key(manifestToProcessKey)
-            .build();
-    try (InputStream dataManifestStream =
-        s3Client.getObjectAsBytes(getObjectRequest).asInputStream()) {
-      DataSetManifest manifest =
-          DataSetManifestFactory.newInstance().parseManifest(dataManifestStream);
+    GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+        .bucket(options.getS3BucketName())
+        .key(manifestToProcessKey)
+        .build();
+    try (InputStream dataManifestStream = s3Client.getObjectAsBytes(getObjectRequest).asInputStream()) {
+      DataSetManifest manifest = DataSetManifestFactory.newInstance().parseManifest(dataManifestStream);
       // Setup the manifest incoming/outgoing location
       if (manifestToProcessKey.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
         manifest.setManifestKeyIncomingLocation(
@@ -309,7 +326,8 @@ public final class DataSetQueue {
   /**
    * Gets the manifests to process.
    *
-   * @return the {@link Stream} that QueuedDataSets should be pulled from, when requested
+   * @return the {@link Stream} that QueuedDataSets should be pulled from, when
+   *         requested
    */
   private Stream<DataSetManifest> getManifestsToProcess() {
     return manifestsToProcess.stream()
@@ -319,8 +337,9 @@ public final class DataSetQueue {
   /**
    * Determines if there are no remaining manifests to process.
    *
-   * @return <code>false</code> if there is at least one pending {@link DataSetManifest} to process,
-   *     <code>true</code> if not
+   * @return <code>false</code> if there is at least one pending
+   *         {@link DataSetManifest} to process,
+   *         <code>true</code> if not
    */
   public boolean isEmpty() {
     return getManifestsToProcess().count() == 0;
@@ -329,7 +348,8 @@ public final class DataSetQueue {
   /**
    * Gets the next data set to process.
    *
-   * @return the {@link DataSetManifest} for the next data set that should be processed, if any
+   * @return the {@link DataSetManifest} for the next data set that should be
+   *         processed, if any
    */
   public Optional<DataSetManifest> getNextDataSetToProcess() {
     return getManifestsToProcess().findFirst();
@@ -338,8 +358,9 @@ public final class DataSetQueue {
   /**
    * Gets the second data set to process.
    *
-   * @return the {@link DataSetManifest} for the next-but-one data set that should be processed, if
-   *     any
+   * @return the {@link DataSetManifest} for the next-but-one data set that should
+   *         be processed, if
+   *         any
    */
   public Optional<DataSetManifest> getSecondDataSetToProcess() {
     return getManifestsToProcess().skip(1).findFirst();
@@ -348,8 +369,9 @@ public final class DataSetQueue {
   /**
    * Gets the pending manifests count.
    *
-   * @return the count of {@link DataSetManifest}s found for data sets that need to be processed
-   *     (including those known to be invalid)
+   * @return the count of {@link DataSetManifest}s found for data sets that need
+   *         to be processed
+   *         (including those known to be invalid)
    */
   public int getPendingManifestsCount() {
     return manifestsToProcess.size()
@@ -360,8 +382,9 @@ public final class DataSetQueue {
   /**
    * Gets the completed manifests count.
    *
-   * @return the count of {@link DataSetManifest}s found for data sets that have already been
-   *     processed
+   * @return the count of {@link DataSetManifest}s found for data sets that have
+   *         already been
+   *         processed
    */
   public Optional<Integer> getCompletedManifestsCount() {
     return completedManifestsCount == null
@@ -370,11 +393,13 @@ public final class DataSetQueue {
   }
 
   /**
-   * Marks the specified {@link DataSetManifest} as processed, removing it from the list of pending
+   * Marks the specified {@link DataSetManifest} as processed, removing it from
+   * the list of pending
    * data sets in this {@link DataSetQueue}.
    *
-   * @param manifest the {@link DataSetManifest} for the data set that has been successfully
-   *     processed
+   * @param manifest the {@link DataSetManifest} for the data set that has been
+   *                 successfully
+   *                 processed
    */
   public void markProcessed(DataSetManifest manifest) {
     this.recentlyProcessedManifests.add(manifest.getId());

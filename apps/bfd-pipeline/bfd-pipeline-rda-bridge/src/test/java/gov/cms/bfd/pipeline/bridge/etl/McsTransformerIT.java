@@ -113,7 +113,8 @@ public class McsTransformerIT {
                   arguments.getWrappedCounter(),
                   arguments.getData(),
                   arguments.getMbiSampler(),
-                  arguments.getSampleId());
+                  arguments.getSampleId(),
+                  "doesNotMatter");
 
       if (expectedException != null) {
         fail("Expected exception to be thrown, but none thrown");
@@ -373,9 +374,7 @@ public class McsTransformerIT {
             .setIdrClmHdIcn(NEW_CLAIM_ICN)
             .setMcsDiagnosisCodes(
                 0,
-                defaultClaim
-                    .getMcsDiagnosisCodes(0)
-                    .toBuilder()
+                defaultClaim.getMcsDiagnosisCodes(0).toBuilder()
                     .setIdrClmHdIcn(NEW_CLAIM_ICN)
                     .build())
             .build();

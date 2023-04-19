@@ -124,23 +124,23 @@ public class SpringConfiguration {
       @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
       @Value("${" + PROP_DB_SCHEMA_APPLY + ":false}") String schemaApplyText,
       MetricRegistry metricRegistry) {
-    HikariDataSource poolingDataSource;
+    DataSource poolingDataSource;
     if (url.startsWith(DatabaseTestUtils.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
       poolingDataSource =
-          (HikariDataSource)
-              DatabaseTestUtils.createTestDatabase(
-                  url,
-                  PROP_DB_URL,
-                  PROP_DB_USERNAME,
-                  PROP_DB_PASSWORD,
-                  connectionsMaxText,
-                  metricRegistry);
+          DatabaseTestUtils.createTestDatabase(
+              url,
+              PROP_DB_URL,
+              PROP_DB_USERNAME,
+              PROP_DB_PASSWORD,
+              connectionsMaxText,
+              metricRegistry);
     } else {
-      poolingDataSource = new HikariDataSource();
-      poolingDataSource.setJdbcUrl(url);
-      if (username != null && !username.isEmpty()) poolingDataSource.setUsername(username);
-      if (password != null && !password.isEmpty()) poolingDataSource.setPassword(password);
-      DatabaseUtils.configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
+      HikariDataSource newDataSource = new HikariDataSource();
+      newDataSource.setJdbcUrl(url);
+      if (username != null && !username.isEmpty()) newDataSource.setUsername(username);
+      if (password != null && !password.isEmpty()) newDataSource.setPassword(password);
+      DatabaseUtils.configureDataSource(newDataSource, connectionsMaxText, metricRegistry);
+      poolingDataSource = newDataSource;
     }
 
     // Wrap the pooled DataSource in a proxy that records performance data.
@@ -428,6 +428,7 @@ public class SpringConfiguration {
    * @param includeFakeOrgName if true, the {@link NPIOrgLookup} will include a fake org name for
    *     testing purposes.
    * @return the {@link NPIOrgLookup} for the application.
+   * @throws IOException if there is an error accessing the resource
    */
   @Bean
   public NPIOrgLookup npiOrgLookup(

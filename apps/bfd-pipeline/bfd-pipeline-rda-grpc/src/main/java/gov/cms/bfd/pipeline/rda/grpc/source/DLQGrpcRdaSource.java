@@ -2,22 +2,25 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.model.rda.MessageError;
+import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -43,33 +46,40 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
   private final DLQDao dao;
   /** Used to compare sequence values. */
   private final BiPredicate<Long, TMessage> sequencePredicate;
+  /** Number of days after which processed messages should expire and be deleted from the DLQ. */
+  private final Optional<Integer> messageErrorExpirationDays;
 
   /**
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
    * gRPC service.
    *
-   * @param entityManager the {@link EntityManager} to use to communicate with the DB
+   * @param transactionManager the {@link TransactionManager} to use to communicate with the DB
    * @param sequencePredicate {@link BiPredicate} used to compare sequence values
    * @param config the configuration values used to establish the channel
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType the claim type
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
    */
   public DLQGrpcRdaSource(
-      EntityManager entityManager,
+      TransactionManager transactionManager,
       BiPredicate<Long, TMessage> sequencePredicate,
       RdaSourceConfig config,
       GrpcStreamCaller<TMessage> caller,
       MeterRegistry appMetrics,
-      String claimType) {
+      String claimType,
+      RdaVersion rdaVersion) {
     this(
-        entityManager,
+        transactionManager,
         sequencePredicate,
         config.createChannel(),
         caller,
         config::createCallOptions,
         appMetrics,
-        claimType);
+        claimType,
+        rdaVersion,
+        config.getMessageErrorExpirationDays(),
+        new DLQDao(Clock.systemUTC(), Preconditions.checkNotNull(transactionManager)));
   }
 
   /**
@@ -77,31 +87,54 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
    * used internally by the primary constructor but is also used by unit tests to allow a mock
    * channel to be provided.
    *
-   * @param entityManager the {@link EntityManager} to use to communicate with the DB
+   * @param transactionManager the {@link TransactionManager} to use to communicate with the DB
    * @param sequencePredicate {@link BiPredicate} used to compare sequence values
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param callOptionsFactory factory for generating runtime options for the gRPC call
    * @param appMetrics the MetricRegistry used to track metrics
    * @param claimType string representation of the claim type
+   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
+   * @param messageErrorExpirationDays value for messageErrorExpirationDays
+   * @param dao {@link DLQDao} used for database transactions
    */
   @VisibleForTesting
   DLQGrpcRdaSource(
-      EntityManager entityManager,
+      TransactionManager transactionManager,
       BiPredicate<Long, TMessage> sequencePredicate,
       ManagedChannel channel,
       GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
       MeterRegistry appMetrics,
-      String claimType) {
+      String claimType,
+      RdaVersion rdaVersion,
+      Optional<Integer> messageErrorExpirationDays,
+      DLQDao dao) {
     super(
         Preconditions.checkNotNull(channel),
         Preconditions.checkNotNull(caller),
         Preconditions.checkNotNull(claimType),
         callOptionsFactory,
-        appMetrics);
-    this.dao = new DLQDao(Preconditions.checkNotNull(entityManager));
+        appMetrics,
+        rdaVersion);
+    this.dao = dao;
     this.sequencePredicate = sequencePredicate;
+    this.messageErrorExpirationDays = messageErrorExpirationDays;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Ensures that our {@link DLQDao} is also closed.
+   *
+   * @throws Exception passed through if anything fails
+   */
+  @Override
+  public void close() throws Exception {
+    final var closer = new MultiCloser();
+    closer.close(dao::close);
+    closer.close(super::close);
+    closer.finish();
   }
 
   /**
@@ -120,6 +153,8 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
     int totalProcessed = 0;
 
     MessageError.ClaimType type = MessageError.ClaimType.valueOf(claimType.toUpperCase());
+
+    messageErrorExpirationDays.ifPresent(maxAgeDays -> deleteExpiredDlqRecords(maxAgeDays, type));
 
     List<MessageError> messageErrors =
         dao.findAllMessageErrorsByClaimTypeAndStatus(type, MessageError.Status.UNRESOLVED);
@@ -141,6 +176,34 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
   }
 
   /**
+   * Attempts to delete expired records from the DLQ prior to processing. All deletions happen in a
+   * separate transaction. Because deleting records is not absolutely required for the DLQ
+   * processing to be completed any errors during the transaction are simply logged.
+   *
+   * @param maxAgeDays maximum days to retain processed message error records
+   * @param type the {@link MessageError.ClaimType} of records to delete
+   * @return number of records deleted
+   */
+  @CanIgnoreReturnValue
+  @VisibleForTesting
+  int deleteExpiredDlqRecords(int maxAgeDays, MessageError.ClaimType type) {
+    int deletedRecordCount;
+    try {
+      deletedRecordCount = dao.deleteExpiredMessageErrors(maxAgeDays, type);
+      if (deletedRecordCount > 0) {
+        log.info("Deleted {} expired {} claims from DLQ", deletedRecordCount, type);
+      } else {
+        log.info("Found no {} expired claims in DLQ", claimType);
+      }
+    } catch (Exception ex) {
+      // Exceptions are not fatal, they just need to be logged for reference.
+      log.warn("Caught exception while deleting expired {} claims from DLQ", claimType, ex);
+      deletedRecordCount = 0;
+    }
+    return deletedRecordCount;
+  }
+
+  /**
    * Helper method, called internally, to return the DLQ processing logic to pass to {@link
    * AbstractGrpcRdaSource#tryRetrieveAndProcessObjects(Processor)}.
    *
@@ -155,6 +218,7 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
     return () -> {
       ProcessResult processResult = new ProcessResult();
       final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+      checkApiVersion(apiVersion);
 
       for (final long startingSequenceNumber : sequenceNumbers) {
         log.info(
@@ -237,60 +301,5 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
       return processResult;
     };
-  }
-
-  /** Utility Data Access Object (DAO) class for querying the database. */
-  @VisibleForTesting
-  @RequiredArgsConstructor
-  static class DLQDao {
-
-    /** The database entity manager. */
-    private final EntityManager entityManager;
-
-    /**
-     * Finds all message errors with the matching claim type and status.
-     *
-     * @param claimType the claim type to match
-     * @param status the status to match
-     * @return the list of errors that match the conditions
-     */
-    public List<MessageError> findAllMessageErrorsByClaimTypeAndStatus(
-        MessageError.ClaimType claimType, MessageError.Status status) {
-      return entityManager
-          .createQuery(
-              "select error from MessageError error where error.claimType = :claimType and error.status = :status",
-              MessageError.class)
-          .setParameter("claimType", claimType)
-          .setParameter("status", status)
-          .getResultList();
-    }
-
-    /**
-     * Updates the message error status for the entry with the specified sequence number and type.
-     *
-     * @param sequenceNumber the sequence number to check for
-     * @param type the type to check for
-     * @param status the status to update with
-     * @return the number of entities affected by the update
-     */
-    public long updateState(
-        Long sequenceNumber, MessageError.ClaimType type, MessageError.Status status) {
-      long entitiesAffected = 0L;
-
-      entityManager.getTransaction().begin();
-
-      MessageError messageError =
-          entityManager.find(MessageError.class, new MessageError.PK(sequenceNumber, type));
-
-      if (messageError != null) {
-        messageError.setStatus(status);
-        entityManager.merge(messageError);
-        entitiesAffected = 1L;
-      }
-
-      entityManager.getTransaction().commit();
-
-      return entitiesAffected;
-    }
   }
 }

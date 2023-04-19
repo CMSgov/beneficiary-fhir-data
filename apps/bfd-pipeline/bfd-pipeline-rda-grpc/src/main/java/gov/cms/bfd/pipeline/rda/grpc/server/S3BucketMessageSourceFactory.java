@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,20 +16,34 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
- * To save on the number of unnecessary calls to S3 to retrieve files and to allow the incremental
- * addition of files over time this implementation of {@link MessageSource.Factory} checks an S3
- * bucket for files matching a pattern that consists of a prefix, the range of sequence numbers in
- * the file, and a suffix. If no files matching this pattern are found but a file has a name equal
- * to the prefix followed by the suffix then that file is considered to hold all valid claims. When
- * one or more files match they are sorted by range and only those files containing sequence numbers
- * greater than or equal to the desired starting number are read. The matching files are then served
+ * To save on the number of unnecessary calls to S3 to retrieve files and to
+ * allow the incremental
+ * addition of files over time this implementation of
+ * {@link MessageSource.Factory} checks an S3
+ * bucket for files matching a pattern that consists of a prefix, the range of
+ * sequence numbers in
+ * the file, and a suffix. If no files matching this pattern are found but a
+ * file has a name equal
+ * to the prefix followed by the suffix then that file is considered to hold all
+ * valid claims. When
+ * one or more files match they are sorted by range and only those files
+ * containing sequence numbers
+ * greater than or equal to the desired starting number are read. The matching
+ * files are then served
  * one after another in sequence number order.
  *
- * <p>NOTE: The files can have overlapping sequence numbers and/or sequence numbers that don't
- * correspond to the values in the object key. No effort is made to compensate for configuration
- * errors. As a consequence if the files contain data that differs from their file names or if they
- * have records out of order within the file the resulting stream of records might not be in
+ * <p>
+ * NOTE: The files can have overlapping sequence numbers and/or sequence numbers
+ * that don't
+ * correspond to the values in the object key. No effort is made to compensate
+ * for configuration
+ * errors. As a consequence if the files contain data that differs from their
+ * file names or if they
+ * have records out of order within the file the resulting stream of records
+ * might not be in
  * increasing order by sequence number.
+ *
+ * @param <T> type of objects contained in files stored in the S3 bucket
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
   /** The client for interacting with AWS S3 buckets and files. */
@@ -39,6 +52,8 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   private final String bucketName;
   /** The directory path to save files to. */
   private final String directoryPath;
+  /** Used to access data from S3 bucket. */
+  private final S3DirectoryDao s3Dao;
   /** A function for getting the message factory to transform the response. */
   private final Function<String, MessageSource<T>> actualFactory;
   /** A function for obtaining the sequence number. */
@@ -49,47 +64,27 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   /**
    * Instantiates a new S3 bucket message source factory.
    *
-   * @param s3Client the s3 client to do operations with
-   * @param bucketName the bucket name to look for files in
-   * @param directoryPath the directory path to download files to
-   * @param filePrefix the file prefix
-   * @param fileSuffix the file suffix
-   * @param actualFactory the source factory creation function
+   * @param s3Dao                used to access data from S3 bucket
+   * @param filePrefix           the file prefix
+   * @param fileSuffix           the file suffix
+   * @param actualFactory        the source factory creation function
    * @param sequenceNumberGetter the function to get the sequence number
    */
   public S3BucketMessageSourceFactory(
       S3Client s3Client,
       String bucketName,
       String directoryPath,
+      S3DirectoryDao s3Dao,
       String filePrefix,
       String fileSuffix,
       Function<String, MessageSource<T>> actualFactory,
       Function<T, Long> sequenceNumberGetter) {
-    this.s3Client = s3Client;
-    this.bucketName = bucketName;
-    this.directoryPath = directoryPath;
+    this.s3Dao = s3Dao;
     this.actualFactory = actualFactory;
     this.sequenceNumberGetter = sequenceNumberGetter;
-    matchPattern =
-        Pattern.compile(
-            String.format(
-                "^%s%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", directoryPath, filePrefix, fileSuffix),
-            Pattern.CASE_INSENSITIVE);
-  }
-
-  /**
-   * Creates a valid object key with the given information about the file. The key will contain the
-   * min/max sequence numbers to assist with filtering files.
-   *
-   * @param filePrefix prefix for the S3 object key
-   * @param fileSuffix suffix for the S3 object key
-   * @param minSeq lowest sequence number in the file
-   * @param maxSeq highest sequence number in the file
-   * @return an object key that will match the expected pattern for a S3BucketMessageSourceFactory
-   */
-  public static String createValidObjectKey(
-      String filePrefix, String fileSuffix, long minSeq, long maxSeq) {
-    return String.format("%s-%d-%d.%s", filePrefix, minSeq, maxSeq, fileSuffix);
+    matchPattern = Pattern.compile(
+        String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
+        Pattern.CASE_INSENSITIVE);
   }
 
   /**
@@ -97,14 +92,16 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    *
    * @param filePrefix prefix for the S3 object key
    * @param fileSuffix suffix for the S3 object key
-   * @return an object key that will match the expected pattern for a S3BucketMessageSourceFactory
+   * @return an object key that will match the expected pattern for a
+   *         S3BucketMessageSourceFactory
    */
   public static String createValidObjectKey(String filePrefix, String fileSuffix) {
     return String.format("%s.%s", filePrefix, fileSuffix);
   }
 
   /**
-   * Gets all available NDJSON files in the bucket that contain the specified sequence number and
+   * Gets all available NDJSON files in the bucket that contain the specified
+   * sequence number and
    * creates a {@link MessageSource} that will return their messages.
    *
    * @param sequenceNumber minimum sequence number desired by the caller
@@ -118,31 +115,37 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   }
 
   /**
-   * Searches the S3 bucket for objects whose key matches our regular expression. Only files whose
-   * maximum sequence number is greater than or equal to our starting sequence number are retained.
+   * Searches the S3 bucket for objects whose key matches our regular expression.
+   * Only files whose
+   * maximum sequence number is greater than or equal to our starting sequence
+   * number are retained.
    * The resulting list of entries is sorted by sequence number order.
    *
-   * @param startingSequenceNumber smallest sequence number that the caller is interested in
-   *     processing
-   * @return a List of FileEntries containing the startingSequenceNumber and sorted by sequence
-   *     number
+   * @param startingSequenceNumber smallest sequence number that the caller is
+   *                               interested in
+   *                               processing
+   * @return a List of FileEntries containing the startingSequenceNumber and
+   *         sorted by sequence
+   *         number
    */
   @VisibleForTesting
   List<FileEntry> listFiles(long startingSequenceNumber) {
     List<FileEntry> entries = new ArrayList<>();
     List<S3Object> s3Objects = getObjectListing();
-    for (S3Object s3Object : s3Objects) {
-      Matcher matcher = matchPattern.matcher(s3Object.key());
+    /*
+     * for (S3Object s3Object : s3Objects) {
+     * Matcher matcher = matchPattern.matcher(s3Object.key()); /*
+     */
+    List<String> fileNames = s3Dao.readFileNames();
+    for (String fileName : fileNames) {
+      Matcher matcher = matchPattern.matcher(fileName);
       if (matcher.matches()) {
         FileEntry entry;
         if (matcher.group(1) != null) {
-          entry =
-              new FileEntry(
-                  s3Object.key(),
-                  Long.parseLong(matcher.group(2)),
-                  Long.parseLong(matcher.group(3)));
+          entry = new FileEntry(
+              fileName, Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
         } else {
-          entry = new FileEntry(s3Object.key(), RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
+          entry = new FileEntry(fileName, RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
         }
         if (entry.maxSequenceNumber >= startingSequenceNumber) {
           entries.add(entry);
@@ -159,8 +162,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * @return the object listing
    */
   private List<S3Object> getObjectListing() {
-    ListObjectsV2Request.Builder listObjectsRequest =
-        ListObjectsV2Request.builder().bucket(bucketName);
+    ListObjectsV2Request.Builder listObjectsRequest = ListObjectsV2Request.builder().bucket(bucketName);
     if (!Strings.isNullOrEmpty(directoryPath)) {
       listObjectsRequest.prefix(directoryPath);
     }
@@ -168,8 +170,10 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   }
 
   /**
-   * Compound {@link MessageSource} implementation that pulls records from a sequence of other
-   * MessageSource. At any given time only one MessageSource is being consumed. MessageSources are
+   * Compound {@link MessageSource} implementation that pulls records from a
+   * sequence of other
+   * MessageSource. At any given time only one MessageSource is being consumed.
+   * MessageSources are
    * closed as they are completed.
    */
   private class MultiS3MessageSource implements MessageSource<T> {
@@ -179,7 +183,8 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     private MessageSource<T> current;
 
     /**
-     * Constructs the source for the list of entries. Starts out with an empty source as current and
+     * Constructs the source for the list of entries. Starts out with an empty
+     * source as current and
      * lets the first call to {@code next()} load the first entry lazily.
      *
      * @param remaining list of S3 entries to pull records from
@@ -190,9 +195,12 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     }
 
     /**
-     * Checks the current source for more records. If the current source has no more records it
-     * closes that source and finds the next available source that does have a record. Sources are
-     * closed along the way to ensure only the current source is open at any given time.
+     * Checks the current source for more records. If the current source has no more
+     * records it
+     * closes that source and finds the next available source that does have a
+     * record. Sources are
+     * closed along the way to ensure only the current source is open at any given
+     * time.
      *
      * @return true if next can be called successfully
      * @throws Exception if any operation fails
@@ -223,8 +231,10 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   }
 
   /**
-   * Immutable entry for S3 objects that match the key regex. Contains the min/max known sequence
-   * number plus the key used to access the specific object in the bucket. Entries have a natural
+   * Immutable entry for S3 objects that match the key regex. Contains the min/max
+   * known sequence
+   * number plus the key used to access the specific object in the bucket. Entries
+   * have a natural
    * order based on ascending min/max sequence numbers.
    */
   @VisibleForTesting

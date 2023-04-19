@@ -20,12 +20,15 @@ import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -48,14 +51,17 @@ public class FissClaimRdaSinkIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final LocalDate today = LocalDate.of(2022, 1, 3);
           final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
+          claim.setClaimId("1id");
           claim.setDcn("1");
+          claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
+          claim.setClmTypInd("1");
           claim.setCurrStatus('T');
           claim.setCurrLoc1('A');
           claim.setCurrLoc2("1A");
@@ -63,7 +69,7 @@ public class FissClaimRdaSinkIT {
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
-          procCode0.setDcn(claim.getDcn());
+          procCode0.setClaimId(claim.getClaimId());
           procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
@@ -71,7 +77,7 @@ public class FissClaimRdaSinkIT {
           claim.getProcCodes().add(procCode0);
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
-          diagCode0.setDcn(claim.getDcn());
+          diagCode0.setClaimId(claim.getClaimId());
           diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
@@ -94,8 +100,11 @@ public class FissClaimRdaSinkIT {
 
           final FissClaim claimMessage =
               FissClaim.newBuilder()
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setHicNo(claim.getHicNo())
+                  .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
                   .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
                   .setCurrLoc1Unrecognized(String.valueOf(claim.getCurrLoc1()))
                   .setCurrLoc2Unrecognized(claim.getCurrLoc2())
@@ -109,6 +118,8 @@ public class FissClaimRdaSinkIT {
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
                   .setDcn(claim.getDcn())
+                  .setRdaClaimKey(claim.getClaimId())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setClaim(claimMessage)
                   .build();
 
@@ -124,9 +135,11 @@ public class FissClaimRdaSinkIT {
           assertEquals(1, count);
 
           List<RdaFissClaim> claims =
-              entityManager
-                  .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
-                  .getResultList();
+              transactionManager.executeFunction(
+                  entityManager ->
+                      entityManager
+                          .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+                          .getResultList());
           assertEquals(1, claims.size());
           RdaFissClaim resultClaim = claims.get(0);
           assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
@@ -141,7 +154,7 @@ public class FissClaimRdaSinkIT {
               Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());
 
           Mbi databaseMbiEntity =
-              RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getMbi());
+              RdaPipelineTestUtils.lookupCachedMbi(transactionManager, claimMessage.getMbi());
           assertNotNull(databaseMbiEntity);
           assertEquals(claim.getMbi(), databaseMbiEntity.getMbi());
           assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
@@ -163,13 +176,15 @@ public class FissClaimRdaSinkIT {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
-        (appState, entityManager) -> {
+        (appState, transactionManager) -> {
           final LocalDate today = LocalDate.of(2022, 1, 3);
           final Instant now = today.atStartOfDay().toInstant(ZoneOffset.UTC);
           final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
           final RdaFissClaim claim = new RdaFissClaim();
           claim.setSequenceNumber(3L);
+          claim.setClaimId("1id");
           claim.setDcn("1");
+          claim.setIntermediaryNb("12345");
           claim.setHicNo("h1");
           claim.setCurrStatus('T');
           claim.setCurrLoc1('A');
@@ -178,7 +193,7 @@ public class FissClaimRdaSinkIT {
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
-          procCode0.setDcn(claim.getDcn());
+          procCode0.setClaimId(claim.getClaimId());
           procCode0.setRdaPosition((short) 1);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
@@ -186,7 +201,7 @@ public class FissClaimRdaSinkIT {
           claim.getProcCodes().add(procCode0);
 
           final RdaFissDiagnosisCode diagCode0 = new RdaFissDiagnosisCode();
-          diagCode0.setDcn(claim.getDcn());
+          diagCode0.setClaimId(claim.getClaimId());
           diagCode0.setRdaPosition((short) 1);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
@@ -209,7 +224,9 @@ public class FissClaimRdaSinkIT {
 
           final FissClaim claimMessage =
               FissClaim.newBuilder()
+                  .setRdaClaimKey(claim.getClaimId())
                   .setDcn(claim.getDcn())
+                  .setIntermediaryNb("12345")
                   .setHicNo(claim.getHicNo())
                   .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
                   .setCurrLoc1Unrecognized(String.valueOf(claim.getCurrLoc1()))
@@ -218,12 +235,15 @@ public class FissClaimRdaSinkIT {
                   .addFissProcCodes(0, procCodeMessage)
                   .addFissDiagCodes(0, diagCodeMessage)
                   .setMbi(claim.getMbi())
+                  .setClmTypIndEnum(FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT)
                   .build();
 
           final FissClaimChange message =
               FissClaimChange.newBuilder()
                   .setSeq(claim.getSequenceNumber())
                   .setDcn(claim.getDcn())
+                  .setRdaClaimKey(claim.getClaimId())
+                  .setIntermediaryNb(claim.getIntermediaryNb())
                   .setClaim(claimMessage)
                   .build();
 
@@ -231,22 +251,25 @@ public class FissClaimRdaSinkIT {
           final FissClaimTransformer transformer =
               new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
           final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true, 0);
-          final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
           assertThrows(ProcessingException.class, () -> sink.writeMessage("version", message));
 
           List<RdaFissClaim> claims =
-              entityManager
-                  .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
-                  .getResultList();
+              transactionManager.executeFunction(
+                  entityManager ->
+                      entityManager
+                          .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
+                          .getResultList());
           assertEquals(0, claims.size());
 
           List<MessageError> errors =
-              entityManager
-                  .createQuery("select e from MessageError e", MessageError.class)
-                  .getResultList();
+              transactionManager.executeFunction(
+                  entityManager ->
+                      entityManager
+                          .createQuery("select e from MessageError e", MessageError.class)
+                          .getResultList());
           assertEquals(1, errors.size());
 
           for (MessageError error : errors) {
@@ -258,7 +281,11 @@ public class FissClaimRdaSinkIT {
 
             assertEquals(Long.valueOf(3), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.FISS, error.getClaimType());
-            assertEquals(claim.getDcn(), error.getClaimId());
+            String decodedClaimId =
+                new String(
+                    Base64.getUrlDecoder()
+                        .decode(error.getClaimId().getBytes(StandardCharsets.UTF_8)));
+            assertEquals(claim.getClaimId(), decodedClaimId);
             assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());
           }
         });

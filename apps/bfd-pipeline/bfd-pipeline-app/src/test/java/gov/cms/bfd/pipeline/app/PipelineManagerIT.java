@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.catchSystemExit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -8,6 +9,7 @@ import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
 import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
@@ -29,12 +31,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link PipelineManager}, {@link PipelineJobRecordStore}, and friends. */
 public final class PipelineManagerIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
+
+  /** Mocks the S3 task manager, which is only used in error scenarios. */
+  @Mock S3TaskManager mockS3TaskManager;
 
   /**
    * Logs a message before each test.
@@ -43,6 +52,7 @@ public final class PipelineManagerIT {
    */
   @BeforeEach
   public void starting(TestInfo testInfo) {
+    MockitoAnnotations.openMocks(this);
     LOGGER.info("{}: starting.", testInfo.getDisplayName());
   }
 
@@ -54,7 +64,7 @@ public final class PipelineManagerIT {
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
-  };
+  }
 
   /**
    * Verifies that {@link PipelineManager} automatically runs {@link MockJob} and {@link
@@ -70,7 +80,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       // Verify that there are job records for the built-ins.
 
       assertEquals(2, jobRecordStore.getJobRecords().size());
@@ -98,7 +110,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       MockJob mockJob = new MockJob(Optional.empty(), () -> PipelineJobOutcome.WORK_DONE);
       pipelineManager.registerJob(mockJob);
       jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
@@ -109,9 +123,7 @@ public final class PipelineManagerIT {
           .until(
               () ->
                   jobRecordStore.getJobRecords().stream()
-                      .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
-                      .findAny()
-                      .isPresent());
+                      .anyMatch(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted()));
 
       // Verify that one of the completed mock job iterations looks correct.
       Optional<PipelineJobRecord<?>> mockJobRecord =
@@ -130,41 +142,54 @@ public final class PipelineManagerIT {
    */
   @Test
   public void runFailingMockOneshotJob() throws Exception {
-    // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore =
-        new PipelineJobRecordStore(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
-    try (PipelineManager pipelineManager =
-        new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
-      MockJob mockJob =
-          new MockJob(
-              Optional.empty(),
-              () -> {
-                throw new RuntimeException("boom");
-              });
-      pipelineManager.registerJob(mockJob);
-      jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+    try (MockedStatic<PipelineApplication> mockPipelineApp =
+        Mockito.mockStatic(PipelineApplication.class)) {
+      // Create the pipeline and have it run a mock job.
+      PipelineJobRecordStore jobRecordStore =
+          new PipelineJobRecordStore(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
+      try (PipelineManager pipelineManager =
+          new PipelineManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              jobRecordStore,
+              mockS3TaskManager)) {
+        MockJob mockJob =
+            new MockJob(
+                Optional.empty(),
+                () -> {
+                  throw new RuntimeException("boom");
+                });
+        pipelineManager.registerJob(mockJob);
 
-      // Wait until a completed iteration of the mock job can be found.
-      Awaitility.await()
-          .atMost(1, TimeUnit.SECONDS)
-          .until(
-              () ->
-                  jobRecordStore.getJobRecords().stream()
-                      .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
-                      .findAny()
-                      .isPresent());
+        int statusCode =
+            catchSystemExit(
+                () -> {
+                  jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
 
-      // Verify that one of the completed mock job iterations looks correct.
-      Optional<PipelineJobRecord<?>> mockJobRecord =
-          jobRecordStore.getJobRecords().stream()
-              .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
-              .findAny();
+                  // Wait until a completed iteration of the mock job can be found.
+                  Awaitility.await()
+                      .atMost(1, TimeUnit.SECONDS)
+                      .until(
+                          () ->
+                              jobRecordStore.getJobRecords().stream()
+                                  .anyMatch(
+                                      j ->
+                                          MockJob.JOB_TYPE.equals(j.getJobType())
+                                              && j.isCompleted()));
+                });
 
-      assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+        assertEquals(2, statusCode);
 
-      assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+        // Verify that one of the completed mock job iterations looks correct.
+        Optional<PipelineJobRecord<?>> mockJobRecord =
+            jobRecordStore.getJobRecords().stream()
+                .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
+                .findAny();
+
+        assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+
+        assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+      }
     }
   }
 
@@ -181,7 +206,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       MockJob mockJob =
           new MockJob(
               Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -222,7 +249,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       MockJob mockJob =
           new MockJob(
               Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -230,17 +259,25 @@ public final class PipelineManagerIT {
                 throw new RuntimeException("boom");
               });
       pipelineManager.registerJob(mockJob);
-      jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
 
-      // Wait until a completed job can be found.
-      Awaitility.await()
-          .atMost(1, TimeUnit.SECONDS)
-          .until(
-              () ->
-                  jobRecordStore.getJobRecords().stream()
-                      .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
-                      .findAny()
-                      .isPresent());
+      int statusCode =
+          catchSystemExit(
+              () -> {
+                jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+                // Wait until a completed job can be found.
+                Awaitility.await()
+                    .atMost(1, TimeUnit.SECONDS)
+                    .until(
+                        () ->
+                            jobRecordStore.getJobRecords().stream()
+                                .filter(
+                                    j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+                                .findAny()
+                                .isPresent());
+              });
+
+      assertEquals(2, statusCode);
 
       // Verify that one of the completed mock job iterations looks correct.
       Optional<PipelineJobRecord<?>> mockJobRecord =
@@ -275,7 +312,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       MockJob mockJob =
           new MockJob(
               Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -321,7 +360,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       MockJob mockJob =
           new MockJob(
               Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -360,7 +401,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
     try (PipelineManager pipelineManager =
         new PipelineManager(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            jobRecordStore,
+            mockS3TaskManager)) {
       MockJob mockJob =
           new MockJob(
               Optional.empty(),
@@ -435,7 +478,8 @@ public final class PipelineManagerIT {
 
     // Create the pipeline.
     PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
-    try (PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore)) {
+    try (PipelineManager pipelineManager =
+        new PipelineManager(appMetrics, jobRecordStore, mockS3TaskManager)) {
       // Register a mock unscheduled job.
       MockJob mockUnscheduledJob =
           new MockJob(
@@ -457,7 +501,9 @@ public final class PipelineManagerIT {
              * different getType() value.
              */
 
-            /** @see gov.cms.bfd.pipeline.app.PipelineManagerIT.MockJob#getType() */
+            /**
+             * @see gov.cms.bfd.pipeline.app.PipelineManagerIT.MockJob#getType()
+             */
             @Override
             public PipelineJobType<NullPipelineJobArguments> getType() {
               return new PipelineJobType<>(this);
@@ -482,10 +528,7 @@ public final class PipelineManagerIT {
           .until(
               () ->
                   jobRecordStore.getJobRecords().stream()
-                          .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompleted())
-                          .findAny()
-                          .isPresent()
-                      == false);
+                      .noneMatch(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompleted()));
 
       // Stop the pipeline.
       pipelineManager.stop();

@@ -17,6 +17,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -42,7 +43,9 @@ public class StandardGrpcRdaSourceIT {
   /** Example paid claim. */
   private static final String SOURCE_CLAIM_1 =
       "{"
+          + "  \"rdaClaimKey\": \"63843470id\","
           + "  \"dcn\": \"63843470\","
+          + "  \"intermediaryNb\": \"53412\","
           + "  \"hicNo\": \"916689703543\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
@@ -51,6 +54,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
           + "  \"mbi\": \"c1ihk7q0g3i\","
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_INPATIENT\","
           + "  \"fissProcCodes\": ["
           + "    {"
           + "      \"procCd\": \"uec\","
@@ -79,7 +83,9 @@ public class StandardGrpcRdaSourceIT {
   /** Example rejected claim. */
   private static final String SOURCE_CLAIM_2 =
       "{"
+          + "  \"rdaClaimKey\": \"2643602id\","
           + "  \"dcn\": \"2643602\","
+          + "  \"intermediaryNb\": \"24153\","
           + "  \"hicNo\": \"640930211775\","
           + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
           + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
@@ -90,6 +96,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
           + "  \"mbi\": \"0vtc7u321x0\","
+          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_OUTPATIENT\","
           + "  \"fedTaxNb\": \"2845244764\","
           + "  \"fissProcCodes\": ["
           + "    {"
@@ -114,8 +121,12 @@ public class StandardGrpcRdaSourceIT {
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
-          + "  \"apiSource\" : \"0.10\",\n"
+          + "  \"apiSource\" : \""
+          + RdaService.RDA_PROTO_VERSION
+          + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
+          + "  \"claimId\" : \"NjM4NDM0NzBpZA\",\n"
+          + "  \"clmTypInd\" : \"1\",\n"
           + "  \"currLoc1\" : \"M\",\n"
           + "  \"currLoc2\" : \"uma\",\n"
           + "  \"currStatus\" : \"P\",\n"
@@ -123,6 +134,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"dcn\" : \"63843470\",\n"
           + "  \"diagCodes\" : [ ],\n"
           + "  \"hicNo\" : \"916689703543\",\n"
+          + "  \"intermediaryNb\" : \"53412\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "  \"mbi\" : \"c1ihk7q0g3i\",\n"
           + "  \"mbiHash\" : \"c3b21bb6fef6e8af99a175e53b20893048dc2cd9f566a4930d8c1e6f8a30822d\",\n"
@@ -134,35 +146,40 @@ public class StandardGrpcRdaSourceIT {
           + "  \"payers\" : [ ],\n"
           + "  \"principleDiag\" : \"uec\",\n"
           + "  \"procCodes\" : [ {\n"
-          + "    \"dcn\" : \"63843470\",\n"
+          + "    \"claimId\" : \"NjM4NDM0NzBpZA\",\n"
           + "    \"procCode\" : \"egkkkw\",\n"
           + "    \"procDate\" : \"2021-02-03\",\n"
           + "    \"procFlag\" : \"hsw\",\n"
           + "    \"rdaPosition\" : 2\n"
           + "  }, {\n"
-          + "    \"dcn\" : \"63843470\",\n"
-          + "    \"procCode\" : \"uec\",\n"
-          + "    \"procFlag\" : \"nli\",\n"
-          + "    \"rdaPosition\" : 1\n"
-          + "  }, {\n"
-          + "    \"dcn\" : \"63843470\",\n"
+          + "    \"claimId\" : \"NjM4NDM0NzBpZA\",\n"
           + "    \"procCode\" : \"ods\",\n"
           + "    \"procDate\" : \"2021-01-03\",\n"
           + "    \"rdaPosition\" : 4\n"
           + "  }, {\n"
-          + "    \"dcn\" : \"63843470\",\n"
+          + "    \"claimId\" : \"NjM4NDM0NzBpZA\",\n"
+          + "    \"procCode\" : \"uec\",\n"
+          + "    \"procFlag\" : \"nli\",\n"
+          + "    \"rdaPosition\" : 1\n"
+          + "  }, {\n"
+          + "    \"claimId\" : \"NjM4NDM0NzBpZA\",\n"
           + "    \"procCode\" : \"zhaj\",\n"
           + "    \"procDate\" : \"2021-01-07\",\n"
           + "    \"rdaPosition\" : 3\n"
           + "  } ],\n"
+          + "  \"revenueLines\" : [ ],\n"
           + "  \"sequenceNumber\" : 0,\n"
           + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
   /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
-          + "  \"apiSource\" : \"0.10\",\n"
+          + "  \"apiSource\" : \""
+          + RdaService.RDA_PROTO_VERSION
+          + "\",\n"
           + "  \"auditTrail\" : [ ],\n"
+          + "  \"claimId\" : \"MjY0MzYwMmlk\",\n"
+          + "  \"clmTypInd\" : \"3\",\n"
           + "  \"currLoc1\" : \"O\",\n"
           + "  \"currLoc2\" : \"p6s\",\n"
           + "  \"currStatus\" : \"R\",\n"
@@ -171,6 +188,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"diagCodes\" : [ ],\n"
           + "  \"fedTaxNumber\" : \"2845244764\",\n"
           + "  \"hicNo\" : \"640930211775\",\n"
+          + "  \"intermediaryNb\" : \"24153\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "  \"mbi\" : \"0vtc7u321x0\",\n"
           + "  \"mbiHash\" : \"b30cb27025eceae66fcedf88c3c2a8631381f1ffc26fcc9d46271038dae58721\",\n"
@@ -182,22 +200,23 @@ public class StandardGrpcRdaSourceIT {
           + "  \"payers\" : [ ],\n"
           + "  \"principleDiag\" : \"egnj\",\n"
           + "  \"procCodes\" : [ {\n"
-          + "    \"dcn\" : \"2643602\",\n"
-          + "    \"procCode\" : \"vvqtwoz\",\n"
-          + "    \"procDate\" : \"2021-04-29\",\n"
-          + "    \"rdaPosition\" : 2\n"
-          + "  }, {\n"
-          + "    \"dcn\" : \"2643602\",\n"
+          + "    \"claimId\" : \"MjY0MzYwMmlk\",\n"
           + "    \"procCode\" : \"egnj\",\n"
           + "    \"procDate\" : \"2021-05-13\",\n"
           + "    \"rdaPosition\" : 1\n"
           + "  }, {\n"
-          + "    \"dcn\" : \"2643602\",\n"
+          + "    \"claimId\" : \"MjY0MzYwMmlk\",\n"
           + "    \"procCode\" : \"fipyd\",\n"
           + "    \"procFlag\" : \"g\",\n"
           + "    \"rdaPosition\" : 3\n"
+          + "  }, {\n"
+          + "    \"claimId\" : \"MjY0MzYwMmlk\",\n"
+          + "    \"procCode\" : \"vvqtwoz\",\n"
+          + "    \"procDate\" : \"2021-04-29\",\n"
+          + "    \"rdaPosition\" : 2\n"
           + "  } ],\n"
           + "  \"receivedDate\" : \"2021-05-14\",\n"
+          + "  \"revenueLines\" : [ ],\n"
           + "  \"sequenceNumber\" : 1,\n"
           + "  \"totalChargeAmount\" : 55.91\n"
           + "}";
@@ -215,6 +234,8 @@ public class StandardGrpcRdaSourceIT {
   private MeterRegistry appMetrics;
   /** The json sink. */
   private JsonCaptureSink sink;
+  /** The RdaVersion to require. */
+  private RdaVersion rdaVersion;
 
   /**
    * Sets the test dependencies up.
@@ -225,6 +246,7 @@ public class StandardGrpcRdaSourceIT {
   public void setUp() throws Exception {
     appMetrics = new SimpleMeterRegistry();
     sink = new JsonCaptureSink();
+    rdaVersion = RdaVersion.builder().versionString("~" + RdaService.RDA_PROTO_VERSION).build();
   }
 
   /**
@@ -259,6 +281,7 @@ public class StandardGrpcRdaSourceIT {
    */
   @Test
   public void grpcCallWithCorrectAuthToken() throws Exception {
+
     createServerConfig()
         .authorizedToken("secret")
         .build()
@@ -276,6 +299,41 @@ public class StandardGrpcRdaSourceIT {
               assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
               assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
             });
+  }
+
+  /** Verifies that a GRPC call with an incompatible RDA version will throw an exception. */
+  @Test
+  public void grpcCallWithIncompatibleRdaVersion() {
+    final RdaVersion requireHigherRdaVersion =
+        RdaVersion.builder().versionString("100.100.100").build();
+
+    try {
+      createServerConfig()
+          .authorizedToken("secret")
+          .build()
+          .runWithPortParam(
+              port -> {
+                RdaSourceConfig config =
+                    createSourceConfig(port).authenticationToken("secret").build();
+                try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+                    new StandardGrpcRdaSource<>(
+                        config,
+                        streamCaller,
+                        appMetrics,
+                        "fiss",
+                        Optional.empty(),
+                        requireHigherRdaVersion)) {
+                  source.retrieveAndProcessObjects(3, sink);
+                }
+              });
+      fail("Should have thrown exception");
+    } catch (Exception e) {
+      assertEquals(e.getCause().getClass(), IllegalStateException.class);
+      assertEquals(
+          e.getCause().getMessage(),
+          String.format(
+              "Can not ingest data from API running version '%s'", RdaService.RDA_PROTO_VERSION));
+    }
   }
 
   /**
@@ -377,7 +435,8 @@ public class StandardGrpcRdaSourceIT {
   @Nonnull
   private StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> createSource(
       RdaSourceConfig config) {
-    return new StandardGrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
+    return new StandardGrpcRdaSource<>(
+        config, streamCaller, appMetrics, "fiss", Optional.empty(), rdaVersion);
   }
 
   /** The sink for json data. */
@@ -420,7 +479,7 @@ public class StandardGrpcRdaSourceIT {
 
     @Override
     public String getClaimIdForMessage(FissClaimChange object) {
-      return object.getClaim().getDcn();
+      return object.getClaim().getRdaClaimKey();
     }
 
     /** {@inheritDoc} */

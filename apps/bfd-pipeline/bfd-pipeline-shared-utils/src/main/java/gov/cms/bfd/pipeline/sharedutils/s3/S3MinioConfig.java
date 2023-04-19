@@ -29,12 +29,27 @@ public class S3MinioConfig {
    * Singleton method makes sure there is one instance and one instance only of the S3MinioConfig
    * Class.
    *
-   * @return the s3 minio config
+   * @return {@link S3MinioConfig}
    */
   public static synchronized S3MinioConfig Singleton() {
     if (single_instance == null) {
       single_instance = new S3MinioConfig();
     }
     return single_instance;
+  }
+
+  /**
+   * override contents of S3MinioConfig.
+   *
+   * @param userName {@link String} denoting minio user name
+   * @param userPswd {@link String} denoting minio user password
+   * @param url {@link String} denoting URL for minio access
+   * @param status {@link boolean} denoting minio for S3
+   */
+  public void setConfig(String userName, String userPswd, String url, boolean status) {
+    minioUserName = userName;
+    minioPassword = userPswd;
+    minioEndpointAddress = url;
+    useMinio = status;
   }
 }

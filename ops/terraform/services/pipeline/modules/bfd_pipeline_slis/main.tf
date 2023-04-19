@@ -3,6 +3,7 @@ locals {
   region = data.aws_region.current.name
 
   kms_key_arn = var.aws_kms_key_arn
+  kms_key_id  = var.aws_kms_key_id
 
   lambda_full_name = "bfd-${local.env}-update-pipeline-slis"
 
@@ -33,6 +34,14 @@ resource "aws_lambda_function" "this" {
 
   kms_key_arn = local.kms_key_arn
 
+  # Ensures that only _one_ instance of this Lambda can run at any given time. This stops the
+  # possible duplicate submissions to the first available time metric that could otherwise occur
+  # if two instances of this Lambda are invoked close together. This _does_ take from our total
+  # reserved concurrent executions, so we should investigate an even more robust method of stopping
+  # duplicate submissions
+  # TODO: Investigate other methods of stopping duplicate sample submissions to first available metric
+  reserved_concurrent_executions = 1
+
   filename         = data.archive_file.lambda_src.output_path
   source_code_hash = data.archive_file.lambda_src.output_base64sha256
   architectures    = ["x86_64"]
@@ -43,10 +52,17 @@ resource "aws_lambda_function" "this" {
   timeout          = 300
   environment {
     variables = {
-      METRICS_NAMESPACE = local.metrics_namespace
-      ETL_BUCKET_ID     = data.aws_s3_bucket.etl.id
+      METRICS_NAMESPACE   = local.metrics_namespace
+      ETL_BUCKET_ID       = data.aws_s3_bucket.etl.id
+      SENTINEL_QUEUE_NAME = aws_sqs_queue.this.name
     }
   }
 
   role = aws_iam_role.this.arn
+}
+
+resource "aws_sqs_queue" "this" {
+  name                       = local.lambda_full_name
+  visibility_timeout_seconds = 0
+  kms_master_key_id          = local.kms_key_id
 }

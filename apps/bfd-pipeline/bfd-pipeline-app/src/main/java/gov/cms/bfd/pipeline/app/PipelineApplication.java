@@ -80,6 +80,9 @@ public final class PipelineApplication {
    */
   static final int EXIT_CODE_SMOKE_TEST_FAILURE = 3;
 
+  /** Keep this around for cleanup in the event of an error with the CCW pipeline. */
+  private static S3TaskManager s3TaskManager;
+
   /**
    * This method is the one that will get called when users launch the application from the command
    * line.
@@ -215,7 +218,8 @@ public final class PipelineApplication {
      * Create the PipelineManager and register all jobs.
      */
     PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
-    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
+    PipelineManager pipelineManager =
+        new PipelineManager(appMetrics, jobRecordStore, s3TaskManager);
     registerShutdownHook(appMetrics, pipelineManager);
     jobs.forEach(pipelineManager::registerJob);
     LOGGER.info("Job processing started.");
@@ -375,10 +379,11 @@ public final class PipelineApplication {
         LOGGER.info("Skipping RdaServerJob registration - not enabled in app configuration.");
       }
 
-      jobs.add(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      final var mbiCache = rdaLoadOptions.createComputedMbiCache(rdaAppState);
+      jobs.add(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState, mbiCache));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
 
-      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      jobs.add(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState, mbiCache));
       LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");
@@ -399,8 +404,7 @@ public final class PipelineApplication {
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
-    S3TaskManager s3TaskManager =
-        new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
+    s3TaskManager = new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
@@ -522,14 +526,16 @@ public final class PipelineApplication {
      */
 
     LOGGER.error("Data set failed with an unhandled error. Application will exit.", throwable);
+    shutdown();
+  }
 
-    /*
-     * This will trigger the shutdown monitors, block until they complete, and then terminate this
-     * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
-     * be halted: 1) this thread is the CcwRifLoadJob's and that thread will block then die,
-     * and 2) the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home,
-     * folks.
-     */
+  /**
+   * This will trigger the shutdown monitors, block until they complete, and then terminate this
+   * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
+   * be halted: 1) this thread is the CcwRifLoadJob's and that thread will block then die, and 2)
+   * the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home, folks.
+   */
+  static void shutdown() {
     System.exit(EXIT_CODE_JOB_FAILED);
   }
 }
