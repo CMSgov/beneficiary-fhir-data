@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.IOException;
 import java.util.Comparator;
@@ -40,19 +41,29 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(transactionManager));
   }
 
-  /** {@inheritDoc} */
+  /**
+   * This implementation checks the {@link McsClaimChange#getChangeType}.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param mcsClaimChange message to check
+   * @return true if {@link McsClaimChange#getChangeType} is {@link ChangeType#CHANGE_TYPE_DELETE}.
+   */
+  @Override
+  public boolean isDeleteMessage(McsClaimChange mcsClaimChange) {
+    return mcsClaimChange.getChangeType() == ChangeType.CHANGE_TYPE_DELETE;
+  }
+
   @Override
   public String getClaimIdForMessage(McsClaimChange object) {
     return object.getClaim().getIdrClmHdIcn();
   }
 
-  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(McsClaimChange object) {
     return object.getSeq();
   }
 
-  /** {@inheritDoc} */
   @Nonnull
   @Override
   RdaChange<RdaMcsClaim> transformMessageImpl(String apiVersion, McsClaimChange message) {
@@ -61,7 +72,6 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
     return change;
   }
 
-  /** {@inheritDoc} */
   @Override
   int getInsertCount(RdaMcsClaim claim) {
     return 1 // Add one for the base claim
@@ -72,7 +82,6 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         + claim.getLocations().size();
   }
 
-  /** {@inheritDoc} */
   @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaMcsClaim> change) {
     final RdaMcsClaim claim = change.getClaim();
@@ -96,7 +105,6 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcs
         .build();
   }
 
-  /** {@inheritDoc} */
   @Override
   MessageError createMessageError(
       String apiVersion, McsClaimChange change, List<DataTransformer.ErrorMessage> errors)
