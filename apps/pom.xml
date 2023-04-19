@@ -516,9 +516,9 @@
 					<version>2.6</version>
 				</plugin>
 				<plugin>
-					<groupId>com.coveo</groupId>
+					<groupId>com.spotify.fmt</groupId>
 					<artifactId>fmt-maven-plugin</artifactId>
-					<version>2.9</version>
+					<version>2.18</version>
 				</plugin>
 				<plugin>
 					<groupId>io.github.phillipuniverse</groupId>
@@ -541,14 +541,14 @@ checkJavaFormat() {
   cd apps
 
   set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&1
+  mvn com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1
   checkResult=$?
   set -e
 
   if [ ${checkResult} -eq 0 ]; then
     echo 'Verified Java source code format: a-okay.'
   else
-    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.coveo:fmt-maven-plugin:check' for details or 'mvn com.coveo:fmt-maven-plugin:format' to automatically apply the required formatting."
+    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
   fi
 
   return ${checkResult}
@@ -792,7 +792,7 @@ checkJavaFormat
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.coveo</groupId>
+				<groupId>com.spotify.fmt</groupId>
 				<artifactId>fmt-maven-plugin</artifactId>
 				<executions>
 					<execution>
@@ -968,9 +968,9 @@ checkJavaFormat
 										</pluginExecution>
 										<pluginExecution>
 											<pluginExecutionFilter>
-												<groupId>com.coveo</groupId>
+												<groupId>com.spotify.fmt</groupId>
 												<artifactId>fmt-maven-plugin</artifactId>
-												<versionRange>[2.9,)</versionRange>
+												<versionRange>[2.18,)</versionRange>
 												<goals>
 													<goal>format</goal>
 												</goals>

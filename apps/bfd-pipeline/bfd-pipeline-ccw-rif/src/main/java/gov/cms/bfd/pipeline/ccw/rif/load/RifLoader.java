@@ -204,7 +204,9 @@ public final class RifLoader {
         .register(
             MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
             new Gauge<Integer>() {
-              /** @see com.codahale.metrics.Gauge#getValue() */
+              /**
+               * @see com.codahale.metrics.Gauge#getValue()
+               */
               @Override
               public Integer getValue() {
                 return loadExecutor.getQueue().size();
@@ -216,7 +218,9 @@ public final class RifLoader {
         .register(
             MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
             new Gauge<Integer>() {
-              /** @see com.codahale.metrics.Gauge#getValue() */
+              /**
+               * @see com.codahale.metrics.Gauge#getValue()
+               */
               @Override
               public Integer getValue() {
                 return loadExecutor.getActiveCount();
@@ -1572,7 +1576,9 @@ public final class RifLoader {
         Session session = entityManager.unwrap(Session.class);
         session.doWork(
             new Work() {
-              /** @see org.hibernate.jdbc.Work#execute(java.sql.Connection) */
+              /**
+               * @see org.hibernate.jdbc.Work#execute(java.sql.Connection)
+               */
               @Override
               public void execute(Connection connection) throws SQLException {
                 /*
