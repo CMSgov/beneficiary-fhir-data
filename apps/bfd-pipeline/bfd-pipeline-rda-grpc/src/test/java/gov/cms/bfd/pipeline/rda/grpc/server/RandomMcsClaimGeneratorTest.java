@@ -414,8 +414,7 @@ public class RandomMcsClaimGeneratorTest {
         Matchers.lessThan(RandomMcsClaimGenerator.ForcedErrorFieldLength));
 
     final var overrideConfig =
-        normalConfig
-            .toBuilder()
+        normalConfig.toBuilder()
             .maxUniqueClaimIds(maxClaimIds)
             .maxUniqueMbis(maxMbis)
             .randomErrorRate(10)
