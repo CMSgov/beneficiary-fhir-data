@@ -371,9 +371,7 @@ public final class PipelineManager implements AutoCloseable {
      * consistent and ensure we don't miss any jobs.
      */
     synchronized (jobsEnqueuedHandles) {
-      jobsEnqueuedHandles
-          .values()
-          .parallelStream()
+      jobsEnqueuedHandles.values().parallelStream()
           .forEach(
               j -> {
                 LOGGER.info("  Attempting to cancel " + j.job.getType());

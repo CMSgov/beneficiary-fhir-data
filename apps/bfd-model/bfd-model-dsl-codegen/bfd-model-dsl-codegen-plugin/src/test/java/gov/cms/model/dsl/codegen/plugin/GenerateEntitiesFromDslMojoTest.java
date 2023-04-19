@@ -356,10 +356,10 @@ public class GenerateEntitiesFromDslMojoTest {
     JoinBean.Array array =
         new JoinBean.Array()
             .toBuilder()
-            .fieldName("a")
-            .joinType(JoinBean.JoinType.OneToOne)
-            .entityMapping("ma")
-            .build();
+                .fieldName("a")
+                .joinType(JoinBean.JoinType.OneToOne)
+                .entityMapping("ma")
+                .build();
     MappingBean arrayMapping =
         MappingBean.builder().id("ma").entityClassName("gov.cms.test.A").build();
     TableBean table = TableBean.builder().quoteNames(false).name("records").join(array).build();
