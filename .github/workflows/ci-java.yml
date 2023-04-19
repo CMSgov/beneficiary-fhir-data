@@ -78,12 +78,12 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
-      - name: 'Configure AWS credentials'
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: ci-java
-          aws-region: us-east-1
+      # - name: 'Configure AWS credentials'
+      #   uses: aws-actions/configure-aws-credentials@v2
+      #   with:
+      #     role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+      #     role-session-name: ci-java
+      #     aws-region: us-east-1
       - name: 'Checkout repo'
         uses: actions/checkout@v3
       - name: 'Setup JDK'
