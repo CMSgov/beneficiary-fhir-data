@@ -79,7 +79,7 @@ jobs:
     if: needs.workflow.outputs.files
     steps:
       - name: 'Configure AWS credentials'
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-java
