@@ -33,7 +33,7 @@ public class McsClaimStreamCallerIT {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
         .mcsSourceFactory(
-            sequenceNumber -> new RandomMcsClaimSource(1000L, 3).skipTo(sequenceNumber))
+            sequenceNumber -> new RandomMcsClaimSource(1000L, 2).skipTo(sequenceNumber))
         .build()
         .runWithChannelParam(
             channel -> {
@@ -64,7 +64,7 @@ public class McsClaimStreamCallerIT {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
         .mcsSourceFactory(
-            sequenceNumber -> new RandomMcsClaimSource(1000L, 15).skipTo(sequenceNumber))
+            sequenceNumber -> new RandomMcsClaimSource(1000L, 14).skipTo(sequenceNumber))
         .build()
         .runWithChannelParam(
             channel -> {
