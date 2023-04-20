@@ -37,7 +37,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(RequestResponsePopulateMdcFilter.class);
 
-  /** The HTTP Access Request Logger */
+  /** The HTTP Access Request Logger. */
   private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
   /** Used to compute the MDC key. */
   private static final String MDC_PREFIX = "http_access";
