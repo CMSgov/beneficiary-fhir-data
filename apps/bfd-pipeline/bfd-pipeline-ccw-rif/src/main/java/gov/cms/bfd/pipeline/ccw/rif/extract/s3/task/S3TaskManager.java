@@ -161,7 +161,7 @@ public final class S3TaskManager {
         LOGGER.info("All in-progress downloads are complete.");
       }
 
-      s3TransferManager.shutdownNow();
+      s3TransferManager.close();
     } catch (InterruptedException e) {
       // We're not expecting interrupts here, so go boom.
       throw new BadCodeMonkeyException(e);
