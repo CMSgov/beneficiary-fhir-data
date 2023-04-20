@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
+import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import javax.servlet.ServletContainerInitializer;
@@ -66,6 +67,8 @@ public final class ServerInitializer implements WebApplicationInitializer {
      * Register the MetricRegistry and HealthCheckRegistry into the ServletContext,
      * so that InstrumentedFilter and AdminServlet (configured in web.xml) can work.
      */
+    servletContext.setAttribute(
+        InstrumentedFilter.REGISTRY_ATTRIBUTE, springContext.getBean(MetricRegistry.class));
     servletContext.setAttribute(
         MetricsServlet.METRICS_REGISTRY, springContext.getBean(MetricRegistry.class));
     servletContext.setAttribute(
