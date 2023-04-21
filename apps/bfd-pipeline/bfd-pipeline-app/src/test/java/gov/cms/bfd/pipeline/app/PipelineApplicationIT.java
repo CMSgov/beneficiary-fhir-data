@@ -39,22 +39,18 @@ import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Integration tests for {@link PipelineApplication}.
  *
- * <p>
- * These tests require the application pipeline assembly to be built and
- * available. Accordingly,
- * they may not run correctly in Eclipse: if the assembly isn't built yet,
- * they'll just fail, but if
- * an older assembly exists (because you haven't rebuilt it), it'll run using
- * the old code, which
+ * <p>These tests require the application pipeline assembly to be built and available. Accordingly,
+ * they may not run correctly in Eclipse: if the assembly isn't built yet, they'll just fail, but if
+ * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
 public final class PipelineApplicationIT extends MinioTestContainer {
@@ -67,11 +63,10 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   private static S3Client s3Client = createS3MinioClient();
 
   /**
-   * Verifies that {@link PipelineApplication} exits as expected when launched
-   * with no configuration
+   * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
    * environment variables.
    *
-   * @throws IOException          (indicates a test error)
+   * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
    */
   @Test
@@ -98,15 +93,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Verifies that {@link PipelineApplication} works as expected when asked to run
-   * against an S3
-   * bucket that doesn't exist. This test case isn't so much needed to test that
-   * one specific
-   * failure case, but to instead verify that the application logs and keeps
-   * running as expected
+   * Verifies that {@link PipelineApplication} works as expected when asked to run against an S3
+   * bucket that doesn't exist. This test case isn't so much needed to test that one specific
+   * failure case, but to instead verify that the application logs and keeps running as expected
    * when a job fails.
    *
-   * @throws IOException          (indicates a test error)
+   * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
    */
   @Test
@@ -133,18 +125,15 @@ public final class PipelineApplicationIT extends MinioTestContainer {
       appProcess.waitFor(1, TimeUnit.MINUTES);
       appRunConsumerThread.join();
     } finally {
-      if (appProcess != null)
-        appProcess.destroyForcibly();
+      if (appProcess != null) appProcess.destroyForcibly();
     }
   }
 
   /**
-   * Verifies that {@link PipelineApplication} works as expected when no data is
-   * made available for
-   * it to process. Basically, it should just sit there and wait for data, doing
-   * nothing.
+   * Verifies that {@link PipelineApplication} works as expected when no data is made available for
+   * it to process. Basically, it should just sit there and wait for data, doing nothing.
    *
-   * @throws IOException          (indicates a test error)
+   * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
    */
   @Test
@@ -187,23 +176,19 @@ public final class PipelineApplicationIT extends MinioTestContainer {
       // Verify that the application exited as expected.
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
-      if (appProcess != null)
-        appProcess.destroyForcibly();
+      if (appProcess != null) appProcess.destroyForcibly();
       if (StringUtils.isNotBlank(bucket))
         s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
     }
   }
 
   /**
-   * Verifies that {@link PipelineApplication} works as expected against a small
-   * amount of data. We
-   * trust that other tests elsewhere are covering the ETL results' correctness;
-   * here we're just
-   * verifying the overall flow. Does it find the data set, process it, and then
-   * not find a data set
+   * Verifies that {@link PipelineApplication} works as expected against a small amount of data. We
+   * trust that other tests elsewhere are covering the ETL results' correctness; here we're just
+   * verifying the overall flow. Does it find the data set, process it, and then not find a data set
    * anymore?
    *
-   * @throws IOException          (indicates a test error)
+   * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
    */
   @Test
@@ -218,14 +203,15 @@ public final class PipelineApplicationIT extends MinioTestContainer {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      DataSetManifest manifest = new DataSetManifest(
-          Instant.now(),
-          0,
-          false,
-          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
-          new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
-          new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetManifest manifest =
+          new DataSetManifest(
+              Instant.now(),
+              0,
+              false,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       DataSetTestUtilities.putObject(s3Client, bucket, manifest);
       DataSetTestUtilities.putObject(s3Client, bucket, manifest);
       DataSetTestUtilities.putObject(
@@ -271,16 +257,14 @@ public final class PipelineApplicationIT extends MinioTestContainer {
       // Verify that the application exited as expected.
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
-      if (appProcess != null)
-        appProcess.destroyForcibly();
+      if (appProcess != null) appProcess.destroyForcibly();
       if (StringUtils.isNotBlank(bucket))
         DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 
   /**
-   * Verifies the RDA pipeline can be configured, started, and shut down
-   * successfully.
+   * Verifies the RDA pipeline can be configured, started, and shut down successfully.
    *
    * @throws Exception indicates test failure
    */
@@ -311,8 +295,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                   Awaitility.await()
                       .atMost(Durations.ONE_MINUTE)
                       .until(
-                          () -> hasRdaFissLoadJobCompleted(appRunConsumer)
-                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
+                          () ->
+                              hasRdaFissLoadJobCompleted(appRunConsumer)
+                                  && hasRdaMcsLoadJobCompleted(appRunConsumer));
                 } catch (ConditionTimeoutException e) {
                   throw new RuntimeException(
                       "Pipeline application failed to start scanning within timeout, STDOUT:\n"
@@ -329,14 +314,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                 verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
               });
     } finally {
-      if (appProcess.get() != null)
-        appProcess.get().destroyForcibly();
+      if (appProcess.get() != null) appProcess.get().destroyForcibly();
     }
   }
 
   /**
-   * Verifies that when there is an exception starting the server, the correct
-   * error is output and
+   * Verifies that when there is an exception starting the server, the correct error is output and
    * the process can exit successfully.
    *
    * @throws Exception indicates a test failure
@@ -349,11 +332,13 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     try {
       RdaServer.LocalConfig.builder()
           .fissSourceFactory(
-              ignored -> new ExceptionMessageSource<>(
-                  new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+              ignored ->
+                  new ExceptionMessageSource<>(
+                      new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
           .mcsSourceFactory(
-              ignored -> new ExceptionMessageSource<>(
-                  new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+              ignored ->
+                  new ExceptionMessageSource<>(
+                      new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
           .build()
           .runWithPortParam(
               port -> {
@@ -372,8 +357,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                   Awaitility.await()
                       .atMost(Durations.ONE_MINUTE)
                       .until(
-                          () -> hasRdaFissLoadJobCompleted(appRunConsumer)
-                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
+                          () ->
+                              hasRdaFissLoadJobCompleted(appRunConsumer)
+                                  && hasRdaMcsLoadJobCompleted(appRunConsumer));
                 } catch (ConditionTimeoutException e) {
                   throw new RuntimeException(
                       "Pipeline application failed to start scanning within timeout, STDOUT:\n"
@@ -390,14 +376,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                 verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
               });
     } finally {
-      if (appProcess.get() != null)
-        appProcess.get().destroyForcibly();
+      if (appProcess.get() != null) appProcess.get().destroyForcibly();
     }
   }
 
   /**
-   * Throws an {@link TestAbortedException} if the OS doesn't support
-   * <strong>graceful</strong>
+   * Throws an {@link TestAbortedException} if the OS doesn't support <strong>graceful</strong>
    * shutdowns via {@link Process#destroy()}.
    */
   private static void skipOnUnsupportedOs() {
@@ -421,11 +405,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Checks if the CCW RIF load job has completed by checking the job records.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that data set
-   *         scanning has
-   *         started, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
    */
   private static boolean hasCcwRifLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
@@ -437,11 +419,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Checks if the RDA Fiss load job has completed by checking the job records.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that data set
-   *         scanning has
-   *         started, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
    */
   private static boolean hasRdaFissLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
@@ -453,11 +433,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Checks if the RDA MCS load job has completed by checking the job records.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that data set
-   *         scanning has
-   *         started, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
    */
   private static boolean hasRdaMcsLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
@@ -469,11 +447,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Checks if the CCW RIF load job has failed by checking the job records.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that the
-   *         {@link CcwRifLoadJob}
-   *         failed, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that the {@link CcwRifLoadJob}
+   *     failed, <code>false</code> if not
    */
   private static boolean hasCcwRifLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
@@ -483,11 +459,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Checks if the RDA Fiss load job has failed by checking the job records.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that data set
-   *         scanning has
-   *         started, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
    */
   private static boolean hasRdaFissLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
@@ -499,11 +473,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Checks if the RDA MCS load job has failed by checking the job records.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that data set
-   *         scanning has
-   *         started, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
    */
   private static boolean hasRdaMcsLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
@@ -516,10 +488,9 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    * Checks if a job has a job record matching a specified value.
    *
    * @param appRunConsumer the job to check
-   * @param prefix         the record prefix type to check for
-   * @param klass          the class of the job to check
-   * @return {@code true} if the job had a record matching the specified prefix
-   *         type
+   * @param prefix the record prefix type to check for
+   * @param klass the class of the job to check
+   * @return {@code true} if the job had a record matching the specified prefix type
    */
   private static boolean hasJobRecordMatching(
       ProcessOutputConsumer appRunConsumer, String prefix, Class<?> klass) {
@@ -528,15 +499,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Verifies a data set has been processed by the specified job by checking for a
-   * specific log
+   * Verifies a data set has been processed by the specified job by checking for a specific log
    * message.
    *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should
-   *                       be checked
-   * @return <code>true</code> if the application output indicates that a data set
-   *         has been
-   *         processed, <code>false</code> if not
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that a data set has been
+   *     processed, <code>false</code> if not
    */
   private static boolean hasADataSetBeenProcessed(ProcessOutputConsumer appRunConsumer) {
     return appRunConsumer.matches(
@@ -544,8 +512,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Sends a <code>SIGTERM</code> to the specified {@link Process}, causing it to
-   * exit, but giving
+   * Sends a <code>SIGTERM</code> to the specified {@link Process}, causing it to exit, but giving
    * it a chance to do so gracefully.
    *
    * @param process the {@link Process} to signal
@@ -563,10 +530,10 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
         int processPid = pidField.getInt(process);
 
-        ProcessBuilder killBuilder = new ProcessBuilder("/bin/kill", "--signal", "TERM", "" + processPid);
+        ProcessBuilder killBuilder =
+            new ProcessBuilder("/bin/kill", "--signal", "TERM", "" + processPid);
         int killBuilderExitCode = killBuilder.start().waitFor();
-        if (killBuilderExitCode != 0)
-          process.destroy();
+        if (killBuilderExitCode != 0) process.destroy();
       } catch (NoSuchFieldException
           | SecurityException
           | IllegalArgumentException
@@ -591,12 +558,10 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Verifies that the specified {@link Process} has exited, due to the specified
-   * signal.
+   * Verifies that the specified {@link Process} has exited, due to the specified signal.
    *
    * @param signalNumber the POSIX signal number to check for
-   * @param process      the {@link Process} to check the
-   *                     {@link Process#exitValue()} of
+   * @param process the {@link Process} to check the {@link Process#exitValue()} of
    */
   private static void verifyExitValueMatchesSignal(int signalNumber, Process process) {
     /*
@@ -608,8 +573,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Creates a ProcessBuilder with the common settings used by CCW/RIF and RDA
-   * tests.
+   * Creates a ProcessBuilder with the common settings used by CCW/RIF and RDA tests.
    *
    * @return ProcessBuilder ready for more env vars to be added
    */
@@ -660,9 +624,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Creates a ProcessBuilder configured for an CCS/RIF pipeline test.
    *
-   * @param bucket the name of the S3 bucket that the application will be
-   *               configured to pull RIF
-   *               data from
+   * @param bucket the name of the S3 bucket that the application will be configured to pull RIF
+   *     data from
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
   private static ProcessBuilder createCcwRifAppProcessBuilder(String bucket) {
@@ -702,29 +665,29 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Creates a command to run the pipeline application.
    *
-   * @return the command array for
-   *         {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
-   *         the application via its <code>.x</code> assembly executable script
+   * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
+   *     the application via its <code>.x</code> assembly executable script
    */
   private static String[] createCommandForPipelineApp() {
     try {
-      Path assemblyDirectory = Files.list(Paths.get(".", "target", "pipeline-app"))
-          .filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
-          .findFirst()
-          .get();
+      Path assemblyDirectory =
+          Files.list(Paths.get(".", "target", "pipeline-app"))
+              .filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
+              .findFirst()
+              .get();
       Path pipelineAppScript = assemblyDirectory.resolve("bfd-pipeline-app.sh");
 
       S3MinioConfig minioConfig = S3MinioConfig.Singleton();
       if (minioConfig.useMinio) {
         return new String[] {
-            pipelineAppScript.toAbsolutePath().toString(),
-            "-Ds3.local=true",
-            String.format("-Ds3.localUser=%s", minioConfig.minioUserName),
-            String.format("-Ds3.localPass=%s", minioConfig.minioPassword),
-            String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
+          pipelineAppScript.toAbsolutePath().toString(),
+          "-Ds3.local=true",
+          String.format("-Ds3.localUser=%s", minioConfig.minioUserName),
+          String.format("-Ds3.localPass=%s", minioConfig.minioPassword),
+          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
         };
       }
-      return new String[] { pipelineAppScript.toAbsolutePath().toString() };
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

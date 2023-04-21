@@ -50,18 +50,18 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * @param sequenceNumberGetter the function to get the sequence number
    */
   public S3BucketMessageSourceFactory(
-          S3DirectoryDao s3Dao,
-          String filePrefix,
-          String fileSuffix,
-          Function<String, MessageSource<T>> actualFactory,
-          Function<T, Long> sequenceNumberGetter) {
+      S3DirectoryDao s3Dao,
+      String filePrefix,
+      String fileSuffix,
+      Function<String, MessageSource<T>> actualFactory,
+      Function<T, Long> sequenceNumberGetter) {
     this.s3Dao = s3Dao;
     this.actualFactory = actualFactory;
     this.sequenceNumberGetter = sequenceNumberGetter;
     matchPattern =
-            Pattern.compile(
-                    String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
-                    Pattern.CASE_INSENSITIVE);
+        Pattern.compile(
+            String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
+            Pattern.CASE_INSENSITIVE);
   }
 
   /**
@@ -86,7 +86,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   public MessageSource<T> apply(long sequenceNumber) throws Exception {
     List<FileEntry> entries = listFiles(sequenceNumber);
     return new MultiS3MessageSource(entries)
-            .filter(record -> sequenceNumberGetter.apply(record) >= sequenceNumber);
+        .filter(record -> sequenceNumberGetter.apply(record) >= sequenceNumber);
   }
 
   /**
@@ -109,8 +109,8 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
         FileEntry entry;
         if (matcher.group(1) != null) {
           entry =
-                  new FileEntry(
-                          fileName, Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
+              new FileEntry(
+                  fileName, Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
         } else {
           entry = new FileEntry(fileName, RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
         }

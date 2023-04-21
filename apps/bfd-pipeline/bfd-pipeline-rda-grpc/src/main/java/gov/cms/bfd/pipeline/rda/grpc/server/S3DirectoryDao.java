@@ -3,20 +3,13 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
-import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
-import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
-import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +25,14 @@ import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
+import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
@@ -162,16 +161,21 @@ public class S3DirectoryDao implements AutoCloseable {
 
       GetObjectRequest getObjectRequest = GetObjectRequest.builder().key(s3Key).build();
       DownloadFileRequest downloadFileRequest =
-              DownloadFileRequest.builder()
-                      .getObjectRequest(getObjectRequest)
-                      .addTransferListener(LoggingTransferListener.create())
-                      .build();
+          DownloadFileRequest.builder()
+              .getObjectRequest(getObjectRequest)
+              .addTransferListener(LoggingTransferListener.create())
+              .build();
 
-      Region region = Region.of(s3Client.getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build()).locationConstraintAsString());
+      Region region =
+          Region.of(
+              s3Client
+                  .getBucketLocation(
+                      GetBucketLocationRequest.builder().bucket(s3BucketName).build())
+                  .locationConstraintAsString());
       S3TransferManager s3TransferManager =
-              DefaultS3TransferManager.builder()
-                      .s3Client(SharedS3Utilities.createS3AsyncClient(region))
-                      .build();
+          DefaultS3TransferManager.builder()
+              .s3Client(SharedS3Utilities.createS3AsyncClient(region))
+              .build();
 
       FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
       CompletedFileDownload downloadResult = downloadFile.completionFuture().join();

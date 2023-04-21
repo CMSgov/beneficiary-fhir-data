@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import com.amazonaws.regions.Regions;
+import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.REGION_DEFAULT;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.google.common.io.Files;
@@ -30,32 +31,20 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /**
- * Program to load RDA API NDJSON data files into a database from either a local
- * file or from an S3
- * bucket, depending on the configuration for the file.location. The NDJSON
- * files must contain one
- * ClaimChange record per line and the underlying claim within the JSON must
- * match the type of claim
- * expected by the program (i.e. FISS or MCS each have their own property to
- * specify a data file).
- * Configuration is through a combination of a properties file and system
- * properties. Any settings
+ * Program to load RDA API NDJSON data files into a database from either a local file or from an S3
+ * bucket, depending on the configuration for the file.location. The NDJSON files must contain one
+ * ClaimChange record per line and the underlying claim within the JSON must match the type of claim
+ * expected by the program (i.e. FISS or MCS each have their own property to specify a data file).
+ * Configuration is through a combination of a properties file and system properties. Any settings
  * in a system property override those in the configuration file.
  *
- * <p>
- * The following settings are supported provided: hash.pepper, hash.iterations,
- * database.url,
- * database.user, database.password, job.batchSize, job.migration,
- * file.location, file.fiss,
- * file.mcs, s3.region, and s3.bucket. job.migration (defaults to false) is a
- * boolean value
- * indicating whether to run flyway migrations (true runs the migrations, false
- * does not). The
- * file.fiss and file.mcs each default to loading no data so either or both can
- * be provided as
+ * <p>The following settings are supported provided: hash.pepper, hash.iterations, database.url,
+ * database.user, database.password, job.batchSize, job.migration, file.location, file.fiss,
+ * file.mcs, s3.region, and s3.bucket. job.migration (defaults to false) is a boolean value
+ * indicating whether to run flyway migrations (true runs the migrations, false does not). The
+ * file.fiss and file.mcs each default to loading no data so either or both can be provided as
  * needed.
  */
 public class LoadRdaJsonApp {
@@ -63,8 +52,7 @@ public class LoadRdaJsonApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadRdaJsonApp.class);
 
   /**
-   * Main method to load the System Properties for the Config, start the
-   * log4jReporter, start the
+   * Main method to load the System Properties for the Config, start the log4jReporter, start the
    * metrics, and start the RDA pipeline.
    *
    * @param args to be passed in by the command line
@@ -86,64 +74,50 @@ public class LoadRdaJsonApp {
     }
 
     final MetricRegistry metrics = new MetricRegistry();
-    final Slf4jReporter reporter = Slf4jReporter.forRegistry(metrics)
-        .outputTo(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME))
-        .convertRatesTo(TimeUnit.SECONDS)
-        .convertDurationsTo(TimeUnit.MILLISECONDS)
-        .build();
+    final Slf4jReporter reporter =
+        Slf4jReporter.forRegistry(metrics)
+            .outputTo(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME))
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .build();
     reporter.start(5, TimeUnit.SECONDS);
     try {
       LOGGER.info("starting RDA API local server");
 
       var serviceConfig = config.createMessageSourceFactoryConfig();
 
-      String fileLocation = config.fileLocation.orElse("");
-
-      if (fileLocation.startsWith(AMAZON_S3_PROTOCOL)) {
-        final S3Client s3Client = SharedS3Utilities.createS3Client(config.s3Region);
-        final String directory = fileLocation.replace(AMAZON_S3_PROTOCOL, "");
-        final S3JsonMessageSources s3Sources = new S3JsonMessageSources(s3Client, config.s3Bucket, directory);
-        checkConnectivity("FISS", s3Sources.fissClaimChangeFactory());
-        checkConnectivity("MCS", s3Sources.mcsClaimChangeFactory());
-
-        fissFactory = config.createFissS3Source(s3Sources);
-        mcsFactory = config.createMcsS3Source(s3Sources);
-      } else {
-        fissFactory = config::createFissClaimsSource;
-        mcsFactory = config::createMcsClaimsSource;
-
-        // try (var messageSourceFactory = serviceConfig.createMessageSourceFactory()) {
-        // checkConnectivity("FISS", messageSourceFactory::createFissMessageSource);
-        // checkConnectivity("MCS", messageSourceFactory::createMcsMessageSource);
-        // }
-
-        RdaServer.LocalConfig.builder()
-            .serviceConfig(serviceConfig)
-            .build()
-            .runWithPortParam(
-                port -> {
-                  final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
-                  final DatabaseOptions databaseConfig = config.createDatabaseOptions();
-                  final HikariDataSource pooledDataSource = PipelineApplicationState
-                      .createPooledDataSource(databaseConfig, metrics);
-                  if (config.runSchemaMigration) {
-                    LOGGER.info("running database migration");
-                    DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
-                  }
-                  try (PipelineApplicationState appState = new PipelineApplicationState(
-                      new SimpleMeterRegistry(),
-                      metrics,
-                      pooledDataSource,
-                      PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-                      Clock.systemUTC())) {
-                    final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
-                    for (PipelineJob<?> job : jobs) {
-                      LOGGER.info("starting job {}", job.getClass().getSimpleName());
-                      job.call();
-                    }
-                  }
-                });
+      try (var messageSourceFactory = serviceConfig.createMessageSourceFactory()) {
+        checkConnectivity("FISS", messageSourceFactory::createFissMessageSource);
+        checkConnectivity("MCS", messageSourceFactory::createMcsMessageSource);
       }
+
+      RdaServer.LocalConfig.builder()
+          .serviceConfig(serviceConfig)
+          .build()
+          .runWithPortParam(
+              port -> {
+                final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
+                final DatabaseOptions databaseConfig = config.createDatabaseOptions();
+                final HikariDataSource pooledDataSource =
+                    PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+                if (config.runSchemaMigration) {
+                  LOGGER.info("running database migration");
+                  DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
+                }
+                try (PipelineApplicationState appState =
+                    new PipelineApplicationState(
+                        new SimpleMeterRegistry(),
+                        metrics,
+                        pooledDataSource,
+                        PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+                        Clock.systemUTC())) {
+                  final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
+                  for (PipelineJob<?> job : jobs) {
+                    LOGGER.info("starting job {}", job.getClass().getSimpleName());
+                    job.call();
+                  }
+                }
+              });
     } finally {
       reporter.report();
       reporter.close();
@@ -153,9 +127,8 @@ public class LoadRdaJsonApp {
   /**
    * Checks that we can make a viable connection to the source.
    *
-   * @param claimType  The type of claims the tested source serves
-   * @param factory    A {@link MessageSource.Factory} for creating message
-   *                   sources.
+   * @param claimType The type of claims the tested source serves
+   * @param factory A {@link MessageSource.Factory} for creating message sources.
    * @param <TMessage> the type of objects returned by the message sources
    * @throws Exception If there was an issue connecting to the message source.
    */
@@ -167,8 +140,7 @@ public class LoadRdaJsonApp {
   }
 
   /**
-   * Private singleton class to load the config for values for hashing, database
-   * options, batch
+   * Private singleton class to load the config for values for hashing, database options, batch
    * sizes, fissFile, and mcsFile.
    */
   private static class Config {
@@ -183,8 +155,7 @@ public class LoadRdaJsonApp {
     /** The database password. */
     private final String dbPassword;
     /**
-     * Indicates the type of {@link AbstractRdaLoadJob.SinkTypePreference} to use
-     * when building
+     * Indicates the type of {@link AbstractRdaLoadJob.SinkTypePreference} to use when building
      * sinks.
      */
     private final AbstractRdaLoadJob.SinkTypePreference sinkTypePreference;
@@ -201,7 +172,7 @@ public class LoadRdaJsonApp {
     /** The name of the MCS file to read from at the source. */
     private final Optional<File> mcsFile;
     /** The S3 region to use if the source is an S3 connection. */
-    private final Region s3Region;
+    private final Optional<Region> s3Region;
     /** The S3 bucket to use if the source is an S3 connection. */
     private final Optional<String> s3Bucket;
     /** Optional directory name within our S3 bucket. */
@@ -219,25 +190,25 @@ public class LoadRdaJsonApp {
       dbUser = options.stringValue("database.user", "");
       dbPassword = options.stringValue("database.password", "");
 
-      sinkTypePreference = options
-          .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference::valueOf)
-          .orElse(AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR);
+      sinkTypePreference =
+          options
+              .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference::valueOf)
+              .orElse(AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR);
       writeThreads = options.intValue("job.writeThreads", 1);
       batchSize = options.intValue("job.batchSize", 100);
       runSchemaMigration = options.booleanValue("job.migration", false);
-      fileLocation = options.stringOption("file.location");
-      s3Region = Optional.of(Region.of(options.stringOption("s3.region").orElse("")))
-          .orElse(SharedS3Utilities.REGION_DEFAULT);
       rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
+      s3Region =
+          Optional.of(
+              Region.of(options.stringOption("s3.region").orElse(REGION_DEFAULT.toString())));
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
     }
 
     /**
-     * We do not want to load random data so at least one source of data must have
-     * been defined for
+     * We do not want to load random data so at least one source of data must have been defined for
      * the application to be able to proceed.
      *
      * @return true if at least one source of data is defined
@@ -263,19 +234,21 @@ public class LoadRdaJsonApp {
      */
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
-      final AbstractRdaLoadJob.Config jobConfig = AbstractRdaLoadJob.Config.builder()
-          .runInterval(Duration.ofDays(1))
-          .writeThreads(writeThreads)
-          .batchSize(batchSize)
-          .sinkTypePreference(sinkTypePreference)
-          .rdaVersion(RdaVersion.builder().versionString(rdaVersion).build())
-          .build();
-      final RdaSourceConfig grpcConfig = RdaSourceConfig.builder()
-          .serverType(RdaSourceConfig.ServerType.Remote)
-          .host("localhost")
-          .port(port)
-          .maxIdle(Duration.ofDays(1))
-          .build();
+      final AbstractRdaLoadJob.Config jobConfig =
+          AbstractRdaLoadJob.Config.builder()
+              .runInterval(Duration.ofDays(1))
+              .writeThreads(writeThreads)
+              .batchSize(batchSize)
+              .sinkTypePreference(sinkTypePreference)
+              .rdaVersion(RdaVersion.builder().versionString(rdaVersion).build())
+              .build();
+      final RdaSourceConfig grpcConfig =
+          RdaSourceConfig.builder()
+              .serverType(RdaSourceConfig.ServerType.Remote)
+              .host("localhost")
+              .port(port)
+              .maxIdle(Duration.ofDays(1))
+              .build();
       return new RdaLoadOptions(
           jobConfig, grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
     }
@@ -297,11 +270,10 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * This function creates the pipeline jobs for Fiss and Mcs claims from the app
-     * state.
+     * This function creates the pipeline jobs for Fiss and Mcs claims from the app state.
      *
      * @param jobConfig the RDA options to load
-     * @param appState  the pipeline application state
+     * @param appState the pipeline application state
      * @return the pipeline jobs to execute
      */
     private List<PipelineJob<?>> createPipelineJobs(

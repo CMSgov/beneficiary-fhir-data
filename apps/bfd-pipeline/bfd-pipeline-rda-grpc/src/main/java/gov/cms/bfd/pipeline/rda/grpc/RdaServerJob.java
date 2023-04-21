@@ -1,9 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
-import static java.lang.String.format;
-
-import com.amazonaws.regions.Regions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -25,13 +21,10 @@ import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /**
- * PipelineJob implementation that runs a mock RDA API server using the gRPC
- * in-process mode. Since
- * gRPC uses its own thread pool the job thread simply sleeps and waits for an
- * interrupt to be
+ * PipelineJob implementation that runs a mock RDA API server using the gRPC in-process mode. Since
+ * gRPC uses its own thread pool the job thread simply sleeps and waits for an interrupt to be
  * received. When the interrupt is received the server is stopped.
  */
 public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
@@ -39,10 +32,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
 
   /** The server configuration. */
   private final Config config;
-  /**
-   * Keeps track of how many servers are running, primarily for integration
-   * testing.
-   */
+  /** Keeps track of how many servers are running, primarily for integration testing. */
   private final AtomicInteger running;
 
   /**
@@ -66,22 +56,20 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   }
 
   /**
-   * Starts the mock grpc server, waits for an InterruptedException, then stops
-   * the server. The job
-   * can potentially run for the entire lifetime of the pipeline app. Any
-   * exception thrown by the
-   * server causes the job to clean up and terminate and logs the exception but
-   * does not pass it
+   * Starts the mock grpc server, waits for an InterruptedException, then stops the server. The job
+   * can potentially run for the entire lifetime of the pipeline app. Any exception thrown by the
+   * server causes the job to clean up and terminate and logs the exception but does not pass it
    * through so that the job can be restarted.
    */
   @Override
   public PipelineJobOutcome call() throws Exception {
     try {
       LOGGER.info("starting server with name {} and mode {}", config.serverName, config.serverMode);
-      final var serverConfig = RdaServer.InProcessConfig.builder()
-          .serviceConfig(config.messageSourceFactoryConfig)
-          .serverName(config.serverName)
-          .build();
+      final var serverConfig =
+          RdaServer.InProcessConfig.builder()
+              .serviceConfig(config.messageSourceFactoryConfig)
+              .serverName(config.serverName)
+              .build();
       RdaServer.runWithInProcessServerNoParam(
           serverConfig,
           () -> {
@@ -106,8 +94,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   }
 
   /**
-   * Method to indicate if the server is currently running. Intended for
-   * coordinating integration
+   * Method to indicate if the server is currently running. Intended for coordinating integration
    * tests.
    *
    * @return true if the server has been started, false otherwise
@@ -128,33 +115,25 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     /** Default run interval for the job that manages the in-process gRPC server. */
     public static final Duration DEFAULT_RUN_INTERVAL = Duration.ofMinutes(5);
 
-    /**
-     * Default PRNG seed used to generate random claims when running in Random mode.
-     */
+    /** Default PRNG seed used to generate random claims when running in Random mode. */
     public static final long DEFAULT_SEED = 1;
 
-    /**
-     * Default number of random claims to return to clients when running in Random
-     * mode.
-     */
+    /** Default number of random claims to return to clients when running in Random mode. */
     public static final int DEFAULT_MAX_CLAIMS = 1_000;
 
     /**
-     * runInterval specifies how often the job should be scheduled. It is used to
-     * create a return
+     * runInterval specifies how often the job should be scheduled. It is used to create a return
      * value for the PipelineJob.getSchedule() method.
      */
     private final Duration runInterval;
 
     /**
-     * Server can either return data from an S3 bucket or generate random data. This
-     * field
+     * Server can either return data from an S3 bucket or generate random data. This field
      * determines which mode the server will use.
      */
     private final ServerMode serverMode;
     /**
-     * Name given to the in-process gRPC server. Clients use this name to open a
-     * ManagedChannel to
+     * Name given to the in-process gRPC server. Clients use this name to open a ManagedChannel to
      * the server.
      */
     private final String serverName;
@@ -176,18 +155,17 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     }
 
     /**
-     * Instantiates a new config. S3 bucket is required when {@link #serverMode} is
-     * {@link
+     * Instantiates a new config. S3 bucket is required when {@link #serverMode} is {@link
      * ServerMode#S3}.
      *
-     * @param serverMode       the server mode
-     * @param serverName       optional server name
-     * @param runInterval      optional run interval
-     * @param randomSeed       optional random seed
-     * @param randomMaxClaims  optional random max claims
-     * @param s3Region         optional s3 region
-     * @param s3Bucket         optional s3 bucket
-     * @param s3Directory      optional s3 directory
+     * @param serverMode the server mode
+     * @param serverName optional server name
+     * @param runInterval optional run interval
+     * @param randomSeed optional random seed
+     * @param randomMaxClaims optional random max claims
+     * @param s3Region optional s3 region
+     * @param s3Bucket optional s3 bucket
+     * @param s3Directory optional s3 directory
      * @param s3CacheDirectory optional s3 cache directory
      */
     @Builder
@@ -209,79 +187,18 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       this.serverMode = serverMode;
       this.serverName = serverName;
       this.runInterval = runInterval == null ? DEFAULT_RUN_INTERVAL : runInterval;
-      this.randomSeed = randomSeed == null ? DEFAULT_SEED : randomSeed;
-      this.randomMaxClaims = randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims;
-      if (Strings.isNullOrEmpty(s3Bucket)) {
-        s3Sources = null;
-      } else {
-        final Region region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
-        final S3Client s3Client = SharedS3Utilities.createS3Client(region);
-        final String directory = s3Directory == null ? "" : s3Directory;
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket, directory);
-      }
-    }
-
-    /**
-     * Creates an RDA service version.
-     *
-     * @return the version
-     */
-    private RdaService.Version createVersion() {
-      RdaService.Version.VersionBuilder versionBuilder = RdaService.Version.builder();
-      if (serverMode == ServerMode.S3) {
-        versionBuilder.version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION));
-      } else {
-        versionBuilder.version(format("Random:%d:%s", randomSeed, RDA_PROTO_VERSION));
-      }
-      return versionBuilder.build();
-    }
-
-    /**
-     * Creates randomly generated Fiss claims.
-     *
-     * @param sequenceNumber the sequence number
-     * @return the message source for the generated claims
-     * @throws Exception any error that occurs during claim generation
-     */
-    private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
-      if (serverMode == ServerMode.S3) {
-        LOGGER.info(
-            "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Sources.getBucketName());
-        return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
-      } else {
-        LOGGER.info(
-            "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
-            randomMaxClaims,
-            randomSeed);
-        return new RandomFissClaimSource(randomSeed, randomMaxClaims)
-            .toClaimChanges()
-            .skip(sequenceNumber);
-      }
-    }
-
-    /**
-     * Creates randomly generated MCS claims.
-     *
-     * @param sequenceNumber the sequence number
-     * @return the message source for the generated claims
-     * @throws Exception any error that occurs during claim generation
-     */
-    private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
-      if (serverMode == ServerMode.S3) {
-        LOGGER.info(
-            "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
-            s3Sources.getBucketName());
-        return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
-      } else {
-        LOGGER.info(
-            "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
-            randomMaxClaims,
-            randomSeed);
-        return new RandomMcsClaimSource(randomSeed, randomMaxClaims)
-            .toClaimChanges()
-            .skip(sequenceNumber);
-      }
+      messageSourceFactoryConfig =
+          RdaMessageSourceFactory.Config.builder()
+              .randomClaimConfig(
+                  RandomClaimGeneratorConfig.builder()
+                      .seed(randomSeed == null ? DEFAULT_SEED : randomSeed)
+                      .build())
+              .randomMaxClaims(randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims)
+              .s3Region(s3Region)
+              .s3Bucket(s3Bucket)
+              .s3Directory(s3Directory)
+              .s3CacheDirectory(s3CacheDirectory)
+              .build();
     }
   }
 }

@@ -31,40 +31,40 @@ public class S3BucketMessageSourceFactoryTest {
   @Test
   public void listFilesTest() {
     setFilesInS3Dao(
-            "mcs-215-275.ndjson.gz",
-            "fiss.ndjson",
-            "fiss-101-250.ndjson",
-            "mcs-83-214.ndjson.gz",
-            "this-won't-match",
-            "fiss-0-100.ndjson");
+        "mcs-215-275.ndjson.gz",
+        "fiss.ndjson",
+        "fiss-101-250.ndjson",
+        "mcs-83-214.ndjson.gz",
+        "this-won't-match",
+        "fiss-0-100.ndjson");
 
     S3BucketMessageSourceFactory<?> fissFactory =
-            new S3BucketMessageSourceFactory<>(
-                    s3Dao, "fiss", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
+        new S3BucketMessageSourceFactory<>(
+            s3Dao, "fiss", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
     assertEquals(
-            Arrays.asList(
-                    new S3BucketMessageSourceFactory.FileEntry("fiss-0-100.ndjson", 0, 100),
-                    new S3BucketMessageSourceFactory.FileEntry("fiss.ndjson", 0, Long.MAX_VALUE),
-                    new S3BucketMessageSourceFactory.FileEntry("fiss-101-250.ndjson", 101, 250)),
-            fissFactory.listFiles(0L));
+        Arrays.asList(
+            new S3BucketMessageSourceFactory.FileEntry("fiss-0-100.ndjson", 0, 100),
+            new S3BucketMessageSourceFactory.FileEntry("fiss.ndjson", 0, Long.MAX_VALUE),
+            new S3BucketMessageSourceFactory.FileEntry("fiss-101-250.ndjson", 101, 250)),
+        fissFactory.listFiles(0L));
     assertEquals(
-            Arrays.asList(
-                    new S3BucketMessageSourceFactory.FileEntry("fiss.ndjson", 0, Long.MAX_VALUE),
-                    new S3BucketMessageSourceFactory.FileEntry("fiss-101-250.ndjson", 101, 250)),
-            fissFactory.listFiles(112L));
+        Arrays.asList(
+            new S3BucketMessageSourceFactory.FileEntry("fiss.ndjson", 0, Long.MAX_VALUE),
+            new S3BucketMessageSourceFactory.FileEntry("fiss-101-250.ndjson", 101, 250)),
+        fissFactory.listFiles(112L));
 
     S3BucketMessageSourceFactory<?> mcsFactory =
-            new S3BucketMessageSourceFactory<>(
-                    s3Dao, "mcs", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
+        new S3BucketMessageSourceFactory<>(
+            s3Dao, "mcs", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
     assertEquals(
-            Arrays.asList(
-                    new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson.gz", 83, 214),
-                    new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
-            mcsFactory.listFiles(44L));
+        Arrays.asList(
+            new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson.gz", 83, 214),
+            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
+        mcsFactory.listFiles(44L));
     assertEquals(
-            Collections.singletonList(
-                    new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
-            mcsFactory.listFiles(215L));
+        Collections.singletonList(
+            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
+        mcsFactory.listFiles(215L));
     assertEquals(Collections.emptyList(), mcsFactory.listFiles(276L));
   }
 
@@ -161,7 +161,7 @@ public class S3BucketMessageSourceFactoryTest {
     }
     doReturn(List.copyOf(filenames)).when(s3Dao).readFileNames();
     return new S3BucketMessageSourceFactory<>(
-            s3Dao, "fiss", "ndjson", sourceMap::get, Function.identity());
+        s3Dao, "fiss", "ndjson", sourceMap::get, Function.identity());
   }
 
   /**
