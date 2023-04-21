@@ -98,9 +98,11 @@ public final class PipelineApplication {
     LOGGER.info("Application starting up!");
     configureUnexpectedExceptionHandlers();
 
-    final var configLoader = ConfigLoader.builder().addEnvironmentVariables().build();
+    ConfigLoader configLoader = ConfigLoader.builder().addEnvironmentVariables().build();
     AppConfiguration appConfig = null;
     try {
+      // add any additional sources of configuration variables then load the app config
+      configLoader = AppConfiguration.createConfigLoader(configLoader);
       appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (ConfigException | AppConfigurationException e) {

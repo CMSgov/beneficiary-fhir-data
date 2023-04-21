@@ -5,6 +5,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -31,13 +32,6 @@ import org.apache.commons.codec.binary.Hex;
  * default values but allow environment variables to override anything in the Map.
  */
 public class ConfigLoader {
-
-  /**
-   * The data source to load data from. A lambda function or method reference can be used as the
-   * source of data (e.g. System::getenv or myMap::get).
-   */
-  private final Function<String, Collection<String>> source;
-
   /** Error message for invalid integer. */
   private static final String NOT_VALID_INTEGER = "not a valid integer";
 
@@ -58,6 +52,12 @@ public class ConfigLoader {
 
   /** Used to find and remove leading and trailing spaces and tabs. */
   private static final Pattern TRIM_PATTERN = Pattern.compile("^([ \\t]*)(.*?)([ \\t]*)$");
+
+  /**
+   * The data source to load data from. A lambda function or method reference can be used as the
+   * source of data (e.g. System::getenv or myMap::get).
+   */
+  private final Function<String, Collection<String>> source;
 
   /**
    * Constructs a ConfigLoader that uses the provided Function as the source of key/value
@@ -663,6 +663,18 @@ public class ConfigLoader {
     }
 
     /**
+     * Adds the provided {@link ConfigLoader} as a source. Just a convenience method that adds the
+     * config's own source as a source for the config we are building.
+     *
+     * @param config source of config variables
+     * @return the builder for chaining
+     */
+    public Builder addConfig(ConfigLoader config) {
+      add(config.source);
+      return this;
+    }
+
+    /**
      * Adds a source that pulls values from environment variables.
      *
      * @return the builder for chaining
@@ -704,6 +716,17 @@ public class ConfigLoader {
         props.load(in);
       }
       return addProperties(props);
+    }
+
+    /**
+     * Adds a lookup function that retrieves values from the specified {@link Map}.
+     *
+     * @param valuesMap source of values
+     * @return this builder
+     */
+    public Builder addMap(Map<String, String> valuesMap) {
+      final var immutableMap = ImmutableMap.copyOf(valuesMap);
+      return addSingle(immutableMap::get);
     }
 
     /**

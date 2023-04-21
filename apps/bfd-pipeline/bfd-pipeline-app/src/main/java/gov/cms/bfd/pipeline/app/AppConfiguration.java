@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
@@ -25,6 +26,8 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch.CloudWatchConfig;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
@@ -43,6 +46,18 @@ import javax.annotation.Nullable;
  */
 public final class AppConfiguration extends BaseAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
+
+  /**
+   * The name of the environment variable that should be used to provide a path for looking up
+   * configuration variables in AWS SSM parameter store.
+   */
+  public static final String ENV_VAR_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
+
+  /**
+   * The name of a java properties file that should be used to provide a source of configuration
+   * variables.
+   */
+  public static final String ENV_VAR_PROPERTIES_FILE = "PROPERTIES_FILE";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -443,6 +458,48 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   }
 
   /**
+   * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
+   * information. The provided {@link ConfigLoader} is used to look up variables related to where to
+   * find other sources of config variables.
+   *
+   * <p>Config values will be loaded from (in order with first matching value used):
+   *
+   * <ol>
+   *   <li>Environment variables.
+   *   <li>If {@link #ENV_VAR_PROPERTIES_FILE} is defined use properties in that file.
+   *   <li>If {@link #ENV_VAR_SSM_PARAMETER_PATH} is defined use parameters at that path.
+   * </ol>
+   *
+   * @param baseConfig used to check for properties file and SSM path
+   * @return appropriately configured {@link ConfigLoader}
+   */
+  static ConfigLoader createConfigLoader(ConfigLoader baseConfig) {
+    final var configBuilder = ConfigLoader.builder();
+
+    final var ssmPath = baseConfig.stringValue(ENV_VAR_SSM_PARAMETER_PATH, "");
+    if (ssmPath.length() > 0) {
+      ensureAwsCredentialsConfiguredCorrectly();
+      final var ssmClient = AWSSimpleSystemsManagementClient.builder().build();
+      final var parameterStore = new AwsParameterStoreClient(ssmClient);
+      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath);
+      configBuilder.addMap(parametersMap);
+    }
+
+    final var propertiesFile = baseConfig.stringValue(ENV_VAR_PROPERTIES_FILE, "");
+    if (propertiesFile.length() > 0) {
+      try {
+        final var file = new File(propertiesFile);
+        configBuilder.addPropertiesFile(file);
+      } catch (IOException ex) {
+        throw new ConfigException(ENV_VAR_PROPERTIES_FILE, "error parsing file", ex);
+      }
+    }
+
+    configBuilder.addEnvironmentVariables();
+    return configBuilder.build();
+  }
+
+  /**
    * Load configuration variables using the provided {@link ConfigLoader} instance and build an
    * {@link AppConfiguration} instance from them.
    *
@@ -505,7 +562,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * @return the database options
    */
   private static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
-    // Get the base database options from env vars
     DatabaseOptions databaseOptions = loadDatabaseOptions(config);
 
     Optional<Integer> databaseMaxPoolSize = config.intOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
@@ -561,10 +617,16 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       allowedRifFileType = Optional.empty();
     }
 
-    /*
-     * Just for convenience: make sure DefaultAWSCredentialsProviderChain
-     * has whatever it needs.
-     */
+    ensureAwsCredentialsConfiguredCorrectly();
+    ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
+    return new CcwRifLoadOptions(extractionOptions, loadOptions);
+  }
+
+  /*
+   * Just for convenience: makes sure DefaultAWSCredentialsProviderChain has whatever it needs before
+   * we try to use any AWS resources.
+   */
+  static void ensureAwsCredentialsConfiguredCorrectly() {
     try {
       DefaultAWSCredentialsProviderChain awsCredentialsProvider =
           new DefaultAWSCredentialsProviderChain();
@@ -580,8 +642,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
               DefaultAWSCredentialsProviderChain.class.getName()),
           e);
     }
-    ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
-    return new CcwRifLoadOptions(extractionOptions, loadOptions);
   }
 
   /**
