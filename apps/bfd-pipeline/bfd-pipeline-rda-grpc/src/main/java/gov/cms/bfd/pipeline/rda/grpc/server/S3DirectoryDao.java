@@ -10,14 +10,12 @@ import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -431,58 +429,5 @@ public class S3DirectoryDao implements AutoCloseable {
       };
     }
     return byteSource;
-  }
-
-  /**
-   * Metadata {@link Map<String,String>} for the given S3 key. Recognize the possible case of object
-   * not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
-   *
-   * @param fileName the simple file name for the object
-   * @param s3Key the S3 object key
-   * @return the meta data
-   * @throws IOException eith {@link FileNotFoundException} or an AWS runtime exception
-   */
-  private Map<String, String> readS3ObjectMetaData(String fileName, String s3Key)
-      throws IOException {
-    try {
-      GetObjectRequest request = GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
-      return s3Client.getObject(request).response().metadata();
-    } catch (S3Exception ex) {
-      if (ex.statusCode() == AWS_NOT_FOUND_STATUS_CODE) {
-        var fileNotFound = new FileNotFoundException(fileName);
-        fileNotFound.addSuppressed(ex);
-        throw fileNotFound;
-      } else {
-        throw ex;
-      }
-    }
-  }
-
-  /**
-   * Download S3 object and return its Metadata {@link Map<String,String>}. Recognize the possible
-   * case of object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
-   *
-   * @param fileName the simple file name for the object
-   * @param s3Key the S3 object key
-   * @param tempDataFile where to store the downloaded object
-   * @return the meta data
-   * @throws IOException eith {@link FileNotFoundException} or an AWS runtime exception
-   */
-  private Map<String, String> downloadS3Object(String fileName, String s3Key, Path tempDataFile)
-      throws IOException {
-    try {
-      GetObjectRequest request = GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
-      var metaData = s3Client.getObject(request).response().metadata();
-      if (metaData == null) {
-        throw new FileNotFoundException(fileName);
-      }
-      return metaData;
-    } catch (S3Exception ex) {
-      if (ex.statusCode() == AWS_NOT_FOUND_STATUS_CODE) {
-        throw new FileNotFoundException(convertS3KeyToFileName(s3Key));
-      } else {
-        throw ex;
-      }
-    }
   }
 }

@@ -13,7 +13,7 @@ import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
-import io.micrometer.cloudwatch.CloudWatchConfig;
+import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.core.instrument.config.MissingRequiredConfigurationException;
 import java.io.BufferedReader;
 import java.io.IOException;
