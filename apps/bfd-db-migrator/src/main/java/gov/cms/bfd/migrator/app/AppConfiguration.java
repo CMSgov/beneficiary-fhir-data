@@ -2,6 +2,7 @@ package gov.cms.bfd.migrator.app;
 
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.util.Optional;
@@ -62,13 +63,13 @@ public class AppConfiguration extends BaseAppConfiguration {
    *     configuration passed to the application are incomplete or incorrect.
    */
   public static AppConfiguration readConfigFromEnvironmentVariables() {
-    final var configLoader = BaseAppConfiguration.envVarConfigLoader();
+    final var configLoader = ConfigLoader.builder().addEnvironmentVariables().build();
 
-    MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables(configLoader);
-    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(configLoader);
+    MetricOptions metricOptions = loadMetricOptions(configLoader);
+    DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
 
     Optional<String> flywayScriptLocationOverride =
-        readEnvStringOptional(configLoader, ENV_VAR_FLYWAY_SCRIPT_LOCATION);
+        configLoader.stringOptionEmptyOK(ENV_VAR_FLYWAY_SCRIPT_LOCATION);
     String flywayScriptLocation = flywayScriptLocationOverride.orElse("");
 
     return new AppConfiguration(metricOptions, databaseOptions, flywayScriptLocation);

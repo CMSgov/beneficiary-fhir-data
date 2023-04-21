@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link AppConfiguration}. */
 public class AppConfigurationTest {
   /**
-   * Verifies that {@link AppConfiguration#readConfigFromEnvironmentVariables} works as expected
-   * when passed valid configuration environment variables.
+   * Verifies that {@link AppConfiguration#loadConfig} works as expected when passed valid
+   * configuration environment variables.
    *
    * @throws Exception (indicates a test error)
    */
@@ -102,9 +102,8 @@ public class AppConfigurationTest {
   }
 
   /**
-   * Verifies that {@link AppConfiguration#readConfigFromEnvironmentVariables} fails as expected
-   * when it's called in an application that hasn't had any of the configuration environment
-   * variables set.
+   * Verifies that {@link AppConfiguration#loadConfig} fails as expected when it's called in an
+   * application that hasn't had any of the configuration environment variables set.
    */
   @Test
   public void noEnvVarsSpecified() {
@@ -116,8 +115,8 @@ public class AppConfigurationTest {
   @Test
   public void testCloudWatchMicrometerConfigSettings() {
     final var envVars = new HashMap<String, String>();
-    final var helper =
-        AppConfiguration.MICROMETER_CW_CONFIG_HELPER.withValueLookupFunction(envVars::get);
+    final var configLoader = ConfigLoader.builder().addSingle(envVars::get).build();
+    final var helper = AppConfiguration.createMicrometerConfigHelper(configLoader);
     final CloudWatchConfig config = helper::get;
     assertEquals("cloudwatch", config.prefix());
 
@@ -136,13 +135,15 @@ public class AppConfigurationTest {
   }
 
   /**
-   * Calls {@link AppConfiguration#readConfigFromEnvironmentVariables} and serializes the resulting
-   * {@link AppConfiguration} instance out an array of bytes.
+   * Calls {@link AppConfiguration#loadConfig} and serializes the resulting {@link AppConfiguration}
+   * instance out an array of bytes.
    *
    * @param configLoader used to load the app config
+   * @return the decoded bytes
+   * @throws IOException if serializing the config failed
    */
   private byte[] loadAndWriteConfig(ConfigLoader configLoader) throws IOException {
-    AppConfiguration appConfig = AppConfiguration.readConfigFromEnvironmentVariables(configLoader);
+    AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
 
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     // Serialize data object to a file

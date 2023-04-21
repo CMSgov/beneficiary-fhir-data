@@ -27,8 +27,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
-import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import io.micrometer.cloudwatch.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -98,10 +98,10 @@ public final class PipelineApplication {
     LOGGER.info("Application starting up!");
     configureUnexpectedExceptionHandlers();
 
-    final var configLoader = BaseAppConfiguration.envVarConfigLoader();
+    final var configLoader = ConfigLoader.builder().addEnvironmentVariables().build();
     AppConfiguration appConfig = null;
     try {
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables(configLoader);
+      appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (ConfigException | AppConfigurationException e) {
       System.err.println(e.getMessage());
@@ -118,7 +118,8 @@ public final class PipelineApplication {
             Tag.of("host", metricOptions.getHostname().orElse("unknown")),
             Tag.of("appName", metricOptions.getNewRelicAppName().orElse("unknown")));
 
-    final var cloudwatchRegistryConfig = AppConfiguration.getCloudWatchRegistryConfig();
+    final var cloudwatchRegistryConfig =
+        AppConfiguration.loadCloudWatchRegistryConfig(configLoader);
     if (cloudwatchRegistryConfig.enabled()) {
       LOGGER.info("Adding CloudWatchMeterRegistry...");
       final var cloudWatchRegistry =

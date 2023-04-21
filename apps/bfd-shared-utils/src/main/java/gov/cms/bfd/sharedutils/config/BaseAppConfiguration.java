@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Models the common configuration options for BFD applications, should be extended by a specific
@@ -97,15 +96,6 @@ public abstract class BaseAppConfiguration implements Serializable {
   }
 
   /**
-   * Creates a {@link ConfigLoader} that reads environment variables.
-   *
-   * @return the config
-   */
-  public static ConfigLoader envVarConfigLoader() {
-    return new ConfigLoader(key -> Optional.ofNullable(System.getenv(key)).stream().toList());
-  }
-
-  /**
    * Gets the {@link #metricOptions}.
    *
    * @return the {@link MetricOptions} that the application will use
@@ -123,7 +113,6 @@ public abstract class BaseAppConfiguration implements Serializable {
     return databaseOptions;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -135,20 +124,17 @@ public abstract class BaseAppConfiguration implements Serializable {
   }
 
   /**
-   * Reads metric options from environment variables.
+   * Reads metric options from a {@link ConfigLoader}.
    *
-   * @return the metric options read from the environment variables
+   * @param config used to read and parse configuration values
+   * @return the metric options
    */
-  protected static MetricOptions readMetricOptionsFromEnvironmentVariables(ConfigLoader config) {
-    Optional<String> newRelicMetricKey =
-        readEnvStringOptional(config, ENV_VAR_NEW_RELIC_METRIC_KEY);
-    Optional<String> newRelicAppName = readEnvStringOptional(config, ENV_VAR_NEW_RELIC_APP_NAME);
-    Optional<String> newRelicMetricHost =
-        readEnvStringOptional(config, ENV_VAR_NEW_RELIC_METRIC_HOST);
-    Optional<String> newRelicMetricPath =
-        readEnvStringOptional(config, ENV_VAR_NEW_RELIC_METRIC_PATH);
-    Optional<Integer> newRelicMetricPeriod =
-        readEnvIntOptional(config, ENV_VAR_NEW_RELIC_METRIC_PERIOD);
+  protected static MetricOptions loadMetricOptions(ConfigLoader config) {
+    Optional<String> newRelicMetricKey = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_METRIC_KEY);
+    Optional<String> newRelicAppName = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_APP_NAME);
+    Optional<String> newRelicMetricHost = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_METRIC_HOST);
+    Optional<String> newRelicMetricPath = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_METRIC_PATH);
+    Optional<Integer> newRelicMetricPeriod = config.intOption(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
 
     Optional<String> hostname;
     try {
@@ -167,140 +153,19 @@ public abstract class BaseAppConfiguration implements Serializable {
   }
 
   /**
-   * Reads the database options from environment variables.
+   * Reads the database options from a {@link ConfigLoader}.
    *
-   * @return the database options read from the environment variables
+   * @param config used to read and parse configuration values
+   * @return the database options
    */
-  protected static DatabaseOptions readDatabaseOptionsFromEnvironmentVariables(
-      ConfigLoader config) {
-    String databaseUrl = readEnvStringRequired(config, ENV_VAR_KEY_DATABASE_URL);
-    String databaseUsername = readEnvStringRequired(config, ENV_VAR_KEY_DATABASE_USERNAME);
-    String databasePassword = readEnvStringRequired(config, ENV_VAR_KEY_DATABASE_PASSWORD);
+  protected static DatabaseOptions loadDatabaseOptions(ConfigLoader config) {
+    String databaseUrl = config.stringValue(ENV_VAR_KEY_DATABASE_URL);
+    String databaseUsername = config.stringValue(ENV_VAR_KEY_DATABASE_USERNAME);
+    String databasePassword = config.stringValue(ENV_VAR_KEY_DATABASE_PASSWORD);
     Optional<Integer> databaseMaxPoolSize =
-        readEnvIntOptional(config, ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
-
-    if (databaseMaxPoolSize.isPresent() && databaseMaxPoolSize.get() < 1) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSize));
-    }
+        config.positiveIntOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
 
     return new DatabaseOptions(
         databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.orElse(1));
-  }
-
-  /**
-   * Reads an optional String environment variable.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set or is empty
-   */
-  protected static Optional<String> readEnvStringOptional(
-      ConfigLoader config, String environmentVariableName) {
-    return config.stringOptionEmptyOK(environmentVariableName);
-  }
-
-  /**
-   * Reads an optional String environment value, skipping any that are null or whitespace.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set or contains an empty value
-   */
-  protected static Optional<String> readEnvNonEmptyStringOptional(
-      ConfigLoader config, String environmentVariableName) {
-    return config.stringOption(environmentVariableName);
-  }
-
-  /**
-   * Reads a required String environment variable.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value is missing
-   */
-  protected static String readEnvStringRequired(
-      ConfigLoader config, String environmentVariableName) {
-    return config.stringValue(environmentVariableName);
-  }
-
-  /**
-   * Reads an optional Integer environment variable.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed
-   */
-  protected static Optional<Integer> readEnvIntOptional(
-      ConfigLoader config, String environmentVariableName) {
-    return config.intOption(environmentVariableName);
-  }
-
-  /**
-   * Reads an optional environment variable using a parser to determine the value.
-   *
-   * @param <T> the type parameter
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @param klass class of object returned by the parser
-   * @param parser the function used to convert the name into a parsed value
-   * @return the value of the specified environment variable converted to a parsed value
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  protected static <T> Optional<T> readEnvParsedOptional(
-      ConfigLoader config,
-      String environmentVariableName,
-      Class<T> klass,
-      Function<String, T> parser) {
-    return config.parsedOption(environmentVariableName, klass, parser);
-  }
-
-  /**
-   * Reads a required Integer environment variable that must be positive.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed or is not positive.
-   */
-  protected static int readEnvIntPositiveRequired(
-      ConfigLoader config, String environmentVariableName) {
-    int value = config.intValue(environmentVariableName);
-    if (value < 1) {
-      throw new ConfigException(environmentVariableName, "not a positive integer");
-    }
-    return value;
-  }
-
-  /**
-   * Reads an optional Boolean environment variable.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  protected static Optional<Boolean> readEnvBooleanOptional(
-      ConfigLoader config, String environmentVariableName) {
-    return config.booleanOption(environmentVariableName);
-  }
-
-  /**
-   * Reads a required Boolean environment variable.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  protected static boolean readEnvBooleanRequired(
-      ConfigLoader config, String environmentVariableName) {
-    return config.booleanValue(environmentVariableName);
   }
 }

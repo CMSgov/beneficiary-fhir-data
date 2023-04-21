@@ -41,6 +41,9 @@ public class ConfigLoader {
   /** Error message for invalid integer. */
   private static final String NOT_VALID_INTEGER = "not a valid integer";
 
+  /** Error message for non-positive integer. */
+  public static final String NOT_POSITIVE_INTEGER = "not a positive integer";
+
   /** Error message for invalid float. */
   private static final String NOT_VALID_FLOAT = "not a valid float";
 
@@ -51,7 +54,7 @@ public class ConfigLoader {
   private static final String NOT_PROVIDED = "required option not provided";
 
   /** Format string for {@link String#format} for unparseable value. */
-  private static final String NOT_VALID_PARSED = "not a value %s value";
+  private static final String NOT_VALID_PARSED = "not a valid %s value";
 
   /** Used to find and remove leading and trailing spaces and tabs. */
   private static final Pattern TRIM_PATTERN = Pattern.compile("^([ \\t]*)(.*?)([ \\t]*)$");
@@ -227,6 +230,39 @@ public class ConfigLoader {
     } catch (Exception ex) {
       throw new ConfigException(name, NOT_VALID_INTEGER, ex);
     }
+  }
+
+  /**
+   * Gets a required positive integer configuration value.
+   *
+   * @param name name of configuration value
+   * @return integer value
+   * @throws ConfigException if there is no valid integer value or value is not positive
+   */
+  public int positiveIntValue(String name) {
+    int value = intValue(name);
+    if (value < 1) {
+      throw new ConfigException(name, NOT_POSITIVE_INTEGER);
+    }
+    return value;
+  }
+
+  /**
+   * Gets an optional positive integer configuration value.
+   *
+   * @param name name of configuration value
+   * @return optional integer value
+   * @throws ConfigException if there is an integer value and it is not positive
+   */
+  public Optional<Integer> positiveIntOption(String name) {
+    return intOption(name)
+        .map(
+            value -> {
+              if (value < 1) {
+                throw new ConfigException(name, NOT_POSITIVE_INTEGER);
+              }
+              return value;
+            });
   }
 
   /**
@@ -440,6 +476,7 @@ public class ConfigLoader {
    * Calls a parsing function to parse a string..
    *
    * @param name name of configuration value
+   * @param source the string to parse
    * @param klass class of object returned by the parser
    * @param parser function that parses a string
    * @return the parsed object
@@ -451,7 +488,7 @@ public class ConfigLoader {
     try {
       return parser.apply(source);
     } catch (RuntimeException e) {
-      final var message = String.format(NOT_VALID_PARSED, klass.getSimpleName());
+      final var message = String.format(NOT_VALID_PARSED, klass.getName());
       throw new ConfigException(name, message, e);
     }
   }
