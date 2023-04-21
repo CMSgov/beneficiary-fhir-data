@@ -10,7 +10,7 @@
 	</appender>
 
 	<!-- At 'debug', the AWS SDK will log HTTP/S request/response summaries. -->
-	<!-- <logger name="com.amazonaws.request" level="debug" /> -->
+	<!-- <logger name="software.amazon.awssdk.request" level="debug" /> -->
 
 	<!--  At 'debug', the AWS SDK (and possibly other libs) will log full HTTP/S requests and responses. -->
 	<!-- <logger name="org.apache.http.wire" level="debug" /> -->

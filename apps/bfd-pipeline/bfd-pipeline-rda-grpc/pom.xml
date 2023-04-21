@@ -15,6 +15,11 @@
         Loads partially adjudicated claims data exported from RDA gRPC service into the BFD database.
     </description>
 
+    <properties>
+        <awssdk.transfer.manager.version>2.20.9</awssdk.transfer.manager.version>
+        <awssdk.core.version>2.20.9</awssdk.core.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
@@ -202,6 +207,27 @@
             <artifactId>testcontainers</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to interact with AWS' S3 service -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3-transfer-manager</artifactId>
+            <version>${awssdk.transfer.manager.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>aws-core</artifactId>
+            <version>${awssdk.core.version}</version>
         </dependency>
     </dependencies>
 

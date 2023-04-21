@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.net.URL;
@@ -25,13 +26,14 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
 public final class CcwRifLoadJobIT extends MinioTestContainer {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client = createS3MinioClient();
+  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
@@ -40,7 +42,7 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
    */
   @Test
   public void emptyBucketTest() throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       // Create the (empty) bucket to run against.
@@ -67,7 +69,7 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       assertEquals(0, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
     } finally {
-      if (bucket != null)
+      if (StringUtils.isNotBlank(bucket))
         s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
     }
   }
@@ -113,7 +115,6 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
    */
   @Test
   public void multipleDataSetsWithSyntheticTest() throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       /*
@@ -278,7 +279,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
               == HttpStatus.SC_OK);
 
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 
@@ -289,7 +291,6 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
    */
   @Test
   public void multipleDataSetsTest() throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       /*
@@ -384,7 +385,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
           1 + manifestA.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 
@@ -396,7 +398,6 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
    */
   @Test
   public void skipDataSetTest() throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       /*
@@ -462,7 +463,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
           0,
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 
@@ -474,7 +476,6 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
    */
   @Test
   public void skipDataSetTestForFutureManifestDate() throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       /*
@@ -540,7 +541,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
           0,
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 
@@ -561,7 +563,6 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       List<URL> fileList,
       DataSetManifest inManifest)
       throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       /*
@@ -621,7 +622,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 

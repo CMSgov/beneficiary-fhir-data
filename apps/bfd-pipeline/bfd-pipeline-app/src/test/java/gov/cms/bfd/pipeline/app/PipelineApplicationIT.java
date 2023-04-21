@@ -43,6 +43,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -63,7 +64,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   private static final int SIGTERM = 15;
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client = createS3MinioClient();
+  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched
@@ -150,7 +151,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    S3Client s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
     String bucket = null;
     Process appProcess = null;
     try {
@@ -189,7 +189,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     } finally {
       if (appProcess != null)
         appProcess.destroyForcibly();
-      if (bucket != null)
+      if (StringUtils.isNotBlank(bucket))
         s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
     }
   }
@@ -210,7 +210,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    S3Client s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
     String bucket = null;
     Process appProcess = null;
     try {
@@ -274,7 +273,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     } finally {
       if (appProcess != null)
         appProcess.destroyForcibly();
-      if (bucket != null)
+      if (StringUtils.isNotBlank(bucket))
         DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }

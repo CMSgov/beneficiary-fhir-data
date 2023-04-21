@@ -1,14 +1,16 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
+import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
@@ -22,6 +24,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -29,6 +32,9 @@ import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
  * Front end for downloading files from an S3 bucket/directory and caching them locally. Once
@@ -65,11 +71,11 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   private static final String S3FileNameRegex = "[_a-z0-9][-_.a-z0-9]+";
 
-  /** Value returned by {@link AmazonS3Exception#getStatusCode} to indicate object not found. */
+  /** Value returned by {@link S3Exception#statusCode()} to indicate object not found. */
   private static final int AWS_NOT_FOUND_STATUS_CODE = 404;
 
   /** The client for interacting with AWS S3 buckets and files. */
-  private final AmazonS3 s3Client;
+  private final S3Client s3Client;
   /** The S3 bucket containing source files. */
   @Getter private final String s3BucketName;
   /** The directory path within bucket containing source files. */
@@ -97,7 +103,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * @param deleteOnExit causes close to delete all cached files and directory when true
    */
   public S3DirectoryDao(
-      AmazonS3 s3Client,
+      S3Client s3Client,
       String s3BucketName,
       String s3DirectoryPath,
       Path cacheDirectory,
@@ -134,9 +140,8 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   public ByteSource downloadFile(String fileName) throws IOException {
     final String s3Key = s3DirectoryPath + fileName;
-    var s3MetaData = readS3ObjectMetaData(fileName, s3Key);
-
-    String eTag = s3MetaData.getETag();
+    String eTag =
+        s3Client.getObject(GetObjectRequest.builder().key(s3Key).build()).response().eTag();
     Path cacheFile = cacheFilePath(fileName, eTag);
     if (Files.isRegularFile(cacheFile)) {
       log.info(
@@ -154,11 +159,26 @@ public class S3DirectoryDao implements AutoCloseable {
           fileName,
           s3Key,
           tempDataFile.getFileName());
-      s3MetaData = downloadS3Object(fileName, s3Key, tempDataFile);
+
+      GetObjectRequest getObjectRequest = GetObjectRequest.builder().key(s3Key).build();
+      DownloadFileRequest downloadFileRequest =
+              DownloadFileRequest.builder()
+                      .getObjectRequest(getObjectRequest)
+                      .addTransferListener(LoggingTransferListener.create())
+                      .build();
+
+      Region region = Region.of(s3Client.getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build()).locationConstraintAsString());
+      S3TransferManager s3TransferManager =
+              DefaultS3TransferManager.builder()
+                      .s3Client(SharedS3Utilities.createS3AsyncClient(region))
+                      .build();
+
+      FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
+      CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
 
       // It is possible that the eTag changed between the time we fetched meta data and the
       // time we downloaded the object.
-      eTag = s3MetaData.getETag();
+      eTag = downloadResult.response().eTag();
       cacheFile = cacheFilePath(fileName, eTag);
 
       try {
@@ -267,8 +287,8 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return the list
    */
   private List<String> readFileNamesFromS3() {
-    return readS3ObjectListing().getObjectSummaries().stream()
-        .map(S3ObjectSummary::getKey)
+    return readS3ObjectListing().stream()
+        .map(S3Object::key)
         .filter(this::isValidS3Key)
         .map(this::convertS3KeyToFileName)
         .collect(ImmutableList.toImmutableList());
@@ -281,8 +301,8 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return the set
    */
   private Set<String> readCacheFileNamesFromS3() {
-    return readS3ObjectListing().getObjectSummaries().stream()
-        .filter(summary -> isValidS3Key(summary.getKey()))
+    return readS3ObjectListing().stream()
+        .filter(s3Object -> isValidS3Key(s3Object.key()))
         .map(this::cacheFilePath)
         .map(Path::toString)
         .collect(ImmutableSet.toImmutableSet());
@@ -318,11 +338,16 @@ public class S3DirectoryDao implements AutoCloseable {
    *
    * @return the object listing
    */
-  private ObjectListing readS3ObjectListing() {
+  private List<S3Object> readS3ObjectListing() {
     if (Strings.isNullOrEmpty(s3DirectoryPath)) {
-      return s3Client.listObjects(s3BucketName);
+      return s3Client
+          .listObjectsV2(ListObjectsV2Request.builder().bucket(s3BucketName).build())
+          .contents();
     } else {
-      return s3Client.listObjects(s3BucketName, s3DirectoryPath);
+      return s3Client
+          .listObjectsV2(
+              ListObjectsV2Request.builder().bucket(s3BucketName).prefix(s3DirectoryPath).build())
+          .contents();
     }
   }
 
@@ -357,15 +382,14 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Convert a {@link S3ObjectSummary} into a {@link Path} referencing a file in our cache
-   * directory.
+   * Convert an {@link S3Object} into a {@link Path} referencing a file in our cache directory.
    *
-   * @param summary {@link S3ObjectSummary} for object to store in cache
+   * @param s3Object {@link S3Object} for object to store in cache
    * @return file handle
    */
-  private Path cacheFilePath(S3ObjectSummary summary) {
-    final var fileName = convertS3KeyToFileName(summary.getKey());
-    return cacheFilePath(fileName, summary.getETag());
+  private Path cacheFilePath(S3Object s3Object) {
+    final var fileName = convertS3KeyToFileName(s3Object.key());
+    return cacheFilePath(fileName, s3Object.eTag());
   }
 
   /**
@@ -406,19 +430,21 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Read {@link ObjectMetadata} for the given S3 key. Recognize the possible case of object not
-   * found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   * Metadata {@link Map<String,String>} for the given S3 key. Recognize the possible case of object
+   * not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
    *
    * @param fileName the simple file name for the object
    * @param s3Key the S3 object key
    * @return the meta data
    * @throws IOException eith {@link FileNotFoundException} or an AWS runtime exception
    */
-  private ObjectMetadata readS3ObjectMetaData(String fileName, String s3Key) throws IOException {
+  private Map<String, String> readS3ObjectMetaData(String fileName, String s3Key)
+      throws IOException {
     try {
-      return s3Client.getObjectMetadata(s3BucketName, s3Key);
-    } catch (AmazonS3Exception ex) {
-      if (ex.getStatusCode() == AWS_NOT_FOUND_STATUS_CODE) {
+      GetObjectRequest request = GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
+      return s3Client.getObject(request).response().metadata();
+    } catch (S3Exception ex) {
+      if (ex.statusCode() == AWS_NOT_FOUND_STATUS_CODE) {
         var fileNotFound = new FileNotFoundException(fileName);
         fileNotFound.addSuppressed(ex);
         throw fileNotFound;
@@ -429,8 +455,8 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Download S3 object and return its {@link ObjectMetadata}. Recognize the possible case of object
-   * not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   * Download S3 object and return its Metadata {@link Map<String,String>}. Recognize the possible
+   * case of object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
    *
    * @param fileName the simple file name for the object
    * @param s3Key the S3 object key
@@ -438,17 +464,17 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return the meta data
    * @throws IOException eith {@link FileNotFoundException} or an AWS runtime exception
    */
-  private ObjectMetadata downloadS3Object(String fileName, String s3Key, Path tempDataFile)
+  private Map<String, String> downloadS3Object(String fileName, String s3Key, Path tempDataFile)
       throws IOException {
     try {
-      final var downloadRequest = new GetObjectRequest(s3BucketName, s3Key);
-      var metaData = s3Client.getObject(downloadRequest, tempDataFile.toFile());
+      GetObjectRequest request = GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
+      var metaData = s3Client.getObject(request).response().metadata();
       if (metaData == null) {
         throw new FileNotFoundException(fileName);
       }
       return metaData;
-    } catch (AmazonS3Exception ex) {
-      if (ex.getStatusCode() == AWS_NOT_FOUND_STATUS_CODE) {
+    } catch (S3Exception ex) {
+      if (ex.statusCode() == AWS_NOT_FOUND_STATUS_CODE) {
         throw new FileNotFoundException(convertS3KeyToFileName(s3Key));
       } else {
         throw ex;

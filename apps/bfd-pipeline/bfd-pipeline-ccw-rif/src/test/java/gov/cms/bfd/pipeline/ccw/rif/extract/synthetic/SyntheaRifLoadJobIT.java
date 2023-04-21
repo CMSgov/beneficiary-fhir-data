@@ -40,13 +40,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
 public final class SyntheaRifLoadJobIT extends MinioTestContainer {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client = createS3MinioClient();
+  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -93,7 +94,6 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
@@ -216,7 +216,7 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
                   .statusCode()
               == HttpStatus.SC_OK);
     } finally {
-      if (bucket != null) {
+      if (StringUtils.isNotBlank(bucket)) {
         DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
       }
     }
@@ -246,7 +246,6 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
@@ -373,7 +372,7 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
               == HttpStatus.SC_OK);
 
     } finally {
-      if (bucket != null) {
+      if (StringUtils.isNotBlank(bucket)) {
         DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
       }
     }

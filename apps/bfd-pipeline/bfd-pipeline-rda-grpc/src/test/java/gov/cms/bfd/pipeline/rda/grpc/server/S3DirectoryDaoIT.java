@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import com.google.common.io.ByteSource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,6 +20,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 /** Integration test for {@link S3DirectoryDao}. */
 public class S3DirectoryDaoIT {
@@ -33,16 +33,15 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testBasicOperations() throws Exception {
-    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
-    Bucket s3Bucket = null;
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
+    String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
     try {
       s3Bucket = createTestBucket(s3Client);
       final String s3Directory = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao =
-          new S3DirectoryDao(s3Client, s3Bucket.getName(), s3Directory, cacheDirectoryPath, true);
+      s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, true);
 
       // no files in the bucket yet
       assertEquals(List.of(), s3Dao.readFileNames());
@@ -112,8 +111,8 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testDeleteOnClose() throws Exception {
-    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
-    Bucket s3Bucket = null;
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
+    String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
     String aTag1;
@@ -122,8 +121,7 @@ public class S3DirectoryDaoIT {
       s3Bucket = createTestBucket(s3Client);
       final String s3Directory = "";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao =
-          new S3DirectoryDao(s3Client, s3Bucket.getName(), s3Directory, cacheDirectoryPath, true);
+      s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, true);
 
       // add a couple of files
       aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
@@ -160,8 +158,8 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testCloseDeletesNothingWhenFlagNotTrue() throws Exception {
-    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
-    Bucket s3Bucket = null;
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
+    String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
     String aTag1;
@@ -170,8 +168,7 @@ public class S3DirectoryDaoIT {
       s3Bucket = createTestBucket(s3Client);
       final String s3Directory = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao =
-          new S3DirectoryDao(s3Client, s3Bucket.getName(), s3Directory, cacheDirectoryPath, false);
+      s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, false);
 
       // add a couple of files
       aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
@@ -212,14 +209,14 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testGetObjectMetaDataForMissingFile() throws Exception {
-    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
-    Bucket s3Bucket = null;
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
+    String s3Bucket = null;
     try {
       s3Bucket = createTestBucket(s3Client);
       final String s3Directory = "";
       try (var s3Dao =
           new S3DirectoryDao(
-              s3Client, s3Bucket.getName(), s3Directory, Files.createTempDirectory("test"), true)) {
+              s3Client, s3Bucket, s3Directory, Files.createTempDirectory("test"), true)) {
         assertThrows(
             FileNotFoundException.class,
             () -> {
@@ -234,7 +231,7 @@ public class S3DirectoryDaoIT {
   /**
    * Upload the string as a "file" to the s3 bucket and return the ETag assigned to it by S3.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @param bucket the bucket to receive the file
    * @param objectKey the key for the object
    * @param fileData a string uploaded as a file
@@ -242,15 +239,16 @@ public class S3DirectoryDaoIT {
    * @throws IOException pass through if anything fails
    */
   private String uploadFileToBucket(
-      AmazonS3 s3Client, Bucket bucket, String objectKey, String fileData) throws IOException {
+      S3Client s3Client, String bucket, String objectKey, String fileData) throws IOException {
     uploadJsonToBucket(
-        s3Client,
-        bucket.getName(),
-        objectKey,
-        ByteSource.wrap(fileData.getBytes(StandardCharsets.UTF_8)));
-    var metaData = s3Client.getObjectMetadata(bucket.getName(), objectKey);
-    assertNotNull(metaData);
-    return metaData.getETag();
+        s3Client, bucket, objectKey, ByteSource.wrap(fileData.getBytes(StandardCharsets.UTF_8)));
+    var eTag =
+        s3Client
+            .getObject(GetObjectRequest.builder().key(objectKey).bucket(bucket).build())
+            .response()
+            .eTag();
+    assertNotNull(eTag);
+    return eTag;
   }
 
   /**

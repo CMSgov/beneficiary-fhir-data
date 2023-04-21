@@ -32,13 +32,14 @@ import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
+import software.amazon.awssdk.utils.StringUtils;
 
 /** Tests downloaded S3 file attributes such as MD5ChkSum. */
 public final class ManifestEntryDownloadTaskIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client;
+  private static S3Client s3Client;
   /** The S3 task manager. */
   private S3TaskManager s3TaskManager;
   /** Dummy S3 bucket name. */
@@ -56,7 +57,6 @@ public final class ManifestEntryDownloadTaskIT {
   @SuppressWarnings("deprecation")
   @Test
   public void testMD5ChkSum() throws Exception {
-    S3Client s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
@@ -136,7 +136,8 @@ public final class ManifestEntryDownloadTaskIT {
       // Shouldn't happen, as our apps don't use thread interrupts.
       throw new BadCodeMonkeyException(e);
     } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 }
