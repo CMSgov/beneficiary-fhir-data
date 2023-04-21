@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.REGION_DEFAULT;
-import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.createS3Client;
+import static gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer.createS3MinioClient;
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.createTestBucket;
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.deleteTestBucket;
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.uploadJsonToBucket;
@@ -12,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.io.ByteSource;
+import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +24,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 /** Integration test for {@link S3DirectoryDao}. */
-public class S3DirectoryDaoIT {
+public class S3DirectoryDaoIT extends MinioTestContainer {
+
+  /** only need a single instance of the S3 client. */
+  private static S3Client s3Client = createS3MinioClient();
+
   /**
    * Tests all basic operations of the {@link S3DirectoryDao}. Uploads and accesses data to a bucket
    * and verifies that cached files are managed as expected.
@@ -33,7 +37,6 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testBasicOperations() throws Exception {
-    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
@@ -111,7 +114,6 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testDeleteOnClose() throws Exception {
-    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
@@ -158,7 +160,6 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testCloseDeletesNothingWhenFlagNotTrue() throws Exception {
-    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
@@ -209,7 +210,6 @@ public class S3DirectoryDaoIT {
    */
   @Test
   public void testGetObjectMetaDataForMissingFile() throws Exception {
-    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     try {
       s3Bucket = createTestBucket(s3Client);

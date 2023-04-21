@@ -11,7 +11,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.net.URL;
@@ -42,7 +41,6 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
    */
   @Test
   public void emptyBucketTest() throws Exception {
-    S3Utilities.createS3Client(new ExtractionOptions("foo"));
     String bucket = null;
     try {
       // Create the (empty) bucket to run against.

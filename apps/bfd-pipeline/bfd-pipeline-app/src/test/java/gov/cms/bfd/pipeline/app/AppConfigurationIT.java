@@ -14,7 +14,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
-import io.micrometer.core.instrument.config.MissingRequiredConfigurationException;
+import io.micrometer.core.instrument.config.validate.ValidationException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -181,7 +181,7 @@ public final class AppConfigurationIT {
     // confirm the defaults work as expected
     assertFalse(config.enabled());
     assertEquals(Duration.ofMinutes(1), config.step());
-    assertThrows(MissingRequiredConfigurationException.class, () -> config.namespace());
+    assertThrows(ValidationException.class, () -> config.namespace());
 
     // confirm explicit values are parsed correctly
     envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_ENABLED, "true");

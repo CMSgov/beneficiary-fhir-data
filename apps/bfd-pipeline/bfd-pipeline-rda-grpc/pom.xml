@@ -229,6 +229,11 @@
             <artifactId>aws-core</artifactId>
             <version>${awssdk.core.version}</version>
         </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-pipeline-shared-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
