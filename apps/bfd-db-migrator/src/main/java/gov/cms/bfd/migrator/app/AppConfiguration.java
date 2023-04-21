@@ -62,12 +62,13 @@ public class AppConfiguration extends BaseAppConfiguration {
    *     configuration passed to the application are incomplete or incorrect.
    */
   public static AppConfiguration readConfigFromEnvironmentVariables() {
+    final var configLoader = BaseAppConfiguration.envVarConfigLoader();
 
-    MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
-    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables();
+    MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables(configLoader);
+    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(configLoader);
 
     Optional<String> flywayScriptLocationOverride =
-        readEnvStringOptional(ENV_VAR_FLYWAY_SCRIPT_LOCATION);
+        readEnvStringOptional(configLoader, ENV_VAR_FLYWAY_SCRIPT_LOCATION);
     String flywayScriptLocation = flywayScriptLocationOverride.orElse("");
 
     return new AppConfiguration(metricOptions, databaseOptions, flywayScriptLocation);

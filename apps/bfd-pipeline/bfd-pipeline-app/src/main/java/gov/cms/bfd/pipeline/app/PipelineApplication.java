@@ -27,6 +27,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
+import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import io.micrometer.cloudwatch.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -96,11 +98,12 @@ public final class PipelineApplication {
     LOGGER.info("Application starting up!");
     configureUnexpectedExceptionHandlers();
 
+    final var configLoader = BaseAppConfiguration.envVarConfigLoader();
     AppConfiguration appConfig = null;
     try {
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+      appConfig = AppConfiguration.readConfigFromEnvironmentVariables(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
-    } catch (AppConfigurationException e) {
+    } catch (ConfigException | AppConfigurationException e) {
       System.err.println(e.getMessage());
       LOGGER.warn("Invalid app configuration.", e);
       System.exit(EXIT_CODE_BAD_CONFIG);
@@ -129,7 +132,7 @@ public final class PipelineApplication {
       appMeters.add(cloudWatchRegistry);
       LOGGER.info("Added CloudWatchMeterRegistry.");
     }
-    if (AppConfiguration.isJmxMetricsEnabled()) {
+    if (AppConfiguration.isJmxMetricsEnabled(configLoader)) {
       appMeters.add(new JmxMeterRegistry(JmxConfig.DEFAULT, micrometerClock));
       LOGGER.info("Added JmxMeterRegistry.");
     }

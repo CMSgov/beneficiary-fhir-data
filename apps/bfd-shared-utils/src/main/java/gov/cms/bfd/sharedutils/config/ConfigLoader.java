@@ -1,13 +1,15 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * Abstracts loading configuration values from one or more sources of key/value pairs. Provides
@@ -39,6 +44,18 @@ public class ConfigLoader {
   /** Error message for invalid float. */
   private static final String NOT_VALID_FLOAT = "not a valid float";
 
+  /** Error message for invalid boolean. */
+  public static final String NOT_BOOLEAN = "not a valid boolean";
+
+  /** Error message for missing required value. */
+  private static final String NOT_PROVIDED = "required option not provided";
+
+  /** Format string for {@link String#format} for unparseable value. */
+  private static final String NOT_VALID_PARSED = "not a value %s value";
+
+  /** Used to find and remove leading and trailing spaces and tabs. */
+  private static final Pattern TRIM_PATTERN = Pattern.compile("^([ \\t]*)(.*?)([ \\t]*)$");
+
   /**
    * Constructs a ConfigLoader that uses the provided Function as the source of key/value
    * configuration data. The function will be called whenever a specific configuration value is
@@ -61,34 +78,38 @@ public class ConfigLoader {
   }
 
   /**
-   * Returns the string values for the specified configuration data.
+   * Returns the string values for the specified configuration data. Null values are converted into
+   * empty strings. Strings have leading and trailing whitespace removed. Empty strings are
+   * retained. If there are no values for the given name an empty immutable list is returned.
    *
    * @param name the name to look up
    * @return the values in a list
    */
   public List<String> stringValues(String name) {
-    final Collection<String> values = source.apply(name);
+    final List<String> values = rawStringValues(name);
 
-    if (values == null || values.isEmpty()) {
-      throw new ConfigException(name, "required option not provided");
+    if (values.isEmpty()) {
+      throw new ConfigException(name, NOT_PROVIDED);
     } else {
-      return new ArrayList<>(values);
+      return values;
     }
   }
 
   /**
-   * Returns the string values for the specified configuration data.
+   * Returns the string values for the specified configuration data. Null values are converted into
+   * empty strings. Strings have leading and trailing whitespace removed. Empty strings are
+   * retained. If there are no values for the given name an immutable list containing the provided
+   * default values is returned.
    *
    * @param name the name to look up
    * @param defaults the defaults for the values if no value found for name
-   * @return the values for the specified name, using the specified defaults if no value was found
+   * @return immutable list containing the values for the specified name, using the specified
+   *     defaults if no value was found
    */
   public List<String> stringValues(String name, Collection<String> defaults) {
-    final Collection<String> values = source.apply(name);
+    final List<String> values = rawStringValues(name);
 
-    return (values == null || values.isEmpty())
-        ? new ArrayList<>(defaults)
-        : new ArrayList<>(values);
+    return values.isEmpty() ? ImmutableList.copyOf(defaults) : values;
   }
 
   /**
@@ -99,7 +120,8 @@ public class ConfigLoader {
    * @throws ConfigException if there is no non-empty value
    */
   public String stringValue(String name) {
-    return stringValues(name).get(0);
+    return stringOption(name)
+        .orElseThrow(() -> new ConfigException(name, "required option not provided"));
   }
 
   /**
@@ -110,21 +132,20 @@ public class ConfigLoader {
    * @return either the non-empty string value or defaultValue
    */
   public String stringValue(String name, String defaultValue) {
-    return stringValues(name, Collections.singletonList(defaultValue)).get(0);
+    return stringOption(name).orElse(defaultValue);
   }
 
   /**
-   * Gets an optonal configuration value list.
+   * Gets an optional configuration value list. Null values are converted into empty strings.
+   * Strings have leading and trailing whitespace removed. Empty strings are retained.
    *
    * @param name the name of configuration value
    * @return the optional list of string values for the name
    */
   public Optional<List<String>> stringsOption(String name) {
-    final Collection<String> values = source.apply(name);
+    final List<String> values = rawStringValues(name);
 
-    return (values == null || values.isEmpty())
-        ? Optional.empty()
-        : Optional.of(new ArrayList<>(values));
+    return values.isEmpty() ? Optional.empty() : Optional.of(values);
   }
 
   /**
@@ -134,9 +155,17 @@ public class ConfigLoader {
    * @return empty Option if there is no non-empty value, otherwise Option holding the value
    */
   public Optional<String> stringOption(String name) {
-    Optional<List<String>> optional = stringsOption(name);
+    return firstNonEmpty(rawStringValues(name));
+  }
 
-    return optional.map(strings -> strings.get(0));
+  /**
+   * Gets an Optional for the specified configuration value.
+   *
+   * @param name name of configuration value
+   * @return empty Option if there is a value, otherwise Option holding the value
+   */
+  public Optional<String> stringOptionEmptyOK(String name) {
+    return first(rawStringValues(name));
   }
 
   /**
@@ -165,17 +194,7 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid float
    */
   public float floatValue(String name, float defaultValue) {
-    Optional<String> optional = stringOption(name);
-
-    if (optional.isEmpty()) {
-      return defaultValue;
-    }
-
-    try {
-      return Float.parseFloat(optional.get());
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
-    }
+    return floatOption(name).orElse(defaultValue);
   }
 
   /**
@@ -221,7 +240,7 @@ public class ConfigLoader {
   public int intValue(String name, int defaultValue) {
     Optional<String> optional = stringOption(name);
 
-    if (!optional.isPresent()) {
+    if (optional.isEmpty()) {
       return defaultValue;
     }
 
@@ -301,8 +320,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no value or the file is not readable
    */
   public File readableFile(String name) {
-    return readableFileOption(name)
-        .orElseThrow(() -> new ConfigException(name, "required option not provided"));
+    return readableFileOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -333,6 +351,35 @@ public class ConfigLoader {
   }
 
   /**
+   * Gets an optional boolean configuration value.
+   *
+   * @param name name of configuration value
+   * @return either the boolean value or empty
+   * @throws ConfigException if a value existed but it wasn't a valid boolean
+   */
+  public Optional<Boolean> booleanOption(String name) {
+    return stringOption(name)
+        .map(
+            s ->
+                switch (s.toLowerCase()) {
+                  case "true" -> true;
+                  case "false" -> false;
+                  default -> throw new ConfigException(name, NOT_BOOLEAN);
+                });
+  }
+
+  /**
+   * Gets an optional boolean configuration value or a defaultValue if there is no value.
+   *
+   * @param name name of configuration value
+   * @return either the boolean value or defaultValue
+   * @throws ConfigException if a value was missing or it wasn't a valid boolean
+   */
+  public boolean booleanValue(String name) {
+    return booleanOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  }
+
+  /**
    * Gets an optional boolean configuration value or a defaultValue if there is no value.
    *
    * @param name name of configuration value
@@ -341,19 +388,71 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but it wasn't a valid boolean
    */
   public boolean booleanValue(String name, boolean defaultValue) {
-    Optional<String> value = stringOption(name);
+    return booleanOption(name).orElse(defaultValue);
+  }
 
-    if (!value.isPresent()) {
-      return defaultValue;
+  /**
+   * Gets a required hex encoded binary configuration value.
+   *
+   * @param name name of configuration value
+   * @return the decoded byte array
+   * @throws ConfigException if a value is missing or could not be decoded
+   */
+  public byte[] hexBytes(String name) {
+    final var hexString = stringValue(name);
+    try {
+      return Hex.decodeHex(hexString.toCharArray());
+    } catch (DecoderException e) {
+      throw new ConfigException(name, "invalid hex string", e);
     }
+  }
 
-    switch (value.get().toLowerCase()) {
-      case "true":
-        return true;
-      case "false":
-        return false;
-      default:
-        throw new ConfigException(name, "invalid boolean value: " + value);
+  /**
+   * Gets an optional configuration value and parses it into an object using provided function.
+   *
+   * @param name name of configuration value
+   * @param klass class of object returned by the parser
+   * @param parser function that parses a string
+   * @return the parsed object
+   * @throws ConfigException if a value is missing or could not be parsed
+   * @param <T> type returned by the parser
+   */
+  public <T> Optional<T> parsedOption(String name, Class<T> klass, Function<String, T> parser) {
+    return stringOption(name).map(source -> parseString(name, source, klass, parser));
+  }
+
+  /**
+   * Gets a required configuration value and parses it into an object using provided function.
+   *
+   * @param name name of configuration value
+   * @param klass class of object returned by the parser
+   * @param parser function that parses a string
+   * @return the parsed object
+   * @throws ConfigException if a value is missing or could not be parsed
+   * @param <T> type returned by the parser
+   */
+  public <T> T parsedValue(String name, Class<T> klass, Function<String, T> parser) {
+    return parsedOption(name, klass, parser)
+        .orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  }
+
+  /**
+   * Calls a parsing function to parse a string..
+   *
+   * @param name name of configuration value
+   * @param klass class of object returned by the parser
+   * @param parser function that parses a string
+   * @return the parsed object
+   * @throws ConfigException if a value is missing or could not be parsed
+   * @param <T> type returned by the parser
+   */
+  private <T> T parseString(
+      String name, String source, Class<T> klass, Function<String, T> parser) {
+    try {
+      return parser.apply(source);
+    } catch (RuntimeException e) {
+      final var message = String.format(NOT_VALID_PARSED, klass.getSimpleName());
+      throw new ConfigException(name, message, e);
     }
   }
 
@@ -414,6 +513,60 @@ public class ConfigLoader {
       throw new ConfigException(name, "attempt to validate the file failed with an exception", ex);
     }
     return file;
+  }
+
+  /**
+   * Removes spaces and tabs from the beginning and end of a string.
+   *
+   * @param rawString string to be modified
+   * @return the resulting string or same if no changes needed
+   */
+  @VisibleForTesting
+  static String trim(String rawString) {
+    var matcher = TRIM_PATTERN.matcher(rawString);
+    return matcher.matches() && !matcher.group(1).equals(rawString) ? matcher.group(2) : rawString;
+  }
+
+  /**
+   * Returns the string values for the specified configuration data. Null values are converted into
+   * empty strings. Strings have leading and trailing whitespace removed. If there are no values for
+   * the given name an empty list is returned.
+   *
+   * @param name the name to look up
+   * @return immutable list of values
+   */
+  private List<String> rawStringValues(String name) {
+    final Collection<String> values = source.apply(name);
+    if (values == null || values.isEmpty()) {
+      return ImmutableList.of();
+    } else {
+      return values.stream()
+          .map(Strings::nullToEmpty)
+          .map(ConfigLoader::trim)
+          .collect(toImmutableList());
+    }
+  }
+
+  /**
+   * Returns an {@link Optional} containing the first value from the list or an empty {@link
+   * Optional} if the list is empty.
+   *
+   * @param values list of values to check
+   * @return the optional
+   */
+  private Optional<String> first(List<String> values) {
+    return values.isEmpty() ? Optional.empty() : Optional.of(values.get(0));
+  }
+
+  /**
+   * Returns an {@link Optional} containing the first non-empty value from the list or an empty
+   * {@link Optional} if the list is empty or contains only empty strings.
+   *
+   * @param values list of values to check
+   * @return the optional
+   */
+  private Optional<String> firstNonEmpty(List<String> values) {
+    return values.stream().filter(s -> !s.isEmpty()).findFirst();
   }
 
   /**

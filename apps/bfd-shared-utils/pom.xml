@@ -51,7 +51,13 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
-    
+
+		<dependency>
+			<!-- Used to parse and read hex encoded data. -->
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

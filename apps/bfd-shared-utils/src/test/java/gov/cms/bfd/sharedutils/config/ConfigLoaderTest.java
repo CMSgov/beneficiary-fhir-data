@@ -3,6 +3,7 @@ package gov.cms.bfd.sharedutils.config;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
@@ -440,7 +441,10 @@ public class ConfigLoaderTest {
     final List<String> names = new ArrayList<>(System.getenv().keySet());
     final ConfigLoader config = ConfigLoader.builder().addEnvironmentVariables().build();
     for (String name : names) {
-      assertEquals(System.getenv(name), config.stringValue(name, ""), "mismatch for " + name);
+      assertEquals(
+          ConfigLoader.trim(Strings.nullToEmpty(System.getenv(name))),
+          config.stringValue(name, ""),
+          "mismatch for " + name);
     }
   }
 
@@ -451,7 +455,9 @@ public class ConfigLoaderTest {
     final ConfigLoader config = ConfigLoader.builder().addSystemProperties().build();
     for (String name : names) {
       assertEquals(
-          System.getProperty(name, ""), config.stringValue(name, ""), "mismatch for " + name);
+          ConfigLoader.trim(System.getProperty(name, "")),
+          config.stringValue(name, ""),
+          "mismatch for " + name);
     }
   }
 
@@ -477,6 +483,21 @@ public class ConfigLoaderTest {
         ConfigLoader.builder().addSingle(fallback::get).addSingle(primary::get).build();
     assertEquals("A", config.stringValue("in-primary"));
     assertEquals("B", config.stringValue("in-fallback"));
+  }
+
+  /** Validates that leading and trailing whitespace are removed as expected. */
+  @Test
+  public void testTrimming() {
+    assertEquals("", ConfigLoader.trim(""));
+    assertEquals("x", ConfigLoader.trim("x"));
+    assertEquals("x y", ConfigLoader.trim("x y"));
+    assertEquals("x y", ConfigLoader.trim(" x y"));
+    assertEquals("x y", ConfigLoader.trim("x y "));
+    assertEquals("x y", ConfigLoader.trim("\tx y"));
+    assertEquals("x y", ConfigLoader.trim("x y\t"));
+    assertEquals("x y", ConfigLoader.trim(" x y\t"));
+    assertEquals("x y", ConfigLoader.trim("\tx y "));
+    assertEquals("x y", ConfigLoader.trim(" \tx y\t "));
   }
 
   /**
