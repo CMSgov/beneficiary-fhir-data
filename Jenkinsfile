@@ -30,7 +30,7 @@ properties([
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
-		booleanParam(name: 'skip_migrator_deployment', description: 'When true, blow past the migrator deployment in test. Non-trunk/non-master only.', defaultValue: false),
+		booleanParam(name: 'force_migrator_deployment', description: 'When false, it will blow past the migrator deployment in all environments unless there is changes in the migrator project, then deploy the migrator.', defaultValue: false),
 		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
@@ -49,6 +49,8 @@ def amiIds
 def currentStage
 def gitCommitId
 def gitRepoUrl
+def gitBranchName
+def forceMigratorDeployment
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
@@ -169,6 +171,33 @@ try {
 					// Get the remote repo url. This assumes we are using git+https not git+ssh.
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
+					forceMigratorDeployment = false
+
+					if(!params.force_migrator_deployment){
+						gitBranchName = ""
+						//Check for a PR branch
+						if (env.BRANCH_NAME.startsWith('PR')) {
+							gitBranchName = env.CHANGE_BRANCH
+						}else {
+							gitBranchName = env.BRANCH_NAME
+						}
+						println "Repo Url: ${gitRepoUrl.toUpperCase()}"
+						println  "Checking to see if any changes to migrator scripts on branch: ${gitBranchName.toUpperCase()}"
+						println  "Proceeding to shallow clone ${gitBranchName.toUpperCase()}"
+						// Git shallow clone of pr branch with a depth of 2
+						gitShallowCloneRepo = sh(returnStdout: true, script: "git clone --depth 2 --branch ${gitBranchName} ${gitRepoUrl}").trim()
+						// Git diff of shallow
+						dir("beneficiary-fhir-data"){
+							gitDiffs = sh(returnStdout: true, script: "git diff HEAD^ HEAD -- apps/bfd-model/bfd-model-rif/src/main/resources/db")
+							if(gitDiffs){
+								println  "Changes to migrator on branch: ${gitBranchName.toUpperCase()}, forcing migrator to deploy."
+								forceMigratorDeployment = true;
+							}else{
+								println  "No changes to migrator on branch: ${gitBranchName.toUpperCase()}"
+							}
+						}
+					}
+
 					// Send notifications that the build has started
 					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 				}
@@ -228,7 +257,7 @@ try {
 
 			stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
-				if (!params.skip_migrator_deployment || env.BRANCH == "master" ) {
+				if (params.force_migrator_deployment || (env.BRANCH == "master" && forceMigratorDeployment) ) {
 					lock(resource: 'env_test') {
 						milestone(label: 'stage_deploy_test_migration_start')
 						container('bfd-cbc-build') {
@@ -360,7 +389,7 @@ try {
 
 			stage('Deploy Migrator to PROD-SBX') {
 				currentStage = env.STAGE_NAME
-				if (willDeployToProdEnvs) {
+				if ((willDeployToProdEnvs && forceMigratorDeployment) || params.force_migrator_deployment) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_migration_start')
 						container('bfd-cbc-build') {
@@ -477,7 +506,7 @@ try {
 			stage('Deploy Migrator to PROD') {
 				currentStage = env.STAGE_NAME
 
-				if (willDeployToProdEnvs) {
+				if ((willDeployToProdEnvs && forceMigratorDeployment) || params.force_migrator_deployment) {
 					lock(resource: 'env_prod') {
 						milestone(label: 'stage_deploy_prod_migration_start')
 						container('bfd-cbc-build') {
