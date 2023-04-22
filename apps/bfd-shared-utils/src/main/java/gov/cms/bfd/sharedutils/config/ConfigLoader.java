@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,31 +29,42 @@ import org.apache.commons.codec.binary.Hex;
  * default values but allow environment variables to override anything in the Map.
  */
 public class ConfigLoader {
+  /** Format string for {@link String#format} for unparseable value. */
+  @VisibleForTesting static final String NOT_VALID_PARSED = "not a valid %s value";
+
   /** Error message for missing required value. */
   @VisibleForTesting static final String NOT_PROVIDED = "required option not provided";
 
   /** Error message for invalid integer. */
-  @VisibleForTesting static final String NOT_VALID_INTEGER = "not a valid integer";
+  @VisibleForTesting
+  static final String NOT_VALID_INTEGER =
+      String.format(NOT_VALID_PARSED, Integer.class.getSimpleName());
 
   /** Error message for non-positive integer. */
   @VisibleForTesting static final String NOT_POSITIVE_INTEGER = "not a positive integer";
 
   /** Error message for invalid long. */
-  @VisibleForTesting static final String NOT_VALID_LONG = "not a valid long";
+  @VisibleForTesting
+  static final String NOT_VALID_LONG = String.format(NOT_VALID_PARSED, Long.class.getSimpleName());
 
   /** Error message for invalid float. */
-  @VisibleForTesting static final String NOT_VALID_FLOAT = "not a valid float";
+  @VisibleForTesting
+  static final String NOT_VALID_FLOAT =
+      String.format(NOT_VALID_PARSED, Float.class.getSimpleName());
 
   /** Error message for invalid boolean. */
-  @VisibleForTesting static final String NOT_VALID_BOOLEAN = "not a valid boolean";
+  @VisibleForTesting
+  static final String NOT_VALID_BOOLEAN =
+      String.format(NOT_VALID_PARSED, Boolean.class.getSimpleName());
 
-  /** Format string for {@link String#format} for unparseable value. */
-  @VisibleForTesting static final String NOT_VALID_PARSED = "not a valid %s value";
+  /** Error message for invalid hex strings. */
+  public static final String NOT_VALID_HEX = "invalid hex string";
 
   /** Used to find and remove leading and trailing spaces and tabs. */
   private static final Pattern TRIM_PATTERN = Pattern.compile("^([ \\t]*)(.*?)([ \\t]*)$");
 
-  public static final String NOT_VALID_HEX = "invalid hex string";
+  /** Group number for trimmed string group in {@link #TRIM_PATTERN}. */
+  private static final int TRIM_PATTERN_CENTER_GROUP = 2;
 
   /**
    * The data source to load data from. A lambda function or method reference can be used as the
@@ -207,11 +217,7 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid float
    */
   public Optional<Float> floatOption(String name) {
-    try {
-      return stringOption(name).map(Float::parseFloat);
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
-    }
+    return parsedOption(name, Float.class, Float::parseFloat);
   }
 
   /**
@@ -244,14 +250,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is an integer value and it is not positive
    */
   public Optional<Integer> positiveIntOption(String name) {
-    return intOption(name)
-        .map(
-            value -> {
-              if (value < 1) {
-                throw new ConfigException(name, NOT_POSITIVE_INTEGER);
-              }
-              return value;
-            });
+    return intOption(name).map(x -> validate(name, x, NOT_POSITIVE_INTEGER, x > 0));
   }
 
   /**
@@ -274,11 +273,7 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid integer
    */
   public Optional<Integer> intOption(String name) {
-    try {
-      return stringOption(name).map(Integer::parseInt);
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
-    }
+    return parsedOption(name, Integer.class, Integer::parseInt);
   }
 
   /**
@@ -289,11 +284,7 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid long
    */
   public Optional<Long> longOption(String name) {
-    try {
-      return stringOption(name).map(Long::parseLong);
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_LONG, ex);
-    }
+    return parsedOption(name, Long.class, Long::parseLong);
   }
 
   /**
@@ -368,14 +359,7 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but it wasn't a valid boolean
    */
   public Optional<Boolean> booleanOption(String name) {
-    return stringOption(name)
-        .map(
-            s ->
-                switch (s.toLowerCase()) {
-                  case "true" -> true;
-                  case "false" -> false;
-                  default -> throw new ConfigException(name, NOT_VALID_BOOLEAN);
-                });
+    return parsedOption(name, Boolean.class, ConfigLoader::parseBoolean);
   }
 
   /**
@@ -444,6 +428,39 @@ public class ConfigLoader {
   public <T> T parsedValue(String name, Class<T> klass, Function<String, T> parser) {
     return parsedOption(name, klass, parser)
         .orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  }
+
+  /**
+   * Suitable for use in a {@link Optional#map} call to validate that a condition is true.
+   *
+   * @param name name of the value
+   * @param value the value being tested
+   * @param errorMessage error message in case condition is false
+   * @param isValid condition to check
+   * @return the value if condition is true
+   * @param <T> type of value being checked
+   * @throws ConfigException if the condition is false
+   */
+  private static <T> T validate(String name, T value, String errorMessage, boolean isValid) {
+    if (!isValid) {
+      throw new ConfigException(name, errorMessage);
+    }
+    return value;
+  }
+
+  /**
+   * More robust version of {@link Boolean#parseBoolean}.
+   *
+   * @param s string to parse
+   * @return boolean value
+   * @throws IllegalArgumentException if string is invalid
+   */
+  private static Boolean parseBoolean(String s) {
+    return switch (s.toLowerCase()) {
+      case "true" -> true;
+      case "false" -> false;
+      default -> throw new IllegalArgumentException(NOT_VALID_BOOLEAN);
+    };
   }
 
   /**
@@ -535,7 +552,7 @@ public class ConfigLoader {
   @VisibleForTesting
   static String trim(String rawString) {
     var matcher = TRIM_PATTERN.matcher(rawString);
-    return matcher.matches() ? matcher.group(2) : rawString;
+    return matcher.matches() ? matcher.group(TRIM_PATTERN_CENTER_GROUP) : rawString;
   }
 
   /**
@@ -545,7 +562,6 @@ public class ConfigLoader {
    * that calls can be chained.
    */
   public static class Builder {
-
     /**
      * The data source to load data from. A lambda function or method reference can be used as the
      * source of data (e.g. System::getenv or myMap::get).
@@ -562,7 +578,7 @@ public class ConfigLoader {
     }
 
     /**
-     * Adds a configuration collection by copying the input source configuration.
+     * Adds a new configuration source that takes precedence over the current source.
      *
      * @param newSource the source to add
      * @return the builder for chaining
@@ -578,7 +594,8 @@ public class ConfigLoader {
     }
 
     /**
-     * Adds a single configuration by copying the value of the input source configuration.
+     * Adds a new configuration source that returns a single value per key rather than a collection
+     * of values.
      *
      * @param newSource the source to add
      * @return the builder for chaining
@@ -591,18 +608,6 @@ public class ConfigLoader {
           };
 
       return add(wrappedNewSource);
-    }
-
-    /**
-     * Adds the provided {@link ConfigLoader} as a source. Just a convenience method that adds the
-     * config's own source as a source for the config we are building.
-     *
-     * @param config source of config variables
-     * @return the builder for chaining
-     */
-    public Builder addConfig(ConfigLoader config) {
-      add(config.source);
-      return this;
     }
 
     /**
@@ -668,14 +673,14 @@ public class ConfigLoader {
      * @return the builder with the arguments mapped
      */
     public Builder addKeyValueCommandLineArguments(String[] args) {
-      Map<String, String> map = new HashMap<>();
+      final var map = ImmutableMap.<String, String>builder();
       for (String arg : args) {
-        int prefixEnd = arg.indexOf(":");
+        final int prefixEnd = arg.indexOf(":");
         if (prefixEnd > 0) {
           map.put(arg.substring(0, prefixEnd), arg.substring(prefixEnd + 1));
         }
       }
-      return addSingle(map::get);
+      return addMap(map.build());
     }
   }
 }

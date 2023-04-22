@@ -634,9 +634,9 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     return new CcwRifLoadOptions(extractionOptions, loadOptions);
   }
 
-  /*
-   * Just for convenience: makes sure DefaultAWSCredentialsProviderChain has whatever it needs before
-   * we try to use any AWS resources.
+  /**
+   * Just for convenience: makes sure DefaultAWSCredentialsProviderChain has whatever it needs
+   * before we try to use any AWS resources.
    */
   static void ensureAwsCredentialsConfiguredCorrectly() {
     try {
