@@ -468,9 +468,11 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * information. The provided {@link ConfigLoader} is used to look up variables related to where to
    * find other sources of config variables.
    *
-   * <p>Config values will be loaded from (in order with first matching value used):
+   * <p>Config values will be loaded from these sources. Sources are checked in order with first
+   * matching value used.
    *
    * <ol>
+   *   <li>System properties.
    *   <li>Environment variables.
    *   <li>If {@link #ENV_VAR_KEY_PROPERTIES_FILE} is defined use properties in that file.
    *   <li>If {@link #ENV_VAR_KEY_SSM_PARAMETER_PATH} is defined use parameters at that path.
@@ -505,6 +507,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     }
 
     configBuilder.addEnvironmentVariables();
+    configBuilder.addSystemProperties();
     return configBuilder.build();
   }
 
