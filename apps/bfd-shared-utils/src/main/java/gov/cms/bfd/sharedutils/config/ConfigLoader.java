@@ -1,7 +1,5 @@
 package gov.cms.bfd.sharedutils.config;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -12,10 +10,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
@@ -32,26 +30,34 @@ import org.apache.commons.codec.binary.Hex;
  * default values but allow environment variables to override anything in the Map.
  */
 public class ConfigLoader {
+  /** Error message for missing required value. */
+  @VisibleForTesting static final String NOT_PROVIDED = "required option not provided";
+
   /** Error message for invalid integer. */
-  private static final String NOT_VALID_INTEGER = "not a valid integer";
+  @VisibleForTesting static final String NOT_VALID_INTEGER = "not a valid integer";
 
   /** Error message for non-positive integer. */
-  public static final String NOT_POSITIVE_INTEGER = "not a positive integer";
+  @VisibleForTesting static final String NOT_POSITIVE_INTEGER = "not a positive integer";
+
+  /** Error message for invalid long. */
+  @VisibleForTesting static final String NOT_VALID_LONG = "not a valid long";
 
   /** Error message for invalid float. */
-  private static final String NOT_VALID_FLOAT = "not a valid float";
+  @VisibleForTesting static final String NOT_VALID_FLOAT = "not a valid float";
 
   /** Error message for invalid boolean. */
-  public static final String NOT_BOOLEAN = "not a valid boolean";
+  @VisibleForTesting static final String NOT_VALID_BOOLEAN = "not a valid boolean";
 
-  /** Error message for missing required value. */
-  private static final String NOT_PROVIDED = "required option not provided";
+  /** Error message for invalid enum. */
+  @VisibleForTesting static final String NOT_VALID_ENUM = "not a valid enum";
 
   /** Format string for {@link String#format} for unparseable value. */
-  private static final String NOT_VALID_PARSED = "not a valid %s value";
+  @VisibleForTesting static final String NOT_VALID_PARSED = "not a valid %s value";
 
   /** Used to find and remove leading and trailing spaces and tabs. */
   private static final Pattern TRIM_PATTERN = Pattern.compile("^([ \\t]*)(.*?)([ \\t]*)$");
+
+  public static final String NOT_VALID_HEX = "invalid hex string";
 
   /**
    * The data source to load data from. A lambda function or method reference can be used as the
@@ -89,12 +95,12 @@ public class ConfigLoader {
    * @return the values in a list
    */
   public List<String> stringValues(String name) {
-    final List<String> values = rawStringValues(name);
+    final Collection<String> values = source.apply(name);
 
-    if (values.isEmpty()) {
+    if (values == null || values.isEmpty()) {
       throw new ConfigException(name, NOT_PROVIDED);
     } else {
-      return values;
+      return ImmutableList.copyOf(values);
     }
   }
 
@@ -110,9 +116,11 @@ public class ConfigLoader {
    *     defaults if no value was found
    */
   public List<String> stringValues(String name, Collection<String> defaults) {
-    final List<String> values = rawStringValues(name);
+    final Collection<String> values = source.apply(name);
 
-    return values.isEmpty() ? ImmutableList.copyOf(defaults) : values;
+    return (values == null || values.isEmpty())
+        ? ImmutableList.copyOf(defaults)
+        : ImmutableList.copyOf(values);
   }
 
   /**
@@ -123,8 +131,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no non-empty value
    */
   public String stringValue(String name) {
-    return stringOption(name)
-        .orElseThrow(() -> new ConfigException(name, "required option not provided"));
+    return stringOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -139,26 +146,22 @@ public class ConfigLoader {
   }
 
   /**
-   * Gets an optional configuration value list. Null values are converted into empty strings.
-   * Strings have leading and trailing whitespace removed. Empty strings are retained.
-   *
-   * @param name the name of configuration value
-   * @return the optional list of string values for the name
-   */
-  public Optional<List<String>> stringsOption(String name) {
-    final List<String> values = rawStringValues(name);
-
-    return values.isEmpty() ? Optional.empty() : Optional.of(values);
-  }
-
-  /**
    * Gets an Optional for the specified configuration value.
    *
    * @param name name of configuration value
    * @return empty Option if there is no non-empty value, otherwise Option holding the value
    */
   public Optional<String> stringOption(String name) {
-    return firstNonEmpty(rawStringValues(name));
+    final Collection<String> values = source.apply(name);
+    if (values == null || values.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return values.stream()
+          .filter(Objects::nonNull)
+          .map(ConfigLoader::trim)
+          .filter(s -> !s.isEmpty())
+          .findFirst();
+    }
   }
 
   /**
@@ -168,7 +171,12 @@ public class ConfigLoader {
    * @return empty Option if there is a value, otherwise Option holding the value
    */
   public Optional<String> stringOptionEmptyOK(String name) {
-    return first(rawStringValues(name));
+    final Collection<String> values = source.apply(name);
+    if (values == null || values.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return values.stream().map(Strings::nullToEmpty).map(ConfigLoader::trim).findFirst();
+    }
   }
 
   /**
@@ -179,13 +187,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no valid float value
    */
   public float floatValue(String name) {
-    final String value = stringValue(name);
-
-    try {
-      return Float.parseFloat(value);
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_FLOAT, ex);
-    }
+    return floatOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -223,13 +225,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no valid integer value
    */
   public int intValue(String name) {
-    final String value = stringValue(name);
-
-    try {
-      return Integer.parseInt(value);
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
-    }
+    return intOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -240,11 +236,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no valid integer value or value is not positive
    */
   public int positiveIntValue(String name) {
-    int value = intValue(name);
-    if (value < 1) {
-      throw new ConfigException(name, NOT_POSITIVE_INTEGER);
-    }
-    return value;
+    return positiveIntOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -274,17 +266,7 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid integer
    */
   public int intValue(String name, int defaultValue) {
-    Optional<String> optional = stringOption(name);
-
-    if (optional.isEmpty()) {
-      return defaultValue;
-    }
-
-    try {
-      return Integer.parseInt(optional.get());
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
-    }
+    return intOption(name).orElse(defaultValue);
   }
 
   /**
@@ -313,7 +295,7 @@ public class ConfigLoader {
     try {
       return stringOption(name).map(Long::parseLong);
     } catch (Exception ex) {
-      throw new ConfigException(name, "not a valid long", ex);
+      throw new ConfigException(name, NOT_VALID_LONG, ex);
     }
   }
 
@@ -327,8 +309,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no valid enum value
    */
   public <T extends Enum<T>> T enumValue(String name, Function<String, T> parser) {
-    return enumOption(name, parser)
-        .orElseThrow(() -> new ConfigException(name, "required enum not provided"));
+    return enumOption(name, parser).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -344,7 +325,7 @@ public class ConfigLoader {
     try {
       return stringOption(name).map(parser);
     } catch (Exception ex) {
-      throw new ConfigException(name, "not a valid enum value: " + ex.getMessage(), ex);
+      throw new ConfigException(name, NOT_VALID_ENUM, ex);
     }
   }
 
@@ -400,7 +381,7 @@ public class ConfigLoader {
                 switch (s.toLowerCase()) {
                   case "true" -> true;
                   case "false" -> false;
-                  default -> throw new ConfigException(name, NOT_BOOLEAN);
+                  default -> throw new ConfigException(name, NOT_VALID_BOOLEAN);
                 });
   }
 
@@ -439,7 +420,7 @@ public class ConfigLoader {
     try {
       return Hex.decodeHex(hexString.toCharArray());
     } catch (DecoderException e) {
-      throw new ConfigException(name, "invalid hex string", e);
+      throw new ConfigException(name, NOT_VALID_HEX, e);
     }
   }
 
@@ -561,49 +542,7 @@ public class ConfigLoader {
   @VisibleForTesting
   static String trim(String rawString) {
     var matcher = TRIM_PATTERN.matcher(rawString);
-    return matcher.matches() && !matcher.group(1).equals(rawString) ? matcher.group(2) : rawString;
-  }
-
-  /**
-   * Returns the string values for the specified configuration data. Null values are converted into
-   * empty strings. Strings have leading and trailing whitespace removed. If there are no values for
-   * the given name an empty list is returned.
-   *
-   * @param name the name to look up
-   * @return immutable list of values
-   */
-  private List<String> rawStringValues(String name) {
-    final Collection<String> values = source.apply(name);
-    if (values == null || values.isEmpty()) {
-      return ImmutableList.of();
-    } else {
-      return values.stream()
-          .map(Strings::nullToEmpty)
-          .map(ConfigLoader::trim)
-          .collect(toImmutableList());
-    }
-  }
-
-  /**
-   * Returns an {@link Optional} containing the first value from the list or an empty {@link
-   * Optional} if the list is empty.
-   *
-   * @param values list of values to check
-   * @return the optional
-   */
-  private Optional<String> first(List<String> values) {
-    return values.isEmpty() ? Optional.empty() : Optional.of(values.get(0));
-  }
-
-  /**
-   * Returns an {@link Optional} containing the first non-empty value from the list or an empty
-   * {@link Optional} if the list is empty or contains only empty strings.
-   *
-   * @param values list of values to check
-   * @return the optional
-   */
-  private Optional<String> firstNonEmpty(List<String> values) {
-    return values.stream().filter(s -> !s.isEmpty()).findFirst();
+    return matcher.matches() ? matcher.group(2) : rawString;
   }
 
   /**
@@ -655,8 +594,7 @@ public class ConfigLoader {
       Function<String, Collection<String>> wrappedNewSource =
           name -> {
             String value = newSource.apply(name);
-
-            return (Strings.isNullOrEmpty(value)) ? null : Collections.singletonList(value);
+            return value == null ? null : ImmutableList.of(value);
           };
 
       return add(wrappedNewSource);

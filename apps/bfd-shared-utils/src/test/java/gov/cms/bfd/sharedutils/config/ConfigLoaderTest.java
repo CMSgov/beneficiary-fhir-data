@@ -1,5 +1,15 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_POSITIVE_INTEGER;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_PROVIDED;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_BOOLEAN;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_ENUM;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_FLOAT;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_HEX;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_INTEGER;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_LONG;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -13,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 /** Ensures the ConfigLoader can read the various configuration type data. */
 public class ConfigLoaderTest {
@@ -33,6 +43,24 @@ public class ConfigLoaderTest {
     loader = spy(ConfigLoader.builder().addSingle(values::get).build());
   }
 
+  /** Validates that getting lists of strings work properly for multi-value sources. */
+  @Test
+  public void testMultipleValues() {
+    var multiValues = new HashMap<String, List<String>>();
+    multiValues.put("a", List.of());
+    multiValues.put("b", List.of("", ""));
+    multiValues.put("d", List.of("D"));
+    loader = new ConfigLoader(multiValues::get);
+    assertThrows(ConfigException.class, () -> loader.stringValues("a"));
+    assertThrows(ConfigException.class, () -> loader.stringValues("z"));
+    assertEquals(List.of("x"), loader.stringValues("a", List.of("x")));
+    assertEquals(List.of("x"), loader.stringValues("z", List.of("x")));
+    assertEquals(List.of("", ""), loader.stringValues("b"));
+    assertEquals(List.of("D"), loader.stringValues("d"));
+    assertEquals(List.of("", ""), loader.stringValues("b", List.of("x")));
+    assertEquals(List.of("D"), loader.stringValues("d", List.of("x")));
+  }
+
   /** Validates that a required string value is found if it exists in the config data. */
   @Test
   public void requiredStringValueFound() {
@@ -46,11 +74,7 @@ public class ConfigLoaderTest {
    */
   @Test
   public void requiredStringValueNotFound() {
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.stringValue("not-there");
-        });
+    assertThrows(ConfigException.class, () -> loader.stringValue("not-there"));
   }
 
   /**
@@ -60,10 +84,15 @@ public class ConfigLoaderTest {
   @Test
   public void optionalStringValue() {
     values.put("a", "A");
+    values.put("b", "");
     assertEquals("A", loader.stringValue("a", "---"));
     assertEquals("---", loader.stringValue("z", "---"));
     assertEquals(Optional.of("A"), loader.stringOption("a"));
+    assertEquals(Optional.empty(), loader.stringOption("b"));
     assertEquals(Optional.empty(), loader.stringOption("z"));
+    assertEquals(Optional.of("A"), loader.stringOptionEmptyOK("a"));
+    assertEquals(Optional.of(""), loader.stringOptionEmptyOK("b"));
+    assertEquals(Optional.empty(), loader.stringOptionEmptyOK("z"));
   }
 
   /** Validates that a required float value is found if it exists in the config data. */
@@ -79,11 +108,7 @@ public class ConfigLoaderTest {
    */
   @Test
   public void requiredFloatValueNotFound() {
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.floatValue("not-there");
-        });
+    assertException("not-there", NOT_PROVIDED, () -> loader.floatValue("not-there"));
   }
 
   /**
@@ -93,11 +118,7 @@ public class ConfigLoaderTest {
   @Test
   public void invalidFloatValue() {
     values.put("a", "-not-a-number");
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.floatValue("a");
-        });
+    assertException("a", NOT_VALID_FLOAT, () -> loader.floatValue("a"));
   }
 
   /**
@@ -125,11 +146,7 @@ public class ConfigLoaderTest {
    */
   @Test
   public void requiredIntValueNotFound() {
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.intValue("not-there");
-        });
+    assertThrows(ConfigException.class, () -> loader.intValue("not-there"));
   }
 
   /**
@@ -139,11 +156,7 @@ public class ConfigLoaderTest {
   @Test
   public void invalidIntValue() {
     values.put("a", "-not-a-number");
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.intValue("a");
-        });
+    assertThrows(ConfigException.class, () -> loader.intValue("a"));
   }
 
   /**
@@ -153,81 +166,114 @@ public class ConfigLoaderTest {
   @Test
   public void optionalIntValue() {
     values.put("a", "33");
+
     assertEquals(33, loader.intValue("a", -10));
     assertEquals(-10, loader.intValue("z", -10));
     assertEquals(Optional.of(33), loader.intOption("a"));
     assertEquals(Optional.empty(), loader.intOption("z"));
   }
 
-  /**
-   * Validates that if a long value is optional, it can correctly fall back to a default, returns if
-   * exists, and returns an empty optional if it doesnt exist in the config data.
-   */
+  /** Validates all cases for positive int values. */
   @Test
-  public void optionalLongValue() {
+  public void testPositiveInts() {
+    values.put("a", "10");
+    values.put("b", "0");
+    values.put("c", "-1");
+    values.put("d", "not-a-number");
+
+    assertEquals(Optional.of(10), loader.positiveIntOption("a"));
+    assertException("b", NOT_POSITIVE_INTEGER, () -> loader.positiveIntOption("b"));
+    assertException("c", NOT_POSITIVE_INTEGER, () -> loader.positiveIntOption("c"));
+    assertException("d", NOT_VALID_INTEGER, () -> loader.positiveIntOption("d"));
+    assertEquals(Optional.empty(), loader.positiveIntOption("z"));
+
+    assertEquals(10, loader.positiveIntValue("a"));
+    assertException("b", NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("b"));
+    assertException("c", NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("c"));
+    assertException("d", NOT_VALID_INTEGER, () -> loader.positiveIntValue("d"));
+    assertException("z", NOT_PROVIDED, () -> loader.positiveIntValue("z"));
+  }
+
+  /** Validates all cases for long values. */
+  @Test
+  public void testLongs() {
     values.put("a", "33");
+    values.put("b", "-20");
+    values.put("c", "not-a-number");
+
     assertEquals(Optional.of(33L), loader.longOption("a"));
+    assertEquals(Optional.of(-20L), loader.longOption("b"));
+    assertException("c", NOT_VALID_LONG, () -> loader.longOption("c"));
     assertEquals(Optional.empty(), loader.longOption("z"));
   }
 
-  /** Validates that a required enum value is found if it exists in the config data. */
+  /** Validates all cases for enum values. */
   @Test
-  public void requiredEnumValueFound() {
+  public void testEnums() {
     values.put("a", "First");
+    values.put("b", "Eighth");
+
+    assertEquals(Optional.of(TestEnum.First), loader.enumOption("a", TestEnum::valueOf));
+    assertException("b", NOT_VALID_ENUM, () -> loader.<TestEnum>enumOption("b", TestEnum::valueOf));
+    assertEquals(Optional.empty(), loader.<TestEnum>enumOption("z", TestEnum::valueOf));
+
     assertEquals(TestEnum.First, loader.enumValue("a", TestEnum::valueOf));
+    assertException("b", NOT_VALID_ENUM, () -> loader.<TestEnum>enumValue("b", TestEnum::valueOf));
+    assertException("z", NOT_PROVIDED, () -> loader.<TestEnum>enumValue("z", TestEnum::valueOf));
   }
 
-  /**
-   * Validates that an exception is thrown if a required enum value doesnt exist in the config data.
-   */
+  /** Validates all cases for boolean values. */
   @Test
-  public void requiredEnumValueNotFound() {
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.enumValue("not-there", TestEnum::valueOf);
-        });
-  }
-
-  /**
-   * Validates that if an enum value in the configuration is not parsable, a {@link ConfigException}
-   * is thrown.
-   */
-  @Test
-  public void invalidEnumValue() {
-    values.put("a", "-not-a-number");
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.enumValue("a", TestEnum::valueOf);
-        });
-  }
-
-  /**
-   * Validates that if a boolean value is optional, it can correctly fall back to a default, and
-   * returns if exists.
-   */
-  // SimplifiableAssert - Clearer failure message with assertEquals
-  @SuppressWarnings("SimplifiableAssertion")
-  @Test
-  public void optionalBooleanValue() {
+  public void testBooleans() {
     values.put("a", "True");
+    values.put("b", "fAlSe");
+    values.put("c", "yes");
+
+    assertTrue(loader.booleanValue("a"));
     assertTrue(loader.booleanValue("a", false));
+    assertFalse(loader.booleanValue("b"));
+    assertFalse(loader.booleanValue("b", true));
+    assertException("c", NOT_VALID_BOOLEAN, () -> loader.booleanValue("c"));
+    assertException("c", NOT_VALID_BOOLEAN, () -> loader.booleanValue("c", true));
+    assertException("z", NOT_PROVIDED, () -> loader.booleanValue("z"));
     assertFalse(loader.booleanValue("z", false));
+
+    assertEquals(Optional.of(TRUE), loader.booleanOption("a"));
+    assertEquals(Optional.of(FALSE), loader.booleanOption("b"));
+    assertException("c", NOT_VALID_BOOLEAN, () -> loader.booleanOption("c"));
+    assertEquals(Optional.empty(), loader.booleanOption("z"));
   }
 
-  /**
-   * Validates that if a boolean value in the configuration is not parsable, a {@link
-   * ConfigException} is thrown.
-   */
+  /** Validates all cases for hex values. */
   @Test
-  public void invalidBooleanValue() {
-    values.put("a", "-not-a-boolean");
-    assertThrows(
-        ConfigException.class,
-        () -> {
-          loader.booleanValue("a", false);
-        });
+  public void testHex() {
+    values.put("a", "0123456789abcdef");
+    values.put("b", "not-hex");
+    assertArrayEquals(new byte[] {1, 35, 69, 103, -119, -85, -51, -17}, loader.hexBytes("a"));
+    assertException("b", NOT_VALID_HEX, () -> loader.hexBytes("b"));
+    assertException("z", NOT_PROVIDED, () -> loader.hexBytes("z"));
+  }
+
+  /** Validates all cases for parsed values. */
+  @Test
+  public void testParsed() {
+    values.put("a", "10");
+    values.put("b", "not-a-number");
+
+    assertEquals(10, loader.parsedValue("a", Integer.class, Integer::valueOf));
+    assertException(
+        "b",
+        "not a valid java.lang.Integer value",
+        () -> loader.parsedValue("b", Integer.class, Integer::valueOf));
+    assertException(
+        "z", NOT_PROVIDED, () -> loader.parsedValue("z", Integer.class, Integer::valueOf));
+
+    assertEquals(Optional.of(10), loader.parsedOption("a", Integer.class, Integer::valueOf));
+    assertException(
+        "b",
+        "not a valid java.lang.Integer value",
+        () -> loader.parsedOption("b", Integer.class, Integer::valueOf));
+    assertEquals(Optional.empty(), loader.parsedOption("z", Integer.class, Integer::valueOf));
   }
 
   /**
@@ -505,22 +551,12 @@ public class ConfigLoaderTest {
    *
    * @param expectedName the expected name
    * @param expectedMessage the expected message
-   * @param test the test to call which expects an exception
-   * @throws Exception any unexpected exception (i.e. not a {@link ConfigException})
+   * @param action the lambda to call which expects an exception
    */
-  private void assertException(String expectedName, String expectedMessage, Callable<?> test)
-      throws Exception {
-    try {
-      test.call();
-      fail(
-          "expected a ConfigException with name "
-              + expectedName
-              + " and message "
-              + expectedMessage);
-    } catch (ConfigException ex) {
-      assertEquals(expectedName, ex.getName());
-      assertEquals(expectedMessage, ex.getMessage());
-    }
+  private void assertException(String expectedName, String expectedMessage, Executable action) {
+    final var ex = assertThrows(ConfigException.class, action);
+    assertEquals(expectedName, ex.getName());
+    assertEquals(expectedMessage, ex.getMessage());
   }
 
   /** An enum used for testing configurations. */
