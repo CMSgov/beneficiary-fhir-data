@@ -48,16 +48,22 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   private static final long serialVersionUID = -6845504165285244536L;
 
   /**
+   * The name of the environment variable that should be used to provide the region used for looking
+   * up configuration variables in AWS SSM parameter store.
+   */
+  public static final String ENV_VAR_KEY_SSM_REGION = "SSM_REGION";
+
+  /**
    * The name of the environment variable that should be used to provide a path for looking up
    * configuration variables in AWS SSM parameter store.
    */
-  public static final String ENV_VAR_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
+  public static final String ENV_VAR_KEY_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
 
   /**
    * The name of a java properties file that should be used to provide a source of configuration
    * variables.
    */
-  public static final String ENV_VAR_PROPERTIES_FILE = "PROPERTIES_FILE";
+  public static final String ENV_VAR_KEY_PROPERTIES_FILE = "PROPERTIES_FILE";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -466,8 +472,8 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    *
    * <ol>
    *   <li>Environment variables.
-   *   <li>If {@link #ENV_VAR_PROPERTIES_FILE} is defined use properties in that file.
-   *   <li>If {@link #ENV_VAR_SSM_PARAMETER_PATH} is defined use parameters at that path.
+   *   <li>If {@link #ENV_VAR_KEY_PROPERTIES_FILE} is defined use properties in that file.
+   *   <li>If {@link #ENV_VAR_KEY_SSM_PARAMETER_PATH} is defined use parameters at that path.
    * </ol>
    *
    * @param baseConfig used to check for properties file and SSM path
@@ -476,22 +482,25 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   static ConfigLoader createConfigLoader(ConfigLoader baseConfig) {
     final var configBuilder = ConfigLoader.builder();
 
-    final var ssmPath = baseConfig.stringValue(ENV_VAR_SSM_PARAMETER_PATH, "");
+    final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
     if (ssmPath.length() > 0) {
       ensureAwsCredentialsConfiguredCorrectly();
-      final var ssmClient = AWSSimpleSystemsManagementClient.builder().build();
-      final var parameterStore = new AwsParameterStoreClient(ssmClient);
+      final var ssmClient = AWSSimpleSystemsManagementClient.builder();
+      baseConfig
+          .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
+          .ifPresent(r -> ssmClient.setRegion(r.getName()));
+      final var parameterStore = new AwsParameterStoreClient(ssmClient.build());
       final var parametersMap = parameterStore.loadParametersAtPath(ssmPath);
       configBuilder.addMap(parametersMap);
     }
 
-    final var propertiesFile = baseConfig.stringValue(ENV_VAR_PROPERTIES_FILE, "");
+    final var propertiesFile = baseConfig.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, "");
     if (propertiesFile.length() > 0) {
       try {
         final var file = new File(propertiesFile);
         configBuilder.addPropertiesFile(file);
       } catch (IOException ex) {
-        throw new ConfigException(ENV_VAR_PROPERTIES_FILE, "error parsing file", ex);
+        throw new ConfigException(ENV_VAR_KEY_PROPERTIES_FILE, "error parsing file", ex);
       }
     }
 

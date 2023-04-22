@@ -198,7 +198,7 @@ public class LoadRdaJsonApp {
       rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
-      s3Region = options.enumOption("s3.region", Regions.class);
+      s3Region = options.parsedOption("s3.region", Regions.class, Regions::fromName);
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
     }
