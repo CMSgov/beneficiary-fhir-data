@@ -48,9 +48,6 @@ public class ConfigLoader {
   /** Error message for invalid boolean. */
   @VisibleForTesting static final String NOT_VALID_BOOLEAN = "not a valid boolean";
 
-  /** Error message for invalid enum. */
-  @VisibleForTesting static final String NOT_VALID_ENUM = "not a valid enum";
-
   /** Format string for {@link String#format} for unparseable value. */
   @VisibleForTesting static final String NOT_VALID_PARSED = "not a valid %s value";
 
@@ -304,12 +301,12 @@ public class ConfigLoader {
    *
    * @param <T> the type parameter
    * @param name name of configuration value
-   * @param parser the function to parse the enum with
+   * @param klass the enum class
    * @return enum value
    * @throws ConfigException if there is no valid enum value
    */
-  public <T extends Enum<T>> T enumValue(String name, Function<String, T> parser) {
-    return enumOption(name, parser).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  public <T extends Enum<T>> T enumValue(String name, Class<T> klass) {
+    return enumOption(name, klass).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
   }
 
   /**
@@ -317,16 +314,12 @@ public class ConfigLoader {
    *
    * @param <T> the type parameter
    * @param name name of configuration value
-   * @param parser the function to parse the enum with
+   * @param klass the enum class
    * @return Optional enum value
    * @throws ConfigException if there is no valid enum value
    */
-  public <T extends Enum<T>> Optional<T> enumOption(String name, Function<String, T> parser) {
-    try {
-      return stringOption(name).map(parser);
-    } catch (Exception ex) {
-      throw new ConfigException(name, NOT_VALID_ENUM, ex);
-    }
+  public <T extends Enum<T>> Optional<T> enumOption(String name, Class<T> klass) {
+    return parsedOption(name, klass, s -> Enum.valueOf(klass, s));
   }
 
   /**
@@ -469,7 +462,7 @@ public class ConfigLoader {
     try {
       return parser.apply(source);
     } catch (RuntimeException e) {
-      final var message = String.format(NOT_VALID_PARSED, klass.getName());
+      final var message = String.format(NOT_VALID_PARSED, klass.getSimpleName());
       throw new ConfigException(name, message, e);
     }
   }

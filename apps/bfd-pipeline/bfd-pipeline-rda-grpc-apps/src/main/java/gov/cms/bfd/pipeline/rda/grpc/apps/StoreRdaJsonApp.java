@@ -151,7 +151,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
      * @param options for config values
      */
     private Config(ConfigLoader options) {
-      claimType = options.enumValue("output.type", ClaimType::valueOf);
+      claimType = options.enumValue("output.type", ClaimType.class);
       maxToReceive = options.intValue("output.maxCount", Integer.MAX_VALUE);
       outputFile = options.writeableFile("output.file");
       startingSequenceNumber = options.longOption("output.seq").orElse(RdaChange.MIN_SEQUENCE_NUM);

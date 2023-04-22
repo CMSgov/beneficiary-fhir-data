@@ -82,7 +82,7 @@ public class RdaServerApp {
               .mcsClaimJson(
                   config.readableFileOption("file.mcs").map(Files::asByteSource).orElse(null))
               .s3Bucket(config.stringOption("s3.bucket").orElse(null))
-              .s3Region(config.enumOption("s3.region", Regions::fromName).orElse(null))
+              .s3Region(config.enumOption("s3.region", Regions.class).orElse(null))
               .s3Directory(config.stringOption("s3.directory").orElse(""))
               .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
               .build();

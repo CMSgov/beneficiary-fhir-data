@@ -688,8 +688,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         RdaSourceConfig.builder()
             .serverType(
                 config
-                    .enumOption(
-                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType::valueOf)
+                    .enumOption(ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.class)
                     .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE))
             .host(config.stringValue(ENV_VAR_KEY_RDA_GRPC_HOST, DEFAULT_RDA_GRPC_HOST))
             .port(config.intValue(ENV_VAR_KEY_RDA_GRPC_PORT, DEFAULT_RDA_GRPC_PORT))
@@ -716,7 +715,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     mockServerConfig.serverMode(
         config
             .enumOption(
-                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode::valueOf)
+                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
             .orElse(RdaServerJob.Config.ServerMode.Random));
     mockServerConfig.serverName(grpcConfig.getInProcessServerName());
     config

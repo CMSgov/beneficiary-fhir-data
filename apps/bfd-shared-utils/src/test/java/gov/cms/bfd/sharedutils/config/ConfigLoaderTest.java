@@ -3,7 +3,6 @@ package gov.cms.bfd.sharedutils.config;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_POSITIVE_INTEGER;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_PROVIDED;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_BOOLEAN;
-import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_ENUM;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_FLOAT;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_HEX;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_INTEGER;
@@ -213,13 +212,14 @@ public class ConfigLoaderTest {
     values.put("a", "First");
     values.put("b", "Eighth");
 
-    assertEquals(Optional.of(TestEnum.First), loader.enumOption("a", TestEnum::valueOf));
-    assertException("b", NOT_VALID_ENUM, () -> loader.<TestEnum>enumOption("b", TestEnum::valueOf));
-    assertEquals(Optional.empty(), loader.<TestEnum>enumOption("z", TestEnum::valueOf));
+    assertEquals(Optional.of(TestEnum.First), loader.enumOption("a", TestEnum.class));
+    assertException(
+        "b", "not a valid TestEnum value", () -> loader.enumOption("b", TestEnum.class));
+    assertEquals(Optional.empty(), loader.<TestEnum>enumOption("z", TestEnum.class));
 
-    assertEquals(TestEnum.First, loader.enumValue("a", TestEnum::valueOf));
-    assertException("b", NOT_VALID_ENUM, () -> loader.<TestEnum>enumValue("b", TestEnum::valueOf));
-    assertException("z", NOT_PROVIDED, () -> loader.<TestEnum>enumValue("z", TestEnum::valueOf));
+    assertEquals(TestEnum.First, loader.enumValue("a", TestEnum.class));
+    assertException("b", "not a valid TestEnum value", () -> loader.enumValue("b", TestEnum.class));
+    assertException("z", NOT_PROVIDED, () -> loader.<TestEnum>enumValue("z", TestEnum.class));
   }
 
   /** Validates all cases for boolean values. */
@@ -263,7 +263,7 @@ public class ConfigLoaderTest {
     assertEquals(10, loader.parsedValue("a", Integer.class, Integer::valueOf));
     assertException(
         "b",
-        "not a valid java.lang.Integer value",
+        "not a valid Integer value",
         () -> loader.parsedValue("b", Integer.class, Integer::valueOf));
     assertException(
         "z", NOT_PROVIDED, () -> loader.parsedValue("z", Integer.class, Integer::valueOf));
@@ -271,7 +271,7 @@ public class ConfigLoaderTest {
     assertEquals(Optional.of(10), loader.parsedOption("a", Integer.class, Integer::valueOf));
     assertException(
         "b",
-        "not a valid java.lang.Integer value",
+        "not a valid Integer value",
         () -> loader.parsedOption("b", Integer.class, Integer::valueOf));
     assertEquals(Optional.empty(), loader.parsedOption("z", Integer.class, Integer::valueOf));
   }

@@ -190,7 +190,7 @@ public class LoadRdaJsonApp {
 
       sinkTypePreference =
           options
-              .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference::valueOf)
+              .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference.class)
               .orElse(AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR);
       writeThreads = options.intValue("job.writeThreads", 1);
       batchSize = options.intValue("job.batchSize", 100);
@@ -198,7 +198,7 @@ public class LoadRdaJsonApp {
       rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
-      s3Region = options.enumOption("s3.region", Regions::fromName);
+      s3Region = options.enumOption("s3.region", Regions.class);
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
     }
