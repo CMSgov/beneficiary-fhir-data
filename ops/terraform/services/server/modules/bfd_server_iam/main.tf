@@ -1,11 +1,12 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  service = var.name == "fhir" ? "server" : "pipeline" # NOTE: with this, the iam module is only capable of supporting the server and pipeline services
+  service = "server"
+  env     = terraform.workspace
 }
 
 data "aws_kms_key" "master_key" {
-  key_id = "alias/bfd-${var.env_config.env}-cmk"
+  key_id = "alias/bfd-${local.env}-cmk"
 }
 
 data "aws_kms_key" "mgmt_key" {
@@ -22,13 +23,13 @@ data "aws_iam_policy" "cloudwatch_xray_policy" {
 }
 
 resource "aws_iam_instance_profile" "instance" {
-  name = "bfd-${var.env_config.env}-${var.name}-profile"
+  name = "bfd-${local.env}-${var.name}-profile"
   role = aws_iam_role.instance.name
 }
 
 # EC2 instance role
 resource "aws_iam_role" "instance" {
-  name = "bfd-${var.env_config.env}-${var.name}-role"
+  name = "bfd-${local.env}-${var.name}-role"
   path = "/"
 
   assume_role_policy = <<-EOF
@@ -51,7 +52,7 @@ resource "aws_iam_role" "instance" {
 # policy to allow full s3 privs
 resource "aws_iam_role_policy" "s3_policy" {
   count = length(var.s3_bucket_arns) > 0 ? 1 : 0
-  name  = "bfd-${var.env_config.env}-${var.name}-s3-policy"
+  name  = "bfd-${local.env}-${var.name}-s3-policy"
   role  = aws_iam_role.instance.id
 
   policy = <<-EOF
@@ -84,8 +85,8 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
 
 # TODO: Separate SSM and KMS statements
 resource "aws_iam_policy" "ssm" {
-  name        = "bfd-${var.env_config.env}-${local.service}-ssm-parameters"
-  description = "Permissions to /bfd/${var.env_config.env}/common/nonsensitive, /bfd/${var.env_config.env}/${local.service} SSM hierarchies"
+  name        = "bfd-${local.env}-${local.service}-ssm-parameters"
+  description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service} SSM hierarchies"
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -98,9 +99,9 @@ resource "aws_iam_policy" "ssm" {
         "ssm:GetParameter"
       ],
       "Resource": [
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/sensitive/user/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/common/nonsensitive/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${var.env_config.env}/${local.service}/*"
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${local.service}/*"
       ]
     },
     {
@@ -130,8 +131,8 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 }
 
 resource "aws_iam_policy" "ssm_mgmt" {
-  description = "Policy granting BFD Server in ${var.env_config.env} environment access to certain mgmt SSM hierarchies"
-  name        = "bfd-${var.env_config.env}-${local.service}-ssm-mgmt-parameters"
+  description = "Policy granting BFD Server in ${local.env} environment access to certain mgmt SSM hierarchies"
+  name        = "bfd-${local.env}-${local.service}-ssm-mgmt-parameters"
   path        = "/"
   policy      = <<-POLICY
 {
@@ -161,8 +162,8 @@ resource "aws_iam_role_policy_attachment" "ssm_mgmt" {
 }
 
 resource "aws_iam_policy" "kms_mgmt" {
-  description = "Policy granting BFD Server in ${var.env_config.env} environment access to decrypt using the mgmt KMS key"
-  name        = "bfd-${var.env_config.env}-${local.service}-kms-mgmt"
+  description = "Policy granting BFD Server in ${local.env} environment access to decrypt using the mgmt KMS key"
+  name        = "bfd-${local.env}-${local.service}-kms-mgmt"
   path        = "/"
   policy      = <<-POLICY
 {
