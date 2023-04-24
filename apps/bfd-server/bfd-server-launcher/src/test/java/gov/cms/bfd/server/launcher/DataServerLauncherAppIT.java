@@ -104,7 +104,6 @@ public final class DataServerLauncherAppIT {
               .resolve("access.json");
       assertTrue(Files.isReadable(accessLogJson));
       assertTrue(Files.size(accessLogJson) > 0);
-
       // Stop the application.
       serverProcess.close();
 
