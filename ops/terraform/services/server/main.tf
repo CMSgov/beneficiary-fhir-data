@@ -33,7 +33,6 @@ locals {
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env = terraform.workspace
   env_config = {
-    tags    = var.env_config.tags,
     vpc_id  = data.aws_vpc.main.id,
     zone_id = data.aws_route53_zone.local_zone.id,
     azs     = local.azs
@@ -41,6 +40,15 @@ locals {
   port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
+
+  default_tags = {
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Environment    = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/${local.service}"
+  }
 
   # add new peerings here
   vpc_peerings_by_env = {
