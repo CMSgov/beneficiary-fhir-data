@@ -2,9 +2,9 @@
 #
 
 locals {
-  env        = terraform.workspace
-  tags       = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
-  log_prefix = "${var.role}_elb_access_logs"
+  env             = terraform.workspace
+  additional_tags = { Layer = var.layer, role = var.role }
+  log_prefix      = "${var.role}_elb_access_logs"
 }
 
 ## RESOURCES
@@ -13,7 +13,7 @@ locals {
 # classic ELB 
 resource "aws_elb" "main" {
   name = "bfd-${local.env}-${var.role}"
-  tags = local.tags
+  tags = local.addiitonal_tags
 
   internal        = !var.is_public
   subnets         = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
@@ -52,7 +52,7 @@ resource "aws_security_group" "lb" {
   name        = "bfd-${local.env}-${var.role}-lb"
   description = "Allow access to the ${var.role} load-balancer"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${local.env}-${var.role}-lb" }, local.tags)
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-lb" }, local.addiitonal_tags)
 
   ingress {
     from_port   = var.ingress.port
