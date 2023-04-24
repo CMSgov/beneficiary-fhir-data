@@ -2,8 +2,37 @@
 # Build the stateless resources for an environment (ASG, security groups, etc)
 
 locals {
+  legacy_service   = "fhir"
+  service          = "server"
+  established_envs = ["test", "prod-sbx", "prod"]
+
+  # NOTE: nonsensitive service-oriented and common config
+  nonsensitive_common_map = zipmap(
+    data.aws_ssm_parameters_by_path.nonsensitive_common.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values)
+  )
+  nonsensitive_common_config = {
+    for key, value in local.nonsensitive_common_map
+    : split("/", key)[5] => value
+  }
+  nonsensitive_service_map = zipmap(
+    data.aws_ssm_parameters_by_path.nonsensitive_service.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_service.values)
+  )
+  nonsensitive_service_config = {
+    for key, value in local.nonsensitive_service_map
+    : split("/", key)[5] => value
+  }
+
+  # ephemeral environment determination is based on the existence of the ephemeral_environment_seed
+  # in the common hierarchy
+  seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)
+  is_ephemeral_env = local.seed_env == null ? false : true
+  is_prod          = local.env == "prod"
+
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config      = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
+  env             = terraform.workspace
+  env_config      = { env = local.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
   port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
@@ -26,7 +55,7 @@ locals {
       "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc"
     ]
   }
-  vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
+  vpc_peerings = local.vpc_peerings_by_env[local.env]
 }
 
 ## IAM role for FHIR
@@ -35,8 +64,9 @@ module "fhir_iam" {
   source = "./modules/bfd_server_iam"
 
   env_config = local.env_config
-  name       = "fhir"
+  name       = local.legacy_service
 }
+
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
   role       = module.fhir_iam.role
   policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
@@ -49,7 +79,7 @@ module "fhir_lb" {
   source = "./modules/bfd_server_lb"
 
   env_config = local.env_config
-  role       = "fhir"
+  role       = local.legacy_service
   layer      = "dmz"
   log_bucket = data.aws_s3_bucket.logs.id
   is_public  = var.is_public
@@ -79,7 +109,7 @@ module "lb_alarms" {
   load_balancer_name     = module.fhir_lb.name
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  env                    = var.env_config.env
+  env                    = local.env
   app                    = "bfd"
 
   # NLBs only have this metric to alarm on
@@ -97,7 +127,7 @@ module "fhir_asg" {
   source = "./modules/bfd_server_asg"
 
   env_config = local.env_config
-  role       = "fhir"
+  role       = local.legacy_service
   layer      = "app"
   lb_config  = module.fhir_lb.lb_config
 
@@ -114,7 +144,7 @@ module "fhir_asg" {
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
     instance_type = "c6i.4xlarge"
-    volume_size   = var.env_config.env == "prod" ? 250 : 60 # GB
+    volume_size   = local.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
 
@@ -142,17 +172,17 @@ module "fhir_asg" {
 ## FHIR server metrics, per partner
 module "bfd_server_metrics" {
   source = "./modules/bfd_server_metrics"
-  env    = var.env_config.env
+  env    = local.env
 }
 
 module "bfd_server_slo_alarms" {
   source = "./modules/bfd_server_slo_alarms"
-  env    = var.env_config.env
+  env    = local.env
 }
 
 module "bfd_server_log_alarms" {
   source = "./modules/bfd_server_log_alarms"
-  env    = var.env_config.env
+  env    = local.env
 }
 
 ## This is where cloudwatch dashboards are managed. 
@@ -160,10 +190,10 @@ module "bfd_server_log_alarms" {
 module "bfd_dashboards" {
   source         = "./modules/bfd_server_dashboards"
   dashboard_name = var.dashboard_name
-  env            = var.env_config.env
+  env            = local.env
 }
 
 module "disk_usage_alarms" {
   source = "./modules/bfd_server_disk_alarms"
-  env    = var.env_config.env
+  env    = local.env
 }
