@@ -39,7 +39,38 @@ The dd_to_json script combines all data dictionary elements found in the caller 
 The dd_to_html script combines all data dictionary elements found in the caller supplied source folder into an HTML file specified in the target parameter.  This script uses the Jinja2 templating engine.  The directory containing the templates must be supplied in the templateDir parameter, and the actual template file that drives layout and formatting must be supplied in the templateFile parameter. See ./template for more information.
 > $ python dd_to_html.py --templateDir [template dir] --templateFile [template file] --source [source data folder] --target [target file]
 
+#### Preparing CSV and JSON Data Dictionaries in a Release
+As of this writing, a more formal versioning and release strategy are still being discussed.
+However, a _supervised_ process for generating these artifacts might include something like the following _toy_ example:
 
+``` sh
+# Identify the root of the repository as `REPO_ROOT`
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+# Identify short commit hash for build metadata
+REPO_METADATA="$(git rev-parse --short HEAD)"
+# Specify a pre-release rc.1 version
+BFD_RELEASE="0.0.1-rc.1+${REPO_METADATA}"
+
+# Create, push tag reference
+git tag -a "$BFD_RELEASE" -m "Release v${BFD_RELEASE}"
+git push origin "$BFD_RELEASE"
+
+# Create the typical, temporary `dist` directory
+rm -rf "${REPO_ROOT}/dist" && mkdir -p "${REPO_ROOT}/dist"
+
+# Generate Versioned CSV and JSON Data Dictionaries
+for version in V1 V2; do
+    python3 "${REPO_ROOT}/apps/bfd-server/dev/bfd-data-dictionary/app/dd-transformer/dd_to_csv.py" \
+        --template "${REPO_ROOT}/apps/bfd-server/dev/bfd-data-dictionary/app/dd-transformer/template/${version}-to-csv.json" \
+        --source "${REPO_ROOT}/apps/bfd-server/dev/bfd-data-dictionary/data/${version}/" \
+        --target "${REPO_ROOT}/dist/${version}-data-dictionary-${BFD_RELEASE}.csv"
+    python3 "${REPO_ROOT}/apps/bfd-server/dev/bfd-data-dictionary/app/dd-transformer/dd_to_json.py" \
+        --source "${REPO_ROOT}/apps/bfd-server/dev/bfd-data-dictionary/data/${version}/" \
+        --target "${REPO_ROOT}/dist/${version}-data-dictionary-${BFD_RELEASE}.json"
+done
+
+gh release create "$BFD_RELEASE" "${REPO_ROOT}/dist/*" 
+```
 
 ## License
 
