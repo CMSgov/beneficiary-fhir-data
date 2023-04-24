@@ -62,8 +62,6 @@ locals {
 #
 module "fhir_iam" {
   source = "./modules/bfd_server_iam"
-
-  env_config = local.env_config
 }
 
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
