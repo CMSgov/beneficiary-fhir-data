@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpc"]
+    values = ["bfd-${local.env}-vpc"]
   }
 }
 
@@ -25,32 +25,32 @@ data "aws_vpc_peering_connection" "peers" {
 
 # dns
 data "aws_route53_zone" "local_zone" {
-  name         = "bfd-${var.env_config.env}.local"
+  name         = "bfd-${local.env}.local"
   private_zone = true
 }
 
 # s3 buckets
 data "aws_s3_bucket" "admin" {
-  bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+  bucket = "bfd-${local.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
 
 data "aws_s3_bucket" "logs" {
-  bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
+  bucket = "bfd-${local.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
 # cloudwatch topics
 data "aws_sns_topic" "cloudwatch_alarms" {
-  name = "bfd-${var.env_config.env}-cloudwatch-alarms"
+  name = "bfd-${local.env}-cloudwatch-alarms"
 }
 data "aws_sns_topic" "cloudwatch_ok" {
-  name = "bfd-${var.env_config.env}-cloudwatch-ok"
+  name = "bfd-${local.env}-cloudwatch-ok"
 }
 
 # aurora security group
 data "aws_security_group" "aurora_cluster" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-aurora-cluster"]
+    values = ["bfd-${local.env}-aurora-cluster"]
   }
 }
 
@@ -58,7 +58,7 @@ data "aws_security_group" "aurora_cluster" {
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpn-private"]
+    values = ["bfd-${local.env}-vpn-private"]
   }
 }
 
@@ -82,7 +82,7 @@ data "aws_ec2_managed_prefix_list" "jenkins" {
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-enterprise-tools"]
+    values = ["bfd-${local.env}-enterprise-tools"]
   }
 }
 
@@ -90,7 +90,7 @@ data "aws_security_group" "tools" {
 data "aws_security_group" "remote" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-remote-management"]
+    values = ["bfd-${local.env}-remote-management"]
   }
 }
 
