@@ -11,12 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -38,14 +33,10 @@ public class TransactionManagerTest {
   @Mock private EntityManager entityManager1;
   /** Mock for the second created entity manager. */
   @Mock private EntityManager entityManager2;
-  /** Mock for the second created entity manager. */
-  @Mock private EntityManager entityManager3;
   /** Mock for transactions within first entity manager. */
   @Mock private EntityTransaction transaction1;
   /** Mock for transactions within second entity manager. */
   @Mock private EntityTransaction transaction2;
-  /** Mock for transactions within second entity manager. */
-  @Mock private EntityTransaction transaction3;
   /** The {@link TransactionManager} being tested. */
   private TransactionManager transactionManager;
 
@@ -54,15 +45,12 @@ public class TransactionManagerTest {
   void setUp() {
     doReturn(entityManager1)
         .doReturn(entityManager2)
-        .doReturn(entityManager3)
         .when(entityManagerFactory)
         .createEntityManager();
     doReturn(transaction1).when(entityManager1).getTransaction();
     doReturn(true).when(entityManager1).isOpen();
     doReturn(transaction2).when(entityManager2).getTransaction();
     doReturn(true).when(entityManager2).isOpen();
-    doReturn(transaction3).when(entityManager3).getTransaction();
-    doReturn(true).when(entityManager3).isOpen();
     transactionManager = new TransactionManager(entityManagerFactory);
   }
 
@@ -198,115 +186,5 @@ public class TransactionManagerTest {
       assertArrayEquals(
           new Throwable[] {rollbackException, closeException}, exception.getSuppressed());
     }
-  }
-
-  /** Verifies a transaction that throws a non-retriable exception does no retries. */
-  @Test
-  void shouldNotRetryInvalidFirstException() {
-    final var transactionException = new IOException("transaction failed");
-    final Predicate<Exception> isRetriable = e -> false;
-    final ThrowingFunction<String, EntityManager, IOException> function =
-        em -> {
-          throw transactionException;
-        };
-
-    var exception =
-        assertThrows(
-            IOException.class,
-            () -> transactionManager.executeFunctionWithRetries(2, isRetriable, function));
-    assertSame(transactionException, exception);
-    verify(transaction1).rollback();
-    verifyNoInteractions(transaction2);
-  }
-
-  /**
-   * Verifies a transaction that always throws retriable exceptions throws the first exception after
-   * exhausting allowed retries.
-   */
-  @Test
-  void shouldThrowAfterMaxRetries() {
-    final var firstException = new IOException("error 1");
-    final var secondException = new IOException("error 2");
-    final var thirdException = new IOException("error 3");
-    final var errors = List.of(firstException, secondException, thirdException);
-    final Predicate<Exception> isRetriable = e -> e instanceof IOException;
-    final var retryCount = new AtomicInteger();
-    final ThrowingFunction<String, EntityManager, IOException> function =
-        em -> {
-          throw errors.get(retryCount.getAndIncrement());
-        };
-
-    var exception =
-        assertThrows(
-            IOException.class,
-            () -> transactionManager.executeFunctionWithRetries(2, isRetriable, function));
-    assertSame(firstException, exception);
-    assertEquals(errors.subList(1, errors.size()), Arrays.asList(exception.getSuppressed()));
-    verify(transaction1).rollback();
-    verify(transaction2).rollback();
-    verify(transaction3).rollback();
-  }
-
-  /**
-   * Verifies a transaction that throws a retriable exception on first call but a non-retriable one
-   * on retry throws immediately with no more retries.
-   */
-  @Test
-  void shouldThrowAfterRetryWrongException() {
-    final var goodException = new IOException("transaction failed");
-    final var badException = new IOException("transaction failed badly");
-    final Predicate<Exception> isRetriable = e -> e == goodException;
-    final var retryCount = new AtomicInteger();
-    final ThrowingFunction<String, EntityManager, IOException> function =
-        em -> {
-          if (retryCount.getAndIncrement() == 1) {
-            throw badException;
-          } else {
-            throw goodException;
-          }
-        };
-
-    var exception =
-        assertThrows(
-            IOException.class,
-            () -> transactionManager.executeFunctionWithRetries(2, isRetriable, function));
-    assertSame(goodException, exception);
-    assertSame(badException, exception.getSuppressed()[0]);
-    verify(transaction1).rollback();
-    verify(transaction2).rollback();
-    verifyNoInteractions(transaction3);
-  }
-
-  /**
-   * Verifies a transaction that throws retriable exceptions and then returns a value returns that
-   * value plus the correct number of retries and the first exception with proper suppressed
-   * exceptions array.
-   */
-  @Test
-  void shouldReturnSuccessAfterRetries() throws IOException {
-    final var firstException = new IOException("transaction failed");
-    final var secondException = new IOException("transaction failed");
-    final Predicate<Exception> isRetriable = e -> true;
-    final var retryCount = new AtomicInteger();
-    final ThrowingFunction<String, EntityManager, IOException> function =
-        em -> {
-          switch (retryCount.getAndIncrement()) {
-            case 0:
-              throw firstException;
-            case 1:
-              throw secondException;
-            default:
-              return "ok";
-          }
-        };
-
-    var result = transactionManager.executeFunctionWithRetries(2, isRetriable, function);
-    assertEquals("ok", result.getValue());
-    assertEquals(2, result.getNumRetries());
-    assertSame(firstException, result.getFirstException());
-    assertSame(secondException, firstException.getSuppressed()[0]);
-    verify(transaction1).rollback();
-    verify(transaction2).rollback();
-    verify(transaction3).commit();
   }
 }

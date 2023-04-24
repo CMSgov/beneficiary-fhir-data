@@ -55,9 +55,6 @@ public final class LoadAppOptions implements Serializable {
    */
   private final int recordBatchSize;
 
-  /** The maximum size (per thread) of the task queue used to process batches. */
-  private final int taskQueueSizeMultiple;
-
   /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
@@ -66,24 +63,20 @@ public final class LoadAppOptions implements Serializable {
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
    * @param filterNon2023Benes the filter non 2023 benes
    * @param recordBatchSize the load batch size
-   * @param taskQueueSizeMultiple the task queue size multiple
    */
   public LoadAppOptions(
       IdHasher.Config idHasherConfig,
       int loaderThreads,
       boolean idempotencyRequired,
       boolean filterNon2023Benes,
-      int recordBatchSize,
-      int taskQueueSizeMultiple) {
+      int recordBatchSize) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
-    if (taskQueueSizeMultiple < 1) throw new IllegalArgumentException();
 
     this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
     this.filteringNonNullAndNon2023Benes = filterNon2023Benes;
     this.recordBatchSize = recordBatchSize;
-    this.taskQueueSizeMultiple = taskQueueSizeMultiple;
   }
 
   /**
@@ -138,15 +131,7 @@ public final class LoadAppOptions implements Serializable {
     return filteringNonNullAndNon2023Benes;
   }
 
-  /**
-   * Gets the {@link #taskQueueSizeMultiple}.
-   *
-   * @return the size
-   */
-  public int getTaskQueueSizeMultiple() {
-    return taskQueueSizeMultiple;
-  }
-
+  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -160,10 +145,6 @@ public final class LoadAppOptions implements Serializable {
     builder.append(idempotencyRequired);
     builder.append(", filteringNonNullAndNon2023Benes=");
     builder.append(filteringNonNullAndNon2023Benes);
-    builder.append(", recordBatchSize=");
-    builder.append(recordBatchSize);
-    builder.append(", taskQueueSizeMultiple=");
-    builder.append(taskQueueSizeMultiple);
     builder.append("]");
     return builder.toString();
   }

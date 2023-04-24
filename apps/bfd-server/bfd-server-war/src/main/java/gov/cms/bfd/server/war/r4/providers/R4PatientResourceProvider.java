@@ -186,6 +186,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
+    root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
@@ -489,7 +490,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // So, in cases where there are joins and paging, we query in two steps: first
     // fetch bene-ids
     // with paging and then fetch full benes with joins.
-    boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
+    boolean useTwoSteps = paging.isPagingRequested();
 
     if (useTwoSteps) {
       // Fetch ids
@@ -536,10 +537,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * that gets executed.
      */
 
-    // BFD379: original V2, no MBI logic here
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    }
+    joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -616,10 +614,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       List<String> ids, RequestHeaders requestHeader) {
     String joinsClause = "";
     boolean passDistinctThrough = false;
-    // BFD379: no MBI logic in original V2 code here
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    }
+
+    joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
 
     String query =
         "select distinct b from Beneficiary b "
@@ -855,10 +851,17 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    // BFD379: in original V2, if check is commented out
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-    }
+    /*
+     * Check both bene history and a now-defunct MBI id table for historical MBIs;
+     * These will be used to return any historical MBIs in the response and/or find the bene_id
+     * in the event that the user is searching using an old MBI value.
+     *
+     * FUTURE: The medicareBeneficiaryIdHistories was updated via a special RIF
+     * from CCW but that rif type hasnt been sent since 2019; this table should probably be merged
+     * into bene history and removed so we have one source of truth for historical MBIs.
+     */
+    beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+    beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
@@ -1113,16 +1116,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       TokenParam coverageId, LocalDate yearMonth, RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-
-    // This endpoint only supports returning unhashed MBIs (and not HICNs), so
-    // verify that was
-    // requested.
-    if (!requestHeader.isMBIinIncludeIdentifiers() || requestHeader.isHICNinIncludeIdentifiers()) {
-      throw new InvalidRequestException(
-          String.format(
-              "This endpoint requires the '%s: mbi' header.",
-              CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS));
-    }
 
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
 

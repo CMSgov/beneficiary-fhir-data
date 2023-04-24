@@ -22,9 +22,6 @@ public final class CcwRifLoadTestUtils {
   /** The default batch size to use for testing. */
   public static final int DEFAULT_LOAD_BATCH_SIZE = 100;
 
-  /** The default queue size multiple to use for testing. */
-  private static final int DEFAULT_QUEUE_SIZE_MULTIPLE = 2;
-
   /**
    * Gets the load options.
    *
@@ -37,8 +34,7 @@ public final class CcwRifLoadTestUtils {
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED,
         false,
-        DEFAULT_LOAD_BATCH_SIZE,
-        DEFAULT_QUEUE_SIZE_MULTIPLE);
+        DEFAULT_LOAD_BATCH_SIZE);
   }
 
   /**
@@ -71,8 +67,7 @@ public final class CcwRifLoadTestUtils {
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         idempotencyRequired,
         filterNon2023benes,
-        DEFAULT_LOAD_BATCH_SIZE,
-        DEFAULT_QUEUE_SIZE_MULTIPLE);
+        DEFAULT_LOAD_BATCH_SIZE);
   }
 
   /**
@@ -87,7 +82,6 @@ public final class CcwRifLoadTestUtils {
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED,
         false,
-        batchSize,
-        DEFAULT_QUEUE_SIZE_MULTIPLE);
+        batchSize);
   }
 }

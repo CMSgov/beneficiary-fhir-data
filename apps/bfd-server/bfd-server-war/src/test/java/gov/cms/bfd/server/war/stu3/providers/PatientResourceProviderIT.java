@@ -28,9 +28,11 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -42,6 +44,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -1119,6 +1122,105 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
 
     assertTrue(hicnUnhashedPresent);
     assertTrue(mbiUnhashedPresent);
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns the historical MBI
+   * values in the response when searching by MBI hash. The search should look in both the
+   * medicare_beneficiaryid_history and beneficiaries_history for historical MBIs to include in the
+   * response.
+   */
+  @Test
+  public void searchForExistingPatientByMbiHashHasHistoricMbis() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = createFhirClient("true", "false");
+
+    List<String> historicUnhashedMbis = new ArrayList<>();
+    /*
+     * Historic MBI from the medicare_beneficiaryid_history table (loaded from
+     * sample-a-medicarebeneficiaryidhistory.txt)
+     */
+    historicUnhashedMbis.add("9AB2WW3GR44");
+    // current MBI from the beneficiaries table (loaded from sample-a-beneficiaries.txt)
+    String currentUnhashedMbi = "3456789";
+
+    BeneficiaryHistory bh =
+        loadedRecords.stream()
+            .filter(r -> r instanceof BeneficiaryHistory)
+            .map(r -> (BeneficiaryHistory) r)
+            .findAny()
+            .orElse(null);
+    assertNotNull(bh);
+    assertTrue(bh.getMbiHash().isPresent());
+    String searchHash = bh.getMbiHash().get();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                Patient.IDENTIFIER
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, searchHash))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    assertNotNull(searchResults);
+    assertEquals(1, searchResults.getTotal());
+    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+
+    /*
+     * V1 returns a lot of stuff with IncludeIdentifiers=true, so lets review the entries:
+     * 8 total Identifier entries:
+     *
+     * 1 entry for the bene id
+     * 1 entry for hashed current MBI
+     * 1 entry for unhashed current MBI
+     * 1 entry for historical MBI values from only medicare_beneficiaryid_history
+     * 4 entries for HICN values
+     */
+    assertEquals(8, patientFromSearchResult.getIdentifier().size());
+    List<Identifier> historicalIds =
+        patientFromSearchResult.getIdentifier().stream()
+            .filter(
+                r ->
+                    r.getSystem().contains("mbi")
+                        && r.hasExtension()
+                        && r.getExtension()
+                            .get(0)
+                            .getUrl()
+                            .equals(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY)
+                        && ((Coding) r.getExtension().get(0).getValue())
+                            .getCode()
+                            .equals("historic"))
+            .toList();
+
+    for (String mbi : historicUnhashedMbis) {
+      assertTrue(
+          historicalIds.stream().anyMatch(h -> h.getValue().equals(mbi)),
+          "Missing historical mbi: " + mbi);
+    }
+
+    Identifier currentMbiFromSearch =
+        patientFromSearchResult.getIdentifier().stream()
+            .filter(
+                r ->
+                    r.getSystem().contains("mbi")
+                        && r.hasExtension()
+                        && r.getExtension()
+                            .get(0)
+                            .getUrl()
+                            .equals(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY)
+                        && ((Coding) r.getExtension().get(0).getValue())
+                            .getCode()
+                            .equals("current"))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(currentMbiFromSearch);
+    assertEquals(currentUnhashedMbi, currentMbiFromSearch.getValue());
   }
 
   /**
