@@ -2,6 +2,7 @@
 #
 
 locals {
+  env        = terraform.workspace
   tags       = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
   log_prefix = "${var.role}_elb_access_logs"
 }
@@ -31,10 +32,10 @@ data "aws_s3_bucket" "logs" {
 
 # classic ELB 
 resource "aws_elb" "main" {
-  name = "bfd-${var.env_config.env}-${var.role}"
+  name = "bfd-${local.env}-${var.role}"
   tags = local.tags
 
-  internal        = ! var.is_public
+  internal        = !var.is_public
   subnets         = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
   security_groups = [aws_security_group.lb.id]
 
@@ -68,10 +69,10 @@ resource "aws_elb" "main" {
 
 # security group
 resource "aws_security_group" "lb" {
-  name        = "bfd-${var.env_config.env}-${var.role}-lb"
+  name        = "bfd-${local.env}-${var.role}-lb"
   description = "Allow access to the ${var.role} load-balancer"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-lb" }, local.tags)
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-lb" }, local.tags)
 
   ingress {
     from_port   = var.ingress.port
