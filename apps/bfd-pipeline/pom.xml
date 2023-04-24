@@ -15,6 +15,10 @@
 		A parent POM for the bfd-pipeline-* projects, which migrate data from the CCW data warehouse to the Beneficiary FHIR Data systems.
 	</description>
 
+	<properties>
+		<awssdk.core.version>2.20.50</awssdk.core.version>
+	</properties>
+
 	<modules>
 		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-shared-test-utils</module>
@@ -64,6 +68,23 @@
 			<artifactId>bfd-shared-test-utils</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used to interact with AWS' S3 service, which is where RIF files
+				from the CCW will arrive, when an ETL pipeline is running in production. -->
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>aws-core</artifactId>
+			<version>${awssdk.core.version}</version>
 		</dependency>
 	</dependencies>
 

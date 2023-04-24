@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer.createS3MinioClient;
+import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.REGION_DEFAULT;
+import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.createS3Client;
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.createTestBucket;
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.deleteTestBucket;
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.uploadJsonToBucket;
@@ -11,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.io.ByteSource;
-import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,11 +24,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 /** Integration test for {@link S3DirectoryDao}. */
-public class S3DirectoryDaoIT extends MinioTestContainer {
-
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client = createS3MinioClient();
-
+public class S3DirectoryDaoIT {
   /**
    * Tests all basic operations of the {@link S3DirectoryDao}. Uploads and accesses data to a bucket
    * and verifies that cached files are managed as expected.
@@ -37,6 +33,7 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
    */
   @Test
   public void testBasicOperations() throws Exception {
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
@@ -50,8 +47,8 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
       assertEquals(List.of(), s3Dao.readFileNames());
 
       // add a couple of files
-      String aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
-      String bTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
+      String aTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
+      String bTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
 
       // now the files show up in the list
       assertEquals(
@@ -73,7 +70,7 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
       assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
       // update one of the files so it has new contents and new eTag
-      String aTag2 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-2");
+      String aTag2 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-2");
       assertNotEquals(aTag2, aTag1);
 
       // download and verify the updated file contents
@@ -114,6 +111,7 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
    */
   @Test
   public void testDeleteOnClose() throws Exception {
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
@@ -126,8 +124,8 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
       s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, true);
 
       // add a couple of files
-      aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
-      bTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
+      aTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
+      bTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
 
       // verify the file contents
       assertEquals(
@@ -160,6 +158,7 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
    */
   @Test
   public void testCloseDeletesNothingWhenFlagNotTrue() throws Exception {
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath;
@@ -172,8 +171,8 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
       s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, false);
 
       // add a couple of files
-      aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
-      bTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
+      aTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
+      bTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
 
       // verify the file contents
       assertEquals(
@@ -210,6 +209,7 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
    */
   @Test
   public void testGetObjectMetaDataForMissingFile() throws Exception {
+    S3Client s3Client = createS3Client(REGION_DEFAULT);
     String s3Bucket = null;
     try {
       s3Bucket = createTestBucket(s3Client);
@@ -238,7 +238,7 @@ public class S3DirectoryDaoIT extends MinioTestContainer {
    * @return eTag assigned to the file by S3
    * @throws IOException pass through if anything fails
    */
-  private String uploadFileToBucket(
+  private String uploadFileToString(
       S3Client s3Client, String bucket, String objectKey, String fileData) throws IOException {
     uploadJsonToBucket(
         s3Client, bucket, objectKey, ByteSource.wrap(fileData.getBytes(StandardCharsets.UTF_8)));

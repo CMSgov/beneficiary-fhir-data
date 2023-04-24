@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<aws.core.version>2.20.50</aws.core.version>
+		<awssdk.core.version>2.20.50</awssdk.core.version>
 	</properties>
 	
 	<dependencies>
@@ -44,10 +44,9 @@
 
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
-      		<artifactId>aws-core</artifactId>
-			<version>${aws.core.version}</version>
+			<artifactId>aws-core</artifactId>
+			<version>${awssdk.core.version}</version>
 		</dependency>
-
 		<dependency>
 			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
