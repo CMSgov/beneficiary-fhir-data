@@ -22,7 +22,7 @@ This will help:
 ## Status
 [Status]: #status
 
-* Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Rejected <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
     * [BFD-1820](https://jira.cms.gov/browse/BFD-1820)
 
