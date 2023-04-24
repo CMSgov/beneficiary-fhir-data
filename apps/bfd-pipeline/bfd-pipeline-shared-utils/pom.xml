@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<aws.core.version>2.20.9</aws.core.version>
+		<aws.core.version>2.20.50</aws.core.version>
 	</properties>
 	
 	<dependencies>
