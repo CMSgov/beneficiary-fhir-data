@@ -2,11 +2,7 @@ package gov.cms.bfd.sharedutils.config;
 
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_POSITIVE_INTEGER;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_PROVIDED;
-import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_BOOLEAN;
-import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_FLOAT;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_HEX;
-import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_INTEGER;
-import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_LONG;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,12 +18,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 /** Ensures the ConfigLoader can read the various configuration type data. */
 public class ConfigLoaderTest {
+  /** Expected error message when parsing invalid float value. */
+  private static final String NOT_VALID_FLOAT =
+      "not a valid Float value: exception=NumberFormatException message=For input string: \"***\"";
+  /** Expected error message when parsing invalid integer value. */
+  private static final String NOT_VALID_INTEGER =
+      "not a valid Integer value: exception=NumberFormatException message=For input string: \"***\"";
+  /** Expected error message when parsing invalid long value. */
+  private static final String NOT_VALID_LONG =
+      "not a valid Long value: exception=NumberFormatException message=For input string: \"***\"";
+  /** Expected error message when parsing invalid boolean value. */
+  private static final String NOT_VALID_BOOLEAN =
+      "not a valid Boolean value: exception=IllegalArgumentException message=invalid boolean value";
+  /** Expected error message when parsing invalid enum value. */
+  private static final String NOT_VALID_ENUM =
+      "not a valid TestEnum value: exception=IllegalArgumentException message=No enum constant gov.cms.bfd.sharedutils.config.ConfigLoaderTest.TestEnum.***";
 
   /** The configuration values. */
   private Map<String, String> values;
@@ -107,7 +119,7 @@ public class ConfigLoaderTest {
    */
   @Test
   public void requiredFloatValueNotFound() {
-    assertException("not-there", NOT_PROVIDED, () -> loader.floatValue("not-there"));
+    assertException("not-there", null, NOT_PROVIDED, () -> loader.floatValue("not-there"));
   }
 
   /**
@@ -117,7 +129,7 @@ public class ConfigLoaderTest {
   @Test
   public void invalidFloatValue() {
     values.put("a", "-not-a-number");
-    assertException("a", NOT_VALID_FLOAT, () -> loader.floatValue("a"));
+    assertException("a", values, NOT_VALID_FLOAT, () -> loader.floatValue("a"));
   }
 
   /**
@@ -181,16 +193,16 @@ public class ConfigLoaderTest {
     values.put("d", "not-a-number");
 
     assertEquals(Optional.of(10), loader.positiveIntOption("a"));
-    assertException("b", NOT_POSITIVE_INTEGER, () -> loader.positiveIntOption("b"));
-    assertException("c", NOT_POSITIVE_INTEGER, () -> loader.positiveIntOption("c"));
-    assertException("d", NOT_VALID_INTEGER, () -> loader.positiveIntOption("d"));
+    assertException("b", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntOption("b"));
+    assertException("c", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntOption("c"));
+    assertException("d", values, NOT_VALID_INTEGER, () -> loader.positiveIntOption("d"));
     assertEquals(Optional.empty(), loader.positiveIntOption("z"));
 
     assertEquals(10, loader.positiveIntValue("a"));
-    assertException("b", NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("b"));
-    assertException("c", NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("c"));
-    assertException("d", NOT_VALID_INTEGER, () -> loader.positiveIntValue("d"));
-    assertException("z", NOT_PROVIDED, () -> loader.positiveIntValue("z"));
+    assertException("b", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("b"));
+    assertException("c", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("c"));
+    assertException("d", values, NOT_VALID_INTEGER, () -> loader.positiveIntValue("d"));
+    assertException("z", null, NOT_PROVIDED, () -> loader.positiveIntValue("z"));
   }
 
   /** Validates all cases for long values. */
@@ -202,7 +214,7 @@ public class ConfigLoaderTest {
 
     assertEquals(Optional.of(33L), loader.longOption("a"));
     assertEquals(Optional.of(-20L), loader.longOption("b"));
-    assertException("c", NOT_VALID_LONG, () -> loader.longOption("c"));
+    assertException("c", values, NOT_VALID_LONG, () -> loader.longOption("c"));
     assertEquals(Optional.empty(), loader.longOption("z"));
   }
 
@@ -213,13 +225,13 @@ public class ConfigLoaderTest {
     values.put("b", "Eighth");
 
     assertEquals(Optional.of(TestEnum.First), loader.enumOption("a", TestEnum.class));
-    assertException(
-        "b", "not a valid TestEnum value", () -> loader.enumOption("b", TestEnum.class));
+    assertException("b", values, NOT_VALID_ENUM, () -> loader.enumOption("b", TestEnum.class));
     assertEquals(Optional.empty(), loader.<TestEnum>enumOption("z", TestEnum.class));
 
     assertEquals(TestEnum.First, loader.enumValue("a", TestEnum.class));
-    assertException("b", "not a valid TestEnum value", () -> loader.enumValue("b", TestEnum.class));
-    assertException("z", NOT_PROVIDED, () -> loader.<TestEnum>enumValue("z", TestEnum.class));
+    assertException("b", values, NOT_VALID_ENUM, () -> loader.enumValue("b", TestEnum.class));
+    assertException(
+        "z", values, NOT_PROVIDED, () -> loader.<TestEnum>enumValue("z", TestEnum.class));
   }
 
   /** Validates all cases for boolean values. */
@@ -233,14 +245,14 @@ public class ConfigLoaderTest {
     assertTrue(loader.booleanValue("a", false));
     assertFalse(loader.booleanValue("b"));
     assertFalse(loader.booleanValue("b", true));
-    assertException("c", NOT_VALID_BOOLEAN, () -> loader.booleanValue("c"));
-    assertException("c", NOT_VALID_BOOLEAN, () -> loader.booleanValue("c", true));
-    assertException("z", NOT_PROVIDED, () -> loader.booleanValue("z"));
+    assertException("c", values, NOT_VALID_BOOLEAN, () -> loader.booleanValue("c"));
+    assertException("c", values, NOT_VALID_BOOLEAN, () -> loader.booleanValue("c", true));
+    assertException("z", values, NOT_PROVIDED, () -> loader.booleanValue("z"));
     assertFalse(loader.booleanValue("z", false));
 
     assertEquals(Optional.of(TRUE), loader.booleanOption("a"));
     assertEquals(Optional.of(FALSE), loader.booleanOption("b"));
-    assertException("c", NOT_VALID_BOOLEAN, () -> loader.booleanOption("c"));
+    assertException("c", values, NOT_VALID_BOOLEAN, () -> loader.booleanOption("c"));
     assertEquals(Optional.empty(), loader.booleanOption("z"));
   }
 
@@ -250,8 +262,8 @@ public class ConfigLoaderTest {
     values.put("a", "0123456789abcdef");
     values.put("b", "not-hex");
     assertArrayEquals(new byte[] {1, 35, 69, 103, -119, -85, -51, -17}, loader.hexBytes("a"));
-    assertException("b", NOT_VALID_HEX, () -> loader.hexBytes("b"));
-    assertException("z", NOT_PROVIDED, () -> loader.hexBytes("z"));
+    assertException("b", values, NOT_VALID_HEX, () -> loader.hexBytes("b"));
+    assertException("z", values, NOT_PROVIDED, () -> loader.hexBytes("z"));
   }
 
   /** Validates all cases for parsed values. */
@@ -263,15 +275,17 @@ public class ConfigLoaderTest {
     assertEquals(10, loader.parsedValue("a", Integer.class, Integer::valueOf));
     assertException(
         "b",
-        "not a valid Integer value",
+        values,
+        NOT_VALID_INTEGER,
         () -> loader.parsedValue("b", Integer.class, Integer::valueOf));
     assertException(
-        "z", NOT_PROVIDED, () -> loader.parsedValue("z", Integer.class, Integer::valueOf));
+        "z", values, NOT_PROVIDED, () -> loader.parsedValue("z", Integer.class, Integer::valueOf));
 
     assertEquals(Optional.of(10), loader.parsedOption("a", Integer.class, Integer::valueOf));
     assertException(
         "b",
-        "not a valid Integer value",
+        values,
+        NOT_VALID_INTEGER,
         () -> loader.parsedOption("b", Integer.class, Integer::valueOf));
     assertEquals(Optional.empty(), loader.parsedOption("z", Integer.class, Integer::valueOf));
   }
@@ -297,7 +311,7 @@ public class ConfigLoaderTest {
         .when(loader)
         .validateReadableFile("f", new File("path"));
     values.put("f", "path");
-    assertException("f", "not readable", () -> loader.readableFile("f"));
+    assertException("f", null, "not readable", () -> loader.readableFile("f"));
   }
 
   /**
@@ -317,25 +331,25 @@ public class ConfigLoaderTest {
    * is not readable.
    */
   @Test
-  public void validateReadableFileIsNotReadable() throws Exception {
+  public void validateReadableFileIsNotReadable() {
     File file = mock(File.class);
     doReturn(true).when(file).isFile();
     doReturn(false).when(file).canRead();
-    assertException("a", "file is not readable", () -> loader.validateReadableFile("a", file));
+    assertException(
+        "a", null, "file is not readable", () -> loader.validateReadableFile("a", file));
   }
 
   /**
    * Validates an exception is thrown if a file passed to {@link ConfigLoader#validateReadableFile}
    * is not a file.
-   *
-   * @throws Exception an unexpected exception thrown from the test
    */
   @Test
-  public void validateReadableFileIsNotAFile() throws Exception {
+  public void validateReadableFileIsNotAFile() {
     File file = mock(File.class);
     doReturn(false).when(file).isFile();
     assertException(
         "a",
+        null,
         "object referenced by path is not a file",
         () -> loader.validateReadableFile("a", file));
   }
@@ -350,7 +364,7 @@ public class ConfigLoaderTest {
   public void validateReadableFileThrows() throws Exception {
     File file = mock(File.class);
     doThrow(new ConfigException("a", "oops", new IOException())).when(file).isFile();
-    assertException("a", "oops", () -> loader.validateReadableFile("a", file));
+    assertException("a", null, "oops", () -> loader.validateReadableFile("a", file));
   }
 
   /**
@@ -378,7 +392,7 @@ public class ConfigLoaderTest {
         .when(loader)
         .validateWriteableFile("f", new File("path"));
     values.put("f", "path");
-    assertException("f", "not readable", () -> loader.writeableFile("f"));
+    assertException("f", null, "not readable", () -> loader.writeableFile("f"));
   }
 
   /**
@@ -392,6 +406,7 @@ public class ConfigLoaderTest {
     doReturn(false).when(file).isFile();
     assertException(
         "a",
+        null,
         "object referenced by path is not a file",
         () -> loader.validateWriteableFile("a", file));
   }
@@ -421,7 +436,8 @@ public class ConfigLoaderTest {
     doReturn(true).when(file).exists();
     doReturn(true).when(file).isFile();
     doReturn(false).when(file).canWrite();
-    assertException("a", "file is not writeable", () -> loader.validateWriteableFile("a", file));
+    assertException(
+        "a", null, "file is not writeable", () -> loader.validateWriteableFile("a", file));
   }
 
   /**
@@ -440,6 +456,7 @@ public class ConfigLoaderTest {
     doReturn(false).when(parent).canWrite();
     assertException(
         "a",
+        null,
         "file does not exist and parent is not writeable",
         () -> loader.validateWriteableFile("a", file));
   }
@@ -469,7 +486,7 @@ public class ConfigLoaderTest {
   public void validateWriteableFileThrows() throws Exception {
     File file = mock(File.class);
     doThrow(new ConfigException("a", "oops", new IOException())).when(file).exists();
-    assertException("a", "oops", () -> loader.validateWriteableFile("a", file));
+    assertException("a", null, "oops", () -> loader.validateWriteableFile("a", file));
   }
 
   /** Validates a config value can be read from {@link Properties}. */
@@ -547,16 +564,32 @@ public class ConfigLoaderTest {
   }
 
   /**
-   * Asserts that an exception is thrown with the expected name and message.
+   * Asserts that an exception is thrown with the expected name and message. Optionally also ensures
+   * that no config value leaks into thrown {@link ConfigException} messages.
    *
    * @param expectedName the expected name
+   * @param valuesMap optional map containing config values
    * @param expectedMessage the expected message
    * @param action the lambda to call which expects an exception
    */
-  private void assertException(String expectedName, String expectedMessage, Executable action) {
+  private void assertException(
+      String expectedName,
+      @Nullable Map<String, String> valuesMap,
+      String expectedMessage,
+      Executable action) {
     final var ex = assertThrows(ConfigException.class, action);
     assertEquals(expectedName, ex.getName());
     assertEquals(expectedMessage, ex.getMessage());
+    if (valuesMap != null && valuesMap.containsKey(expectedName)) {
+      var doNotLogValue = valuesMap.get(expectedName);
+      Throwable t = ex;
+      while (t != null) {
+        if (t.getMessage().contains(doNotLogValue)) {
+          fail("message contains config value: " + t.getMessage());
+        }
+        t = t.getCause();
+      }
+    }
   }
 
   /** An enum used for testing configurations. */

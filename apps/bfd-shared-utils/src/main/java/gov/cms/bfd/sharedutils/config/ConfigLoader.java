@@ -30,35 +30,20 @@ import org.apache.commons.codec.binary.Hex;
  */
 public class ConfigLoader {
   /** Format string for {@link String#format} for unparseable value. */
-  @VisibleForTesting static final String NOT_VALID_PARSED = "not a valid %s value";
+  @VisibleForTesting
+  private static final String NOT_VALID_PARSED = "not a valid %s value: exception=%s message=%s";
 
   /** Error message for missing required value. */
   @VisibleForTesting static final String NOT_PROVIDED = "required option not provided";
 
-  /** Error message for invalid integer. */
-  @VisibleForTesting
-  static final String NOT_VALID_INTEGER =
-      String.format(NOT_VALID_PARSED, Integer.class.getSimpleName());
-
   /** Error message for non-positive integer. */
   @VisibleForTesting static final String NOT_POSITIVE_INTEGER = "not a positive integer";
 
-  /** Error message for invalid long. */
-  @VisibleForTesting
-  static final String NOT_VALID_LONG = String.format(NOT_VALID_PARSED, Long.class.getSimpleName());
-
-  /** Error message for invalid float. */
-  @VisibleForTesting
-  static final String NOT_VALID_FLOAT =
-      String.format(NOT_VALID_PARSED, Float.class.getSimpleName());
+  /** Error message for invalid hex strings. */
+  @VisibleForTesting static final String NOT_VALID_HEX = "invalid hex string";
 
   /** Error message for invalid boolean. */
-  @VisibleForTesting
-  static final String NOT_VALID_BOOLEAN =
-      String.format(NOT_VALID_PARSED, Boolean.class.getSimpleName());
-
-  /** Error message for invalid hex strings. */
-  public static final String NOT_VALID_HEX = "invalid hex string";
+  private static final String NOT_VALID_BOOLEAN = "invalid boolean value";
 
   /** Used to find and remove leading and trailing spaces and tabs. */
   private static final Pattern TRIM_PATTERN = Pattern.compile("^([ \\t]*)(.*?)([ \\t]*)$");
@@ -479,8 +464,8 @@ public class ConfigLoader {
     try {
       return parser.apply(source);
     } catch (RuntimeException e) {
-      final var message = String.format(NOT_VALID_PARSED, klass.getSimpleName());
-      throw new ConfigException(name, message, e);
+      final var message = parseFailedMessage(source, klass, e);
+      throw new ConfigException(name, message);
     }
   }
 
@@ -553,6 +538,24 @@ public class ConfigLoader {
   static String trim(String rawString) {
     var matcher = TRIM_PATTERN.matcher(rawString);
     return matcher.matches() ? matcher.group(TRIM_PATTERN_CENTER_GROUP) : rawString;
+  }
+
+  /**
+   * Create an exception message for a parse failure. Filters out the source value from the error's
+   * message so we can't accidentally leak sensitive configuration values to log files.
+   *
+   * @param sourceValue source that failed to parse
+   * @param klass class we tried to parse into
+   * @param error exception that was trigger when parsin
+   * @return helpful error message describing the failure
+   */
+  private static String parseFailedMessage(String sourceValue, Class<?> klass, Exception error) {
+    var reasonMessage = error.getMessage();
+    if (!Strings.isNullOrEmpty(sourceValue)) {
+      reasonMessage = reasonMessage.replaceAll(sourceValue, "***");
+    }
+    return String.format(
+        NOT_VALID_PARSED, klass.getSimpleName(), error.getClass().getSimpleName(), reasonMessage);
   }
 
   /**
