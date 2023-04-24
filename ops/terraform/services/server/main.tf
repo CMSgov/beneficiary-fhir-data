@@ -30,9 +30,14 @@ locals {
   is_ephemeral_env = local.seed_env == null ? false : true
   is_prod          = local.env == "prod"
 
-  azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env             = terraform.workspace
-  env_config      = { env = local.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
+  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env = terraform.workspace
+  env_config = {
+    tags    = var.env_config.tags,
+    vpc_id  = data.aws_vpc.main.id,
+    zone_id = data.aws_route53_zone.local_zone.id,
+    azs     = local.azs
+  }
   port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
