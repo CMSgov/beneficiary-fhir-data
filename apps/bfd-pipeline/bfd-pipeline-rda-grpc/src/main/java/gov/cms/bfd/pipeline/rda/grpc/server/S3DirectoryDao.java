@@ -10,6 +10,7 @@ import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -137,8 +138,18 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   public ByteSource downloadFile(String fileName) throws IOException {
     final String s3Key = s3DirectoryPath + fileName;
-    String eTag =
-        s3Client.getObject(GetObjectRequest.builder().key(s3Key).build()).response().eTag();
+    String eTag;
+    try {
+      eTag = s3Client.getObject(GetObjectRequest.builder().key(s3Key).build()).response().eTag();
+    } catch (S3Exception ex) {
+      if (ex.statusCode() == AWS_NOT_FOUND_STATUS_CODE) {
+        var fileNotFound = new FileNotFoundException(fileName);
+        fileNotFound.addSuppressed(ex);
+        throw fileNotFound;
+      } else {
+        throw ex;
+      }
+    }
     Path cacheFile = cacheFilePath(fileName, eTag);
     if (Files.isRegularFile(cacheFile)) {
       log.info(

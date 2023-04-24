@@ -106,7 +106,11 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 		</dependency>
-
+		<dependency>
+			<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
 		<dependency>
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). 
 				Brought into the compile classpath here, because RifLoader directly uses 

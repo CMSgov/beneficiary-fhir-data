@@ -142,7 +142,26 @@ public final class SharedS3Utilities {
    */
   public static S3AsyncClient createS3AsyncMinioClient(
       Region awsS3Region, S3MinioConfig minioConfig) {
-    return (S3AsyncClient) (createS3MinioClient(awsS3Region, minioConfig));
+    // Uses BasicCredentials to connect to the minio client and gets the
+    // username,password, and
+    // address from the minioconfig
+    AwsCredentials credentials =
+        AwsBasicCredentials.create(minioConfig.minioUserName, minioConfig.minioPassword);
+
+    ClientOverrideConfiguration.Builder overrideConfig =
+        ClientOverrideConfiguration.builder()
+            .putAdvancedOption(SdkAdvancedClientOption.SIGNER, AwsS3V4Signer.create());
+    S3Configuration.Builder s3ConfigBuilder =
+        S3Configuration.builder().pathStyleAccessEnabled(true);
+
+    return S3AsyncClient.builder()
+        .serviceConfiguration(s3ConfigBuilder.build())
+        .overrideConfiguration(overrideConfig.build())
+        .defaultsMode(DefaultsMode.STANDARD)
+        .region(awsS3Region)
+        .endpointOverride(URI.create(minioConfig.minioEndpointAddress))
+        .credentialsProvider(StaticCredentialsProvider.create(credentials))
+        .build();
   }
 
   /**
