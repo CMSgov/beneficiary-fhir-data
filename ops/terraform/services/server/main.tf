@@ -88,7 +88,6 @@ resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
 module "fhir_lb" {
   source = "./modules/bfd_server_lb"
 
-  env_config = local.env_config
   role       = local.legacy_service
   layer      = "dmz"
   log_bucket = data.aws_s3_bucket.logs.id
