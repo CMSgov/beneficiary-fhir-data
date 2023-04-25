@@ -2,6 +2,8 @@
 #
 
 locals {
+  env = terraform.workspace
+
   alarm_actions = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
   ok_actions    = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
 }
@@ -17,7 +19,7 @@ resource "aws_cloudwatch_metric_alarm" "healthy_hosts" {
   statistic           = "Average"
   threshold           = var.healthy_hosts.threshold
 
-  alarm_description = "No healthy hosts available for ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "No healthy hosts available for ${var.load_balancer_name} in APP-ENV: ${var.app}-${local.env}"
 
   dimensions = {
     LoadBalancerName = var.load_balancer_name
@@ -49,7 +51,7 @@ resource "aws_cloudwatch_metric_alarm" "clb_spillover_count" {
 
   threshold         = var.clb_spillover_count.threshold
   unit              = "Count"
-  alarm_description = "Spillover alarm for ELB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "Spillover alarm for ELB ${var.load_balancer_name} in APP-ENV: ${var.app}-${local.env}"
 
   # a missing spillover count means that we haven't spillover - that's good! don't alert.
   treat_missing_data = "notBreaching"
@@ -73,7 +75,7 @@ resource "aws_cloudwatch_metric_alarm" "clb_clb_surge_queue_length" {
 
   threshold         = var.clb_surge_queue_length.threshold
   unit              = "Count"
-  alarm_description = "Surge queue exceeded for ELB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "Surge queue exceeded for ELB ${var.load_balancer_name} in APP-ENV: ${var.app}-${local.env}"
 
   # an undefined surge queue length is good - we haven't had to queue any requests recently, so don't alert
   treat_missing_data = "notBreaching"
@@ -102,7 +104,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_alb_high_latency" {
 
   threshold         = var.alb_high_latency.threshold
   unit              = "Seconds"
-  alarm_description = "High latency for ALB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "High latency for ALB ${var.load_balancer_name} in APP-ENV: ${var.app}-${local.env}"
 
   # "Missing data" means that we haven't had any measure of latency - alert if we don't
   treat_missing_data = "breaching"
@@ -126,7 +128,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_status_4xx" {
 
   threshold         = var.alb_status_4xx.threshold
   unit              = "Count"
-  alarm_description = "HTTP Backend 4xx response codes exceeded for ALB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "HTTP Backend 4xx response codes exceeded for ALB ${var.load_balancer_name} in APP-ENV: ${var.app}-${local.env}"
 
   treat_missing_data = "notBreaching"
 
@@ -140,7 +142,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_rate_of_5xx" {
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = var.alb_rate_of_5xx.eval_periods
   threshold           = var.alb_rate_of_5xx.threshold
-  alarm_description   = "HTTP 5xx response codes rate exceeded for ALB ${var.load_balancer_name} in APP-ENV: ${var.app}-${var.env}"
+  alarm_description   = "HTTP 5xx response codes rate exceeded for ALB ${var.load_balancer_name} in APP-ENV: ${var.app}-${local.env}"
   treat_missing_data  = "notBreaching"
   alarm_actions       = local.alarm_actions
   ok_actions          = local.ok_actions

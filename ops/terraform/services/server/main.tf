@@ -119,7 +119,6 @@ module "lb_alarms" {
   load_balancer_name     = module.fhir_lb.name
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  env                    = local.env
   app                    = "bfd"
 
   # NLBs only have this metric to alarm on
