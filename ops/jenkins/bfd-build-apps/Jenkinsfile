@@ -64,6 +64,11 @@ spec:
                     scriptForDeploys = load('ops/deploy-ccs.groovy')
 
                     awsAuth.assumeRole()
+
+                    // Find the most current AMI IDs (if any).
+					amiIds = null
+					amiIds = scriptForDeploys.findAmis()
+
                 }
             }
         }
@@ -72,6 +77,7 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
+                    awsAuth.assumeRole()
                     appBuildResults = scriptForApps.build(verboseMaven)
                 }
             }
@@ -81,6 +87,7 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
+                    awsAuth.assumeRole()
                     amiIds = scriptForDeploys.buildAppAmis(params.GIT_BRANCH, gitCommitId, amiIds, appBuildResults)
                 }
             }
