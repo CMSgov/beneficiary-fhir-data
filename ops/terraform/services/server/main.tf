@@ -70,6 +70,14 @@ locals {
     ]
   }
   vpc_peerings = lookup(local.vpc_peerings_by_env, local.env, [])
+
+  create_server_lb          = contains(local.established_envs, local.env)
+  create_server_lb_alarms   = local.create_server_lb && contains(local.established_envs, local.env)
+  create_server_metrics     = contains(local.established_envs, local.env)
+  create_server_slo_alarms  = local.create_server_metrics && contains(local.established_envs, local.env)
+  create_server_log_alarms  = contains(local.established_envs, local.env)
+  create_server_dashboards  = local.create_server_metrics && contains(local.established_envs, local.env)
+  create_server_disk_alarms = contains(local.established_envs, local.env)
 }
 
 ## IAM role for FHIR
@@ -90,6 +98,8 @@ resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
 ## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
 module "fhir_lb" {
+  count = local.create_server_lb ? 1 : 0
+
   source = "./modules/bfd_server_lb"
 
   env_config = local.env_config
@@ -118,9 +128,11 @@ module "fhir_lb" {
 }
 
 module "lb_alarms" {
+  count = local.create_server_lb_alarms ? 1 : 0
+
   source = "./modules/bfd_server_lb_alarms"
 
-  load_balancer_name     = module.fhir_lb.name
+  load_balancer_name     = coalesce(module.fhir_lb[0].name, "")
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   app                    = "bfd"
@@ -142,7 +154,7 @@ module "fhir_asg" {
   env_config = local.env_config
   role       = local.legacy_service
   layer      = "app"
-  lb_config  = module.fhir_lb.lb_config
+  lb_config  = try(module.fhir_lb[0].lb_config, null)
 
   # Initial size is one server per AZ
   asg_config = {
@@ -184,23 +196,33 @@ module "fhir_asg" {
 
 ## FHIR server metrics, per partner
 module "bfd_server_metrics" {
+  count = local.create_server_metrics ? 1 : 0
+
   source = "./modules/bfd_server_metrics"
 }
 
 module "bfd_server_slo_alarms" {
+  count = local.create_server_slo_alarms ? 1 : 0
+
   source = "./modules/bfd_server_slo_alarms"
 }
 
 module "bfd_server_log_alarms" {
+  count = local.create_server_log_alarms ? 1 : 0
+
   source = "./modules/bfd_server_log_alarms"
 }
 
 ## This is where cloudwatch dashboards are managed. 
 #
 module "bfd_dashboards" {
-  source         = "./modules/bfd_server_dashboards"
+  count = local.create_server_dashboards ? 1 : 0
+
+  source = "./modules/bfd_server_dashboards"
 }
 
 module "disk_usage_alarms" {
+  count = local.create_server_disk_alarms ? 1 : 0
+
   source = "./modules/bfd_server_disk_alarms"
 }
