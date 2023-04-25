@@ -1,0 +1,77 @@
+#!/usr/bin/env groovy
+
+/**
+ * <p>
+ * This script will be run by Jenkins when building apps and app AMIs.
+ * </p>
+ */
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def verboseMaven = params.verbose_mvn_logging
+def appBuildResults
+def amiIds
+def scriptForApps
+def scriptForDeploys
+
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-latest'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
+        }
+    }
+
+    parameters {
+        string(name: 'GIT Branch',
+        defaultValue: '',
+        description: 'To build, specify a branch within BFD.')
+    }
+
+    stages {
+        stage('Prepare') {
+            // Grab the commit that triggered the build.
+            checkout scm
+
+            // Address limitations resulting from CVE-2022-24767
+            sh 'git config --global --add safe.directory "$WORKSPACE"'
+
+            // Get the current commit id
+			gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+            // Load the child Jenkinsfiles.
+            scriptForApps = load('apps/build.groovy')
+            scriptForDeploys = load('ops/deploy-ccs.groovy')
+
+            awsAuth.assumeRole()
+        }
+
+        stage('Build Apps') {
+            currentStage = env.STAGE_NAME
+            appBuildResults = scriptForApps.build(verboseMaven)
+        }
+
+        stage('Build App AMIs') {
+			currentStage = env.STAGE_NAME
+			amiIds = scriptForDeploys.buildAppAmis(params.GIT_BRANCH, gitCommitId, amiIds, appBuildResults)
+			}
+    }
+}
