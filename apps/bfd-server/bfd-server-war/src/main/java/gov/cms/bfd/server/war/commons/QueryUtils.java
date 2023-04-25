@@ -26,22 +26,22 @@ public class QueryUtils {
   public static final String CHECK_CLAIMS_FOR_DATA =
       "SELECT * FROM check_claims_mask(:beneIdValue)";
 
-  /** bitwise value denoting CARRIER_CLAIMS data for a beneficiary. */
-  public static final int CARRIER_HAS_DATA = 0; // (1 << 1);
-  /** bitwise value denoting INPATIENT_CLAIMS data for a beneficiary. */
-  public static final int INPATIENT_HAS_DATA = 1; // (1 << 2);
-  /** bitwise value denoting OUTPATIENT_CLAIMS data for a beneficiary. */
-  public static final int OUTPATIENT_HAS_DATA = 2; // (1 << 3);
-  /** bitwise value denoting SNF_CLAIMS data for a beneficiary. */
-  public static final int SNF_HAS_DATA = 3; // (1 << 4);
-  /** bitwise value denoting DME_CLAIMS data for a beneficiary. */
-  public static final int DME_HAS_DATA = 4; // (1 << 5);
-  /** bitwise value denoting HHA_CLAIMS data for a beneficiary. */
-  public static final int HHA_HAS_DATA = 5; // (1 << 6);
-  /** bitwise value denoting HOSPICE_CLAIMS data for a beneficiary. */
-  public static final int HOSPICE_HAS_DATA = 6; // (1 << 7);
-  /** bitwise value denoting PARTD_EVENTS data for a beneficiary. */
-  public static final int PART_D_HAS_DATA = 7; // (1 << 8);
+  /** BitSet index identifier for Carrier Claims. */
+  public static final int CARRIER_HAS_DATA = 0;
+  /** BitSet index identifier for Inpatient Claims. */
+  public static final int INPATIENT_HAS_DATA = 1;
+  /** BitSet index identifier for Outpatient Claims. */
+  public static final int OUTPATIENT_HAS_DATA = 2;
+  /** BitSet index identifier for SNF Claims. */
+  public static final int SNF_HAS_DATA = 3;
+  /** BitSet index identifier for DME Claims. */
+  public static final int DME_HAS_DATA = 4;
+  /** BitSet index identifier for HHA Claims. */
+  public static final int HHA_HAS_DATA = 5;
+  /** BitSet index identifier for Hospice Claims. */
+  public static final int HOSPICE_HAS_DATA = 6;
+  /** BitSet index identifier for Part D Events. */
+  public static final int PART_D_HAS_DATA = 7;
 
   /** bitwise value denoting CARRIER_CLAIMS data for a beneficiary. */
   private static final int V_CARRIER_HAS_DATA = (1 << 0);
@@ -253,31 +253,14 @@ public class QueryUtils {
 
     Integer maskVal = (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
     BitSet rslt = new BitSet(maskVal);
-
-    if ((maskVal & V_CARRIER_HAS_DATA) == 1) {
-      rslt.set(CARRIER_HAS_DATA);
-    }
-    if ((maskVal & V_INPATIENT_HAS_DATA) == 1) {
-      rslt.set(INPATIENT_HAS_DATA);
-    }
-    if ((maskVal & V_OUTPATIENT_HAS_DATA) == 1) {
-      rslt.set(OUTPATIENT_HAS_DATA);
-    }
-    if ((maskVal & V_SNF_HAS_DATA) == 1) {
-      rslt.set(SNF_HAS_DATA);
-    }
-    if ((maskVal & V_DME_HAS_DATA) == 1) {
-      rslt.set(DME_HAS_DATA);
-    }
-    if ((maskVal & V_HHA_HAS_DATA) == 1) {
-      rslt.set(HHA_HAS_DATA);
-    }
-    if ((maskVal & V_HOSPICE_HAS_DATA) == 1) {
-      rslt.set(HOSPICE_HAS_DATA);
-    }
-    if ((maskVal & V_PART_D_HAS_DATA) == 1) {
-      rslt.set(PART_D_HAS_DATA);
-    }
+    rslt.set(CARRIER_HAS_DATA, (maskVal & V_CARRIER_HAS_DATA) == 1);
+    rslt.set(INPATIENT_HAS_DATA, (maskVal & V_INPATIENT_HAS_DATA) == 1);
+    rslt.set(OUTPATIENT_HAS_DATA, (maskVal & V_OUTPATIENT_HAS_DATA) == 1);
+    rslt.set(SNF_HAS_DATA, (maskVal & V_SNF_HAS_DATA) == 1);
+    rslt.set(DME_HAS_DATA, (maskVal & V_DME_HAS_DATA) == 1);
+    rslt.set(HHA_HAS_DATA, (maskVal & V_HHA_HAS_DATA) == 1);
+    rslt.set(HOSPICE_HAS_DATA, (maskVal & V_HOSPICE_HAS_DATA) == 1);
+    rslt.set(PART_D_HAS_DATA, (maskVal & V_PART_D_HAS_DATA) == 1);
     return rslt;
   }
 }
