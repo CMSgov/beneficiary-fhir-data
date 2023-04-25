@@ -36,6 +36,11 @@
 			<version>${flyway.version}</version>
 		</dependency>
 		<dependency>
+			<!-- Used to interact with AWS' SSM service -->
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-ssm</artifactId>
+		</dependency>
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
 				 Java. -->
 			<groupId>org.slf4j</groupId>

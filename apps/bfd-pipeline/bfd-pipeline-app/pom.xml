@@ -116,12 +116,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to interact with AWS' SSM service -->
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-ssm</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.github.stefanbirkner</groupId>
 			<artifactId>system-lambda</artifactId>
 			<version>${system-lambda-version}</version>

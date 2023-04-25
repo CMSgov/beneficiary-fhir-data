@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
@@ -23,7 +27,12 @@ import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.AwsParameterStoreClient;
+import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -32,6 +41,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
@@ -46,9 +56,8 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.*;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
@@ -56,9 +65,29 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
+// @PropertySource(value = "classpath:config.properties", factory =
+// ConfigPropertySource.Factory.class)
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
 public class SpringConfiguration {
+  /**
+   * The name of the environment variable that should be used to provide the region used for looking
+   * up configuration variables in AWS SSM parameter store.
+   */
+  public static final String ENV_VAR_KEY_SSM_REGION = "SSM_REGION";
+
+  /**
+   * The name of the environment variable that should be used to provide a path for looking up
+   * configuration variables in AWS SSM parameter store.
+   */
+  public static final String ENV_VAR_KEY_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
+
+  /**
+   * The name of a java properties file that should be used to provide a source of configuration
+   * variables.
+   */
+  public static final String ENV_VAR_KEY_PROPERTIES_FILE = "PROPERTIES_FILE";
+
   /** The database url that BFD will use for all database calls. */
   public static final String PROP_DB_URL = "bfdServer.db.url";
   /** The database username. */
@@ -104,6 +133,18 @@ public class SpringConfiguration {
    * Wildfly or whatever (see <code>server-config.sh</code> for details).
    */
   private static final boolean HIBERNATE_DETAILED_LOGGING = false;
+
+  /**
+   * Makes our {@link ConfigLoader} instance available as a singleton to components in the
+   * application.
+   *
+   * @return the config object
+   */
+  @Bean
+  @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
+  public ConfigLoader configLoader() {
+    return createConfigLoader(System::getenv);
+  }
 
   /**
    * Sets up the application's database connection.
@@ -343,18 +384,18 @@ public class SpringConfiguration {
    * @return the metric registry
    */
   @Bean
-  public MetricRegistry metricRegistry() {
+  public MetricRegistry metricRegistry(ConfigLoader config) {
     MetricRegistry metricRegistry = new MetricRegistry();
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    String newRelicMetricKey = System.getenv("NEW_RELIC_METRIC_KEY");
+    String newRelicMetricKey = config.stringValue("NEW_RELIC_METRIC_KEY", null);
 
     if (newRelicMetricKey != null) {
-      String newRelicAppName = System.getenv("NEW_RELIC_APP_NAME");
-      String newRelicMetricHost = System.getenv("NEW_RELIC_METRIC_HOST");
-      String newRelicMetricPath = System.getenv("NEW_RELIC_METRIC_PATH");
-      String rawNewRelicPeriod = System.getenv("NEW_RELIC_METRIC_PERIOD");
+      String newRelicAppName = config.stringValue("NEW_RELIC_APP_NAME", null);
+      String newRelicMetricHost = config.stringValue("NEW_RELIC_METRIC_HOST", null);
+      String newRelicMetricPath = config.stringValue("NEW_RELIC_METRIC_PATH", null);
+      String rawNewRelicPeriod = config.stringValue("NEW_RELIC_METRIC_PERIOD", null);
 
       int newRelicPeriod;
       try {
@@ -438,6 +479,65 @@ public class SpringConfiguration {
       return NPIOrgLookup.createNpiOrgLookupForTesting();
     } else {
       return NPIOrgLookup.createNpiOrgLookupForProduction();
+    }
+  }
+
+  /**
+   * Creates a new {@link ConfigLoader} instance that takes config values from system properties,
+   * then from environment variables.
+   *
+   * @return the new config loader
+   */
+  public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
+    final var baseConfig = ConfigLoader.builder().addSingle(getenv).build();
+    final var configBuilder = ConfigLoader.builder();
+
+    final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
+    if (ssmPath.length() > 0) {
+      ensureAwsCredentialsConfiguredCorrectly();
+      final var ssmClient = AWSSimpleSystemsManagementClient.builder();
+      baseConfig
+          .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
+          .ifPresent(r -> ssmClient.setRegion(r.getName()));
+      final var parameterStore = new AwsParameterStoreClient(ssmClient.build());
+      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath);
+      configBuilder.addMap(parametersMap);
+    }
+
+    final var propertiesFile = baseConfig.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, "");
+    if (propertiesFile.length() > 0) {
+      try {
+        final var file = new File(propertiesFile);
+        configBuilder.addPropertiesFile(file);
+      } catch (IOException ex) {
+        throw new ConfigException(ENV_VAR_KEY_PROPERTIES_FILE, "error parsing file", ex);
+      }
+    }
+
+    configBuilder.addSingle(getenv);
+    configBuilder.addSystemProperties();
+    return configBuilder.build();
+  }
+
+  /**
+   * Just for convenience: makes sure DefaultAWSCredentialsProviderChain has whatever it needs
+   * before we try to use any AWS resources.
+   */
+  static void ensureAwsCredentialsConfiguredCorrectly() {
+    try {
+      DefaultAWSCredentialsProviderChain awsCredentialsProvider =
+          new DefaultAWSCredentialsProviderChain();
+      awsCredentialsProvider.getCredentials();
+    } catch (AmazonClientException e) {
+      /*
+       * The credentials provider should throw this if it can't find what
+       * it needs.
+       */
+      throw new AppConfigurationException(
+          String.format(
+              "Missing configuration for AWS credentials (for %s).",
+              DefaultAWSCredentialsProviderChain.class.getName()),
+          e);
     }
   }
 }

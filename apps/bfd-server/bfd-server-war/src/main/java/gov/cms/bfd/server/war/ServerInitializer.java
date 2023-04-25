@@ -5,6 +5,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -12,6 +13,7 @@ import javax.servlet.ServletRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.web.SpringServletContainerInitializer;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -29,14 +31,16 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
 
-  /** {@inheritDoc} */
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
     LOGGER.info("Initializing Blue Button API backend server...");
 
+    ConfigLoader config = SpringConfiguration.createConfigLoader(System::getenv);
+
     // Create the Spring application context.
     AnnotationConfigWebApplicationContext springContext =
         new AnnotationConfigWebApplicationContext();
+    configPropertySource(springContext.getEnvironment(), config);
     springContext.register(SpringConfiguration.class);
     springContext.refresh();
 
@@ -75,5 +79,26 @@ public final class ServerInitializer implements WebApplicationInitializer {
         HealthCheckServlet.HEALTH_CHECK_REGISTRY, springContext.getBean(HealthCheckRegistry.class));
 
     LOGGER.info("Initialized Blue Button API backend server.");
+  }
+
+  //  public ConfigLoader getConfigLoader() {
+  //    ConfigLoader baseConfig =
+  //        ConfigLoader.builder().addEnvironmentVariables().addSystemProperties().build();
+  //    ConfigLoader.Builder realConfig = ConfigLoader.builder();
+  //
+  //    String ssmPath = baseConfig.stringValue("aws.ssm.path", "");
+  //    if (ssmPath.length() > 0) {}
+  //
+  //    realConfig.addEnvironmentVariables();
+  //    realConfig.addSystemProperties();
+  //    return realConfig.build();
+  //  }
+
+  public ConfigPropertySource configPropertySource(
+      ConfigurableEnvironment env, ConfigLoader config) {
+    ConfigPropertySource propertySource = new ConfigPropertySource("configLoader", config);
+    MutablePropertySources sources = env.getPropertySources();
+    sources.addFirst(propertySource);
+    return propertySource;
   }
 }

@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.app;
+package gov.cms.bfd.sharedutils.config;
 
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
@@ -8,8 +8,6 @@ import com.amazonaws.services.simplesystemsmanagement.model.Parameter;
 import com.amazonaws.services.simplesystemsmanagement.model.ParameterNotFoundException;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.sharedutils.config.ConfigException;
-import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.util.Map;
 
 /** Client for retrieving parameters from AWS SSM. Defined as an object to facilitate mocking. */
