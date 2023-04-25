@@ -1,6 +1,6 @@
 variable "env_config" {
   description = "All high-level info for the whole vpc"
-  type        = object({ vpc_id = string, zone_id = string, azs = list(string) })
+  type        = object({ default_tags = map(string), vpc_id = string, zone_id = string, azs = list(string) })
 }
 
 variable "role" {
