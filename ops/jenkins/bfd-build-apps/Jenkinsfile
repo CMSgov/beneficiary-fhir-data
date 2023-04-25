@@ -57,7 +57,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
     if (buildStatus == 'UNSTABLE'){
         slackMsg = "UNSTABLE APP BUILD ON ${params.git_branch.toUpperCase()} BRANCH <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
 	} else {
-        slackMsg = "BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+        slackMsg = "APP BUILD ON ${params.git_branch.toUpperCase()} BRANCH <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
     }
 
     // send Slack messages
