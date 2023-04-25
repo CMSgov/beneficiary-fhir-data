@@ -4,7 +4,8 @@ locals {
   env = terraform.workspace
   app = "bfd-server"
 
-  namespace = "bfd-${local.env}/${local.app}"
+  dashboard_name = "bfd-${local.env}-server"
+  namespace      = "bfd-${local.env}/${local.app}"
   # This metric is not used -- instead, it is used to collect the proper client_ssls per-environment
   all_requests_count_metric = "http-requests/count/all"
 
@@ -40,7 +41,7 @@ locals {
 }
 
 resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
-  dashboard_name = var.dashboard_name
+  dashboard_name = local.dashboard_name
   dashboard_body = templatefile(
     "${path.module}/templates/bfd-dashboard.tftpl",
     merge({
@@ -51,7 +52,7 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
 }
 
 resource "aws_cloudwatch_dashboard" "bfd_dashboard_slos" {
-  dashboard_name = "${var.dashboard_name}-slos"
+  dashboard_name = "${local.dashboard_name}-slos"
   dashboard_body = templatefile(
     "${path.module}/templates/bfd-dashboard-slos.tftpl",
     merge({

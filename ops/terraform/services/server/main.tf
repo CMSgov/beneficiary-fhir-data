@@ -199,7 +199,6 @@ module "bfd_server_log_alarms" {
 #
 module "bfd_dashboards" {
   source         = "./modules/bfd_server_dashboards"
-  dashboard_name = var.dashboard_name
 }
 
 module "disk_usage_alarms" {
