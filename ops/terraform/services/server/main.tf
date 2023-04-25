@@ -185,7 +185,6 @@ module "bfd_server_metrics" {
 
 module "bfd_server_slo_alarms" {
   source = "./modules/bfd_server_slo_alarms"
-  env    = local.env
 }
 
 module "bfd_server_log_alarms" {
