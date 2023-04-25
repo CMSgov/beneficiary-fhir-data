@@ -1,9 +1,10 @@
 # This module is for defining the BDF CloudWatch dashboard
 #
 locals {
+  env = terraform.workspace
   app = "bfd-server"
 
-  namespace = "bfd-${var.env}/${local.app}"
+  namespace = "bfd-${local.env}/${local.app}"
   # This metric is not used -- instead, it is used to collect the proper client_ssls per-environment
   all_requests_count_metric = "http-requests/count/all"
 
@@ -44,7 +45,7 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
     "${path.module}/templates/bfd-dashboard.tftpl",
     merge({
       namespace = local.namespace
-      env       = var.env
+      env       = local.env
     }, local.client_ssls)
   )
 }
@@ -55,7 +56,7 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard_slos" {
     "${path.module}/templates/bfd-dashboard-slos.tftpl",
     merge({
       namespace = local.namespace
-      env       = var.env
+      env       = local.env
     }, local.client_ssls)
   )
 }
