@@ -8,7 +8,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
@@ -17,6 +19,47 @@ import javax.persistence.criteria.Root;
 
 /** As set of methods to help form JPA queries. */
 public class QueryUtils {
+  /**
+   * Database function that checks all claims for a given beneficiaryId and returns a bitwise mask
+   * value that shows if a given claim type will have any data.
+   */
+  public static final String CHECK_CLAIMS_FOR_DATA =
+      "SELECT * FROM check_claims_mask(:beneIdValue)";
+
+  /** bitwise value denoting CARRIER_CLAIMS data for a beneficiary. */
+  public static final int CARRIER_HAS_DATA = 0; // (1 << 1);
+  /** bitwise value denoting INPATIENT_CLAIMS data for a beneficiary. */
+  public static final int INPATIENT_HAS_DATA = 1; // (1 << 2);
+  /** bitwise value denoting OUTPATIENT_CLAIMS data for a beneficiary. */
+  public static final int OUTPATIENT_HAS_DATA = 2; // (1 << 3);
+  /** bitwise value denoting SNF_CLAIMS data for a beneficiary. */
+  public static final int SNF_HAS_DATA = 3; // (1 << 4);
+  /** bitwise value denoting DME_CLAIMS data for a beneficiary. */
+  public static final int DME_HAS_DATA = 4; // (1 << 5);
+  /** bitwise value denoting HHA_CLAIMS data for a beneficiary. */
+  public static final int HHA_HAS_DATA = 5; // (1 << 6);
+  /** bitwise value denoting HOSPICE_CLAIMS data for a beneficiary. */
+  public static final int HOSPICE_HAS_DATA = 6; // (1 << 7);
+  /** bitwise value denoting PARTD_EVENTS data for a beneficiary. */
+  public static final int PART_D_HAS_DATA = 7; // (1 << 8);
+
+  /** bitwise value denoting CARRIER_CLAIMS data for a beneficiary. */
+  private static final int V_CARRIER_HAS_DATA = (1 << 0);
+  /** bitwise value denoting INPATIENT_CLAIMS data for a beneficiary. */
+  private static final int V_INPATIENT_HAS_DATA = (1 << 1);
+  /** bitwise value denoting OUTPATIENT_CLAIMS data for a beneficiary. */
+  private static final int V_OUTPATIENT_HAS_DATA = (1 << 2);
+  /** bitwise value denoting SNF_CLAIMS data for a beneficiary. */
+  private static final int V_SNF_HAS_DATA = (1 << 3);
+  /** bitwise value denoting DME_CLAIMS data for a beneficiary. */
+  private static final int V_DME_HAS_DATA = (1 << 4);
+  /** bitwise value denoting HHA_CLAIMS data for a beneficiary. */
+  private static final int V_HHA_HAS_DATA = (1 << 5);
+  /** bitwise value denoting HOSPICE_CLAIMS data for a beneficiary. */
+  private static final int V_HOSPICE_HAS_DATA = (1 << 6);
+  /** bitwise value denoting PARTD_EVENTS data for a beneficiary. */
+  private static final int V_PART_D_HAS_DATA = (1 << 7);
+
   /**
    * Create a predicate for the lastUpdate field based on the passed _lastUpdated parameter range.
    *
@@ -177,5 +220,64 @@ public class QueryUtils {
       }
     }
     return true;
+  }
+
+  /**
+   * Query database to determine which claim types have data for the specified beneficiary.
+   *
+   * @param entityManager {@link EntityManager} used to query database.
+   * @param bene_id used to identify the Benficiary to chek claims for.
+   * @return {@link BitSet} denoting which claims have data.
+   */
+  public static BitSet hasClaimsData(EntityManager entityManager, long bene_id) {
+    /*
+     * execute a database function that returns a bitwise mask value that denotes that the given
+     * claim type will have data for the specified beneficiayrId. This represents fast and efficient
+     * way to ignore a requested claim type that ultimately has no data for our beneficiaryId.
+     *
+     * The database function returns bits as follows:
+     * CARRIER_CLAIMS      : bit 0
+     * INPATIENT CLAIMS    : bit 1
+     * OUTPATIENT CLAIMS   : bit 2
+     * SNF CLAIMS          : bit 3
+     * DME CLAIMS          : bit 4
+     * HHA CLAIMS          : bit 5
+     * HOSPICE CLAIMS      : bit 6
+     * PART D CLAIMS       : bit 7
+     */
+    List<Object> values =
+        entityManager
+            .createNativeQuery(CHECK_CLAIMS_FOR_DATA)
+            .setParameter("beneIdValue", bene_id)
+            .getResultList();
+
+    Integer maskVal = (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
+    BitSet rslt = new BitSet(maskVal);
+
+    if ((maskVal & V_CARRIER_HAS_DATA) == 1) {
+      rslt.set(CARRIER_HAS_DATA);
+    }
+    if ((maskVal & V_INPATIENT_HAS_DATA) == 1) {
+      rslt.set(INPATIENT_HAS_DATA);
+    }
+    if ((maskVal & V_OUTPATIENT_HAS_DATA) == 1) {
+      rslt.set(OUTPATIENT_HAS_DATA);
+    }
+    if ((maskVal & V_SNF_HAS_DATA) == 1) {
+      rslt.set(SNF_HAS_DATA);
+    }
+    if ((maskVal & V_DME_HAS_DATA) == 1) {
+      rslt.set(DME_HAS_DATA);
+    }
+    if ((maskVal & V_HHA_HAS_DATA) == 1) {
+      rslt.set(HHA_HAS_DATA);
+    }
+    if ((maskVal & V_HOSPICE_HAS_DATA) == 1) {
+      rslt.set(HOSPICE_HAS_DATA);
+    }
+    if ((maskVal & V_PART_D_HAS_DATA) == 1) {
+      rslt.set(PART_D_HAS_DATA);
+    }
+    return rslt;
   }
 }
