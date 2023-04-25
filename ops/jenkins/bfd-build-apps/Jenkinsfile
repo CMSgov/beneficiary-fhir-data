@@ -48,30 +48,42 @@ spec:
 
     stages {
         stage('Prepare') {
-            // Grab the commit that triggered the build.
-            checkout scm
+            steps {
+                script {
+                    // Grab the commit that triggered the build.
+                    checkout scm
 
-            // Address limitations resulting from CVE-2022-24767
-            sh 'git config --global --add safe.directory "$WORKSPACE"'
+                    // Address limitations resulting from CVE-2022-24767
+                    sh 'git config --global --add safe.directory "$WORKSPACE"'
 
-            // Get the current commit id
-			gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+                    // Get the current commit id
+                    gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
-            // Load the child Jenkinsfiles.
-            scriptForApps = load('apps/build.groovy')
-            scriptForDeploys = load('ops/deploy-ccs.groovy')
+                    // Load the child Jenkinsfiles.
+                    scriptForApps = load('apps/build.groovy')
+                    scriptForDeploys = load('ops/deploy-ccs.groovy')
 
-            awsAuth.assumeRole()
+                    awsAuth.assumeRole()
+                }
+            }
         }
 
         stage('Build Apps') {
-            currentStage = env.STAGE_NAME
-            appBuildResults = scriptForApps.build(verboseMaven)
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    appBuildResults = scriptForApps.build(verboseMaven)
+                }
+            }
         }
 
         stage('Build App AMIs') {
-			currentStage = env.STAGE_NAME
-			amiIds = scriptForDeploys.buildAppAmis(params.GIT_BRANCH, gitCommitId, amiIds, appBuildResults)
-			}
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    amiIds = scriptForDeploys.buildAppAmis(params.GIT_BRANCH, gitCommitId, amiIds, appBuildResults)
+                }
+            }
+        }
     }
 }
