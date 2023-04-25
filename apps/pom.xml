@@ -75,11 +75,11 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<micrometer.version>1.10.4</micrometer.version>
-		<metrics.version>4.2.16</metrics.version>
+		<micrometer.version>1.10.6</micrometer.version>
+		<metrics.version>4.2.18</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.410</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>1.12.455</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.11</spring-data-jpa.version>
 		<spring-framework.version>5.3.23</spring-framework.version>
 
@@ -89,29 +89,30 @@
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.2</junit.version>
 		<javadoc.version>3.5.0</javadoc.version>
-		<testcontainers.version>1.17.6</testcontainers.version>
+		<testcontainers.version>1.18.0</testcontainers.version>
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
-		<jackson-databind.version>2.14.2</jackson-databind.version>
-		<jackson-datatype-jdk8.version>2.14.2</jackson-datatype-jdk8.version>
-		<jackson-dataformat-yaml.version>2.14.2</jackson-dataformat-yaml.version>
-		<jackson-datatype-jsr310.version>2.14.2</jackson-datatype-jsr310.version>
+		<jackson-databind.version>2.15.0</jackson-databind.version>
+		<jackson-datatype-jdk8.version>2.15.0</jackson-datatype-jdk8.version>
+		<jackson-dataformat-yaml.version>2.15.0</jackson-dataformat-yaml.version>
+		<jackson-datatype-jsr310.version>2.15.0</jackson-datatype-jsr310.version>
                 <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
                 <snakeyaml.version>2.0</snakeyaml.version>
 
-		<mockito.version>5.1.1</mockito.version>
+		<mockito.version>5.3.1</mockito.version>
+		<mockito-inline.version>5.2.0</mockito-inline.version>
 		<system-lambda-version>1.2.1</system-lambda-version>
-		<postgresql.version>42.5.4</postgresql.version>
+		<postgresql.version>42.6.0</postgresql.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
-		<slf4j.version>2.0.6</slf4j.version>
+		<slf4j.version>2.0.7</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
-		<flyway.version>9.16.1</flyway.version>
-		<newrelic.agent.version>8.0.1</newrelic.agent.version>
-		<checkstyle.version>10.7.0</checkstyle.version>
+		<flyway.version>9.16.3</flyway.version>
+		<newrelic.agent.version>8.1.0</newrelic.agent.version>
+		<checkstyle.version>10.9.3</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
-		<logback.classic.version>1.4.5</logback.classic.version>
+		<logback.classic.version>1.4.7</logback.classic.version>
 		<zjsonpatch.version>0.4.14</zjsonpatch.version>
 		<freemarker.version>2.3.32</freemarker.version>
 
@@ -126,7 +127,7 @@
 		<lombok.version>1.18.26</lombok.version>
 
 		<!-- Dependencies required for connecting to a gRPC API -->
-		<grpc_java.version>1.53.0</grpc_java.version>
+		<grpc_java.version>1.54.1</grpc_java.version>
 		<protoc.version>3.21.12</protoc.version>
 		<protobuf.version>3.21.12</protobuf.version>
 
@@ -148,7 +149,7 @@
 		<local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
 
 		<!-- Functional-reactive programming api for concurrent claim ingestion. -->
-		<reactor.version>3.5.1</reactor.version>
+		<reactor.version>3.5.5</reactor.version>
 
 		<!-- Default number of threads that we can overridden as needed in module poms. -->
 		<compile.thread.count>4</compile.thread.count>
