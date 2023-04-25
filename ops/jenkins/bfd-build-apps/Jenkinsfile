@@ -54,6 +54,9 @@ spec:
         stage('Prepare') {
             steps {
                 script {
+                    echo 'this is the branch name'
+                    echo params.git_branch
+
                     // Grab the commit that triggered the build.
                     checkout scm
 
@@ -90,8 +93,6 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    echo 'this is the branch name'
-                    echo params.git_branch
 
                     awsAuth.assumeRole()
                     amiIds = scriptForDeploys.buildAppAmis(params.git_branch, gitCommitId, amiIds, appBuildResults)
