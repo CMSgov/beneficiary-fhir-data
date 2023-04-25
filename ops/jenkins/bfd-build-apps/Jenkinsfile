@@ -13,6 +13,57 @@ def amiIds
 def scriptForApps
 def scriptForDeploys
 
+// send notifications to slack, email, etc
+def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
+    // buildStatus of NULL means success
+    if (!buildStatus) {
+        buildStatus = 'SUCCESS'
+    }
+
+    // build colors
+    def colorMap = [:]
+    colorMap['STARTED']  = '#0000FF'
+    colorMap['SUCCESS']  = '#00FF00'
+    colorMap['ABORTED']  = '#6A0DAD'
+    colorMap['UNSTABLE'] = '#FFFF00'
+    colorMap['FAILED']   = '#FF0000'
+    def buildColor = colorMap[buildStatus]
+    buildColor = buildColor ?: '#FF0000' // default to red
+
+    // prettyfi messages
+    def msg = ''
+    switch (buildStatus){
+		case 'UNSTABLE':
+		case 'SUCCESS':
+            msg = "COMPLETED SUCCESSFULLY: BUILT APPS AND AMIS ON ${params.git_branch.toUpperCase()} BRANCH"
+            break
+		case 'FAILED':
+		case 'FAILURE':
+            msg = "FAILED ON ${stageName.toUpperCase()} STAGE ON ${params.git_branch.toUpperCase()} BRANCH"
+            break
+		case 'STARTED':
+            msg = 'HAS STARTED'
+            break
+		case 'ABORTED':
+            msg = 'WAS ABORTED'
+            break
+		default:
+			msg = "${buildStatus.toUpperCase()}"
+            break
+    }
+    
+ // build slack message
+	def slackMsg = ''
+    if (buildStatus == 'UNSTABLE'){
+        slackMsg = "UNSTABLE APP BUILD ON ${params.git_branch.toUpperCase()} BRANCH <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+	} else {
+        slackMsg = "BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+    }
+
+    // send Slack messages
+    slackSend(color: buildColor, message: slackMsg)
+}
+
 pipeline {
     agent {
         kubernetes {
@@ -54,9 +105,6 @@ spec:
         stage('Prepare') {
             steps {
                 script {
-                    echo 'this is the branch name'
-                    echo params.git_branch
-
                     // Grab the commit that triggered the build.
                     checkout scm
 
@@ -65,6 +113,9 @@ spec:
 
                     // Get the current commit id
                     gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+                    // Get the remote repo url. This assumes we are using git+https not git+ssh.
+                    gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
                     // Load the child Jenkinsfiles.
                     scriptForApps = load('apps/build.groovy')
@@ -83,8 +134,18 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    awsAuth.assumeRole()
-                    appBuildResults = scriptForApps.build(verboseMaven)
+                    try {
+                        awsAuth.assumeRole()
+                        appBuildResults = scriptForApps.build(verboseMaven)
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
+                    }
                 }
             }
         }
@@ -93,9 +154,18 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-
-                    awsAuth.assumeRole()
-                    amiIds = scriptForDeploys.buildAppAmis(params.git_branch, gitCommitId, amiIds, appBuildResults)
+                    try {
+                        awsAuth.assumeRole()
+                        amiIds = scriptForDeploys.buildAppAmis(params.git_branch, gitCommitId, amiIds, appBuildResults)
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
+                        currentBuild.result = "ABORTED"
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = "FAILURE"
+                        throw ex
+                    } finally {
+                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                    }
                 }
             }
         }
