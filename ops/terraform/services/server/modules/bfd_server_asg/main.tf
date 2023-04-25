@@ -1,4 +1,6 @@
 locals {
+  env = terraform.workspace
+
   tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
 }
 
@@ -15,7 +17,7 @@ data "aws_subnet" "app_subnets" {
 
 # kms master key
 data "aws_kms_key" "master_key" {
-  key_id = "alias/bfd-${var.env_config.env}-cmk"
+  key_id = "alias/bfd-${local.env}-cmk"
 }
 
 
@@ -24,10 +26,10 @@ data "aws_kms_key" "master_key" {
 
 # base
 resource "aws_security_group" "base" {
-  name        = "bfd-${var.env_config.env}-${var.role}-base"
+  name        = "bfd-${local.env}-${var.role}-base"
   description = "Allow CI access to app servers"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-base" }, local.tags)
 
   ingress = [] # Make the ingress empty for this SG.
 
@@ -42,10 +44,10 @@ resource "aws_security_group" "base" {
 # app server
 resource "aws_security_group" "app" {
   count       = var.lb_config == null ? 0 : 1
-  name        = "bfd-${var.env_config.env}-${var.role}-app"
+  name        = "bfd-${local.env}-${var.role}-app"
   description = "Allow access to app servers"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-app" }, local.tags)
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.tags)
 
   ingress {
     from_port       = var.lb_config.port
@@ -72,8 +74,8 @@ resource "aws_security_group_rule" "allow_db_access" {
 ## Launch Template
 #
 resource "aws_launch_template" "main" {
-  name                   = "bfd-${var.env_config.env}-${var.role}"
-  description            = "Template for the ${var.env_config.env} environment ${var.role} servers"
+  name                   = "bfd-${local.env}-${var.role}"
+  description            = "Template for the ${local.env} environment ${var.role} servers"
   vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.tool_sg], aws_security_group.app[*].id)
   key_name               = var.launch_config.key_name
   image_id               = var.launch_config.ami_id
@@ -104,7 +106,7 @@ resource "aws_launch_template" "main" {
   }
 
   user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
-    env           = var.env_config.env
+    env           = local.env
     port          = var.lb_config.port
     accountId     = var.launch_config.account_id
     gitBranchName = var.launch_config.git_branch
@@ -113,12 +115,12 @@ resource "aws_launch_template" "main" {
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge({ Name = "bfd-${var.env_config.env}-${var.role}" }, local.tags)
+    tags          = merge({ Name = "bfd-${local.env}-${var.role}" }, local.tags)
   }
 
   tag_specifications {
     resource_type = "volume"
-    tags          = merge({ snapshot = "true", Name = "bfd-${var.env_config.env}-${var.role}" }, local.tags)
+    tags          = merge({ snapshot = "true", Name = "bfd-${local.env}-${var.role}" }, local.tags)
   }
 }
 
@@ -175,7 +177,7 @@ resource "aws_autoscaling_group" "main" {
 
   tag {
     key                 = "Name"
-    value               = "bfd-${var.env_config.env}-${var.role}"
+    value               = "bfd-${local.env}-${var.role}"
     propagate_at_launch = true
   }
 
@@ -188,7 +190,7 @@ resource "aws_autoscaling_group" "main" {
 ## Autoscaling Policies and Cloudwatch Alarms
 #
 resource "aws_autoscaling_policy" "high-cpu" {
-  name                      = "bfd-${var.env_config.env}-${var.role}-high-cpu-policy"
+  name                      = "bfd-${local.env}-${var.role}-high-cpu-policy"
   autoscaling_group_name    = aws_autoscaling_group.main.name
   adjustment_type           = "ChangeInCapacity"
   policy_type               = "StepScaling"
@@ -214,7 +216,7 @@ resource "aws_autoscaling_policy" "high-cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "high-cpu" {
-  alarm_name          = "bfd-${var.env_config.env}-${var.role}-high-cpu"
+  alarm_name          = "bfd-${local.env}-${var.role}-high-cpu"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
@@ -232,7 +234,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu" {
 }
 
 resource "aws_autoscaling_policy" "low-cpu" {
-  name                      = "bfd-${var.env_config.env}-${var.role}-low-cpu-policy"
+  name                      = "bfd-${local.env}-${var.role}-low-cpu-policy"
   autoscaling_group_name    = aws_autoscaling_group.main.name
   adjustment_type           = "ChangeInCapacity"
   policy_type               = "StepScaling"
@@ -252,7 +254,7 @@ resource "aws_autoscaling_policy" "low-cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "low-cpu" {
-  alarm_name          = "bfd-${var.env_config.env}-${var.role}-low-cpu"
+  alarm_name          = "bfd-${local.env}-${var.role}-low-cpu"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
