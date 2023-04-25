@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -347,12 +348,21 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
+    // See if we have claims data for the beneficiary.
+    BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
+    // find out the number of bits that are set; we could use this to create 'n' threads
+    int numEntriesThatAreSet = bitSet.cardinality();
+    LOGGER.info(
+        String.format(
+            "# of V2 claims that have data for bene_id (%d): %0d",
+            beneficiaryId, numEntriesThatAreSet));
+
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimTypeV2.CARRIER)) {
+    if (claimTypes.contains(ClaimTypeV2.CARRIER) && bitSet.get(QueryUtils.CARRIER_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.CARRIER,
@@ -362,7 +372,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.DME)) {
+    if (claimTypes.contains(ClaimTypeV2.DME) && bitSet.get(QueryUtils.DME_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.DME,
@@ -372,7 +382,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.HHA)) {
+    if (claimTypes.contains(ClaimTypeV2.HHA) && bitSet.get(QueryUtils.HHA_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.HHA,
@@ -382,7 +392,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
+    if (claimTypes.contains(ClaimTypeV2.HOSPICE) && bitSet.get(QueryUtils.HOSPICE_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.HOSPICE,
@@ -392,7 +402,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
+    if (claimTypes.contains(ClaimTypeV2.INPATIENT) && bitSet.get(QueryUtils.INPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.INPATIENT,
@@ -403,7 +413,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
+    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT) && bitSet.get(QueryUtils.OUTPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.OUTPATIENT,
@@ -414,7 +424,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.PDE)) {
+    if (claimTypes.contains(ClaimTypeV2.PDE) && bitSet.get(QueryUtils.PART_D_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.PDE,
@@ -424,7 +434,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               npiOrgLookup));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.SNF)) {
+    if (claimTypes.contains(ClaimTypeV2.SNF) && bitSet.get(QueryUtils.SNF_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.SNF,

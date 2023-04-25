@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -350,12 +351,21 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
+    // See if we have claims data for the beneficiary.
+    BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
+    // find out the number of bits that are set; we could use this to create 'n' threads
+    int numEntriesThatAreSet = bitSet.cardinality();
+    LOGGER.info(
+        String.format(
+            "# of V1 claims that have data for bene_id (%d): %0d",
+            beneficiaryId, numEntriesThatAreSet));
+
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimType.CARRIER))
+    if (claimTypes.contains(ClaimType.CARRIER) && bitSet.get(QueryUtils.CARRIER_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.CARRIER,
@@ -363,7 +373,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.DME))
+    }
+    if (claimTypes.contains(ClaimType.DME) && bitSet.get(QueryUtils.DME_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.DME,
@@ -371,7 +382,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.HHA))
+    }
+    if (claimTypes.contains(ClaimType.HHA) && bitSet.get(QueryUtils.HHA_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.HHA,
@@ -379,7 +391,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.HOSPICE))
+    }
+    if (claimTypes.contains(ClaimType.HOSPICE) && bitSet.get(QueryUtils.HOSPICE_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
@@ -387,7 +400,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.INPATIENT))
+    }
+    if (claimTypes.contains(ClaimType.INPATIENT) && bitSet.get(QueryUtils.INPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
@@ -395,7 +409,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.OUTPATIENT))
+    }
+    if (claimTypes.contains(ClaimType.OUTPATIENT) && bitSet.get(QueryUtils.OUTPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
@@ -403,7 +418,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.PDE))
+    }
+    if (claimTypes.contains(ClaimType.PDE) && bitSet.get(QueryUtils.PART_D_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.PDE,
@@ -411,7 +427,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.SNF))
+    }
+    if (claimTypes.contains(ClaimType.SNF) && bitSet.get(QueryUtils.SNF_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.SNF,
@@ -419,6 +436,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
+    }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
       filterSamhsa(eobs);
