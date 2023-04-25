@@ -7,7 +7,7 @@ data "aws_kms_key" "mgmt_cmk" {
 # TODO: Consolidate the two data sources (and related resources in main.tf) with similar resources
 # in server-load
 data "aws_launch_template" "template" {
-  name = "bfd-${var.env}-fhir"
+  name = "bfd-${local.env}-fhir"
 }
 
 data "aws_autoscaling_group" "asg" {

@@ -1,24 +1,26 @@
 locals {
+  env = terraform.workspace
+
   account_id = data.aws_caller_identity.current.account_id
 
   kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
   kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
 
-  topic_name = "bfd-server-${var.env}-instance-launch-terminate"
+  topic_name = "bfd-server-${local.env}-instance-launch-terminate"
 
   lambda_timeout_seconds = 30
   lambda_name            = "manage-disk-usage-alarms"
 
-  alarms_prefix = "bfd-server-${var.env}-alert-disk-usage-percent"
+  alarms_prefix = "bfd-server-${local.env}-alert-disk-usage-percent"
 
   alarm_action_sns_by_env = {
-    test     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
-    prod-sbx = "bfd-${var.env}-cloudwatch-alarms"
-    prod     = "bfd-${var.env}-cloudwatch-alarms"
+    test     = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
+    prod-sbx = "bfd-${local.env}-cloudwatch-alarms"
+    prod     = "bfd-${local.env}-cloudwatch-alarms"
   }
   alarm_action_sns = try(coalesce(
     var.alarm_action_sns_override,
-    lookup(local.alarm_action_sns_by_env, var.env, null)
+    lookup(local.alarm_action_sns_by_env, local.env, null)
   ), null)
   alarms_ok_sns = var.alarm_ok_sns_override
 }
@@ -58,8 +60,8 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_iam_policy" "logs" {
-  name        = "bfd-${var.env}-${local.lambda_name}-logs"
-  description = "Permissions to create and write to bfd-${var.env}-${local.lambda_name} logs"
+  name        = "bfd-${local.env}-${local.lambda_name}-logs"
+  description = "Permissions to create and write to bfd-${local.env}-${local.lambda_name} logs"
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -73,7 +75,7 @@ resource "aws_iam_policy" "logs" {
       "Effect": "Allow",
       "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
       "Resource": [
-        "arn:aws:logs:us-east-1:${local.account_id}:log-group:/aws/lambda/bfd-${var.env}-${local.lambda_name}:*"
+        "arn:aws:logs:us-east-1:${local.account_id}:log-group:/aws/lambda/bfd-${local.env}-${local.lambda_name}:*"
       ]
     }
   ]
@@ -82,7 +84,7 @@ EOF
 }
 
 resource "aws_iam_policy" "kms" {
-  name        = "bfd-${var.env}-${local.lambda_name}-kms"
+  name        = "bfd-${local.env}-${local.lambda_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
   policy      = <<-EOF
 {
@@ -99,8 +101,8 @@ EOF
 }
 
 resource "aws_iam_policy" "autoscaling" {
-  name        = "bfd-${var.env}-${local.lambda_name}-autoscaling"
-  description = "Permissions for bfd-${var.env}-${local.lambda_name} to describe ASGs"
+  name        = "bfd-${local.env}-${local.lambda_name}-autoscaling"
+  description = "Permissions for bfd-${local.env}-${local.lambda_name} to describe ASGs"
   # Unfortunately AWS does not support anything but wildcarding for the resource definition for the
   # DescribeAutoScalingGroups action
   policy = <<-EOF
@@ -121,8 +123,8 @@ EOF
 }
 
 resource "aws_iam_policy" "cloudwatch" {
-  name        = "bfd-${var.env}-${local.lambda_name}-cloudwatch"
-  description = "Permissions for bfd-${var.env}-${local.lambda_name} to create and destroy metric alarms"
+  name        = "bfd-${local.env}-${local.lambda_name}-cloudwatch"
+  description = "Permissions for bfd-${local.env}-${local.lambda_name} to create and destroy metric alarms"
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -143,9 +145,9 @@ EOF
 }
 
 resource "aws_iam_role" "this" {
-  name        = "bfd-${var.env}-${local.lambda_name}"
+  name        = "bfd-${local.env}-${local.lambda_name}"
   path        = "/"
-  description = "Role for bfd-${var.env}-${local.lambda_name} Lambda"
+  description = "Role for bfd-${local.env}-${local.lambda_name} Lambda"
 
   assume_role_policy = <<-EOF
 {
@@ -175,8 +177,8 @@ resource "aws_lambda_function" "this" {
     "Creates and destroys per-instance disk usage alarms when launch and terminate notifications ",
     "from AutoScaling Notifications are received"
   ])
-  function_name = "bfd-${var.env}-${local.lambda_name}"
-  tags          = { Name = "bfd-${var.env}-${local.lambda_name}" }
+  function_name = "bfd-${local.env}-${local.lambda_name}"
+  tags          = { Name = "bfd-${local.env}-${local.lambda_name}" }
 
   filename         = data.archive_file.this.output_path
   source_code_hash = data.archive_file.this.output_base64sha256
@@ -188,12 +190,12 @@ resource "aws_lambda_function" "this" {
   timeout          = local.lambda_timeout_seconds
   environment {
     variables = {
-      ENV              = var.env
+      ENV              = local.env
       ALARM_THRESHOLD  = "95.0"
       ALARM_PERIOD     = "60"
       ALARM_ACTION_ARN = try(data.aws_sns_topic.alarms_action_sns[0].arn, null)
       OK_ACTION_ARN    = try(data.aws_sns_topic.alarms_ok_sns[0].arn, null)
-      METRIC_NAMESPACE = "bfd-${var.env}/bfd-server/CWAgent"
+      METRIC_NAMESPACE = "bfd-${local.env}/bfd-server/CWAgent"
       METRIC_NAME      = "disk_used_percent"
       ALARMS_PREFIX    = local.alarms_prefix
     }

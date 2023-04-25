@@ -200,5 +200,4 @@ module "bfd_dashboards" {
 
 module "disk_usage_alarms" {
   source = "./modules/bfd_server_disk_alarms"
-  env    = local.env
 }
