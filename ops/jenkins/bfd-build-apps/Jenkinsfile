@@ -41,7 +41,7 @@ spec:
     }
 
     parameters {
-        string(name: 'GIT Branch',
+        string(name: 'git_branch',
         defaultValue: '',
         description: 'To build, specify a branch within BFD.')
 
@@ -92,7 +92,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     awsAuth.assumeRole()
-                    amiIds = scriptForDeploys.buildAppAmis(params.GIT_BRANCH, gitCommitId, amiIds, appBuildResults)
+                    amiIds = scriptForDeploys.buildAppAmis(params.git_branch, gitCommitId, amiIds, appBuildResults)
                 }
             }
         }
