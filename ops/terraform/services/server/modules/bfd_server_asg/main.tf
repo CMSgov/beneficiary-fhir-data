@@ -88,7 +88,7 @@ resource "aws_launch_template" "main" {
     }
   }
 
-  user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
+  user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
     env           = local.env
     port          = var.lb_config.port
     accountId     = var.launch_config.account_id
