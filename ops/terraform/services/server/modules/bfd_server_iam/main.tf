@@ -1,16 +1,15 @@
 locals {
-  service = "server"
-  env     = terraform.workspace
+  env = terraform.workspace
 }
 
 resource "aws_iam_instance_profile" "instance" {
-  name = "bfd-${local.env}-${var.name}-profile"
+  name = "bfd-${local.env}-${var.legacy_service}-profile"
   role = aws_iam_role.instance.name
 }
 
 # EC2 instance role
 resource "aws_iam_role" "instance" {
-  name = "bfd-${local.env}-${var.name}-role"
+  name = "bfd-${local.env}-${var.legacy_service}-role"
   path = "/"
 
   assume_role_policy = <<-EOF
@@ -44,8 +43,8 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
 
 # TODO: Separate SSM and KMS statements
 resource "aws_iam_policy" "ssm" {
-  name        = "bfd-${local.env}-${local.service}-ssm-parameters"
-  description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service} SSM hierarchies"
+  name        = "bfd-${local.env}-${var.service}-ssm-parameters"
+  description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${var.service} SSM hierarchies"
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -60,7 +59,7 @@ resource "aws_iam_policy" "ssm" {
       "Resource": [
         "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
         "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${local.service}/*"
+        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
       ]
     },
     {
@@ -91,7 +90,7 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 
 resource "aws_iam_policy" "ssm_mgmt" {
   description = "Policy granting BFD Server in ${local.env} environment access to certain mgmt SSM hierarchies"
-  name        = "bfd-${local.env}-${local.service}-ssm-mgmt-parameters"
+  name        = "bfd-${local.env}-${var.service}-ssm-mgmt-parameters"
   path        = "/"
   policy      = <<-POLICY
 {
@@ -122,7 +121,7 @@ resource "aws_iam_role_policy_attachment" "ssm_mgmt" {
 
 resource "aws_iam_policy" "kms_mgmt" {
   description = "Policy granting BFD Server in ${local.env} environment access to decrypt using the mgmt KMS key"
-  name        = "bfd-${local.env}-${local.service}-kms-mgmt"
+  name        = "bfd-${local.env}-${var.service}-kms-mgmt"
   path        = "/"
   policy      = <<-POLICY
 {
