@@ -69,7 +69,7 @@ locals {
       "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc"
     ]
   }
-  vpc_peerings = local.vpc_peerings_by_env[local.env]
+  vpc_peerings = lookup(local.vpc_peerings_by_env, local.env, [])
 }
 
 ## IAM role for FHIR
