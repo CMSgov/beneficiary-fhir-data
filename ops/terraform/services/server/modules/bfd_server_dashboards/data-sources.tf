@@ -6,7 +6,7 @@ data "external" "client_ssls" {
     local.namespace,
     jsonencode({
       for partner, per_env_regex in local.partner_client_ssl_regexs :
-      partner => lookup(per_env_regex, replace(var.env, "-", "_"), null)
+      partner => lookup(per_env_regex, replace(local.env, "-", "_"), null)
     })
   ]
 }
