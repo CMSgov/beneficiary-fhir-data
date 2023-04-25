@@ -181,7 +181,6 @@ module "fhir_asg" {
 ## FHIR server metrics, per partner
 module "bfd_server_metrics" {
   source = "./modules/bfd_server_metrics"
-  env    = local.env
 }
 
 module "bfd_server_slo_alarms" {

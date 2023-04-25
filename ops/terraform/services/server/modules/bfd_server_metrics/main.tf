@@ -1,9 +1,11 @@
 locals {
+  env = terraform.workspace
+
   log_groups = {
-    access   = "/bfd/${var.env}/bfd-server/access.json"
-    messages = "/bfd/${var.env}/bfd-server/messages.json"
+    access   = "/bfd/${local.env}/bfd-server/access.json"
+    messages = "/bfd/${local.env}/bfd-server/messages.json"
   }
-  namespace = "bfd-${var.env}/bfd-server"
+  namespace = "bfd-${local.env}/bfd-server"
   endpoints = {
     all                = "*/fhir/*"
     metadata           = "*/fhir/metadata*"
@@ -51,7 +53,7 @@ locals {
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count" {
   for_each = local.endpoint_filters_config
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/${each.value.resource_name}/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/count/${each.value.resource_name}/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -72,7 +74,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count" {
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
   for_each = local.endpoint_filters_config
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/${each.value.resource_name}/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/${each.value.resource_name}/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -94,7 +96,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/500-responses/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/count/500-responses/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -114,7 +116,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" 
 resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_responses" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/non-2xx-responses/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/count/non-2xx-responses/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -135,7 +137,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_respons
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_by_contract" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/patient-not-by-contract/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/patient-not-by-contract/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   # Terraform HCL has no support for breaking long strings, so the join() function is used as a
@@ -162,7 +164,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_b
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_by_contract_count_4000" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/patient-by-contract-count-4000/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/patient-by-contract-count-4000/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -187,7 +189,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_by_co
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/eob-all/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency-by-kb/eob-all/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -209,7 +211,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_with_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eob-all-with-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/eob-all-with-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -232,7 +234,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_with_
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all_with_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/eob-all-with-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency-by-kb/eob-all-with-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -256,7 +258,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/eob-all-no-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/eob-all-no-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -279,7 +281,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_re
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claim_all_with_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/claim-all-with-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency-by-kb/claim-all-with-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -303,7 +305,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claim_a
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_no_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/claim-all-no-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/claim-all-no-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -326,7 +328,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_no_
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_with_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/claim-all-with-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/claim-all-with-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -349,7 +351,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_wit
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claimresponse_all_with_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency-by-kb/claimresponse-all-with-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency-by-kb/claimresponse-all-with-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -373,7 +375,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claimre
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse_all_no_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/claimresponse-all-no-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/claimresponse-all-no-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -396,7 +398,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
 resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse_all_with_resources" {
   for_each = local.filter_variations
 
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/claimresponse-all-with-resources/${each.value.name_suffix}"
+  name           = "bfd-${local.env}/bfd-server/http-requests/latency/claimresponse-all-with-resources/${each.value.name_suffix}"
   log_group_name = local.log_groups.access
 
   pattern = join("", [
@@ -417,7 +419,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
 
 # Count of WARNING messages from the QueryLoggingListener indicates an unknown query type
 resource "aws_cloudwatch_log_metric_filter" "query_logging_listener_count_warning_messages" {
-  name           = "bfd-${var.env}/bfd-server/query-logging-listener/count/warning"
+  name           = "bfd-${local.env}/bfd-server/query-logging-listener/count/warning"
   log_group_name = local.log_groups.messages
   pattern        = "{$.logger = \"gov.cms.bfd.server.war.QueryLoggingListener\"}"
 
