@@ -44,6 +44,10 @@ spec:
         string(name: 'GIT Branch',
         defaultValue: '',
         description: 'To build, specify a branch within BFD.')
+
+        booleanParam(name: 'verbose_mvn_logging',
+        description: 'When true, `mvn` will produce verbose logs.',
+        defaultValue: false)
     }
 
     stages {
