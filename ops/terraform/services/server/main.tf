@@ -2,9 +2,20 @@
 # Build the stateless resources for an environment (ASG, security groups, etc)
 
 locals {
+  env              = terraform.workspace
+  established_envs = ["test", "prod-sbx", "prod"]
+  azs              = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service   = "fhir"
   service          = "server"
-  established_envs = ["test", "prod-sbx", "prod"]
+
+  default_tags = {
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Environment    = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/${local.service}"
+  }
 
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map = zipmap(
@@ -30,25 +41,15 @@ locals {
   is_ephemeral_env = local.seed_env == null ? false : true
   is_prod          = local.env == "prod"
 
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env = terraform.workspace
   env_config = {
-    vpc_id  = data.aws_vpc.main.id,
-    zone_id = data.aws_route53_zone.local_zone.id,
-    azs     = local.azs
+    default_tags = local.default_tags,
+    vpc_id       = data.aws_vpc.main.id,
+    zone_id      = data.aws_route53_zone.local_zone.id,
+    azs          = local.azs
   }
   port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
-
-  default_tags = {
-    application    = "bfd"
-    business       = "oeda"
-    stack          = local.env
-    Environment    = local.env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/${local.service}"
-  }
 
   # add new peerings here
   vpc_peerings_by_env = {

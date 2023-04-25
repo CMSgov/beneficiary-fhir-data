@@ -1,7 +1,7 @@
 locals {
   env = terraform.workspace
 
-  tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
+  additional_tags = { Layer = var.layer, role = var.role }
 }
 
 ## Security groups
@@ -12,7 +12,7 @@ resource "aws_security_group" "base" {
   name        = "bfd-${local.env}-${var.role}-base"
   description = "Allow CI access to app servers"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${local.env}-${var.role}-base" }, local.tags)
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-base" }, local.additional_tags)
 
   ingress = [] # Make the ingress empty for this SG.
 
@@ -30,7 +30,7 @@ resource "aws_security_group" "app" {
   name        = "bfd-${local.env}-${var.role}-app"
   description = "Allow access to app servers"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.tags)
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.additional_tags)
 
   ingress {
     from_port       = var.lb_config.port
@@ -98,12 +98,12 @@ resource "aws_launch_template" "main" {
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge({ Name = "bfd-${local.env}-${var.role}" }, local.tags)
+    tags          = merge({ Name = "bfd-${local.env}-${var.role}" }, local.additional_tags)
   }
 
   tag_specifications {
     resource_type = "volume"
-    tags          = merge({ snapshot = "true", Name = "bfd-${local.env}-${var.role}" }, local.tags)
+    tags          = merge({ snapshot = "true", Name = "bfd-${local.env}-${var.role}" }, local.additional_tags)
   }
 }
 
@@ -150,7 +150,7 @@ resource "aws_autoscaling_group" "main" {
   }
 
   dynamic "tag" {
-    for_each = local.tags
+    for_each = merge(local.additional_tags, var.env_config.default_tags)
     content {
       key                 = tag.key
       value               = tag.value
