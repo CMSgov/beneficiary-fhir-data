@@ -1,4 +1,4 @@
--- BFD-2346
+-- BFD-2549
 -- SETUP_CLAIMS_AVAILABILITY_FUNCTION.SQL
 -- flyway migration to reate a db function that takes a bene_id as an input parameter,
 -- and returns a bit mask denoting available claims data for that beneficiary. This
