@@ -47,7 +47,7 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "some_password");
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
     envVars.put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
-    final var configLoader = ConfigLoader.builder().addSingle(envVars::get).build();
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
     final var encodedBytes = loadAndWriteConfig(configLoader);
 
     // NOTE: Retained the serialize/deserialize step even though it's not necessary
@@ -115,7 +115,7 @@ public class AppConfigurationTest {
   @Test
   public void testCloudWatchMicrometerConfigSettings() {
     final var envVars = new HashMap<String, String>();
-    final var configLoader = ConfigLoader.builder().addSingle(envVars::get).build();
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
     final var helper = AppConfiguration.createMicrometerConfigHelper(configLoader);
     final CloudWatchConfig config = helper::get;
     assertEquals("cloudwatch", config.prefix());

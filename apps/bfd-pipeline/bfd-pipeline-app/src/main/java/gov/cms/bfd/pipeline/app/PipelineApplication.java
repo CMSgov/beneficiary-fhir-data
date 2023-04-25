@@ -98,11 +98,11 @@ public final class PipelineApplication {
     LOGGER.info("Application starting up!");
     configureUnexpectedExceptionHandlers();
 
-    ConfigLoader configLoader = ConfigLoader.builder().addEnvironmentVariables().build();
     AppConfiguration appConfig = null;
+    ConfigLoader configLoader = null;
     try {
       // add any additional sources of configuration variables then load the app config
-      configLoader = AppConfiguration.createConfigLoader(configLoader);
+      configLoader = AppConfiguration.createConfigLoader(System::getenv);
       appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (ConfigException | AppConfigurationException e) {
@@ -111,6 +111,8 @@ public final class PipelineApplication {
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
+    assert appConfig != null;
+    assert configLoader != null;
     final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
     final var appMeters = new CompositeMeterRegistry();
