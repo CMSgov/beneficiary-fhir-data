@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.StringType;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
 final class BeneficiaryTransformerV2 {
-
   /**
    * Transforms a {@link Beneficiary} into a {@link Patient}.
    *
@@ -218,51 +217,44 @@ final class BeneficiaryTransformerV2 {
 
   /**
    * Adds the historical mbi data to the patient from the beneficiary data. The historical mbi data
-   * is queried and added to the beneficiary model in the resource provider.
+   * is queried from the database and added to the beneficiary model in the resource provider before
+   * reaching this point.
    *
    * @param patient the patient to add the historical mbi extensions to
    * @param beneficiary the beneficiary to get the historical data from
    */
   private static void addHistoricalMbiExtensions(Patient patient, Beneficiary beneficiary) {
-    Set<String> uniqueMbis = new HashSet<>();
+    Set<String> uniqueHistoricalMbis = new HashSet<>();
+    Extension historicalIdentifier =
+        TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+    String currentMbi = beneficiary.getMedicareBeneficiaryId().orElse("");
 
+    // Add historical MBI data found in medicare_beneficiaryid_history
     for (MedicareBeneficiaryIdHistory mbiHistory :
         beneficiary.getMedicareBeneficiaryIdHistories()) {
 
-      // Skip adding a historical entry for anything which has the same unhashed MBI
-      if (mbiHistory.getMedicareBeneficiaryId().isPresent()
-          && !mbiHistory
-              .getMedicareBeneficiaryId()
-              .equals(beneficiary.getMedicareBeneficiaryId())) {
-        uniqueMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
+      if (mbiHistory.getMedicareBeneficiaryId().isPresent()) {
+        uniqueHistoricalMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
       }
-      // would come in ascending order, so any rcd would have a later
-      // update date than prev rcd.
       TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
     }
 
+    // Add historical MBI data found in beneficiaries_history
     for (BeneficiaryHistory mbiHistory : beneficiary.getBeneficiaryHistories()) {
 
-      // Skip adding a historical entry for anything which has the same unhashed MBI
-      if (mbiHistory.getMedicareBeneficiaryId().isPresent()
-          && !mbiHistory
-              .getMedicareBeneficiaryId()
-              .equals(beneficiary.getMedicareBeneficiaryId())) {
-        uniqueMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
+      if (mbiHistory.getMedicareBeneficiaryId().isPresent()) {
+        uniqueHistoricalMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
       }
-      // would come in ascending order, so any rcd would have a later
-      // update date than prev rcd.
       TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
     }
 
-    if (uniqueMbis.size() > 0) {
-      Extension historicalIdentifier =
-          TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-
-      for (String mbi : uniqueMbis) {
+    // Add a historical extension for each unique non-current MBI found in the history table(s)
+    for (String historicalMbi : uniqueHistoricalMbis) {
+      // Don't add a historical entry for any MBI which matches the current MBI
+      if (!historicalMbi.equals(currentMbi)) {
         addUnhashedIdentifier(
             patient,
-            mbi,
+            historicalMbi,
             TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
             historicalIdentifier,
             null);

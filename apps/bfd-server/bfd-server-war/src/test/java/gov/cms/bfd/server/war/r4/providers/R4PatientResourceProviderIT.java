@@ -765,9 +765,15 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
 
   /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns the historical MBI
-   * values in the response when searching by MBI hash. The search should look in both the
-   * medicare_beneficiaryid_history and beneficiaries_history for historical MBIs to include in the
-   * response.
+   * values in the response when searching by historic (non-current) MBI hash. The search should
+   * look in both the medicare_beneficiaryid_history and beneficiaries_history for historical MBIs
+   * to include in the response.
+   *
+   * <p>Context: The Patient endpoint (v2) supports looking up a Patient by MBI using any MBI
+   * (hashed) that the patient has ever been associated with, functionality needed for cases where
+   * the patient's MBI has changed but the caller does not have the new data. The new MBI is
+   * returned in the response; however BFD should also return the historical MBI data to allow the
+   * caller to verify the new MBI and the old MBI are associated with the same Patient.
    */
   @Test
   public void searchForExistingPatientByMbiHashHasHistoricMbis() {

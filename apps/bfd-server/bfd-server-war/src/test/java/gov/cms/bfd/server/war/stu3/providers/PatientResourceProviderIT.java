@@ -28,7 +28,6 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
@@ -1125,10 +1124,15 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns the historical MBI
-   * values in the response when searching by MBI hash. The search should look in both the
-   * medicare_beneficiaryid_history and beneficiaries_history for historical MBIs to include in the
-   * response.
+   * Verifies that {@link PatientResourceProvider#searchByIdentifier} returns the historical MBI
+   * values in the response when searching by historic (non-current) MBI hash. The search should
+   * look in the medicare_beneficiaryid_history for historical MBIs to include in the response when
+   * IncludeIdentifiers is set to true in the header.
+   *
+   * <p>Context: The v1 Patient endpoint supports historical MBI lookups for Patients where current
+   * data will be returned if a previous MBI associated with that patient is used as an identifier
+   * in the call. The historical MBIs for that patient should be returned along with the payload to
+   * allow a caller to double check the current MBI and historical MBI relate to the same patient.
    */
   @Test
   public void searchForExistingPatientByMbiHashHasHistoricMbis() {
