@@ -244,6 +244,9 @@ public class QueryUtils {
      * HHA CLAIMS          : bit 5
      * HOSPICE CLAIMS      : bit 6
      * PART D CLAIMS       : bit 7
+     *
+     * For more information on the database function, see: V111__SETUP_CLAIMS_AVAILABILITY_FUNCTION.SQL
+     * in the db migration directory.
      */
     List<Object> values =
         entityManager
