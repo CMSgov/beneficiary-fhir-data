@@ -1,8 +1,10 @@
 locals {
-  victor_ops_sns         = "bfd-${var.env}-cloudwatch-alarms"
-  bfd_test_slack_sns     = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-test"
-  bfd_warnings_slack_sns = "bfd-${var.env}-cloudwatch-alarms-slack-bfd-warnings"
-  default_ok_sns         = "bfd-${var.env}-cloudwatch-ok"
+  env = terraform.workspace
+  
+  victor_ops_sns         = "bfd-${local.env}-cloudwatch-alarms"
+  bfd_test_slack_sns     = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
+  bfd_warnings_slack_sns = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-warnings"
+  default_ok_sns         = "bfd-${local.env}-cloudwatch-ok"
   # Each established environment has a different destination for which alarm notifications should
   # route to. The below map maps each particular SNS (destination) to a particular alarm severity.
   topic_names_by_env = {
@@ -24,7 +26,7 @@ locals {
   }
   # In the event this module is being applied in a non-established environment (i.e. an ephemeral
   # environment) this lookup will ensure that an empty configuration will be returned
-  env_sns = lookup(local.topic_names_by_env, var.env, {
+  env_sns = lookup(local.topic_names_by_env, local.env, {
     alert  = null
     notify = null
     ok     = null
@@ -52,7 +54,7 @@ locals {
 }
 
 resource "aws_cloudwatch_metric_alarm" "server-log-availability-1hr" {
-  alarm_name          = "bfd-${var.env}-server-log-availability-1hr"
+  alarm_name          = "bfd-${local.env}-server-log-availability-1hr"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = local.server_log_availability.eval_periods
   period              = local.server_log_availability.period
@@ -61,14 +63,14 @@ resource "aws_cloudwatch_metric_alarm" "server-log-availability-1hr" {
 
   alarm_description = join("", [
     "BFD Server logs have not been submitted to CloudWatch in 1 hour, server has likely shutdown ",
-    "in APP-ENV: bfd-${var.env}"
+    "in APP-ENV: bfd-${local.env}"
   ])
 
   metric_name = "IncomingLogEvents"
   namespace   = "AWS/Logs"
 
   dimensions = {
-    LogGroupName = "/bfd/${var.env}/bfd-server/access.json"
+    LogGroupName = "/bfd/${local.env}/bfd-server/access.json"
   }
 
   alarm_actions = local.alert_arn
@@ -81,7 +83,7 @@ resource "aws_cloudwatch_metric_alarm" "server-log-availability-1hr" {
 # NOTE: alarm is triggered when gov.cms.bfd.server.war QueryLoggingListener encounters an
 #       unknown query, signaling that the application is missing a required pattern.
 resource "aws_cloudwatch_metric_alarm" "server-query-logging-listener-warning" {
-  alarm_name          = "bfd-${var.env}-server-query-logging-listener-warning"
+  alarm_name          = "bfd-${local.env}-server-query-logging-listener-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   period              = 1 * 60 # 1 Minute
@@ -90,14 +92,14 @@ resource "aws_cloudwatch_metric_alarm" "server-query-logging-listener-warning" {
 
   alarm_description = join("", [
     "BFD Server QueryLoggingListener has encountered an unknown query ",
-    "in APP-ENV: bfd-${var.env}"
+    "in APP-ENV: bfd-${local.env}"
   ])
 
   metric_name = "query-logging-listener/count/warning"
-  namespace   = "bfd-${var.env}/bfd-server"
+  namespace   = "bfd-${local.env}/bfd-server"
 
   dimensions = {
-    LogGroupName = "/bfd/${var.env}/bfd-server/messages.json"
+    LogGroupName = "/bfd/${local.env}/bfd-server/messages.json"
   }
 
   # NOTE: alarm should always be a low severity notification

@@ -189,7 +189,6 @@ module "bfd_server_slo_alarms" {
 
 module "bfd_server_log_alarms" {
   source = "./modules/bfd_server_log_alarms"
-  env    = local.env
 }
 
 ## This is where cloudwatch dashboards are managed. 
