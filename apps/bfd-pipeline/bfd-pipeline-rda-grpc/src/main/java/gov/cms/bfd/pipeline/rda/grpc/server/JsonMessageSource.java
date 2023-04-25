@@ -105,7 +105,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * Returns a [@link Parser} instance for parsing {@link McsClaimChange} JSON.
+   * Returns a {@link Parser} instance for parsing {@link McsClaimChange} JSON.
    *
    * @return the parser
    */
