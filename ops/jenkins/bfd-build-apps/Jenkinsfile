@@ -134,9 +134,9 @@ spec:
             name during PR builds.
             */
         stage('Set Branch Name') {
-            currentStage = env.STAGE_NAME
             steps {
                 script {
+                    currentStage = env.STAGE_NAME
                     if (env.BRANCH_NAME.startsWith('PR')) {
                         gitBranchName = env.CHANGE_BRANCH
                         } else {
