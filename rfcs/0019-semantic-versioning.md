@@ -70,6 +70,7 @@ that is, the latest versioned BFD FHIR API endpoint whose availability is **not*
 4. The release engineer will generate relevant, point-in-time artifacts from this tag, such as the change log and data dictionary, among others.
 5. This tag will serve as the basis of a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases) to which the point-in-time artifacts are attached.
 6. The tag will also be used to identify the final _deployable_ artifacts, such as machine images, as part of the existing and future build, delivery, and deployment processes.
+7. For generally available releases, the versioned GitHub release will be shared with our partners for their reference.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
@@ -79,8 +80,7 @@ N/A.
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
-None.
-There are no drawbacks to providing a pragmatic solution to versioning for this product.
+There are few drawbacks to providing a pragmatic solution to versioning for this product, mainly limited to an additional step to the existing process, even if temporarily.
 - Adoption does not require extensive engineering work, though it would be wise to only adopt this when the resolution and storage of versioned releases is available
 - If an alternative versioning scheme is deemed superior, it should be trivial to transition away from this versioning scheme, provided that the alternative satisfies similar signaling requirements
 - In the unlikely event that release versions are deemed harmful, backing away from these changes will not be trivial after some amount of automation is constructed around it, but those changes still shouldn't be extensive.
