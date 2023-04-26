@@ -37,7 +37,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
     switch (buildStatus){
 		case 'UNSTABLE':
 		case 'SUCCESS':
-            msg = "COMPLETED SUCCESSFULLY: BUILT APPS AND AMIS ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}>"
+            msg = "COMPLETED SUCCESSFULLY: BUILT APPS AND AMIS"
             break
 		case 'FAILED':
 		case 'FAILURE':
