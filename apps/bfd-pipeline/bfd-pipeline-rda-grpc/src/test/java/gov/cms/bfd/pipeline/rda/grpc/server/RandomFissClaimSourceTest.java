@@ -83,16 +83,19 @@ public class RandomFissClaimSourceTest {
   }
 
   /**
-   * Validates that the sequence numbers generated for claims is sequential.
+   * Validates that the sequence numbers generated for claims are sequential and start at 1.
    *
    * @throws Exception indicates test failure
    */
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<FissClaimChange> source = new RandomFissClaimSource(0, 7).skipTo(4);
+    MessageSource<FissClaimChange> source = new RandomFissClaimSource(0, 7);
+    assertEquals(1L, source.next().getSeq());
+    source.skipTo(4);
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());
     assertEquals(6L, source.next().getSeq());
+    assertEquals(7L, source.next().getSeq());
     assertFalse(source.hasNext());
   }
 
