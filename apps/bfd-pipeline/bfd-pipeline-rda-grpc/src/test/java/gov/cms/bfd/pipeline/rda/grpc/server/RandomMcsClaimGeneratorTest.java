@@ -38,350 +38,339 @@ public class RandomMcsClaimGeneratorTest {
                 .build());
     final McsClaim claim = generator.randomClaim();
     final String json = JsonFormat.printer().print(claim);
+    assertEquals(1, generator.getPreviousSequenceNumber());
     assertEquals(claim.getIdrDtlCnt(), claim.getMcsDetailsList().size());
     for (McsDiagnosisCode diagnosisCode : claim.getMcsDiagnosisCodesList()) {
       assertEquals(claim.getIdrClmHdIcn(), diagnosisCode.getIdrClmHdIcn());
     }
     assertEquals(
-        "{\n"
-            + "  \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "  \"idrContrId\": \"2\",\n"
-            + "  \"idrHic\": \"922470\",\n"
-            + "  \"idrDtlCnt\": 3,\n"
-            + "  \"idrBeneLast16\": \"xm\",\n"
-            + "  \"idrBeneFirstInit\": \"g\",\n"
-            + "  \"idrBeneMidInit\": \"c\",\n"
-            + "  \"idrStatusCodeEnum\": \"STATUS_CODE_APPROVED_AND_PAID_D\",\n"
-            + "  \"idrStatusDate\": \"2021-06-16\",\n"
-            + "  \"idrBillProvNpi\": \"d6fdchd69\",\n"
-            + "  \"idrBillProvNum\": \"6285\",\n"
-            + "  \"idrBillProvEin\": \"zvzf\",\n"
-            + "  \"idrBillProvType\": \"rx\",\n"
-            + "  \"idrBillProvSpec\": \"q7\",\n"
-            + "  \"idrBillProvPriceSpec\": \"0\",\n"
-            + "  \"idrBillProvCounty\": \"n\",\n"
-            + "  \"idrBillProvLoc\": \"39\",\n"
-            + "  \"idrTotAllowed\": \"326.33\",\n"
-            + "  \"idrCoinsurance\": \"1709.09\",\n"
-            + "  \"idrDeductible\": \"72395.23\",\n"
-            + "  \"idrTotBilledAmt\": \"65.06\",\n"
-            + "  \"idrClaimReceiptDate\": \"2021-03-31\",\n"
-            + "  \"idrClaimMbi\": \"978t9bxjj24\",\n"
-            + "  \"mcsDiagnosisCodes\": [{\n"
-            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD10\",\n"
-            + "    \"idrDiagCode\": \"v4j\",\n"
-            + "    \"rdaPosition\": 1\n"
-            + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD9\",\n"
-            + "    \"idrDiagCode\": \"bsr\",\n"
-            + "    \"rdaPosition\": 2\n"
-            + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "    \"idrDiagCode\": \"kn\",\n"
-            + "    \"idrDiagIcdTypeUnrecognized\": \"r\",\n"
-            + "    \"rdaPosition\": 3\n"
-            + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "    \"idrDiagCode\": \"1p34\",\n"
-            + "    \"idrDiagIcdTypeUnrecognized\": \"j\",\n"
-            + "    \"rdaPosition\": 4\n"
-            + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD10\",\n"
-            + "    \"idrDiagCode\": \"jb0m2\",\n"
-            + "    \"rdaPosition\": 5\n"
-            + "  }, {\n"
-            + "    \"idrClmHdIcn\": \"212941673334303\",\n"
-            + "    \"idrDiagCode\": \"k\",\n"
-            + "    \"idrDiagIcdTypeUnrecognized\": \"s\",\n"
-            + "    \"rdaPosition\": 6\n"
-            + "  }],\n"
-            + "  \"mcsDetails\": [{\n"
-            + "    \"idrDtlFromDate\": \"2021-04-22\",\n"
-            + "    \"idrDtlToDate\": \"2021-04-22\",\n"
-            + "    \"idrProcCode\": \"q2\",\n"
-            + "    \"idrModOne\": \"dt\",\n"
-            + "    \"idrModTwo\": \"xq\",\n"
-            + "    \"idrModThree\": \"t\",\n"
-            + "    \"idrModFour\": \"tm\",\n"
-            + "    \"idrDtlPrimaryDiagCode\": \"8x4k854\",\n"
-            + "    \"idrKPosLnameOrg\": \"jgnvgswfffxcpqqqhjwfhftprhxnwtmvcdkkzz\",\n"
-            + "    \"idrKPosFname\": \"svsctnnkjjqnqr\",\n"
-            + "    \"idrKPosMname\": \"fvfrbj\",\n"
-            + "    \"idrKPosAddr1\": \"48sscv0475m4pbj5x2p0k1qbtnnb\",\n"
-            + "    \"idrKPosAddr21st\": \"22hdc64zvgh7qx988jm3zsrc1mh\",\n"
-            + "    \"idrKPosAddr22nd\": \"w44zwdj030xphz87p7p7\",\n"
-            + "    \"idrKPosCity\": \"qncmshzqgcdgfwngzwtvvwtdnjrwrr\",\n"
-            + "    \"idrKPosState\": \"td\",\n"
-            + "    \"idrKPosZip\": \"31974158965575\",\n"
-            + "    \"idrDtlDiagIcdTypeUnrecognized\": \"p\",\n"
-            + "    \"idrDtlStatusUnrecognized\": \"w\",\n"
-            + "    \"idrTosEnum\": \"TYPE_OF_SERVICE_SECOND_OPINION_ON_ELECTIVE_SURGERY\",\n"
-            + "    \"idrTwoDigitPosEnum\": \"TWO_DIGIT_PLAN_OF_SERVICE_INDEPENDENT_CLINIC\",\n"
-            + "    \"idrDtlRendType\": \"9\",\n"
-            + "    \"idrDtlRendSpec\": \"4\",\n"
-            + "    \"idrDtlRendNpi\": \"0dq9g\",\n"
-            + "    \"idrDtlRendProv\": \"8ftzksvsh\",\n"
-            + "    \"idrKDtlFacProvNpi\": \"k9nh13zws\",\n"
-            + "    \"idrDtlAmbPickupAddres1\": \"0vp9qf9\",\n"
-            + "    \"idrDtlAmbPickupAddres2\": \"w5x\",\n"
-            + "    \"idrDtlAmbPickupCity\": \"vtf0px\",\n"
-            + "    \"idrDtlAmbPickupState\": \"c\",\n"
-            + "    \"idrDtlAmbPickupZipcode\": \"w\",\n"
-            + "    \"idrDtlAmbDropoffName\": \"hdbpsrhg8s1frw35dg1mp47\",\n"
-            + "    \"idrDtlAmbDropoffAddrL1\": \"gfzxjm5pq6dmw8bt\",\n"
-            + "    \"idrDtlAmbDropoffAddrL2\": \"3q\",\n"
-            + "    \"idrDtlAmbDropoffCity\": \"874r8sm4m2ppm42\",\n"
-            + "    \"idrDtlAmbDropoffState\": \"8\",\n"
-            + "    \"idrDtlAmbDropoffZipcode\": \"1h5qrgv\",\n"
-            + "    \"idrDtlNumber\": 1\n"
-            + "  }, {\n"
-            + "    \"idrDtlStatusEnum\": \"DETAIL_STATUS_PENDING\",\n"
-            + "    \"idrDtlFromDate\": \"2021-01-12\",\n"
-            + "    \"idrDtlToDate\": \"2021-01-12\",\n"
-            + "    \"idrProcCode\": \"2t7\",\n"
-            + "    \"idrModOne\": \"s6\",\n"
-            + "    \"idrModTwo\": \"mt\",\n"
-            + "    \"idrModThree\": \"hm\",\n"
-            + "    \"idrModFour\": \"6\",\n"
-            + "    \"idrDtlPrimaryDiagCode\": \"bd3jz\",\n"
-            + "    \"idrKPosLnameOrg\": \"cgkpbdpwcschkgfdjnjshsqkhdffrzbkbhtkmjqcbcfcgz\",\n"
-            + "    \"idrKPosFname\": \"jddsbtsbkqnwvzcgnvjdp\",\n"
-            + "    \"idrKPosMname\": \"ctxghttkhdpngbghfpnb\",\n"
-            + "    \"idrKPosAddr1\": \"5g2v7qv6qn3770rh6xpr\",\n"
-            + "    \"idrKPosAddr21st\": \"mggmhsdxm19213cfs\",\n"
-            + "    \"idrKPosAddr22nd\": \"5qt65kbghfg3kwqqczs6vvhkz\",\n"
-            + "    \"idrKPosCity\": \"wwbwdmcpgbxkmjxdqvctwqmz\",\n"
-            + "    \"idrKPosState\": \"gv\",\n"
-            + "    \"idrKPosZip\": \"768036076\",\n"
-            + "    \"idrDtlDiagIcdTypeUnrecognized\": \"c\",\n"
-            + "    \"idrTosUnrecognized\": \"n\",\n"
-            + "    \"idrTwoDigitPosUnrecognized\": \"c0\",\n"
-            + "    \"idrDtlRendType\": \"w\",\n"
-            + "    \"idrDtlRendSpec\": \"t\",\n"
-            + "    \"idrDtlRendNpi\": \"0850gpz2qw\",\n"
-            + "    \"idrDtlRendProv\": \"nn46pf7hw\",\n"
-            + "    \"idrKDtlFacProvNpi\": \"f7\",\n"
-            + "    \"idrDtlAmbPickupAddres1\": \"8x48c935s\",\n"
-            + "    \"idrDtlAmbPickupAddres2\": \"x58hbk9snz32jh8xz\",\n"
-            + "    \"idrDtlAmbPickupCity\": \"32mhgt3ww4wvmgz9m4\",\n"
-            + "    \"idrDtlAmbPickupState\": \"c\",\n"
-            + "    \"idrDtlAmbPickupZipcode\": \"rcjbw9\",\n"
-            + "    \"idrDtlAmbDropoffName\": \"hq307m0jbtpbn0vc5b\",\n"
-            + "    \"idrDtlAmbDropoffAddrL1\": \"zgv4fvmzz7q\",\n"
-            + "    \"idrDtlAmbDropoffAddrL2\": \"np136vsmv7g51z\",\n"
-            + "    \"idrDtlAmbDropoffCity\": \"bw37q1\",\n"
-            + "    \"idrDtlAmbDropoffState\": \"1v\",\n"
-            + "    \"idrDtlAmbDropoffZipcode\": \"z\",\n"
-            + "    \"idrDtlNumber\": 2\n"
-            + "  }, {\n"
-            + "    \"idrDtlFromDate\": \"2021-02-02\",\n"
-            + "    \"idrDtlToDate\": \"2021-02-02\",\n"
-            + "    \"idrProcCode\": \"6w\",\n"
-            + "    \"idrModOne\": \"t\",\n"
-            + "    \"idrModTwo\": \"7\",\n"
-            + "    \"idrModThree\": \"pg\",\n"
-            + "    \"idrModFour\": \"6\",\n"
-            + "    \"idrDtlPrimaryDiagCode\": \"sjjct\",\n"
-            + "    \"idrKPosLnameOrg\": \"bvmspqfpqzqmzkvwhcfzcmwrqzdsqnpbjpfctzfnbdhtttrpdgmbxxmrjq\",\n"
-            + "    \"idrKPosFname\": \"mjvmfthnrnqqnhzndxvhgkccphzsbt\",\n"
-            + "    \"idrKPosMname\": \"qxjmbth\",\n"
-            + "    \"idrKPosAddr1\": \"vx342s\",\n"
-            + "    \"idrKPosAddr21st\": \"wzp0t7gd13\",\n"
-            + "    \"idrKPosAddr22nd\": \"89nc2sp6bqq83f2bb2\",\n"
-            + "    \"idrKPosCity\": \"dqfbrjzvkgjzmc\",\n"
-            + "    \"idrKPosState\": \"k\",\n"
-            + "    \"idrKPosZip\": \"87915092362\",\n"
-            + "    \"idrDtlDiagIcdTypeUnrecognized\": \"t\",\n"
-            + "    \"idrDtlStatusUnrecognized\": \"z\",\n"
-            + "    \"idrTosUnrecognized\": \"t\",\n"
-            + "    \"idrTwoDigitPosUnrecognized\": \"n0\",\n"
-            + "    \"idrDtlRendType\": \"w\",\n"
-            + "    \"idrDtlRendSpec\": \"n\",\n"
-            + "    \"idrDtlRendNpi\": \"pvf7q\",\n"
-            + "    \"idrDtlRendProv\": \"0\",\n"
-            + "    \"idrKDtlFacProvNpi\": \"xsf4\",\n"
-            + "    \"idrDtlAmbPickupAddres1\": \"544gdh59g\",\n"
-            + "    \"idrDtlAmbPickupAddres2\": \"qb3zd1mgj\",\n"
-            + "    \"idrDtlAmbPickupCity\": \"z\",\n"
-            + "    \"idrDtlAmbPickupState\": \"c8\",\n"
-            + "    \"idrDtlAmbPickupZipcode\": \"6w\",\n"
-            + "    \"idrDtlAmbDropoffName\": \"bwph7wkksmfhg814s9x\",\n"
-            + "    \"idrDtlAmbDropoffAddrL1\": \"2j9f9p90pq41118fz97cqh\",\n"
-            + "    \"idrDtlAmbDropoffAddrL2\": \"ms8xjxrhq94xbb00nb\",\n"
-            + "    \"idrDtlAmbDropoffCity\": \"mzf5phf\",\n"
-            + "    \"idrDtlAmbDropoffState\": \"5\",\n"
-            + "    \"idrDtlAmbDropoffZipcode\": \"9dm\",\n"
-            + "    \"idrDtlNumber\": 3\n"
-            + "  }],\n"
-            + "  \"idrClaimTypeUnrecognized\": \"c\",\n"
-            + "  \"idrBeneSexUnrecognized\": \"j\",\n"
-            + "  \"idrBillProvGroupIndUnrecognized\": \"b\",\n"
-            + "  \"idrBillProvStatusCdUnrecognized\": \"v\",\n"
-            + "  \"idrHdrFromDos\": \"2021-01-12\",\n"
-            + "  \"idrHdrToDos\": \"2021-04-22\",\n"
-            + "  \"idrAssignmentEnum\": \"CLAIM_ASSIGNMENT_NON_ASSIGNED_LAB_SERVICES\",\n"
-            + "  \"idrClmLevelIndEnum\": \"CLAIM_LEVEL_INDICATOR_VOID\",\n"
-            + "  \"idrHdrAudit\": 9360,\n"
-            + "  \"idrHdrAuditIndEnum\": \"AUDIT_INDICATOR_AUDIT_NUMBER\",\n"
-            + "  \"idrUSplitReasonEnum\": \"SPLIT_REASON_CODE_2ND_OPINION\",\n"
-            + "  \"idrJReferringProvNpi\": \"jhjfvs9\",\n"
-            + "  \"idrJFacProvNpi\": \"f\",\n"
-            + "  \"idrUDemoProvNpi\": \"j7\",\n"
-            + "  \"idrUSuperNpi\": \"pbdckqr7\",\n"
-            + "  \"idrUFcadjBilNpi\": \"cw0pskjw\",\n"
-            + "  \"idrAmbPickupAddresLine1\": \"jtvnhjmznt60hzcz5w7t\",\n"
-            + "  \"idrAmbPickupAddresLine2\": \"c4tdhr36pp\",\n"
-            + "  \"idrAmbPickupCity\": \"4p\",\n"
-            + "  \"idrAmbPickupState\": \"50\",\n"
-            + "  \"idrAmbPickupZipcode\": \"cpmb3\",\n"
-            + "  \"idrAmbDropoffName\": \"7dghwmqnx3\",\n"
-            + "  \"idrAmbDropoffAddrLine1\": \"njxn8639h559w\",\n"
-            + "  \"idrAmbDropoffAddrLine2\": \"ht6d8d87j\",\n"
-            + "  \"idrAmbDropoffCity\": \"nnnpqb892nks\",\n"
-            + "  \"idrAmbDropoffState\": \"g6\",\n"
-            + "  \"idrAmbDropoffZipcode\": \"bsrrw\",\n"
-            + "  \"mcsAudits\": [{\n"
-            + "    \"idrJAuditNum\": 30026,\n"
-            + "    \"idrJAuditIndUnrecognized\": \"9\",\n"
-            + "    \"idrJAuditDispUnrecognized\": \"4\",\n"
-            + "    \"rdaPosition\": 1\n"
-            + "  }, {\n"
-            + "    \"idrJAuditNum\": 16367,\n"
-            + "    \"idrJAuditIndUnrecognized\": \"n\",\n"
-            + "    \"idrJAuditDispEnum\": \"CUTBACK_AUDIT_DISPOSITION_DENY\",\n"
-            + "    \"rdaPosition\": 2\n"
-            + "  }, {\n"
-            + "    \"idrJAuditNum\": 30113,\n"
-            + "    \"idrJAuditIndUnrecognized\": \"7\",\n"
-            + "    \"idrJAuditDispUnrecognized\": \"4\",\n"
-            + "    \"rdaPosition\": 3\n"
-            + "  }, {\n"
-            + "    \"idrJAuditNum\": 15286,\n"
-            + "    \"idrJAuditIndUnrecognized\": \"s\",\n"
-            + "    \"idrJAuditDispEnum\": \"CUTBACK_AUDIT_DISPOSITION_AUDIT_OVERRIDDEN\",\n"
-            + "    \"rdaPosition\": 4\n"
-            + "  }, {\n"
-            + "    \"idrJAuditNum\": 20021,\n"
-            + "    \"idrJAuditIndUnrecognized\": \"p\",\n"
-            + "    \"idrJAuditDispEnum\": \"CUTBACK_AUDIT_DISPOSITION_EOMB_MESSAGE_ONLY\",\n"
-            + "    \"rdaPosition\": 5\n"
-            + "  }, {\n"
-            + "    \"idrJAuditNum\": 14325,\n"
-            + "    \"idrJAuditIndUnrecognized\": \"j\",\n"
-            + "    \"idrJAuditDispUnrecognized\": \"z\",\n"
-            + "    \"rdaPosition\": 6\n"
-            + "  }],\n"
-            + "  \"mcsLocations\": [{\n"
-            + "    \"idrLocClerk\": \"gh\",\n"
-            + "    \"idrLocCode\": \"8\",\n"
-            + "    \"idrLocDate\": \"2021-01-28\",\n"
-            + "    \"idrLocActvCodeEnum\": \"LOCATION_ACTIVITY_CODE_FINANCIAL_RESPONSE_ACTIVITY\",\n"
-            + "    \"rdaPosition\": 1\n"
-            + "  }, {\n"
-            + "    \"idrLocClerk\": \"m\",\n"
-            + "    \"idrLocCode\": \"b4r\",\n"
-            + "    \"idrLocDate\": \"2021-01-18\",\n"
-            + "    \"idrLocActvCodeEnum\": \"LOCATION_ACTIVITY_CODE_MAINTENANCE_APPLIED_FROM_WORKSHEET_F\",\n"
-            + "    \"rdaPosition\": 2\n"
-            + "  }, {\n"
-            + "    \"idrLocClerk\": \"378k\",\n"
-            + "    \"idrLocCode\": \"k74\",\n"
-            + "    \"idrLocDate\": \"2021-03-30\",\n"
-            + "    \"idrLocActvCodeUnrecognized\": \"0\",\n"
-            + "    \"rdaPosition\": 3\n"
-            + "  }, {\n"
-            + "    \"idrLocClerk\": \"t\",\n"
-            + "    \"idrLocCode\": \"4\",\n"
-            + "    \"idrLocDate\": \"2021-06-21\",\n"
-            + "    \"idrLocActvCodeEnum\": \"LOCATION_ACTIVITY_CODE_ACTIVATION_ACTIVITY\",\n"
-            + "    \"rdaPosition\": 4\n"
-            + "  }],\n"
-            + "  \"mcsAdjustments\": [{\n"
-            + "    \"idrAdjDate\": \"2021-03-11\",\n"
-            + "    \"idrXrefIcn\": \"xmxj\",\n"
-            + "    \"idrAdjClerk\": \"320\",\n"
-            + "    \"idrInitCcn\": \"t96h\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-06-16\",\n"
-            + "    \"idrAdjBEombAmt\": \"10.13\",\n"
-            + "    \"idrAdjPEombAmt\": \"194.27\",\n"
-            + "    \"rdaPosition\": 1\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-01-21\",\n"
-            + "    \"idrXrefIcn\": \"z270m\",\n"
-            + "    \"idrAdjClerk\": \"qb\",\n"
-            + "    \"idrInitCcn\": \"f0g03sj\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-04-21\",\n"
-            + "    \"idrAdjBEombAmt\": \"2185.24\",\n"
-            + "    \"idrAdjPEombAmt\": \"48855.78\",\n"
-            + "    \"rdaPosition\": 2\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-06-28\",\n"
-            + "    \"idrXrefIcn\": \"kq4rbc3\",\n"
-            + "    \"idrAdjClerk\": \"dz6\",\n"
-            + "    \"idrInitCcn\": \"sq2kh\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-06-02\",\n"
-            + "    \"idrAdjBEombAmt\": \"16.13\",\n"
-            + "    \"idrAdjPEombAmt\": \"8943.66\",\n"
-            + "    \"rdaPosition\": 3\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-03-28\",\n"
-            + "    \"idrXrefIcn\": \"qt3z\",\n"
-            + "    \"idrAdjClerk\": \"k5\",\n"
-            + "    \"idrInitCcn\": \"zs6q6q8g158\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-01-17\",\n"
-            + "    \"idrAdjBEombAmt\": \"713.08\",\n"
-            + "    \"idrAdjPEombAmt\": \"7.06\",\n"
-            + "    \"rdaPosition\": 4\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-01-03\",\n"
-            + "    \"idrXrefIcn\": \"15ctbq7rb9fwhzt\",\n"
-            + "    \"idrAdjClerk\": \"z\",\n"
-            + "    \"idrInitCcn\": \"k5mvp3k\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-04-09\",\n"
-            + "    \"idrAdjBEombAmt\": \"74.75\",\n"
-            + "    \"idrAdjPEombAmt\": \"4985.31\",\n"
-            + "    \"rdaPosition\": 5\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-02-05\",\n"
-            + "    \"idrXrefIcn\": \"jvn64s5r4qb6\",\n"
-            + "    \"idrAdjClerk\": \"r995\",\n"
-            + "    \"idrInitCcn\": \"jkrd69\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-04-17\",\n"
-            + "    \"idrAdjBEombAmt\": \"913.50\",\n"
-            + "    \"idrAdjPEombAmt\": \"8.87\",\n"
-            + "    \"rdaPosition\": 6\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-01-25\",\n"
-            + "    \"idrXrefIcn\": \"9bq\",\n"
-            + "    \"idrAdjClerk\": \"hk\",\n"
-            + "    \"idrInitCcn\": \"6180\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-01-17\",\n"
-            + "    \"idrAdjBEombAmt\": \"67.97\",\n"
-            + "    \"idrAdjPEombAmt\": \"73.67\",\n"
-            + "    \"rdaPosition\": 7\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-04-23\",\n"
-            + "    \"idrXrefIcn\": \"s\",\n"
-            + "    \"idrAdjClerk\": \"pj4j\",\n"
-            + "    \"idrInitCcn\": \"wc\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-05-18\",\n"
-            + "    \"idrAdjBEombAmt\": \"30262.95\",\n"
-            + "    \"idrAdjPEombAmt\": \"16464.26\",\n"
-            + "    \"rdaPosition\": 8\n"
-            + "  }, {\n"
-            + "    \"idrAdjDate\": \"2021-05-18\",\n"
-            + "    \"idrXrefIcn\": \"5rnjvb7r8tqjnm2\",\n"
-            + "    \"idrAdjClerk\": \"3b\",\n"
-            + "    \"idrInitCcn\": \"f5w98zrjhcjsbw\",\n"
-            + "    \"idrAdjChkWrtDt\": \"2021-03-05\",\n"
-            + "    \"idrAdjBEombAmt\": \"20.31\",\n"
-            + "    \"idrAdjPEombAmt\": \"5676.34\",\n"
-            + "    \"rdaPosition\": 9\n"
-            + "  }]\n"
-            + "}",
+        """
+{
+  "idrClmHdIcn": "543185449367619",
+  "idrContrId": "0546",
+  "idrHic": "935301121",
+  "idrDtlCnt": 3,
+  "idrBeneLast16": "bg",
+  "idrBeneFirstInit": "c",
+  "idrBeneMidInit": "k",
+  "idrBeneSexEnum": "BENEFICIARY_SEX_MALE",
+  "idrStatusCodeEnum": "STATUS_CODE_ADJUSTED",
+  "idrStatusDate": "2021-05-24",
+  "idrBillProvNpi": "db",
+  "idrBillProvNum": "9743",
+  "idrBillProvEin": "zrcfgs7",
+  "idrBillProvType": "h",
+  "idrBillProvSpec": "cm",
+  "idrBillProvGroupIndEnum": "BILLING_PROVIDER_INDICATOR_GROUP",
+  "idrBillProvPriceSpec": "1",
+  "idrBillProvCounty": "1r",
+  "idrBillProvLoc": "84",
+  "idrTotAllowed": "50055.81",
+  "idrCoinsurance": "95.89",
+  "idrDeductible": "9894.24",
+  "idrTotBilledAmt": "866.34",
+  "idrClaimReceiptDate": "2021-06-18",
+  "idrClaimMbi": "k71641b7gm3",
+  "mcsDiagnosisCodes": [{
+    "idrClmHdIcn": "543185449367619",
+    "idrDiagCode": "p",
+    "idrDiagIcdTypeUnrecognized": "s",
+    "rdaPosition": 1
+  }, {
+    "idrClmHdIcn": "543185449367619",
+    "idrDiagIcdTypeEnum": "DIAGNOSIS_ICD_TYPE_ICD10",
+    "idrDiagCode": "c3pz04",
+    "rdaPosition": 2
+  }, {
+    "idrClmHdIcn": "543185449367619",
+    "idrDiagIcdTypeEnum": "DIAGNOSIS_ICD_TYPE_ICD9",
+    "idrDiagCode": "3hm99",
+    "rdaPosition": 3
+  }, {
+    "idrClmHdIcn": "543185449367619",
+    "idrDiagCode": "c",
+    "idrDiagIcdTypeUnrecognized": "s",
+    "rdaPosition": 4
+  }, {
+    "idrClmHdIcn": "543185449367619",
+    "idrDiagCode": "g88",
+    "idrDiagIcdTypeUnrecognized": "d",
+    "rdaPosition": 5
+  }, {
+    "idrClmHdIcn": "543185449367619",
+    "idrDiagCode": "vwmb",
+    "idrDiagIcdTypeUnrecognized": "x",
+    "rdaPosition": 6
+  }],
+  "mcsDetails": [{
+    "idrDtlStatusEnum": "DETAIL_STATUS_REJECTED",
+    "idrDtlFromDate": "2021-03-08",
+    "idrDtlToDate": "2021-03-08",
+    "idrProcCode": "n",
+    "idrModOne": "5",
+    "idrModTwo": "k",
+    "idrModThree": "q",
+    "idrModFour": "v3",
+    "idrDtlPrimaryDiagCode": "k",
+    "idrKPosLnameOrg": "pggtbgjwkmztsfjvjzgtcpbkhfhmzxhpdnqsrzqjvbpgthdsxpsrk",
+    "idrKPosFname": "pcrstwdwfthjxwbbmzgzjthbrfjr",
+    "idrKPosMname": "gqkbtrk",
+    "idrKPosAddr1": "4btxhsqcz68vc",
+    "idrKPosAddr21st": "fgp2f0q408xvhcwv1fs7hz6r9pw",
+    "idrKPosAddr22nd": "tsn",
+    "idrKPosCity": "qbcmjpdsfzzhqwbrvrxdnjqcdzhp",
+    "idrKPosState": "fr",
+    "idrKPosZip": "1061715129",
+    "idrDtlDiagIcdTypeUnrecognized": "p",
+    "idrTosEnum": "TYPE_OF_SERVICE_ASSISTANCE_AT_SURGERY",
+    "idrTwoDigitPosEnum": "TWO_DIGIT_PLAN_OF_SERVICE_COMPREHENSIVE_OUTPATIENT_REHABILITATION_FACILITY",
+    "idrDtlRendType": "5n",
+    "idrDtlRendSpec": "81",
+    "idrDtlRendNpi": "2cjn",
+    "idrDtlRendProv": "cr1bnkb3",
+    "idrKDtlFacProvNpi": "x4wz142gr",
+    "idrDtlAmbPickupAddres1": "0qvnn4rpj93q728c1d7n9x3m7",
+    "idrDtlAmbPickupAddres2": "6z4dxbxvkv3",
+    "idrDtlAmbPickupCity": "qs05mkp3bkm2s5c3ktm",
+    "idrDtlAmbPickupState": "2",
+    "idrDtlAmbPickupZipcode": "t01",
+    "idrDtlAmbDropoffName": "djfj8",
+    "idrDtlAmbDropoffAddrL1": "gwd0hb70d0gpb3px",
+    "idrDtlAmbDropoffAddrL2": "b6cttknhfwg",
+    "idrDtlAmbDropoffCity": "ds",
+    "idrDtlAmbDropoffState": "01",
+    "idrDtlAmbDropoffZipcode": "88jcc14",
+    "idrDtlNumber": 1
+  }, {
+    "idrDtlFromDate": "2021-04-12",
+    "idrDtlToDate": "2021-04-12",
+    "idrProcCode": "k",
+    "idrModOne": "n",
+    "idrModTwo": "9",
+    "idrModThree": "cb",
+    "idrModFour": "0v",
+    "idrDtlDiagIcdTypeEnum": "DIAGNOSIS_ICD_TYPE_ICD9",
+    "idrDtlPrimaryDiagCode": "w",
+    "idrKPosLnameOrg": "wxsdbmvqwhdpgvqkhnzmpqtzkdvczxhwxjmfbwwqshndhbpckrvcmngc",
+    "idrKPosFname": "nmctkmdjkxgnsddnqthbwqbgcbzbjb",
+    "idrKPosMname": "mpmsjjqxdhdrknb",
+    "idrKPosAddr1": "0z4p95cqnq4tg6wg1wd1sdkxschm4nvzwbnwt05dg5tsw8q1xcwfw5",
+    "idrKPosAddr21st": "0",
+    "idrKPosAddr22nd": "6wmnd13g7gj61qs8w4rdxcht",
+    "idrKPosCity": "wcgk",
+    "idrKPosState": "kc",
+    "idrKPosZip": "395749",
+    "idrDtlStatusUnrecognized": "b",
+    "idrTosEnum": "TYPE_OF_SERVICE_DME_PRESCRIPTION",
+    "idrTwoDigitPosUnrecognized": "s",
+    "idrDtlRendType": "x",
+    "idrDtlRendSpec": "m",
+    "idrDtlRendNpi": "dvb",
+    "idrDtlRendProv": "p7bpvdkc",
+    "idrKDtlFacProvNpi": "p061",
+    "idrDtlAmbPickupAddres1": "6zzkc06vrf8qq70961rz2",
+    "idrDtlAmbPickupAddres2": "v6tv",
+    "idrDtlAmbPickupCity": "1d7gvd3gd198pdtk",
+    "idrDtlAmbPickupState": "zz",
+    "idrDtlAmbPickupZipcode": "bw9d",
+    "idrDtlAmbDropoffName": "wfh4p5jgpdg5jszdrcb6j2ns",
+    "idrDtlAmbDropoffAddrL1": "bs954dwjq3m85ndjdgdjwjcq",
+    "idrDtlAmbDropoffAddrL2": "29dd4d3",
+    "idrDtlAmbDropoffCity": "9hrhpnjnw8tq3c0m7jt4",
+    "idrDtlAmbDropoffState": "hj",
+    "idrDtlAmbDropoffZipcode": "r",
+    "idrDtlNumber": 2
+  }, {
+    "idrDtlFromDate": "2021-03-29",
+    "idrDtlToDate": "2021-03-29",
+    "idrProcCode": "kzg4b",
+    "idrModOne": "3j",
+    "idrModTwo": "pj",
+    "idrModThree": "k",
+    "idrModFour": "n",
+    "idrDtlPrimaryDiagCode": "07d",
+    "idrKPosLnameOrg": "gqnrrphtwszfhdqvnbcsvgxsrpfzcdbfcxgstzhcrfbvznspht",
+    "idrKPosFname": "hvr",
+    "idrKPosMname": "tsdwjfsr",
+    "idrKPosAddr1": "vd0c6mvws5hzmvmvtmbjcx7p9m1f1dvg0n03whcnb078f6m2wkjq",
+    "idrKPosAddr21st": "xsg6qhr8f4n34c77gqzz7",
+    "idrKPosAddr22nd": "sv3fzr7tzn3hw",
+    "idrKPosCity": "cjmbrcs",
+    "idrKPosState": "r",
+    "idrKPosZip": "97239824074",
+    "idrDtlDiagIcdTypeUnrecognized": "h",
+    "idrDtlStatusUnrecognized": "n",
+    "idrTosUnrecognized": "v",
+    "idrTwoDigitPosEnum": "TWO_DIGIT_PLAN_OF_SERVICE_INDEPENDENT_CLINIC",
+    "idrDtlRendType": "f",
+    "idrDtlRendSpec": "z",
+    "idrDtlRendNpi": "918q",
+    "idrDtlRendProv": "kr23h9k4f6",
+    "idrKDtlFacProvNpi": "tf9ncj",
+    "idrDtlAmbPickupAddres1": "z",
+    "idrDtlAmbPickupAddres2": "tzvvnxcst5zcc8pvb",
+    "idrDtlAmbPickupCity": "zj2p94m3hjct",
+    "idrDtlAmbPickupState": "d",
+    "idrDtlAmbPickupZipcode": "2hx",
+    "idrDtlAmbDropoffName": "rn93",
+    "idrDtlAmbDropoffAddrL1": "g379h9z14qpwj",
+    "idrDtlAmbDropoffAddrL2": "b36rjh56",
+    "idrDtlAmbDropoffCity": "k435qcfd53whjf5txf",
+    "idrDtlAmbDropoffState": "gs",
+    "idrDtlAmbDropoffZipcode": "qqwq",
+    "idrDtlNumber": 3
+  }],
+  "idrClaimTypeUnrecognized": "h",
+  "idrBillProvStatusCdUnrecognized": "s",
+  "idrHdrFromDos": "2021-03-08",
+  "idrHdrToDos": "2021-04-12",
+  "idrAssignmentEnum": "CLAIM_ASSIGNMENT_NON_ASSIGNED_LAB_SERVICES",
+  "idrClmLevelIndUnrecognized": "9",
+  "idrHdrAudit": 28109,
+  "idrHdrAuditIndEnum": "AUDIT_INDICATOR_AUDIT_NUMBER",
+  "idrUSplitReasonEnum": "SPLIT_REASON_CODE_KIDNEY_DONOR",
+  "idrJReferringProvNpi": "h5xbd3",
+  "idrJFacProvNpi": "brpb24",
+  "idrUDemoProvNpi": "qbrsqrw9",
+  "idrUSuperNpi": "8crf7m43j9",
+  "idrUFcadjBilNpi": "g4gj4sf",
+  "idrAmbPickupAddresLine1": "4jvn1w5z5706s3mw",
+  "idrAmbPickupAddresLine2": "pst59d0",
+  "idrAmbPickupCity": "xbn02z37f",
+  "idrAmbPickupState": "37",
+  "idrAmbPickupZipcode": "h1",
+  "idrAmbDropoffName": "rjps29fczvd5f6g0fjppk",
+  "idrAmbDropoffAddrLine1": "84m013kgpfxcbbpszzh977hzc",
+  "idrAmbDropoffAddrLine2": "4ck32",
+  "idrAmbDropoffCity": "f0qw",
+  "idrAmbDropoffState": "x",
+  "idrAmbDropoffZipcode": "ggtmg3wp",
+  "mcsAudits": [{
+    "idrJAuditNum": 32488,
+    "idrJAuditIndEnum": "CUTBACK_AUDIT_INDICATOR_HEADER_EDIT_NUMBER",
+    "idrJAuditDispUnrecognized": "x",
+    "rdaPosition": 1
+  }, {
+    "idrJAuditNum": 6771,
+    "idrJAuditIndEnum": "CUTBACK_AUDIT_INDICATOR__AUDIT_NUM_IS_ZEROES",
+    "idrJAuditDispUnrecognized": "t",
+    "rdaPosition": 2
+  }, {
+    "idrJAuditNum": 15930,
+    "idrJAuditIndUnrecognized": "k",
+    "idrJAuditDispEnum": "CUTBACK_AUDIT_DISPOSITION_MODIFIER_51",
+    "rdaPosition": 3
+  }, {
+    "idrJAuditNum": 25878,
+    "idrJAuditIndUnrecognized": "b",
+    "idrJAuditDispEnum": "CUTBACK_AUDIT_DISPOSITION_REDUCE_BY_SUM_OF_PRIOR_PAYMENTS",
+    "rdaPosition": 4
+  }, {
+    "idrJAuditNum": 1044,
+    "idrJAuditIndUnrecognized": "t",
+    "idrJAuditDispEnum": "CUTBACK_AUDIT_DISPOSITION_REDUCE_BY_SUM_OF_MATCHING_DATES",
+    "rdaPosition": 5
+  }, {
+    "idrJAuditNum": 17441,
+    "idrJAuditIndUnrecognized": "3",
+    "idrJAuditDispEnum": "CUTBACK_AUDIT_DISPOSITION_EOMB_MESSAGE_ONLY",
+    "rdaPosition": 6
+  }, {
+    "idrJAuditNum": 16211,
+    "idrJAuditIndEnum": "CUTBACK_AUDIT_INDICATOR_HEADER_EDIT_NUMBER",
+    "idrJAuditDispEnum": "CUTBACK_AUDIT_DISPOSITION_TRANSFER",
+    "rdaPosition": 7
+  }],
+  "mcsLocations": [{
+    "idrLocClerk": "t",
+    "idrLocCode": "d",
+    "idrLocDate": "2021-04-17",
+    "idrLocActvCodeUnrecognized": "x",
+    "rdaPosition": 1
+  }, {
+    "idrLocClerk": "9j",
+    "idrLocCode": "6kc",
+    "idrLocDate": "2021-03-04",
+    "idrLocActvCodeUnrecognized": "f",
+    "rdaPosition": 2
+  }, {
+    "idrLocClerk": "579",
+    "idrLocCode": "3jb",
+    "idrLocDate": "2021-05-21",
+    "idrLocActvCodeUnrecognized": "3",
+    "rdaPosition": 3
+  }, {
+    "idrLocClerk": "gzx",
+    "idrLocCode": "z",
+    "idrLocDate": "2021-05-22",
+    "idrLocActvCodeUnrecognized": "w",
+    "rdaPosition": 4
+  }, {
+    "idrLocClerk": "p5",
+    "idrLocCode": "kd2",
+    "idrLocDate": "2021-03-11",
+    "idrLocActvCodeEnum": "LOCATION_ACTIVITY_CODE_MAINTENANCE_APPLIED_FROM_WORKSHEET_F",
+    "rdaPosition": 5
+  }, {
+    "idrLocClerk": "5g7",
+    "idrLocCode": "cg",
+    "idrLocDate": "2021-05-11",
+    "idrLocActvCodeEnum": "LOCATION_ACTIVITY_CODE_CORRECTION_DOCUMENT_REPRINT",
+    "rdaPosition": 6
+  }, {
+    "idrLocClerk": "q6g3",
+    "idrLocCode": "ttf",
+    "idrLocDate": "2021-02-01",
+    "idrLocActvCodeEnum": "LOCATION_ACTIVITY_CODE_CLAIM_IS_MISSING",
+    "rdaPosition": 7
+  }],
+  "mcsAdjustments": [{
+    "idrAdjDate": "2021-04-02",
+    "idrXrefIcn": "j1ct",
+    "idrAdjClerk": "gz",
+    "idrInitCcn": "11hc3kgkv",
+    "idrAdjChkWrtDt": "2021-01-03",
+    "idrAdjBEombAmt": "380.38",
+    "idrAdjPEombAmt": "685.12",
+    "rdaPosition": 1
+  }, {
+    "idrAdjDate": "2021-02-13",
+    "idrXrefIcn": "jvqb45f5xfvn",
+    "idrAdjClerk": "jnz",
+    "idrInitCcn": "qfrm7fs9ws7",
+    "idrAdjChkWrtDt": "2021-06-26",
+    "idrAdjBEombAmt": "3983.09",
+    "idrAdjPEombAmt": "47308.33",
+    "rdaPosition": 2
+  }, {
+    "idrAdjDate": "2021-02-26",
+    "idrXrefIcn": "j14b9",
+    "idrAdjClerk": "8",
+    "idrInitCcn": "m81p0",
+    "idrAdjChkWrtDt": "2021-06-20",
+    "idrAdjBEombAmt": "8800.96",
+    "idrAdjPEombAmt": "501.81",
+    "rdaPosition": 3
+  }, {
+    "idrAdjDate": "2021-04-26",
+    "idrXrefIcn": "s4kb8c49b34j18",
+    "idrAdjClerk": "vn",
+    "idrInitCcn": "hzf12cg",
+    "idrAdjChkWrtDt": "2021-01-31",
+    "idrAdjBEombAmt": "43.34",
+    "idrAdjPEombAmt": "3.13",
+    "rdaPosition": 4
+  }, {
+    "idrAdjDate": "2021-04-04",
+    "idrXrefIcn": "rc9w3kvc67",
+    "idrAdjClerk": "0dw7",
+    "idrInitCcn": "mpvbt2p5fk7fpzf",
+    "idrAdjChkWrtDt": "2021-05-09",
+    "idrAdjBEombAmt": "166.38",
+    "idrAdjPEombAmt": "714.80",
+    "rdaPosition": 5
+  }]
+}""",
         json);
   }
 
