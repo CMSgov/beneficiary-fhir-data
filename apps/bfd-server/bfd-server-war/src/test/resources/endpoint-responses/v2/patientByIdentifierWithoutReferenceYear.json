@@ -46,6 +46,24 @@
               "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
               "valueCoding" : {
                 "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "code" : "historic",
+                "display" : "Historic"
+              }
+            } ],
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "MC",
+            "display" : "Patient's Medicare number"
+          } ]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "value" : "3456689"
+      }, {
+        "type" : {
+          "coding" : [ {
+            "extension" : [ {
+              "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+              "valueCoding" : {
+                "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
                 "code" : "current",
                 "display" : "Current"
               }
@@ -60,6 +78,24 @@
         "period" : {
           "start" : "2020-07-30"
         }
+      }, {
+        "type" : {
+          "coding" : [ {
+            "extension" : [ {
+              "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+              "valueCoding" : {
+                "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "code" : "historic",
+                "display" : "Historic"
+              }
+            } ],
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "MC",
+            "display" : "Patient's Medicare number"
+          } ]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "value" : "9AB2WW3GR44"
       }, {
         "type" : {
           "coding" : [ {
