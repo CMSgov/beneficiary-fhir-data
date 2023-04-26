@@ -55,15 +55,27 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
     BfdMDC.clear();
     ContentCachingRequestWrapper reqWrapper = new ContentCachingRequestWrapper(request);
     ContentCachingResponseWrapper resWrapper = new ContentCachingResponseWrapper(response);
-    reqWrapper.getParameterMap(); // needed for caching!!
+    // Requests aren't cached until their parameters have been accessed.
+    reqWrapper.getParameterMap();
 
     handleRequest(reqWrapper);
     try {
       chain.doFilter(reqWrapper, resWrapper);
+      // The original response will not return with its body unless this method is called.
       resWrapper.copyBodyToResponse();
     } catch (EOFException e) {
+      /*
+       * The EOFException is a checked exception and is expected when the response body's GZIP stream has reached its end.
+       * We can't control whether external filters or applications continue to read the streamed response body
+       * after its completion, so this is the best we can do.
+       */
       LOGGER.info("End of stream", e);
     } catch (IOException e) {
+      /*
+       * The IOException is a checked exception and will be thrown whenever the response body's GZIP stream is interrupted.
+       * This can occur when the ASG is scaling down (like after a load test), or if the client cancels a request mid-stream.
+       * There isn't much we can do on our end aside from catching it.
+       */
       LOGGER.info("Tried closing stream", e);
     } finally {
       handleResponse(reqWrapper, resWrapper);
@@ -140,10 +152,6 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
      * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
      * CustomRequestLog to write the payload size to the access.log:
      * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
-     *
-     * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
-     * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
-     * accessible to the filter.
      */
     BfdMDC.put(
         BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
