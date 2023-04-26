@@ -1357,10 +1357,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   public static IGenericClient createFhirClient(String addrHdrVal) {
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            "mbi",
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-            addrHdrVal);
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, addrHdrVal);
     return createFhirClient(requestHeader);
   }
 

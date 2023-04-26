@@ -67,8 +67,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -77,9 +75,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(R4PatientResourceProvider.class);
-
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    * NOTE: For v2, HICN no longer supported.
@@ -524,7 +519,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging) {
-    String joinsClause = "left join fetch b.skippedRifRecords ";
+    String joinsClause =
+        "left join fetch b.skippedRifRecords left join fetch b.medicareBeneficiaryIdHistories ";
     boolean passDistinctThrough = false;
 
     /*
@@ -612,7 +608,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids) {
-    String joinsClause = ""; // ""left join fetch b.medicareBeneficiaryIdHistories ";
+    String joinsClause = "left join fetch b.medicareBeneficiaryIdHistories ";
     boolean passDistinctThrough = false;
 
     String query =
