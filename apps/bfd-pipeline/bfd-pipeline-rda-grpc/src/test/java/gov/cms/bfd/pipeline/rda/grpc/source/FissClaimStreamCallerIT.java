@@ -139,7 +139,7 @@ public class FissClaimStreamCallerIT {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
         .fissSourceFactory(
-            sequenceNumber -> new RandomFissClaimSource(1000L, 15).skipTo(sequenceNumber))
+            sequenceNumber -> new RandomFissClaimSource(1000L, 14).skipTo(sequenceNumber))
         .build()
         .runWithChannelParam(
             channel -> {

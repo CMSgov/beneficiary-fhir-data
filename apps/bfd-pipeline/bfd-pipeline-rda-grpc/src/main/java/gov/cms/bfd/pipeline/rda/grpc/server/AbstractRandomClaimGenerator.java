@@ -66,7 +66,7 @@ abstract class AbstractRandomClaimGenerator<T> {
   AbstractRandomClaimGenerator(RandomClaimGeneratorConfig config) {
     this.config = config;
     errorGenerationRandom = new Random(config.getRandomErrorSeed());
-    sequence = 0;
+    sequence = 1;
     path = new Stack<>();
   }
 
