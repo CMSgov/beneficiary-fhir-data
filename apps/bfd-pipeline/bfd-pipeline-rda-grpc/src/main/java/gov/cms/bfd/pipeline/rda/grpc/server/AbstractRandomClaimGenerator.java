@@ -66,8 +66,33 @@ abstract class AbstractRandomClaimGenerator<T> {
   AbstractRandomClaimGenerator(RandomClaimGeneratorConfig config) {
     this.config = config;
     errorGenerationRandom = new Random(config.getRandomErrorSeed());
-    sequence = 0;
+    sequence = 1;
     path = new Stack<>();
+  }
+
+  /**
+   * Used by {@link MessageSource#skipTo} to jump ahead in the sequence to a desired sequence
+   * number.
+   *
+   * @param startingSequenceNumber desired next sequence number
+   * @return the number skipped
+   */
+  public long skipTo(long startingSequenceNumber) {
+    long skipped = 0;
+    if (sequence < startingSequenceNumber) {
+      skipped = startingSequenceNumber - sequence;
+      sequence = startingSequenceNumber;
+    }
+    return skipped;
+  }
+
+  /**
+   * Returns the previous claim's sequence number.
+   *
+   * @return a sequence number corresponding to the previous claim
+   */
+  public long getPreviousSequenceNumber() {
+    return sequence - 1;
   }
 
   /**
@@ -79,15 +104,6 @@ abstract class AbstractRandomClaimGenerator<T> {
    */
   public void setSequence(long sequence) {
     this.sequence = sequence;
-  }
-
-  /**
-   * Increments the current sequence value. Can be used to skip an arbitrary number of claims.
-   *
-   * @param delta value to add to current sequence number
-   */
-  public void incrementSequence(long delta) {
-    sequence += delta;
   }
 
   /**
