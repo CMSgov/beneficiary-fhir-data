@@ -10,6 +10,7 @@
 def verboseMaven = params.verbose_mvn_logging
 def appBuildResults
 def amiIds
+def gitBranchName
 def scriptForApps
 def scriptForDeploys
 
@@ -94,10 +95,6 @@ spec:
     }
 
     parameters {
-        string(name: 'git_branch',
-        defaultValue: '',
-        description: 'To build, specify a branch within BFD.')
-
         booleanParam(name: 'verbose_mvn_logging',
         description: 'When true, `mvn` will produce verbose logs.',
         defaultValue: false)
@@ -132,6 +129,23 @@ spec:
             }
         }
 
+        /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+            value if the build is a PR as the BRANCH_NAME var is populated with the build
+            name during PR builds.
+            */
+        stage('Set Branch Name') {
+            currentStage = env.STAGE_NAME
+            steps {
+                script {
+                    if (env.BRANCH_NAME.startsWith('PR')) {
+                        gitBranchName = env.CHANGE_BRANCH
+                        } else {
+                        gitBranchName = env.BRANCH_NAME
+                    }
+                }
+            }
+        }
+
         stage('Build Apps') {
             steps {
                 script {
@@ -158,7 +172,7 @@ spec:
                     currentStage = env.STAGE_NAME
                     try {
                         awsAuth.assumeRole()
-                        amiIds = scriptForDeploys.buildAppAmis(params.git_branch, gitCommitId, amiIds, appBuildResults)
+                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         throw e

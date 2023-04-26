@@ -54,8 +54,8 @@ class AmiIds implements Serializable {
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
 */
 def findAmis() {
-	// Replace this lookup either with a lookup in SSM or in a build artifact.
-	return new AmiIds(
+    // Replace this lookup either with a lookup in SSM or in a build artifact.
+    return new AmiIds(
 		platinumAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
@@ -63,34 +63,10 @@ def findAmis() {
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
-		bfdPipelineAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk17-etl-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdServerAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk17-fhir-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdMigratorAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk17-db-migrator-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdServerLoadAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=server-load-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		)
+		'',
+		'',
+		'',
+		''
 	)
 }
 
@@ -118,7 +94,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
 			withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",
 					 "gitCommitId=${gitCommitId}"]) {
-					// build AMIs in parallel
+    // build AMIs in parallel
 				sh '''
 packer build -color=false \
 -var vault_password_file="$vaultPasswordFile" \
@@ -128,7 +104,7 @@ packer build -color=false \
 -var git_commit="$gitCommitId" \
 ../../packer/build_bfd-all.json
 '''
-			}
+      }
 			return new AmiIds(
 					platinumAmiId: amiIds.platinumAmiId,
 					bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
@@ -140,8 +116,8 @@ packer build -color=false \
 					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
 			)
-		}
-	}
+  }
+ }
 }
 
 /**
@@ -156,13 +132,13 @@ packer build -color=false \
 def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds) {
 
 	dir("${workspace}/ops/terraform/env/${environmentId}/stateless") {
-		// Debug output terraform version
+  // Debug output terraform version
 		sh "terraform --version"
 
-		// Initilize terraform
+  // Initilize terraform
 		sh "terraform init -no-color"
 
-		// Gathering terraform plan
+  // Gathering terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
@@ -171,20 +147,20 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		-var='git_commit_id=${gitCommitId}' \
 		-no-color -out=tfplan"
 
-		// Apply Terraform plan
+  // Apply Terraform plan
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "terraform apply \
 		-no-color -input=false tfplan"
 		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-	}
+ }
 }
 
 def extractAmiIdFromPackerManifest(String manifest) {
 	dir('ops/ansible/playbooks-ccs'){
 		def manifestJson = new JsonSlurper().parseText(manifest)
-		// artifactId will be of the form $region:$amiId
+  // artifactId will be of the form $region:$amiId
 		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
-	}
+ }
 }
 
 return this
