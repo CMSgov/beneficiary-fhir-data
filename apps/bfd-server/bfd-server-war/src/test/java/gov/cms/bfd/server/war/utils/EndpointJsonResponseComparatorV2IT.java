@@ -61,7 +61,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -214,7 +213,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
    * @param endpointId the endpoint id
    * @param endpointOperation the endpoint operation
    */
-  @Disabled
+  // @Disabled
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
   public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {

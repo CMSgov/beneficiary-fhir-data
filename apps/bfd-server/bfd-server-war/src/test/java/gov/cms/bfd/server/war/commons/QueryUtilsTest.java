@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -8,6 +11,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.BitSet;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
@@ -126,6 +130,59 @@ public class QueryUtilsTest {
     doReturn(upperBoundPredicate).when(builder).lessThan(dateExpression, upper);
     QueryUtils.createDateRangePredicate(builder, dateRange, dateExpression);
     verify(builder).and(notNullPredicate, lowerBoundPredicate, upperBoundPredicate);
+  }
+
+  /** Test {@link QueryUtils#hasClaimsData} testing claims bitmask values. */
+  @Test
+  public void testHasClaimsDataMaskValues() {
+    int testVal = QueryUtils.V_CARRIER_HAS_DATA | QueryUtils.V_SNF_HAS_DATA;
+    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
+
+    // test additive values instead of XOR
+    testVal = QueryUtils.V_CARRIER_HAS_DATA + QueryUtils.V_SNF_HAS_DATA;
+    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
+    assertEquals(0, (testVal & QueryUtils.V_DME_HAS_DATA));
+
+    // test additive vs. XOR of values
+    testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
+    assertEquals(
+        testVal, QueryUtils.V_DME_HAS_DATA + QueryUtils.V_SNF_HAS_DATA + QueryUtils.V_HHA_HAS_DATA);
+    // test entire mask being set; each & mask should produce a value of 1
+    testVal =
+        QueryUtils.V_CARRIER_HAS_DATA
+            + QueryUtils.V_INPATIENT_HAS_DATA
+            + QueryUtils.V_OUTPATIENT_HAS_DATA
+            + QueryUtils.V_SNF_HAS_DATA
+            + QueryUtils.V_DME_HAS_DATA
+            + QueryUtils.V_HHA_HAS_DATA
+            + QueryUtils.V_HOSPICE_HAS_DATA
+            + QueryUtils.V_PART_D_HAS_DATA;
+
+    assertEquals(QueryUtils.V_PART_D_HAS_DATA, (testVal & QueryUtils.V_PART_D_HAS_DATA));
+    assertEquals(QueryUtils.V_HOSPICE_HAS_DATA, (testVal & QueryUtils.V_HOSPICE_HAS_DATA));
+    assertEquals(QueryUtils.V_HHA_HAS_DATA, (testVal & QueryUtils.V_HHA_HAS_DATA));
+    assertEquals(QueryUtils.V_DME_HAS_DATA, (testVal & QueryUtils.V_DME_HAS_DATA));
+    assertEquals(QueryUtils.V_SNF_HAS_DATA, (testVal & QueryUtils.V_SNF_HAS_DATA));
+    assertEquals(QueryUtils.V_OUTPATIENT_HAS_DATA, (testVal & QueryUtils.V_OUTPATIENT_HAS_DATA));
+    assertEquals(QueryUtils.V_INPATIENT_HAS_DATA, (testVal & QueryUtils.V_INPATIENT_HAS_DATA));
+    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
+
+    testVal =
+        QueryUtils.V_CARRIER_HAS_DATA
+            | QueryUtils.V_INPATIENT_HAS_DATA
+            | QueryUtils.V_SNF_HAS_DATA
+            | QueryUtils.V_HHA_HAS_DATA
+            | QueryUtils.V_PART_D_HAS_DATA;
+
+    BitSet testBits = QueryUtils.convertClaimsBtimaskValue(testVal);
+    assertTrue(testBits.get(QueryUtils.CARRIER_HAS_DATA));
+    assertTrue(testBits.get(QueryUtils.INPATIENT_HAS_DATA));
+    assertTrue(testBits.get(QueryUtils.SNF_HAS_DATA));
+    assertTrue(testBits.get(QueryUtils.HHA_HAS_DATA));
+    assertTrue(testBits.get(QueryUtils.PART_D_HAS_DATA));
+    assertFalse(testBits.get(QueryUtils.OUTPATIENT_HAS_DATA));
+    assertFalse(testBits.get(QueryUtils.HOSPICE_HAS_DATA));
+    assertFalse(testBits.get(QueryUtils.DME_HAS_DATA));
   }
 
   /**
