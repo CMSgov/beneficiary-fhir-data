@@ -14,7 +14,7 @@ def scriptForApps
 def scriptForDeploys
 
 // send notifications to slack, email, etc
-def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
+def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {
     // buildStatus of NULL means success
     if (!buildStatus) {
         buildStatus = 'SUCCESS'
@@ -32,33 +32,32 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 
     def branchUrl = "https://github.com/CMSgov/beneficiary-fhir-data/tree/${params.git_branch}"
 
-    // prettyfi messages
     def msg = ''
-    switch (buildStatus){
-		case 'UNSTABLE':
-		case 'SUCCESS':
-            msg = "COMPLETED SUCCESSFULLY: BUILT APPS AND AMIS"
+    switch (buildStatus) {
+        case 'UNSTABLE':
+        case 'SUCCESS':
+            msg = 'COMPLETED SUCCESSFULLY: BUILT APPS AND AMIS'
             break
-		case 'FAILED':
-		case 'FAILURE':
+        case 'FAILED':
+        case 'FAILURE':
             msg = "FAILED ON ${stageName.toUpperCase()} STAGE ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}>"
             break
-		case 'STARTED':
+        case 'STARTED':
             msg = 'HAS STARTED'
             break
-		case 'ABORTED':
+        case 'ABORTED':
             msg = 'WAS ABORTED'
             break
-		default:
-			msg = "${buildStatus.toUpperCase()}"
+        default:
+            msg = "${buildStatus.toUpperCase()}"
             break
     }
 
- // build slack message
-	def slackMsg = ''
-    if (buildStatus == 'UNSTABLE'){
+    // build slack message
+    def slackMsg = ''
+    if (buildStatus == 'UNSTABLE') {
         slackMsg = "UNSTABLE APP BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}> ${msg} \n"
-	} else {
+    } else {
         slackMsg = "APP BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}> ${msg} \n"
     }
     slackMsg += "\tJob '${env.JOB_NAME}' \n"
@@ -118,7 +117,7 @@ spec:
                     gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
                     // Get the remote repo url. This assumes we are using git+https not git+ssh.
-                    gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+                    gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/, '')
 
                     // Load the child Jenkinsfiles.
                     scriptForApps = load('apps/build.groovy')
@@ -127,8 +126,8 @@ spec:
                     awsAuth.assumeRole()
 
                     // Find the most current AMI IDs (if any).
-					amiIds = null
-					amiIds = scriptForDeploys.findAmis()
+                    amiIds = null
+                    amiIds = scriptForDeploys.findAmis()
                 }
             }
         }
@@ -160,11 +159,11 @@ spec:
                     try {
                         awsAuth.assumeRole()
                         amiIds = scriptForDeploys.buildAppAmis(params.git_branch, gitCommitId, amiIds, appBuildResults)
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
-                        currentBuild.result = "ABORTED"
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
                         throw e
                     } catch (ex) {
-                        currentBuild.result = "FAILURE"
+                        currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
                         sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
