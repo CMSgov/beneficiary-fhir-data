@@ -23,12 +23,6 @@ data "aws_vpc_peering_connection" "peers" {
   tags  = { Name = local.vpc_peerings[count.index] }
 }
 
-# dns
-data "aws_route53_zone" "local_zone" {
-  name         = "bfd-${local.env}.local"
-  private_zone = true
-}
-
 # s3 buckets
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${local.env}-admin-${data.aws_caller_identity.current.account_id}"

@@ -44,7 +44,6 @@ locals {
   env_config = {
     default_tags = local.default_tags,
     vpc_id       = data.aws_vpc.main.id,
-    zone_id      = data.aws_route53_zone.local_zone.id,
     azs          = local.azs
   }
   port            = 7443
