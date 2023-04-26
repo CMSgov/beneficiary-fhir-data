@@ -30,6 +30,7 @@ data "aws_s3_bucket" "logs" {
 
 # aurora security group
 data "aws_security_group" "aurora_cluster" {
+  vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
     values = ["bfd-${local.env}-aurora-cluster"]
