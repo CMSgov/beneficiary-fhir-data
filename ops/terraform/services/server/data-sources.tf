@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-vpc"]
+    values = [local.vpc_name]
   }
 }
 
@@ -44,7 +44,7 @@ data "aws_security_group" "aurora_cluster" {
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-vpn-private"]
+    values = [local.vpn_security_group]
   }
 }
 
@@ -68,7 +68,7 @@ data "aws_ec2_managed_prefix_list" "jenkins" {
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-enterprise-tools"]
+    values = [local.enterprise_tools_security_group]
   }
 }
 
@@ -76,7 +76,7 @@ data "aws_security_group" "tools" {
 data "aws_security_group" "remote" {
   filter {
     name   = "tag:Name"
-    values = ["bfd-${local.env}-remote-management"]
+    values = [local.management_security_group]
   }
 }
 

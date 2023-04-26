@@ -35,6 +35,11 @@ locals {
     : split("/", key)[5] => value
   }
 
+  enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
+  management_security_group       = local.nonsensitive_common_config["management_security_group"]
+  vpn_security_group              = local.nonsensitive_common_config["vpn_security_group"]
+  vpc_name                        = local.nonsensitive_common_config["vpc_name"]
+
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed
   # in the common hierarchy
   seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)
