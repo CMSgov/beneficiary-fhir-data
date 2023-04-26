@@ -116,7 +116,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   private void createPatient(RequestHeaders reqHeaders) {
     Patient genPatient =
-        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
+        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders, true);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genPatient);
     patient = parser.parseResource(Patient.class, json);
