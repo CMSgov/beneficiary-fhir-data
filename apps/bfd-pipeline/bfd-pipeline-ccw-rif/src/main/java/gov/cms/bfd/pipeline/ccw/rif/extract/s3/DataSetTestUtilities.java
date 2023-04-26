@@ -196,18 +196,12 @@ public class DataSetTestUtilities {
     String objectKey = String.format("%s/%s", keyPrefix, manifestEntry.getName());
 
     try {
-      // If this isn't specified, the AWS API logs annoying warnings.
       Map<String, String> metadata = new HashMap<>();
-      metadata.put("x-amz-meta-myVal", "test");
+      metadata.put(
+          "md5chksum", ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
 
       PutObjectRequest putObjectRequest =
-          PutObjectRequest.builder()
-              .bucket(bucket)
-              .key(objectKey)
-              .metadata(metadata)
-              .contentMD5(
-                  ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()))
-              .build();
+          PutObjectRequest.builder().bucket(bucket).key(objectKey).metadata(metadata).build();
 
       putObjectHelper(s3Client, putObjectRequest, manifest);
     } catch (IOException e) {

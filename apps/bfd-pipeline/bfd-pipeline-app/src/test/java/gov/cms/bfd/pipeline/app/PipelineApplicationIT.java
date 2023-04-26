@@ -214,7 +214,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       DataSetTestUtilities.putObject(s3Client, bucket, manifest);
-      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
       DataSetTestUtilities.putObject(
           s3Client,
           bucket,
