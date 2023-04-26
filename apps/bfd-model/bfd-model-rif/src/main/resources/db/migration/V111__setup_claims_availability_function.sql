@@ -6,6 +6,7 @@
 -- improve performance, especially for the case(s) when there are no claims wahtsoever
 -- for a given Claim type for the Beneficiary.
 --
+-- Uncomment following line to enable HSQL detail logging during a migration
 -- ${logic.hsql-only} set database event log level 4
 ${logic.psql-only} CREATE OR REPLACE FUNCTION check_claims_mask(v_bene_id bigint)
 ${logic.hsql-only} CREATE FUNCTION check_claims_mask(IN v_bene_id bigint)
