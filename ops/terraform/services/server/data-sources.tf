@@ -24,10 +24,6 @@ data "aws_vpc_peering_connection" "peers" {
 }
 
 # s3 buckets
-data "aws_s3_bucket" "admin" {
-  bucket = "bfd-${local.env}-admin-${data.aws_caller_identity.current.account_id}"
-}
-
 data "aws_s3_bucket" "logs" {
   bucket = "bfd-${local.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
