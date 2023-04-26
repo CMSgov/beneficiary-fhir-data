@@ -52,6 +52,10 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException {
 
+    /*
+     * This should be cleared by Jetty via the request log handling but just in case we have a situation where
+     * that handler does not fire (say, due to a Jetty defect) clear it now before the request starts.
+     */
     BfdMDC.clear();
     ContentCachingRequestWrapper reqWrapper = new ContentCachingRequestWrapper(request);
     ContentCachingResponseWrapper resWrapper = new ContentCachingResponseWrapper(response);
