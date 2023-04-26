@@ -3,6 +3,11 @@ variable "env_config" {
   type        = object({ default_tags = map(string), vpc_id = string, azs = list(string) })
 }
 
+variable "kms_key_alias" {
+  description = "Key alias of environment's KMS key"
+  type        = string
+}
+
 variable "role" {
   type = string
 }

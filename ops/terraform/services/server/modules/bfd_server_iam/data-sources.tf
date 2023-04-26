@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 data "aws_kms_key" "master_key" {
-  key_id = "alias/bfd-${local.env}-cmk"
+  key_id = var.kms_key_alias
 }
 
 data "aws_kms_key" "mgmt_key" {

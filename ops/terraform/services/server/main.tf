@@ -38,6 +38,7 @@ locals {
   enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
   management_security_group       = local.nonsensitive_common_config["management_security_group"]
   vpn_security_group              = local.nonsensitive_common_config["vpn_security_group"]
+  kms_key_alias                   = local.nonsensitive_common_config["kms_key_alias"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed
@@ -88,6 +89,7 @@ locals {
 module "fhir_iam" {
   source = "./modules/bfd_server_iam"
 
+  kms_key_alias  = local.kms_key_alias
   service        = local.service
   legacy_service = local.legacy_service
 }
@@ -150,10 +152,11 @@ module "lb_alarms" {
 module "fhir_asg" {
   source = "./modules/bfd_server_asg"
 
-  env_config = local.env_config
-  role       = local.legacy_service
-  layer      = "app"
-  lb_config  = try(module.fhir_lb[0].lb_config, null)
+  kms_key_alias = local.kms_key_alias
+  env_config    = local.env_config
+  role          = local.legacy_service
+  layer         = "app"
+  lb_config     = try(module.fhir_lb[0].lb_config, null)
 
   # Initial size is one server per AZ
   asg_config = {

@@ -11,5 +11,5 @@ data "aws_subnet" "app_subnets" {
 
 # kms master key
 data "aws_kms_key" "master_key" {
-  key_id = "alias/bfd-${local.env}-cmk"
+  key_id = var.kms_key_alias
 }

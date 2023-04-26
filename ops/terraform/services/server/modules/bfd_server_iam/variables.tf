@@ -9,3 +9,8 @@ variable "legacy_service" {
   type        = string
   default     = "fhir"
 }
+
+variable "kms_key_alias" {
+  description = "Key alias of environment's KMS key"
+  type        = string
+}
