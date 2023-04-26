@@ -6,6 +6,7 @@ import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,20 +33,25 @@ public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
 
   @Override
-  public void onStartup(ServletContext servletContext) throws ServletException {
+  public void onStartup(@Nonnull ServletContext servletContext) throws ServletException {
     LOGGER.info("Initializing Blue Button API backend server...");
 
+    // Create the Spring application context and configure it with our ConfigLoader
+    // and SpringConfiguration.  We store the ConfigLoader as a ServletContext
+    // attribute so that it can be reused in SpringConfiguration rather than
+    // creating a static field.
+    var springContext = new AnnotationConfigWebApplicationContext();
+    springContext.setServletContext(servletContext);
     ConfigLoader config = SpringConfiguration.createConfigLoader(System::getenv);
+    servletContext.setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, config);
 
-    // Create the Spring application context.
-    AnnotationConfigWebApplicationContext springContext =
-        new AnnotationConfigWebApplicationContext();
-    configPropertySource(springContext.getEnvironment(), config);
+    ConfigurableEnvironment springEnv = springContext.getEnvironment();
+    MutablePropertySources sources = springEnv.getPropertySources();
+    sources.addFirst(new ConfigPropertySource("configLoader", config));
     springContext.register(SpringConfiguration.class);
     springContext.refresh();
 
     // Set the Spring PRODUCTION profile as the default.
-    ConfigurableEnvironment springEnv = springContext.getEnvironment();
     springEnv.setDefaultProfiles(SpringProfile.PRODUCTION);
 
     // Manage the lifecycle of the root application context.
@@ -79,26 +85,5 @@ public final class ServerInitializer implements WebApplicationInitializer {
         HealthCheckServlet.HEALTH_CHECK_REGISTRY, springContext.getBean(HealthCheckRegistry.class));
 
     LOGGER.info("Initialized Blue Button API backend server.");
-  }
-
-  //  public ConfigLoader getConfigLoader() {
-  //    ConfigLoader baseConfig =
-  //        ConfigLoader.builder().addEnvironmentVariables().addSystemProperties().build();
-  //    ConfigLoader.Builder realConfig = ConfigLoader.builder();
-  //
-  //    String ssmPath = baseConfig.stringValue("aws.ssm.path", "");
-  //    if (ssmPath.length() > 0) {}
-  //
-  //    realConfig.addEnvironmentVariables();
-  //    realConfig.addSystemProperties();
-  //    return realConfig.build();
-  //  }
-
-  public ConfigPropertySource configPropertySource(
-      ConfigurableEnvironment env, ConfigLoader config) {
-    ConfigPropertySource propertySource = new ConfigPropertySource("configLoader", config);
-    MutablePropertySources sources = env.getPropertySources();
-    sources.addFirst(propertySource);
-    return propertySource;
   }
 }

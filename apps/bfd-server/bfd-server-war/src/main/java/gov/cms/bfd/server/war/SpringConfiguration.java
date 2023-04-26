@@ -48,12 +48,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
+import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -128,22 +130,33 @@ public class SpringConfiguration {
   static final String BLUEBUTTON_R4_RESOURCE_PROVIDERS = "bluebuttonR4ResourceProviders";
 
   /**
-   * Set this to <code>true</code> to have Hibernate log a ton of info on the SQL statements being
-   * run and each session's performance. Be sure to also adjust the related logging levels in
-   * Wildfly or whatever (see <code>server-config.sh</code> for details).
+   * Attribute name used to expose the source {@link ConfigLoader} for use by {@link
+   * SpringConfiguration}. Avoids the need to recreate an instance there if one has already been
+   * created for use here or define a static field to hold it.
+   */
+  static final String CONFIG_LOADER_CONTEXT_NAME = "ConfigLoaderInstance";
+
+  /**
+   * Set this to {@code true} to have Hibernate log a ton of info on the SQL statements being run
+   * and each session's performance. Be sure to also adjust the related logging levels in Wildfly or
+   * whatever (see {@code server-config.sh} for details).
    */
   private static final boolean HIBERNATE_DETAILED_LOGGING = false;
 
   /**
-   * Makes our {@link ConfigLoader} instance available as a singleton to components in the
-   * application.
+   * Exposes our {@link ConfigLoader} instance as a singleton to components in the application. If
+   * one has already been created for use in a {@link ConfigPropertySource} and added to the {@link
+   * ServletContext} we simply return that one. Otherwise we create a new one.
    *
+   * @param servletContext used to look for config loader attribute
    * @return the config object
    */
   @Bean
   @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
-  public ConfigLoader configLoader() {
-    return createConfigLoader(System::getenv);
+  public ConfigLoader configLoader(@Autowired ServletContext servletContext) {
+    return servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME) != null
+        ? (ConfigLoader) servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME)
+        : createConfigLoader(System::getenv);
   }
 
   /**
@@ -381,6 +394,7 @@ public class SpringConfiguration {
    * Creates a {@link MetricRegistry} for the application, which can be used to collect statistics
    * on the application's performance.
    *
+   * @param config used to look up configuration values
    * @return the metric registry
    */
   @Bean
@@ -483,10 +497,22 @@ public class SpringConfiguration {
   }
 
   /**
-   * Creates a new {@link ConfigLoader} instance that takes config values from system properties,
-   * then from environment variables.
+   * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
+   * information. The provided lambda is used to look up variables related to where to find other
+   * sources of config variables.
    *
-   * @return the new config loader
+   * <p>Config values will be loaded from these sources. Sources are checked in order with first
+   * matching value used.
+   *
+   * <ol>
+   *   <li>System properties.
+   *   <li>Environment variables.
+   *   <li>If {@link #ENV_VAR_KEY_PROPERTIES_FILE} is defined use properties in that file.
+   *   <li>If {@link #ENV_VAR_KEY_SSM_PARAMETER_PATH} is defined use parameters at that path.
+   * </ol>
+   *
+   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @return appropriately configured {@link ConfigLoader}
    */
   public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
     final var baseConfig = ConfigLoader.builder().addSingle(getenv).build();
