@@ -104,7 +104,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
    * @return a MessageSource that reads and parses the data
    */
   private MessageSource<FissClaimChange> readFissClaimChanges(String ndjsonObjectKey) {
-    return createMessageSource(ndjsonObjectKey, JsonMessageSource::parseFissClaimChange);
+    return createMessageSource(ndjsonObjectKey, JsonMessageSource.fissParser());
   }
 
   /**
@@ -114,7 +114,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
    * @return a MessageSource that reads and parses the data
    */
   private MessageSource<McsClaimChange> readMcsClaimChanges(String ndjsonObjectKey) {
-    return createMessageSource(ndjsonObjectKey, JsonMessageSource::parseMcsClaimChange);
+    return createMessageSource(ndjsonObjectKey, JsonMessageSource.mcsParser());
   }
 
   /**

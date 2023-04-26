@@ -34,8 +34,10 @@ public class RandomMcsClaimSourceTest {
   public void oneMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 1);
     assertTrue(source.hasNext());
-    McsClaim claim = source.next();
+    McsClaimChange change = source.next();
+    McsClaim claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
@@ -50,32 +52,42 @@ public class RandomMcsClaimSourceTest {
   public void threeMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 3);
     assertTrue(source.hasNext());
-    McsClaim claim = source.next();
+    McsClaimChange change = source.next();
+    McsClaim claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
 
     assertTrue(source.hasNext());
-    claim = source.next();
+    change = source.next();
+    claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
 
     assertTrue(source.hasNext());
-    claim = source.next();
+    change = source.next();
+    claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
 
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
   /**
-   * Validates that the sequence numbers generated for claims is sequential.
+   * Validates that the sequence numbers generated for claims are sequential and start at 1.
    *
    * @throws Exception indicates test failure
    */
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 6).toClaimChanges().skip(3);
-    assertEquals(3L, source.next().getSeq());
-    assertEquals(4L, source.next().getSeq());
+    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 8);
+    assertEquals(1L, source.next().getSeq());
+    assertEquals(2L, source.next().getSeq());
+    source.skipTo(5);
     assertEquals(5L, source.next().getSeq());
+    assertEquals(6L, source.next().getSeq());
+    assertEquals(7L, source.next().getSeq());
+    assertEquals(8L, source.next().getSeq());
     assertFalse(source.hasNext());
   }
 

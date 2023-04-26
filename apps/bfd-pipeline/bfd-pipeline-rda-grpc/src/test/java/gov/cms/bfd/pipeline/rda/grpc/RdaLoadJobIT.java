@@ -89,7 +89,7 @@ public class RdaLoadJobIT {
   @Test
   public void fissClaimsAreValid() throws Exception {
     final ImmutableList<FissClaimChange> expectedClaims =
-        JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
+        JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource.fissParser());
     final FissClaimTransformer transformer =
         new FissClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (FissClaimChange claim : expectedClaims) {
@@ -125,7 +125,7 @@ public class RdaLoadJobIT {
                     job.call();
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
-              JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
+              JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource.fissParser());
           List<RdaFissClaim> claims = getRdaFissClaims(transactionManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaFissClaim resultClaim : claims) {
@@ -194,7 +194,7 @@ public class RdaLoadJobIT {
   @Test
   public void mcsClaimsAreValid() throws Exception {
     final ImmutableList<McsClaimChange> expectedClaims =
-        JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
+        JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource.mcsParser());
     final McsClaimTransformer transformer =
         new McsClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (McsClaimChange claim : expectedClaims) {
@@ -231,7 +231,7 @@ public class RdaLoadJobIT {
                     job.call();
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
-              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
+              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource.mcsParser());
           List<RdaMcsClaim> claims = getRdaMcsClaims(transactionManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaMcsClaim resultClaim : claims) {
@@ -268,8 +268,7 @@ public class RdaLoadJobIT {
               .mcsSourceFactory(
                   ignored ->
                       new ExceptionMessageSource<>(
-                          new JsonMessageSource<>(
-                              mcsClaimJson, JsonMessageSource::parseMcsClaimChange),
+                          new JsonMessageSource<>(mcsClaimJson, JsonMessageSource.mcsParser()),
                           claimsToSendBeforeThrowing,
                           () -> new IOException("oops")))
               .build()
@@ -412,8 +411,7 @@ public class RdaLoadJobIT {
     // resource - This is a factory method, resource handling is done later
     //noinspection resource
     return sequenceNumber ->
-        new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange)
-            .skip(sequenceNumber - 1);
+        new JsonMessageSource<>(claimJson, JsonMessageSource.fissParser()).skipTo(sequenceNumber);
   }
 
   /**
@@ -426,7 +424,6 @@ public class RdaLoadJobIT {
     // resource - This is a factory method, resource handling is done later
     //noinspection resource
     return sequenceNumber ->
-        new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange)
-            .skip(sequenceNumber - 1);
+        new JsonMessageSource<>(claimJson, JsonMessageSource.mcsParser()).skipTo(sequenceNumber);
   }
 }
