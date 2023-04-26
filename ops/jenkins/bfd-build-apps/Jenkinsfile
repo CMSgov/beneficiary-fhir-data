@@ -126,7 +126,7 @@ spec:
 
                     awsAuth.assumeRole()
 
-     // Find the most current AMI IDs (if any).
+                    // Find the most current AMI IDs (if any).
 					amiIds = null
 					amiIds = scriptForDeploys.findAmis()
                 }
