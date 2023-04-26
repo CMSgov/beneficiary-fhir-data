@@ -21,19 +21,41 @@ public class EmptyMessageSource<T> implements MessageSource<T> {
     return ignored -> new EmptyMessageSource<>();
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Nothing to skip so just return this.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param startingSequenceNumber number of records to skip past
+   * @return this
+   */
   @Override
-  public boolean hasNext() throws Exception {
+  public MessageSource<T> skipTo(long startingSequenceNumber) {
+    return this;
+  }
+
+  /**
+   * Always returns false.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public boolean hasNext() {
     return false;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * We never have a value so always throw {@link NoSuchElementException}.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @throws NoSuchElementException because we never have a value
+   */
   @Override
   public T next() throws Exception {
     throw new NoSuchElementException();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {}
 }

@@ -59,7 +59,7 @@ public class WrappedClaimSourceTest {
   }
 
   /**
-   * Verifies that wrapping a source with many claims and calling {@link WrappedClaimSource#skip}
+   * Verifies that wrapping a source with many claims and calling {@link WrappedClaimSource#skipTo}
    * skips the expected number of claims as if skipping within the original source.
    *
    * @throws Exception indicates test failure
@@ -77,12 +77,12 @@ public class WrappedClaimSourceTest {
             McsClaim.newBuilder().setIdrHic("g").build());
     final MessageSource<McsClaim> realSource = fromList(claims);
     final MessageSource<McsClaimChange> wrapped =
-        WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 1000L).skip(3);
+        WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 0L).skipTo(3);
 
     for (int index = 3; index < claims.size(); ++index) {
       assertTrue(wrapped.hasNext());
       McsClaimChange change = wrapped.next();
-      assertEquals(1000L + index, change.getSeq());
+      assertEquals(index, change.getSeq());
       assertSame(claims.get(index), change.getClaim());
     }
     assertFalse(wrapped.hasNext());
@@ -176,19 +176,24 @@ public class WrappedClaimSourceTest {
     return new MessageSource<T>() {
       final Iterator<T> iterator = claims.iterator();
 
-      /** {@inheritDoc} */
+      @Override
+      public MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
+        while (iterator.hasNext() && startingSequenceNumber-- > 0) {
+          iterator.next();
+        }
+        return this;
+      }
+
       @Override
       public boolean hasNext() throws Exception {
         return iterator.hasNext();
       }
 
-      /** {@inheritDoc} */
       @Override
       public T next() throws Exception {
         return iterator.next();
       }
 
-      /** {@inheritDoc} */
       @Override
       public void close() throws Exception {}
     };

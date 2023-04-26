@@ -34,8 +34,10 @@ public class RandomMcsClaimSourceTest {
   public void oneMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 1);
     assertTrue(source.hasNext());
-    McsClaim claim = source.next();
+    McsClaimChange change = source.next();
+    McsClaim claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
@@ -50,16 +52,22 @@ public class RandomMcsClaimSourceTest {
   public void threeMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 3);
     assertTrue(source.hasNext());
-    McsClaim claim = source.next();
+    McsClaimChange change = source.next();
+    McsClaim claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
 
     assertTrue(source.hasNext());
-    claim = source.next();
+    change = source.next();
+    claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
 
     assertTrue(source.hasNext());
-    claim = source.next();
+    change = source.next();
+    claim = change.getClaim();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
+    assertEquals(change.getIcn(), claim.getIdrClmHdIcn());
 
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
@@ -72,7 +80,7 @@ public class RandomMcsClaimSourceTest {
    */
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 6).toClaimChanges().skip(3);
+    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 6).skipTo(3);
     assertEquals(3L, source.next().getSeq());
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());
