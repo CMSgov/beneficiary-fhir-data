@@ -38,14 +38,6 @@ data "aws_s3_bucket" "logs" {
   bucket = "bfd-${local.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
-# cloudwatch topics
-data "aws_sns_topic" "cloudwatch_alarms" {
-  name = "bfd-${local.env}-cloudwatch-alarms"
-}
-data "aws_sns_topic" "cloudwatch_ok" {
-  name = "bfd-${local.env}-cloudwatch-ok"
-}
-
 # aurora security group
 data "aws_security_group" "aurora_cluster" {
   filter {

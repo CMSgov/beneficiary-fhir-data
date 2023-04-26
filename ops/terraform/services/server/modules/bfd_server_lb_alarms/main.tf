@@ -4,8 +4,8 @@
 locals {
   env = terraform.workspace
 
-  alarm_actions = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
-  ok_actions    = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
+  alarm_actions = [data.aws_sns_topic.cloudwatch_alarms.arn]
+  ok_actions    = [data.aws_sns_topic.cloudwatch_ok.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "healthy_hosts" {

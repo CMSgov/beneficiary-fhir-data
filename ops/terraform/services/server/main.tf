@@ -132,10 +132,8 @@ module "lb_alarms" {
 
   source = "./modules/bfd_server_lb_alarms"
 
-  load_balancer_name     = coalesce(module.fhir_lb[0].name, "")
-  alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  app                    = "bfd"
+  load_balancer_name = coalesce(module.fhir_lb[0].name, "")
+  app                = "bfd"
 
   # NLBs only have this metric to alarm on
   healthy_hosts = {
