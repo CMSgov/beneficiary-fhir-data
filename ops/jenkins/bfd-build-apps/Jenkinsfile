@@ -15,7 +15,7 @@ def scriptForApps
 def scriptForDeploys
 
 // send notifications to slack, email, etc
-def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {
+def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '', String gitBranchName = '') {
     // buildStatus of NULL means success
     if (!buildStatus) {
         buildStatus = 'SUCCESS'
@@ -180,7 +180,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
-                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl, gitBranchName)
                     }
                 }
             }
