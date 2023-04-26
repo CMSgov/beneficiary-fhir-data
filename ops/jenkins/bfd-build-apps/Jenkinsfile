@@ -31,7 +31,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
     def buildColor = colorMap[buildStatus]
     buildColor = buildColor ?: '#FF0000' // default to red
 
-    def branchUrl = "https://github.com/CMSgov/beneficiary-fhir-data/tree/${params.git_branch}"
+    def branchUrl = "https://github.com/CMSgov/beneficiary-fhir-data/tree/${gitBranchName}"
 
     def msg = ''
     switch (buildStatus) {
@@ -41,7 +41,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
             break
         case 'FAILED':
         case 'FAILURE':
-            msg = "FAILED ON ${stageName.toUpperCase()} STAGE ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}>"
+            msg = "FAILED ON ${stageName.toUpperCase()} STAGE ON BRANCH <${branchUrl}|${gitBranchName.toUpperCase()}>"
             break
         case 'STARTED':
             msg = 'HAS STARTED'
@@ -57,9 +57,9 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
     // build slack message
     def slackMsg = ''
     if (buildStatus == 'UNSTABLE') {
-        slackMsg = "UNSTABLE APP BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}> ${msg} \n"
+        slackMsg = "UNSTABLE APP BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${gitBranchName.toUpperCase()}> ${msg} \n"
     } else {
-        slackMsg = "APP BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${params.git_branch.toUpperCase()}> ${msg} \n"
+        slackMsg = "APP BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${gitBranchName.toUpperCase()}> ${msg} \n"
     }
     slackMsg += "\tJob '${env.JOB_NAME}' \n"
 
