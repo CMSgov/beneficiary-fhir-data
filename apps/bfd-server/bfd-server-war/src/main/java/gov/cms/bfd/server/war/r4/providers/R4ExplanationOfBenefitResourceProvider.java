@@ -350,12 +350,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
 
     // See if we have claims data for the beneficiary.
     BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
-    // find out the number of bits that are set; we could use this to create 'n' threads
-    int numEntriesThatAreSet = bitSet.cardinality();
     LOGGER.info(
-        String.format(
-            "# of V2 claims that have data for bene_id (%d): %0d",
-            beneficiaryId, numEntriesThatAreSet));
+        String.format("BitSet for V2 claims, bene_id %d: %s", beneficiaryId, bitSet.toString()));
 
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
