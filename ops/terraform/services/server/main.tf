@@ -70,8 +70,7 @@ locals {
   }
   vpc_peerings = lookup(local.vpc_peerings_by_env, local.env, [])
 
-  create_server_lb          = contains(local.established_envs, local.env)
-  create_server_lb_alarms   = local.create_server_lb && contains(local.established_envs, local.env)
+  create_server_lb_alarms   = contains(local.established_envs, local.env)
   create_server_metrics     = contains(local.established_envs, local.env)
   create_server_slo_alarms  = local.create_server_metrics && contains(local.established_envs, local.env)
   create_server_log_alarms  = contains(local.established_envs, local.env)
@@ -97,8 +96,6 @@ resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
 ## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
 module "fhir_lb" {
-  count = local.create_server_lb ? 1 : 0
-
   source = "./modules/bfd_server_lb"
 
   env_config = local.env_config
