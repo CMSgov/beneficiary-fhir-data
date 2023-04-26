@@ -23,7 +23,7 @@ public class QueryUtils {
    * Database function that checks all claims for a given beneficiaryId and returns a bitwise mask
    * value that shows if a given claim type will have any data.
    */
-  public static final String CHECK_CLAIMS_FOR_DATA =
+  public static final String CHECK_CLAIMS_FOR_DATA_SQL =
       "SELECT * FROM check_claims_mask(:beneIdValue)";
 
   /** BitSet index identifier for Carrier Claims. */
@@ -250,7 +250,7 @@ public class QueryUtils {
      */
     List<Object> values =
         entityManager
-            .createNativeQuery(CHECK_CLAIMS_FOR_DATA)
+            .createNativeQuery(CHECK_CLAIMS_FOR_DATA_SQL)
             .setParameter("beneIdValue", bene_id)
             .getResultList();
 
