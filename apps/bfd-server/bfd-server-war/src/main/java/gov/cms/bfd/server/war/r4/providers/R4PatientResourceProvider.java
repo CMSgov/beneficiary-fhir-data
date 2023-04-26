@@ -67,6 +67,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -75,6 +77,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(R4PatientResourceProvider.class);
+
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    * NOTE: For v2, HICN no longer supported.
@@ -222,7 +227,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           beneficiary == null ? 0 : 1);
     }
 
-    return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
+    return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader, true);
   }
 
   /**
@@ -500,10 +505,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               .getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids, requestHeader).getResultList();
+      return queryBeneficiariesByIds(ids).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging, requestHeader)
+      return queryBeneficiariesBy(contractMonthField, contractCode, paging)
           .setMaxResults(paging.getQueryMaxSize())
           .getResultList();
     }
@@ -515,12 +520,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @param field to match on
    * @param value to match on
    * @param paging to use for the result set
-   * @param requestHeader the request header
    * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
-    String joinsClause = "left join fetch b.skippedRifRecords";
+      String field, String value, PatientLinkBuilder paging) {
+    String joinsClause = "left join fetch b.skippedRifRecords ";
     boolean passDistinctThrough = false;
 
     /*
@@ -536,8 +540,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * passing DISTINCT to the SQL statement
      * that gets executed.
      */
-
-    joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -607,15 +609,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * Build a criteria for a beneficiary query using the passed in list of ids.
    *
    * @param ids to use
-   * @param requestHeader the request header
    * @return the query object
    */
-  private TypedQuery<Beneficiary> queryBeneficiariesByIds(
-      List<String> ids, RequestHeaders requestHeader) {
-    String joinsClause = "";
+  private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids) {
+    String joinsClause = ""; // ""left join fetch b.medicareBeneficiaryIdHistories ";
     boolean passDistinctThrough = false;
-
-    joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
 
     String query =
         "select distinct b from Beneficiary b "
@@ -920,7 +918,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     beneficiary.setHicnUnhashed(Optional.empty());
 
     Patient patient =
-        BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
+        BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader, true);
     return patient;
   }
 
@@ -1136,10 +1134,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         matchingBeneficiaries.stream()
             .map(b -> BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader))
             .collect(Collectors.toList());
-
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
-
     TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
 
     // Add bene_id to MDC logs

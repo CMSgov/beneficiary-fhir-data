@@ -37,16 +37,22 @@ final class BeneficiaryTransformerV2 {
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
    *     request headers
+   * @param addHistoricalMbis whether to add historical MBIs as extensions to the transformed
+   *     Patient; the beneficiary must have been called using a join against the bene history table
+   *     in order to do this
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   @Trace
   public static Patient transform(
-      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
+      MetricRegistry metricRegistry,
+      Beneficiary beneficiary,
+      RequestHeaders requestHeader,
+      boolean addHistoricalMbis) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformerV2.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, requestHeader);
+    Patient patient = transform(beneficiary, requestHeader, addHistoricalMbis);
     timer.stop();
 
     return patient;
@@ -55,12 +61,29 @@ final class BeneficiaryTransformerV2 {
   /**
    * Transforms a {@link Beneficiary} into a {@link Patient}.
    *
+   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
    *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
+  @Trace
+  public static Patient transform(
+      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
+    return transform(metricRegistry, beneficiary, requestHeader, false);
+  }
+
+  /**
+   * Transforms a {@link Beneficiary} into a {@link Patient}.
+   *
+   * @param beneficiary the CCW {@link Beneficiary} to transform
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
+   * @param addHistoricalMbiExtensions the add historical mbi extensions
+   * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
+   */
+  private static Patient transform(
+      Beneficiary beneficiary, RequestHeaders requestHeader, boolean addHistoricalMbiExtensions) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -117,7 +140,12 @@ final class BeneficiaryTransformerV2 {
 
     // NOTE - No longer returning any HCIN value(s) in V2
 
-    addHistoricalMbiExtensions(patient, beneficiary);
+    /* Only add this if we know the beneficiary was queried in such a way that the bene history / medicare_beneficiaryid_history
+     * tables were left joined, such that the beneficiary model object has the historical MBI data to draw from
+     * Otherwise JPA will complain. */
+    if (addHistoricalMbiExtensions) {
+      addHistoricalMbiExtensions(patient, beneficiary);
+    }
 
     // support header includeAddressFields from downstream components e.g. BB2
     // per requirement of BFD-379, BB2 always send header includeAddressFields = False

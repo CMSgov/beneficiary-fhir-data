@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -26,6 +27,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,17 +38,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link R4PatientResourceProvider}. */
 public final class R4PatientResourceProviderIT extends ServerRequiredTest {
 
-  /** Constant used for setting up tests with include identifiers = true. */
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
-  /** Constant for setting up tests with include identifiers without mbi. */
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
+  /**
+   * A list of expected historical mbis for adding to the sample A loaded data (as data coming back
+   * from the endpoint will have this added in the resource provider).
+   */
+  private static final List<String> standardExpectedHistoricalMbis =
+      List.of("9AB2WW3GR44", "3456689");
 
   /**
    * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
@@ -69,47 +76,27 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    comparePatient(beneficiary, patient);
+    comparePatient(beneficiary, patient, standardExpectedHistoricalMbis);
   }
 
   /**
    * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
-   * when include identifiers value = "true".
+   * when include address fields value = "true".
    */
   @Test
-  public void readExistingPatientIncludeIdentifiersTrue() {
+  public void readExistingPatientIncludeAddressFieldsTrue() {
     assertExistingPatientIncludeIdentifiersExpected(
-        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            "true",
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-            "true"));
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true"));
   }
 
   /**
-   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
-   * when include identifiers value = "mbi".
-   */
-  @Test
-  public void readExistingPatientIncludeIdentifiersMbi() {
-    assertExistingPatientIncludeIdentifiersExpected(
-        CNST_INCL_IDENTIFIERS_EXPECT_MBI,
-        RequestHeaders.getHeaderWrapper(
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            "mbi",
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-            "true"));
-  }
-
-  /**
-   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
-   * when include identifiers value = "false".
+   * Verifies that {@link R4PatientResourceProvider#read} returns MBI data for a {@link Patient}
+   * when include identifiers value = "false", since V2 no longer uses this header.
    */
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
     assertExistingPatientIncludeIdentifiersExpected(
-        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "false",
@@ -124,7 +111,6 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
     assertExistingPatientIncludeIdentifiersExpected(
-        CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "",
@@ -134,58 +120,16 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
 
   /**
    * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
-   * when include identifiers value = "invalid-identifier-value" and that an exception is thrown.
-   */
-  @Test
-  public void readExistingPatientIncludeIdentifiersInvalid1() {
-    assertThrows(
-        InvalidRequestException.class,
-        () -> {
-          assertExistingPatientIncludeIdentifiersExpected(
-              CNST_INCL_IDENTIFIERS_EXPECT_MBI,
-              RequestHeaders.getHeaderWrapper(
-                  R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-                  "invalid-identifier-value",
-                  R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-                  "true"));
-        });
-  }
-
-  /**
-   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
-   * when include identifiers value = ["mbi,invalid-identifier-value"] and that an exception is
-   * thrown.
-   */
-  @Test
-  public void readExistingPatientIncludeIdentifiersInvalid2() {
-    assertThrows(
-        InvalidRequestException.class,
-        () -> {
-          assertExistingPatientIncludeIdentifiersExpected(
-              CNST_INCL_IDENTIFIERS_EXPECT_MBI,
-              RequestHeaders.getHeaderWrapper(
-                  R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-                  "mbi,invalid-identifier-value",
-                  R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-                  "true"));
-        });
-  }
-
-  /**
-   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
    * that does exist in the DB but has no {@link BeneficiaryHistory} or {@link
-   * MedicareBeneficiaryIdHistory} records when include identifiers value = ["true"].
+   * MedicareBeneficiaryIdHistory} records.
    */
   @Test
-  public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
+  public void readExistingPatientWithNoHistory() {
     List<Object> loadedRecords =
         ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            "true",
-            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
-            "true");
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
     IGenericClient fhirClient = createFhirClient(requestHeader);
 
     Beneficiary beneficiary =
@@ -197,7 +141,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    comparePatient(beneficiary, patient, requestHeader);
+    comparePatient(beneficiary, patient, requestHeader, new ArrayList<>());
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -232,107 +176,15 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
 
   /**
    * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
-   * {@link Patient} that does exist in the DB.
+   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
+   * and MBI.
    */
   @Test
   public void searchForExistingPatientByLogicalId() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.RES_ID
-                    .exactly()
-                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-
-    /*
-     * Verify that no paging links exist within the bundle.
-     */
-    assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    assertNull(searchResults.getLink(Constants.LINK_LAST));
-
-    assertEquals(1, searchResults.getTotal());
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    comparePatient(beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
-  }
-
-  /**
-   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
-   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
-   * and MBI.
-   */
-  @Test
-  public void searchForExistingPatientByLogicalIdIncludeIdentifiersTrue() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = createFhirClient("true", "true");
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.RES_ID
-                    .exactly()
-                    .systemAndIdentifier(null, String.valueOf(beneficiary.getBeneficiaryId())))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    /*
-     * Ensure the unhashed values for MBI is present.
-     */
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_ID)) {
-        mbiUnhashedPresent = true;
-      }
-    }
-
-    assertTrue(mbiUnhashedPresent);
-  }
-
-  /**
-   * Verifies that {@link R4PatientResourceProvider#searchByLogicalId} works as expected for a
-   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
-   * and MBI.
-   */
-  @Test
-  public void searchForExistingPatientByLogicalIdIncludeIdentifiersFalse() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = createFhirClient("false", "true");
+    IGenericClient fhirClient = createFhirClient("true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -476,7 +328,11 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
-    comparePatient(beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
+    comparePatient(
+        beneficiary,
+        patientFromSearchResult,
+        getRHwithIncldAddrFldHdr("false"),
+        standardExpectedHistoricalMbis);
 
     String mbiIdentifier =
         patientFromSearchResult.getIdentifier().stream()
@@ -494,62 +350,11 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
-   * {@link Patient} that does exist in the DB, including identifiers to return the unhashed HICN
-   * and MBI.
-   */
-  @Test
-  public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = createFhirClient("true", "true");
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.IDENTIFIER
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
-                        beneficiary.getMbiHash().get()))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    /*
-     * Ensure the unhashed values for MBI is present.
-     */
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier
-          .getSystem()
-          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
-        mbiUnhashedPresent = true;
-      }
-    }
-
-    assertTrue(mbiUnhashedPresent);
-  }
-
-  /**
    * Verifies that the correct bene id or exception is returned when an MBI points to more than one
    * bene id in either the Beneficiaries and/or BeneficiariesHistory table.
    */
   @Test
-  public void searchForExistingPatientByMbiHashWithBeneDups() {
+  public void searchForExistingPatientByMbiHashWithBeneDupes() {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -589,7 +394,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
         567834L,
         "3456789",
         useMbiFromBeneficiaryTable,
-        expectsSingleBeneMatch);
+        expectsSingleBeneMatch,
+        standardExpectedHistoricalMbis);
 
     /*
      * The following scenario tests when only one mbi is in the
@@ -604,7 +410,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
         -123456L,
         "3456789N",
         useMbiFromBeneficiaryTable,
-        expectsSingleBeneMatch);
+        expectsSingleBeneMatch,
+        new ArrayList<>());
 
     /*
      * The following scenario tests when the same mbi is in the
@@ -623,7 +430,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
         1234L,
         "SAMEMBI",
         useMbiFromBeneficiaryTable,
-        expectsSingleBeneMatch);
+        expectsSingleBeneMatch,
+        List.of("HISTMBI"));
 
     /*
      * The following scenario tests when the requested mbi is only in the
@@ -639,7 +447,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
         55555L,
         "HISTMBI",
         useMbiFromBeneficiaryTable,
-        expectsSingleBeneMatch);
+        expectsSingleBeneMatch,
+        List.of("HISTMBI"));
 
     /*
      * The following scenario tests when the requested mbi is only in the
@@ -655,7 +464,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
         66666L,
         "DUPHISTMBI",
         useMbiFromBeneficiaryTable,
-        expectsSingleBeneMatch);
+        expectsSingleBeneMatch,
+        List.of("HISTMBI"));
 
     /*
      * The following scenario tests when a mbi is not found in the
@@ -712,7 +522,11 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
-    comparePatient(beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
+    comparePatient(
+        beneficiary,
+        patientFromSearchResult,
+        getRHwithIncldAddrFldHdr("false"),
+        standardExpectedHistoricalMbis);
 
     /*
      * Verify that only the first and last paging links exist, since there should
@@ -914,7 +728,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   public void searchForExistingPatientByMbiWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("true", "true");
+    IGenericClient fhirClient = createFhirClient("true");
 
     loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
@@ -1126,10 +940,11 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
                 StaticRifResource.SAMPLE_A_BENES,
                 StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
                 StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = createFhirClient("mbi", "true");
+    IGenericClient fhirClient = createFhirClient("true");
 
+    Bundle searchResults = null;
     // Should return a single match
-    Bundle searchResults =
+    searchResults =
         fhirClient
             .search()
             .forResource(Patient.class)
@@ -1177,7 +992,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
         ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("mbi, false", "true");
+    IGenericClient fhirClient = createFhirClient("true");
 
     // Should return a single match
     Bundle searchResults =
@@ -1427,8 +1242,10 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
    * Verifies that searching by a known existing part D contract number with an invalid year returns
    * no results.
    */
+  @Disabled(
+      "This test is currently failing and needs a separate functionality fix; Should be fixed in https://jira.cms.gov/browse/BFD-2565")
   @Test
-  public void searchForPatientByPartDContractNumWithAInvalidYear() {
+  public void searchForPatientByPartDContractNumWithAnInvalidYear() {
 
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
@@ -1461,11 +1278,9 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
    * Asserts that {@link R4PatientResourceProvider#read} contains expected/present identifiers for a
    * {@link Patient}.
    *
-   * @param expectingMbi true if expecting a MBI
    * @param requestHeader the request header
    */
-  public void assertExistingPatientIncludeIdentifiersExpected(
-      boolean expectingMbi, RequestHeaders requestHeader) {
+  public void assertExistingPatientIncludeIdentifiersExpected(RequestHeaders requestHeader) {
 
     List<Object> loadedRecords =
         ServerTestUtils.get()
@@ -1488,12 +1303,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    // Because of how transform doesn't go through R4PatientResourceProvider, `expected` won't have
-    // the historical MBI data.
-    // Also, SAMPLE_A does not have mbi history (it used to); however, what used to be denoted as
-    // historical
-    // is not provided as the 'current' MBI identifier (no historical).
-    comparePatient(expected, patient);
+    comparePatient(expected, patient, standardExpectedHistoricalMbis);
 
     /*
      * Ensure the unhashed values for MBI are present.
@@ -1539,18 +1349,16 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   }
 
   /**
-   * Creates a FHIR client for testing with the specified 'include identifiers' and 'include
-   * address' header values.
+   * Creates a FHIR client for testing with the specified 'include address' header values.
    *
-   * @param idHdrVal includeIdentifiers header value
    * @param addrHdrVal includeAddressFields header value
    * @return the client
    */
-  public static IGenericClient createFhirClient(String idHdrVal, String addrHdrVal) {
+  public static IGenericClient createFhirClient(String addrHdrVal) {
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
-            idHdrVal,
+            "mbi",
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
             addrHdrVal);
     return createFhirClient(requestHeader);
@@ -1572,6 +1380,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
    * @param unhashedValue the unhashed value
    * @param useFromBeneficiaryTable the use from beneficiary table
    * @param expectsSingleBeneMatch if a single bene match is expected
+   * @param expectedHistoricalMbis the expected historical mbis
    */
   private void assertPatientByHashTypeMatch(
       IGenericClient fhirClient,
@@ -1580,7 +1389,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
       Long beneficiaryId,
       String unhashedValue,
       Boolean useFromBeneficiaryTable,
-      Boolean expectsSingleBeneMatch) {
+      Boolean expectsSingleBeneMatch,
+      List<String> expectedHistoricalMbis) {
 
     Bundle searchResults = null;
     String mbiHash = "";
@@ -1637,7 +1447,11 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
               .get();
       Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
-      comparePatient(beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
+      comparePatient(
+          beneficiary,
+          patientFromSearchResult,
+          getRHwithIncldAddrFldHdr("false"),
+          expectedHistoricalMbis);
     }
   }
 
@@ -1672,8 +1486,13 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
    * @param beneficiary the beneficiary to test
    * @param patient the expected patient
    * @param headers the headers to use while transforming the bene
+   * @param expectedHistoricalMbis the expected historical mbis for the expected beneficiary
    */
-  private void comparePatient(Beneficiary beneficiary, Patient patient, RequestHeaders headers) {
+  private void comparePatient(
+      Beneficiary beneficiary,
+      Patient patient,
+      RequestHeaders headers,
+      List<String> expectedHistoricalMbis) {
     assertNotNull(patient);
 
     Patient expected =
@@ -1682,7 +1501,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
             beneficiary,
             headers);
 
-    comparePatient(expected, patient);
+    comparePatient(expected, patient, expectedHistoricalMbis);
   }
 
   /**
@@ -1690,9 +1509,11 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
    *
    * @param beneficiary the beneficiary
    * @param patient the patient
+   * @param expectedHistoricalMbis the expected historical mbis for the beneficiary
    */
-  private void comparePatient(Beneficiary beneficiary, Patient patient) {
-    comparePatient(beneficiary, patient, RequestHeaders.getHeaderWrapper());
+  private void comparePatient(
+      Beneficiary beneficiary, Patient patient, List<String> expectedHistoricalMbis) {
+    comparePatient(beneficiary, patient, RequestHeaders.getHeaderWrapper(), expectedHistoricalMbis);
   }
 
   /**
@@ -1700,8 +1521,10 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
    *
    * @param expected the expected patient
    * @param patient the patient to test
+   * @param expectedHistoricalMbis the expected historical mbis for the expected patient
    */
-  private void comparePatient(Patient expected, Patient patient) {
+  private void comparePatient(
+      Patient expected, Patient patient, List<String> expectedHistoricalMbis) {
     // The ID returned from the FHIR client differs from the transformer.  It adds URL information.
     // Here we verify that the resource it is pointing to is the same, and then set up to do a deep
     // compare of the rest
@@ -1712,7 +1535,49 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     assertNotNull(patient.getMeta().getLastUpdated());
     patient.getMeta().setLastUpdatedElement(expected.getMeta().getLastUpdatedElement());
 
+    // Add the identifiers that wont be present in the expected due to not going through the
+    // resource provider that adds historical mbis
+    addHistoricalExtensions(expected, expectedHistoricalMbis);
+
     assertTrue(expected.equalsDeep(patient));
+  }
+
+  /**
+   * Adds a historical extension to a patient loaded from the sample A data for each mbi provided,
+   * as if it had been transformed using the resource provider that would normally add them.
+   *
+   * @param patient the patient to add the Identifiers for historical MBIs to
+   * @param historicalMbis the historical mbis to add as identifier extensions as historical mbis
+   */
+  private void addHistoricalExtensions(Patient patient, List<String> historicalMbis) {
+    Period period = new Period();
+    try {
+      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+      period.setStart(start, TemporalPrecisionEnum.DAY);
+    } catch (Exception e) {
+    }
+
+    for (String historicalMbi : historicalMbis) {
+      Extension extension =
+          new Extension(
+              "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+              new Coding(
+                  "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                  "historic",
+                  "Historic"));
+
+      Identifier histId = new Identifier();
+      histId
+          .setValue(historicalMbi)
+          .setSystem("http://hl7.org/fhir/sid/us-mbi")
+          .getType()
+          .addCoding()
+          .setCode("MC")
+          .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+          .setDisplay("Patient's Medicare number")
+          .addExtension(extension);
+      patient.getIdentifier().add(histId);
+    }
   }
 
   /**

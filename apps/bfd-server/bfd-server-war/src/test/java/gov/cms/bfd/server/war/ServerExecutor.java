@@ -281,4 +281,16 @@ public class ServerExecutor {
 
     return true;
   }
+
+  /**
+   * Gets the std out.
+   *
+   * @return the std out
+   */
+  public static String getServerStdOut() {
+    if (appRunConsumer != null) {
+      return appRunConsumer.getStdoutContents();
+    }
+    return "";
+  }
 }
