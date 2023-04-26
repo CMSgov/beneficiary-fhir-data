@@ -24,15 +24,17 @@ public class RdaJsonMessageSourceFactory implements RdaMessageSourceFactory {
   }
 
   @Override
-  public MessageSource<FissClaimChange> createFissMessageSource(long startingSequenceNumber) {
-    return new JsonMessageSource<>(fissJson, JsonMessageSource::parseFissClaimChange)
-        .filter(change -> change.getSeq() >= startingSequenceNumber);
+  public MessageSource<FissClaimChange> createFissMessageSource(long startingSequenceNumber)
+      throws Exception {
+    return new JsonMessageSource<>(fissJson, JsonMessageSource.fissParser())
+        .skipTo(startingSequenceNumber);
   }
 
   @Override
-  public MessageSource<McsClaimChange> createMcsMessageSource(long startingSequenceNumber) {
-    return new JsonMessageSource<>(mcsJson, JsonMessageSource::parseMcsClaimChange)
-        .filter(change -> change.getSeq() >= startingSequenceNumber);
+  public MessageSource<McsClaimChange> createMcsMessageSource(long startingSequenceNumber)
+      throws Exception {
+    return new JsonMessageSource<>(mcsJson, JsonMessageSource.mcsParser())
+        .skipTo(startingSequenceNumber);
   }
 
   @Override

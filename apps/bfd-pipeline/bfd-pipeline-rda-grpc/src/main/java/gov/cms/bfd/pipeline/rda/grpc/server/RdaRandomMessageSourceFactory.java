@@ -24,16 +24,12 @@ public class RdaRandomMessageSourceFactory implements RdaMessageSourceFactory {
 
   @Override
   public MessageSource<FissClaimChange> createFissMessageSource(long startingSequenceNumber) {
-    return new RandomFissClaimSource(config, maxToSend)
-        .toClaimChanges()
-        .filter(change -> change.getSeq() >= startingSequenceNumber);
+    return new RandomFissClaimSource(config, maxToSend).skipTo(startingSequenceNumber);
   }
 
   @Override
   public MessageSource<McsClaimChange> createMcsMessageSource(long startingSequenceNumber) {
-    return new RandomMcsClaimSource(config, maxToSend)
-        .toClaimChanges()
-        .filter(change -> change.getSeq() >= startingSequenceNumber);
+    return new RandomMcsClaimSource(config, maxToSend).skipTo(startingSequenceNumber);
   }
 
   @Override
