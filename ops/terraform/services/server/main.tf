@@ -42,6 +42,18 @@ locals {
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
+  lb_is_public                   = local.nonsensitive_service_config["lb_is_public"]
+  lb_ingress_port                = local.nonsensitive_service_config["lb_ingress_port"]
+  lb_egress_port                 = local.nonsensitive_service_config["lb_egress_port"]
+  lb_vpc_peerings                = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
+  asg_min_instance_count         = local.nonsensitive_service_config["asg_min_instance_count"]
+  asg_max_instance_count         = local.nonsensitive_service_config["asg_max_instance_count"]
+  asg_max_warm_instance_count    = local.nonsensitive_service_config["asg_max_warm_instance_count"]
+  asg_desired_instance_count     = local.nonsensitive_service_config["asg_desired_instance_count"]
+  asg_instance_warmup_time       = local.nonsensitive_service_config["asg_instance_warmup_time"]
+  launch_template_instance_type  = local.nonsensitive_service_config["launch_template_instance_type"]
+  launch_template_volume_size_gb = local.nonsensitive_service_config["launch_template_volume_size_gb"]
+
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed
   # in the common hierarchy
   seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)

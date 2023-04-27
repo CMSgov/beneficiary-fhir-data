@@ -64,3 +64,19 @@
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_directory: ''
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_region: ''
+
+# SERVER CONFIGURATION
+/bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
+/bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
+## SERVER+MTLS CONFIGURATION
+/bfd/${env}/server/nonsensitive/lb_is_public: false
+/bfd/${env}/server/nonsensitive/lb_ingress_port: 443
+/bfd/${env}/server/nonsensitive/lb_egress_port: 7443
+# NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
+# Terraservice into a list. The ephemeral variant is purposefully empty to ensure there are no
+# peerings to ephemeral environments
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
+  []
