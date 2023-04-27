@@ -23,7 +23,7 @@ variable "asg_config" {
 
 variable "db_config" {
   description = "Setup a db ingress rules if defined"
-  type        = object({ db_sg = string, role = string })
+  type        = object({ db_sg = string, role = string, db_cluster_identifier = string })
   default     = null
 }
 
@@ -39,4 +39,10 @@ variable "mgmt_config" {
 
 variable "launch_config" {
   type = object({ instance_type = string, volume_size = number, ami_id = string, key_name = string, profile = string, user_data_tpl = string, account_id = string })
+}
+
+variable "jdbc_suffix" {
+  default     = "?logServerErrorDetail=false"
+  description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
+  type        = string
 }

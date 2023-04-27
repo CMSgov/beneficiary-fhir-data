@@ -13,3 +13,14 @@ data "aws_subnet" "app_subnets" {
 data "aws_kms_key" "master_key" {
   key_id = var.kms_key_alias
 }
+
+data "aws_rds_cluster" "rds" {
+  cluster_identifier = var.db_config.db_cluster_identifier
+}
+
+data "external" "rds" {
+  program = [
+    "${path.module}/scripts/rds-cluster-config.sh", # helper script
+    data.aws_rds_cluster.rds.cluster_identifier     # verified, positional argument to script
+  ]
+}

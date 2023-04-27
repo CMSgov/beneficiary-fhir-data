@@ -1,6 +1,9 @@
 locals {
   env = terraform.workspace
 
+  rds_availability_zone = data.external.rds.result["WriterAZ"]
+  rds_writer_endpoint   = data.external.rds.result["Endpoint"]
+
   additional_tags = { Layer = var.layer, role = var.role }
 }
 
@@ -89,9 +92,10 @@ resource "aws_launch_template" "main" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
-    env       = local.env
-    port      = var.lb_config.port
-    accountId = var.launch_config.account_id
+    env                = local.env
+    port               = var.lb_config.port
+    accountId          = var.launch_config.account_id
+    data_server_db_url = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${var.jdbc_suffix}"
   }))
 
   tag_specifications {
