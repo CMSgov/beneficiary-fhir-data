@@ -353,7 +353,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
     // See if we have claims data for the beneficiary.
     BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
-    LOGGER.info(
+    LOGGER.debug(
         String.format("BitSet for V1 claims, bene_id %d: %s", beneficiaryId, bitSet.toString()));
 
     /*
