@@ -65,9 +65,10 @@ locals {
     vpc_id       = data.aws_vpc.main.id,
     azs          = local.azs
   }
-  port            = 7443
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
+
+  ami_id = data.aws_ami.main.image_id
 
   create_server_lb_alarms   = contains(local.established_envs, local.env)
   create_server_metrics     = contains(local.established_envs, local.env)
@@ -102,23 +103,23 @@ module "fhir_lb" {
   role       = local.legacy_service
   layer      = "dmz"
   log_bucket = data.aws_s3_bucket.logs.id
-  is_public  = var.is_public
+  is_public  = local.lb_is_public
 
-  ingress = var.is_public ? {
+  ingress = local.lb_is_public ? {
     description     = "Public Internet access"
-    port            = 443
+    port            = local.lb_ingress_port
     cidr_blocks     = ["0.0.0.0/0"]
     prefix_list_ids = []
     } : {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port            = 443
+    port            = local.lb_ingress_port
     cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
 
   egress = {
     description = "To VPC instances"
-    port        = local.port
+    port        = local.lb_egress_port
     cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
@@ -153,19 +154,19 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config = {
-    min             = local.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
-    max             = 8 * length(local.azs)
-    max_warm        = 4 * length(local.azs)
-    desired         = local.env == "prod-sbx" ? length(local.azs) : 2 * length(local.azs)
+    min             = local.asg_min_instance_count
+    max             = local.asg_max_instance_count
+    max_warm        = local.asg_max_warm_instance_count
+    desired         = local.asg_desired_instance_count
     sns_topic_arn   = ""
-    instance_warmup = 430
+    instance_warmup = local.asg_instance_warmup_time
   }
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    instance_type = "c6i.4xlarge"
-    volume_size   = local.env == "prod" ? 250 : 60 # GB
-    ami_id        = var.fhir_ami
+    instance_type = local.launch_template_instance_type
+    volume_size   = local.launch_template_volume_size_gb
+    ami_id        = local.ami_id
     key_name      = local.ssh_key_pair
 
     profile       = module.fhir_iam.profile
@@ -174,8 +175,9 @@ module "fhir_asg" {
   }
 
   db_config = {
-    db_sg = data.aws_security_group.aurora_cluster.id
-    role  = "aurora cluster"
+    db_sg                 = data.aws_security_group.aurora_cluster.id
+    role                  = "aurora cluster"
+    db_cluster_identifier = local.nonsensitive_common_config["rds_cluster_identifier"]
   }
 
   mgmt_config = {
