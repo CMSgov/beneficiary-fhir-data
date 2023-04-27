@@ -228,7 +228,7 @@ public class QueryUtils {
    * @param maskVal integer value suitable for decomposing into a Claims BitSet.
    * @return {@link BitSet} denoting which claims have data.
    */
-  public static BitSet convertClaimsBtimaskValue(int maskVal) {
+  public static BitSet convertClaimsBitmaskValue(int maskVal) {
     BitSet rslt = new BitSet(maskVal);
     rslt.set(CARRIER_HAS_DATA, (maskVal & V_CARRIER_HAS_DATA) != 0);
     rslt.set(INPATIENT_HAS_DATA, (maskVal & V_INPATIENT_HAS_DATA) != 0);
@@ -274,6 +274,6 @@ public class QueryUtils {
             .getResultList();
 
     Integer maskVal = (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
-    return convertClaimsBtimaskValue(maskVal);
+    return convertClaimsBitmaskValue(maskVal);
   }
 }

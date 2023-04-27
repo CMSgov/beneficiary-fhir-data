@@ -195,7 +195,7 @@ public class QueryUtilsTest {
             | QueryUtils.V_HHA_HAS_DATA
             | QueryUtils.V_PART_D_HAS_DATA;
 
-    BitSet testBits = QueryUtils.convertClaimsBtimaskValue(testVal);
+    BitSet testBits = QueryUtils.convertClaimsBitmaskValue(testVal);
     assertTrue(testBits.get(QueryUtils.CARRIER_HAS_DATA));
     assertTrue(testBits.get(QueryUtils.INPATIENT_HAS_DATA));
     assertTrue(testBits.get(QueryUtils.SNF_HAS_DATA));
