@@ -157,48 +157,53 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
      * CustomRequestLog to write the payload size to the access.log:
      * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
      */
-    BfdMDC.put(
-        BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
-        Integer.toString(response.getStatus()));
-    // Record the response headers.
-    Collection<String> headerNames = response.getHeaderNames();
-    for (String headerName : headerNames) {
-      Collection<String> headerValues = response.getHeaders(headerName);
-      if (headerValues.isEmpty())
-        BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
-      else if (headerValues.size() == 1)
-        BfdMDC.put(
-            BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
-            headerValues.iterator().next());
-      else
-        BfdMDC.put(
-            BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
-            headerValues.toString());
-    }
-    String contentLength = response.getHeader("Content-Length");
-    Long outputSizeInBytes = Long.valueOf(contentLength);
-    BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
-
-    // Record the response duration.
-    Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
-    if (requestStartMilliseconds != null) {
-      Long responseDurationInMilliseconds = System.currentTimeMillis() - requestStartMilliseconds;
+    try {
       BfdMDC.put(
-          BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
-          Long.toString(responseDurationInMilliseconds));
+          BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "status"),
+          Integer.toString(response.getStatus()));
+      // Record the response headers.
+      Collection<String> headerNames = response.getHeaderNames();
+      for (String headerName : headerNames) {
+        Collection<String> headerValues = response.getHeaders(headerName);
+        if (headerValues.isEmpty())
+          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName), "");
+        else if (headerValues.size() == 1)
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.iterator().next());
+        else
+          BfdMDC.put(
+              BfdMDC.computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "header", headerName),
+              headerValues.toString());
+      }
+      String contentLength = response.getHeader("Content-Length");
+      Long outputSizeInBytes = Long.valueOf(contentLength);
+      BfdMDC.put(
+          BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
 
-      if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
-        Long responseDurationPerKB = ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
+      // Record the response duration.
+      Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
+      if (requestStartMilliseconds != null) {
+        Long responseDurationInMilliseconds = System.currentTimeMillis() - requestStartMilliseconds;
         BfdMDC.put(
-            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
+            BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
+            Long.toString(responseDurationInMilliseconds));
+
+        if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
+          Long responseDurationPerKB =
+              ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
+          BfdMDC.put(
+              BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
+        } else {
+          BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+        }
       } else {
         BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
       }
-    } else {
-      BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
+      LOGGER_HTTP_ACCESS.info("response complete");
+    } finally {
+      BfdMDC.clear();
     }
-    LOGGER_HTTP_ACCESS.info("response complete");
-    BfdMDC.clear();
   }
 
   /**
