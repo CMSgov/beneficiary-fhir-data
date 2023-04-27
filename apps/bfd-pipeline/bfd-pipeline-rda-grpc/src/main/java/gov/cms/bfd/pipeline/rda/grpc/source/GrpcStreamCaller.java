@@ -10,6 +10,8 @@ import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import java.io.IOException;
 import java.util.Iterator;
@@ -81,6 +83,12 @@ public abstract class GrpcStreamCaller<TResponse> {
           logger.info("callVersionService successful on attempt {}", tryNumber);
         }
         return version;
+      } catch (StatusRuntimeException ex) {
+        // if we're not authenticated now we never will be...
+        if (ex.getStatus() == Status.UNAUTHENTICATED) {
+          throw ex;
+        }
+        error = ex;
       } catch (RuntimeException ex) {
         error = ex;
       }

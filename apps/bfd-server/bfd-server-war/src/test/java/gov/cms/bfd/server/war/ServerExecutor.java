@@ -281,4 +281,16 @@ public class ServerExecutor {
 
     return true;
   }
+
+  /**
+   * Gets the standard out for the running server, useful for debugging.
+   *
+   * @return the standard out for the E2E server
+   */
+  public static String getServerStdOut() {
+    if (appRunConsumer != null) {
+      return appRunConsumer.getStdoutContents();
+    }
+    return "<Server not running>";
+  }
 }
