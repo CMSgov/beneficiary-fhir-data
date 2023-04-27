@@ -73,14 +73,14 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
        * We can't control whether external filters or applications continue to read the streamed response body
        * after its completion, so this is the best we can do.
        */
-      LOGGER.info("End of stream", e);
+      LOGGER.debug("End of stream", e);
     } catch (IOException e) {
       /*
        * The IOException is a checked exception and will be thrown whenever the response body's GZIP stream is interrupted.
        * This can occur when the ASG is scaling down (like after a load test), or if the client cancels a request mid-stream.
        * There isn't much we can do on our end aside from catching it.
        */
-      LOGGER.info("Tried closing stream", e);
+      LOGGER.debug("Tried closing stream", e);
     } finally {
       handleResponse(reqWrapper, resWrapper);
     }
