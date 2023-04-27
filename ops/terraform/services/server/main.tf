@@ -178,8 +178,6 @@ module "fhir_asg" {
     profile       = module.fhir_iam.profile
     user_data_tpl = "fhir_server.tpl" # See templates directory for choices
     account_id    = data.aws_caller_identity.current.account_id
-    git_branch    = var.git_branch_name
-    git_commit    = var.git_commit_id
   }
 
   db_config = {

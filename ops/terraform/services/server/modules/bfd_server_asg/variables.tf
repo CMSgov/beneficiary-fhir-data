@@ -38,5 +38,5 @@ variable "mgmt_config" {
 }
 
 variable "launch_config" {
-  type = object({ instance_type = string, volume_size = number, ami_id = string, key_name = string, profile = string, user_data_tpl = string, account_id = string, git_branch = string, git_commit = string })
+  type = object({ instance_type = string, volume_size = number, ami_id = string, key_name = string, profile = string, user_data_tpl = string, account_id = string })
 }

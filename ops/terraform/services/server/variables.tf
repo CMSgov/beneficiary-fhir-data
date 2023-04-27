@@ -8,16 +8,6 @@ variable "ssh_key_name" {
   type        = string
 }
 
-variable "git_branch_name" {
-  description = "git branch of beneficiary-fhir-data"
-  type        = string
-}
-
-variable "git_commit_id" {
-  description = "git commit of beneficiary-fhir-data"
-  type        = string
-}
-
 variable "is_public" {
   description = "If true, open the FHIR data end-point to the public Internet"
   type        = bool
