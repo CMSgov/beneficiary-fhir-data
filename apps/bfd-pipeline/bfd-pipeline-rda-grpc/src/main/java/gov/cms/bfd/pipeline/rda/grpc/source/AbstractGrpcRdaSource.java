@@ -264,7 +264,7 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     /** Number of invalid objects skipped. */
     private final Counter invalidObjectsSkipped;
     /**
-     * Number of batches/transactions used to store the objects. Generally {@code} objectsReceived /
+     * Number of batches/transactions used to store the objects. Generally {@code objectsReceived /
      * maxPerBatch}.
      */
     private final Counter batches;
