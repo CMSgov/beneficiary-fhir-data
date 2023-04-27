@@ -31,13 +31,26 @@ public class ExceptionMessageSource<T> implements MessageSource<T> {
     remainingBeforeThrow = countBeforeThrow;
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
+    source.skipTo(startingSequenceNumber);
+    return this;
+  }
+
   @Override
   public boolean hasNext() throws Exception {
     return source.hasNext();
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Works normally until configured number of messages have been returned. Then throws the
+   * configured exception.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @return value from real source
+   * @throws Exception the configured exception or pass through from source
+   */
   @Override
   public T next() throws Exception {
     if (remainingBeforeThrow <= 0) {
@@ -47,7 +60,6 @@ public class ExceptionMessageSource<T> implements MessageSource<T> {
     return source.next();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     source.close();

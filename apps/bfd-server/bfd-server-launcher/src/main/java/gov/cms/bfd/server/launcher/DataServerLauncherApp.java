@@ -18,8 +18,6 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -303,59 +301,6 @@ public final class DataServerLauncherApp {
      */
     public BfdRequestLog(Slf4jRequestLogWriter writer, String accessLogFormat) {
       super(writer, accessLogFormat);
-    }
-
-    /**
-     * Log a message for a request/response pair to the access.json (via Logback).
-     *
-     * @param request the request
-     * @param response the response
-     */
-    @Override
-    public void log(Request request, Response response) {
-      try {
-        /*
-         * Capture the payload size in MDC. This Jetty specific call is the same one that is used by the
-         * CustomRequestLog to write the payload size to the access.log:
-         * org.eclipse.jetty.server.CustomRequestLog.logBytesSent().
-         *
-         * We capture this field here rather than in the RequestResponsePopulateMdcFilter because we need access to
-         * the underlying Jetty classes in the response that are in classes that are not loaded in the war file so not
-         * accessible to the filter.
-         */
-        Long outputSizeInBytes = response.getHttpOutput().getWritten();
-        BfdMDC.put(
-            BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES, String.valueOf(outputSizeInBytes));
-
-        // Record the response duration.
-        Long requestStartMilliseconds = (Long) request.getAttribute(BfdMDC.REQUEST_START_KEY);
-        if (requestStartMilliseconds != null) {
-          Long responseDurationInMilliseconds =
-              System.currentTimeMillis() - requestStartMilliseconds;
-          BfdMDC.put(
-              BfdMDC.computeMDCKey(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
-              Long.toString(responseDurationInMilliseconds));
-
-          if (outputSizeInBytes != 0 && responseDurationInMilliseconds != 0) {
-            Long responseDurationPerKB =
-                ((1024 * responseDurationInMilliseconds) / outputSizeInBytes);
-            BfdMDC.put(
-                BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, String.valueOf(responseDurationPerKB));
-          } else {
-            BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-          }
-        } else {
-          BfdMDC.put(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB, null);
-        }
-
-        /*
-         * Write to the access.json. The message here isn't actually the payload; the MDC context that will get
-         * automatically included with it is!
-         */
-        LOGGER_HTTP_ACCESS.info("response complete");
-      } finally {
-        BfdMDC.clear();
-      }
     }
   }
 
