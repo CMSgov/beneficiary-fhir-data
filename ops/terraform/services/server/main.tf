@@ -39,6 +39,7 @@ locals {
   management_security_group       = local.nonsensitive_common_config["management_security_group"]
   vpn_security_group              = local.nonsensitive_common_config["vpn_security_group"]
   kms_key_alias                   = local.nonsensitive_common_config["kms_key_alias"]
+  ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
   # ephemeral environment determination is based on the existence of the ephemeral_environment_seed
@@ -173,7 +174,7 @@ module "fhir_asg" {
     instance_type = "c6i.4xlarge"
     volume_size   = local.env == "prod" ? 250 : 60 # GB
     ami_id        = var.fhir_ami
-    key_name      = var.ssh_key_name
+    key_name      = local.ssh_key_pair
 
     profile       = module.fhir_iam.profile
     user_data_tpl = "fhir_server.tpl" # See templates directory for choices
