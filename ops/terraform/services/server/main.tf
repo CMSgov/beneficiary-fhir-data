@@ -57,26 +57,6 @@ locals {
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
 
-  # add new peerings here
-  vpc_peerings_by_env = {
-    test = [
-      "bfd-test-vpc-to-bluebutton-test"
-    ],
-    prod = [
-      "bfd-prod-vpc-to-dpc-prod-vpc",
-      "bfd-prod-vpc-to-bluebutton-prod",
-      "bfd-prod-vpc-to-bcda-prod-vpc",
-      "bfd-prod-to-ab2d-prod"
-    ],
-    prod-sbx = [
-      "bfd-prod-sbx-to-ab2d-dev", "bfd-prod-sbx-to-ab2d-impl", "bfd-prod-sbx-to-ab2d-sbx",
-      "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx",
-      "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test",
-      "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc"
-    ]
-  }
-  vpc_peerings = lookup(local.vpc_peerings_by_env, local.env, [])
-
   create_server_lb_alarms   = contains(local.established_envs, local.env)
   create_server_metrics     = contains(local.established_envs, local.env)
   create_server_slo_alarms  = local.create_server_metrics && contains(local.established_envs, local.env)
