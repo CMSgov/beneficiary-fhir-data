@@ -136,7 +136,7 @@ public class QueryUtilsTest {
    * Test {@link QueryUtils#hasClaimsData} asserting various ways an integer mask value can be
    * created (mathematical XOR or additive integers) and result in the same integer value. The test
    * further verifies that leveraging operator AND functionality to extract a subset of the bits in
-   * the state, one can arrive at a boolean true/false outcome.@interface.
+   * the state, one can arrive at a boolean true/false outcome.
    *
    * <p>The {@link QueryUtils#hasClaimsData} method takes in an arithmetic integer and returns a
    * {@link BitSet} object that denotes availability of claims data, using predefined {@link
