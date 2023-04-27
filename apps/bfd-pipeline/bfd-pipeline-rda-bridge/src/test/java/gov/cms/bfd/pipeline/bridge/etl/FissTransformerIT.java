@@ -20,9 +20,11 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import gov.cms.mpsm.rda.v1.fiss.FissRevenueLine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -257,7 +259,18 @@ public class FissTransformerIT {
     dataSampler.add(TestData.FISS_SAMPLE_ID, TestData.MBI);
 
     // Expected values
-    FissClaim expectedClaim = TestData.createDefaultClaimBuilder().build();
+    FissClaim expectedClaim =
+        TestData.createDefaultClaimBuilder()
+            .addFissRevenueLines(
+                FissRevenueLine.newBuilder()
+                    .setRdaPosition(2)
+                    .setHcpcInd("A")
+                    .setApcHcpcsApc("00000")
+                    .setNonBillRevCodeEnum(FissNonBillRevCode.NON_BILL_ESRD)
+                    .setServDtCymd("1970-01-01")
+                    .setServDtCymdText("1970-01-01")
+                    .build())
+            .build();
     FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
 
     WrappedMessage expectedWrappedMessage = new WrappedMessage();
@@ -537,7 +550,16 @@ public class FissTransformerIT {
           .setStmtCovToCymd(CLM_THRU_DT)
           .setMedaProv6(PRVDR_NUM)
           .setLobCdEnumValue(CLM_FAC_TYPE_CD)
-          .setServTypeCdEnumValue(CLM_SRVC_CLSFCTN_TYPE_CD);
+          .setServTypeCdEnumValue(CLM_SRVC_CLSFCTN_TYPE_CD)
+          .addFissRevenueLines(
+              FissRevenueLine.newBuilder()
+                  .setRdaPosition(1)
+                  .setHcpcInd("A")
+                  .setApcHcpcsApc("00000")
+                  .setNonBillRevCodeEnum(FissNonBillRevCode.NON_BILL_ESRD)
+                  .setServDtCymd("1970-01-01")
+                  .setServDtCymdText("1970-01-01")
+                  .build());
     }
 
     /**
