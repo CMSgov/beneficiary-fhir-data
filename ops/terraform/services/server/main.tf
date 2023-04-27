@@ -128,7 +128,7 @@ module "lb_alarms" {
 
   source = "./modules/bfd_server_lb_alarms"
 
-  load_balancer_name = module.fhir_lb[0].name
+  load_balancer_name = module.fhir_lb.name
   app                = "bfd"
 
   # NLBs only have this metric to alarm on
@@ -149,7 +149,7 @@ module "fhir_asg" {
   env_config    = local.env_config
   role          = local.legacy_service
   layer         = "app"
-  lb_config     = module.fhir_lb[0].lb_config
+  lb_config     = module.fhir_lb.lb_config
 
   # Initial size is one server per AZ
   asg_config = {
