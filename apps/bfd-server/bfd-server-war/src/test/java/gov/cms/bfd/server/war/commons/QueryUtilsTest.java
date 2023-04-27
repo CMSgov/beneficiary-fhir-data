@@ -132,23 +132,43 @@ public class QueryUtilsTest {
     verify(builder).and(notNullPredicate, lowerBoundPredicate, upperBoundPredicate);
   }
 
-  /** Test {@link QueryUtils#hasClaimsData} testing claims bitmask values. */
+  /**
+   * Test {@link QueryUtils#hasClaimsData} asserting various ways an integer mask value can be
+   * created (mathematical XOR or additive integers) and result in the same integer value. The test
+   * further verifies that leveraging operator AND functionality to extract a subset of the bits in
+   * the state, one can arrive at a boolean true/false outcome.@interface.
+   *
+   * <p>The {@link QueryUtils#hasClaimsData} method takes in an arithmetic integer and returns a
+   * {@link BitSet} object that denotes availability of claims data, using predefined {@link
+   * QueryUtils} bitset identifiers.
+   */
   @Test
   public void testHasClaimsDataMaskValues() {
+    // 0001001 testVal
+    // 0000001 maskVal
+    // -------
+    // 0000001 expected
     int testVal = QueryUtils.V_CARRIER_HAS_DATA | QueryUtils.V_SNF_HAS_DATA;
     assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
 
-    // test additive values instead of XOR
+    // same test as previous, but use additive additive values instead of XOR
     testVal = QueryUtils.V_CARRIER_HAS_DATA + QueryUtils.V_SNF_HAS_DATA;
     assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
+
+    // 0001001 testVal
+    // 0010000 maskVal
+    // -------
+    // 0000000 expected
     assertEquals(0, (testVal & QueryUtils.V_DME_HAS_DATA));
 
-    // test additive vs. XOR of values
+    // test additive vs. XOR of values by comparing two integer values, each derived
+    // in a different manner.
     testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
     assertEquals(
         testVal, QueryUtils.V_DME_HAS_DATA + QueryUtils.V_SNF_HAS_DATA + QueryUtils.V_HHA_HAS_DATA);
-    // test entire mask being set; each & mask should produce a value equal to mask we are checking
-    // for
+
+    // test entire mask being set; each '&' mask should produce a value equal
+    // to mask we are checking for.
     testVal =
         QueryUtils.V_CARRIER_HAS_DATA
             + QueryUtils.V_INPATIENT_HAS_DATA
@@ -181,9 +201,12 @@ public class QueryUtilsTest {
     assertTrue(testBits.get(QueryUtils.SNF_HAS_DATA));
     assertTrue(testBits.get(QueryUtils.HHA_HAS_DATA));
     assertTrue(testBits.get(QueryUtils.PART_D_HAS_DATA));
+    // the following bits were not set.
     assertFalse(testBits.get(QueryUtils.OUTPATIENT_HAS_DATA));
     assertFalse(testBits.get(QueryUtils.HOSPICE_HAS_DATA));
     assertFalse(testBits.get(QueryUtils.DME_HAS_DATA));
+    // verify that the BitSet represents only those bit that are set.
+    assertEquals("{0, 1, 3, 5, 7}", testBits.toString());
   }
 
   /**
