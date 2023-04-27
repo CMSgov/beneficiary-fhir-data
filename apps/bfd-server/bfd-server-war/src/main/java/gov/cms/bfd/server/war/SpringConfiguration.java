@@ -59,7 +59,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
@@ -525,7 +528,9 @@ public class SpringConfiguration {
       baseConfig
           .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
           .ifPresent(r -> ssmClient.setRegion(r.getName()));
-      final var parameterStore = new AwsParameterStoreClient(ssmClient.build());
+      final var parameterStore =
+          new AwsParameterStoreClient(
+              ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
       final var parametersMap = parameterStore.loadParametersAtPath(ssmPath);
       configBuilder.addMap(parametersMap);
     }
