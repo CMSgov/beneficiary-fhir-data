@@ -147,7 +147,8 @@ public class QueryUtilsTest {
     testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
     assertEquals(
         testVal, QueryUtils.V_DME_HAS_DATA + QueryUtils.V_SNF_HAS_DATA + QueryUtils.V_HHA_HAS_DATA);
-    // test entire mask being set; each & mask should produce a value of 1
+    // test entire mask being set; each & mask should produce a value equal to mask we are checking
+    // for
     testVal =
         QueryUtils.V_CARRIER_HAS_DATA
             + QueryUtils.V_INPATIENT_HAS_DATA
