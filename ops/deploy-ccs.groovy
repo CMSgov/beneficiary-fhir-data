@@ -63,10 +63,34 @@ def findAmis() {
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 		).trim(),
-		bfdPipelineAmiId: '',
-		bfdServerAmiId: '',
-		bfdMigratorAmiId: '',
-		bfdServerLoadAmiId: ''
+		bfdPipelineAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-amzn2-jdk17-etl-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim(),
+		bfdServerAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-amzn2-jdk17-fhir-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim(),
+		bfdMigratorAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-amzn2-jdk17-db-migrator-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim(),
+		bfdServerLoadAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=server-load-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		)
 	)
 }
 
