@@ -110,7 +110,7 @@ public class RandomFissClaimSourceTest {
    * @param source the source
    * @throws Exception the exception
    */
-  private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(MessageSource<?> source) throws Exception {
     try {
       source.next();
       fail("expected exception");
