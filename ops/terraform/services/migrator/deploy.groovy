@@ -166,7 +166,7 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
     ) as Integer
 
     // check latest available versioned migration
-    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/") as Integer
+    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/getLatestSchemaMigrationScriptVersion.sh") as Integer
 
     // compare and determine
     return latestAvailableMigrationVersion > storedSchemaVersion
