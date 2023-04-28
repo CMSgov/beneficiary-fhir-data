@@ -212,13 +212,21 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
               setUptimeToReceiving();
               final TMessage result = responseStream.next();
               metrics.getObjectsReceived().increment();
-              if (sink.isValidMessage(result)) {
+              if (sink.isDeleteMessage(result)) {
+                metrics.getDeleteMessagesSkipped().increment();
+                log.warn(
+                    "skipping DELETE message: claimType={} claimId={} seq={}",
+                    claimType,
+                    sink.getClaimIdForMessage(result),
+                    sink.getSequenceNumberForObject(result));
+              } else if (sink.isValidMessage(result)) {
                 batch.put(sink.getClaimIdForMessage(result), result);
                 if (batch.size() >= maxPerBatch) {
                   processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
                 }
                 lastProcessedTime = clock.millis();
               } else {
+                metrics.getInvalidObjectsSkipped().increment();
                 log.info(
                     "skipping invalid claim: claimType={} claimId={} seq={}",
                     claimType,
