@@ -60,6 +60,18 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   }
 
   /**
+   * Called to determine if a message represents a {@link
+   * gov.cms.mpsm.rda.v1.ChangeType#CHANGE_TYPE_DELETE} change. We filter these messages because
+   * they do not have any meaning within the BFD system.
+   *
+   * @param message message to check
+   * @return true if the message is a delete
+   */
+  default boolean isDeleteMessage(TMessage message) {
+    return false;
+  }
+
+  /**
    * Write the object to the data store and return the number of objects successfully written. The
    * count returned is just the most recent unreported processed count and for asynchronous sinks
    * can reflect values from previously submitted batches.
