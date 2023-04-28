@@ -368,7 +368,7 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion
+								awsRegion: awsRegion,
 								forceDeployment: args.force_migrator_deployment
 							)
 
@@ -486,7 +486,7 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion
+								awsRegion: awsRegion,
 								forceDeployment: args.force_migrator_deployment
 							)
 
