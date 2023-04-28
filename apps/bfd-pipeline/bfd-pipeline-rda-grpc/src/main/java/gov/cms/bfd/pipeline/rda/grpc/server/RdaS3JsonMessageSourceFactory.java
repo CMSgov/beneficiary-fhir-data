@@ -43,10 +43,10 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
     this.s3Dao = s3Dao;
     fissFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Dao, FISS_PREFIX, FILE_SUFFIX, this::readFissClaimChanges, FissClaimChange::getSeq);
+            s3Dao, FISS_PREFIX, FILE_SUFFIX, this::readFissClaimChanges);
     mcsFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Dao, MCS_PREFIX, FILE_SUFFIX, this::readMcsClaimChanges, McsClaimChange::getSeq);
+            s3Dao, MCS_PREFIX, FILE_SUFFIX, this::readMcsClaimChanges);
   }
 
   @Override
@@ -57,13 +57,13 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
   @Override
   public MessageSource<FissClaimChange> createFissMessageSource(long startingSequenceNumber)
       throws Exception {
-    return fissFactory.apply(startingSequenceNumber);
+    return fissFactory.createMessageSource(startingSequenceNumber);
   }
 
   @Override
   public MessageSource<McsClaimChange> createMcsMessageSource(long startingSequenceNumber)
       throws Exception {
-    return mcsFactory.apply(startingSequenceNumber);
+    return mcsFactory.createMessageSource(startingSequenceNumber);
   }
 
   /**

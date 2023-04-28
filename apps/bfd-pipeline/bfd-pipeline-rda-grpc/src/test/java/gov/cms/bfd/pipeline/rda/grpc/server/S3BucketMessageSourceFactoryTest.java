@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,7 @@ public class S3BucketMessageSourceFactoryTest {
 
     S3BucketMessageSourceFactory<?> fissFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Dao, "fiss", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
+            s3Dao, "fiss", "ndjson", s -> new EmptyMessageSource<>());
     assertEquals(
         Arrays.asList(
             new S3BucketMessageSourceFactory.FileEntry("fiss-0-100.ndjson", 0, 100),
@@ -54,8 +53,7 @@ public class S3BucketMessageSourceFactoryTest {
         fissFactory.listFiles(112L));
 
     S3BucketMessageSourceFactory<?> mcsFactory =
-        new S3BucketMessageSourceFactory<>(
-            s3Dao, "mcs", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
+        new S3BucketMessageSourceFactory<>(s3Dao, "mcs", "ndjson", s -> new EmptyMessageSource<>());
     assertEquals(
         Arrays.asList(
             new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson.gz", 83, 214),
@@ -77,7 +75,7 @@ public class S3BucketMessageSourceFactoryTest {
   @Test
   public void noSourcesToConsume() throws Exception {
     S3BucketMessageSourceFactory<Long> factory = createFactory();
-    MessageSource<Long> source = factory.apply(0);
+    MessageSource<Long> source = factory.createMessageSource(0);
     assertFalse(source.hasNext());
   }
 
@@ -94,10 +92,10 @@ public class S3BucketMessageSourceFactoryTest {
     MockMessageSource source1 = new MockMessageSource(83, 117);
     MockMessageSource source2 = new MockMessageSource(118, 195);
     S3BucketMessageSourceFactory<Long> factory = createFactory(source2, source1);
-    MessageSource<Long> empty = factory.apply(200);
+    MessageSource<Long> empty = factory.createMessageSource(200);
     assertFalse(empty.hasNext());
 
-    MessageSource<Long> source = factory.apply(87);
+    MessageSource<Long> source = factory.createMessageSource(87);
     Long expected = 87L;
     while (source.hasNext()) {
       assertEquals(expected, source.next());
@@ -121,10 +119,10 @@ public class S3BucketMessageSourceFactoryTest {
     MockMessageSource source1 = new MockMessageSource(83, 117);
     MockMessageSource source2 = new MockMessageSource(118, 195);
     S3BucketMessageSourceFactory<Long> factory = createFactory(source2, source1);
-    MessageSource<Long> empty = factory.apply(200);
+    MessageSource<Long> empty = factory.createMessageSource(200);
     assertFalse(empty.hasNext());
 
-    MessageSource<Long> source = factory.apply(118);
+    MessageSource<Long> source = factory.createMessageSource(118);
     Long expected = 118L;
     while (source.hasNext()) {
       assertEquals(expected, source.next());
@@ -160,8 +158,7 @@ public class S3BucketMessageSourceFactoryTest {
       sourceMap.put(source.getFilename(), source);
     }
     doReturn(List.copyOf(filenames)).when(s3Dao).readFileNames();
-    return new S3BucketMessageSourceFactory<>(
-        s3Dao, "fiss", "ndjson", sourceMap::get, Function.identity());
+    return new S3BucketMessageSourceFactory<>(s3Dao, "fiss", "ndjson", sourceMap::get);
   }
 
   /**

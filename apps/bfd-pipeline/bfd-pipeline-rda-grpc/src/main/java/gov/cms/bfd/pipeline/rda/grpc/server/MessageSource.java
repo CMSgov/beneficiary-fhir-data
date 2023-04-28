@@ -1,9 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 /**
- * Interface for objects that produce FissClaim objects from some source (e.g. a file, an array, a
+ * Interface for objects that produce message objects from some source (e.g. a file, an array, a
  * database, etc). Mirrors the Iterator protocol but allows for unwrapped exceptions to be passed
- * through to the caller and adds a close() method for proper cleanup.
+ * through to the caller. Also adds a method to skip ahead in the stream and a close() method for
+ * proper cleanup.
  */
 public interface MessageSource<T> extends AutoCloseable {
   /**
@@ -35,22 +36,4 @@ public interface MessageSource<T> extends AutoCloseable {
    * @throws Exception if there is an issue getting the next claim
    */
   MessageSource<T> skipTo(long startingSequenceNumber) throws Exception;
-
-  /**
-   * Used to define lambdas that can create a {@link MessageSource} instance for a given starting
-   * sequence number.
-   *
-   * @param <T> the type
-   */
-  @FunctionalInterface
-  interface Factory<T> {
-    /**
-     * Applies a function to the supplied input.
-     *
-     * @param sequenceNumber the sequence number
-     * @return the message source
-     * @throws Exception if there is any issue applying the function
-     */
-    MessageSource<T> apply(long sequenceNumber) throws Exception;
-  }
 }

@@ -11,17 +11,6 @@ import java.util.NoSuchElementException;
 public class EmptyMessageSource<T> implements MessageSource<T> {
 
   /**
-   * Factory method for use when creating RdaService instances that return no messages. Uses a
-   * method rather than a static value so that types are inferred correctly by the compiler.
-   *
-   * @param <T> type of message being returned
-   * @return a factory object
-   */
-  public static <T> MessageSource.Factory<T> factory() {
-    return ignored -> new EmptyMessageSource<>();
-  }
-
-  /**
    * Nothing to skip so just return this.
    *
    * <p>{@inheritDoc}
