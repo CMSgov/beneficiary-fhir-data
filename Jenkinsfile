@@ -238,7 +238,7 @@ try {
 							bfdEnv: bfdEnv,
 							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 							awsRegion: awsRegion,
-							forceDeployment: args.force_migrator_deployment
+							forceDeployment: params.force_migrator_deployment
 						)
 						if (migratorDeploymentSuccessful) {
 							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
@@ -369,7 +369,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								forceDeployment: args.force_migrator_deployment
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -487,7 +487,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								forceDeployment: args.force_migrator_deployment
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
