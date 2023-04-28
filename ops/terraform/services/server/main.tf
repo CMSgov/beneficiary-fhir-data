@@ -55,7 +55,6 @@ locals {
   # in the common hierarchy
   seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)
   is_ephemeral_env = local.seed_env == null ? false : true
-  is_prod          = local.env == "prod"
 
   env_config = {
     default_tags = local.default_tags,
@@ -67,12 +66,12 @@ locals {
 
   ami_id = data.aws_ami.main.image_id
 
-  create_server_lb_alarms   = contains(local.established_envs, local.env)
-  create_server_metrics     = contains(local.established_envs, local.env)
-  create_server_slo_alarms  = local.create_server_metrics && contains(local.established_envs, local.env)
-  create_server_log_alarms  = contains(local.established_envs, local.env)
-  create_server_dashboards  = local.create_server_metrics && contains(local.established_envs, local.env)
-  create_server_disk_alarms = contains(local.established_envs, local.env)
+  create_server_lb_alarms   = !local.is_ephemeral_env || var.force_create_server_lb_alarms
+  create_server_metrics     = !local.is_ephemeral_env || var.force_create_server_metrics
+  create_server_slo_alarms  = (local.create_server_metrics && !local.is_ephemeral_env) || var.force_create_server_slo_alarms
+  create_server_log_alarms  = !local.is_ephemeral_env || var.force_create_server_log_alarms
+  create_server_dashboards  = (local.create_server_metrics && !local.is_ephemeral_env) || var.force_create_server_dashboards
+  create_server_disk_alarms = !local.is_ephemeral_env || var.force_create_server_disk_alarms
 }
 
 ## IAM role for FHIR
