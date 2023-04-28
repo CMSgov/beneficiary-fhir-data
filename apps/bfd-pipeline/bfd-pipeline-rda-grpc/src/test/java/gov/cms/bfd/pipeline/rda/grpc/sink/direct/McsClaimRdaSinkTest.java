@@ -31,6 +31,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -40,6 +41,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -126,6 +128,29 @@ public class McsClaimRdaSinkTest {
             .map(meter -> meter.getId().getName())
             .sorted()
             .collect(Collectors.toList()));
+  }
+
+  /**
+   * Verifies that {@link McsClaimRdaSink#isDeleteMessage} correctly recognizes all possible {@link
+   * ChangeType} values.
+   */
+  @Test
+  public void testIsDeleteMessage() {
+    var cases =
+        Map.of(
+            ChangeType.CHANGE_TYPE_INSERT,
+            false,
+            ChangeType.CHANGE_TYPE_UPDATE,
+            false,
+            ChangeType.CHANGE_TYPE_DELETE,
+            true);
+    for (Map.Entry<ChangeType, Boolean> e : cases.entrySet()) {
+      var changeType = e.getKey();
+      var expected = e.getValue();
+      var message = McsClaimChange.newBuilder().setChangeType(changeType).build();
+      var actual = sink.isDeleteMessage(message);
+      assertEquals(expected, actual, "incorrect result for " + changeType);
+    }
   }
 
   /**

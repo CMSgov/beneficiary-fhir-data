@@ -255,13 +255,17 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
     /** Number of objects that have been received from the RDA API. */
     private final Counter objectsReceived;
     /**
-     * Number of objects that have been successfully stored by the sink. Generally <code>
-     * batches * maxPerBatch</code>
+     * Number of objects that have been successfully stored by the sink. Generally {@code batches *
+     * maxPerBatch}.
      */
     private final Counter objectsStored;
+    /** Number of {@link gov.cms.mpsm.rda.v1.ChangeType#CHANGE_TYPE_DELETE} messages skipped. */
+    private final Counter deleteMessagesSkipped;
+    /** Number of invalid objects skipped. */
+    private final Counter invalidObjectsSkipped;
     /**
-     * Number of batches/transactions used to store the objects. Generally <code>
-     * objectsReceived / maxPerBatch</code>
+     * Number of batches/transactions used to store the objects. Generally {@code objectsReceived /
+     * maxPerBatch}.
      */
     private final Counter batches;
 
@@ -282,6 +286,8 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
       failures = appMetrics.counter(MetricRegistry.name(base, "failures"));
       objectsReceived = appMetrics.counter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.counter(MetricRegistry.name(base, "objects", "stored"));
+      invalidObjectsSkipped = appMetrics.counter(MetricRegistry.name(base, "skipped", "invalid"));
+      deleteMessagesSkipped = appMetrics.counter(MetricRegistry.name(base, "skipped", "delete"));
       batches = appMetrics.counter(MetricRegistry.name(base, "batches"));
       final String uptimeGaugeName = MetricRegistry.name(base, "uptime");
       uptime = GAUGES.getGaugeForName(appMetrics, uptimeGaugeName);
