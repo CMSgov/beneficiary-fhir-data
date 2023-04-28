@@ -65,18 +65,45 @@ function get_migrator_state {
 #######################################
 function migrator_is_running {
   local _state="$1"
-  local _code="$(jq -r .code <<< "$_state")"
-  local _status="$(jq -r .status <<< "$_state")"
+
+  local _code
+  local _status
+  _code="$(jq -r .code <<< "$_state")"
+  _status="$(jq -r .status <<< "$_state")"
   [ "$_code" = '(null)' ] && [ "$_status" = "0/0" ]
+}
+
+#######################################
+#TODO
+#######################################
+function set_migrated_state {
+  local _state="$1"
+  local schema_version
+
+  if grep -s "No migration necessary." "{{ db_migrator_dir }}/migrator-log.json"; then
+    schema_version="$(grep "Current version of schema" no-migration.json | jq -r .message | cut -d: -f2)"
+  else
+    schema_version="$(grep "now at version" migration.json | jq -r .message | grep -o 'v[0-9]\+' | sed 's/[^0-9]//g')"
+  fi
+  jq --arg arg "$schema_version" -c '. += {"schema_version": $arg}' <<< "$_state"
 }
 
 while true; do
   currentState="$(get_migrator_state)"
-  send_message "$currentState"
   if migrator_is_running "$currentState"; then
+    send_message "$currentState"
     sleep "$MONITOR_HEARTBEAT_INTERVAL_SECONDS"
     continue
   else
+    # check for success...
+    if [ "$(jq .status <<< "$currentState")" = "0/0" ]; then
+    # On successful migration, adulterate the currentState adding schema version
+      migratedState="$(set_migrated_state $currentState)"
+      send_message "$migratedState"
+    else
+      # Failed migration, no updates to
+      send_message "$currentState"
+    fi
     break
   fi
 done
