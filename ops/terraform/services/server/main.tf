@@ -1,6 +1,3 @@
-## 
-# Build the stateless resources for an environment (ASG, security groups, etc)
-
 locals {
   env              = terraform.workspace
   established_envs = ["test", "prod-sbx", "prod"]
