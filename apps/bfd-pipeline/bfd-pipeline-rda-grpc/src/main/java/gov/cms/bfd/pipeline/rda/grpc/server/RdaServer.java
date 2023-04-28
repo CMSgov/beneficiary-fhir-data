@@ -14,10 +14,7 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
+import lombok.*;
 
 /** Class for creating a local RDA server for testing purposes. */
 public class RdaServer {
@@ -204,7 +201,7 @@ public class RdaServer {
     @Builder
     private LocalConfig(
         RdaMessageSourceFactory.Config serviceConfig,
-        @Singular Set<String> authorizedTokens,
+        @NonNull @Singular Set<String> authorizedTokens,
         String hostname,
         int port) {
       super(serviceConfig, authorizedTokens);
@@ -253,7 +250,7 @@ public class RdaServer {
     @Builder
     private InProcessConfig(
         RdaMessageSourceFactory.Config serviceConfig,
-        @Singular Set<String> authorizedTokens,
+        @NonNull @Singular Set<String> authorizedTokens,
         @Nullable String serverName) {
       super(serviceConfig, authorizedTokens);
       this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;

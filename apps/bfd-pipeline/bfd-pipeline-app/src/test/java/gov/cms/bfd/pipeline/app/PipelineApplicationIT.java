@@ -268,12 +268,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
+      final var randomClaimConfig =
+          RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(30).build();
+      final var serviceConfig =
+          RdaMessageSourceFactory.Config.builder().randomClaimConfig(randomClaimConfig).build();
       RdaServer.LocalConfig.builder()
-          .serviceConfig(
-              RdaMessageSourceFactory.Config.builder()
-                  .randomClaimConfig(
-                      RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(30).build())
-                  .build())
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {
@@ -337,13 +337,15 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
+      final var randomClaimConfig =
+          RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(100).build();
+      final var serviceConfig =
+          RdaMessageSourceFactory.Config.builder()
+              .randomClaimConfig(randomClaimConfig)
+              .throwExceptionAfterCount(25)
+              .build();
       RdaServer.LocalConfig.builder()
-          .serviceConfig(
-              RdaMessageSourceFactory.Config.builder()
-                  .randomClaimConfig(
-                      RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(100).build())
-                  .throwExceptionAfterCount(25)
-                  .build())
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {

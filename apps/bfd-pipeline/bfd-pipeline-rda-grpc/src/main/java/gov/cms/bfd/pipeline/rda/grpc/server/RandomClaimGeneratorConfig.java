@@ -45,7 +45,7 @@ public class RandomClaimGeneratorConfig implements Serializable {
    */
   private final boolean useTimestampForErrorSeed;
 
-  /** Maximum number of claims to return when using random generate as a message source. */
+  /** Maximum number of claims to return when using random generator as a message source. */
   @Builder.Default private final int maxToSend = Integer.MAX_VALUE;
 
   /**

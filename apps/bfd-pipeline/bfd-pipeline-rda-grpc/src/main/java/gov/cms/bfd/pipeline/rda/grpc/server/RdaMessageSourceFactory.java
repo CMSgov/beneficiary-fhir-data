@@ -78,9 +78,9 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     /** Optional hard coded version. */
     @Nullable private final RdaService.Version version;
     /**
-     * If positive this is the number of valid messages to be returned by each message source before
-     * throwing an exception when more are requested. Causes all message sources to be wrapped in
-     * {@link ExceptionMessageSource}. {@see ExceptionMessageSource#countBeforeThrow}
+     * If positive this is the number of valid messages that will be returned by each message source
+     * before throwing an exception. Causes all message sources to be wrapped in {@link
+     * ExceptionMessageSource}. {@see ExceptionMessageSource#countBeforeThrow}
      */
     int throwExceptionAfterCount;
 
@@ -181,8 +181,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @SuppressWarnings("unused")
     public static class ConfigBuilder {
       /**
-       * Calls {@link Config#fissClaimJson} with a {@link CharSource} constructed by combining the
-       * provided JSON strings.
+       * Optionally add a {@link CharSource} constructed by combining the provided JSON strings as a
+       * source of FISS claim data.
        *
        * @param jsonChanges JSON for {@link FissClaimChange} objects
        * @return this builder
@@ -192,8 +192,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       }
 
       /**
-       * Calls {@link Config#mcsClaimJson} with a {@link CharSource} constructed by combining the
-       * provided JSON strings.
+       * Optionally add a {@link CharSource} constructed by combining the provided JSON strings as a
+       * source of MCS claim data.
        *
        * @param jsonChanges JSON for {@link McsClaimChange} objects
        * @return this builder

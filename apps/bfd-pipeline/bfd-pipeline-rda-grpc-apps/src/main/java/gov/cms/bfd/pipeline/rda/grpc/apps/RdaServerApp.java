@@ -57,9 +57,8 @@ public class RdaServerApp {
      * Configures the S3bucket for connectivity for Fiss and Mcs claims.
      *
      * @param args that are sent in
-     * @throws Exception if there is a connectivity issue to S3
      */
-    private Config(String[] args) throws Exception {
+    private Config(String[] args) {
       final ConfigLoader config =
           ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
       final var defaultRandomSeed = System.currentTimeMillis();

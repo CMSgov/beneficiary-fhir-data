@@ -85,13 +85,9 @@ public class RandomFissClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  /**
-   * Validates that the sequence numbers generated for claims are sequential and start at 1.
-   *
-   * @throws Exception indicates test failure
-   */
+  /** Validates that the sequence numbers generated for claims are sequential and start at 1. */
   @Test
-  public void sequenceNumbers() throws Exception {
+  public void sequenceNumbers() {
     final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(7).build();
     final var source = new RandomFissClaimSource(config);
     assertEquals(1L, source.next().getSeq());

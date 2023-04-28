@@ -6,8 +6,8 @@ import java.io.IOException;
 import lombok.AllArgsConstructor;
 
 /**
- * Decorator for another {@link RdaMessageSourceFactory} that wraps all generated {@link
- * MessageSource}s with {@link ExceptionMessageSource}.
+ * Decorator for another {@link RdaMessageSourceFactory} that wraps every {@link MessageSource} with
+ * a {@link ExceptionMessageSource}.
  */
 @AllArgsConstructor
 public class RdaExceptionMessageSourceFactory implements RdaMessageSourceFactory {
