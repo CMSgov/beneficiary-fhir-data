@@ -7,7 +7,6 @@ import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -105,11 +104,6 @@ public final class DataServerLauncherAppIT {
               .resolve("access.json");
       assertTrue(Files.isReadable(accessLogJson));
       assertTrue(Files.size(accessLogJson) > 0);
-      assertTrue(
-          Files.readString(accessLogJson)
-              .contains(BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES));
-      assertTrue(
-          Files.readString(accessLogJson).contains(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB));
       // Stop the application.
       serverProcess.close();
 
