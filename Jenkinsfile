@@ -52,6 +52,7 @@ def gitRepoUrl
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
+@Library('bfd@bfd-2200')
 
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
