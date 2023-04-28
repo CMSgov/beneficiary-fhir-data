@@ -26,22 +26,11 @@ public class RandomMcsClaimSource implements MessageSource<McsClaimChange> {
   /**
    * Creates a new instance.
    *
-   * @param seed the seed for randomization
-   * @param maxToSend the maximum number of claims to send
-   */
-  public RandomMcsClaimSource(long seed, int maxToSend) {
-    this(RandomClaimGeneratorConfig.builder().seed(seed).build(), maxToSend);
-  }
-
-  /**
-   * Creates a new instance.
-   *
    * @param config the random generator configuration
-   * @param maxToSend the maximum number of claims to send
    */
-  public RandomMcsClaimSource(RandomClaimGeneratorConfig config, int maxToSend) {
+  public RandomMcsClaimSource(RandomClaimGeneratorConfig config) {
     this.generator = new RandomMcsClaimGenerator(config);
-    this.maxToSend = maxToSend;
+    this.maxToSend = config.getMaxToSend();
     clock = config.getClock();
   }
 

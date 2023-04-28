@@ -19,10 +19,7 @@ import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
-import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.*;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
@@ -272,8 +269,11 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 30))
-          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 30))
+          .serviceConfig(
+              RdaMessageSourceFactory.Config.builder()
+                  .randomClaimConfig(
+                      RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(30).build())
+                  .build())
           .build()
           .runWithPortParam(
               port -> {
@@ -338,14 +338,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new RandomFissClaimSource(12345, 100), 25, IOException::new))
-          .mcsSourceFactory(
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new RandomMcsClaimSource(12345, 100), 25, IOException::new))
+          .serviceConfig(
+              RdaMessageSourceFactory.Config.builder()
+                  .randomClaimConfig(
+                      RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(100).build())
+                  .throwExceptionAfterCount(25)
+                  .build())
           .build()
           .runWithPortParam(
               port -> {

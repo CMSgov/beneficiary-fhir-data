@@ -20,7 +20,8 @@ public class RandomFissClaimSourceTest {
    */
   @Test
   public void zeroMaxToReturn() throws Exception {
-    RandomFissClaimSource source = new RandomFissClaimSource(0, 0);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(0).build();
+    final var source = new RandomFissClaimSource(config);
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
@@ -33,7 +34,8 @@ public class RandomFissClaimSourceTest {
    */
   @Test
   public void oneMaxToReturn() throws Exception {
-    RandomFissClaimSource source = new RandomFissClaimSource(0, 1);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(1).build();
+    final var source = new RandomFissClaimSource(config);
     assertTrue(source.hasNext());
     FissClaimChange change = source.next();
     FissClaim claim = change.getClaim();
@@ -53,7 +55,8 @@ public class RandomFissClaimSourceTest {
    */
   @Test
   public void threeMaxToReturn() throws Exception {
-    RandomFissClaimSource source = new RandomFissClaimSource(0, 3);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(3).build();
+    final var source = new RandomFissClaimSource(config);
     assertTrue(source.hasNext());
     FissClaimChange change = source.next();
     FissClaim claim = change.getClaim();
@@ -89,7 +92,8 @@ public class RandomFissClaimSourceTest {
    */
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<FissClaimChange> source = new RandomFissClaimSource(0, 7);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(7).build();
+    final var source = new RandomFissClaimSource(config);
     assertEquals(1L, source.next().getSeq());
     source.skipTo(4);
     assertEquals(4L, source.next().getSeq());

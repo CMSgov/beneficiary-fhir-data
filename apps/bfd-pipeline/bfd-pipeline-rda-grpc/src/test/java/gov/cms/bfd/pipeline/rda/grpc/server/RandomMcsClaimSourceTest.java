@@ -19,7 +19,8 @@ public class RandomMcsClaimSourceTest {
    */
   @Test
   public void zeroMaxToReturn() throws Exception {
-    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 0);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(0).build();
+    final var source = new RandomMcsClaimSource(config);
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
@@ -32,7 +33,8 @@ public class RandomMcsClaimSourceTest {
    */
   @Test
   public void oneMaxToReturn() throws Exception {
-    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 1);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(1).build();
+    final var source = new RandomMcsClaimSource(config);
     assertTrue(source.hasNext());
     McsClaimChange change = source.next();
     McsClaim claim = change.getClaim();
@@ -50,7 +52,8 @@ public class RandomMcsClaimSourceTest {
    */
   @Test
   public void threeMaxToReturn() throws Exception {
-    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 3);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(3).build();
+    final var source = new RandomMcsClaimSource(config);
     assertTrue(source.hasNext());
     McsClaimChange change = source.next();
     McsClaim claim = change.getClaim();
@@ -80,7 +83,8 @@ public class RandomMcsClaimSourceTest {
    */
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 8);
+    final var config = RandomClaimGeneratorConfig.builder().seed(0).maxToSend(8).build();
+    final var source = new RandomMcsClaimSource(config);
     assertEquals(1L, source.next().getSeq());
     assertEquals(2L, source.next().getSeq());
     source.skipTo(5);

@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
 import com.amazonaws.regions.Regions;
-import com.google.common.io.Files;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -72,15 +71,13 @@ public class RdaServerApp {
               .maxUniqueMbis(config.intOption("random.max.mbi").orElse(0))
               .maxUniqueClaimIds(config.intOption("random.max.claimId").orElse(0))
               .useTimestampForErrorSeed(true)
+              .maxToSend(config.intValue("maxToSend", 5_000))
               .build();
       final var messageSourceFactoryConfig =
           RdaMessageSourceFactory.Config.builder()
-              .randomMaxClaims(config.intValue("maxToSend", 5_000))
               .randomClaimConfig(randomClaimConfig)
-              .fissClaimJson(
-                  config.readableFileOption("file.fiss").map(Files::asByteSource).orElse(null))
-              .mcsClaimJson(
-                  config.readableFileOption("file.mcs").map(Files::asByteSource).orElse(null))
+              .fissClaimJsonFile(config.readableFileOption("file.fiss").orElse(null))
+              .mcsClaimJsonFile(config.readableFileOption("file.mcs").orElse(null))
               .s3Bucket(config.stringOption("s3.bucket").orElse(null))
               .s3Region(config.enumOption("s3.region", Regions::fromName).orElse(null))
               .s3Directory(config.stringOption("s3.directory").orElse(""))

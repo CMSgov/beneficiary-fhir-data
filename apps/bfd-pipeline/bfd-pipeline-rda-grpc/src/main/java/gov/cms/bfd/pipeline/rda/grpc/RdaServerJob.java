@@ -192,8 +192,8 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
               .randomClaimConfig(
                   RandomClaimGeneratorConfig.builder()
                       .seed(randomSeed == null ? DEFAULT_SEED : randomSeed)
+                      .maxToSend(randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims)
                       .build())
-              .randomMaxClaims(randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims)
               .s3Region(s3Region)
               .s3Bucket(s3Bucket)
               .s3Directory(s3Directory)
