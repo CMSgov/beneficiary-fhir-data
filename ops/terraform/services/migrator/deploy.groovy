@@ -7,6 +7,7 @@ boolean deployMigrator(Map args = [:]) {
     bfdEnv = args.bfdEnv
     heartbeatInterval = args.heartbeatInterval ?: 30
     awsRegion = args.awsRegion ?: 'us-east-1'
+    forceDeployment = args.forceDeployment ?: false
 
     // authenticate
     awsAuth.assumeRole()
@@ -14,7 +15,14 @@ boolean deployMigrator(Map args = [:]) {
     // set sqsQueueName
     sqsQueueName = "bfd-${bfdEnv}-migrator"
 
-    // precheck
+    // prechecks
+    if (isMigratorDeploymentRequired(bfdEnv, awsRegion) || forceDeployment) {
+        println "Migrator deployment is required"
+    } else {
+        println "Migrator deployment is NOT required. Skipping migrator deployment."
+        return true
+    }
+
     if (canMigratorDeploymentProceed(sqsQueueName, awsRegion)) {
         println "Proceeding to Migrator Deployment"
     } else {
@@ -136,6 +144,25 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
         println "Queue ${sqsQueueName} can not be found. Migrator deployment can proceed!"
         return true
     }
+}
+
+// checks to determine whether the migrator deployment is required
+// returns true when the latest versioned migration script is newer
+// than the database's stored schema version
+// otherwise false
+boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
+    println "Comparing schema migration versions..."
+    // check SSM Parameter Store
+    storedSchemaVersion = awsSsm.getParameter(
+        parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
+        awsRegion: awsRegion
+    ) as Integer
+
+    // check latest available versioned migration
+    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/") as Integer
+
+    // compare and determine
+    return latestAvailableMigrationVersion > storedSchemaVersion
 }
 
 return this
