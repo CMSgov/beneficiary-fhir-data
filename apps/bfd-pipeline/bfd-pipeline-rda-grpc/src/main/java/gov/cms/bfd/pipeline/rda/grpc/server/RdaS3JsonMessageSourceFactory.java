@@ -2,10 +2,10 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteSource;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -132,8 +132,8 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
         s3Dao.getS3BucketName(),
         ndjsonObjectKey);
     try {
-      ByteSource byteSource = s3Dao.downloadFile(ndjsonObjectKey);
-      return new JsonMessageSource<>(byteSource, parser);
+      var charSource = s3Dao.downloadFile(ndjsonObjectKey).asCharSource(StandardCharsets.UTF_8);
+      return new JsonMessageSource<>(charSource, parser);
     } catch (IOException ex) {
       throw new RuntimeException(
           String.format("error while downloading file from S3 bucket: key=%s", ndjsonObjectKey),

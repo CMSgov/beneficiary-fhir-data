@@ -407,30 +407,4 @@ public class RdaLoadJobIT {
         0,
         new IdHasher.Config(100, "thisisjustatest"));
   }
-
-  /**
-   * Creates a Fiss source factory for the claim json data.
-   *
-   * @param claimJson the claim json
-   * @return the source factory
-   */
-  private MessageSource.Factory<FissClaimChange> fissJsonSource(List<String> claimJson) {
-    // resource - This is a factory method, resource handling is done later
-    //noinspection resource
-    return sequenceNumber ->
-        new JsonMessageSource<>(claimJson, JsonMessageSource.fissParser()).skipTo(sequenceNumber);
-  }
-
-  /**
-   * Creates a MCS source factory for the claim json data.
-   *
-   * @param claimJson the claim json
-   * @return the source factory
-   */
-  private MessageSource.Factory<McsClaimChange> mcsJsonSource(List<String> claimJson) {
-    // resource - This is a factory method, resource handling is done later
-    //noinspection resource
-    return sequenceNumber ->
-        new JsonMessageSource<>(claimJson, JsonMessageSource.mcsParser()).skipTo(sequenceNumber);
-  }
 }

@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.apps;
 import com.amazonaws.regions.Regions;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
-import com.google.common.io.Files;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
@@ -257,8 +256,8 @@ public class LoadRdaJsonApp {
     private RdaMessageSourceFactory.Config createMessageSourceFactoryConfig() {
       return RdaMessageSourceFactory.Config.builder()
           .version(RdaService.Version.builder().version(RdaService.RDA_PROTO_VERSION).build())
-          .fissClaimJson(fissFile.map(Files::asByteSource).orElse(null))
-          .mcsClaimJson(mcsFile.map(Files::asByteSource).orElse(null))
+          .fissClaimJsonFile(fissFile.orElse(null))
+          .mcsClaimJsonFile(mcsFile.orElse(null))
           .s3Bucket(s3Bucket.orElse(null))
           .s3Region(s3Region.orElse(null))
           .s3Directory(s3Directory.orElse(null))
