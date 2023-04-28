@@ -75,7 +75,7 @@ public class RdaServerJobIT extends MinioTestContainer {
             .serverMode(RdaServerJob.Config.ServerMode.Random)
             .serverName(SERVER_NAME)
             .randomSeed(1L)
-            .randomMaxClaims(5)
+            .randomMaxClaims(4)
             .build();
     final RdaServerJob job = new RdaServerJob(config);
     final ExecutorService exec = Executors.newCachedThreadPool();

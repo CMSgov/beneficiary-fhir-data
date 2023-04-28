@@ -85,8 +85,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   @Override
   public MessageSource<T> apply(long sequenceNumber) throws Exception {
     List<FileEntry> entries = listFiles(sequenceNumber);
-    return new MultiS3MessageSource(entries)
-        .filter(record -> sequenceNumberGetter.apply(record) >= sequenceNumber);
+    return new MultiS3MessageSource(entries).skipTo(sequenceNumber);
   }
 
   /**
@@ -146,12 +145,28 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     }
 
     /**
+     * Calls {@link MessageSource#skipTo} on each source in turn until if finds one that still has
+     * messages to return or it runs out of sources to try.
+     *
+     * <p>{@inheritDoc}
+     */
+    @Override
+    public synchronized MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
+      current.skipTo(startingSequenceNumber);
+      while (remaining.size() > 0 && !current.hasNext()) {
+        current.close();
+        current = actualFactory.apply(remaining.remove(0).objectKey);
+        current.skipTo(startingSequenceNumber);
+      }
+      return this;
+    }
+
+    /**
      * Checks the current source for more records. If the current source has no more records it
      * closes that source and finds the next available source that does have a record. Sources are
      * closed along the way to ensure only the current source is open at any given time.
      *
-     * @return true if next can be called successfully
-     * @throws Exception if any operation fails
+     * <p>{@inheritDoc}
      */
     @Override
     public synchronized boolean hasNext() throws Exception {
@@ -165,13 +180,11 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
       return current.hasNext();
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized T next() throws Exception {
       return current.next();
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized void close() throws Exception {
       current.close();
