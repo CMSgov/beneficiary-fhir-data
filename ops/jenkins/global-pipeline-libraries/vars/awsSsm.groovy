@@ -14,7 +14,7 @@ String getParameter(Map args = [:]) {
 String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
-    shouldOverwrite = args.overwrite ?: false
+    shouldOverwrite = args.overwrite ? true : false
     awsRegion = args.awsRegion ?: 'us-east-1'
 
     if (shouldOverwrite) {

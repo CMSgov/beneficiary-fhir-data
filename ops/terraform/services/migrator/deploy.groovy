@@ -108,7 +108,8 @@ def monitorMigrator(Map args = [:]) {
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (migratorStatus != '0/0') {
-                return new Tuple(migratorStatus, schemaVersion)
+                def resultsList = [migratorStatus, schemaVersion]
+                return resultsList
             }
         }
         sleep(heartbeatInterval)
@@ -164,9 +165,11 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
         parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
         awsRegion: awsRegion
     ) as Integer
+    echo "Stored Schema Version : ${storedSchemaVersion}"
 
     // check latest available versioned migration
-    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/getLatestSchemaMigrationScriptVersion.sh") as Integer
+    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
+    echo "Latest Available Migration Version: ${latestAvailableMigrationVersion}"
 
     // compare and determine
     return latestAvailableMigrationVersion > storedSchemaVersion
