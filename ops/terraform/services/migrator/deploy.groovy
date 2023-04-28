@@ -53,8 +53,14 @@ boolean deployMigrator(Map args = [:]) {
     awsAuth.assumeRole()
 
     // set return value for final disposition
-    if (finalMigratorStatus == '0') {
+    if (finalMigratorStatus[0] == '0') {
         migratorDeployedSuccessfully = true
+        awsSsm.putParameter(
+            parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
+            parameterValue: finalMigratorStatus[1],
+            shouldOverwrite: true
+        )
+
         // Teardown when there is a healthy exit status
         terraform.deployTerraservice(
             env: bfdEnv,
@@ -70,14 +76,14 @@ boolean deployMigrator(Map args = [:]) {
 
     awsSqs.purgeQueue(sqsQueueName)
 
-    println "Migrator completed with exit status ${finalMigratorStatus}"
+    println "Migrator completed with exit status ${finalMigratorStatus[0]}"
     return migratorDeployedSuccessfully
 }
 
 
 // polls the given AWS SQS Queue `sqsQueueName` for migrator messages for
 // 20s at the `heartbeatInterval`
-String monitorMigrator(Map args = [:]) {
+def monitorMigrator(Map args = [:]) {
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion
     heartbeatInterval = args.heartbeatInterval
@@ -98,10 +104,11 @@ String monitorMigrator(Map args = [:]) {
         // 2. if the message body contains a non "0/0" (running) value, return it
         for (msg in messages) {
             migratorStatus = msg.body.status
+            schemaVersion = msg.body.schema_version
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (migratorStatus != '0/0') {
-                return migratorStatus
+                return new Tuple(migratorStatus, schemaVersion)
             }
         }
         sleep(heartbeatInterval)
