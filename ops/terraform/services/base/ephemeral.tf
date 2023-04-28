@@ -37,6 +37,8 @@ locals {
     "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"            = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
     "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key"           = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
     "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"            = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
+    "/bfd/${local.env}/server/sensitive/test_client_key"                             = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
+    "/bfd/${local.env}/server/sensitive/test_client_cert"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
   } : {}
 }
 
