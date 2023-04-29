@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,10 +10,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -37,9 +38,12 @@ public class S3BucketMessageSourceFactoryTest {
         "this-won't-match",
         "fiss-0-100.ndjson");
 
+    // Since we don't parse any files we just need a function to pass to the constructor.
+    final Function<String, MessageSource<Object>> emptyObjectParser =
+        s -> new EmptyMessageSource<>();
+
     S3BucketMessageSourceFactory<?> fissFactory =
-        new S3BucketMessageSourceFactory<>(
-            s3Dao, "fiss", "ndjson", s -> new EmptyMessageSource<>());
+        new S3BucketMessageSourceFactory<>(s3Dao, "fiss", "ndjson", emptyObjectParser);
     assertEquals(
         Arrays.asList(
             new S3BucketMessageSourceFactory.FileEntry("fiss-0-100.ndjson", 0, 100),
@@ -53,7 +57,7 @@ public class S3BucketMessageSourceFactoryTest {
         fissFactory.listFiles(112L));
 
     S3BucketMessageSourceFactory<?> mcsFactory =
-        new S3BucketMessageSourceFactory<>(s3Dao, "mcs", "ndjson", s -> new EmptyMessageSource<>());
+        new S3BucketMessageSourceFactory<>(s3Dao, "mcs", "ndjson", emptyObjectParser);
     assertEquals(
         Arrays.asList(
             new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson.gz", 83, 214),
@@ -141,7 +145,7 @@ public class S3BucketMessageSourceFactoryTest {
    */
   private void setFilesInS3Dao(String... filenames) {
     var allFileNames = List.copyOf(Arrays.asList(filenames));
-    doReturn(allFileNames).when(s3Dao).readFileNames();
+    Mockito.doReturn(allFileNames).when(s3Dao).readFileNames();
   }
 
   /**
@@ -157,7 +161,7 @@ public class S3BucketMessageSourceFactoryTest {
       filenames.add(source.getFilename());
       sourceMap.put(source.getFilename(), source);
     }
-    doReturn(List.copyOf(filenames)).when(s3Dao).readFileNames();
+    Mockito.doReturn(List.copyOf(filenames)).when(s3Dao).readFileNames();
     return new S3BucketMessageSourceFactory<>(s3Dao, "fiss", "ndjson", sourceMap::get);
   }
 

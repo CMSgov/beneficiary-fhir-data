@@ -33,8 +33,11 @@ import lombok.ToString;
 public class S3BucketMessageSourceFactory<T> {
   /** Used to access data from S3 bucket. */
   private final S3DirectoryDao s3Dao;
-  /** A function for getting the message factory to transform the response. */
-  private final Function<String, MessageSource<T>> actualFactory;
+  /**
+   * A function that, when passed an S3 object key, produces a {@link MessageSource} that parses the
+   * S3 object to produce messages.
+   */
+  private final Function<String, MessageSource<T>> s3ObjectParser;
   /** The pattern to use to find files from S3. */
   private final Pattern matchPattern;
 
@@ -44,15 +47,15 @@ public class S3BucketMessageSourceFactory<T> {
    * @param s3Dao used to access data from S3 bucket
    * @param filePrefix the file prefix
    * @param fileSuffix the file suffix
-   * @param actualFactory the source factory creation function
+   * @param s3ObjectParser used to turn S3 object keys into {@link MessageSource}s
    */
   public S3BucketMessageSourceFactory(
       S3DirectoryDao s3Dao,
       String filePrefix,
       String fileSuffix,
-      Function<String, MessageSource<T>> actualFactory) {
+      Function<String, MessageSource<T>> s3ObjectParser) {
     this.s3Dao = s3Dao;
-    this.actualFactory = actualFactory;
+    this.s3ObjectParser = s3ObjectParser;
     matchPattern =
         Pattern.compile(
             String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
@@ -71,8 +74,8 @@ public class S3BucketMessageSourceFactory<T> {
   }
 
   /**
-   * Creates a {@link MessageSource} containing messages with sequence number greater than or equal
-   * to the provided one.
+   * Creates a {@link MessageSource} that produces messages with sequence number greater than or
+   * equal to the provided one.
    *
    * @param sequenceNumber minimum sequence number desired by the caller
    * @return a MessageSource pulling records from the bucket
@@ -149,7 +152,7 @@ public class S3BucketMessageSourceFactory<T> {
       current.skipTo(startingSequenceNumber);
       while (remaining.size() > 0 && !current.hasNext()) {
         current.close();
-        current = actualFactory.apply(remaining.remove(0).objectKey);
+        current = s3ObjectParser.apply(remaining.remove(0).objectKey);
         current.skipTo(startingSequenceNumber);
       }
       return this;
@@ -169,7 +172,7 @@ public class S3BucketMessageSourceFactory<T> {
       }
       while (remaining.size() > 0 && !current.hasNext()) {
         current.close();
-        current = actualFactory.apply(remaining.remove(0).objectKey);
+        current = s3ObjectParser.apply(remaining.remove(0).objectKey);
       }
       return current.hasNext();
     }

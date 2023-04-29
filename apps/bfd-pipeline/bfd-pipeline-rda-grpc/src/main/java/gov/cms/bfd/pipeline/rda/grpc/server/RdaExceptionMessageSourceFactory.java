@@ -62,5 +62,7 @@ public class RdaExceptionMessageSourceFactory implements RdaMessageSourceFactory
   }
 
   @Override
-  public void close() throws Exception {}
+  public void close() throws Exception {
+    realFactory.close();
+  }
 }

@@ -115,8 +115,8 @@ public class RdaLoadJobIT {
           RdaServer.LocalConfig.builder()
               .serviceConfig(
                   RdaMessageSourceFactory.Config.builder()
-                      .fissClaimJsonList(fissClaimJson)
                       .version(ARBITRARY_RDA_VERSION)
+                      .fissClaimJsonList(fissClaimJson)
                       .build())
               .build()
               .runWithPortParam(
@@ -166,8 +166,8 @@ public class RdaLoadJobIT {
           RdaServer.LocalConfig.builder()
               .serviceConfig(
                   RdaMessageSourceFactory.Config.builder()
-                      .fissClaimJsonList(badFissClaimJson)
                       .version(ARBITRARY_RDA_VERSION)
+                      .fissClaimJsonList(badFissClaimJson)
                       .build())
               .build()
               .runWithPortParam(
@@ -226,8 +226,8 @@ public class RdaLoadJobIT {
           RdaServer.InProcessConfig.builder()
               .serviceConfig(
                   RdaMessageSourceFactory.Config.builder()
-                      .mcsClaimJsonList(mcsClaimJson)
                       .version(ARBITRARY_RDA_VERSION)
+                      .mcsClaimJsonList(mcsClaimJson)
                       .build())
               .serverName(RdaServerJob.Config.DEFAULT_SERVER_NAME)
               .build()
@@ -274,9 +274,9 @@ public class RdaLoadJobIT {
           RdaServer.LocalConfig.builder()
               .serviceConfig(
                   RdaMessageSourceFactory.Config.builder()
+                      .version(ARBITRARY_RDA_VERSION)
                       .mcsClaimJsonList(mcsClaimJson)
                       .throwExceptionAfterCount(claimsToSendBeforeThrowing)
-                      .version(ARBITRARY_RDA_VERSION)
                       .build())
               .build()
               .runWithPortParam(

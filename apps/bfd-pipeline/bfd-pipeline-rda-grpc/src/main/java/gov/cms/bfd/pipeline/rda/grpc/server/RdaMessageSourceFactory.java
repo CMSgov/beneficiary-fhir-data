@@ -78,9 +78,9 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     /** Optional hard coded version. */
     @Nullable private final RdaService.Version version;
     /**
-     * If positive this is the number of valid messages that will be returned by each message source
-     * before throwing an exception. Causes all message sources to be wrapped in {@link
-     * ExceptionMessageSource}. {@see ExceptionMessageSource#countBeforeThrow}
+     * If positive this causes all generated {@link MessageSource}s to be wrapped in {@link
+     * ExceptionMessageSource} with {@see ExceptionMessageSource#countBeforeThrow} set to this
+     * value.
      */
     int throwExceptionAfterCount;
 

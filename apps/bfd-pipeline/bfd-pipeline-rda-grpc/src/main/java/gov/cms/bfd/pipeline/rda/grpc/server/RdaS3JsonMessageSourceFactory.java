@@ -132,7 +132,8 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
         s3Dao.getS3BucketName(),
         ndjsonObjectKey);
     try {
-      var charSource = s3Dao.downloadFile(ndjsonObjectKey).asCharSource(StandardCharsets.UTF_8);
+      final var byteSource = s3Dao.downloadFile(ndjsonObjectKey);
+      final var charSource = byteSource.asCharSource(StandardCharsets.UTF_8);
       return new JsonMessageSource<>(charSource, parser);
     } catch (IOException ex) {
       throw new RuntimeException(
