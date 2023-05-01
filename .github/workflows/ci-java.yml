@@ -208,7 +208,6 @@ jobs:
   # ansible system testing
 
   ansible-role-bfd-pipeline:
-    needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline

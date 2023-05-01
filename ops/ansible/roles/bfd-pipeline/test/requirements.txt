@@ -1,4 +1,4 @@
+urllib3==1.26.15
 ansible==2.9.27
-requests<=2.28.0
 docker
 lxml
