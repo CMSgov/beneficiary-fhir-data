@@ -230,14 +230,14 @@ public class QueryUtils {
    */
   public static BitSet convertClaimsBitmaskValue(int maskVal) {
     BitSet rslt = new BitSet(maskVal);
-    rslt.set(CARRIER_HAS_DATA, (maskVal & (1 << CARRIER_HAS_DATA)) != 0);
-    rslt.set(INPATIENT_HAS_DATA, (maskVal & (1 << INPATIENT_HAS_DATA)) != 0);
-    rslt.set(OUTPATIENT_HAS_DATA, (maskVal & (1 << OUTPATIENT_HAS_DATA)) != 0);
-    rslt.set(SNF_HAS_DATA, (maskVal & (1 << SNF_HAS_DATA)) != 0);
-    rslt.set(DME_HAS_DATA, (maskVal & (1 << DME_HAS_DATA)) != 0);
-    rslt.set(HHA_HAS_DATA, (maskVal & (1 << HHA_HAS_DATA)) != 0);
-    rslt.set(HOSPICE_HAS_DATA, (maskVal & (1 << HOSPICE_HAS_DATA)) != 0);
-    rslt.set(PART_D_HAS_DATA, (maskVal & (1 << PART_D_HAS_DATA)) != 0);
+    rslt.set(CARRIER_HAS_DATA, (maskVal & V_CARRIER_HAS_DATA) != 0);
+    rslt.set(INPATIENT_HAS_DATA, (maskVal & V_INPATIENT_HAS_DATA) != 0);
+    rslt.set(OUTPATIENT_HAS_DATA, (maskVal & V_OUTPATIENT_HAS_DATA) != 0);
+    rslt.set(SNF_HAS_DATA, (maskVal & V_SNF_HAS_DATA) != 0);
+    rslt.set(DME_HAS_DATA, (maskVal & V_DME_HAS_DATA) != 0);
+    rslt.set(HHA_HAS_DATA, (maskVal & V_HHA_HAS_DATA) != 0);
+    rslt.set(HOSPICE_HAS_DATA, (maskVal & V_HOSPICE_HAS_DATA) != 0);
+    rslt.set(PART_D_HAS_DATA, (maskVal & V_PART_D_HAS_DATA) != 0);
     return rslt;
   }
 
