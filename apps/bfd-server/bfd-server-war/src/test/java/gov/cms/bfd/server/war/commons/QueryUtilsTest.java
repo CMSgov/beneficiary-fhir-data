@@ -148,12 +148,13 @@ public class QueryUtilsTest {
     // 0000001 maskVal
     // -------
     // 0000001 expected
-    int testVal = QueryUtils.V_CARRIER_HAS_DATA | QueryUtils.V_SNF_HAS_DATA;
-    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
+    int testVal = (1 << QueryUtils.CARRIER_HAS_DATA) | (1 << QueryUtils.SNF_HAS_DATA);
+    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & (1 << QueryUtils.CARRIER_HAS_DATA)));
 
     // same test as previous, but use additive additive values instead of XOR
-    testVal = QueryUtils.V_CARRIER_HAS_DATA + QueryUtils.V_SNF_HAS_DATA;
-    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
+    testVal = (1 << QueryUtils.CARRIER_HAS_DATA) + (1 << QueryUtils.SNF_HAS_DATA);
+    assertEquals(
+        (1 << QueryUtils.CARRIER_HAS_DATA), (testVal & (1 << QueryUtils.CARRIER_HAS_DATA)));
 
     // 0001001 testVal
     // 0010000 maskVal
@@ -163,23 +164,29 @@ public class QueryUtilsTest {
 
     // test additive vs. XOR of values by comparing two integer values, each derived
     // in a different manner.
-    testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
+    testVal =
+        (1 << QueryUtils.DME_HAS_DATA)
+            | (1 << QueryUtils.SNF_HAS_DATA)
+            | (1 << QueryUtils.HHA_HAS_DATA);
     assertEquals(
-        testVal, QueryUtils.V_DME_HAS_DATA + QueryUtils.V_SNF_HAS_DATA + QueryUtils.V_HHA_HAS_DATA);
+        testVal,
+        (1 << QueryUtils.DME_HAS_DATA)
+            + (1 << QueryUtils.SNF_HAS_DATA)
+            + (1 << QueryUtils.HHA_HAS_DATA));
 
     // test entire mask being set; each '&' mask should produce a value equal
     // to mask we are checking for.
     testVal =
-        QueryUtils.V_CARRIER_HAS_DATA
-            + QueryUtils.V_INPATIENT_HAS_DATA
-            + QueryUtils.V_OUTPATIENT_HAS_DATA
-            + QueryUtils.V_SNF_HAS_DATA
-            + QueryUtils.V_DME_HAS_DATA
-            + QueryUtils.V_HHA_HAS_DATA
-            + QueryUtils.V_HOSPICE_HAS_DATA
-            + QueryUtils.V_PART_D_HAS_DATA;
+        (1 << QueryUtils.CARRIER_HAS_DATA)
+            + (1 << QueryUtils.INPATIENT_HAS_DATA)
+            + (1 << QueryUtils.OUTPATIENT_HAS_DATA)
+            + (1 << QueryUtils.SNF_HAS_DATA)
+            + (1 << QueryUtils.DME_HAS_DATA)
+            + (1 << QueryUtils.HHA_HAS_DATA)
+            + (1 << QueryUtils.HOSPICE_HAS_DATA)
+            + (1 << QueryUtils.PART_D_HAS_DATA);
 
-    assertEquals(QueryUtils.V_PART_D_HAS_DATA, (testVal & QueryUtils.V_PART_D_HAS_DATA));
+    assertEquals((1 << QueryUtils.PART_D_HAS_DATA), (testVal & (1 << QueryUtils.PART_D_HAS_DATA)));
     assertEquals(QueryUtils.V_HOSPICE_HAS_DATA, (testVal & QueryUtils.V_HOSPICE_HAS_DATA));
     assertEquals(QueryUtils.V_HHA_HAS_DATA, (testVal & QueryUtils.V_HHA_HAS_DATA));
     assertEquals(QueryUtils.V_DME_HAS_DATA, (testVal & QueryUtils.V_DME_HAS_DATA));
