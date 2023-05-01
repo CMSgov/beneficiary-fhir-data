@@ -245,10 +245,10 @@ public class QueryUtils {
    * Query database to determine which claim types have data for the specified beneficiary.
    *
    * @param entityManager {@link EntityManager} used to query database.
-   * @param bene_id used to identify the Benficiary to chek claims for.
+   * @param beneficiaryId used to identify the Benficiary to chek claims for.
    * @return {@link BitSet} denoting which claims have data.
    */
-  public static BitSet hasClaimsData(EntityManager entityManager, long bene_id) {
+  public static BitSet hasClaimsData(EntityManager entityManager, long beneficiaryId) {
     /*
      * execute a database function that returns a bitwise mask value that denotes that the given
      * claim type will have data for the specified beneficiayrId. This represents fast and efficient
@@ -270,7 +270,7 @@ public class QueryUtils {
     List<Object> values =
         entityManager
             .createNativeQuery(CHECK_CLAIMS_FOR_DATA_SQL)
-            .setParameter("beneIdValue", bene_id)
+            .setParameter("beneIdValue", beneficiaryId)
             .getResultList();
 
     Integer maskVal = (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
