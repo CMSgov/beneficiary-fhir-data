@@ -9,12 +9,7 @@
       - docker
       - docker-compose
     state: present
-  package:
-    name: "{{ item }}"
-    state: present
   become: true
-  with_items:
-    - docker
 
 - name: Enable and Start Docker
   systemd:
