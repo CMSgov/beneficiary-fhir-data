@@ -31,6 +31,7 @@ import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -268,22 +269,34 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @Trace
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           ReferenceParam patient,
       @OptionalParam(name = "type")
-          @Description(shortDefinition = "A list of claim types to include")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_CLAIM_TYPE_SHORT,
+              value = OpenAPIContentProvider.EOB_CLAIM_TYPE_VALUE)
           TokenAndListParam type,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "excludeSAMHSA")
-          @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_SHORT,
+              value = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_VALUE)
           String excludeSamhsa,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       @OptionalParam(name = "service-date")
-          @Description(shortDefinition = "Include resources that completed in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_SERVICE_DATE_SHORT,
+              value = OpenAPIContentProvider.EOB_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
       RequestDetails requestDetails) {
     /*
