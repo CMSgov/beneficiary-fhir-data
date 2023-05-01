@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.io.IOException;
 import java.util.List;
@@ -58,19 +59,29 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return !InvalidDcnRegex.matcher(fissClaimChange.getDcn()).find();
   }
 
-  /** {@inheritDoc} */
+  /**
+   * This implementation checks the {@link FissClaimChange#getChangeType}.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param fissClaimChange message to check
+   * @return true if {@link FissClaimChange#getChangeType} is {@link ChangeType#CHANGE_TYPE_DELETE}.
+   */
+  @Override
+  public boolean isDeleteMessage(FissClaimChange fissClaimChange) {
+    return fissClaimChange.getChangeType() == ChangeType.CHANGE_TYPE_DELETE;
+  }
+
   @Override
   public String getClaimIdForMessage(FissClaimChange object) {
     return object.getClaim().getRdaClaimKey();
   }
 
-  /** {@inheritDoc} */
   @Override
   public long getSequenceNumberForObject(FissClaimChange object) {
     return object.getSeq();
   }
 
-  /** {@inheritDoc} */
   @Nonnull
   @Override
   RdaChange<RdaFissClaim> transformMessageImpl(String apiVersion, FissClaimChange message) {
@@ -79,7 +90,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
     return change;
   }
 
-  /** {@inheritDoc} */
   @Override
   int getInsertCount(RdaFissClaim claim) {
     return 1 // Add one for the base claim
@@ -89,7 +99,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         + claim.getAuditTrail().size();
   }
 
-  /** {@inheritDoc} */
   @Override
   RdaClaimMessageMetaData createMetaData(RdaChange<RdaFissClaim> change) {
     final RdaFissClaim claim = change.getClaim();
@@ -109,7 +118,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaF
         .build();
   }
 
-  /** {@inheritDoc} */
   @Override
   MessageError createMessageError(
       String apiVersion, FissClaimChange change, List<DataTransformer.ErrorMessage> errors)
