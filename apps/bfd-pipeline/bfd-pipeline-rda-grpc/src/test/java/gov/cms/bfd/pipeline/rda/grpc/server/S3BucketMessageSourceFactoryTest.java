@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +16,6 @@ import lombok.Getter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -145,7 +145,7 @@ public class S3BucketMessageSourceFactoryTest {
    */
   private void setFilesInS3Dao(String... filenames) {
     var allFileNames = List.copyOf(Arrays.asList(filenames));
-    Mockito.doReturn(allFileNames).when(s3Dao).readFileNames();
+    doReturn(allFileNames).when(s3Dao).readFileNames();
   }
 
   /**
@@ -161,7 +161,7 @@ public class S3BucketMessageSourceFactoryTest {
       filenames.add(source.getFilename());
       sourceMap.put(source.getFilename(), source);
     }
-    Mockito.doReturn(List.copyOf(filenames)).when(s3Dao).readFileNames();
+    doReturn(List.copyOf(filenames)).when(s3Dao).readFileNames();
     return new S3BucketMessageSourceFactory<>(s3Dao, "fiss", "ndjson", sourceMap::get);
   }
 
