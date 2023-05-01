@@ -531,30 +531,6 @@
 #!/usr/bin/env bash
 set -e
 
-checkJavaFormat() {
-  echo 'Verifying Java source code format...'
-
-  if ! git diff --name-only --cached | grep -q '^apps/.*'; then
-    echo 'Verified Java source code format: no staged changes in app/.'
-    return 0
-  fi
-
-  cd apps
-
-  set +e
-  mvn com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1
-  checkResult=$?
-  set -e
-
-  if [ ${checkResult} -eq 0 ]; then
-    echo 'Verified Java source code format: a-okay.'
-  else
-    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
-  fi
-
-  return ${checkResult}
-}
-
 checkSecretFilesForPlainText() {
   echo 'Verifying secret files are not in plaintext...'
   set +e
@@ -586,8 +562,38 @@ checkSecretFilesForPlainText() {
 }
 
 checkSecretFilesForPlainText
-checkJavaFormat
 							]]></pre-commit>
+							<pre-push><![CDATA[
+#!/usr/bin/env bash
+set -e
+
+checkJavaFormat() {
+  echo 'Verifying Java source code format...'
+
+  if ! git diff --name-only --cached | grep -q '^apps/.*'; then
+    echo 'Verified Java source code format: no staged changes in app/.'
+    return 0
+  fi
+
+  cd apps
+
+  set +e
+  mvn com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1
+  checkResult=$?
+  set -e
+
+  if [ ${checkResult} -eq 0 ]; then
+    echo 'Verified Java source code format: a-okay.'
+  else
+    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
+  fi
+
+  return ${checkResult}
+}
+
+checkJavaFormat
+							]]>
+							</pre-push>
 						</hooks>
 					</configuration>
 				</plugin>
