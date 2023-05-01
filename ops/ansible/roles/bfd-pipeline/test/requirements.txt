@@ -1,3 +1,4 @@
 ansible==2.9.27
+requests<2.2.29
 docker
 lxml
