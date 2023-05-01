@@ -43,8 +43,6 @@ docker run \
     postgres:14 -c max_connections=200
 fi
 
-docker run echo "$(openssl version)"
-
 # Prep the Docker container that will be used (if it's not already running).
 if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E "^${CONTAINER_NAME}$")" ]; then
   docker run \
