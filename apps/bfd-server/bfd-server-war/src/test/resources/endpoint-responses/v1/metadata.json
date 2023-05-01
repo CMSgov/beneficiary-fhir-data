@@ -30,15 +30,15 @@
       "searchParam" : [ {
         "name" : "beneficiary",
         "type" : "reference",
-        "documentation" : "The patient identifier to search for"
+        "documentation" : "Fetch <i>Patient<i/> data using a FHIR <i>IdType<i/> identifier; an IdType represents the logical identity for a resource, or as much of that identity that is known. In FHIR, every resource must have a <i>logical ID<i/> which is defined by the FHIR specification as:<p><code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.)</code></p><p>This class contains that logical ID, and can optionally also contain a relative or absolute URL representing the resource identity; the following are all valid values for IdType, and all might represent the same resource:</p><ul><li><code>123</code> (just a resource's ID)</li><li><code>Patient/123</code> (a relative identity)</li><li><code>http://example.com/Patient/123 (an absolute identity)</code></li>"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "documentation" : "Only satisfy the Search if the Beneficiary's <i>last_updated</i> Date falls within a specified <i>DateRange<i/>. A DateRange can include both lo and hi date values, only a lo date value, or only a hi date value.<p/>Examples:<ul><li>&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01</li><li>&_lastUpdated=gt2023-01-02</li><li>&_lastUpdated=lt2023-05-01</li></ul><p/><a href=\"https://localhost:9876/v2/fhir/docs/foo.html\">See BFD Documentation for _lastUpdated</a><p/>"
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.<p/>Example:<ul><li>startIndex=100</li>"
       } ]
     }, {
       "type" : "ExplanationOfBenefit",
@@ -53,27 +53,27 @@
       "searchParam" : [ {
         "name" : "patient",
         "type" : "reference",
-        "documentation" : "The patient identifier to search for"
+        "documentation" : "Fetch <i>Patient<i/> data using a FHIR <i>IdType<i/> identifier; an IdType represents the logical identity for a resource, or as much of that identity that is known. In FHIR, every resource must have a <i>logical ID<i/> which is defined by the FHIR specification as:<p><code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.)</code></p><p>This class contains that logical ID, and can optionally also contain a relative or absolute URL representing the resource identity; the following are all valid values for IdType, and all might represent the same resource:</p><ul><li><code>123</code> (just a resource's ID)</li><li><code>Patient/123</code> (a relative identity)</li><li><code>http://example.com/Patient/123 (an absolute identity)</code></li>"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "documentation" : "Only satisfy the Search if the Beneficiary's <i>last_updated</i> Date falls within a specified <i>DateRange<i/>. A DateRange can include both lo and hi date values, only a lo date value, or only a hi date value.<p/>Examples:<ul><li>&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01</li><li>&_lastUpdated=gt2023-01-02</li><li>&_lastUpdated=lt2023-05-01</li></ul><p/><a href=\"https://localhost:9876/v2/fhir/docs/foo.html\">See BFD Documentation for _lastUpdated</a><p/>"
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
-        "documentation" : "If true, exclude all SAMHSA-related resources"
+        "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims ifrom the response.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Include resources that completed in the given range"
+        "documentation" : "Only satisfy the Search request if a claim's <i>thru</i> Date falls within a specified <i>DateRange<i/>. A DateRange can include both lo and hi date values, only a lo date value, or only a hi date value.<p/>Examples:<ul><li>&service-date=gt2023-01-02&service-date=lt2023-05-01</li><li>&service-date=gt2023-01-02</li><li>&_service-date=lt2023-05-01</li></ul>"
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.<p/>Example:<ul><li>startIndex=100</li>"
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of claim types to include"
+        "documentation" : "A list of one or more comma-separated claim types to be included in the request; within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified claim types will be checked.<p/>Supported Claim Type values:<ul><li>carrier</li><li>inpatient</li><li>outpatient</li><li>hha</li><li>hospice</li><li>snf</li><li>dme</li><li>partd</li></ul><p>BFD also supports a wildcard claims type denoted by an &#42; ; this includes all claim types in the filter.<p/>Examples:<ul><li>type=carrier,inpatient,snf,dme</li><li>type=outpatient</li><li>type=&#42;</li>"
       } ]
     }, {
       "type" : "OperationDefinition",
@@ -96,19 +96,19 @@
       "searchParam" : [ {
         "name" : "_has:Coverage",
         "type" : "token",
-        "documentation" : "Part D coverage type"
+        "documentation" : "When searching for a Patient's Part D events information, this resource identifies the Part D contract value that will be used when determining eligibility.<p/>Example:<ul><li>_has:Coverage.extension=ABCD</li>"
       }, {
         "name" : "_has:Coverage",
         "type" : "token",
-        "documentation" : "Part D reference year"
+        "documentation" : "When searching for a Patient's Part D events information, this resource identifies the reference year that will be applied when determining applicable Part D events.<p/>Example:<ul><li>_has:Coverage.rfrncyr=2023</li>"
       }, {
         "name" : "_id",
         "type" : "token",
-        "documentation" : "The patient identifier to search for"
+        "documentation" : "Fetch <i>Patient<i/> data using a FHIR <i>IdType<i/> identifier; an IdType represents the logical identity for a resource, or as much of that identity that is known. In FHIR, every resource must have a <i>logical ID<i/> which is defined by the FHIR specification as:<p><code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.)</code></p><p>This class contains that logical ID, and can optionally also contain a relative or absolute URL representing the resource identity; the following are all valid values for IdType, and all might represent the same resource:</p><ul><li><code>123</code> (just a resource's ID)</li><li><code>Patient/123</code> (a relative identity)</li><li><code>http://example.com/Patient/123 (an absolute identity)</code></li>"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "documentation" : "Only satisfy the Search if the Beneficiary's <i>last_updated</i> Date falls within a specified <i>DateRange<i/>. A DateRange can include both lo and hi date values, only a lo date value, or only a hi date value.<p/>Examples:<ul><li>&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01</li><li>&_lastUpdated=gt2023-01-02</li><li>&_lastUpdated=lt2023-05-01</li></ul><p/><a href=\"https://localhost:9876/v2/fhir/docs/foo.html\">See BFD Documentation for _lastUpdated</a><p/>"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
@@ -116,7 +116,7 @@
       }, {
         "name" : "cursor",
         "type" : "string",
-        "documentation" : "The cursor used for result pagination"
+        "documentation" : "Provide a pagination cursor for processing Patient's Part D events information; this resource identifies a numeric offset into a result set.<p/>Example:<ul><li>cursor=200</li>"
       }, {
         "name" : "identifier",
         "type" : "token",
@@ -124,7 +124,7 @@
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.<p/>Example:<ul><li>startIndex=100</li>"
       }, {
         "name" : "startIndex",
         "type" : "string",

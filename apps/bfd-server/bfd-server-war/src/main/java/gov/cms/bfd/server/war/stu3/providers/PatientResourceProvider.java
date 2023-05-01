@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -163,7 +164,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
-    // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
+    // there is another method with exclude list:
+    // requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
@@ -240,13 +242,19 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
-          @Description(shortDefinition = "Part D coverage type")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
           TokenParam coverageId,
       @OptionalParam(name = "_has:Coverage.rfrncyr")
-          @Description(shortDefinition = "Part D reference year")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_REFYR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_REFYR_VALUE)
           TokenParam referenceYear,
       @OptionalParam(name = "cursor")
-          @Description(shortDefinition = "The cursor used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
       RequestDetails requestDetails) {
     // Figure out what month they're searching for.
@@ -259,7 +267,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     int year = Year.now().getValue();
     if (referenceYear != null && !StringUtils.isEmpty(referenceYear.getValueNotNull())) {
       /*
-       * TODO Once AB2D has switched to always specifying the year, the implicit `else` on this
+       * TODO Once AB2D has switched to always specifying the year, the implicit
+       * `else` on this
        * needs to become an invalid request.
        */
       try {
@@ -296,13 +305,19 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   @Trace
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           TokenParam logicalId,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (logicalId.getQueryParameterQualifier() != null)
@@ -337,8 +352,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     /*
-     * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
-     * to override the operation name that was published by the possible call to read(...), above.
+     * Publish the operation name. Note: This is a bit later than we'd normally do
+     * this, as we need
+     * to override the operation name that was published by the possible call to
+     * read(...), above.
      */
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
@@ -376,7 +393,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    // This endpoint only supports returning unhashed MBIs (and not HICNs), so verify that was
+    // This endpoint only supports returning unhashed MBIs (and not HICNs), so
+    // verify that was
     // requested.
     if (!requestHeader.isMBIinIncludeIdentifiers() || requestHeader.isHICNinIncludeIdentifiers()) {
       throw new InvalidRequestException(
@@ -487,11 +505,16 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     String contractCode = coverageId.getValueNotNull();
 
     /*
-     * Workaround for BFD-1057: The `ORDER BY` required on our "find the bene IDs" query (below)
-     * intermittently causes the PostgreSQL query planner to run a table scan, which takes over an
-     * hour in prod. This _seems_ to be only occurring when the query would return no results. (Yes,
-     * this is odd and we don't entirely trust it.) So, when we're on the first page of results or
-     * not paging at all here, we first pull a count of expected matches here to see if there's any
+     * Workaround for BFD-1057: The `ORDER BY` required on our "find the bene IDs"
+     * query (below)
+     * intermittently causes the PostgreSQL query planner to run a table scan, which
+     * takes over an
+     * hour in prod. This _seems_ to be only occurring when the query would return
+     * no results. (Yes,
+     * this is odd and we don't entirely trust it.) So, when we're on the first page
+     * of results or
+     * not paging at all here, we first pull a count of expected matches here to see
+     * if there's any
      * reason to even run the next query.
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
@@ -503,10 +526,14 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     /*
-     * Fetching with joins is not compatible with setMaxResults as explained in this post:
-     * https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
-     * So, because we need to use a join, we query in two steps: first fetch bene-ids with paging
-     * and then fetch full benes with joins. (Note: We can't run this as a subquery, either, as JPA
+     * Fetching with joins is not compatible with setMaxResults as explained in this
+     * post:
+     * https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-
+     * pagination-best-practices
+     * So, because we need to use a join, we query in two steps: first fetch
+     * bene-ids with paging
+     * and then fetch full benes with joins. (Note: We can't run this as a subquery,
+     * either, as JPA
      * doesn't support `limit` on those.)
      */
 
@@ -829,34 +856,49 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       throw new InvalidRequestException("Hash value cannot be null/empty");
     }
     /*
-     * Beneficiaries' HICN/MBIs can change over time and those past HICN/MBIs may land in
-     * BeneficiaryHistory records. Accordingly, we need to search for matching HICN/MBIs in both the
+     * Beneficiaries' HICN/MBIs can change over time and those past HICN/MBIs may
+     * land in
+     * BeneficiaryHistory records. Accordingly, we need to search for matching
+     * HICN/MBIs in both the
      * Beneficiary and the BeneficiaryHistory records.
      *
-     * There's no sane way to do this in a single query with JPA 2.1, it appears: JPA doesn't
-     * support UNIONs and it doesn't support subqueries in FROM clauses. That said, the ideal query
+     * There's no sane way to do this in a single query with JPA 2.1, it appears:
+     * JPA doesn't
+     * support UNIONs and it doesn't support subqueries in FROM clauses. That said,
+     * the ideal query
      * would look like this:
      *
-     * SELECT * FROM ( SELECT DISTINCT "beneficiaryId" FROM "Beneficiaries" WHERE "hicn" =
-     * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM "BeneficiariesHistory" WHERE "hicn" =
-     * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON matching_benes."beneficiaryId"
+     * SELECT * FROM ( SELECT DISTINCT "beneficiaryId" FROM "Beneficiaries" WHERE
+     * "hicn" =
+     * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM
+     * "BeneficiariesHistory" WHERE "hicn" =
+     * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON
+     * matching_benes."beneficiaryId"
      * = "Beneficiaries"."beneficiaryId" LEFT JOIN "BeneficiariesHistory" ON
-     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT JOIN
+     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT
+     * JOIN
      * "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" =
      * "MedicareBeneficiaryIdHistory"."beneficiaryId";
      *
-     * ... with the returned columns and JOINs being dynamic, depending on IncludeIdentifiers.
+     * ... with the returned columns and JOINs being dynamic, depending on
+     * IncludeIdentifiers.
      *
-     * In lieu of that, we run two queries: one to find HICN/MBI matches in BeneficiariesHistory,
-     * and a second to find BENE_ID or HICN/MBI matches in Beneficiaries (with all of their data, so
-     * we're ready to return the result). This is bad and dumb but I can't find a better working
+     * In lieu of that, we run two queries: one to find HICN/MBI matches in
+     * BeneficiariesHistory,
+     * and a second to find BENE_ID or HICN/MBI matches in Beneficiaries (with all
+     * of their data, so
+     * we're ready to return the result). This is bad and dumb but I can't find a
+     * better working
      * alternative.
      *
-     * (I'll just note that I did also try JPA/Hibernate native SQL queries but couldn't get the
+     * (I'll just note that I did also try JPA/Hibernate native SQL queries but
+     * couldn't get the
      * joins or fetch groups to work with them.)
      *
-     * If we want to fix this, we need to move identifiers out entirely to separate tables:
-     * BeneficiaryHicns and BeneficiaryMbis. We could then safely query these tables and join them
+     * If we want to fix this, we need to move identifiers out entirely to separate
+     * tables:
+     * BeneficiaryHicns and BeneficiaryMbis. We could then safely query these tables
+     * and join them
      * back to Beneficiaries (and hopefully the optimizer will play nice, too).
      */
 

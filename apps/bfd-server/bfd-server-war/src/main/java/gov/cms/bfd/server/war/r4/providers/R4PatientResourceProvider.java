@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -247,13 +248,19 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Trace
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           TokenParam logicalId,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (logicalId.getQueryParameterQualifier() != null)
@@ -328,13 +335,19 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
-          @Description(shortDefinition = "Part D coverage type")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
           TokenParam coverageId,
       @OptionalParam(name = "_has:Coverage.rfrncyr")
-          @Description(shortDefinition = "Part D reference year")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_REFYR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_REFYR_VALUE)
           TokenParam referenceYear,
       @OptionalParam(name = "cursor")
-          @Description(shortDefinition = "The cursor used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
       RequestDetails requestDetails) {
 
@@ -373,7 +386,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   public Bundle searchByCoverageContractByFieldName(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      TokenParam coverageId, String cursor, RequestDetails requestDetails) {
+      @RequiredParam(name = "_has:Coverage.extension")
+          @Description(
+              shortDefinition = "Part D coverage contract identifier",
+              value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
+          TokenParam coverageId,
+      String cursor,
+      RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
