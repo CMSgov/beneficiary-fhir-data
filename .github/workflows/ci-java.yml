@@ -27,7 +27,7 @@ env:
 jobs:
   workflow:
     name: Checking workflow
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       files: ${{ steps.workflow_files.outputs.files }}
     steps:
@@ -43,7 +43,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
   mvn-fmt-maven-plugin:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
@@ -74,7 +74,7 @@ jobs:
         working-directory: ./apps
 
   mvn-verify:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
