@@ -187,6 +187,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
+    root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
@@ -222,7 +223,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           beneficiary == null ? 0 : 1);
     }
 
-    return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
+    return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader, true);
   }
 
   /**
@@ -508,7 +509,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // So, in cases where there are joins and paging, we query in two steps: first
     // fetch bene-ids
     // with paging and then fetch full benes with joins.
-    boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
+    boolean useTwoSteps = paging.isPagingRequested();
 
     if (useTwoSteps) {
       // Fetch ids
@@ -518,10 +519,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               .getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids, requestHeader).getResultList();
+      return queryBeneficiariesByIds(ids).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging, requestHeader)
+      return queryBeneficiariesBy(contractMonthField, contractCode, paging)
           .setMaxResults(paging.getQueryMaxSize())
           .getResultList();
     }
@@ -533,12 +534,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @param field to match on
    * @param value to match on
    * @param paging to use for the result set
-   * @param requestHeader the request header
    * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
-    String joinsClause = "left join fetch b.skippedRifRecords";
+      String field, String value, PatientLinkBuilder paging) {
+    String joinsClause =
+        "left join fetch b.skippedRifRecords left join fetch b.medicareBeneficiaryIdHistories ";
     boolean passDistinctThrough = false;
 
     /*
@@ -554,11 +555,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * passing DISTINCT to the SQL statement
      * that gets executed.
      */
-
-    // BFD379: original V2, no MBI logic here
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -628,17 +624,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * Build a criteria for a beneficiary query using the passed in list of ids.
    *
    * @param ids to use
-   * @param requestHeader the request header
    * @return the query object
    */
-  private TypedQuery<Beneficiary> queryBeneficiariesByIds(
-      List<String> ids, RequestHeaders requestHeader) {
-    String joinsClause = "";
+  private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids) {
+    String joinsClause = "left join fetch b.medicareBeneficiaryIdHistories ";
     boolean passDistinctThrough = false;
-    // BFD379: no MBI logic in original V2 code here
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    }
 
     String query =
         "select distinct b from Beneficiary b "
@@ -874,10 +864,17 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    // BFD379: in original V2, if check is commented out
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-    }
+    /*
+     * Check both bene history and a now-defunct MBI id table for historical MBIs;
+     * These will be used to return any historical MBIs in the response and/or find the bene_id
+     * in the event that the user is searching using an old MBI value.
+     *
+     * FUTURE: The medicareBeneficiaryIdHistories was updated via a special RIF
+     * from CCW but that rif type hasnt been sent since 2019; this table should probably be merged
+     * into bene history and removed so we have one source of truth for historical MBIs.
+     */
+    beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+    beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
@@ -936,7 +933,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     beneficiary.setHicnUnhashed(Optional.empty());
 
     Patient patient =
-        BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
+        BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader, true);
     return patient;
   }
 
@@ -1133,16 +1130,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    // This endpoint only supports returning unhashed MBIs (and not HICNs), so
-    // verify that was
-    // requested.
-    if (!requestHeader.isMBIinIncludeIdentifiers() || requestHeader.isHICNinIncludeIdentifiers()) {
-      throw new InvalidRequestException(
-          String.format(
-              "This endpoint requires the '%s: mbi' header.",
-              CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS));
-    }
-
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
@@ -1162,10 +1149,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         matchingBeneficiaries.stream()
             .map(b -> BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader))
             .collect(Collectors.toList());
-
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
-
     TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
 
     // Add bene_id to MDC logs

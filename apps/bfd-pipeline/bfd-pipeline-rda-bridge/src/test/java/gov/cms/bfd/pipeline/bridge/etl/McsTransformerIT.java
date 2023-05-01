@@ -374,9 +374,7 @@ public class McsTransformerIT {
             .setIdrClmHdIcn(NEW_CLAIM_ICN)
             .setMcsDiagnosisCodes(
                 0,
-                defaultClaim
-                    .getMcsDiagnosisCodes(0)
-                    .toBuilder()
+                defaultClaim.getMcsDiagnosisCodes(0).toBuilder()
                     .setIdrClmHdIcn(NEW_CLAIM_ICN)
                     .build())
             .build();

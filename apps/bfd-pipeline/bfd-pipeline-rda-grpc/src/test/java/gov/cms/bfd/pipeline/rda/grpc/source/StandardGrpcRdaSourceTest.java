@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -153,6 +154,8 @@ public class StandardGrpcRdaSourceTest {
             "StandardGrpcRdaSource.ints.failures",
             "StandardGrpcRdaSource.ints.objects.received",
             "StandardGrpcRdaSource.ints.objects.stored",
+            "StandardGrpcRdaSource.ints.skipped.delete",
+            "StandardGrpcRdaSource.ints.skipped.invalid",
             "StandardGrpcRdaSource.ints.successes",
             "StandardGrpcRdaSource.ints.uptime"),
         appMetrics.getMeters().stream()
@@ -258,6 +261,7 @@ public class StandardGrpcRdaSourceTest {
     assertMeterReading(2, "batches", metrics.getBatches());
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
+    assertMeterReading(1, "invalid", metrics.getInvalidObjectsSkipped());
     // once at start, twice after a batch
     verify(source, times(3)).setUptimeToRunning();
     // once per object received
@@ -602,6 +606,40 @@ public class StandardGrpcRdaSourceTest {
     verify(channel).isTerminated();
     verify(channel).shutdown();
     verify(channel, times(2)).awaitTermination(anyLong(), any(TimeUnit.class));
+  }
+
+  /**
+   * Verifies that DELETE messages are skipped and metric is updated.
+   *
+   * @throws Exception required since method being tested has checked exceptions
+   */
+  @Test
+  public void testSkipsDeleteMessage() throws Exception {
+    doReturn(Optional.of(DATABASE_SEQUENCE_NUMBER)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
+        .when(caller)
+        .callService(same(channel), any(), anyLong());
+    // treat CLAIM_2 as a DELETE message
+    doReturn(true).when(sink).isDeleteMessage(eq(CLAIM_2));
+    doReturn(false).when(sink).isDeleteMessage(intThat(i -> !i.equals(CLAIM_2)));
+    doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_3));
+
+    int processedCount = source.retrieveAndProcessObjects(2, sink);
+    assertEquals(2, processedCount);
+
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(3, "received", metrics.getObjectsReceived());
+    assertMeterReading(2, "stored", metrics.getObjectsStored());
+    assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
+    assertMeterReading(1, "failures", metrics.getDeleteMessagesSkipped());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(3)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, CallOptions.DEFAULT, DATABASE_SEQUENCE_NUMBER);
   }
 
   /**

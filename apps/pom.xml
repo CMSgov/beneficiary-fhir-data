@@ -75,12 +75,12 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<micrometer.version>1.10.4</micrometer.version>
-		<metrics.version>4.2.16</metrics.version>
+		<micrometer.version>1.10.6</micrometer.version>
+		<metrics.version>4.2.18</metrics.version>
 		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.410</aws-java-sdk-bom.version>
-		<spring-data-jpa.version>2.7.10</spring-data-jpa.version>
+		<aws-java-sdk-bom.version>1.12.455</aws-java-sdk-bom.version>
+		<spring-data-jpa.version>2.7.11</spring-data-jpa.version>
 		<spring-framework.version>5.3.23</spring-framework.version>
 
 		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
@@ -89,29 +89,30 @@
 		<hibernate.version>5.6.10.Final</hibernate.version>
 		<junit.version>5.9.2</junit.version>
 		<javadoc.version>3.5.0</javadoc.version>
-		<testcontainers.version>1.17.6</testcontainers.version>
+		<testcontainers.version>1.18.0</testcontainers.version>
 
 		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
 			when vulnerabilities or other fixes affect some but not all components -->
-		<jackson-databind.version>2.14.2</jackson-databind.version>
-		<jackson-datatype-jdk8.version>2.14.2</jackson-datatype-jdk8.version>
-		<jackson-dataformat-yaml.version>2.14.2</jackson-dataformat-yaml.version>
-		<jackson-datatype-jsr310.version>2.14.2</jackson-datatype-jsr310.version>
+		<jackson-databind.version>2.15.0</jackson-databind.version>
+		<jackson-datatype-jdk8.version>2.15.0</jackson-datatype-jdk8.version>
+		<jackson-dataformat-yaml.version>2.15.0</jackson-dataformat-yaml.version>
+		<jackson-datatype-jsr310.version>2.15.0</jackson-datatype-jsr310.version>
                 <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
                 <snakeyaml.version>2.0</snakeyaml.version>
 
-		<mockito.version>5.1.1</mockito.version>
+		<mockito.version>5.3.1</mockito.version>
+		<mockito-inline.version>5.2.0</mockito-inline.version>
 		<system-lambda-version>1.2.1</system-lambda-version>
-		<postgresql.version>42.5.4</postgresql.version>
+		<postgresql.version>42.6.0</postgresql.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
-		<slf4j.version>2.0.6</slf4j.version>
+		<slf4j.version>2.0.7</slf4j.version>
 		<hikari.version>5.0.1</hikari.version>
 		<flyway.version>9.16.1</flyway.version>
-		<newrelic.agent.version>8.0.1</newrelic.agent.version>
-		<checkstyle.version>10.7.0</checkstyle.version>
+		<newrelic.agent.version>8.1.0</newrelic.agent.version>
+		<checkstyle.version>10.9.3</checkstyle.version>
 		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<guava.version>31.1-jre</guava.version>
-		<logback.classic.version>1.4.5</logback.classic.version>
+		<logback.classic.version>1.4.7</logback.classic.version>
 		<zjsonpatch.version>0.4.14</zjsonpatch.version>
 		<freemarker.version>2.3.32</freemarker.version>
 
@@ -126,9 +127,9 @@
 		<lombok.version>1.18.26</lombok.version>
 
 		<!-- Dependencies required for connecting to a gRPC API -->
-		<grpc_java.version>1.53.0</grpc_java.version>
+		<grpc_java.version>1.54.1</grpc_java.version>
 		<protoc.version>3.21.12</protoc.version>
-		<protobuf.version>3.21.12</protobuf.version>
+		<protobuf.version>3.22.3</protobuf.version>
 
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -137,9 +138,6 @@
 		<its.db.username/>
 		<its.db.password/>
 		<its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
-
-		<!-- Whether the V2 endpoints should be enabled -->
-		<local.v2.enabled>true</local.v2.enabled>
 
 		<!-- Whether the partially adjudicated claims endpoints should be enabled -->
 		<local.pac.enabled>true</local.pac.enabled>
@@ -151,7 +149,7 @@
 		<local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
 
 		<!-- Functional-reactive programming api for concurrent claim ingestion. -->
-		<reactor.version>3.5.1</reactor.version>
+		<reactor.version>3.5.5</reactor.version>
 
 		<!-- Default number of threads that we can overridden as needed in module poms. -->
 		<compile.thread.count>4</compile.thread.count>
@@ -519,9 +517,9 @@
 					<version>2.6</version>
 				</plugin>
 				<plugin>
-					<groupId>com.coveo</groupId>
+					<groupId>com.spotify.fmt</groupId>
 					<artifactId>fmt-maven-plugin</artifactId>
-					<version>2.9</version>
+					<version>2.18</version>
 				</plugin>
 				<plugin>
 					<groupId>io.github.phillipuniverse</groupId>
@@ -544,14 +542,14 @@ checkJavaFormat() {
   cd apps
 
   set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&1
+  mvn com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1
   checkResult=$?
   set -e
 
   if [ ${checkResult} -eq 0 ]; then
     echo 'Verified Java source code format: a-okay.'
   else
-    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.coveo:fmt-maven-plugin:check' for details or 'mvn com.coveo:fmt-maven-plugin:format' to automatically apply the required formatting."
+    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
   fi
 
   return ${checkResult}
@@ -795,7 +793,7 @@ checkJavaFormat
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.coveo</groupId>
+				<groupId>com.spotify.fmt</groupId>
 				<artifactId>fmt-maven-plugin</artifactId>
 				<executions>
 					<execution>
@@ -971,9 +969,9 @@ checkJavaFormat
 										</pluginExecution>
 										<pluginExecution>
 											<pluginExecutionFilter>
-												<groupId>com.coveo</groupId>
+												<groupId>com.spotify.fmt</groupId>
 												<artifactId>fmt-maven-plugin</artifactId>
-												<versionRange>[2.9,)</versionRange>
+												<versionRange>[2.18,)</versionRange>
 												<goals>
 													<goal>format</goal>
 												</goals>

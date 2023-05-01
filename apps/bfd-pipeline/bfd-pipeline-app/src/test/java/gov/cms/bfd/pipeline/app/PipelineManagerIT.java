@@ -64,7 +64,7 @@ public final class PipelineManagerIT {
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
-  };
+  }
 
   /**
    * Verifies that {@link PipelineManager} automatically runs {@link MockJob} and {@link
@@ -501,7 +501,9 @@ public final class PipelineManagerIT {
              * different getType() value.
              */
 
-            /** @see gov.cms.bfd.pipeline.app.PipelineManagerIT.MockJob#getType() */
+            /**
+             * @see gov.cms.bfd.pipeline.app.PipelineManagerIT.MockJob#getType()
+             */
             @Override
             public PipelineJobType<NullPipelineJobArguments> getType() {
               return new PipelineJobType<>(this);

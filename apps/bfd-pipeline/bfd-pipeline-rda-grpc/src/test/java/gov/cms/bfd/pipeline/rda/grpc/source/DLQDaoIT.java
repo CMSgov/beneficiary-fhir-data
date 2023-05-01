@@ -138,8 +138,7 @@ public class DLQDaoIT {
         List.of(recordToUpdate, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     final var updatedRecord =
-        recordToUpdate
-            .toBuilder()
+        recordToUpdate.toBuilder()
             .status(RESOLVED)
             .updatedDate(clock.instant().truncatedTo(ChronoUnit.MICROS))
             .build();

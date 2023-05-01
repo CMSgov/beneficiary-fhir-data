@@ -6,16 +6,17 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -36,16 +37,22 @@ final class BeneficiaryTransformerV2 {
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
    *     request headers
+   * @param addHistoricalMbis whether to add historical MBIs as extensions to the transformed
+   *     Patient; the beneficiary must have been called using a join against the bene history table
+   *     in order to do this
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   @Trace
   public static Patient transform(
-      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
+      MetricRegistry metricRegistry,
+      Beneficiary beneficiary,
+      RequestHeaders requestHeader,
+      boolean addHistoricalMbis) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformerV2.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, requestHeader);
+    Patient patient = transform(beneficiary, requestHeader, addHistoricalMbis);
     timer.stop();
 
     return patient;
@@ -54,12 +61,29 @@ final class BeneficiaryTransformerV2 {
   /**
    * Transforms a {@link Beneficiary} into a {@link Patient}.
    *
+   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
    *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
+  @Trace
+  public static Patient transform(
+      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
+    return transform(metricRegistry, beneficiary, requestHeader, false);
+  }
+
+  /**
+   * Transforms a {@link Beneficiary} into a {@link Patient}.
+   *
+   * @param beneficiary the CCW {@link Beneficiary} to transform
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
+   * @param addHistoricalMbiExtensions the add historical mbi extensions
+   * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
+   */
+  private static Patient transform(
+      Beneficiary beneficiary, RequestHeaders requestHeader, boolean addHistoricalMbiExtensions) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -116,43 +140,11 @@ final class BeneficiaryTransformerV2 {
 
     // NOTE - No longer returning any HCIN value(s) in V2
 
-    /*
-     * The following logic attempts to distill {@link MedicareBeneficiaryIdHistory} data into only
-     * those records which have an endDate present. This is due to the fact that it includes the
-     * CURRENT MBI record which was handle previously. Also, the {@link
-     * MedicareBeneficiaryIdHistory} table appears to contain spurious records with the only
-     * difference is the generated surrogate key identifier.
-     */
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      HashMap<LocalDate, MedicareBeneficiaryIdHistory> mbiHistMap =
-          new HashMap<LocalDate, MedicareBeneficiaryIdHistory>();
-
-      for (MedicareBeneficiaryIdHistory mbiHistory :
-          beneficiary.getMedicareBeneficiaryIdHistories()) {
-
-        // if rcd does not have an end date, then it's probably still active
-        // and will have been previously provided as the CURRENT rcd.
-        if (mbiHistory.getMbiEndDate().isPresent()) {
-          mbiHistMap.put(mbiHistory.getMbiEndDate().get(), mbiHistory);
-        }
-        // would come in ascending order, so any rcd would have a later
-        // update date than prev rcd.
-        TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
-      }
-
-      if (mbiHistMap.size() > 0) {
-        Extension historicalIdentifier =
-            TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-
-        for (MedicareBeneficiaryIdHistory mbi : mbiHistMap.values()) {
-          addUnhashedIdentifier(
-              patient,
-              mbi.getMedicareBeneficiaryId().get(),
-              TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-              historicalIdentifier,
-              null);
-        }
-      }
+    /* Only add this if we know the beneficiary was queried in such a way that the bene history / medicare_beneficiaryid_history
+     * tables were left joined, such that the beneficiary model object has the historical MBI data to draw from
+     * Otherwise JPA will complain. */
+    if (addHistoricalMbiExtensions) {
+      addHistoricalMbiExtensions(patient, beneficiary);
     }
 
     // support header includeAddressFields from downstream components e.g. BB2
@@ -249,6 +241,53 @@ final class BeneficiaryTransformerV2 {
     // Last Updated => Patient.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
     return patient;
+  }
+
+  /**
+   * Adds the historical mbi data to the patient from the beneficiary data. The historical mbi data
+   * is queried from the database and added to the beneficiary model in the resource provider before
+   * reaching this point.
+   *
+   * @param patient the patient to add the historical mbi extensions to
+   * @param beneficiary the beneficiary to get the historical data from
+   */
+  private static void addHistoricalMbiExtensions(Patient patient, Beneficiary beneficiary) {
+    Set<String> uniqueHistoricalMbis = new HashSet<>();
+    Extension historicalIdentifier =
+        TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+    String currentMbi = beneficiary.getMedicareBeneficiaryId().orElse("");
+
+    // Add historical MBI data found in medicare_beneficiaryid_history
+    for (MedicareBeneficiaryIdHistory mbiHistory :
+        beneficiary.getMedicareBeneficiaryIdHistories()) {
+
+      if (mbiHistory.getMedicareBeneficiaryId().isPresent()) {
+        uniqueHistoricalMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
+      }
+      TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
+    }
+
+    // Add historical MBI data found in beneficiaries_history
+    for (BeneficiaryHistory mbiHistory : beneficiary.getBeneficiaryHistories()) {
+
+      if (mbiHistory.getMedicareBeneficiaryId().isPresent()) {
+        uniqueHistoricalMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
+      }
+      TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
+    }
+
+    // Add a historical extension for each unique non-current MBI found in the history table(s)
+    for (String historicalMbi : uniqueHistoricalMbis) {
+      // Don't add a historical entry for any MBI which matches the current MBI
+      if (!historicalMbi.equals(currentMbi)) {
+        addUnhashedIdentifier(
+            patient,
+            historicalMbi,
+            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+            historicalIdentifier,
+            null);
+      }
+    }
   }
 
   /**

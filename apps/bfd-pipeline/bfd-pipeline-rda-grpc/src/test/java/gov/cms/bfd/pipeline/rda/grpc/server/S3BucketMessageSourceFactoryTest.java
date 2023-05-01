@@ -188,17 +188,25 @@ public class S3BucketMessageSourceFactoryTest {
     private MockMessageSource(long minSeq, long maxSeq) {
       filename = String.format("fiss-%d-%d.ndjson", minSeq, maxSeq);
       maxValue = maxSeq;
-      currentValue = minSeq - 1;
+      currentValue = minSeq;
+    }
+
+    @Override
+    public MessageSource<Long> skipTo(long startingSequenceNumber) {
+      if (startingSequenceNumber > currentValue) {
+        currentValue = startingSequenceNumber;
+      }
+      return this;
     }
 
     @Override
     public boolean hasNext() throws Exception {
-      return currentValue < maxValue;
+      return currentValue <= maxValue;
     }
 
     @Override
     public Long next() throws Exception {
-      return ++currentValue;
+      return currentValue++;
     }
 
     @Override

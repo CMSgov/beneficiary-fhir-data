@@ -70,7 +70,7 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn com.coveo:fmt-maven-plugin:check
+        run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
   
   mvn-verify:
