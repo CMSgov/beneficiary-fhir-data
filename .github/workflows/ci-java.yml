@@ -73,11 +73,6 @@ jobs:
         run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
 
-  ansible-role-bfd-pipeline:
-    uses: ./.github/workflows/ci-ansible.yml
-    with:
-      role: bfd-pipeline
-
   mvn-verify:
     runs-on: ubuntu-20.04
     needs: workflow
@@ -213,6 +208,10 @@ jobs:
 
   # ansible system testing
 
+  ansible-role-bfd-pipeline:
+    uses: ./.github/workflows/ci-ansible.yml
+    with:
+      role: bfd-pipeline
 
   ansible-role-bfd-server:
     needs: mvn-verify
