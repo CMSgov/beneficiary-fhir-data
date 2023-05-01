@@ -1,2 +1,3 @@
 ansible==2.9.27
 docker
+lxml
