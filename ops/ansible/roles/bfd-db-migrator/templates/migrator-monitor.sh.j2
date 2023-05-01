@@ -80,10 +80,10 @@ function set_migrated_state {
   local _state="$1"
   local schema_version
 
-  if grep -s "No migration necessary." "{{ db_migrator_dir }}/migrator-log.json"; then
-    schema_version="$(grep "Current version of schema" no-migration.json | jq -r .message | cut -d: -f2)"
+  if grep -q "No migration necessary." "{{ db_migrator_dir }}/migrator-log.json"; then
+    schema_version="$(grep "Current version of schema" "{{ db_migrator_dir }}/migrator-log.json" | jq -r .message | cut -d: -f2 | head -n1 | xargs)"
   else
-    schema_version="$(grep "now at version" migration.json | jq -r .message | grep -o 'v[0-9]\+' | sed 's/[^0-9]//g')"
+    schema_version="$(grep "now at version" "{{ db_migrator_dir }}/migrator-log.json" | jq -r .message | grep -o 'v[0-9]\+' | sed 's/[^0-9]//g' | head -n1 | xargs)"
   fi
   jq --arg arg "$schema_version" -c '. += {"schema_version": $arg}' <<< "$_state"
 }
@@ -95,15 +95,8 @@ while true; do
     sleep "$MONITOR_HEARTBEAT_INTERVAL_SECONDS"
     continue
   else
-    # check for success...
-    if [ "$(jq .status <<< "$currentState")" = "0/0" ]; then
-    # On successful migration, adulterate the currentState adding schema version
-      migratedState="$(set_migrated_state $currentState)"
-      send_message "$migratedState"
-    else
-      # Failed migration, no updates to
-      send_message "$currentState"
-    fi
+    migratedState="$(set_migrated_state "$currentState")"
+    send_message "$migratedState"
     break
   fi
 done
