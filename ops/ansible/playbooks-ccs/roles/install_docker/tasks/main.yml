@@ -1,13 +1,8 @@
 ---
 
 - name: Install Docker
-  pip:
-    name:
-      - websocket-client==0.59.0
-      - requests==2.28.2
-      - urllib3==1.26.15
-      - docker
-      - docker-compose
+  package:
+    name: "{{ item }}"
     state: present
   become: true
 

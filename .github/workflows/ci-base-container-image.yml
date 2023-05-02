@@ -10,7 +10,7 @@ on:
 jobs:
   build-container:
     name: Build and Deliver Container
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3

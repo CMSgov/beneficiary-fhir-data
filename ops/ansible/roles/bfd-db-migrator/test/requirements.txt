@@ -1,4 +1,4 @@
-ansible
+ansible==2.9.27
 lxml
 docker
 requests==2.28.2
