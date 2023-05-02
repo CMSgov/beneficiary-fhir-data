@@ -70,8 +70,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
-// @PropertySource(value = "classpath:config.properties", factory =
-// ConfigPropertySource.Factory.class)
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
 public class SpringConfiguration {
@@ -133,18 +131,18 @@ public class SpringConfiguration {
   static final String BLUEBUTTON_R4_RESOURCE_PROVIDERS = "bluebuttonR4ResourceProviders";
 
   /**
-   * Attribute name used to expose the source {@link ConfigLoader} for use by {@link
-   * SpringConfiguration}. Avoids the need to recreate an instance there if one has already been
-   * created for use here or define a static field to hold it.
-   */
-  static final String CONFIG_LOADER_CONTEXT_NAME = "ConfigLoaderInstance";
-
-  /**
    * Set this to {@code true} to have Hibernate log a ton of info on the SQL statements being run
    * and each session's performance. Be sure to also adjust the related logging levels in Wildfly or
    * whatever (see {@code server-config.sh} for details).
    */
   private static final boolean HIBERNATE_DETAILED_LOGGING = false;
+
+  /**
+   * Attribute name used to expose the source {@link ConfigLoader} for use by {@link
+   * SpringConfiguration}. Avoids the need to recreate an instance there if one has already been
+   * created for use here or define a static field to hold it.
+   */
+  static final String CONFIG_LOADER_CONTEXT_NAME = "ConfigLoaderInstance";
 
   /**
    * Exposes our {@link ConfigLoader} instance as a singleton to components in the application. If
