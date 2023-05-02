@@ -38,7 +38,7 @@ public class S3BucketMessageSourceFactoryTest {
         "this-won't-match",
         "fiss-0-100.ndjson");
 
-    // Since we don't parse any files we just need a function to pass to the constructor.
+    // We don't parse any files but we still need a parser to pass to the constructor.
     final Function<String, MessageSource<Object>> emptyObjectParser =
         s -> new EmptyMessageSource<>();
 
