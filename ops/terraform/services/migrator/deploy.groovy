@@ -168,15 +168,24 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
     storedSchemaVersion = awsSsm.getParameter(
         parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
         awsRegion: awsRegion
-    ) as Integer
-    echo "Stored Schema Version : ${storedSchemaVersion}"
+    )
+
+    echo "Stored Schema Version : ${storeSchemaVersion}"
+    if(storedSchemaVersion == null)
+    {
+        echo "Stored schema version returning true"
+        return true
+    }
+    storeSchemaVersionLatest = storedSchemaVersion as Integer
+
+    echo "Stored Schema Version : ${storeSchemaVersionLatest}"
 
     // check latest available versioned migration
     latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
     echo "Latest Available Migration Version: ${latestAvailableMigrationVersion}"
 
     // compare and determine
-    return latestAvailableMigrationVersion > storedSchemaVersion
+    return latestAvailableMigrationVersion > storeSchemaVersionLatest
 }
 
 return this
