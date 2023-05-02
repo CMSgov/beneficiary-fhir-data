@@ -58,6 +58,7 @@ boolean deployMigrator(Map args = [:]) {
         awsSsm.putParameter(
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
             parameterValue: finalMigratorStatus[1],
+            parameterType: "String",
             shouldOverwrite: true
         )
 
