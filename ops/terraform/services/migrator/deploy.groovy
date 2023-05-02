@@ -111,7 +111,7 @@ def monitorMigrator(Map args = [:]) {
             println "Migrator message ${msg}"
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (migratorStatus!='0' && migratorStatus!='0/0') {
+            if (migratorStatus =='0') {
                 def resultsList = [migratorStatus, schemaVersion]
                 return resultsList
             }
