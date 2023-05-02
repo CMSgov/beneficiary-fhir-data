@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.RdaFissPayer;
 import gov.cms.bfd.model.rda.RdaFissProcCode;
+import gov.cms.bfd.model.rda.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.model.rda.RdaMcsDetail;
 import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
@@ -37,6 +38,7 @@ public class RDATestUtils {
   /** Tracking entities (tables) so they can be cleaned after. */
   private static final List<Class<?>> TABLE_ENTITIES =
       List.of(
+          RdaFissRevenueLine.class,
           RdaFissPayer.class,
           RdaFissDiagnosisCode.class,
           RdaFissProcCode.class,
@@ -202,6 +204,7 @@ public class RDATestUtils {
             .servTypeCd("A")
             .freqCd("C")
             .clmTypInd("4")
+            .drgCd("drgc")
             .build();
 
     Set<RdaFissProcCode> procCodes =
@@ -262,9 +265,34 @@ public class RDATestUtils {
                 .payersName("BCBS KC")
                 .build());
 
+    Set<RdaFissRevenueLine> revenueLines =
+        Set.of(
+            RdaFissRevenueLine.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 1)
+                .serviceDate(LocalDate.of(1980, 4, 5))
+                .serviceDateText("1980-04-05")
+                .revUnitsBilled(5)
+                .revServUnitCnt(6)
+                .revCd("abcd")
+                .nonBillRevCode("B")
+                .hcpcCd("12345")
+                .hcpcInd("A")
+                .acoRedRarc("rarc")
+                .acoRedCarc("car")
+                .acoRedCagc("ca")
+                .hcpcModifier("m1")
+                .hcpcModifier2("m2")
+                .hcpcModifier3("m3")
+                .hcpcModifier4("m4")
+                .hcpcModifier5("m5")
+                .apcHcpcsApc("00001")
+                .build());
+
     claim.setPayers(payers);
     claim.setProcCodes(procCodes);
     claim.setDiagCodes(diagnosisCodes);
+    claim.setRevenueLines(revenueLines);
 
     return claim;
   }
@@ -304,6 +332,7 @@ public class RDATestUtils {
             .servTypeCd("A")
             .freqCd("C")
             .clmTypInd("1")
+            .drgCd("drgd")
             .build();
 
     Set<RdaFissProcCode> procCodes =
@@ -358,9 +387,34 @@ public class RDATestUtils {
                 .payersName("BCBS KC")
                 .build());
 
+    Set<RdaFissRevenueLine> revenueLines =
+        Set.of(
+            RdaFissRevenueLine.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 1)
+                .serviceDate(LocalDate.of(1990, 12, 11))
+                .serviceDateText("1990-12-11")
+                .revUnitsBilled(9)
+                .revServUnitCnt(1)
+                .revCd("dcba")
+                .nonBillRevCode("D")
+                .hcpcCd("54321")
+                .hcpcInd("C")
+                .acoRedRarc("crar")
+                .acoRedCarc("rac")
+                .acoRedCagc("ac")
+                .hcpcModifier("1m")
+                .hcpcModifier2("2m")
+                .hcpcModifier3("3m")
+                .hcpcModifier4("4m")
+                .hcpcModifier5("5m")
+                .apcHcpcsApc("00002")
+                .build());
+
     claim.setPayers(payers);
     claim.setProcCodes(procCodes);
     claim.setDiagCodes(diagnosisCodes);
+    claim.setRevenueLines(revenueLines);
 
     return claim;
   }

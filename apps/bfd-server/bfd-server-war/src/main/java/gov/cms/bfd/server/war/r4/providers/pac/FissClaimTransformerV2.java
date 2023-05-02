@@ -3,33 +3,40 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.RdaFissPayer;
 import gov.cms.bfd.model.rda.RdaFissProcCode;
+import gov.cms.bfd.model.rda.RdaFissRevenueLine;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.codesystems.ClaimInformationcategory;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
@@ -106,6 +113,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setDiagnosis(getDiagnosis(claimGroup, isIcd9));
     claim.setProcedure(getProcedure(claimGroup, isIcd9));
     claim.setInsurance(getInsurance(claimGroup));
+    claim.setItem(getClaimItems(claimGroup));
 
     claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
@@ -123,15 +131,66 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
       RdaFissClaim claimGroup) {
-    return Strings.isBlank(claimGroup.getFreqCd())
-        ? null
-        : List.of(
-            new Claim.SupportingInformationComponent()
-                .setCategory(createCodeableConcept(C4BBSupportingInfoType.TYPE_OF_BILL))
-                .setCode(
-                    new CodeableConcept(
-                        new Coding(BBCodingSystems.FISS.FREQ_CD, claimGroup.getFreqCd(), null)))
-                .setSequence(1));
+    List<Claim.SupportingInformationComponent> supportingInfo = new ArrayList<>();
+    int sequenceNumber = 0;
+
+    if (Strings.isNotBlank(claimGroup.getFreqCd())) {
+      supportingInfo.add(
+          new Claim.SupportingInformationComponent()
+              .setSequence(sequenceNumber++)
+              .setCategory(createCodeableConcept(C4BBSupportingInfoType.TYPE_OF_BILL))
+              .setCode(
+                  new CodeableConcept(
+                      new Coding(BBCodingSystems.FISS.FREQ_CD, claimGroup.getFreqCd(), null))));
+    }
+
+    if (Strings.isNotBlank(claimGroup.getDrgCd())) {
+      supportingInfo.add(
+          new Claim.SupportingInformationComponent()
+              .setSequence(sequenceNumber++)
+              .setCategory(
+                  new CodeableConcept()
+                      .setCoding(
+                          List.of(
+                              new Coding(
+                                  ClaimInformationcategory.INFO.getSystem(),
+                                  ClaimInformationcategory.INFO.toCode(),
+                                  ClaimInformationcategory.INFO.getDisplay()),
+                              new Coding(
+                                  TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
+                                  CCWUtils.calculateVariableReferenceUrl(
+                                      CcwCodebookVariable.CLM_DRG_CD),
+                                  "Claim Diagnosis Related Group Code (or MS-DRG Code)"))))
+              .setCode(
+                  new CodeableConcept(
+                      new Coding(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
+                          claimGroup.getDrgCd(),
+                          null))));
+    }
+
+    if (Strings.isNotBlank("placeholder")) {
+      supportingInfo.add(
+          new Claim.SupportingInformationComponent()
+              .setSequence(sequenceNumber)
+              .setCategory(
+                  new CodeableConcept()
+                      .setCoding(
+                          List.of(
+                              new Coding(
+                                  ClaimInformationcategory.INFO.getSystem(),
+                                  ClaimInformationcategory.INFO.toCode(),
+                                  ClaimInformationcategory.INFO.getDisplay()),
+                              new Coding(
+                                  TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
+                                  BBCodingSystems.FISS.APC_HCPCS_APC,
+                                  "Ambulatory Payment Classification"))))
+              .setCode(
+                  new CodeableConcept(
+                      new Coding(BBCodingSystems.FISS.APC_HCPCS_APC, "placeholder", null))));
+    }
+
+    return supportingInfo;
   }
 
   /**
@@ -224,7 +283,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             })
         .filter(Objects::nonNull)
         .sorted(Comparator.comparing(Claim.DiagnosisComponent::getSequence))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -247,7 +306,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                     .setDate(localDateToDate(procCode.getProcDate()))
                     .setProcedure(createCodeableConcept(icdSystem, procCode.getProcCode())))
         .sorted(Comparator.comparing(Claim.ProcedureComponent::getSequence))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -282,6 +341,115 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             })
         .filter(Objects::nonNull)
         .sorted(Comparator.comparing(Claim.InsuranceComponent::getSequence))
-        .collect(Collectors.toList());
+        .toList();
+  }
+
+  /**
+   * Maps {@link RdaFissRevenueLine} data to appropriate FHIR components.
+   *
+   * @param claimGroup The claim data to map.
+   * @return The created FHIR component with given claim data.
+   */
+  private static List<Claim.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
+    return claimGroup.getRevenueLines().stream()
+        .map(
+            revenueLine -> {
+              Claim.ItemComponent itemComponent = new Claim.ItemComponent();
+
+              itemComponent.setSequence(revenueLine.getRdaPosition());
+
+              CodeableConcept revenue;
+
+              if (Strings.isNotBlank(revenueLine.getNonBillRevCode())
+                  || Strings.isNotBlank(revenueLine.getRevCd())) {
+                revenue = new CodeableConcept();
+
+                if (Strings.isNotBlank(revenueLine.getNonBillRevCode())) {
+                  revenue.setCoding(
+                      List.of(
+                          new Coding(
+                              BBCodingSystems.FISS.REV_CD, revenueLine.getNonBillRevCode(), null)));
+                }
+
+                if (Strings.isNotBlank(revenueLine.getRevCd())) {
+                  revenue.addExtension(
+                      BBCodingSystems.FISS.NON_BILL_REV_CODE,
+                      new CodeableConcept(
+                          new Coding(
+                              BBCodingSystems.FISS.NON_BILL_REV_CODE,
+                              revenueLine.getRevCd(),
+                              null)));
+                }
+              } else {
+                revenue = null;
+              }
+
+              itemComponent.setRevenue(revenue);
+
+              if (revenueLine.getRevUnitsBilled() != null) {
+                itemComponent.setQuantity(new Quantity(revenueLine.getRevUnitsBilled()));
+              }
+
+              if (revenueLine.getRevServUnitCnt() != null) {
+                itemComponent.addExtension(
+                    BBCodingSystems.FISS.REV_SERV_UNIT_CNT,
+                    new Quantity(revenueLine.getRevServUnitCnt()));
+              }
+
+              LocalDate serviceDate = revenueLine.getServiceDate();
+              if (serviceDate != null) {
+                itemComponent.setServiced(
+                    new DateType(
+                        serviceDate.getYear(),
+                        serviceDate.getMonthValue(),
+                        serviceDate.getDayOfMonth()));
+              }
+
+              if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
+                itemComponent.setProductOrService(
+                    new CodeableConcept(
+                        new Coding(
+                            CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
+                            revenueLine.getHcpcCd(),
+                            null)));
+              }
+
+              if (Strings.isNotBlank(revenueLine.getHcpcInd())) {
+                itemComponent.addExtension(
+                    BBCodingSystems.FISS.HCPC_IND,
+                    new CodeableConcept(
+                        new Coding(BBCodingSystems.FISS.HCPC_IND, revenueLine.getHcpcInd(), null)));
+              }
+
+              itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier(), "1"));
+              itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier2(), "2"));
+              itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier3(), "3"));
+              itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier4(), "4"));
+
+              return itemComponent;
+            })
+        .toList();
+  }
+
+  /**
+   * Creates FHIR components for given modifier data.
+   *
+   * @param modifierValue The modifier code value to use.
+   * @param version The modifier version to use.
+   * @return The created FHIR component for modifier data.
+   */
+  private static CodeableConcept createModifierCoding(String modifierValue, String version) {
+    CodeableConcept modifier;
+
+    if (Strings.isNotBlank(modifierValue)) {
+      modifier =
+          new CodeableConcept(
+              new Coding(TransformerConstants.CODING_SYSTEM_HCPCS, modifierValue, null)
+                  .setVersion(version));
+    } else {
+      modifier = null;
+    }
+
+    return modifier;
   }
 }
