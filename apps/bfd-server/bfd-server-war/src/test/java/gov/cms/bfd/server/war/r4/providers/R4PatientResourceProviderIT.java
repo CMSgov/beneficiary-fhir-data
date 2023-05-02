@@ -14,13 +14,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -1293,11 +1293,10 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
             .findFirst()
             .get();
 
-    Patient expected =
-        BeneficiaryTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            beneficiary,
-            requestHeader);
+    BeneficiaryTransformerV2 beneficiaryTransformerV2 =
+        new BeneficiaryTransformerV2(new MetricRegistry());
+
+    Patient expected = beneficiaryTransformerV2.transform(beneficiary, requestHeader);
 
     IGenericClient fhirClient = createFhirClient(requestHeader);
     Patient patient =
@@ -1492,11 +1491,10 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
       List<String> expectedHistoricalMbis) {
     assertNotNull(patient);
 
-    Patient expected =
-        BeneficiaryTransformerV2.transform(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            beneficiary,
-            headers);
+    BeneficiaryTransformerV2 beneficiaryTransformerV2 =
+        new BeneficiaryTransformerV2(new MetricRegistry());
+
+    Patient expected = beneficiaryTransformerV2.transform(beneficiary, headers);
 
     comparePatient(expected, patient, expectedHistoricalMbis);
   }

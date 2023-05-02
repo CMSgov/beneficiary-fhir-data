@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -48,7 +50,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -75,6 +76,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
+
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    * NOTE: For v2, HICN no longer supported.
@@ -101,12 +103,36 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   /** The Entity manager. */
   private EntityManager entityManager;
   /** The Metric registry. */
-  private MetricRegistry metricRegistry;
+  private final MetricRegistry metricRegistry;
   /** The Loaded filter manager. */
-  private LoadedFilterManager loadedFilterManager;
+  private final LoadedFilterManager loadedFilterManager;
+  /** The Beneficiary transformer. */
+  private final BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
   /** The expected coverage id length. */
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
+
+  /**
+   * Instantiates a new patient resource provider.
+   *
+   * <p>Spring will wire this class during the initial component scan, so this constructor should
+   * only be explicitly called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param loadedFilterManager the loaded filter manager
+   * @param beneficiaryTransformerV2 the beneficiary transformer
+   */
+  public R4PatientResourceProvider(
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      BeneficiaryTransformerV2 beneficiaryTransformerV2) {
+    requireNonNull(metricRegistry);
+    requireNonNull(loadedFilterManager);
+    requireNonNull(beneficiaryTransformerV2);
+    this.metricRegistry = metricRegistry;
+    this.loadedFilterManager = loadedFilterManager;
+    this.beneficiaryTransformerV2 = beneficiaryTransformerV2;
+  }
 
   /**
    * Sets the {@link #entityManager}.
@@ -116,26 +142,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
-  }
-
-  /**
-   * Sets the {@link #metricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
-  @Inject
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
-
-  /**
-   * Sets the {@link #loadedFilterManager}.
-   *
-   * @param loadedFilterManager the {@link LoadedFilterManager} to use
-   */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
   }
 
   /** {@inheritDoc} */
@@ -222,7 +228,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           beneficiary == null ? 0 : 1);
     }
 
-    return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader, true);
+    return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
   }
 
   /**
@@ -398,9 +404,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                   // Null out the unhashed HICNs
                   beneficiary.setHicnUnhashed(Optional.empty());
 
-                  Patient patient =
-                      BeneficiaryTransformerV2.transform(
-                          metricRegistry, beneficiary, requestHeader);
+                  Patient patient = beneficiaryTransformerV2.transform(beneficiary, requestHeader);
                   return patient;
                 })
             .collect(Collectors.toList());
@@ -913,8 +917,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // Null out the unhashed HICNs; in v2 we are ignoring HICNs
     beneficiary.setHicnUnhashed(Optional.empty());
 
-    Patient patient =
-        BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader, true);
+    Patient patient = beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
     return patient;
   }
 
@@ -1128,7 +1131,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(b -> BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader))
+            .map(b -> beneficiaryTransformerV2.transform(b, requestHeader))
             .collect(Collectors.toList());
     Bundle bundle =
         TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());

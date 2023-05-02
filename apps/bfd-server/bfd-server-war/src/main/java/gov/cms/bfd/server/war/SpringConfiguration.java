@@ -15,6 +15,7 @@ import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -56,7 +57,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
-@ComponentScan(basePackageClasses = {ServerInitializer.class})
+@ComponentScan(basePackageClasses = {ServerInitializer.class, BeneficiaryTransformerV2.class})
 @EnableScheduling
 public class SpringConfiguration {
   /** The database url that BFD will use for all database calls. */
