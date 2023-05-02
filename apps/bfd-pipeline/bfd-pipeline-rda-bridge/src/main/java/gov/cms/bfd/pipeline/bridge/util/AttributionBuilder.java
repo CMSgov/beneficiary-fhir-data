@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Helper class for building the attribution sql script.
  *
- * <p>See [FreeMarker](https://freemarker.apache.org/docs/ for templating information)
+ * <p>See <a href="https://freemarker.apache.org/docs/">FreeMarker</a> for templating information
  */
 @Slf4j
 @RequiredArgsConstructor
