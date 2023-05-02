@@ -74,7 +74,15 @@ function migrator_is_running {
 }
 
 #######################################
-#TODO
+# Sets the migration schema version based on the monitor log
+# Globals:
+#   None
+# Arguments:
+#   Current state of the migrator
+# Outputs:
+#  json response to be used to update the schema version
+#  that was reported out in the monitor log and report that schema version
+#  to be used to send to SQS in order to update the migrator on whether to deploy or not
 #######################################
 function set_migrated_state {
   local _state="$1"

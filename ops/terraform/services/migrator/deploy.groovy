@@ -104,12 +104,9 @@ def monitorMigrator(Map args = [:]) {
         // 1. "handle" (capture status, print, delete) each message
         // 2. if the message body contains a non "0/0" (running) value, return it
         for (msg in messages) {
-            println "Migrator body statyus ${msg.body.status}"
             migratorStatus = msg.body.status
-            println "Migrator body schema version ${msg.body.schema_version}"
+            println "Migrator schema version is at ${msg.body.schema_version}"
             schemaVersion = msg.body.schema_version
-            println "Migrator message body ${msg.body}"
-            println "Migrator message ${msg}"
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (migratorStatus =='0') {
@@ -165,28 +162,26 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
 // otherwise false
 boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
     println "Comparing schema migration versions..."
+    // Initialize stored schema version
+    int storedSchemaVersion = 0
     // check SSM Parameter Store
-    storedSchemaVersion = awsSsm.getParameter(
-        parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
-        awsRegion: awsRegion
-    )
-
-    echo "Stored Schema Version : ${storeSchemaVersion}"
-    if(storedSchemaVersion == null)
-    {
-        echo "Stored schema version returning true"
+    try {
+        storedSchemaVersion = awsSsm.getParameter(
+                parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
+                awsRegion: awsRegion
+        ) as Integer
+    } catch(groovy.lang.MissingPropertyException ex){
+        echo "Exception has been encountered getting the storedSchemaVersion from aws ssm, missing ssm parameter for stored schema version."
         return true
     }
-    storeSchemaVersionLatest = storedSchemaVersion as Integer
-
-    echo "Stored Schema Version : ${storeSchemaVersionLatest}"
+    echo "Stored Schema Version : ${storedSchemaVersion}"
 
     // check latest available versioned migration
     latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
     echo "Latest Available Migration Version: ${latestAvailableMigrationVersion}"
 
     // compare and determine
-    return latestAvailableMigrationVersion > storeSchemaVersionLatest
+    return latestAvailableMigrationVersion > storedSchemaVersion
 }
 
 return this
