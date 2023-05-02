@@ -119,7 +119,7 @@ jobs:
       - name: 'Run Maven Build'
         run: mvn --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
         working-directory: ./apps
-      
+
       - name: Login to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" \
