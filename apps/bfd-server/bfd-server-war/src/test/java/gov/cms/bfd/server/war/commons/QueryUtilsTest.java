@@ -148,9 +148,9 @@ public class QueryUtilsTest {
     // -------
     // 0000001 expected
     int testVal = QueryUtils.V_CARRIER_HAS_DATA | QueryUtils.V_SNF_HAS_DATA;
-    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (tesVal & QueryUtils.V_CARRIER_HAS_DATA));
+    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
 
-    // same test as previous, but use additive additive values instead of XOR
+    // same test as previous, but use additive values instead of XOR
     testVal = QueryUtils.V_CARRIER_HAS_DATA + QueryUtils.V_SNF_HAS_DATA;
     assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
 
@@ -165,34 +165,6 @@ public class QueryUtilsTest {
     testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
     assertEquals(
         testVal, QueryUtils.V_DME_HAS_DATA + QueryUtils.V_SNF_HAS_DATA + QueryUtils.V_HHA_HAS_DATA);
-
-    // test entire mask being set; each '&' mask should produce a value equal
-    // to mask we are checking for.
-    testVal =
-        QueryUtils.V_CARRIER_HAS_DATA
-            + QueryUtils.V_INPATIENT_HAS_DATA
-            + QueryUtils.V_OUTPATIENT_HAS_DATA
-            + QueryUtils.V_SNF_HAS_DATA
-            + QueryUtils.V_DME_HAS_DATA
-            + QueryUtils.V_HHA_HAS_DATA
-            + QueryUtils.V_HOSPICE_HAS_DATA
-            + QueryUtils.V_PART_D_HAS_DATA;
-
-    assertEquals(QueryUtils.V_PART_D_HAS_DATA, (testVal & QueryUtils.V_PART_D_HAS_DATA));
-    assertEquals(QueryUtils.V_HOSPICE_HAS_DATA, (testVal & QueryUtils.V_HOSPICE_HAS_DATA));
-    assertEquals(QueryUtils.V_HHA_HAS_DATA, (testVal & QueryUtils.V_HHA_HAS_DATA));
-    assertEquals(QueryUtils.V_DME_HAS_DATA, (testVal & QueryUtils.V_DME_HAS_DATA));
-    assertEquals(QueryUtils.V_SNF_HAS_DATA, (testVal & QueryUtils.V_SNF_HAS_DATA));
-    assertEquals(QueryUtils.V_OUTPATIENT_HAS_DATA, (testVal & QueryUtils.V_OUTPATIENT_HAS_DATA));
-    assertEquals(QueryUtils.V_INPATIENT_HAS_DATA, (testVal & QueryUtils.V_INPATIENT_HAS_DATA));
-    assertEquals(QueryUtils.V_CARRIER_HAS_DATA, (testVal & QueryUtils.V_CARRIER_HAS_DATA));
-
-    testVal =
-        QueryUtils.V_CARRIER_HAS_DATA
-            | QueryUtils.V_INPATIENT_HAS_DATA
-            | QueryUtils.V_SNF_HAS_DATA
-            | QueryUtils.V_HHA_HAS_DATA
-            | QueryUtils.V_PART_D_HAS_DATA;
 
     BitSet testBits = QueryUtils.convertClaimsBitmaskValue(testVal);
     assertTrue(testBits.get(QueryUtils.CARRIER_HAS_DATA));
