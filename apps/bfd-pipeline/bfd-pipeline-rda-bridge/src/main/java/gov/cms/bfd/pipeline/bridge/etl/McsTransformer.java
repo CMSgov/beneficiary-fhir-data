@@ -29,7 +29,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
-  /** Maps the mbi number to its benficiary data. */
+  /** Maps the mbi number to its beneficiary data. */
   private final Map<String, BeneficiaryData> mbiMap;
 
   /** {@inheritDoc} */
@@ -45,10 +45,8 @@ public class McsTransformer extends AbstractTransformer {
 
     int lineNumber = getLineNumber(data, Mcs.LINE_NUM);
 
-    if (message.getMessage() instanceof McsClaimChange) {
+    if (message.getMessage() instanceof McsClaimChange storedClaim) {
       // There is an existing claim from a previous run
-      McsClaimChange storedClaim = (McsClaimChange) message.getMessage();
-
       if (message.getLineNumber() == (lineNumber - 1)) {
         // If it's the next sequential line number, add to previous claim
         message.setMessage(addToExistingClaim(lineNumber, storedClaim, data));
@@ -107,7 +105,7 @@ public class McsTransformer extends AbstractTransformer {
    * @param sequenceNumber The sequence number of the current claim
    * @param lineNumber The line number of the current claim
    * @param data The {@link Parser.Data} to pull claim data for building the claim
-   * @param mbiSampler The samples for the mbis
+   * @param mbiSampler The samples for the MBIs
    * @param sampleId The samples of IDs
    * @return A new claim built from parsing the given {@link Parser.Data}
    */
@@ -234,20 +232,11 @@ public class McsTransformer extends AbstractTransformer {
    * @return The converted {@link McsDiagnosisIcdType}
    */
   private McsDiagnosisIcdType mapVersionCode(String code) {
-    McsDiagnosisIcdType icdType;
-
-    switch (code) {
-      case "0":
-        icdType = McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10;
-        break;
-      case "9":
-        icdType = McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9;
-        break;
-      default:
-        throw new IllegalStateException("Invalid diagnosis code type: '" + code + "'");
-    }
-
-    return icdType;
+    return switch (code) {
+      case "0" -> McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10;
+      case "9" -> McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9;
+      default -> throw new IllegalStateException("Invalid diagnosis code type: '" + code + "'");
+    };
   }
 
   /**
