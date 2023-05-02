@@ -6,6 +6,7 @@ import static gov.cms.bfd.model.rif.InpatientClaimColumn.ICD_PRCDR_CD1;
 import static gov.cms.bfd.model.rif.InpatientClaimColumn.PRCDR_DT1;
 import static gov.cms.bfd.pipeline.bridge.model.ModelUtil.listNumberedEnumNames;
 
+import gov.cms.bfd.model.rif.DMEClaimColumn;
 import gov.cms.bfd.model.rif.InpatientClaimColumn;
 import java.util.List;
 
@@ -58,6 +59,28 @@ public class Fiss {
   public static final String PRNCPAL_DGNS_CD = InpatientClaimColumn.PRNCPAL_DGNS_CD.name();
   /** Provider Number is set to Inpatient Claim Provider Number name. */
   public static final String PRVDR_NUM = InpatientClaimColumn.PRVDR_NUM.name();
+  /** Claim DRG code is set to Inpatient claim DRG code name. */
+  public static final String CLM_DRG_CD = InpatientClaimColumn.CLM_DRG_CD.name();
+  /** Rev Center code is set to Inpatient Rev Center name. */
+  public static final String REV_CNTR = InpatientClaimColumn.REV_CNTR.name();
+  /** Claim Line Service Count is set to DME claim Line Service Count name. */
+  public static final String LINE_SRVC_CNT = DMEClaimColumn.LINE_SRVC_CNT.name();
+  /** Rev center unit count is set to Inpatient Rev center unit count name. */
+  public static final String REV_CNTR_UNIT_CNT = InpatientClaimColumn.REV_CNTR_UNIT_CNT.name();
+  /** HCPCS code is set to Inpatient HCPCS code name. */
+  public static final String HCPCS_CD = InpatientClaimColumn.HCPCS_CD.name();
+
+  /** HCPCS first modifier code is set to Inpatient HCPCS first modifier code name. */
+  public static final String HCPCS_1_MDFR_CD = DMEClaimColumn.HCPCS_1ST_MDFR_CD.name();
+
+  /** HCPCS second modifier code is set to Inpatient HCPCS second modifier code name. */
+  public static final String HCPCS_2_MDFR_CD = DMEClaimColumn.HCPCS_2ND_MDFR_CD.name();
+
+  /** HCPCS third modifier code is set to Inpatient HCPCS third modifier code name. */
+  public static final String HCPCS_3_MDFR_CD = DMEClaimColumn.HCPCS_3RD_MDFR_CD.name();
+
+  /** HCPCS fourth modifier code is set to Inpatient HCPCS fourth modifier code name. */
+  public static final String HCPCS_4_MDFR_CD = DMEClaimColumn.HCPCS_4TH_MDFR_CD.name();
 
   /**
    * The maximum number of diagnosis column names available for {@link ICD_DGNS_CD} and {@link
