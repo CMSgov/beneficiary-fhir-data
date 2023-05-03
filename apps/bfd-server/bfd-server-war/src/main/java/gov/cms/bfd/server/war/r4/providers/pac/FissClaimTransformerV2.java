@@ -331,17 +331,16 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static List<Claim.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
     return claimGroup.getRevenueLines().stream()
+        .sorted(Comparator.comparing(RdaFissRevenueLine::getRdaPosition))
         .map(
             revenueLine -> {
               Claim.ItemComponent itemComponent = new Claim.ItemComponent();
 
               itemComponent.setSequence(revenueLine.getRdaPosition());
 
-              CodeableConcept revenue;
-
               if (Strings.isNotBlank(revenueLine.getNonBillRevCode())
                   || Strings.isNotBlank(revenueLine.getRevCd())) {
-                revenue = new CodeableConcept();
+                CodeableConcept revenue = new CodeableConcept();
 
                 if (Strings.isNotBlank(revenueLine.getNonBillRevCode())) {
                   revenue.setCoding(
@@ -359,11 +358,9 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                               revenueLine.getRevCd(),
                               null)));
                 }
-              } else {
-                revenue = null;
-              }
 
-              itemComponent.setRevenue(revenue);
+                itemComponent.setRevenue(revenue);
+              }
 
               if (revenueLine.getRevUnitsBilled() != null) {
                 itemComponent.setQuantity(new Quantity(revenueLine.getRevUnitsBilled()));
