@@ -27,7 +27,7 @@ String putParameter(Map args = [:]) {
         overwrite = ''
     }
 
-     includeType = "--type ${type}"
+    includeType = "--type ${type}"
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
     output = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --region ${awsRegion} ${overwrite}").trim()
