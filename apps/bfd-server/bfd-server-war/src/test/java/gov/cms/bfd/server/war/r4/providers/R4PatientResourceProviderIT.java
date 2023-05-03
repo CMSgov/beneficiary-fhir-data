@@ -213,7 +213,9 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_ID)) {
+      if (identifier
+          .getSystem()
+          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -720,45 +722,6 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for MBIs
-   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
-   * records.
-   */
-  @Test
-  public void searchForExistingPatientByMbiWithNoHistoryIncludeIdentifiersTrue() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("true");
-
-    loadedRecords.stream()
-        .filter(r -> r instanceof Beneficiary)
-        .map(r -> (Beneficiary) r)
-        .forEach(
-            h -> {
-              Bundle searchResults =
-                  fhirClient
-                      .search()
-                      .forResource(Patient.class)
-                      .where(
-                          Patient.IDENTIFIER
-                              .exactly()
-                              .systemAndIdentifier(
-                                  TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
-                                  h.getMbiHash().get()))
-                      .returnBundle(Bundle.class)
-                      .execute();
-
-              assertNotNull(searchResults);
-              assertEquals(1, searchResults.getTotal());
-              Patient patientFromSearchResult =
-                  (Patient) searchResults.getEntry().get(0).getResource();
-              assertEquals(
-                  String.valueOf(h.getBeneficiaryId()),
-                  patientFromSearchResult.getIdElement().getIdPart());
-            });
-  }
-
-  /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
    * {@link Patient} that does not exist in the DB.
    */
@@ -783,45 +746,12 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that searching by a known existing part D contract number returns a result as
-   * expected.
+   * Verifies that searching by a known existing part D contract number (with 'include identifiers'
+   * in the header) returns a result as expected. Also ensures the unhashed MBI values are returned
+   * by default.
    */
   @Test
   public void searchForExistingPatientByPartDContractNum() {
-    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
-                        "2018"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(1, searchResults.getEntry().size());
-  }
-
-  /**
-   * Verifies that searching by a known existing part D contract number (with 'include identifiers'
-   * in the header) returns a result as expected. Also ensures the unhashed MBI values are returned
-   * due to the 'include identifiers' header.
-   */
-  @Test
-  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
@@ -977,67 +907,6 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
                     TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
                         i.getSystem()))
             .count());
-  }
-
-  /**
-   * Verifies that searching by a known existing part D contract number (with 'include identifiers'
-   * set to {@code false} in the header) returns a result as expected. Also ensures the unhashed MBI
-   * values are NOT returned due to the 'include identifiers' header being {@code false}.
-   *
-   * <p>TODO: Is this test testing the wrong thing? The idea is that includeIdentifiers=false should
-   * not return unhashed MBIs but this test seems to test that they ARE returned as long as
-   * includeIdentifiers exists at all
-   */
-  @Test
-  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("true");
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
-                        "2018"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(1, searchResults.getEntry().size());
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    assertEquals(
-        String.valueOf(expectedBene.getBeneficiaryId()),
-        patientFromSearchResult.getIdElement().getIdPart());
-
-    /*
-     * Ensure the unhashed values for MBI is present.
-     */
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier
-          .getSystem()
-          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
-        mbiUnhashedPresent = true;
-      }
-    }
-
-    assertTrue(mbiUnhashedPresent);
   }
 
   /**
