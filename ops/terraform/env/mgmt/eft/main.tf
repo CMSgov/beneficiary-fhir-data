@@ -18,6 +18,7 @@ locals {
 
 resource "aws_lb" "this" {
   name               = "${local.full_name}-nlb"
+  internal           = true
   load_balancer_type = "network"
   tags               = merge({ Name = "${local.full_name}-nlb" }, local.additional_tags)
 
@@ -40,8 +41,17 @@ resource "aws_security_group" "this" {
     from_port   = local.sftp_port
     to_port     = local.sftp_port
     protocol    = "tcp"
-    cidr_blocks = [] # TODO: Determine CIDR
+    cidr_blocks = [data.aws_vpc.this.cidr_block] # TODO: Determine CIDR
     description = "Allow ingress from SFTP traffic"
+  }
+
+  ingress {
+    from_port       = local.sftp_port
+    to_port         = local.sftp_port
+    protocol        = "tcp"
+    cidr_blocks     = [data.aws_vpc.this.cidr_block] # TODO: Determine CIDR
+    description     = "Allow ingress from SFTP traffic from VPN"
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
   }
 
   egress {

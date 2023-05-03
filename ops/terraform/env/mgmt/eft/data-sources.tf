@@ -2,6 +2,13 @@ data "aws_caller_identity" "current" {}
 
 data "aws_elb_service_account" "this" {}
 
+data "aws_ec2_managed_prefix_list" "vpn" {
+  filter {
+    name   = "prefix-list-name"
+    values = ["cmscloud-vpn"]
+  }
+}
+
 data "aws_vpc" "this" {
   filter {
     name   = "tag:Name"
