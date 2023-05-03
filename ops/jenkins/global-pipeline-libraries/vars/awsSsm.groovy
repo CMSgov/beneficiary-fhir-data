@@ -2,7 +2,7 @@
 // awsSsm.groovy contains methods that wrap awscli ssm subcommands
 
 // Gets value from SSM parameter store based on parameter name.
-// If a SSM parameter does not exist, it returns an empty string.
+// If a SSM parameter does not exist, it will result in an exception.
 String getParameter(Map args = [:]) {
     name = args.parameterName
     awsRegion = args.awsRegion ?: 'us-east-1'
@@ -16,12 +16,9 @@ String getParameter(Map args = [:]) {
 String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
-    type = args.parameterType ? args.parameterType : 'String'
-    shouldOverwrite = args.shouldOverwrite ? true : false
+    type = args.parameterType ?: 'String'
+    overwrite = args.shouldOverwrite ? '--overwrite' : ''
     awsRegion = args.awsRegion ?: 'us-east-1'
-
-    overwrite = shouldOverwrite ? '--overwrite' : ''
-
     includeType = "--type ${type}"
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.

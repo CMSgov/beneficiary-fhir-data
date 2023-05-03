@@ -12,6 +12,7 @@ AWS_REGION="${AWS_REGION:-us-east-1}"
 SQS_QUEUE_URL="$(aws sqs get-queue-url --queue-name "{{ sqs_queue_name }}" --region "$AWS_REGION" --output text)"
 MIGRATOR_SERVICE_NAME="{{ db_migrator_service_name_override | default('bfd-db-migrator.service', true) }}"
 MONITOR_HEARTBEAT_INTERVAL_SECONDS="{{ migrator_monitor_heartbeat_interval_seconds | default('300', true) }}"
+MIGRATOR_LOG="{{ db_migrator_dir }}/migrator-log.json"
 
 #######################################
 # Sends a message using AWS SQS
@@ -88,10 +89,10 @@ function set_migrated_state {
   local _state="$1"
   local schema_version
 
-  if grep -q "No migration necessary." "{{ db_migrator_dir }}/migrator-log.json"; then
-    schema_version="$(grep "Current version of schema" "{{ db_migrator_dir }}/migrator-log.json" | jq -r .message | cut -d: -f2 | head -n1 | xargs)"
+  if grep -q "No migration necessary." "$MIGRATOR_LOG"; then
+    schema_version="$(grep "Current version of schema" "$MIGRATOR_LOG" | jq -r .message | cut -d: -f2 | head -n1 | xargs)"
   else
-    schema_version="$(grep "now at version" "{{ db_migrator_dir }}/migrator-log.json" | jq -r .message | grep -o 'v[0-9]\+' | sed 's/[^0-9]//g' | head -n1 | xargs)"
+    schema_version="$(grep "now at version" "$MIGRATOR_LOG" | jq -r .message | grep -o 'v[0-9]\+' | sed 's/[^0-9]//g' | head -n1 | xargs)"
   fi
   jq --arg arg "$schema_version" -c '. += {"schema_version": $arg}' <<< "$_state"
 }

@@ -102,14 +102,14 @@ def monitorMigrator(Map args = [:]) {
         )
 
         // 1. "handle" (capture status, print, delete) each message
-        // 2. if the message body contains a non "0/0" (running) value, return it
+        // 2. if the message body contains a non "0" (running) value, return it
         for (msg in messages) {
             migratorStatus = msg.body.status
-            println "Migrator schema version is at ${msg.body.schema_version}"
             schemaVersion = msg.body.schema_version
+            println "Migrator schema version is at ${schemaVersion}"
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (migratorStatus =='0') {
+            if (migratorStatus == '0') {
                 def resultsList = [migratorStatus, schemaVersion]
                 return resultsList
             }
@@ -171,7 +171,7 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
                 awsRegion: awsRegion
         ) as Integer
     } catch(Exception ex) {
-        echo "Exception has been encountered getting the storedSchemaVersion from aws ssm, missing ssm parameter for stored schema version."
+        echo "Exception has been encountered getting the parameter /bfd/${bfdEnv}/common/nonsensitive/database_schema_version from the aws ssm, missing ssm parameter for stored schema version."
         return true
     }
     echo "Stored Schema Version : ${storedSchemaVersion}"
