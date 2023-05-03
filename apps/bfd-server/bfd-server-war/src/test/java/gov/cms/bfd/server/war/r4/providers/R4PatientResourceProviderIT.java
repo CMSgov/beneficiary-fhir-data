@@ -14,13 +14,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -1294,7 +1294,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
             .get();
 
     BeneficiaryTransformerV2 beneficiaryTransformerV2 =
-        new BeneficiaryTransformerV2(new MetricRegistry());
+        new BeneficiaryTransformerV2(
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
 
     Patient expected = beneficiaryTransformerV2.transform(beneficiary, requestHeader);
 
@@ -1492,7 +1493,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     assertNotNull(patient);
 
     BeneficiaryTransformerV2 beneficiaryTransformerV2 =
-        new BeneficiaryTransformerV2(new MetricRegistry());
+        new BeneficiaryTransformerV2(
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics());
 
     Patient expected = beneficiaryTransformerV2.transform(beneficiary, headers);
 
