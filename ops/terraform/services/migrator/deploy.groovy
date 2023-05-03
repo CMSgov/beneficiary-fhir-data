@@ -170,7 +170,7 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
                 parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
                 awsRegion: awsRegion
         ) as Integer
-    } catch(groovy.lang.MissingPropertyException ex){
+    } catch(Exception ex) {
         echo "Exception has been encountered getting the storedSchemaVersion from aws ssm, missing ssm parameter for stored schema version."
         return true
     }
