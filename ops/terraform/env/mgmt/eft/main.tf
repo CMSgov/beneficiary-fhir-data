@@ -26,7 +26,7 @@ resource "aws_lb" "this" {
   access_logs {
     enabled = true
     bucket  = data.aws_s3_bucket.logs.id
-    prefix  = local.full_name
+    prefix  = "${replace(local.full_name, "-", "_")}_nlb"
   }
 }
 
