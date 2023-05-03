@@ -1,17 +1,12 @@
 locals {
   account_id = data.aws_caller_identity.current.account_id
-  env        = "mgmt"
-  service    = "eft"
-  layer      = "data"
-  azs        = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  full_name  = "bfd-${local.env}-${local.service}"
+  vpc_id     = data.aws_vpc.this.id
 
-  vpc_id = data.aws_vpc.this.id
-
-  additional_tags = {
-    Layer = local.layer
-    role  = local.service
-  }
+  env             = "mgmt"
+  service         = "eft"
+  layer           = "data"
+  full_name       = "bfd-${local.env}-${local.service}"
+  additional_tags = { Layer = local.layer, role = local.service }
 
   sftp_port = 22
 
