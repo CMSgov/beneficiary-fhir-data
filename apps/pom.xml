@@ -531,30 +531,6 @@
 #!/usr/bin/env bash
 set -e
 
-checkJavaFormat() {
-  echo 'Verifying Java source code format...'
-
-  if ! git diff --name-only --cached | grep -q '^apps/.*'; then
-    echo 'Verified Java source code format: no staged changes in app/.'
-    return 0
-  fi
-
-  cd apps
-
-  set +e
-  mvn com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1
-  checkResult=$?
-  set -e
-
-  if [ ${checkResult} -eq 0 ]; then
-    echo 'Verified Java source code format: a-okay.'
-  else
-    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
-  fi
-
-  return ${checkResult}
-}
-
 checkSecretFilesForPlainText() {
   echo 'Verifying secret files are not in plaintext...'
   set +e
@@ -586,8 +562,39 @@ checkSecretFilesForPlainText() {
 }
 
 checkSecretFilesForPlainText
-checkJavaFormat
 							]]></pre-commit>
+							<pre-push><![CDATA[
+#!/usr/bin/env bash
+set -e
+
+checkJavaFormat() {
+  echo 'Verifying Java source code format...'
+  branch_name="$(git rev-parse --abbrev-ref HEAD 2>&1)"
+
+  git fetch origin 2>&1
+
+  localChanges="$(git diff --name-only "origin/${branch_name}:apps" "${branch_name}:apps" 2>&1)"
+
+  echo "Verifying Java source code format for branch: ${branch_name} ..."
+  if [ "$localChanges" = '' ]; then
+    echo 'No changes detected. Exiting.'
+  else
+    set +e
+
+    echo 'Relevant app-directory changes detected. Running fmt plugin check.'
+    if mvn -f apps/ com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1; then
+      echo 'Verified Java source code format: a-okay.'
+    else
+      echo "Inconsistencies discovered in formatting check. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
+      return 1
+    fi
+  fi
+  return 0
+}
+
+checkJavaFormat
+							]]>
+							</pre-push>
 						</hooks>
 					</configuration>
 				</plugin>

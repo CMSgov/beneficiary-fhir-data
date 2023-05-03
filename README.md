@@ -86,7 +86,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       </toolchain>
     </toolchains>
     ```
-1. Install pre-commit hooks `mvn -f apps initialize`
+1. Install pre-commit and pre-push hooks `mvn -f apps/ -Dmaven.build.cache.enabled=false initialize`
 
 ### Native Setup
 1. Change to the `apps/bfd-data-fda` directory and run `mvn clean install`. 
