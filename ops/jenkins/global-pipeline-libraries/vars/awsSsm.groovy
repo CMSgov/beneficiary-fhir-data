@@ -20,12 +20,7 @@ String putParameter(Map args = [:]) {
     shouldOverwrite = args.shouldOverwrite ? true : false
     awsRegion = args.awsRegion ?: 'us-east-1'
 
-    if (shouldOverwrite) {
-        overwrite = '--overwrite'
-    }
-    else {
-        overwrite = ''
-    }
+    overwrite = shouldOverwrite ? '--overwrite' : ''
 
     includeType = "--type ${type}"
 
