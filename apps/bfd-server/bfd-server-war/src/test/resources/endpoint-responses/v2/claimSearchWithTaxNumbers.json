@@ -209,31 +209,6 @@
                 }
               ]
             }
-          },
-          {
-            "sequence": 3,
-            "category": {
-              "coding": [
-                {
-                  "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-                  "code": "info",
-                  "display": "Information"
-                },
-                {
-                  "system": "https://bluebutton.cms.gov/resources/codesystem/information",
-                  "code": "https://bluebutton.cms.gov/resources/variables/fiss/apc-hcpcs-apc",
-                  "display": "Ambulatory Payment Classification"
-                }
-              ]
-            },
-            "code": {
-              "coding": [
-                {
-                  "system": "https://bluebutton.cms.gov/resources/variables/fiss/apc-hcpcs-apc",
-                  "code": "placeholder"
-                }
-              ]
-            }
           }
         ],
         "diagnosis": [
@@ -397,6 +372,19 @@
               ]
             },
             "productOrService": {
+              "extension": [
+                {
+                  "url": "https://bluebutton.cms.gov/resources/variables/fiss/apc-hcpcs-apc",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "https://bluebutton.cms.gov/resources/variables/fiss/apc-hcpcs-apc",
+                        "code": "00001"
+                      }
+                    ]
+                  }
+                }
+              ],
               "coding": [
                 {
                   "system": "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",

@@ -113,6 +113,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     addExtension(extensions, BBCodingSystems.FISS.CURR_STATUS, "" + claimGroup.getCurrStatus());
     addExtension(extensions, BBCodingSystems.FISS.RECD_DT_CYMD, claimGroup.getReceivedDate());
     addExtension(extensions, BBCodingSystems.FISS.CURR_TRAN_DT_CYMD, claimGroup.getCurrTranDate());
+    addExtension(extensions, BBCodingSystems.FISS.GROUP_CODE, claimGroup.getGroupCode());
 
     return extensions;
   }
@@ -142,9 +143,6 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
             revenueLine -> {
               ClaimResponse.ItemComponent itemComponent = new ClaimResponse.ItemComponent();
 
-              itemComponent.addAdjudication(
-                  getClaimItemAdjudication(
-                      BBCodingSystems.FISS.GROUP_CODE, claimGroup.getGroupCode()));
               itemComponent.addAdjudication(
                   getClaimItemAdjudication(
                       BBCodingSystems.FISS.ACO_RED_RARC, revenueLine.getAcoRedRarc()));

@@ -68,6 +68,13 @@
           {
             "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-tran-dt-cymd",
             "valueDate": "1970-01-02"
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
+              "code": "gr"
+            }
           }
         ],
         "identifier": [

@@ -132,7 +132,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
       RdaFissClaim claimGroup) {
     List<Claim.SupportingInformationComponent> supportingInfo = new ArrayList<>();
-    int sequenceNumber = 0;
+    int sequenceNumber = 1;
 
     if (Strings.isNotBlank(claimGroup.getFreqCd())) {
       supportingInfo.add(
@@ -147,7 +147,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     if (Strings.isNotBlank(claimGroup.getDrgCd())) {
       supportingInfo.add(
           new Claim.SupportingInformationComponent()
-              .setSequence(sequenceNumber++)
+              .setSequence(sequenceNumber)
               .setCategory(
                   new CodeableConcept()
                       .setCoding(
@@ -167,27 +167,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                           CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
                           claimGroup.getDrgCd(),
                           null))));
-    }
-
-    if (Strings.isNotBlank("placeholder")) {
-      supportingInfo.add(
-          new Claim.SupportingInformationComponent()
-              .setSequence(sequenceNumber)
-              .setCategory(
-                  new CodeableConcept()
-                      .setCoding(
-                          List.of(
-                              new Coding(
-                                  ClaimInformationcategory.INFO.getSystem(),
-                                  ClaimInformationcategory.INFO.toCode(),
-                                  ClaimInformationcategory.INFO.getDisplay()),
-                              new Coding(
-                                  TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
-                                  BBCodingSystems.FISS.APC_HCPCS_APC,
-                                  "Ambulatory Payment Classification"))))
-              .setCode(
-                  new CodeableConcept(
-                      new Coding(BBCodingSystems.FISS.APC_HCPCS_APC, "placeholder", null))));
     }
 
     return supportingInfo;
@@ -405,13 +384,30 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                         serviceDate.getDayOfMonth()));
               }
 
-              if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
-                itemComponent.setProductOrService(
-                    new CodeableConcept(
-                        new Coding(
-                            CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
-                            revenueLine.getHcpcCd(),
-                            null)));
+              if (Strings.isNotBlank(revenueLine.getHcpcCd())
+                  || Strings.isNotBlank(revenueLine.getApcHcpcsApc())) {
+                CodeableConcept productOrService = new CodeableConcept();
+
+                if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
+                  productOrService.setCoding(
+                      List.of(
+                          new Coding(
+                              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
+                              revenueLine.getHcpcCd(),
+                              null)));
+                }
+
+                if (Strings.isNotBlank(revenueLine.getApcHcpcsApc())) {
+                  productOrService.addExtension(
+                      BBCodingSystems.FISS.APC_HCPCS_APC,
+                      new CodeableConcept(
+                          new Coding(
+                              BBCodingSystems.FISS.APC_HCPCS_APC,
+                              revenueLine.getApcHcpcsApc(),
+                              null)));
+                }
+
+                itemComponent.setProductOrService(productOrService);
               }
 
               if (Strings.isNotBlank(revenueLine.getHcpcInd())) {

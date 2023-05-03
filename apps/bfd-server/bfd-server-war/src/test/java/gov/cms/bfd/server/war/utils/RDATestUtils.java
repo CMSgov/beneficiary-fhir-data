@@ -205,6 +205,7 @@ public class RDATestUtils {
             .freqCd("C")
             .clmTypInd("4")
             .drgCd("drgc")
+            .groupCode("gr")
             .build();
 
     Set<RdaFissProcCode> procCodes =
@@ -333,6 +334,7 @@ public class RDATestUtils {
             .freqCd("C")
             .clmTypInd("1")
             .drgCd("drgd")
+            .groupCode("rg")
             .build();
 
     Set<RdaFissProcCode> procCodes =
