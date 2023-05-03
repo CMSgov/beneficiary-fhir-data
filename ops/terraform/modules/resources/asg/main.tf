@@ -103,6 +103,12 @@ resource "aws_launch_template" "main" {
     }
   }
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 1
+    http_tokens                 = "required"
+  }
+
   user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env           = var.env_config.env
     port          = var.lb_config.port

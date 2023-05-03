@@ -66,6 +66,12 @@ resource "aws_instance" "this" {
   subnet_id              = data.aws_subnet.main.id
   vpc_security_group_ids = [local.vpn_security_group_id, aws_security_group.this[0].id, local.ent_tools_sg_id]
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 1
+    http_tokens                 = "required"
+  }
+
   root_block_device {
     tags                  = merge(local.default_tags, { snapshot = "true" }) # TODO: Consider removing the tag from migrator instances
     volume_type           = "gp2"
