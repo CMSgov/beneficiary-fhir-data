@@ -2,6 +2,11 @@ data "aws_caller_identity" "current" {}
 
 data "aws_elb_service_account" "this" {}
 
+data "aws_ssm_parameter" "subnet_ip_reservations" {
+  name            = "/bfd/${local.env}/${local.service}/sensitive/subnet_to_ip_reservations_nlb_json"
+  with_decryption = true
+}
+
 data "aws_ec2_managed_prefix_list" "vpn" {
   filter {
     name   = "prefix-list-name"
@@ -17,12 +22,12 @@ data "aws_vpc" "this" {
 }
 
 data "aws_subnet" "this" {
-  for_each          = toset(local.azs)
-  vpc_id            = local.vpc_id
-  availability_zone = each.key
+  for_each = local.subnet_ip_reservations
+
+  vpc_id = local.vpc_id
   filter {
-    name   = "tag:Layer"
-    values = [local.layer]
+    name   = "tag:Name"
+    values = [each.key]
   }
 }
 

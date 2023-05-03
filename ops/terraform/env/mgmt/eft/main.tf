@@ -6,7 +6,7 @@ locals {
   azs        = ["us-east-1a", "us-east-1b", "us-east-1c"]
   full_name  = "bfd-${local.env}-${local.service}"
 
-  vpc_id = data.aws_vpc.this.arn
+  vpc_id = data.aws_vpc.this.id
 
   additional_tags = {
     Layer = local.layer
@@ -14,6 +14,16 @@ locals {
   }
 
   sftp_port = 22
+
+  subnet_ip_reservations = jsondecode(nonsensitive(data.aws_ssm_parameter.subnet_ip_reservations.value))
+}
+
+resource "aws_ec2_subnet_cidr_reservation" "this" {
+  for_each = local.subnet_ip_reservations
+
+  cidr_block       = "${each.value}/32"
+  reservation_type = "explicit"
+  subnet_id        = data.aws_subnet.this[each.key].id
 }
 
 resource "aws_lb" "this" {
@@ -22,7 +32,14 @@ resource "aws_lb" "this" {
   load_balancer_type = "network"
   tags               = merge({ Name = "${local.full_name}-nlb" }, local.additional_tags)
 
-  subnets = data.aws_subnet.this[*].id
+  dynamic "subnet_mapping" {
+    for_each = local.subnet_ip_reservations
+
+    content {
+      subnet_id            = data.aws_subnet.this[subnet_mapping.key].id
+      private_ipv4_address = subnet_mapping.value
+    }
+  }
 
   access_logs {
     enabled = true
