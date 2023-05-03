@@ -5,7 +5,9 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -13,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.web.SpringServletContainerInitializer;
@@ -41,17 +44,11 @@ public final class ServerInitializer implements WebApplicationInitializer {
     // attribute so that it can be reused in SpringConfiguration rather than
     // creating a static field.
     var springContext = new AnnotationConfigWebApplicationContext();
-    springContext.setServletContext(servletContext);
-    ConfigLoader config = SpringConfiguration.createConfigLoader(System::getenv);
-    servletContext.setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, config);
-
-    ConfigurableEnvironment springEnv = springContext.getEnvironment();
-    MutablePropertySources sources = springEnv.getPropertySources();
-    sources.addFirst(new ConfigPropertySource("configLoader", config));
-    springContext.register(SpringConfiguration.class);
-    springContext.refresh();
+    initializeSpringConfiguration(
+        springContext, servletContext, SpringConfiguration.class, System::getenv);
 
     // Set the Spring PRODUCTION profile as the default.
+    ConfigurableEnvironment springEnv = springContext.getEnvironment();
     springEnv.setDefaultProfiles(SpringProfile.PRODUCTION);
 
     // Manage the lifecycle of the root application context.
@@ -85,5 +82,35 @@ public final class ServerInitializer implements WebApplicationInitializer {
         HealthCheckServlet.HEALTH_CHECK_REGISTRY, springContext.getBean(HealthCheckRegistry.class));
 
     LOGGER.info("Initialized Blue Button API backend server.");
+  }
+
+  /**
+   * Creates a {@link ConfigLoader} using the provided function to access environment variables and
+   * initializes the provided spring and servlet contexts with the {@link ConfigLoader}. Configures
+   * the spring environment to use a {@link ConfigPropertySource} to access properties so that the
+   * {@link SpringConfiguration} can use properties defined in SSM. Adds a {@link
+   * SpringConfiguration} and refreshes the context.
+   *
+   * @param springContext spring context to initialize
+   * @param servletContext servlet context to initialize
+   * @param configurationClass {@link Configuration} annotated class for our config (parameterized
+   *     for testing)
+   * @param getenv function used to access environment variables (parameterized for testing)
+   */
+  @VisibleForTesting
+  static void initializeSpringConfiguration(
+      AnnotationConfigWebApplicationContext springContext,
+      ServletContext servletContext,
+      Class<?> configurationClass,
+      Function<String, String> getenv) {
+    springContext.setServletContext(servletContext);
+    ConfigLoader config = SpringConfiguration.createConfigLoader(getenv);
+    servletContext.setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, config);
+
+    ConfigurableEnvironment springEnv = springContext.getEnvironment();
+    MutablePropertySources sources = springEnv.getPropertySources();
+    sources.addFirst(new ConfigPropertySource("configLoader", config));
+    springContext.register(configurationClass);
+    springContext.refresh();
   }
 }

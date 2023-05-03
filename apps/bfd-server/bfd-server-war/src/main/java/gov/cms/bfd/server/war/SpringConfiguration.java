@@ -58,11 +58,9 @@ import org.hibernate.tool.schema.Action;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
@@ -153,7 +151,6 @@ public class SpringConfiguration {
    * @return the config object
    */
   @Bean
-  @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
   public ConfigLoader configLoader(@Autowired ServletContext servletContext) {
     return servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME) != null
         ? (ConfigLoader) servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME)

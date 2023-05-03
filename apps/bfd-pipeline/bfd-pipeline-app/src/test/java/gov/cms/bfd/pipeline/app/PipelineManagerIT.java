@@ -252,12 +252,9 @@ public final class PipelineManagerIT {
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
             jobRecordStore,
             mockS3TaskManager)) {
-      // The delay has to be long enough to avoid race conditions where the job gets re-scheduled
-      // before the app stops.  There is a window of time between the failed job being dequeued
-      // and the app shutting down during which the scheduler can reschedule the app.
       MockJob mockJob =
           new MockJob(
-              Optional.of(new PipelineJobSchedule(50, ChronoUnit.MILLIS)),
+              Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
               () -> {
                 throw new RuntimeException("boom");
               });
@@ -294,11 +291,18 @@ public final class PipelineManagerIT {
 
       // Make sure that the job stopped trying to execute after it failed.
 
-      assertEquals(
-          1,
+      var jobRecords =
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
-              .count());
+              .toList();
+      if (jobRecords.size() != 1) {
+        assertEquals(
+            "",
+            jobRecordStore.getJobRecords().stream()
+                .map(PipelineJobRecord::toString)
+                .collect(Collectors.joining("\n")));
+      }
+      assertEquals(1, jobRecords.size());
     }
   }
 
