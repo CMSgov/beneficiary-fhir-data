@@ -17,9 +17,9 @@ locals {
 }
 
 resource "aws_lb" "this" {
-  name               = local.full_name
+  name               = "${local.full_name}-nlb"
   load_balancer_type = "network"
-  tags               = local.additional_tags
+  tags               = merge({ Name = "${local.full_name}-nlb" }, local.additional_tags)
 
   subnets = data.aws_subnet.this[*].id
 
