@@ -6,6 +6,10 @@ locals {
     for key, value in local.eyaml
     : key => value if contains(split("/", key), "common") && value != "UNDEFINED"
   }
+  eft_sensitive = {
+    for key, value in local.eyaml
+    : key => value if contains(split("/", key), "eft") && value != "UNDEFINED"
+  }
 }
 
 data "external" "eyaml" {
@@ -14,6 +18,16 @@ data "external" "eyaml" {
 
 resource "aws_ssm_parameter" "common_sensitive" {
   for_each = local.common_sensitive
+
+  key_id    = var.kms_key_id
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
+}
+
+resource "aws_ssm_parameter" "eft_sensitive" {
+  for_each = local.eft_sensitive
 
   key_id    = var.kms_key_id
   name      = each.key
