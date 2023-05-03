@@ -205,6 +205,27 @@ public class ConfigLoaderTest {
     assertException("z", null, NOT_PROVIDED, () -> loader.positiveIntValue("z"));
   }
 
+  /** Validates all cases for positive int values when zero is allowed. */
+  @Test
+  public void testPositiveIntsZeroOK() {
+    values.put("a", "10");
+    values.put("b", "0");
+    values.put("c", "-1");
+    values.put("d", "not-a-number");
+
+    assertEquals(Optional.of(10), loader.positiveIntOption("a"));
+    assertEquals(Optional.of(0), loader.positiveIntOptionZeroOK("b"));
+    assertException("c", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntOptionZeroOK("c"));
+    assertException("d", values, NOT_VALID_INTEGER, () -> loader.positiveIntOptionZeroOK("d"));
+    assertEquals(Optional.empty(), loader.positiveIntOption("z"));
+
+    assertEquals(10, loader.positiveIntValue("a"));
+    assertEquals(0, loader.positiveIntValueZeroOK("b"));
+    assertException("c", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntValueZeroOK("c"));
+    assertException("d", values, NOT_VALID_INTEGER, () -> loader.positiveIntValueZeroOK("d"));
+    assertException("z", null, NOT_PROVIDED, () -> loader.positiveIntValueZeroOK("z"));
+  }
+
   /** Validates all cases for long values. */
   @Test
   public void testLongs() {

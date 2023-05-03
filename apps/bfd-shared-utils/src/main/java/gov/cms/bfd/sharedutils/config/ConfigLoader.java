@@ -239,6 +239,30 @@ public class ConfigLoader {
   }
 
   /**
+   * Gets a required positive integer configuration value. Zero is considered valid even though it
+   * is not strictly positive.
+   *
+   * @param name name of configuration value
+   * @return integer value
+   * @throws ConfigException if there is no valid integer value or value is not positive
+   */
+  public int positiveIntValueZeroOK(String name) {
+    return positiveIntOptionZeroOK(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  }
+
+  /**
+   * Gets an optional positive integer configuration value. Zero is considered valid even though it
+   * is not strictly positive.
+   *
+   * @param name name of configuration value
+   * @return optional integer value
+   * @throws ConfigException if there is an integer value and it is not positive
+   */
+  public Optional<Integer> positiveIntOptionZeroOK(String name) {
+    return intOption(name).map(x -> validate(name, x, NOT_POSITIVE_INTEGER, x >= 0));
+  }
+
+  /**
    * Gets an optional integer configuration value or a defaultValue if there is no value.
    *
    * @param name name of configuration value

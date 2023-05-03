@@ -1,10 +1,6 @@
 package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
@@ -27,17 +23,15 @@ import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.sharedutils.config.AppConfigurationException;
-import gov.cms.bfd.sharedutils.config.AwsParameterStoreClient;
-import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -496,74 +490,16 @@ public class SpringConfiguration {
 
   /**
    * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
-   * information. The provided lambda is used to look up variables related to where to find other
-   * sources of config variables.
+   * information. The provided function is used to look up environment variables so that these can
+   * be simulated in tests without having to fork a process.
    *
-   * <p>Config values will be loaded from these sources. Sources are checked in order with first
-   * matching value used.
-   *
-   * <ol>
-   *   <li>System properties.
-   *   <li>Environment variables.
-   *   <li>If {@link #ENV_VAR_KEY_PROPERTIES_FILE} is defined use properties in that file.
-   *   <li>If {@link #ENV_VAR_KEY_SSM_PARAMETER_PATH} is defined use parameters at that path.
-   * </ol>
+   * <p>{@see LayeredConfiguration#createConfigLoader} for possible sources of configuration
+   * variables.
    *
    * @param getenv function used to access environment variables (provided explicitly for testing)
    * @return appropriately configured {@link ConfigLoader}
    */
   public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
-    final var baseConfig = ConfigLoader.builder().addSingle(getenv).build();
-    final var configBuilder = ConfigLoader.builder();
-
-    final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
-    if (ssmPath.length() > 0) {
-      ensureAwsCredentialsConfiguredCorrectly();
-      final var ssmClient = AWSSimpleSystemsManagementClient.builder();
-      baseConfig
-          .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
-          .ifPresent(r -> ssmClient.setRegion(r.getName()));
-      final var parameterStore =
-          new AwsParameterStoreClient(
-              ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
-      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath);
-      configBuilder.addMap(parametersMap);
-    }
-
-    final var propertiesFile = baseConfig.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, "");
-    if (propertiesFile.length() > 0) {
-      try {
-        final var file = new File(propertiesFile);
-        configBuilder.addPropertiesFile(file);
-      } catch (IOException ex) {
-        throw new ConfigException(ENV_VAR_KEY_PROPERTIES_FILE, "error parsing file", ex);
-      }
-    }
-
-    configBuilder.addSingle(getenv);
-    configBuilder.addSystemProperties();
-    return configBuilder.build();
-  }
-
-  /**
-   * Just for convenience: makes sure DefaultAWSCredentialsProviderChain has whatever it needs
-   * before we try to use any AWS resources.
-   */
-  static void ensureAwsCredentialsConfiguredCorrectly() {
-    try {
-      DefaultAWSCredentialsProviderChain awsCredentialsProvider =
-          new DefaultAWSCredentialsProviderChain();
-      awsCredentialsProvider.getCredentials();
-    } catch (AmazonClientException e) {
-      /*
-       * The credentials provider should throw this if it can't find what
-       * it needs.
-       */
-      throw new AppConfigurationException(
-          String.format(
-              "Missing configuration for AWS credentials (for %s).",
-              DefaultAWSCredentialsProviderChain.class.getName()),
-          e);
-    }
+    return LayeredConfiguration.createConfigLoader(Map.of(), getenv);
   }
 }
