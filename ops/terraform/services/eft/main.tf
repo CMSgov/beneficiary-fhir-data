@@ -2,15 +2,35 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   vpc_id     = data.aws_vpc.this.id
 
-  env             = "mgmt"
-  service         = "eft"
-  layer           = "data"
-  full_name       = "bfd-${local.env}-${local.service}"
-  additional_tags = { Layer = local.layer, role = local.service }
+  env       = terraform.workspace
+  service   = "eft"
+  layer     = "data"
+  full_name = "bfd-${local.env}-${local.service}"
+
+  default_tags = {
+    application    = "bfd"
+    business       = "oeda"
+    stack          = local.env
+    Environment    = local.env
+    Terraform      = true
+    tf_module_root = "ops/terraform/services/${local.service}"
+    Layer          = local.layer
+    role           = local.service
+  }
+
+  sensitive_service_map = zipmap(
+    data.aws_ssm_parameters_by_path.sensitive_service.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.sensitive_service.values)
+  )
+  sensitive_service_config = {
+    for key, value in local.sensitive_service_map : split("/", key)[5] => value
+  }
+
+  subnet_ip_reservations = jsondecode(
+    local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
+  )
 
   sftp_port = 22
-
-  subnet_ip_reservations = jsondecode(nonsensitive(data.aws_ssm_parameter.subnet_ip_reservations.value))
 }
 
 resource "aws_ec2_subnet_cidr_reservation" "this" {
@@ -25,7 +45,7 @@ resource "aws_lb" "this" {
   name               = "${local.full_name}-nlb"
   internal           = true
   load_balancer_type = "network"
-  tags               = merge({ Name = "${local.full_name}-nlb" }, local.additional_tags)
+  tags               = { Name = "${local.full_name}-nlb" }
 
   dynamic "subnet_mapping" {
     for_each = local.subnet_ip_reservations
@@ -47,7 +67,7 @@ resource "aws_security_group" "this" {
   name        = "${local.full_name}-nlb"
   description = "Allow access to the ${local.service} network load balancer"
   vpc_id      = local.vpc_id
-  tags        = merge({ Name = "${local.full_name}-nlb" }, local.additional_tags)
+  tags        = { Name = "${local.full_name}-nlb" }
 
   ingress {
     from_port   = local.sftp_port

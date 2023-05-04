@@ -66,7 +66,3 @@ module "base_config" {
 
   kms_key_id = data.aws_kms_key.cmk.arn
 }
-
-module "eft" {
-  source = "./eft"
-}

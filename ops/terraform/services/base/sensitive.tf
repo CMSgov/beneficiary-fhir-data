@@ -6,6 +6,7 @@ locals {
   migrator_sensitive = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "migrator") && value != "UNDEFINED" }
   pipeline_sensitive = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "pipeline") && value != "UNDEFINED" }
   server_sensitive   = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "server") && value != "UNDEFINED" }
+  eft_sensitive      = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "eft") && value != "UNDEFINED" }
 }
 
 data "external" "eyaml" {
@@ -44,6 +45,16 @@ resource "aws_ssm_parameter" "pipeline_sensitive" {
 
 resource "aws_ssm_parameter" "server_sensitive" {
   for_each = local.server_sensitive
+
+  key_id    = data.aws_kms_key.cmk.arn
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
+}
+
+resource "aws_ssm_parameter" "eft_sensitive" {
+  for_each = local.eft_sensitive
 
   key_id    = data.aws_kms_key.cmk.arn
   name      = each.key

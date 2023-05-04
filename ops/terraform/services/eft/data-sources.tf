@@ -2,8 +2,8 @@ data "aws_caller_identity" "current" {}
 
 data "aws_elb_service_account" "this" {}
 
-data "aws_ssm_parameter" "subnet_ip_reservations" {
-  name            = "/bfd/${local.env}/${local.service}/sensitive/subnet_to_ip_reservations_nlb_json"
+data "aws_ssm_parameters_by_path" "sensitive_service" {
+  path = "/bfd/${local.env}/${local.service}/sensitive"
   with_decryption = true
 }
 
