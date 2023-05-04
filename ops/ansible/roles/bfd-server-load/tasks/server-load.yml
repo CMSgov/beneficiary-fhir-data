@@ -45,7 +45,7 @@
     requirements: "{{ server_load_dir }}/requirements.txt"
     umask: "0022"
     virtualenv: "{{ server_load_dir }}/venv"
-    virtualenv_command: python3 -m venv
+    virtualenv_command: python3 -m venv --upgrade
   become: true
   tags:
     - pre-ami
