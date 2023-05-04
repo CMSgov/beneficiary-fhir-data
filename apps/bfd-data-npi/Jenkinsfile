@@ -40,6 +40,7 @@ spec:
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
         string(name: 'filemonth', description: 'The month of the npi file will download', defaultValue: '')
         string(name: 'fileyear',  description: 'The year of the npi file will download', defaultValue: '')
+        booleanParam(name:'forceRebuild', description: 'When true, it will force a rebuild of the npi project.', defaultValue: false)
     }
     stages {
         stage('Setup') {
@@ -138,7 +139,7 @@ fi
                         )
                         // Check whether the parameter is empty or the sha value is not equal to the new sha value, if either 
                         // it is empty or doesnt exist we build the project and deploy the new jar to aws code artifact
-                        if (env.ssmLookupSha256.isEmpty() || env.npiOrgNameSha256.trim() != env.ssmLookupSha256.trim()) {
+                        if (params.forceRebuild || env.ssmLookupSha256.isEmpty() || env.npiOrgNameSha256.trim() != env.ssmLookupSha256.trim()) {
                             dir('apps/bfd-data-npi') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
                                 sh "mvn ${quietFlags} -Dnpi.downloadUrl=\"${npiOrgFileDownloadUrl}\" clean install"

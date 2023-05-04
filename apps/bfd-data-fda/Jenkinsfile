@@ -38,6 +38,7 @@ spec:
     }
     parameters {
         booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false)
+        booleanParam(name:'forceRebuild', description: 'When true, it will force a rebuild of the fda project.', defaultValue: false)
     }
     stages {
         stage('Setup') {
@@ -115,7 +116,7 @@ fi
                         )
                         // Check whether the parameter is empty or the sha value is not equal to the new sha value, if either 
                         // it is empty or doesnt exist we build the project and deploy the new jar to aws code artifact
-                        if (ssmLookupSha256.isEmpty() || fdaDrugCodeSha256.trim() != ssmLookupSha256.trim()) {
+                        if (params.forceRebuild || ssmLookupSha256.isEmpty() || fdaDrugCodeSha256.trim() != ssmLookupSha256.trim()) {
                             dir('apps/bfd-data-fda') {
                                 def quietFlags = params.verbose_mvn_logging ? '' : '--quiet'
                                 sh 'echo "$CODEARTIFACT_ENDPOINT"'
