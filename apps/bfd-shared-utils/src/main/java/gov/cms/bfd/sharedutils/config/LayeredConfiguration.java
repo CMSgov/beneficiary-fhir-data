@@ -1,7 +1,10 @@
 package gov.cms.bfd.sharedutils.config;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
 import java.io.File;
@@ -23,6 +26,24 @@ public final class LayeredConfiguration {
    * up configuration variables in AWS SSM parameter store.
    */
   public static final String ENV_VAR_KEY_SSM_REGION = "SSM_REGION";
+
+  /**
+   * The name of the environment variable that should be used to provide an override endpoint used
+   * for looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
+   */
+  public static final String ENV_VAR_KEY_SSM_ENDPOINT = "SSM_ENDPOINT";
+
+  /**
+   * The name of the environment variable that should be used to provide an access key used for
+   * looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
+   */
+  public static final String ENV_VAR_KEY_SSM_ACCESS_KEY = "SSM_ACCESS_KEY";
+
+  /**
+   * The name of the environment variable that should be used to provide a secret key used for
+   * looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
+   */
+  public static final String ENV_VAR_KEY_SSM_SECRET_KEY = "SSM_SECRET_KEY";
 
   /**
    * The name of the environment variable that should be used to provide a path for looking up
@@ -63,13 +84,32 @@ public final class LayeredConfiguration {
 
     configBuilder.addSingle(defaultValues::get);
 
+    // load parameters from AWS SSM if configured
     final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
     if (ssmPath.length() > 0) {
-      ensureAwsCredentialsConfiguredCorrectly();
+      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isEmpty()) {
+        ensureAwsCredentialsConfiguredCorrectly();
+      }
       final var ssmClient = AWSSimpleSystemsManagementClient.builder();
-      baseConfig
-          .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
-          .ifPresent(r -> ssmClient.setRegion(r.getName()));
+      // either region or endpoint can be defined
+      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ENDPOINT).isEmpty()) {
+        baseConfig
+            .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
+            .ifPresent(r -> ssmClient.setRegion(r.getName()));
+      } else {
+        // region has to be defined when defining endpoint
+        ssmClient.withEndpointConfiguration(
+            new AwsClientBuilder.EndpointConfiguration(
+                baseConfig.stringValue(ENV_VAR_KEY_SSM_ENDPOINT),
+                baseConfig.stringValue(ENV_VAR_KEY_SSM_REGION)));
+      }
+      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isPresent()) {
+        ssmClient.withCredentials(
+            new AWSStaticCredentialsProvider(
+                new BasicAWSCredentials(
+                    baseConfig.stringValue(ENV_VAR_KEY_SSM_ACCESS_KEY),
+                    baseConfig.stringValue(ENV_VAR_KEY_SSM_SECRET_KEY))));
+      }
       final var parameterStore =
           new AwsParameterStoreClient(
               ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
@@ -77,6 +117,7 @@ public final class LayeredConfiguration {
       configBuilder.addMap(parametersMap);
     }
 
+    // load properties from file if configured
     final var propertiesFile = baseConfig.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, "");
     if (propertiesFile.length() > 0) {
       try {

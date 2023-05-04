@@ -9,23 +9,20 @@ import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.model.ParameterType;
 import com.amazonaws.services.simplesystemsmanagement.model.PutParameterRequest;
 import com.google.common.collect.ImmutableMap;
+import gov.cms.bfd.TestContainerConstants;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 /** Integration test for {@link AwsParameterStoreClient}. */
 @Testcontainers
 public class AwsParameterStoreClientIT {
-  /** The localstack image and version to use. */
-  private static final DockerImageName localstackImage =
-      DockerImageName.parse("localstack/localstack:2.0.2");
-
   /** Automatically creates and destroys a localstack SSM service container. */
   @Container
-  public LocalStackContainer localstack =
-      new LocalStackContainer(localstackImage).withServices(LocalStackContainer.Service.SSM);
+  LocalStackContainer localstack =
+      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withServices(LocalStackContainer.Service.SSM);
 
   /** Upload some variables and verify that we can retrieve them. */
   @Test
