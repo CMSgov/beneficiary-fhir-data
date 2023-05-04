@@ -40,12 +40,23 @@
   tags:
     - pre-ami
 
+- name: Install virtualenv, upgrade pip
+  pip:
+    name: "pip"
+    umask: "0022"
+    virtualenv: "{{ server_load_dir }}/venv"
+    virtualenv_command: python3 -m venv
+    extra_args: --upgrade
+  become: true
+  tags:
+    - pre-ami
+
 - name: Install server-load Application Requirements
   pip:
     requirements: "{{ server_load_dir }}/requirements.txt"
     umask: "0022"
     virtualenv: "{{ server_load_dir }}/venv"
-    virtualenv_command: python3 -m venv --upgrade
+    virtualenv_command: python3 -m venv
   become: true
   tags:
     - pre-ami
