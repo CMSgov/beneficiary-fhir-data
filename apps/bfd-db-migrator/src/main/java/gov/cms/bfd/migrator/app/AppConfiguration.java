@@ -3,8 +3,10 @@ package gov.cms.bfd.migrator.app;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import java.util.Map;
 import java.util.Optional;
 
 /** Models the configuration options for the application. */
@@ -53,9 +55,8 @@ public class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Per <code>/dev/design-decisions-readme.md</code>, this application accepts its configuration
-   * via environment variables. Read those in, and build an {@link AppConfiguration} instance from
-   * them.
+   * Read configuration variables from a layered {@link ConfigLoader} and build an {@link
+   * AppConfiguration} instance from them.
    *
    * @return the {@link AppConfiguration} instance represented by the configuration provided to this
    *     application via the environment variables
@@ -63,7 +64,7 @@ public class AppConfiguration extends BaseAppConfiguration {
    *     configuration passed to the application are incomplete or incorrect.
    */
   public static AppConfiguration readConfigFromEnvironmentVariables() {
-    final var configLoader = ConfigLoader.builder().addEnvironmentVariables().build();
+    final var configLoader = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
 
     MetricOptions metricOptions = loadMetricOptions(configLoader);
     DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
