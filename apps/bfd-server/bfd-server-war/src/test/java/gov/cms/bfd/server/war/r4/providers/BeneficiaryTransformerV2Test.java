@@ -563,7 +563,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchAddressWithAddrHeader() {
-    RequestHeaders reqHdr = getRHwithIncldAddrFldHdr("true");
+    RequestHeaders reqHdr = getHeaderWithAddressFieldsSetTo("true");
     createPatient(reqHdr);
     assertNotNull(patient);
     List<Address> addrList = patient.getAddress();
@@ -613,25 +613,13 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS}
-   * set to the given value.
-   *
-   * @param value of all include identifier values
-   * @return RequestHeaders instance derived from value
-   */
-  public static RequestHeaders getRHwithIncldIdentityHdr(String value) {
-    return RequestHeaders.getHeaderWrapper(
-        R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, value);
-  }
-
-  /**
    * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS}
    * set to the given value.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value
    */
-  public static RequestHeaders getRHwithIncldAddrFldHdr(String value) {
+  public static RequestHeaders getHeaderWithAddressFieldsSetTo(String value) {
     return RequestHeaders.getHeaderWrapper(
         R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, value);
   }
