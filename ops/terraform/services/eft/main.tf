@@ -70,19 +70,11 @@ resource "aws_security_group" "this" {
   tags        = { Name = "${local.full_name}-nlb" }
 
   ingress {
-    from_port   = local.sftp_port
-    to_port     = local.sftp_port
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.this.cidr_block] # TODO: Determine full CIDR in BFD-2561
-    description = "Allow ingress from SFTP traffic"
-  }
-
-  ingress {
     from_port       = local.sftp_port
     to_port         = local.sftp_port
     protocol        = "tcp"
     cidr_blocks     = [data.aws_vpc.this.cidr_block] # TODO: Determine full CIDR in BFD-2561
-    description     = "Allow ingress from SFTP traffic from VPN"
+    description     = "Allow ingress from SFTP traffic"
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
   }
 
