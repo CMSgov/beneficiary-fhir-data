@@ -1,9 +1,7 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_elb_service_account" "this" {}
-
 data "aws_ssm_parameters_by_path" "sensitive_service" {
-  path = "/bfd/${local.env}/${local.service}/sensitive"
+  path            = "/bfd/${local.env}/${local.service}/sensitive"
   with_decryption = true
 }
 
@@ -29,8 +27,4 @@ data "aws_subnet" "this" {
     name   = "tag:Name"
     values = [each.key]
   }
-}
-
-data "aws_s3_bucket" "logs" {
-  bucket = "bfd-${local.env}-logs-${local.account_id}"
 }

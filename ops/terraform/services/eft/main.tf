@@ -55,12 +55,6 @@ resource "aws_lb" "this" {
       private_ipv4_address = subnet_mapping.value
     }
   }
-
-  access_logs {
-    enabled = true
-    bucket  = data.aws_s3_bucket.logs.id
-    prefix  = "${replace(local.full_name, "-", "_")}_nlb"
-  }
 }
 
 resource "aws_security_group" "this" {
@@ -85,25 +79,3 @@ resource "aws_security_group" "this" {
     cidr_blocks = [data.aws_vpc.this.cidr_block]
   }
 }
-
-resource "aws_s3_bucket_policy" "logs" {
-  bucket = data.aws_s3_bucket.logs.id
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Id": "EFTNLBAccessLogs",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-          "AWS": "${data.aws_elb_service_account.this.arn}"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "${data.aws_s3_bucket.logs.arn}/${local.full_name}*"
-    }
-  ]
-}
-POLICY
-}
-
