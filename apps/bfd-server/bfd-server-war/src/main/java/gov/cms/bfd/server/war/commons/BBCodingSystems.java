@@ -37,7 +37,7 @@ public class BBCodingSystems {
     public static final String GROUP_CODE = FISS_BASE + "/group-code";
 
     /** The full HCPC_IND. */
-    public static final String HCPC_IND = FISS_BASE + "/hcpcs-ind";
+    public static final String HCPC_IND = FISS_BASE + "/hcpc-ind";
 
     /** The full NON_BILL_REV_CODE. */
     public static final String NON_BILL_REV_CODE = FISS_BASE + "/non-bill-rev-code";

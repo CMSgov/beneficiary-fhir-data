@@ -322,11 +322,11 @@
           }
         },
         {
-          "url": "https://bluebutton.cms.gov/resources/variables/fiss/hcpcs-ind",
+          "url": "https://bluebutton.cms.gov/resources/variables/fiss/hcpc-ind",
           "valueCodeableConcept": {
             "coding": [
               {
-                "system": "https://bluebutton.cms.gov/resources/variables/fiss/hcpcs-ind",
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/hcpc-ind",
                 "code": "A"
               }
             ]
