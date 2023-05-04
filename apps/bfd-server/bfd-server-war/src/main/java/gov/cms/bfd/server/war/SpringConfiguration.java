@@ -65,24 +65,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
 public class SpringConfiguration {
-  /**
-   * The name of the environment variable that should be used to provide the region used for looking
-   * up configuration variables in AWS SSM parameter store.
-   */
-  public static final String ENV_VAR_KEY_SSM_REGION = "SSM_REGION";
-
-  /**
-   * The name of the environment variable that should be used to provide a path for looking up
-   * configuration variables in AWS SSM parameter store.
-   */
-  public static final String ENV_VAR_KEY_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
-
-  /**
-   * The name of a java properties file that should be used to provide a source of configuration
-   * variables.
-   */
-  public static final String ENV_VAR_KEY_PROPERTIES_FILE = "PROPERTIES_FILE";
-
   /** The database url that BFD will use for all database calls. */
   public static final String PROP_DB_URL = "bfdServer.db.url";
   /** The database username. */
