@@ -191,7 +191,7 @@ resource "aws_instance" "pipeline" {
   metadata_options {
     http_endpoint               = "enabled"
     http_put_response_hop_limit = 1
-    http_tokens                 = "optional"
+    http_tokens                 = "required"
   }
 
   root_block_device {
