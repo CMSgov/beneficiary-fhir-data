@@ -1,5 +1,7 @@
 # `eft` Terraservice
 
+> _NOTE: `eft` is a `prod`-level Terraservice and so cannot be applied to non-`prod` environments due to those environments missing necessary configuration. This is intentional. At this time, `eft` does **not** support ephemeral environments, even those seeded from `prod`._
+
 This Terraservice contains the Terraform IaC for BFD's EFT infrastructure. This implementation roughly follows the recommended implementation detailed by EFT SWEEPS 2.0.
 
 <!-- BEGIN_TF_DOCS -->
