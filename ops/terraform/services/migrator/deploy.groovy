@@ -102,14 +102,14 @@ def monitorMigrator(Map args = [:]) {
         )
 
         // 1. "handle" (capture status, print, delete) each message
-        // 2. if the message body contains a non "0" (running) value, return it
+        // 2. if the message body contains a non "0/0" (running) value, return it
         for (msg in messages) {
             migratorStatus = msg.body.status
             schemaVersion = msg.body.schema_version
             println "Migrator schema version is at ${schemaVersion}"
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (migratorStatus == '0') {
+            if (migratorStatus != '0/0') {
                 def resultsList = [migratorStatus, schemaVersion]
                 return resultsList
             }
