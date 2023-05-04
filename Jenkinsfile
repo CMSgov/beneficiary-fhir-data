@@ -52,7 +52,6 @@ def gitRepoUrl
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
-@Library('bfd@cbrune/bfd-2200')
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
 	// we will use this to display a link to diffs in the message. This assumes we are using git+https not git+ssh
