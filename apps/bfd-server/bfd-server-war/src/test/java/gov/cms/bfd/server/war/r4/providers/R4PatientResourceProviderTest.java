@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +32,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -99,9 +101,16 @@ public class R4PatientResourceProviderTest {
   /** Logical id to pass in which is considered legal for validation checks. */
   private final TokenParam logicalId = new TokenParam("", "1234");
 
-  /** Test made-up hash to use for the mbi hash. * */
-  private static final String TEST_HASH =
-      "7004708ca44c2ff45b663ef661059ac98131ccb90b4a7e53917e3af7f50c4c56";
+  /** Hash search identifier using a made-up hash. * */
+  private final TokenParam mbiHashIdentifier =
+      new TokenParam(
+          TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
+          "7004708ca44c2ff45b663ef661059ac98131ccb90b4a7e53917e3af7f50c4c56");
+
+  /** A 'valid' contract id to use in tests. */
+  private final TokenParam contractId = new TokenParam("2001/PTDCNTRCT10", "abcde");
+  /** A 'valid' contract reference year to use in tests. */
+  TokenParam refYear = new TokenParam("", "2001");
 
   /** Sets up the test class. */
   @BeforeEach
@@ -131,10 +140,9 @@ public class R4PatientResourceProviderTest {
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
     // transformer mocking
-    when(testPatient.getId()).thenReturn("123test");
-    lenient()
-        .when(beneficiaryTransformerV2.transform(any(), any(), anyBoolean()))
-        .thenReturn(testPatient);
+    when(testPatient.getId()).thenReturn("123");
+    when(beneficiaryTransformerV2.transform(any(), any(), anyBoolean())).thenReturn(testPatient);
+    when(beneficiaryTransformerV2.transform(any(), any())).thenReturn(testPatient);
 
     setupLastUpdatedMocks();
 
@@ -160,6 +168,7 @@ public class R4PatientResourceProviderTest {
     // its value
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS))
         .thenReturn("false");
+    when(requestDetails.getCompleteUrl()).thenReturn("test");
   }
 
   /** Sets up the default entity manager mocks. */
@@ -168,14 +177,21 @@ public class R4PatientResourceProviderTest {
     CriteriaQuery<Beneficiary> mockCriteria = mock(CriteriaQuery.class);
     Root<Beneficiary> root = mock(Root.class);
     Path mockPath = mock(Path.class);
+    Subquery mockSubquery = mock(Subquery.class);
     when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
     doReturn(mockCriteria).when(criteriaBuilder).createQuery(any());
-    doReturn(mockCriteria).when(mockCriteria).select(any());
-    doReturn(root).when(mockCriteria).from(any(Class.class));
-    doReturn(mockPath).when(root).get(isNull(SingularAttribute.class));
+    when(mockCriteria.select(any())).thenReturn(mockCriteria);
+    when(mockCriteria.from(any(Class.class))).thenReturn(root);
+    when(root.get(isNull(SingularAttribute.class))).thenReturn(mockPath);
     when(entityManager.createQuery(mockCriteria)).thenReturn(mockQuery);
+    when(mockQuery.setHint(any(), anyBoolean())).thenReturn(mockQuery);
+    when(mockQuery.setMaxResults(anyInt())).thenReturn(mockQuery);
     when(mockQuery.getResultList()).thenReturn(List.of(testBene));
     when(mockQuery.getSingleResult()).thenReturn(testBene);
+    when(mockCriteria.subquery(any())).thenReturn(mockSubquery);
+    when(mockCriteria.distinct(anyBoolean())).thenReturn(mockCriteria);
+    when(mockSubquery.select(any())).thenReturn(mockSubquery);
+    when(mockSubquery.from(any(Class.class))).thenReturn(root);
   }
 
   /**
@@ -302,12 +318,90 @@ public class R4PatientResourceProviderTest {
   }
 
   /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} calls the transformer
+   * when making a happy path call where the contract is found.
+   */
+  @Test
+  public void testSearchByCoverageContractWhenContractExistsExpectTransformerCalled() {
+    Bundle response =
+        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+
+    assertEquals(1, response.getTotal());
+    verify(beneficiaryTransformerV2, times(1)).transform(eq(testBene), any());
+
+    /*
+     * Check that no paging was added
+     */
+    assertNull(response.getLink(Constants.LINK_FIRST));
+    assertNull(response.getLink(Constants.LINK_NEXT));
+    assertNull(response.getLink(Constants.LINK_PREVIOUS));
+    assertNull(response.getLink(Constants.LINK_LAST));
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} does not return paging
+   * data when none is requested.
+   */
+  @Test
+  public void testSearchByCoverageContractWhenNoPagingRequestedExpectNoPageData() {
+    Bundle response =
+        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+
+    /*
+     * Check that no paging was added
+     */
+    assertNull(response.getLink(Constants.LINK_FIRST));
+    assertNull(response.getLink(Constants.LINK_NEXT));
+    assertNull(response.getLink(Constants.LINK_PREVIOUS));
+    assertNull(response.getLink(Constants.LINK_LAST));
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} returns paging links
+   * when making a happy path call where the contract is found and paging is requested.
+   */
+  @Test
+  public void testSearchByCoverageContractWhenPagingRequestedExpectPageData() {
+    // Set paging params
+    // Apparently the contract endpoint gets the count from the request url instead of how the other
+    // endpoints do
+    when(requestDetails.getCompleteUrl()).thenReturn("https://test?_count=1");
+    // Note: cursor in the param is not used, must be passed from requestDetails
+    Bundle response =
+        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+
+    /*
+     * Check paging; Paging on contract also apparently returns differently
+     * and gives back first/next unlike the others which give back
+     * first/last. May be due to how it sets/reads count. Maybe a bug?
+     */
+    assertNotNull(response.getLink(Constants.LINK_FIRST));
+    assertNotNull(response.getLink(Constants.LINK_NEXT));
+    assertNull(response.getLink(Constants.LINK_PREVIOUS));
+    assertNull(response.getLink(Constants.LINK_LAST));
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} returns an empty
+   * bundle when no patients can be found for the input contract/year.
+   */
+  @Test
+  public void testSearchByCoverageContractWhenNoPatientsExpectEmptyBundle() {
+    when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
+    when(mockQuery.getResultList()).thenReturn(new ArrayList());
+
+    Bundle response =
+        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+
+    assertEquals(0, response.getTotal());
+  }
+
+  /**
    * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} throws an exception
    * when searching by contract id where the contract id is not a number.
    */
   @Test
   public void testSearchByCoverageContractWhenNonNumericContractIdExpectException() {
-    TokenParam contractId = new TokenParam("2001/PTDCNTRCT10", "abcde");
     TokenParam refYear = new TokenParam("", "abc");
 
     InvalidRequestException exception =
@@ -326,7 +420,6 @@ public class R4PatientResourceProviderTest {
   @Test
   public void testSearchByCoverageContractWhenWrongLengthContractIdExpectException() {
     TokenParam contractId = new TokenParam("2001/PTDCNTRCT10", "123");
-    TokenParam refYear = new TokenParam("", "2001");
 
     InvalidRequestException exception =
         assertThrows(
@@ -377,7 +470,7 @@ public class R4PatientResourceProviderTest {
    * returned on the bundle.
    */
   @Test
-  public void testSearchByLogicalIdWhenPagingExpectBundlePages() {
+  public void testSearchByLogicalIdWhenPagingRequestedExpectPageData() {
     Meta mockMeta = mock(Meta.class);
     when(mockMeta.getLastUpdated())
         .thenReturn(Date.from(Instant.now().minus(1, ChronoUnit.SECONDS)));
@@ -407,7 +500,7 @@ public class R4PatientResourceProviderTest {
    * not returned on the bundle.
    */
   @Test
-  public void testSearchByLogicalIdWhenNoPagingExpectNoBundlePages() {
+  public void testSearchByLogicalIdWhenNoPagingRequestedExpectNoPageData() {
     // Set no paging params
     Map<String, String[]> params = new HashMap<>();
     when(requestDetails.getParameters()).thenReturn(params);
@@ -464,12 +557,24 @@ public class R4PatientResourceProviderTest {
   public void testSearchByIdentifierIdWhenMbiHashExpectPatient() {
 
     when(requestDetails.getHeader(any())).thenReturn("");
-    TokenParam identifier =
-        new TokenParam(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, TEST_HASH);
 
-    Bundle bundle = patientProvider.searchByIdentifier(identifier, null, null, requestDetails);
+    Bundle bundle =
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
 
     assertEquals(1, bundle.getTotal());
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns no paging when no
+   * paging is requested.
+   */
+  @Test
+  public void testSearchByIdentifierIdWhenNoPagingExpectNoPageData() {
+
+    when(requestDetails.getHeader(any())).thenReturn("");
+
+    Bundle bundle =
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
 
     /*
      * Check that no paging was added when not requested
@@ -485,17 +590,16 @@ public class R4PatientResourceProviderTest {
    * links when paging is requested.
    */
   @Test
-  public void testSearchByIdentifierIdWhenPagingRequestedExpectPaging() {
+  public void testSearchByIdentifierIdWhenPagingRequestedExpectPageData() {
 
     when(requestDetails.getHeader(any())).thenReturn("");
-    TokenParam identifier =
-        new TokenParam(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, TEST_HASH);
     // Set paging params
     Map<String, String[]> params = new HashMap<>();
     params.put(Constants.PARAM_COUNT, new String[] {"1"});
     when(requestDetails.getParameters()).thenReturn(params);
     // Note: startIndex in the param is not used, must be passed from requestDetails
-    Bundle bundle = patientProvider.searchByIdentifier(identifier, null, null, requestDetails);
+    Bundle bundle =
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
 
     /*
      * Check paging; Verify that only the first and last paging links exist, since there should
@@ -505,6 +609,22 @@ public class R4PatientResourceProviderTest {
     assertNull(bundle.getLink(Constants.LINK_NEXT));
     assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
     assertNotNull(bundle.getLink(Constants.LINK_LAST));
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns an empty bundle when
+   * the patient is not found in the DB and searching by MBI hash.
+   */
+  @Test
+  public void testSearchByIdentifierIdWhenBeneDoesntExistExpectEmptyBundle() {
+    when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
+    when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
+    when(mockQuery.getResultList()).thenReturn(new ArrayList());
+
+    Bundle bundle =
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
+
+    assertEquals(0, bundle.getTotal());
   }
 
   /**
