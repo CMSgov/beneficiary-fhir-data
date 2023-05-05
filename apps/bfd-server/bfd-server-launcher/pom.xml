@@ -116,11 +116,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Used in tests to verify that requests work as expected. -->
+			<!-- Required by AWS SDK. -->
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.14</version>
-			<scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
