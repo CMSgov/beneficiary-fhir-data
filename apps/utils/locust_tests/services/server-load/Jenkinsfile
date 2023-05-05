@@ -40,6 +40,10 @@ spec:
            description: 'The URL under test -- should match the given environment. "%s" will be '
                         + 'replaced with the chosen environment')
 
+    string(name: 'AMI_ID_OVERRIDE',
+           description: 'BFD Server Load Controller override ami-id.'
+                        + 'Defaults to latest server-load AMI from `master`')
+
     string(name: 'INITIAL_WORKER_NODES',
            defaultValue: '0',
            description: 'The number of initial Locust worker nodes to spawn before checking for '
