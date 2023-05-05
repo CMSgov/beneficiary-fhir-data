@@ -5,7 +5,6 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +81,8 @@ public final class LayeredConfiguration {
     final var baseConfig = ConfigLoader.builder().addSingle(getenv).build();
     final var configBuilder = ConfigLoader.builder();
 
-    configBuilder.addSingle(defaultValues::get);
+    // the defaults are our last resort
+    configBuilder.addMap(defaultValues);
 
     // load parameters from AWS SSM if configured
     final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
@@ -91,20 +91,18 @@ public final class LayeredConfiguration {
         ensureAwsCredentialsConfiguredCorrectly();
       }
       final var ssmClient = AWSSimpleSystemsManagementClient.builder();
-      // either region or endpoint can be defined
-      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ENDPOINT).isEmpty()) {
-        baseConfig
-            .parsedOption(ENV_VAR_KEY_SSM_REGION, Regions.class, Regions::fromName)
-            .ifPresent(r -> ssmClient.setRegion(r.getName()));
-      } else {
-        // region has to be defined when defining endpoint
-        ssmClient.withEndpointConfiguration(
+      // either region or endpoint can be set on ssmClient but not both
+      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ENDPOINT).isPresent()) {
+        // region is required when defining endpoint
+        ssmClient.setEndpointConfiguration(
             new AwsClientBuilder.EndpointConfiguration(
                 baseConfig.stringValue(ENV_VAR_KEY_SSM_ENDPOINT),
                 baseConfig.stringValue(ENV_VAR_KEY_SSM_REGION)));
+      } else if (baseConfig.stringOption(ENV_VAR_KEY_SSM_REGION).isPresent()) {
+        ssmClient.setRegion(baseConfig.stringValue(ENV_VAR_KEY_SSM_REGION));
       }
       if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isPresent()) {
-        ssmClient.withCredentials(
+        ssmClient.setCredentials(
             new AWSStaticCredentialsProvider(
                 new BasicAWSCredentials(
                     baseConfig.stringValue(ENV_VAR_KEY_SSM_ACCESS_KEY),

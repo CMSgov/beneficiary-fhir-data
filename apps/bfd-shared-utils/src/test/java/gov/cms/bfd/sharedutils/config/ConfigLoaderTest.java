@@ -590,17 +590,18 @@ public class ConfigLoaderTest {
    *
    * @param expectedName the expected name
    * @param valuesMap optional map containing config values
-   * @param expectedMessage the expected message
+   * @param expectedDetail the expected error detail
    * @param action the lambda to call which expects an exception
    */
   private void assertException(
       String expectedName,
       @Nullable Map<String, String> valuesMap,
-      String expectedMessage,
+      String expectedDetail,
       Executable action) {
     final var ex = assertThrows(ConfigException.class, action);
     assertEquals(expectedName, ex.getName());
-    assertEquals(expectedMessage, ex.getMessage());
+    assertEquals(expectedDetail, ex.getDetail());
+    assertEquals(ConfigException.createMessage(expectedName, expectedDetail), ex.getMessage());
     if (valuesMap != null && valuesMap.containsKey(expectedName)) {
       var doNotLogValue = valuesMap.get(expectedName);
       Throwable t = ex;
