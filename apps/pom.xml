@@ -572,8 +572,15 @@ checkJavaFormat() {
   branch_name="$(git rev-parse --abbrev-ref HEAD 2>&1)"
 
   git fetch origin 2>&1
+  localChanges=''
+  doesRemoteExist="$(git ls-remote origin ${branch_name})"
 
-  localChanges="$(git diff --name-only "origin/${branch_name}:apps" "${branch_name}:apps" 2>&1)"
+  if [ "$doesRemoteExist" = '' ]; then
+    echo 'No Remote exists, checking apps directory on local for changes.'
+    localChanges="$(git log origin/master..HEAD apps)"
+  else
+     localChanges="$(git diff --name-only "origin/${branch_name}:apps" "${branch_name}:apps" 2>&1)"
+  fi
 
   echo "Verifying Java source code format for branch: ${branch_name} ..."
   if [ "$localChanges" = '' ]; then
