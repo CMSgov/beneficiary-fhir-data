@@ -5,8 +5,6 @@
   yum:
     pkg:
       - gcc
-      - python3-devel
-      - python3-setuptools
   become: true
   tags:
     - pre-ami
