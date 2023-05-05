@@ -91,7 +91,7 @@ public final class DataSetMoveTask implements Callable<Void> {
       String ssekmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
       CopyObjectRequest.Builder copyReqBuilder =
           CopyObjectRequest.builder()
-              .copySource(options.getS3BucketName())
+              .copySource(options.getS3BucketName() + "/" + sourceKey)
               .destinationKey(sourceKey)
               .destinationBucket(options.getS3BucketName())
               .destinationKey(targetKey);

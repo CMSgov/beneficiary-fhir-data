@@ -27,11 +27,7 @@ import org.xml.sax.SAXException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.exception.SdkServiceException;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.*;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
 public final class DataSetQueue {
@@ -151,7 +147,7 @@ public final class DataSetQueue {
         HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(manifestS3Key).build();
     try {
       s3TaskManager.getS3Client().headObject(headObjectRequest);
-    } catch (NoSuchBucketException e) {
+    } catch (NoSuchKeyException | NoSuchBucketException e) {
       LOGGER.warn(
           "Unable to find keyspace {} in bucket {} while scanning for manifests.",
           manifestS3Key,

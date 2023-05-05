@@ -108,7 +108,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
       String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
       md5ChkSumTimer.close();
-
       String downloadedFileMD5ChkSum = downloadResult.response().metadata().get("md5chksum");
       // TODO Remove null check below once Jira CBBD-368 is completed
       if ((downloadedFileMD5ChkSum != null)

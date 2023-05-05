@@ -53,33 +53,6 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Helper method for uploading objects into S3.
-   *
-   * @param s3Client the {@link S3Client} client to use
-   * @param putObjectRequest the {@link PutObjectRequest} to use
-   * @param manifest the {@link DataSetManifest} to use
-   */
-  private static void putObjectHelper(
-      S3Client s3Client, PutObjectRequest putObjectRequest, DataSetManifest manifest) {
-    try {
-      // Serialize the manifest to a byte array.
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Marshaller marshaller = jaxbContext.createMarshaller();
-      ByteArrayOutputStream manifestOutputStream = new ByteArrayOutputStream();
-      marshaller.marshal(manifest, manifestOutputStream);
-
-      byte[] manifestByteArray = manifestOutputStream.toByteArray();
-      InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
-
-      s3Client.putObject(
-          putObjectRequest,
-          RequestBody.fromInputStream(manifestInputStream, Long.valueOf(manifestByteArray.length)));
-    } catch (JAXBException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
    * Creates a put request for the specified S3 bucket.
    *
    * @param s3Client the {@link S3Client} client to use
@@ -122,10 +95,29 @@ public class DataSetTestUtilities {
     String objectKey =
         String.format("%s/%d_%s", keyPrefix, manifest.getSequenceId(), "manifest.xml");
 
-    PutObjectRequest putObjectRequest =
-        PutObjectRequest.builder().bucket(bucket).key(objectKey).build();
+    try {
+      // Serialize the manifest to a byte array.
+      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
+      Marshaller marshaller = jaxbContext.createMarshaller();
+      ByteArrayOutputStream manifestOutputStream = new ByteArrayOutputStream();
+      marshaller.marshal(manifest, manifestOutputStream);
 
-    putObjectHelper(s3Client, putObjectRequest, manifest);
+      byte[] manifestByteArray = manifestOutputStream.toByteArray();
+      InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
+
+      PutObjectRequest putObjectRequest =
+          PutObjectRequest.builder()
+              .bucket(bucket)
+              .key(objectKey)
+              .contentLength(Long.valueOf(manifestByteArray.length))
+              .build();
+
+      s3Client.putObject(
+          putObjectRequest,
+          RequestBody.fromInputStream(manifestInputStream, Long.valueOf(manifestByteArray.length)));
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -196,14 +188,22 @@ public class DataSetTestUtilities {
     String objectKey = String.format("%s/%s", keyPrefix, manifestEntry.getName());
 
     try {
-      Map<String, String> metadata = new HashMap<>();
-      metadata.put(
+      long objectContentLength = objectContentsUrl.openConnection().getContentLength();
+
+      Map<String, String> metaData = new HashMap<>();
+      metaData.put(
           "md5chksum", ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
-
+      metaData.put("Content-Length", Long.toString(objectContentLength));
       PutObjectRequest putObjectRequest =
-          PutObjectRequest.builder().bucket(bucket).key(objectKey).metadata(metadata).build();
-
-      putObjectHelper(s3Client, putObjectRequest, manifest);
+          PutObjectRequest.builder()
+              .bucket(bucket)
+              .key(objectKey)
+              .contentLength(objectContentLength)
+              .metadata(metaData)
+              .build();
+      s3Client.putObject(
+          putObjectRequest,
+          RequestBody.fromInputStream(objectContentsUrl.openStream(), objectContentLength));
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (NoSuchAlgorithmException e) {
