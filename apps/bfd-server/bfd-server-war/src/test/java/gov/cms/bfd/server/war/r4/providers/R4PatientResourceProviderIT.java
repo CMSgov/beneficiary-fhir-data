@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -33,6 +35,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -150,14 +153,22 @@ public final class R4PatientResourceProviderIT {
     CriteriaQuery<Beneficiary> mockCriteria = mock(CriteriaQuery.class);
     Root<Beneficiary> root = mock(Root.class);
     Path mockPath = mock(Path.class);
+    Subquery mockSubquery = mock(Subquery.class);
     when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
     doReturn(mockCriteria).when(criteriaBuilder).createQuery(any());
-    doReturn(mockCriteria).when(mockCriteria).select(any());
-    doReturn(root).when(mockCriteria).from(any(Class.class));
-    doReturn(mockPath).when(root).get(isNull(SingularAttribute.class));
+    when(mockCriteria.select(any())).thenReturn(mockCriteria);
+    when(mockCriteria.from(any(Class.class))).thenReturn(root);
+    when(root.get(isNull(SingularAttribute.class))).thenReturn(mockPath);
+    when(root.get(any(SingularAttribute.class))).thenReturn(mockPath);
     when(entityManager.createQuery(mockCriteria)).thenReturn(mockQuery);
+    when(mockQuery.setHint(any(), anyBoolean())).thenReturn(mockQuery);
+    when(mockQuery.setMaxResults(anyInt())).thenReturn(mockQuery);
     when(mockQuery.getResultList()).thenReturn(List.of(testBene));
     when(mockQuery.getSingleResult()).thenReturn(testBene);
+    when(mockCriteria.subquery(any())).thenReturn(mockSubquery);
+    when(mockCriteria.distinct(anyBoolean())).thenReturn(mockCriteria);
+    when(mockSubquery.select(any())).thenReturn(mockSubquery);
+    when(mockSubquery.from(any(Class.class))).thenReturn(root);
   }
 
   /**

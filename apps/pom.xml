@@ -653,6 +653,7 @@ checkJavaFormat
 							<its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
 						</systemPropertyVariables>
 						<includes>
+							<include>**/*IT.java</include>
 							<include>**/*E2E.java</include>
 						</includes>
 
