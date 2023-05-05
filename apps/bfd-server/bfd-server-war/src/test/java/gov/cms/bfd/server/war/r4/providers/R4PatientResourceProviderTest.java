@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -40,7 +41,9 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
@@ -96,6 +99,10 @@ public class R4PatientResourceProviderTest {
   /** Logical id to pass in which is considered legal for validation checks. */
   private final TokenParam logicalId = new TokenParam("", "1234");
 
+  /** Test made-up hash to use for the mbi hash. * */
+  private static final String TEST_HASH =
+      "7004708ca44c2ff45b663ef661059ac98131ccb90b4a7e53917e3af7f50c4c56";
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
@@ -132,6 +139,43 @@ public class R4PatientResourceProviderTest {
     setupLastUpdatedMocks();
 
     mockHeaders();
+  }
+
+  /** Sets up the last updated mocks. */
+  private void setupLastUpdatedMocks() {
+    Meta mockMeta = mock(Meta.class);
+    when(mockMeta.getLastUpdated())
+        .thenReturn(Date.from(Instant.now().minus(1, ChronoUnit.SECONDS)));
+    when(testPatient.getMeta()).thenReturn(mockMeta);
+    when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
+  }
+
+  /** Mocks the default header values. */
+  private void mockHeaders() {
+    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
+        .thenReturn("false");
+    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
+        .thenReturn("false");
+    // We dont use this anymore on v2, so set it to false since everything should work regardless of
+    // its value
+    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS))
+        .thenReturn("false");
+  }
+
+  /** Sets up the default entity manager mocks. */
+  private void mockEntityManager() {
+    CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
+    CriteriaQuery<Beneficiary> mockCriteria = mock(CriteriaQuery.class);
+    Root<Beneficiary> root = mock(Root.class);
+    Path mockPath = mock(Path.class);
+    when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+    doReturn(mockCriteria).when(criteriaBuilder).createQuery(any());
+    doReturn(mockCriteria).when(mockCriteria).select(any());
+    doReturn(root).when(mockCriteria).from(any(Class.class));
+    doReturn(mockPath).when(root).get(isNull(SingularAttribute.class));
+    when(entityManager.createQuery(mockCriteria)).thenReturn(mockQuery);
+    when(mockQuery.getResultList()).thenReturn(List.of(testBene));
+    when(mockQuery.getSingleResult()).thenReturn(testBene);
   }
 
   /**
@@ -413,6 +457,57 @@ public class R4PatientResourceProviderTest {
   }
 
   /**
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns a Bundle with a
+   * patient result when the db search is successful (mocked) and searching by hashed mbi.
+   */
+  @Test
+  public void testSearchByIdentifierIdWhenMbiHashExpectPatient() {
+
+    when(requestDetails.getHeader(any())).thenReturn("");
+    TokenParam identifier =
+        new TokenParam(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, TEST_HASH);
+
+    Bundle bundle = patientProvider.searchByIdentifier(identifier, null, null, requestDetails);
+
+    assertEquals(1, bundle.getTotal());
+
+    /*
+     * Check that no paging was added when not requested
+     */
+    assertNull(bundle.getLink(Constants.LINK_FIRST));
+    assertNull(bundle.getLink(Constants.LINK_NEXT));
+    assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
+    assertNull(bundle.getLink(Constants.LINK_LAST));
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns a Bundle with paging
+   * links when paging is requested.
+   */
+  @Test
+  public void testSearchByIdentifierIdWhenPagingRequestedExpectPaging() {
+
+    when(requestDetails.getHeader(any())).thenReturn("");
+    TokenParam identifier =
+        new TokenParam(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, TEST_HASH);
+    // Set paging params
+    Map<String, String[]> params = new HashMap<>();
+    params.put(Constants.PARAM_COUNT, new String[] {"1"});
+    when(requestDetails.getParameters()).thenReturn(params);
+    // Note: startIndex in the param is not used, must be passed from requestDetails
+    Bundle bundle = patientProvider.searchByIdentifier(identifier, null, null, requestDetails);
+
+    /*
+     * Check paging; Verify that only the first and last paging links exist, since there should
+     * only be one page.
+     */
+    assertNotNull(bundle.getLink(Constants.LINK_FIRST));
+    assertNull(bundle.getLink(Constants.LINK_NEXT));
+    assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
+    assertNotNull(bundle.getLink(Constants.LINK_LAST));
+  }
+
+  /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} throws an exception when
    * searching by identifier where the search hash is empty.
    */
@@ -443,38 +538,5 @@ public class R4PatientResourceProviderTest {
             InvalidRequestException.class,
             () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
     assertEquals("Unsupported identifier system: bad-system", exception.getLocalizedMessage());
-  }
-
-  /** Sets up the last updated mocks. */
-  private void setupLastUpdatedMocks() {
-    Meta mockMeta = mock(Meta.class);
-    when(mockMeta.getLastUpdated())
-        .thenReturn(Date.from(Instant.now().minus(1, ChronoUnit.SECONDS)));
-    when(testPatient.getMeta()).thenReturn(mockMeta);
-    when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
-  }
-
-  /** Mocks the default header values. */
-  private void mockHeaders() {
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("false");
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
-        .thenReturn("false");
-    // We dont use this anymore on v2, so set it to false since everything should work regardless of
-    // its value
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS))
-        .thenReturn("false");
-  }
-
-  /** Sets up the default entity manager mocks. */
-  private void mockEntityManager() {
-    CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
-    CriteriaQuery<Beneficiary> mockCriteria = mock(CriteriaQuery.class);
-    Root<Beneficiary> root = mock(Root.class);
-    when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
-    doReturn(mockCriteria).when(criteriaBuilder).createQuery(any());
-    doReturn(root).when(mockCriteria).from(any(Class.class));
-    when(entityManager.createQuery(mockCriteria)).thenReturn(mockQuery);
-    when(mockQuery.getSingleResult()).thenReturn(testBene);
   }
 }

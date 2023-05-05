@@ -917,8 +917,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // Null out the unhashed HICNs; in v2 we are ignoring HICNs
     beneficiary.setHicnUnhashed(Optional.empty());
 
-    Patient patient = beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
-    return patient;
+    return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
   }
 
   /**

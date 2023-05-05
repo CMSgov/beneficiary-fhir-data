@@ -169,8 +169,6 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     assertTrue(mbiUnhashedPresent);
   }
 
-  // TODO: Continue adjusting tests below this line into unit tests / ITs
-
   /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
    * {@link Patient} that does exist in the DB.
@@ -203,14 +201,6 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
             .execute();
 
     assertNotNull(searchResults);
-
-    /*
-     * Verify that no paging links exist within the bundle.
-     */
-    assertNull(searchResults.getLink(Constants.LINK_FIRST));
-    assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    assertNull(searchResults.getLink(Constants.LINK_LAST));
 
     assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
@@ -374,58 +364,6 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for a
-   * {@link Patient} that does exist in the DB, with paging.
-   */
-  @Test
-  public void searchForExistingPatientByMbiHashWithPaging() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.IDENTIFIER
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
-                        beneficiary.getMbiHash().get()))
-            .count(1)
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(1, searchResults.getTotal());
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    comparePatient(
-        beneficiary,
-        patientFromSearchResult,
-        getRHwithIncldAddrFldHdr("false"),
-        standardExpectedHistoricalMbis);
-
-    /*
-     * Verify that only the first and last paging links exist, since there should
-     * only be one page.
-     */
-    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
-  }
-
-  /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for MBIs
    * that should be present as a {@link BeneficiaryHistory} record.
    */
@@ -462,109 +400,6 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
                   String.valueOf(h.getBeneficiaryId()),
                   patientFromSearchResult.getIdElement().getIdPart());
             });
-  }
-
-  /**
-   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns the historical MBI
-   * values in the response when searching by historic (non-current) MBI hash. The search should
-   * look in both the medicare_beneficiaryid_history and beneficiaries_history for historical MBIs
-   * to include in the response.
-   *
-   * <p>Context: The Patient endpoint (v2) supports looking up a Patient by MBI using any MBI
-   * (hashed) that the patient has ever been associated with, functionality needed for cases where
-   * the patient's MBI has changed but the caller does not have the new data. The new MBI is
-   * returned in the response; however BFD should also return the historical MBI data to allow the
-   * caller to verify the new MBI and the old MBI are associated with the same Patient.
-   */
-  @Test
-  public void searchForExistingPatientByMbiHashHasHistoricMbis() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    List<String> historicUnhashedMbis = new ArrayList<>();
-    // historic MBI from the medicare_beneficiaryid_history table (loaded from
-    // sample-a-medicarebeneficiaryidhistory.txt)
-    historicUnhashedMbis.add("9AB2WW3GR44");
-    // historic MBIs from the beneficiaries_history table (loaded from
-    // sample-a-beneficiaryhistory.txt)
-    historicUnhashedMbis.add("3456689");
-    // current MBI from the beneficiaries table (loaded from sample-a-beneficiaries.txt)
-    String currentUnhashedMbi = "3456789";
-
-    BeneficiaryHistory bh =
-        loadedRecords.stream()
-            .filter(r -> r instanceof BeneficiaryHistory)
-            .map(r -> (BeneficiaryHistory) r)
-            .findAny()
-            .orElse(null);
-    assertNotNull(bh);
-    assertTrue(bh.getMbiHash().isPresent());
-    String searchHash = bh.getMbiHash().get();
-
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.IDENTIFIER
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, searchHash))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(1, searchResults.getTotal());
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    // Check both history entries are present in identifiers plus one for the bene id
-    // and one for the current unhashed mbi
-    assertEquals(4, patientFromSearchResult.getIdentifier().size());
-    List<Identifier> historicalIds =
-        patientFromSearchResult.getIdentifier().stream()
-            .filter(
-                r ->
-                    !r.getType().getCoding().get(0).getExtension().isEmpty()
-                        && r.getType()
-                            .getCoding()
-                            .get(0)
-                            .getExtension()
-                            .get(0)
-                            .getUrl()
-                            .equals(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY)
-                        && ((Coding)
-                                r.getType().getCoding().get(0).getExtension().get(0).getValue())
-                            .getCode()
-                            .equals("historic"))
-            .toList();
-
-    for (String mbi : historicUnhashedMbis) {
-      assertTrue(
-          historicalIds.stream().anyMatch(h -> h.getValue().equals(mbi)),
-          "Missing historical mbi: " + mbi);
-    }
-
-    Identifier currentMbiFromSearch =
-        patientFromSearchResult.getIdentifier().stream()
-            .filter(
-                r ->
-                    !r.getType().getCoding().get(0).getExtension().isEmpty()
-                        && r.getType()
-                            .getCoding()
-                            .get(0)
-                            .getExtension()
-                            .get(0)
-                            .getUrl()
-                            .equals(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY)
-                        && ((Coding)
-                                r.getType().getCoding().get(0).getExtension().get(0).getValue())
-                            .getCode()
-                            .equals("current"))
-            .findFirst()
-            .get();
-    assertEquals(currentUnhashedMbi, currentMbiFromSearch.getValue());
   }
 
   /**
