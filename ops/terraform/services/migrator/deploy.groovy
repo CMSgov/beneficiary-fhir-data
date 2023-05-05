@@ -7,6 +7,7 @@ boolean deployMigrator(Map args = [:]) {
     bfdEnv = args.bfdEnv
     heartbeatInterval = args.heartbeatInterval ?: 30
     awsRegion = args.awsRegion ?: 'us-east-1'
+    forceDeployment = args.forceDeployment ?: false
 
     // authenticate
     awsAuth.assumeRole()
@@ -14,7 +15,14 @@ boolean deployMigrator(Map args = [:]) {
     // set sqsQueueName
     sqsQueueName = "bfd-${bfdEnv}-migrator"
 
-    // precheck
+    // prechecks
+    if (isMigratorDeploymentRequired(bfdEnv, awsRegion) || forceDeployment) {
+        println "Migrator deployment is required"
+    } else {
+        println "Migrator deployment is NOT required. Skipping migrator deployment."
+        return true
+    }
+
     if (canMigratorDeploymentProceed(sqsQueueName, awsRegion)) {
         println "Proceeding to Migrator Deployment"
     } else {
@@ -45,8 +53,15 @@ boolean deployMigrator(Map args = [:]) {
     awsAuth.assumeRole()
 
     // set return value for final disposition
-    if (finalMigratorStatus == '0') {
+    if (finalMigratorStatus[0] == '0') {
         migratorDeployedSuccessfully = true
+        awsSsm.putParameter(
+            parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
+            parameterValue: finalMigratorStatus[1],
+            parameterType: "String",
+            shouldOverwrite: true
+        )
+
         // Teardown when there is a healthy exit status
         terraform.deployTerraservice(
             env: bfdEnv,
@@ -62,14 +77,14 @@ boolean deployMigrator(Map args = [:]) {
 
     awsSqs.purgeQueue(sqsQueueName)
 
-    println "Migrator completed with exit status ${finalMigratorStatus}"
+    println "Migrator completed with exit status ${finalMigratorStatus[0]}"
     return migratorDeployedSuccessfully
 }
 
 
 // polls the given AWS SQS Queue `sqsQueueName` for migrator messages for
 // 20s at the `heartbeatInterval`
-String monitorMigrator(Map args = [:]) {
+def monitorMigrator(Map args = [:]) {
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion
     heartbeatInterval = args.heartbeatInterval
@@ -90,10 +105,13 @@ String monitorMigrator(Map args = [:]) {
         // 2. if the message body contains a non "0/0" (running) value, return it
         for (msg in messages) {
             migratorStatus = msg.body.status
+            schemaVersion = msg.body.schema_version
+            println "Migrator schema version is at ${schemaVersion}"
             printMigratorMessage(msg)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (migratorStatus != '0/0') {
-                return migratorStatus
+                def resultsList = [migratorStatus, schemaVersion]
+                return resultsList
             }
         }
         sleep(heartbeatInterval)
@@ -136,6 +154,34 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
         println "Queue ${sqsQueueName} can not be found. Migrator deployment can proceed!"
         return true
     }
+}
+
+// checks to determine whether the migrator deployment is required
+// returns true when the latest versioned migration script is newer
+// than the database's stored schema version
+// otherwise false
+boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
+    println "Comparing schema migration versions..."
+    // Initialize stored schema version
+    int storedSchemaVersion = 0
+    // check SSM Parameter Store
+    try {
+        storedSchemaVersion = awsSsm.getParameter(
+                parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
+                awsRegion: awsRegion
+        ) as Integer
+    } catch(Exception ex) {
+        echo "Exception has been encountered getting the parameter /bfd/${bfdEnv}/common/nonsensitive/database_schema_version from the aws ssm, missing ssm parameter for stored schema version."
+        return true
+    }
+    echo "Stored Schema Version : ${storedSchemaVersion}"
+
+    // check latest available versioned migration
+    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
+    echo "Latest Available Migration Version: ${latestAvailableMigrationVersion}"
+
+    // compare and determine
+    return latestAvailableMigrationVersion > storedSchemaVersion
 }
 
 return this

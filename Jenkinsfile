@@ -30,7 +30,7 @@ properties([
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
-		booleanParam(name: 'skip_migrator_deployment', description: 'When true, blow past the migrator deployment in test. Non-trunk/non-master only.', defaultValue: false),
+		booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.', defaultValue: false),
 		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
@@ -52,7 +52,6 @@ def gitRepoUrl
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
-
 // send notifications to slack, email, etc
 def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
 	// we will use this to display a link to diffs in the message. This assumes we are using git+https not git+ssh
@@ -228,24 +227,22 @@ try {
 
 			stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
-				if (!params.skip_migrator_deployment || env.BRANCH == "master" ) {
-					lock(resource: 'env_test') {
-						milestone(label: 'stage_deploy_test_migration_start')
-						container('bfd-cbc-build') {
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_migration_start')
+					container('bfd-cbc-build') {
 
-							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-								amiId: amiIds.bfdMigratorAmiId,
-								bfdEnv: bfdEnv,
-								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion
-							)
-
-							if (migratorDeploymentSuccessful) {
-								println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
-							} else {
-								println "See ${migratorRunbookUrl} for troubleshooting resources."
-								error('Migrator deployment failed')
-							}
+						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+							amiId: amiIds.bfdMigratorAmiId,
+							bfdEnv: bfdEnv,
+							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+							awsRegion: awsRegion,
+							forceDeployment: params.force_migrator_deployment
+						)
+						if (migratorDeploymentSuccessful) {
+							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
+						} else {
+							println "See ${migratorRunbookUrl} for troubleshooting resources."
+							error('Migrator deployment failed')
 						}
 					}
 				}
@@ -369,7 +366,8 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion
+								awsRegion: awsRegion,
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -486,7 +484,8 @@ try {
 								amiId: amiIds.bfdMigratorAmiId,
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion
+								awsRegion: awsRegion,
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
