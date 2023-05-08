@@ -1,21 +1,20 @@
 package gov.cms.bfd.migrator.app;
 
-import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
+import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.util.Map;
-import java.util.Optional;
 
 /** Models the configuration options for the application. */
 public class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
-   * will use it's default location <code>src/main/resources/db/migration</code>. This is primarily
-   * for the integration tests, so we can run test migrations under an arbitrary directory full of
+   * will use it's default location {@code src/main/resources/db/migration}. This is primarily for
+   * the integration tests, so we can run test migrations under an arbitrary directory full of
    * scripts.
    */
   private final String flywayScriptLocationOverride;
@@ -45,7 +44,6 @@ public class AppConfiguration extends BaseAppConfiguration {
     return flywayScriptLocationOverride;
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder(super.toString());
@@ -58,20 +56,18 @@ public class AppConfiguration extends BaseAppConfiguration {
    * Read configuration variables from a layered {@link ConfigLoader} and build an {@link
    * AppConfiguration} instance from them.
    *
-   * @return the {@link AppConfiguration} instance represented by the configuration provided to this
-   *     application via the environment variables
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     configuration passed to the application are incomplete or incorrect.
+   * @return instance representing the configuration provided to this application via the
+   *     environment variables
+   * @throws ConfigException if the configuration passed to the application is invalid
    */
-  public static AppConfiguration readConfigFromEnvironmentVariables() {
+  public static AppConfiguration loadConfig() {
     final var configLoader = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
 
     MetricOptions metricOptions = loadMetricOptions(configLoader);
     DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
 
-    Optional<String> flywayScriptLocationOverride =
-        configLoader.stringOptionEmptyOK(ENV_VAR_FLYWAY_SCRIPT_LOCATION);
-    String flywayScriptLocation = flywayScriptLocationOverride.orElse("");
+    String flywayScriptLocation =
+        configLoader.stringOptionEmptyOK(ENV_VAR_FLYWAY_SCRIPT_LOCATION).orElse("");
 
     return new AppConfiguration(metricOptions, databaseOptions, flywayScriptLocation);
   }
