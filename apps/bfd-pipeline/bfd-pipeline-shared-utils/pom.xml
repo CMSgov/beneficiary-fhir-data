@@ -15,10 +15,6 @@
 		Framework and utility code shared across the BFD Pipeline application.
 	</description>
 
-	<properties>
-		<awssdk.core.version>2.20.50</awssdk.core.version>
-	</properties>
-	
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>

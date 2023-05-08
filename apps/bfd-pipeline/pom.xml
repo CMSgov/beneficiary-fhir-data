@@ -17,6 +17,7 @@
 
 	<properties>
 		<awssdk.core.version>2.20.50</awssdk.core.version>
+		<awssdk.transfer.manager.version>2.20.50</awssdk.transfer.manager.version>
 	</properties>
 
 	<modules>
