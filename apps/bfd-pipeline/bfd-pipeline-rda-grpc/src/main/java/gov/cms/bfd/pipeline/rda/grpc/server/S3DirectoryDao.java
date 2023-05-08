@@ -33,6 +33,7 @@ import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Front end for downloading files from an S3 bucket/directory and caching them locally. Once
@@ -140,15 +141,15 @@ public class S3DirectoryDao implements AutoCloseable {
     final String s3Key = s3DirectoryPath + fileName;
     String eTag;
     try {
-      eTag = s3Client.getObject(GetObjectRequest.builder().key(s3Key).build()).response().eTag();
-    } catch (S3Exception ex) {
-      if (ex.statusCode() == AWS_NOT_FOUND_STATUS_CODE) {
-        var fileNotFound = new FileNotFoundException(fileName);
-        fileNotFound.addSuppressed(ex);
-        throw fileNotFound;
-      } else {
-        throw ex;
-      }
+      eTag =
+          s3Client
+              .getObject(GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build())
+              .response()
+              .eTag();
+    } catch (NoSuchKeyException ex) {
+      var fileNotFound = new FileNotFoundException(fileName);
+      fileNotFound.addSuppressed(ex);
+      throw fileNotFound;
     }
     Path cacheFile = cacheFilePath(fileName, eTag);
     if (Files.isRegularFile(cacheFile)) {
@@ -168,19 +169,26 @@ public class S3DirectoryDao implements AutoCloseable {
           s3Key,
           tempDataFile.getFileName());
 
-      GetObjectRequest getObjectRequest = GetObjectRequest.builder().key(s3Key).build();
+      GetObjectRequest getObjectRequest =
+          GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
       DownloadFileRequest downloadFileRequest =
           DownloadFileRequest.builder()
               .getObjectRequest(getObjectRequest)
+              .destination(tempDataFile)
               .addTransferListener(LoggingTransferListener.create())
               .build();
 
+      // locationConstraintAsString() returns null if the bucket location is us-east-1,
+      // so we need to handle that result specifically
+      String bucketLocation =
+          s3Client
+              .getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build())
+              .locationConstraintAsString();
       Region region =
           Region.of(
-              s3Client
-                  .getBucketLocation(
-                      GetBucketLocationRequest.builder().bucket(s3BucketName).build())
-                  .locationConstraintAsString());
+              StringUtils.isNotBlank(bucketLocation)
+                  ? bucketLocation
+                  : Region.US_EAST_1.toString());
       S3TransferManager s3TransferManager =
           DefaultS3TransferManager.builder()
               .s3Client(SharedS3Utilities.createS3AsyncClient(region))

@@ -53,7 +53,7 @@ public abstract class MinioTestContainer {
    * @return the {@link S3Client} minio client to use
    */
   public static S3Client createS3MinioClient() {
-    return SharedS3Utilities.createS3MinioClient(Region.AP_EAST_1, minioConfig);
+    return SharedS3Utilities.createS3MinioClient(Region.AP_EAST_1, minioConfig, S3Client.class);
   }
 
   /** support manual stop of {@link DockerComposeContainer} testcontainer. */
