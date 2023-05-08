@@ -100,7 +100,9 @@ spec:
                     lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
 
                     awsAuth.assumeRole()
-                    amiIds = new scriptForDeploys.AmiIds(
+
+                    //instantiate AmiIds class
+                    amiIds = scriptForDeploys.AmiIds.newInstance(
                         platinumAmiId: sh(
                             returnStdout: true,
                             script: "aws ec2 describe-images --owners self --filters \
