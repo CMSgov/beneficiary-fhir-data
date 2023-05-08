@@ -119,6 +119,12 @@ public class SpringConfiguration {
   static final String CONFIG_LOADER_CONTEXT_NAME = "ConfigLoaderInstance";
 
   /**
+   * The {@link Bean#name()} for the {@link Boolean} indicating if PAC data should be queryable
+   * using old MBI hash.
+   */
+  public static final String PAC_OLD_MBI_HASH_ENABLED = "PacOldMbiHashEnabled";
+
+  /**
    * Exposes our {@link ConfigLoader} instance as a singleton to components in the application. If
    * one has already been created for use in a {@link ConfigPropertySource} and added to the {@link
    * ServletContext} we simply return that one. Otherwise we create a new one.
@@ -290,41 +296,17 @@ public class SpringConfiguration {
   }
 
   /**
-   * Determines if the fhir resources related to partially adjudicated claims data should be
-   * accessible via the fhir api service.
-   *
-   * @return True if the resources should be available to consume, False otherwise.
-   */
-  private static boolean isPacResourcesEnabled() {
-    return Boolean.TRUE
-        .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.pac.enabled", "false"));
-  }
-
-  /**
    * Determines if the fhir resources related to partially adjudicated claims data will accept
    * {@link Mbi#getOldHash()} values for queries. This is off by default but when enabled will
    * simplify rotation of hash values.
    *
+   * @param enabled injected property indicating if feature is enabled
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
-  public static boolean isPacOldMbiHashEnabled() {
-    return Boolean.TRUE
-        .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.pac.oldMbiHash.enabled", "false"));
-  }
-
-  /**
-   * Determines the type of claim sources to enable for constructing PAC resources ({@link
-   * org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}.
-   *
-   * @return The {@link Set} of enabled source types (i.e. FISS/MCS).
-   */
-  public static Set<String> getEnabledPacResourceTypes() {
-    return Stream.of(System.getProperty("bfdServer.pac.claimSourceTypes", "").split(","))
-        .filter(Strings::isNotBlank)
-        .map(String::toLowerCase)
-        .collect(Collectors.toSet());
+  @Bean(name = PAC_OLD_MBI_HASH_ENABLED)
+  Boolean isPacOldMbiHashEnabled(
+      @Value("${bfdServer.pac.oldMbiHash.enabled:false}") Boolean enabled) {
+    return enabled;
   }
 
   /**
@@ -335,6 +317,11 @@ public class SpringConfiguration {
    * @param r4EOBResourceProvider the r4 eob resource provider
    * @param r4ClaimResourceProvider the r4 claim resource provider
    * @param r4ClaimResponseResourceProvider the r4 claim response resource provider
+   * @param pacEnabled Determines if the fhir resources related to partially adjudicated claims data
+   *     should be accessible via the fhir api service.
+   * @param claimSourceTypeNames Determines the type of claim sources to enable for constructing PAC
+   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
+   *     org.hl7.fhir.r4.model.ClaimResponse}.
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
@@ -343,14 +330,20 @@ public class SpringConfiguration {
       R4CoverageResourceProvider r4CoverageResourceProvider,
       R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
       R4ClaimResourceProvider r4ClaimResourceProvider,
-      R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider) {
+      R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider,
+      @Value("${bfdServer.pac.enabled:false}") Boolean pacEnabled,
+      @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
-    if (isPacResourcesEnabled()) {
-      Set<String> allowedResourceTypes = getEnabledPacResourceTypes();
+    if (pacEnabled) {
+      Set<String> allowedResourceTypes =
+          Stream.of(claimSourceTypeNames.split(","))
+              .filter(Strings::isNotBlank)
+              .map(String::toLowerCase)
+              .collect(Collectors.toSet());
 
       // If there are no enabled source types, this endpoint will never return anything, so don't
       // add it

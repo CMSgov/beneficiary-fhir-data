@@ -53,6 +53,8 @@ import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -85,6 +87,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The enabled source types for this provider. */
   private Set<String> enabledSourceTypes = new HashSet<>();
 
+  /** True if old MBI values should be included in queries. */
+  private Boolean oldMbiHashEnabled = false;
+
   /**
    * Sets the {@link #entityManager}.
    *
@@ -106,6 +111,17 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
+   * Sets the {@link #oldMbiHashEnabled}.
+   *
+   * @param oldMbiHashEnabled true if old MBI hash should be used
+   */
+  @Autowired
+  @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED)
+  public void setOldMbiHashEnabled(Boolean oldMbiHashEnabled) {
+    this.oldMbiHashEnabled = oldMbiHashEnabled;
+  }
+
+  /**
    * Sets the {@link #samhsaMatcher}.
    *
    * @param samhsaMatcher the {@link R4ClaimSamhsaMatcher} to use
@@ -118,8 +134,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** Initiates the provider's dependencies. */
   @PostConstruct
   public void init() {
-    claimDao =
-        new ClaimDao(entityManager, metricRegistry, SpringConfiguration.isPacOldMbiHashEnabled());
+    claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled);
 
     setResourceType();
   }
