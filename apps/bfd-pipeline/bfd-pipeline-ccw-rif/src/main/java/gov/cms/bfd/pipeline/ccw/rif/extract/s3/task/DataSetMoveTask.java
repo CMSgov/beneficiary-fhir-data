@@ -10,11 +10,9 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 import software.amazon.awssdk.transfer.s3.model.Copy;
 import software.amazon.awssdk.transfer.s3.model.CopyRequest;
@@ -88,15 +86,15 @@ public final class DataSetMoveTask implements Callable<Void> {
        */
       HeadObjectRequest headObjectRequest =
           HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
-      String ssekmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
+      String sseKmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
       CopyObjectRequest.Builder copyReqBuilder =
           CopyObjectRequest.builder()
-              .copySource(options.getS3BucketName() + "/" + sourceKey)
-              .destinationKey(sourceKey)
+              .sourceBucket(options.getS3BucketName())
+              .sourceKey(sourceKey)
               .destinationBucket(options.getS3BucketName())
               .destinationKey(targetKey);
-      if (Strings.isNotBlank(ssekmsKeyId)) {
-        copyReqBuilder.ssekmsKeyId(ssekmsKeyId);
+      if (Strings.isNotBlank(sseKmsKeyId)) {
+        copyReqBuilder.ssekmsKeyId(sseKmsKeyId);
       }
       Copy copy =
           s3TaskManager
@@ -124,11 +122,8 @@ public final class DataSetMoveTask implements Callable<Void> {
       DeleteObjectRequest deleteObjectRequest =
           DeleteObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
       s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);
-
-      WaiterResponse<HeadObjectResponse> waiterResponse =
-          s3Waiter.waitUntilObjectNotExists(
-              HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build());
-      waiterResponse.matched().response().ifPresent(System.out::println);
+      s3Waiter.waitUntilObjectNotExists(
+          HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build());
     }
     LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 

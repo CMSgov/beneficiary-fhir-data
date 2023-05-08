@@ -193,7 +193,6 @@ public class DataSetTestUtilities {
       Map<String, String> metaData = new HashMap<>();
       metaData.put(
           "md5chksum", ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
-      metaData.put("Content-Length", Long.toString(objectContentLength));
       PutObjectRequest putObjectRequest =
           PutObjectRequest.builder()
               .bucket(bucket)

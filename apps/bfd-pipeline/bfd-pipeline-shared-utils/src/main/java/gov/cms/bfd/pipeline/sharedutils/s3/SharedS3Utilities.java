@@ -16,7 +16,6 @@ import software.amazon.awssdk.awscore.defaultsmode.DefaultsMode;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -27,7 +26,6 @@ import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
@@ -318,8 +316,6 @@ public final class SharedS3Utilities {
     S3Waiter s3Waiter = s3Client.waiter();
     HeadObjectRequest headRequestWait =
         HeadObjectRequest.builder().bucket(bucketName).key(objectKey).build();
-    WaiterResponse<HeadObjectResponse> waiterResponse =
-        s3Waiter.waitUntilObjectExists(headRequestWait);
-    waiterResponse.matched().response().ifPresent(System.out::println);
+    s3Waiter.waitUntilObjectExists(headRequestWait);
   }
 }

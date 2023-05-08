@@ -211,8 +211,7 @@ public final class DataSetQueue {
     }
 
     /*
-     * S3 will return results in separate pages. Loop through all of the
-     * pages, looking for manifests.
+     * Loop through all of the pages, looking for manifests.
      */
     AtomicInteger completedManifestsCount = new AtomicInteger();
     Consumer<S3Object> addToManifest =
