@@ -137,11 +137,13 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     if (Strings.isNotBlank(claimGroup.getFreqCd())) {
       supportingInfo.add(
           new Claim.SupportingInformationComponent()
-              .setSequence(sequenceNumber++)
+              .setSequence(sequenceNumber)
               .setCategory(createCodeableConcept(C4BBSupportingInfoType.TYPE_OF_BILL))
               .setCode(
                   new CodeableConcept(
                       new Coding(BBCodingSystems.FISS.FREQ_CD, claimGroup.getFreqCd(), null))));
+
+      ++sequenceNumber;
     }
 
     if (Strings.isNotBlank(claimGroup.getDrgCd())) {
