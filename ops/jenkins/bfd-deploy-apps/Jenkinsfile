@@ -104,7 +104,7 @@ spec:
                     awsAuth.assumeRole()
 
                     //instantiate AmiIds class
-                    amiIds = new scriptForDeploys.AmiIds(
+                    amiIds = new AmiIds(
                         platinumAmiId: sh(
                             returnStdout: true,
                             script: "aws ec2 describe-images --owners self --filters \
