@@ -14,13 +14,13 @@ import lombok.ToString;
 
 /**
  * To save on the number of unnecessary calls to S3 to retrieve files and to allow the incremental
- * addition of files over time this implementation of {@link MessageSource.Factory} checks an S3
- * bucket for files matching a pattern that consists of a prefix, the range of sequence numbers in
- * the file, and a suffix. If no files matching this pattern are found but a file has a name equal
- * to the prefix followed by the suffix then that file is considered to hold all valid claims. When
- * one or more files match they are sorted by range and only those files containing sequence numbers
- * greater than or equal to the desired starting number are read. The matching files are then served
- * one after another in sequence number order.
+ * addition of files over time this factory class checks an S3 bucket for files matching a pattern
+ * that consists of a prefix, the range of sequence numbers in the file, and a suffix. If no files
+ * matching this pattern are found but a file has a name equal to the prefix followed by the suffix
+ * then that file is considered to hold all valid claims. When one or more files match they are
+ * sorted by range and only those files containing sequence numbers greater than or equal to the
+ * desired starting number are read. The matching files are then served one after another in
+ * sequence number order.
  *
  * <p>NOTE: The files can have overlapping sequence numbers and/or sequence numbers that don't
  * correspond to the values in the object key. No effort is made to compensate for configuration
@@ -30,13 +30,14 @@ import lombok.ToString;
  *
  * @param <T> type of objects contained in files stored in the S3 bucket
  */
-public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
+public class S3BucketMessageSourceFactory<T> {
   /** Used to access data from S3 bucket. */
   private final S3DirectoryDao s3Dao;
-  /** A function for getting the message factory to transform the response. */
-  private final Function<String, MessageSource<T>> actualFactory;
-  /** A function for obtaining the sequence number. */
-  private final Function<T, Long> sequenceNumberGetter;
+  /**
+   * A function that, when passed an S3 object key, produces a {@link MessageSource} that parses the
+   * S3 object to produce messages.
+   */
+  private final Function<String, MessageSource<T>> s3ObjectParser;
   /** The pattern to use to find files from S3. */
   private final Pattern matchPattern;
 
@@ -46,18 +47,15 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    * @param s3Dao used to access data from S3 bucket
    * @param filePrefix the file prefix
    * @param fileSuffix the file suffix
-   * @param actualFactory the source factory creation function
-   * @param sequenceNumberGetter the function to get the sequence number
+   * @param s3ObjectParser used to turn S3 object keys into {@link MessageSource}s
    */
   public S3BucketMessageSourceFactory(
       S3DirectoryDao s3Dao,
       String filePrefix,
       String fileSuffix,
-      Function<String, MessageSource<T>> actualFactory,
-      Function<T, Long> sequenceNumberGetter) {
+      Function<String, MessageSource<T>> s3ObjectParser) {
     this.s3Dao = s3Dao;
-    this.actualFactory = actualFactory;
-    this.sequenceNumberGetter = sequenceNumberGetter;
+    this.s3ObjectParser = s3ObjectParser;
     matchPattern =
         Pattern.compile(
             String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
@@ -76,14 +74,14 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
   }
 
   /**
-   * Gets all available NDJSON files in the bucket that contain the specified sequence number and
-   * creates a {@link MessageSource} that will return their messages.
+   * Creates a {@link MessageSource} that produces messages with sequence number greater than or
+   * equal to the provided one.
    *
    * @param sequenceNumber minimum sequence number desired by the caller
    * @return a MessageSource pulling records from the bucket
+   * @throws Exception if the source could not be created
    */
-  @Override
-  public MessageSource<T> apply(long sequenceNumber) throws Exception {
+  public MessageSource<T> createMessageSource(long sequenceNumber) throws Exception {
     List<FileEntry> entries = listFiles(sequenceNumber);
     return new MultiS3MessageSource(entries).skipTo(sequenceNumber);
   }
@@ -95,8 +93,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
    *
    * @param startingSequenceNumber smallest sequence number that the caller is interested in
    *     processing
-   * @return a List of FileEntries containing the startingSequenceNumber and sorted by sequence
-   *     number
+   * @return a list of matching {@link FileEntry}s sorted by sequence number
    */
   @VisibleForTesting
   List<FileEntry> listFiles(long startingSequenceNumber) {
@@ -107,9 +104,9 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
       if (matcher.matches()) {
         FileEntry entry;
         if (matcher.group(1) != null) {
-          entry =
-              new FileEntry(
-                  fileName, Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
+          long firstSeqNum = Long.parseLong(matcher.group(2));
+          long lastSeqNum = Long.parseLong(matcher.group(3));
+          entry = new FileEntry(fileName, firstSeqNum, lastSeqNum);
         } else {
           entry = new FileEntry(fileName, RdaChange.MIN_SEQUENCE_NUM, Long.MAX_VALUE);
         }
@@ -155,7 +152,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
       current.skipTo(startingSequenceNumber);
       while (remaining.size() > 0 && !current.hasNext()) {
         current.close();
-        current = actualFactory.apply(remaining.remove(0).objectKey);
+        current = s3ObjectParser.apply(remaining.remove(0).objectKey);
         current.skipTo(startingSequenceNumber);
       }
       return this;
@@ -175,7 +172,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
       }
       while (remaining.size() > 0 && !current.hasNext()) {
         current.close();
-        current = actualFactory.apply(remaining.remove(0).objectKey);
+        current = s3ObjectParser.apply(remaining.remove(0).objectKey);
       }
       return current.hasNext();
     }
@@ -209,7 +206,6 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     /** The maximum sequence number. */
     private final long maxSequenceNumber;
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(FileEntry o) {
       if (minSequenceNumber < o.minSequenceNumber) {

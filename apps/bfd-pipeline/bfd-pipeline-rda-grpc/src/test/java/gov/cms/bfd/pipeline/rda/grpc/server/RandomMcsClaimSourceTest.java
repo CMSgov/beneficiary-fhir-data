@@ -73,14 +73,10 @@ public class RandomMcsClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  /**
-   * Validates that the sequence numbers generated for claims are sequential and start at 1.
-   *
-   * @throws Exception indicates test failure
-   */
+  /** Validates that the sequence numbers generated for claims are sequential and start at 1. */
   @Test
-  public void sequenceNumbers() throws Exception {
-    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 8);
+  public void sequenceNumbers() {
+    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 8);
     assertEquals(1L, source.next().getSeq());
     assertEquals(2L, source.next().getSeq());
     source.skipTo(5);
@@ -98,7 +94,7 @@ public class RandomMcsClaimSourceTest {
    * @param source the source
    * @throws Exception the exception
    */
-  private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(MessageSource<?> source) throws Exception {
     try {
       source.next();
       fail("expected exception");

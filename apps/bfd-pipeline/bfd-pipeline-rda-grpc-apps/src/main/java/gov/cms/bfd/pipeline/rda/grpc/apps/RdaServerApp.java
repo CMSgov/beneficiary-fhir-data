@@ -9,24 +9,33 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.regions.Region;
 
 /**
- * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The server is intended for
- * testing purposes only and will not be used in production. Data served is specified on the command
- * line and comes from either random data or from a NDJSON file. The server always starts on port
+ * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The
+ * server is intended for
+ * testing purposes only and will not be used in production. Data served is
+ * specified on the command
+ * line and comes from either random data or from a NDJSON file. The server
+ * always starts on port
  * 5003.
  */
 @Slf4j
 public class RdaServerApp {
   /**
-   * Starts a RDA API server listening on localhost at a specific port. Configuration is controlled
-   * by command line arguments. Each argument specifies one setting. Valid arguments are:
+   * Starts a RDA API server listening on localhost at a specific port.
+   * Configuration is controlled
+   * by command line arguments. Each argument specifies one setting. Valid
+   * arguments are:
    *
    * <ul>
-   *   <li>maxToSend:number sets the maximum number of objects to send in random streams
-   *   <li>port:number sets the port for the server to listen on (default is 5003)
-   *   <li>seed:number creates a random source using the number as the PRNG seed value
-   *   <li>random creates a random source using current time as the PRNG seed
-   *   <li>fissFile:filename creates a source that returns FissClaims contained in an NDJSON file
-   *   <li>mcsFile:filename creates a source that returns McsClaims contained in an NDJSON file
+   * <li>maxToSend:number sets the maximum number of objects to send in random
+   * streams
+   * <li>port:number sets the port for the server to listen on (default is 5003)
+   * <li>seed:number creates a random source using the number as the PRNG seed
+   * value
+   * <li>random creates a random source using current time as the PRNG seed
+   * <li>fissFile:filename creates a source that returns FissClaims contained in
+   * an NDJSON file
+   * <li>mcsFile:filename creates a source that returns McsClaims contained in an
+   * NDJSON file
    * </ul>
    *
    * @param args the input arguments
@@ -35,11 +44,10 @@ public class RdaServerApp {
   public static void main(String[] args) throws Exception {
     final Config config = new Config(args);
     log.info("Starting server on port {}.", config.port);
-    final var serverConfig =
-        RdaServer.LocalConfig.builder()
-            .port(config.port)
-            .serviceConfig(config.serviceConfig)
-            .build();
+    final var serverConfig = RdaServer.LocalConfig.builder()
+        .port(config.port)
+        .serviceConfig(config.serviceConfig)
+        .build();
     try (RdaServer.ServerState state = RdaServer.startLocal(serverConfig)) {
       state.getServer().awaitTermination();
       log.info("server stopping.");
@@ -60,31 +68,26 @@ public class RdaServerApp {
      * @param args that are sent in
      */
     private Config(String[] args) {
-      final ConfigLoader config =
-          ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
+      final ConfigLoader config = ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
       final var defaultRandomSeed = System.currentTimeMillis();
-      final var randomClaimConfig =
-          RandomClaimGeneratorConfig.builder()
-              .seed(config.longOption("random.seed").orElse(defaultRandomSeed))
-              .optionalOverride(config.booleanValue("random.verbose", false))
-              .randomErrorRate(config.intOption("random.errorRate").orElse(0))
-              .maxUniqueMbis(config.intOption("random.max.mbi").orElse(0))
-              .maxUniqueClaimIds(config.intOption("random.max.claimId").orElse(0))
-              .useTimestampForErrorSeed(true)
-              .build();
-      final var messageSourceFactoryConfig =
-          RdaMessageSourceFactory.Config.builder()
-              .randomMaxClaims(config.intValue("maxToSend", 5_000))
-              .randomClaimConfig(randomClaimConfig)
-              .fissClaimJson(
-                  config.readableFileOption("file.fiss").map(Files::asByteSource).orElse(null))
-              .mcsClaimJson(
-                  config.readableFileOption("file.mcs").map(Files::asByteSource).orElse(null))
-              .s3Bucket(config.stringOption("s3.bucket").orElse(null))
-              .s3Region(Region.of(config.stringOption("s3.region").orElse(null)))
-              .s3Directory(config.stringOption("s3.directory").orElse(""))
-              .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
-              .build();
+      final var randomClaimConfig = RandomClaimGeneratorConfig.builder()
+          .seed(config.longOption("random.seed").orElse(defaultRandomSeed))
+          .optionalOverride(config.booleanValue("random.verbose", false))
+          .randomErrorRate(config.intOption("random.errorRate").orElse(0))
+          .maxUniqueMbis(config.intOption("random.max.mbi").orElse(0))
+          .maxUniqueClaimIds(config.intOption("random.max.claimId").orElse(0))
+          .useTimestampForErrorSeed(true)
+          .maxToSend(config.intValue("maxToSend", 5_000))
+          .build();
+      final var messageSourceFactoryConfig = RdaMessageSourceFactory.Config.builder()
+          .randomClaimConfig(randomClaimConfig)
+          .fissClaimJsonFile(config.readableFileOption("file.fiss").orElse(null))
+          .mcsClaimJsonFile(config.readableFileOption("file.mcs").orElse(null))
+          .s3Bucket(config.stringOption("s3.bucket").orElse(null))
+          .s3Region(Region.of(config.stringOption("s3.region").orElse(null)))
+          .s3Directory(config.stringOption("s3.directory").orElse(""))
+          .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
+          .build();
       port = config.intValue("port", 5003);
       serviceConfig = messageSourceFactoryConfig;
     }

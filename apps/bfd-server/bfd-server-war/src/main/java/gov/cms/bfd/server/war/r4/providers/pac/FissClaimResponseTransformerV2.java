@@ -4,15 +4,21 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaFissRevenueLine;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.ClaimResponse;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
@@ -88,6 +94,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/f-%s", claimGroup.getClaimId())));
+    claim.setItem(getClaimItems(claimGroup));
 
     claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
@@ -106,6 +113,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
     addExtension(extensions, BBCodingSystems.FISS.CURR_STATUS, "" + claimGroup.getCurrStatus());
     addExtension(extensions, BBCodingSystems.FISS.RECD_DT_CYMD, claimGroup.getReceivedDate());
     addExtension(extensions, BBCodingSystems.FISS.CURR_TRAN_DT_CYMD, claimGroup.getCurrTranDate());
+    addExtension(extensions, BBCodingSystems.FISS.GROUP_CODE, claimGroup.getGroupCode());
 
     return extensions;
   }
@@ -120,5 +128,57 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private static ClaimResponse.RemittanceOutcome getOutcome(char statusCode) {
     return STATUS_TO_OUTCOME.getOrDefault(
         Character.toLowerCase(statusCode), ClaimResponse.RemittanceOutcome.PARTIAL);
+  }
+
+  /**
+   * Maps the {@link RdaFissRevenueLine} data to the appropriate FHIR fields.
+   *
+   * @param claimGroup The claim data to map.
+   * @return The mapped FHIR objects.
+   */
+  private static List<ClaimResponse.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
+    return claimGroup.getRevenueLines().stream()
+        .sorted(Comparator.comparing(RdaFissRevenueLine::getRdaPosition))
+        .map(
+            revenueLine -> {
+              ClaimResponse.ItemComponent itemComponent = new ClaimResponse.ItemComponent();
+
+              itemComponent.addAdjudication(
+                  getClaimItemAdjudication(
+                      BBCodingSystems.FISS.ACO_RED_RARC, revenueLine.getAcoRedRarc()));
+              itemComponent.addAdjudication(
+                  getClaimItemAdjudication(
+                      BBCodingSystems.FISS.ACO_RED_CARC, revenueLine.getAcoRedCarc()));
+              itemComponent.addAdjudication(
+                  getClaimItemAdjudication(
+                      BBCodingSystems.FISS.ACO_RED_CAGC, revenueLine.getAcoRedCagc()));
+
+              return itemComponent;
+            })
+        .toList();
+  }
+
+  /**
+   * Creates FHIR {@link ClaimResponse.AdjudicationComponent} objects from the given system and
+   * code.
+   *
+   * @param system The system to use to create the component.
+   * @param code The code to use to create the component.
+   * @return The created FHIR component.
+   */
+  private static ClaimResponse.AdjudicationComponent getClaimItemAdjudication(
+      String system, String code) {
+    ClaimResponse.AdjudicationComponent adjComponent;
+
+    if (Strings.isNotBlank(code)) {
+      adjComponent = new ClaimResponse.AdjudicationComponent();
+
+      adjComponent.setCategory(createCodeableConcept(C4BBAdjudicationDiscriminator.DENIAL_REASON));
+      adjComponent.setReason(new CodeableConcept(new Coding(system, code, null)));
+    } else {
+      adjComponent = null;
+    }
+
+    return adjComponent;
   }
 }
