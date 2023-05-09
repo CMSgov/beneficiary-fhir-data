@@ -197,13 +197,13 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def mgiratorAmiOverride = (params.migrator_ami_override?.trim())
+                        def migratorAmiOverride = (params.migrator_ami_override?.trim())
                                                         ? params.migrator_ami_override.trim()
                                                         : ""
 
                         lock(resource: lockResource) {
                             migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-                                amiId: mgiratorAmiOverride,
+                                amiId: migratorAmiOverride,
                                 bfdEnv: trimmedEnv,
                                 heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
                                 awsRegion: awsRegion,
