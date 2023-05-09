@@ -193,7 +193,7 @@ spec:
                                 echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
                                 sh "terraform plan \
                                 -var='fhir_ami=${params.server_ami_override}' \
-                                -var='ssh_key_name=bfd-${environmentId}' \
+                                -var='ssh_key_name=bfd-${trimmedEnv}' \
                                 -var='git_branch_name=${gitBranchName}' \
                                 -var='git_commit_id=${gitCommitId}' \
                                 -no-color -out=tfplan"
