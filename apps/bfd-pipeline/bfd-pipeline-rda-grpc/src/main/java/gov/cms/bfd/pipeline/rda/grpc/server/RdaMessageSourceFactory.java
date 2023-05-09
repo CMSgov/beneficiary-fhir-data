@@ -19,11 +19,9 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.utils.StringUtils;
 
 /**
- * Interface for objects that can provide information required by
- * {@link RdaService} to generate
+ * Interface for objects that can provide information required by {@link RdaService} to generate
  * responses to clients.
  */
 public interface RdaMessageSourceFactory extends AutoCloseable {
@@ -35,8 +33,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
   RdaService.Version getVersion();
 
   /**
-   * Called by {@link RdaService#getFissClaims} to get a source of FISS claims to
-   * send to client.
+   * Called by {@link RdaService#getFissClaims} to get a source of FISS claims to send to client.
    *
    * @param startingSequenceNumber first sequence number to send to the client
    * @return appropriate claim source
@@ -46,8 +43,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       throws Exception;
 
   /**
-   * Called by {@link RdaService#getMcsClaims} to get a source of MCS claims to
-   * send to client.
+   * Called by {@link RdaService#getMcsClaims} to get a source of MCS claims to send to client.
    *
    * @param startingSequenceNumber first sequence number to send to the client
    * @return appropriate claim source
@@ -57,59 +53,43 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       throws Exception;
 
   /**
-   * Object that can produce a particular instance of
-   * {@link RdaMessageSourceFactory} on demand
+   * Object that can produce a particular instance of {@link RdaMessageSourceFactory} on demand
    * based on a flexible set of possible sources of data.
    */
   @Builder
   @Slf4j
   class Config implements Serializable {
-    /**
-     * The {@link RandomClaimGeneratorConfig} to use for random claim generation.
-     */
+    /** The {@link RandomClaimGeneratorConfig} to use for random claim generation. */
     @Builder.Default
-    private final RandomClaimGeneratorConfig randomClaimConfig = RandomClaimGeneratorConfig.builder().build();
+    private final RandomClaimGeneratorConfig randomClaimConfig =
+        RandomClaimGeneratorConfig.builder().build();
     /** NDJSON fiss claim data for the RDA Server. */
-    @Nullable
-    private final CharSource fissClaimJson;
+    @Nullable private final CharSource fissClaimJson;
     /** NDJSON mcs claim data for the RDI Server. */
-    @Nullable
-    private final CharSource mcsClaimJson;
+    @Nullable private final CharSource mcsClaimJson;
     /** AWS region containing our S3 bucket. */
-    @Nullable
-    private final Region s3Region;
+    @Nullable private final Region s3Region;
     /** Name of our S3 bucket. */
-    @Nullable
-    private final String s3Bucket;
+    @Nullable private final String s3Bucket;
     /** Optional directory name within our S3 bucket. */
-    @Nullable
-    private final String s3Directory;
+    @Nullable private final String s3Directory;
     /** Name of a local directory in which to store cached files from S3. */
-    @Nullable
-    private final String s3CacheDirectory;
+    @Nullable private final String s3CacheDirectory;
     /** Optional hard coded version. */
-    @Nullable
-    private final RdaService.Version version;
+    @Nullable private final RdaService.Version version;
     /**
-     * If positive this causes all generated {@link MessageSource}s to be wrapped in
-     * {@link
-     * ExceptionMessageSource} with {@see ExceptionMessageSource#countBeforeThrow}
-     * set to this
+     * If positive this causes all generated {@link MessageSource}s to be wrapped in {@link
+     * ExceptionMessageSource} with {@see ExceptionMessageSource#countBeforeThrow} set to this
      * value.
      */
     int throwExceptionAfterCount;
 
     /**
-     * Creates an instance based on which set of configuration values have been
-     * provided when
-     * building this config. Possible instances are (in priority and based on which
-     * options were
-     * provided): {@link RdaJsonMessageSourceFactory} using provided NDJSON data,
-     * {@link
-     * RdaS3JsonMessageSourceFactory} using an S3 bucket, or
-     * {@link RdaRandomMessageSourceFactory}
-     * if no other options applied. Optionally (if {@link #throwExceptionAfterCount}
-     * is positive)
+     * Creates an instance based on which set of configuration values have been provided when
+     * building this config. Possible instances are (in priority and based on which options were
+     * provided): {@link RdaJsonMessageSourceFactory} using provided NDJSON data, {@link
+     * RdaS3JsonMessageSourceFactory} using an S3 bucket, or {@link RdaRandomMessageSourceFactory}
+     * if no other options applied. Optionally (if {@link #throwExceptionAfterCount} is positive)
      * wraps factory in a {@link RdaExceptionMessageSourceFactory}.
      *
      * @return the instance
@@ -131,13 +111,13 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     }
 
     /**
-     * Creates {@link RdaJsonMessageSourceFactory} using provided NDJSON data
-     * sources.
+     * Creates {@link RdaJsonMessageSourceFactory} using provided NDJSON data sources.
      *
      * @return the instance
      */
     private RdaMessageSourceFactory createJsonMessageSourceFactory() {
-      final RdaService.Version version = this.version != null ? this.version : RdaService.Version.builder().build();
+      final RdaService.Version version =
+          this.version != null ? this.version : RdaService.Version.builder().build();
       CharSource fissJson = fissClaimJson != null ? fissClaimJson : CharSource.empty();
       CharSource mcsJson = mcsClaimJson != null ? mcsClaimJson : CharSource.empty();
       log.info(
@@ -147,26 +127,28 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     }
 
     /**
-     * Creates {@link RdaS3JsonMessageSourceFactory} using provided S3 bucket
-     * information.
+     * Creates {@link RdaS3JsonMessageSourceFactory} using provided S3 bucket information.
      *
      * @return the instance
      */
     private RdaMessageSourceFactory createS3MessageSourceFactory() throws Exception {
-      final RdaService.Version version = this.version != null
-          ? this.version
-          : RdaService.Version.builder()
-              .version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION))
-              .build();
+      final RdaService.Version version =
+          this.version != null
+              ? this.version
+              : RdaService.Version.builder()
+                  .version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION))
+                  .build();
       final Region region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
       final S3Client s3Client = SharedS3Utilities.createS3Client(region);
       final String directory = s3Directory == null ? "" : s3Directory;
       final boolean useTempDirectoryForCache = Strings.isNullOrEmpty(s3CacheDirectory);
-      final Path cacheDirectory = useTempDirectoryForCache
-          ? java.nio.file.Files.createTempDirectory("s3cache")
-          : Path.of(s3CacheDirectory);
-      final S3DirectoryDao s3Dao = new S3DirectoryDao(
-          s3Client, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
+      final Path cacheDirectory =
+          useTempDirectoryForCache
+              ? java.nio.file.Files.createTempDirectory("s3cache")
+              : Path.of(s3CacheDirectory);
+      final S3DirectoryDao s3Dao =
+          new S3DirectoryDao(
+              s3Client, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
       log.info(
           "serving claims using {} with data from S3 bucket {}",
           RdaS3JsonMessageSourceFactory.class.getSimpleName(),
@@ -175,17 +157,17 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     }
 
     /**
-     * Creates {@link RdaRandomMessageSourceFactory}. Called when no other option
-     * applied.
+     * Creates {@link RdaRandomMessageSourceFactory}. Called when no other option applied.
      *
      * @return the instance
      */
     private RdaMessageSourceFactory createRandomMessageSourceFactory() {
-      final RdaService.Version version = this.version != null
-          ? this.version
-          : RdaService.Version.builder()
-              .version(format("Random:%d:%s", randomClaimConfig.getSeed(), RDA_PROTO_VERSION))
-              .build();
+      final RdaService.Version version =
+          this.version != null
+              ? this.version
+              : RdaService.Version.builder()
+                  .version(format("Random:%d:%s", randomClaimConfig.getSeed(), RDA_PROTO_VERSION))
+                  .build();
       log.info(
           "serving no more than {} claims using {} with seed {}",
           randomClaimConfig.getMaxToSend(),
@@ -194,16 +176,12 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       return new RdaRandomMessageSourceFactory(version, randomClaimConfig);
     }
 
-    /**
-     * This static class allows us to add methods to the builder generated by
-     * lombok.
-     */
+    /** This static class allows us to add methods to the builder generated by lombok. */
     // Lombok uses this class for the builder but IDEA doesn't seem to realize that.
     @SuppressWarnings("unused")
     public static class ConfigBuilder {
       /**
-       * Optionally add a {@link CharSource} constructed by combining the provided
-       * JSON strings as a
+       * Optionally add a {@link CharSource} constructed by combining the provided JSON strings as a
        * source of FISS claim data.
        *
        * @param jsonChanges JSON for {@link FissClaimChange} objects
@@ -214,8 +192,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       }
 
       /**
-       * Optionally add a {@link CharSource} constructed by combining the provided
-       * JSON strings as a
+       * Optionally add a {@link CharSource} constructed by combining the provided JSON strings as a
        * source of MCS claim data.
        *
        * @param jsonChanges JSON for {@link McsClaimChange} objects
@@ -226,10 +203,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       }
 
       /**
-       * Optionally add a UTF-8 encoded {@link File} as a source of FISS claim data.
-       * The argument
-       * can be null so that this can be called when a file may or may not be
-       * available.
+       * Optionally add a UTF-8 encoded {@link File} as a source of FISS claim data. The argument
+       * can be null so that this can be called when a file may or may not be available.
        *
        * @param ndjsonFile null or a valid {@link File} containing ndjson data
        * @return this builder
@@ -242,8 +217,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       }
 
       /**
-       * Optionally add a UTF-8 encoded {@link File} as a source of MCS claim data.
-       * The argument can
+       * Optionally add a UTF-8 encoded {@link File} as a source of MCS claim data. The argument can
        * be null so that this can be called when a file may or may not be available.
        *
        * @param ndjsonFile null or a valid {@link File} containing ndjson data
