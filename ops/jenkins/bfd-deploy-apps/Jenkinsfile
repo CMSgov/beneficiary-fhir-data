@@ -16,7 +16,7 @@ def awsRegion = 'us-east-1'
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
 
 // send notifications to slack, email, etc
-def sendNotifications(String environment, String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {
+def sendNotifications(String environment = '', String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {
     // buildStatus of NULL means success
     if (!buildStatus) {
         buildStatus = 'SUCCESS'
