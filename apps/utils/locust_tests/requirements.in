@@ -3,3 +3,4 @@ psycopg2-binary==2.9.3
 psycogreen==1.0.2
 boto3==1.22.12
 setuptools>=65.5.1
+flask==2.2.5
