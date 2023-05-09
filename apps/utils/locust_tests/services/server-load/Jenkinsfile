@@ -40,6 +40,10 @@ spec:
            description: 'The URL under test -- should match the given environment. "%s" will be '
                         + 'replaced with the chosen environment')
 
+    string(name: 'AMI_ID_OVERRIDE',
+           description: 'BFD Server Load Controller override ami-id. '
+                        + 'Defaults to latest server-load AMI from `master`')
+
     string(name: 'INITIAL_WORKER_NODES',
            defaultValue: '0',
            description: 'The number of initial Locust worker nodes to spawn before checking for '
@@ -110,7 +114,8 @@ spec:
       steps {
         script {
           hostUnderTest = String.format(params.TEST_HOST, params.ENVIRONMENT)
-          terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' }
+          //ignore ENVIRONMENT, TEST_HOST, and any parameters that have empty-string values
+          terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' && it.value != '' }
                                 .collectEntries { key, value -> [(key.toLowerCase()): value] }
           terraformVars.putAll(['test_host': hostUnderTest])
 

@@ -82,6 +82,12 @@ resource "aws_instance" "this" {
   subnet_id              = data.aws_subnet.main[0].id
   vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 1
+    http_tokens                 = "required"
+  }
+
   root_block_device {
     tags                  = local.default_tags
     volume_type           = "gp2"
