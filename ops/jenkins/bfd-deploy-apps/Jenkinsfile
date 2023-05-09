@@ -197,9 +197,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def migratorAmiOverride = (params.migrator_ami_override?.trim())
-                                                        ? params.migrator_ami_override.trim()
-                                                        : ""
+                        def migratorAmiOverride = params.migrator_ami_override.trim()
 
                         lock(resource: lockResource) {
                             migratorDeploymentSuccessful = migratorScripts.deployMigrator(
@@ -235,9 +233,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def pipelineAmiOverride = (params.pipeline_ami_override?.trim())
-                                        ? [ami_id_override: params.pipeline_ami_override.trim()]
-                                        : []
+                        def pipelineAmiOverride = [ami_id_override: params.pipeline_ami_override.trim()]
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
@@ -264,6 +260,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
+                        def serverAmiOverride = params.server_ami_override.trim()
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                                 dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
@@ -276,7 +273,7 @@ spec:
                                     // Gathering terraform plan
                                     echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
                                     sh "terraform plan \
-                                    -var='fhir_ami=${params.server_ami_override}' \
+                                    -var='fhir_ami=${serverAmiOverride}' \
                                     -var='ssh_key_name=bfd-${trimmedEnv}' \
                                     -var='git_branch_name=${gitBranchName}' \
                                     -var='git_commit_id=${gitCommitId}' \
