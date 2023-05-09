@@ -10,6 +10,7 @@
 def amiIds
 def gitBranchName
 def scriptForDeploys
+def scriptForApps
 def migratorScripts
 def serverScripts
 def trimmedEnv
@@ -94,6 +95,7 @@ spec:
                     // Load the child Jenkinsfiles.
                     migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
                     serverScripts = load('ops/terraform/services/server/deploy.groovy')
+                    scriptForApps = load('apps/build.groovy')
                     scriptForDeploys = load('ops/deploy-ccs.groovy')
 
                     trimmedEnv = params.env.trim()
