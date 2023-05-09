@@ -134,8 +134,9 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     def mgiratorAmiOverride = (params.migrator_ami_override?.trim())
-                                                    ? ami_id_override: params.migrator_ami_override.trim()
-                                                    : ''
+                                                    ? params.migrator_ami_override.trim()
+                                                    : ""
+
                     lock(resource: lockResource) {
                         migratorDeploymentSuccessful = migratorScripts.deployMigrator(
                             amiId: mgiratorAmiOverride,
@@ -202,7 +203,7 @@ spec:
                                 sh "terraform apply \
                                 -no-color -input=false tfplan"
                                 echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                            }
+                         }
 
                         awsAuth.assumeRole()
                         terraform.deployTerraservice(
