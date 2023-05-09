@@ -138,7 +138,7 @@ spec:
             }
         }
 
-        stage("Deploy Base to: ${trimmedEnv}") {
+        stage('Deploy Base') {
             steps {
                 script {
                     currentStage = env.STAGE_NAME
@@ -153,7 +153,7 @@ spec:
             }
         }
 
-        stage("Deploy Migrator to: ${trimmedEnv}") {
+        stage('Deploy Migrator') {
             steps {
                 script {
                     currentStage = env.STAGE_NAME
@@ -180,7 +180,7 @@ spec:
             }
         }
 
-        stage("Deploy Pipeline to: ${trimmedEnv}") {
+        stage('Deploy Pipeline') {
             steps {
                 script {
                     currentStage = env.STAGE_NAME
@@ -199,7 +199,7 @@ spec:
             }
         }
 
-        stage("Deploy Server to: ${trimmedEnv}") {
+        stage('Deploy Server') {
             steps {
                 script {
                     currentStage = env.STAGE_NAME
