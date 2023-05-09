@@ -19,9 +19,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
-import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
@@ -271,9 +270,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
+      final var randomClaimConfig =
+          RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(30).build();
+      final var serviceConfig =
+          RdaMessageSourceFactory.Config.builder().randomClaimConfig(randomClaimConfig).build();
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 30))
-          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 30))
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {
@@ -337,15 +339,15 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
+      final var randomClaimConfig =
+          RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(100).build();
+      final var serviceConfig =
+          RdaMessageSourceFactory.Config.builder()
+              .randomClaimConfig(randomClaimConfig)
+              .throwExceptionAfterCount(25)
+              .build();
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new RandomFissClaimSource(12345, 100), 25, IOException::new))
-          .mcsSourceFactory(
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new RandomMcsClaimSource(12345, 100), 25, IOException::new))
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {
