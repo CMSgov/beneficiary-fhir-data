@@ -15,11 +15,6 @@
 		A parent POM for the bfd-pipeline-* projects, which migrate data from the CCW data warehouse to the Beneficiary FHIR Data systems.
 	</description>
 
-	<properties>
-		<awssdk.core.version>2.20.50</awssdk.core.version>
-		<awssdk.transfer.manager.version>2.20.50</awssdk.transfer.manager.version>
-	</properties>
-
 	<modules>
 		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-shared-test-utils</module>
@@ -85,7 +80,7 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>aws-core</artifactId>
-			<version>${awssdk.core.version}</version>
+			<version>${aws-java-sdk-bom.version}</version>
 		</dependency>
 	</dependencies>
 

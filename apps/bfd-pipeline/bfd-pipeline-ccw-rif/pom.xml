@@ -46,12 +46,12 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3-transfer-manager</artifactId>
-			<version>${awssdk.transfer.manager.version}</version>
+			<version>${aws-java-sdk-bom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
       		<artifactId>aws-core</artifactId>
-			<version>${awssdk.core.version}</version>
+			<version>${aws-java-sdk-bom.version}</version>
 		</dependency>
 
 		<dependency>
