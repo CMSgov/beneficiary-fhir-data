@@ -80,7 +80,6 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>aws-core</artifactId>
-			<version>${aws-java-sdk-bom.version}</version>
 		</dependency>
 	</dependencies>
 

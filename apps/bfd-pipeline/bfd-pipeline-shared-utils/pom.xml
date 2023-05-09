@@ -41,7 +41,6 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>aws-core</artifactId>
-			<version>${aws-java-sdk-bom.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
