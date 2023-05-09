@@ -4,7 +4,7 @@
 # table.
 #
 # The MEDICARE_BENEFICIARYID_HISTORY is a BFD dtabase table that (mostly) represents
-# data provided as a one-time data drop by CCW (MAR-2018).
+# data provided as a one-time data drop by CCW (APR-2019).
 #
 # Ostensibly the table could be used (at that time) to derive a BeneficiaryId
 # using a historical MBI_NUM. However, that level of functionality has been
@@ -17,7 +17,8 @@
 #      the BENEFICIARIES_HISTORY table.
 #
 #   2) Takes resultant records from MEDICARE_BENEFICIARYID_HISTORY table, and
-#      makes a determination is to whether we 
+#      makes a determination is to whether we need to insert a record into the
+#      BENEFICIARIES_HISTORY table for the given bene_id / mbi_num / efctv_bgn_dt.
 # ------------------------------------------------------------------
 set -o pipefail
 
@@ -42,9 +43,9 @@ SHOW_SQL=false
 # STEP_TWO_SETUP_TEMP_SQL
 # ==============================================================
 # sql to create a temp medicare_beneficiaryid_history table that
-# we'll use for the work of andalyzing and merging data not found.
+# we'll use for the work of analyzing and merging data not found.
 # It doesn't matter since we'll be dropping both the real
-# medicare_beneficiaryid_history table as well as the
+# medicare_beneficiaryid_history_temp table as well as the
 # medicare_beneficiaryid_history table.
 # ==============================================================
 read -r -d '' STEP_TWO_SETUP_TEMP_SQL << EOM
@@ -327,7 +328,7 @@ echo "Finished processing of Step 5 at: $(date +'%T.%31')"
 
 # STEP 6
 # -------------------------------------------------------------------
-# Get a count of records in the BENEFICIARYIES_HISTORY table.
+# Get a count of records in the BENEFICIARIES_HISTORY table.
 # -------------------------------------------------------------------
 echo "checking current record counts..."
 SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM MEDICARE_BENEFICIARYID_HISTORY_TEMP")
@@ -340,6 +341,6 @@ SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM beneficiaries_history")
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 if [ -n "${CNT}" ]; then
   now=$(date +'%T')
-  printf "\n%s : End count of records in BENEFICIARYIES_HISTORY : %d\n\n" "${now}" "${CNT}";
+  printf "\n%s : End count of records in BENEFICIARIES_HISTORY : %d\n\n" "${now}" "${CNT}";
 fi
 exit 0;
