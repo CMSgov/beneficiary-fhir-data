@@ -224,12 +224,16 @@ fi
 # --------------------------------------------------------------------
 echo "checking current record counts..."
 SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM MEDICARE_BENEFICIARYID_HISTORY")
-# psql doesn't take in the db password for the user on cmd-line;
-# it is set on a host/user basis in ~/.pgpass.
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 if [ -n "${CNT}" ]; then
   now=$(date +'%T')
   printf "%s : Start count of records in MEDICARE_BENEFICIARYID_HISTORY : %d\n\n" "${now}" "${CNT}";
+fi
+SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES_HISTORY")
+CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
+if [ -n "${CNT}" ]; then
+  now=$(date +'%T')
+  printf "%s : Start count of records in BENEFICIARIES_HISTORY : %d\n\n" "${now}" "${CNT}";
 fi
 
 # STEP 2
@@ -283,16 +287,9 @@ echo "Finished processing of Step 3 at: $(date +'%T.%31')"
 
 # STEP 4
 # ---------------------------------------------------------
-# Initial cleanup of rcds that are dead-nuts wrong! Essentially
-# this cleanup compares rcds in the BENEFICIARIES_HISTORY vs.
-# a rcd in the BENEFICIARIES table on those table columns that
-# are (were) compared when creating a BENEFICIARIES_HISTORY rcd.
-# However, due to some CCW data thrashing in which the EFCTV_BGN_DT
-# column in the BENEFICIARIES table would alternate between a null
-# value and a non-null value (weekly vs monthly extracts), causing
-# spurious BENEFICIARIES_HISTORY rcds to be created, when in fact
-# nothing in the BENEFICIARIES data really changed and therefore
-# BENEFICIARIES_HISTORY should not have been created!!!
+# Delete records in the MEDICARE_BENEFICIARYID_HISTORY_TEMP
+# table where there is a match on BENEFICIARIES_HISTORY data
+# (meaning bene_id + mbi_num already present).
 # ---------------------------------------------------------
 echo "Begin processing of Step 4 at: $(date +'%T')"
 
@@ -309,7 +306,7 @@ echo "Finished processing of Step 4 at: $(date +'%T.%31')"
 
 # STEP 5
 # ---------------------------------------------------------
-# Finally, insert all the records from the MEDICARE_BENEFICIARYID_HISTORY_TEMP
+# Finally, insert all records from the MEDICARE_BENEFICIARYID_HISTORY_TEMP
 # table that do not yet exist in the beneficiares_history table.
 # For the last_updated we'll use a timestamp that can differentiate
 # new records in case we need to back them out.
@@ -332,7 +329,13 @@ echo "Finished processing of Step 5 at: $(date +'%T.%31')"
 # -------------------------------------------------------------------
 # Get a count of records in the BENEFICIARYIES_HISTORY table.
 # -------------------------------------------------------------------
-echo "checking current record counts, post VACUUM..."
+echo "checking current record counts..."
+SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM MEDICARE_BENEFICIARYID_HISTORY_TEMP")
+CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
+if [ -n "${CNT}" ]; then
+  now=$(date +'%T')
+  printf "\n%s : End count of records in MEDICARE_BENEFICIARYID_HISTORY_TEMP : %d\n\n" "${now}" "${CNT}";
+fi
 SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM beneficiaries_history")
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 if [ -n "${CNT}" ]; then
