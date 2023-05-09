@@ -2,7 +2,7 @@
 
 /**
  * <p>
- * This script will be run by Jenkins when building apps and app AMIs.
+ * This script will be run by Jenkins when deploying apps and app AMIs.
  * </p>
  */
 
@@ -14,6 +14,59 @@ def trimmedEnv
 def lockResource
 def awsRegion = 'us-east-1'
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
+
+// send notifications to slack, email, etc
+def sendNotifications(String environment, String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {
+    // buildStatus of NULL means success
+    if (!buildStatus) {
+        buildStatus = 'SUCCESS'
+    }
+
+    // build colors
+    def colorMap = [:]
+    colorMap['STARTED']  = '#0000FF'
+    colorMap['SUCCESS']  = '#00FF00'
+    colorMap['ABORTED']  = '#6A0DAD'
+    colorMap['UNSTABLE'] = '#FFFF00'
+    colorMap['FAILED']   = '#FF0000'
+    def buildColor = colorMap[buildStatus]
+    buildColor = buildColor ?: '#FF0000' // default to red
+
+    def branchUrl = "https://github.com/CMSgov/beneficiary-fhir-data/tree/${env.BRANCH_NAME}"
+
+    def msg = ''
+    switch (buildStatus) {
+        case 'UNSTABLE':
+        case 'SUCCESS':
+            msg = 'COMPLETED SUCCESSFULLY: DEPLOYED BFD APPS AND AMIS'
+            break
+        case 'FAILED':
+        case 'FAILURE':
+            msg = "FAILED ON ${stageName.toUpperCase()} STAGE ON BRANCH <${branchUrl}|${env.BRANCH_NAME.toUpperCase()}>"
+            break
+        case 'STARTED':
+            msg = 'HAS STARTED'
+            break
+        case 'ABORTED':
+            msg = 'WAS ABORTED'
+            break
+        default:
+            msg = "${buildStatus.toUpperCase()}"
+            break
+    }
+
+    // build slack message
+    def slackMsg = ''
+    if (buildStatus == 'UNSTABLE') {
+        slackMsg = "UNSTABLE BFD APP/AMI DEPLOY <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${env.BRANCH_NAME.toUpperCase()}> ${msg} \n"
+    } else {
+        slackMsg = "BFD APP/AMI DEPLOY <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${env.BRANCH_NAME.toUpperCase()}> FOR ${environment.toUpperCase()} ENVIRONMENT ${msg} \n"
+    }
+    slackMsg += "\tJob '${env.JOB_NAME}' \n"
+
+    // send Slack messages
+    slackSend(color: buildColor, message: slackMsg)
+}
 
 pipeline {
     agent {
@@ -118,12 +171,22 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    lock(resource: lockResource) {
-                        awsAuth.assumeRole()
-                        terraform.deployTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/base'
-                        )
+                    try {
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/base'
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
                     }
                 }
             }
@@ -133,25 +196,35 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    def mgiratorAmiOverride = (params.migrator_ami_override?.trim())
-                                                    ? params.migrator_ami_override.trim()
-                                                    : ""
+                    try {
+                        def mgiratorAmiOverride = (params.migrator_ami_override?.trim())
+                                                        ? params.migrator_ami_override.trim()
+                                                        : ""
 
-                    lock(resource: lockResource) {
-                        migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-                            amiId: mgiratorAmiOverride,
-                            bfdEnv: trimmedEnv,
-                            heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-                            awsRegion: awsRegion,
-                            forceDeployment: params.force_migrator_deployment
-                        )
+                        lock(resource: lockResource) {
+                            migratorDeploymentSuccessful = migratorScripts.deployMigrator(
+                                amiId: mgiratorAmiOverride,
+                                bfdEnv: trimmedEnv,
+                                heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+                                awsRegion: awsRegion,
+                                forceDeployment: params.force_migrator_deployment
+                            )
 
-                        if (migratorDeploymentSuccessful) {
-                            println "Proceeding to Stage: 'Deploy Pipeline to ${trimmedEnv.toUpperCase()}'"
-                        } else {
-                            println "See ${migratorRunbookUrl} for troubleshooting resources."
-                            error('Migrator deployment failed')
+                            if (migratorDeploymentSuccessful) {
+                                println "Proceeding to Stage: 'Deploy Pipeline to ${trimmedEnv.toUpperCase()}'"
+                            } else {
+                                println "See ${migratorRunbookUrl} for troubleshooting resources."
+                                error('Migrator deployment failed')
+                            }
                         }
+                      } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
                     }
                 }
             }
@@ -161,16 +234,26 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    def pipelineAmiOverride = (params.pipeline_ami_override?.trim())
-                                    ? [ami_id_override: params.pipeline_ami_override.trim()]
-                                    : []
-                    lock(resource: lockResource) {
-                        awsAuth.assumeRole()
-                        terraform.deployTerraservice(
-                        env: trimmedEnv,
-                        directory: 'ops/terraform/services/pipeline',
-                        tfVars: pipelineAmiOverride
-                        )
+                    try {
+                        def pipelineAmiOverride = (params.pipeline_ami_override?.trim())
+                                        ? [ami_id_override: params.pipeline_ami_override.trim()]
+                                        : []
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                            env: trimmedEnv,
+                            directory: 'ops/terraform/services/pipeline',
+                            tfVars: pipelineAmiOverride
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
                     }
                 }
             }
@@ -180,63 +263,73 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    lock(resource: lockResource) {
-                        awsAuth.assumeRole()
-                        	dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
-                                // Debug output terraform version
-                                sh "terraform --version"
+                    try {
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                                dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
+                                    // Debug output terraform version
+                                    sh "terraform --version"
 
-                                // Initilize terraform
-                                sh "terraform init -no-color"
+                                    // Initilize terraform
+                                    sh "terraform init -no-color"
 
-                                // Gathering terraform plan
-                                echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                                sh "terraform plan \
-                                -var='fhir_ami=${params.server_ami_override}' \
-                                -var='ssh_key_name=bfd-${trimmedEnv}' \
-                                -var='git_branch_name=${gitBranchName}' \
-                                -var='git_commit_id=${gitCommitId}' \
-                                -no-color -out=tfplan"
+                                    // Gathering terraform plan
+                                    echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+                                    sh "terraform plan \
+                                    -var='fhir_ami=${params.server_ami_override}' \
+                                    -var='ssh_key_name=bfd-${trimmedEnv}' \
+                                    -var='git_branch_name=${gitBranchName}' \
+                                    -var='git_commit_id=${gitCommitId}' \
+                                    -no-color -out=tfplan"
 
-                                // Apply Terraform plan
-                                echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                                sh "terraform apply \
-                                -no-color -input=false tfplan"
-                                echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                         }
+                                    // Apply Terraform plan
+                                    echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+                                    sh "terraform apply \
+                                    -no-color -input=false tfplan"
+                                    echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+                            }
 
-                        awsAuth.assumeRole()
-                        terraform.deployTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/server/server-regression',
-                                tfVars: [
-                                    docker_image_tag_override: params.server_regression_image_override
-                                ]
-                        )
-
-                        // Deploy the API requests Insights Lambda
-                        awsAuth.assumeRole()
-                        terraform.deployTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/server/insights/api-requests'
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/server-regression',
+                                    tfVars: [
+                                        docker_image_tag_override: params.server_regression_image_override
+                                    ]
                             )
 
-                        awsAuth.assumeRole()
-                        hasRegressionRunSucceeded = serverScripts.runServerRegression(
-                                bfdEnv: trimmedEnv,
-                                gitBranchName: gitBranchName
-                            )
+                            // Deploy the API requests Insights Lambda
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/insights/api-requests'
+                                )
 
-                        if (hasRegressionRunSucceeded) {
-                            println 'Regression suite passed, proceeding to next stage...'
-                        } else {
-                            try {
-                                input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
-                                echo "Regression suite failure in '${trimmedEnv}' has been accepted by operator. Proceeding to next stage..."
-                            } catch (err) {
-                                error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
+                            awsAuth.assumeRole()
+                            hasRegressionRunSucceeded = serverScripts.runServerRegression(
+                                    bfdEnv: trimmedEnv,
+                                    gitBranchName: gitBranchName
+                                )
+
+                            if (hasRegressionRunSucceeded) {
+                                println 'Regression suite passed, proceeding to next stage...'
+                            } else {
+                                try {
+                                    input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+                                    echo "Regression suite failure in '${trimmedEnv}' has been accepted by operator. Proceeding to next stage..."
+                                } catch (err) {
+                                    error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
+                                }
                             }
                         }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        throw ex
+                    } finally {
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                     }
                 }
             }
