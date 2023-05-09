@@ -126,9 +126,9 @@ spec:
         }
 
         stage('Set Branch Name') {
-            currentStage = env.STAGE_NAME
             steps {
                 script {
+                    currentStage = env.STAGE_NAME
                     if (env.BRANCH_NAME.startsWith('PR')) {
                         gitBranchName = env.CHANGE_BRANCH
                     } else {
@@ -139,9 +139,9 @@ spec:
         }
 
         stage("Deploy Base to: ${trimmedEnv}") {
-            currentStage = env.STAGE_NAME
             steps {
                 script {
+                    currentStage = env.STAGE_NAME
                     lock(resource: lockResource) {
                         awsAuth.assumeRole()
                         terraform.deployTerraservice(
@@ -154,9 +154,9 @@ spec:
         }
 
         stage("Deploy Migrator to: ${trimmedEnv}") {
-            currentStage = env.STAGE_NAME
             steps {
                 script {
+                    currentStage = env.STAGE_NAME
                     def mgiratorAmiOverride = (params.migrator_ami_override?.trim())
                                                     ? [ami_id_override: params.migrator_ami_override.trim()]
                                                     : []
@@ -181,9 +181,9 @@ spec:
         }
 
         stage("Deploy Pipeline to: ${trimmedEnv}") {
-            currentStage = env.STAGE_NAME
             steps {
                 script {
+                    currentStage = env.STAGE_NAME
                     def pipelineAmiOverride = (params.pipeline_ami_override?.trim())
                                     ? [ami_id_override: params.pipeline_ami_override.trim()]
                                     : []
@@ -200,36 +200,36 @@ spec:
         }
 
         stage("Deploy Server to: ${trimmedEnv}") {
-            currentStage = env.STAGE_NAME
             steps {
                 script {
-                lock(resource: 'env_test') {
-                    awsAuth.assumeRole()
-                    scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
+                    currentStage = env.STAGE_NAME
+                    lock(resource: 'env_test') {
+                        awsAuth.assumeRole()
+                        scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
 
-                    awsAuth.assumeRole()
-                    terraform.deployTerraservice(
-                            env: trimmedEnv,
-                            directory: 'ops/terraform/services/server/server-regression',
-                            tfVars: [
-                                docker_image_tag_override: params.server_regression_image_override
-                            ]
-                    )
-
-                    // Deploy the API requests Insights Lambda
-                    awsAuth.assumeRole()
-                    terraform.deployTerraservice(
-                            env: trimmedEnv,
-                            directory: 'ops/terraform/services/server/insights/api-requests'
+                        awsAuth.assumeRole()
+                        terraform.deployTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/server-regression',
+                                tfVars: [
+                                    docker_image_tag_override: params.server_regression_image_override
+                                ]
                         )
 
-                    awsAuth.assumeRole()
-                    hasRegressionRunSucceeded = serverScripts.runServerRegression(
-                            bfdEnv: trimmedEnv,
-                            gitBranchName: gitBranchName
-                        )
+                        // Deploy the API requests Insights Lambda
+                        awsAuth.assumeRole()
+                        terraform.deployTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/insights/api-requests'
+                            )
 
-                    if (hasRegressionRunSucceeded) {
+                        awsAuth.assumeRole()
+                        hasRegressionRunSucceeded = serverScripts.runServerRegression(
+                                bfdEnv: trimmedEnv,
+                                gitBranchName: gitBranchName
+                            )
+
+                        if (hasRegressionRunSucceeded) {
                             println 'Regression suite passed, proceeding to next stage...'
                         } else {
                             try {
@@ -238,8 +238,8 @@ spec:
                             } catch (err) {
                                 error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
                             }
+                        }
                     }
-                }
                 }
             }
         }
