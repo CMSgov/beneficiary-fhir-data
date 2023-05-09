@@ -7,10 +7,7 @@
  */
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def amiIds
 def gitBranchName
-def scriptForDeploys
-def scriptForApps
 def migratorScripts
 def serverScripts
 def trimmedEnv
@@ -95,34 +92,11 @@ spec:
                     // Load the child Jenkinsfiles.
                     migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
                     serverScripts = load('ops/terraform/services/server/deploy.groovy')
-                    scriptForApps = load('apps/build.groovy')
-                    scriptForDeploys = load('ops/deploy-ccs.groovy')
 
                     trimmedEnv = params.env.trim()
                     lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
 
                     awsAuth.assumeRole()
-
-                    //instantiate AmiIds class
-                    amiIds = scriptForDeploys.getProperty('AmiIds')(
-                        platinumAmiId: sh(
-                            returnStdout: true,
-                            script: "aws ec2 describe-images --owners self --filters \
-                            'Name=name,Values=bfd-amzn2-jdk17-platinum-??????????????' \
-                            'Name=state,Values=available' --region us-east-1 --output json | \
-                            jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-                        ).trim(),
-                        bfdPipelineAmiId: params.pipeline_ami_override.trim(),
-                        bfdServerAmiId: params.server_ami_override.trim(),
-                        bfdMigratorAmiId: params.migrator_ami_override.trim(),
-                        bfdServerLoadAmiId: sh(
-                            returnStdout: true,
-                            script: "aws ec2 describe-images --owners self --filters \
-                            'Name=name,Values=server-load-??????????????' \
-                            'Name=state,Values=available' --region us-east-1 --output json | \
-                            jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-                        )
-                    )
                 }
             }
         }
@@ -205,9 +179,30 @@ spec:
             steps {
                 script {
                     currentStage = env.STAGE_NAME
-                    lock(resource: 'env_test') {
+                    lock(resource: lockResource) {
                         awsAuth.assumeRole()
-                        scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
+                        	dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
+                                // Debug output terraform version
+                                sh "terraform --version"
+
+                                // Initilize terraform
+                                sh "terraform init -no-color"
+
+                                // Gathering terraform plan
+                                echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+                                sh "terraform plan \
+                                -var='fhir_ami=${params.server_ami_override}' \
+                                -var='ssh_key_name=bfd-${environmentId}' \
+                                -var='git_branch_name=${gitBranchName}' \
+                                -var='git_commit_id=${gitCommitId}' \
+                                -no-color -out=tfplan"
+
+                                // Apply Terraform plan
+                                echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+                                sh "terraform apply \
+                                -no-color -input=false tfplan"
+                                echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+                            }
 
                         awsAuth.assumeRole()
                         terraform.deployTerraservice(
