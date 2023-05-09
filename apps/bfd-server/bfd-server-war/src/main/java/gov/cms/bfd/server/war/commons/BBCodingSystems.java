@@ -15,17 +15,44 @@ public class BBCodingSystems {
     /** The FISS base coding url. */
     private static final String FISS_BASE = BB_BASE_URL + "/variables/fiss";
 
+    /** The full ACO_RED_CAGC. * */
+    public static final String ACO_RED_CAGC = FISS_BASE + "/aco-red-cagc";
+
+    /** The full ACO_RED_CARC. * */
+    public static final String ACO_RED_CARC = FISS_BASE + "/aco-red-carc";
+
+    /** The full ACO_RED_RARC. * */
+    public static final String ACO_RED_RARC = FISS_BASE + "/aco-red-rarc";
+
+    /** The full APC_HCPCS_APC. * */
+    public static final String APC_HCPCS_APC = FISS_BASE + "/apc-hcpcs-apc";
+
     /** The full CURR_STATUS. */
     public static final String CURR_STATUS = FISS_BASE + "/curr-status";
 
     /** The full CURR_TRAN_DT_CYMD. */
     public static final String CURR_TRAN_DT_CYMD = FISS_BASE + "/curr-tran-dt-cymd";
 
+    /** The full group code. */
+    public static final String GROUP_CODE = FISS_BASE + "/group-code";
+
+    /** The full HCPC_IND. */
+    public static final String HCPC_IND = FISS_BASE + "/hcpc-ind";
+
+    /** The full NON_BILL_REV_CODE. */
+    public static final String NON_BILL_REV_CODE = FISS_BASE + "/non-bill-rev-code";
+
     /** The full payer's name. */
     public static final String PAYERS_NAME = FISS_BASE + "/payers-name";
 
+    /** The full REV_CD. */
+    public static final String REV_CD = FISS_BASE + "/rev-cd";
+
     /** The full RECD_DT_CYMD. */
     public static final String RECD_DT_CYMD = FISS_BASE + "/recd-dt-cymd";
+
+    /** The full REV_SERV_UNIT_CNT. */
+    public static final String REV_SERV_UNIT_CNT = FISS_BASE + "/rev-serv-unit-cnt";
 
     /** The full tax number. */
     public static final String TAX_NUM = FISS_BASE + "/fed-tax-nb";
