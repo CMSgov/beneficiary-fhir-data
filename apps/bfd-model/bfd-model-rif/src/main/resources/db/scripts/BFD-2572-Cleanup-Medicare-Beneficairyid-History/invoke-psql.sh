@@ -265,7 +265,7 @@ fi
 echo "Finished processing of Step 2 at: $(date +'%T.%31')"
 
 
-# STEP 3
+# STEP 3 and STEP 4
 # ---------------------------------------------------------
 # Initial cleanup of rcds that are dead-nuts wrong!
 # This step prunes rcds in the MEDICARE_BENEFICIARYID_HISTORY_TEMP
@@ -287,10 +287,6 @@ fi
 echo "Finished processing of Step 3 at: $(date +'%T.%31')"
 
 # STEP 4
-# ---------------------------------------------------------
-# Delete records in the MEDICARE_BENEFICIARYID_HISTORY_TEMP
-# table where there is a match on BENEFICIARIES_HISTORY data
-# (meaning bene_id + mbi_num already present).
 # ---------------------------------------------------------
 echo "Begin processing of Step 4 at: $(date +'%T')"
 
