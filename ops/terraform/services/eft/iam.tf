@@ -1,5 +1,6 @@
 resource "aws_iam_role" "logs" {
-  name = "${local.full_name}-logs"
+  name        = "${local.full_name}-logs"
+  description = "Role allowing the ${aws_transfer_server.this.id} Transfer Server to write logs"
 
   assume_role_policy = jsonencode(
     {
@@ -24,7 +25,8 @@ resource "aws_iam_role" "logs" {
 }
 
 resource "aws_iam_role" "eft_user" {
-  name = "${local.full_name}-eft-user"
+  name        = "${local.full_name}-eft-user"
+  description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.eft_user_username} SFTP user"
 
   assume_role_policy = jsonencode(
     {
@@ -47,6 +49,10 @@ resource "aws_iam_role" "eft_user" {
 
 resource "aws_iam_policy" "eft_user" {
   name = "${local.full_name}-eft-user"
+  description = join("", [
+    "Allows the ${local.eft_user_username} SFTP user to access their restricted portion of the ",
+    "${aws_s3_bucket.this.id} S3 bucket when using SFTP"
+  ])
 
   policy = jsonencode(
     {
