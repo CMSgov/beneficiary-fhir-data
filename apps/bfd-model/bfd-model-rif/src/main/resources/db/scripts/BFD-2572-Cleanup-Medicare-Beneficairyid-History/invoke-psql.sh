@@ -74,10 +74,6 @@ EOM
 
 # STEP_THREE_CLEANUP_SQL
 # ==============================================================
-# SQL to delete data from the medicare_beneficiaryid_history_temp
-# table that is already stored in either the beneficiaries table or
-# the beneficiaries_history table.
-# ==============================================================
 read -r -d '' STEP_THREE_CLEANUP_SQL << EOM
 DELETE
 FROM MEDICARE_BENEFICIARYID_HISTORY_TEMP F
@@ -106,10 +102,6 @@ SELECT A.BENE_MBI_ID
 EOM
 
 # STEP_FOUR_CLEANUP_SQL
-# ==============================================================
-# SQL to delete data from the medicare_beneficiaryid_history_temp
-# table that is already stored in either the beneficiaries table or
-# the beneficiaries_history table.
 # ==============================================================
 read -r -d '' STEP_FOUR_CLEANUP_SQL << EOM
 DELETE
@@ -267,16 +259,13 @@ echo "Finished processing of Step 2 at: $(date +'%T.%31')"
 
 # STEP 3 and STEP 4
 # ---------------------------------------------------------
-# Initial cleanup of rcds that are dead-nuts wrong!
-# This step prunes rcds in the MEDICARE_BENEFICIARYID_HISTORY_TEMP
-# that is already stored in either the BENEFICIARES table or
+# These steps prune rcds in the MEDICARE_BENEFICIARYID_HISTORY_TEMP
+# that are already stored in either the BENEFICIARES table or
 # the BENEFICIARIES_HISTORY table.
 # ---------------------------------------------------------
-
 echo "Begin processing of Step 3 at: $(date +'%T')"
-
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${STEP_THREE_CLEANUP_SQL}")
-# if we got a value back from the sql, we'll log some info
+
 if [ -n "${CNT}" ]; then
   now=$(date +'%T')
   printf "%s : %s\n" "${now}" "${CNT}";
@@ -289,9 +278,8 @@ echo "Finished processing of Step 3 at: $(date +'%T.%31')"
 # STEP 4
 # ---------------------------------------------------------
 echo "Begin processing of Step 4 at: $(date +'%T')"
-
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${STEP_FOUR_CLEANUP_SQL}")
-# if we got a value back from the sql, we'll log some info
+
 if [ -n "${CNT}" ]; then
   now=$(date +'%T')
   printf "%s : %s\n" "${now}" "${CNT}";
@@ -309,9 +297,8 @@ echo "Finished processing of Step 4 at: $(date +'%T.%31')"
 # new records in case we need to back them out.
 # ---------------------------------------------------------
 echo "Begin processing of Step 5 at: $(date +'%T')"
-
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${STEP_FIVE_INSERT_SQL}")
-# if we got a value back from the sql, we'll log some info
+
 if [ -n "${CNT}" ]; then
   now=$(date +'%T')
   printf "%s : %s\n" "${now}" "${CNT}";
