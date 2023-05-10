@@ -16,10 +16,6 @@
         the Blue Button API backend database server.
     </description>
 
-    <properties>
-        <micrometer.cloudwatch.version>1.10.4</micrometer.cloudwatch.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
@@ -147,16 +143,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>cloudwatch</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
