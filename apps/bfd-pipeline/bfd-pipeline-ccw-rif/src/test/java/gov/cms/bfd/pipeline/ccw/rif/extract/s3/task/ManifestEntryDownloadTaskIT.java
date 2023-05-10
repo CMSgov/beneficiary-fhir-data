@@ -11,7 +11,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,7 +48,8 @@ public final class ManifestEntryDownloadTaskIT {
   /** Sets the minio test container. */
   @BeforeAll
   public static void setupMinioS3Client() {
-    s3Client = S3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME));
+    s3Client =
+        SharedS3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME).getS3Region());
   }
 
   /**

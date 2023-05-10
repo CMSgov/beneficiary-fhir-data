@@ -6,9 +6,9 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,10 +53,10 @@ public final class S3TaskManager {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3Client = S3Utilities.createS3Client(options);
+    this.s3Client = SharedS3Utilities.createS3Client(options.getS3Region());
     this.s3TransferManager =
         DefaultS3TransferManager.builder()
-            .s3Client(S3Utilities.createS3AsyncClient(options))
+            .s3Client(SharedS3Utilities.createS3AsyncClient(options.getS3Region()))
             .build();
 
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);

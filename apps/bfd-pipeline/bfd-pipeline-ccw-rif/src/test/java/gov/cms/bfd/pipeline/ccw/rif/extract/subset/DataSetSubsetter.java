@@ -18,7 +18,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -299,7 +299,7 @@ public final class DataSetSubsetter {
       ExtractionOptions options, String dataSetS3KeyPrefix, Path downloadDirectory) {
     S3TransferManager transferManager =
         DefaultS3TransferManager.builder()
-            .s3Client(S3Utilities.createS3AsyncClient(options))
+            .s3Client(SharedS3Utilities.createS3AsyncClient(options.getS3Region()))
             .build();
     String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
     String manifestSuffix = "1_manifest.xml";

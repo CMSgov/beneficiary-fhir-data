@@ -235,7 +235,7 @@
 			<dependency>
 				<!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
 				<groupId>io.micrometer</groupId>
-				<artifactId>micrometer-registry-cloudwatch</artifactId>
+				<artifactId>micrometer-registry-cloudwatch2</artifactId>
 				<version>${micrometer.version}</version>
 			</dependency>
 			<dependency>

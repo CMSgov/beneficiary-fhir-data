@@ -397,8 +397,8 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     Set<String> namesForObjectsInPage =
         s3ObjectListingPaginator.stream()
             .flatMap(s -> s.contents().stream())
-            .peek(s -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", s, manifest))
-            .map(k -> k.key().substring(dataSetKeyPrefix.length()))
+            .peek(o -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.key(), manifest))
+            .map(o -> o.key().substring(dataSetKeyPrefix.length()))
             .collect(Collectors.toSet());
     dataSetObjectNames.addAll(namesForObjectsInPage);
 

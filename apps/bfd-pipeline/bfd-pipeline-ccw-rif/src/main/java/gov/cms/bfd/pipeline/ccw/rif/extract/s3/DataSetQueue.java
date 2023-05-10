@@ -148,7 +148,7 @@ public final class DataSetQueue {
     try {
       s3TaskManager.getS3Client().headObject(headObjectRequest);
     } catch (NoSuchKeyException | NoSuchBucketException e) {
-      LOGGER.warn(
+      LOGGER.debug(
           "Unable to find keyspace {} in bucket {} while scanning for manifests.",
           manifestS3Key,
           options.getS3BucketName());

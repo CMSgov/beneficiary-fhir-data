@@ -84,10 +84,10 @@
             <artifactId>micrometer-registry-jmx</artifactId>
         </dependency>
         <dependency>
-            <!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
+            <!-- Used to transmit metrics to CloudWatch for alerts and dashboards.
+                CloudWatch2 is required for the AWS SDK v2 -->
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-cloudwatch2</artifactId>
-            <version>${micrometer.cloudwatch.version}</version>
         </dependency>
 
         <dependency>
