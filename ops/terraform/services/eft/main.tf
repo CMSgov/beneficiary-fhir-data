@@ -34,13 +34,17 @@ locals {
     for key, value in local.sensitive_service_map : split("/", key)[5] => value
   }
 
-  vpc_name = local.nonsensitive_common_config["vpc_name"]
+  kms_key_alias = local.nonsensitive_common_config["kms_key_alias"]
+  vpc_name      = local.nonsensitive_common_config["vpc_name"]
 
   subnet_ip_reservations = jsondecode(
     local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
   )
+  eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
 
-  sftp_port = 22
+  kms_key_id     = data.aws_kms_key.cmk.arn
+  sftp_port      = 22
+  logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
 
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future
@@ -54,6 +58,38 @@ locals {
     for subnet in values(data.aws_subnet.this)
     : subnet if contains(local.available_endpoint_azs, subnet.availability_zone)
   ]
+}
+
+resource "aws_s3_bucket" "this" {
+  bucket_prefix = local.full_name
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = local.kms_key_id
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_logging" "this" {
+  count  = 0 # TODO: Enable
+  bucket = aws_s3_bucket.this.id
+
+  target_bucket = local.logging_bucket
+  target_prefix = "${local.legacy_service}_s3_access_logs/"
 }
 
 resource "aws_ec2_subnet_cidr_reservation" "this" {
@@ -124,6 +160,30 @@ resource "aws_transfer_server" "this" {
     set_stat_option             = "DEFAULT"
     tls_session_resumption_mode = "ENFORCED"
   }
+}
+
+resource "aws_transfer_user" "eft_user" {
+  server_id = aws_transfer_server.this.id
+  role      = aws_iam_role.eft_user.arn
+
+  user_name = "eft"
+
+  home_directory_type = "LOGICAL"
+
+  home_directory_mappings {
+    entry  = "/"
+    target = "/${aws_s3_bucket.this.id}/$${Transfer:UserName}"
+  }
+}
+
+resource "aws_transfer_ssh_key" "eft_user" {
+  depends_on = [
+    aws_transfer_user.eft_user
+  ]
+
+  server_id = aws_transfer_server.this.id
+  user_name = aws_transfer_user.eft_user.user_name
+  body      = local.eft_user_sftp_pub_key
 }
 
 resource "aws_vpc_endpoint" "this" {
