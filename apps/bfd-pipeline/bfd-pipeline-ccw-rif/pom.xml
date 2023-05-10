@@ -33,23 +33,8 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to interact with AWS' S3 service -->
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3-transfer-manager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-      		<artifactId>aws-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -99,11 +84,7 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 		</dependency>
-		<dependency>
-			<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
-			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-core</artifactId>
-		</dependency>
+
 		<dependency>
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). 
 				Brought into the compile classpath here, because RifLoader directly uses 
