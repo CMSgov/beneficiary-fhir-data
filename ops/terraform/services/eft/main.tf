@@ -40,6 +40,7 @@ locals {
   subnet_ip_reservations = jsondecode(
     local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
   )
+  host_key              = local.sensitive_service_config["sftp_transfer_server_host_key"]
   eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
   eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
 
@@ -193,16 +194,14 @@ resource "aws_security_group" "vpc_endpoint" {
 }
 
 resource "aws_transfer_server" "this" {
-  domain        = "S3"
-  endpoint_type = "VPC_ENDPOINT"
-  # host_key               = "" # TODO: Provide host key via SSM
+  domain                 = "S3"
+  endpoint_type          = "VPC_ENDPOINT"
+  host_key               = local.host_key
   identity_provider_type = "SERVICE_MANAGED"
   logging_role           = aws_iam_role.logs.arn
-  protocols = [
-    "SFTP",
-  ]
-  security_policy_name = "TransferSecurityPolicy-2020-06"
-  tags                 = { Name = "${local.full_name}-sftp" }
+  protocols              = ["SFTP"]
+  security_policy_name   = "TransferSecurityPolicy-2020-06"
+  tags                   = { Name = "${local.full_name}-sftp" }
 
   endpoint_details {
     vpc_endpoint_id = aws_vpc_endpoint.this.id
