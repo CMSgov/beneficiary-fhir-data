@@ -34,6 +34,7 @@ locals {
     for key, value in local.sensitive_service_map : split("/", key)[5] => value
   }
 
+  data_env      = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", local.env)
   kms_key_alias = local.nonsensitive_common_config["kms_key_alias"]
   vpc_name      = local.nonsensitive_common_config["vpc_name"]
 
@@ -46,7 +47,7 @@ locals {
 
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22
-  logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
+  logging_bucket = "bfd-${local.data_env}-logs-${local.account_id}"
 
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future
@@ -87,7 +88,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
-  count  = 0 # TODO: Enable
   bucket = aws_s3_bucket.this.id
 
   target_bucket = local.logging_bucket
