@@ -124,6 +124,7 @@ resource "aws_lb_target_group" "nlb_to_vpc_endpoint" {
   target_type     = "ip"
   ip_address_type = "ipv4"
   vpc_id          = local.vpc_id
+  tags            = { Name = "${local.full_name}-nlb-to-vpce" }
 }
 
 resource "aws_alb_target_group_attachment" "nlb_to_vpc_endpoint" {
@@ -137,6 +138,7 @@ resource "aws_lb_listener" "nlb_to_vpc_endpoint" {
   load_balancer_arn = aws_lb.this.arn
   port              = local.sftp_port
   protocol          = "TCP"
+  tags              = { Name = "${local.full_name}-nlb-listener" }
 
   default_action {
     type             = "forward"
@@ -216,8 +218,8 @@ resource "aws_transfer_server" "this" {
 resource "aws_transfer_user" "eft_user" {
   server_id = aws_transfer_server.this.id
   role      = aws_iam_role.eft_user.arn
-
   user_name = local.eft_user_username
+  tags      = { Name = "${local.full_name}-sftp-user-${local.eft_user_username}" }
 
   home_directory_type = "LOGICAL"
 
