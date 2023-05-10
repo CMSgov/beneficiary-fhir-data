@@ -204,17 +204,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used to interact with AWS' S3 service -->
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3-transfer-manager</artifactId>
         </dependency>
