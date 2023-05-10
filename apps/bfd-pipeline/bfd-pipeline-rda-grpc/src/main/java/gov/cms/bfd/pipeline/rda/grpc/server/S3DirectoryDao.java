@@ -29,7 +29,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
-import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
@@ -139,18 +138,8 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   public ByteSource downloadFile(String fileName) throws IOException {
     final String s3Key = s3DirectoryPath + fileName;
-    String eTag;
-    try {
-      eTag =
-          s3Client
-              .getObject(GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build())
-              .response()
-              .eTag();
-    } catch (NoSuchKeyException ex) {
-      var fileNotFound = new FileNotFoundException(fileName);
-      fileNotFound.addSuppressed(ex);
-      throw fileNotFound;
-    }
+    String eTag = readS3ObjectMetaData(fileName, s3Key).eTag();
+
     Path cacheFile = cacheFilePath(fileName, eTag);
     if (Files.isRegularFile(cacheFile)) {
       log.info(
@@ -169,37 +158,9 @@ public class S3DirectoryDao implements AutoCloseable {
           s3Key,
           tempDataFile.getFileName());
 
-      GetObjectRequest getObjectRequest =
-          GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
-      DownloadFileRequest downloadFileRequest =
-          DownloadFileRequest.builder()
-              .getObjectRequest(getObjectRequest)
-              .destination(tempDataFile)
-              .addTransferListener(LoggingTransferListener.create())
-              .build();
-
-      // locationConstraintAsString() returns null if the bucket location is us-east-1,
-      // so we need to handle that result specifically
-      String bucketLocation =
-          s3Client
-              .getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build())
-              .locationConstraintAsString();
-      Region region =
-          Region.of(
-              StringUtils.isNotBlank(bucketLocation)
-                  ? bucketLocation
-                  : Region.US_EAST_1.toString());
-      S3TransferManager s3TransferManager =
-          DefaultS3TransferManager.builder()
-              .s3Client(SharedS3Utilities.createS3AsyncClient(region))
-              .build();
-
-      FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
-      CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
-
       // It is possible that the eTag changed between the time we fetched meta data and the
       // time we downloaded the object.
-      eTag = downloadResult.response().eTag();
+      eTag = downloadS3Object(s3Key, tempDataFile).eTag();
       cacheFile = cacheFilePath(fileName, eTag);
 
       try {
@@ -448,5 +409,64 @@ public class S3DirectoryDao implements AutoCloseable {
       };
     }
     return byteSource;
+  }
+
+  /**
+   * Read {@link HeadObjectResponse} metadata for the given S3 key. Recognize the possible case of object not
+   * found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   *
+   * @param fileName the simple file name for the object
+   * @param s3Key the S3 object key
+   * @return the meta data
+   * @throws IOException with {@link FileNotFoundException} or an AWS runtime exception
+   */
+  private HeadObjectResponse readS3ObjectMetaData(String fileName, String s3Key)
+      throws IOException {
+    try {
+      HeadObjectRequest headObjectRequest =
+          HeadObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
+      return s3Client.headObject(headObjectRequest);
+    } catch (NoSuchKeyException | NoSuchBucketException e) {
+      var fileNotFound = new FileNotFoundException(fileName);
+      fileNotFound.addSuppressed(e);
+      throw fileNotFound;
+    }
+  }
+
+  /**
+   * Download S3 object and return its {@link GetObjectResponse}. Recognize the possible case of
+   * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   *
+   * @param s3Key the S3 object key
+   * @param tempDataFile where to store the downloaded object
+   * @return the meta data
+   * @throws IOException with {@link FileNotFoundException} or an AWS runtime exception
+   */
+  private GetObjectResponse downloadS3Object(String s3Key, Path tempDataFile) {
+    /* Gather information needed to prepare the S3TransferManager */
+    String bucketLocation =
+        s3Client
+            .getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build())
+            .locationConstraintAsString();
+    // bucketLocation is null if the location is us-east-1, so we need to handle that result
+    // specifically
+    Region region =
+        Region.of(
+            StringUtils.isNotBlank(bucketLocation) ? bucketLocation : Region.US_EAST_1.toString());
+    S3TransferManager s3TransferManager =
+        DefaultS3TransferManager.builder()
+            .s3Client(SharedS3Utilities.createS3AsyncClient(region))
+            .build();
+    GetObjectRequest getObjectRequest =
+        GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
+    DownloadFileRequest downloadFileRequest =
+        DownloadFileRequest.builder()
+            .getObjectRequest(getObjectRequest)
+            .destination(tempDataFile)
+            .addTransferListener(LoggingTransferListener.create())
+            .build();
+
+    FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
+    return downloadFile.completionFuture().join().response();
   }
 }

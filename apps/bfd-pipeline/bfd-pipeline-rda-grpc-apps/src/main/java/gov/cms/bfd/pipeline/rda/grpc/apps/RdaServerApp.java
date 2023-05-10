@@ -78,7 +78,7 @@ public class RdaServerApp {
               .fissClaimJsonFile(config.readableFileOption("file.fiss").orElse(null))
               .mcsClaimJsonFile(config.readableFileOption("file.mcs").orElse(null))
               .s3Bucket(config.stringOption("s3.bucket").orElse(null))
-              .s3Region(Region.of(config.stringOption("s3.region").orElse(null)))
+              .s3Region(config.stringOption("s3.region").map(Region::of).orElse(null))
               .s3Directory(config.stringOption("s3.directory").orElse(""))
               .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
               .build();

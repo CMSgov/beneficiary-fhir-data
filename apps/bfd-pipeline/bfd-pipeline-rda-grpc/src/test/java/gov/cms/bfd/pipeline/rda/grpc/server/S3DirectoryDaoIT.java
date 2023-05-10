@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 
 /** Integration test for {@link S3DirectoryDao}. */
 public class S3DirectoryDaoIT {
@@ -244,8 +244,7 @@ public class S3DirectoryDaoIT {
         s3Client, bucket, objectKey, ByteSource.wrap(fileData.getBytes(StandardCharsets.UTF_8)));
     var eTag =
         s3Client
-            .getObject(GetObjectRequest.builder().key(objectKey).bucket(bucket).build())
-            .response()
+            .headObject(HeadObjectRequest.builder().key(objectKey).bucket(bucket).build())
             .eTag();
     assertNotNull(eTag);
     return eTag;
