@@ -72,18 +72,8 @@ resource "aws_iam_policy" "eft_user" {
             "s3:ListBucket",
             "s3:GetBucketLocation",
           ]
-          Effect = "Allow"
-          Resource = [
-            "arn:aws:s3:::$${transfer:HomeBucket}"
-          ],
-          Condition = {
-            StringLike = {
-              "s3:prefix" = [
-                "$${transfer:HomeFolder}/*",
-                "$${transfer:HomeFolder}"
-              ]
-            }
-          }
+          Effect   = "Allow"
+          Resource = [aws_s3_bucket.this.arn],
         },
         {
           Sid    = "HomeDirObjectAccess"
@@ -97,7 +87,7 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetObjectACL",
             "s3:PutObjectACL"
           ]
-          Resource = "arn:aws:s3:::$${transfer:HomeDirectory}/*"
+          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_user_username}*"]
         }
       ]
     }

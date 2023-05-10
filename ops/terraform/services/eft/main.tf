@@ -41,6 +41,7 @@ locals {
     local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
   )
   eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
+  eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
 
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22
@@ -89,7 +90,7 @@ resource "aws_s3_bucket_logging" "this" {
   bucket = aws_s3_bucket.this.id
 
   target_bucket = local.logging_bucket
-  target_prefix = "${local.legacy_service}_s3_access_logs/"
+  target_prefix = "${local.full_name}_s3_access_logs/"
 }
 
 resource "aws_ec2_subnet_cidr_reservation" "this" {
@@ -116,7 +117,34 @@ resource "aws_lb" "this" {
   }
 }
 
-resource "aws_security_group" "this" {
+resource "aws_lb_target_group" "nlb_to_vpc_endpoint" {
+  name            = "${local.full_name}-nlb-to-vpce"
+  port            = local.sftp_port
+  protocol        = "TCP"
+  target_type     = "ip"
+  ip_address_type = "ipv4"
+  vpc_id          = local.vpc_id
+}
+
+resource "aws_alb_target_group_attachment" "nlb_to_vpc_endpoint" {
+  for_each = toset(values(data.aws_network_interface.vpc_endpoint)[*].private_ip)
+
+  target_group_arn = aws_lb_target_group.nlb_to_vpc_endpoint.arn
+  target_id        = each.key
+}
+
+resource "aws_lb_listener" "nlb_to_vpc_endpoint" {
+  load_balancer_arn = aws_lb.this.arn
+  port              = local.sftp_port
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.nlb_to_vpc_endpoint.arn
+  }
+}
+
+resource "aws_security_group" "nlb" {
   name        = "${local.full_name}-nlb"
   description = "Allow access to the ${local.service} network load balancer"
   vpc_id      = local.vpc_id
@@ -135,7 +163,30 @@ resource "aws_security_group" "this" {
     from_port   = local.sftp_port # TODO: Determine correct port in BFD-2561
     to_port     = local.sftp_port # TODO: Determine correct port in BFD-2561
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.this.cidr_block]
+    cidr_blocks = [for ip in values(data.aws_network_interface.vpc_endpoint)[*].private_ip : "${ip}/32"]
+  }
+}
+
+resource "aws_security_group" "vpc_endpoint" {
+  name        = "${local.full_name}-vpc-endpoint"
+  description = "Allow ingress from ${aws_lb.this.name}"
+  vpc_id      = local.vpc_id
+  tags        = { Name = "${local.full_name}-vpc-endpoint" }
+
+  ingress {
+    from_port   = local.sftp_port
+    to_port     = local.sftp_port
+    protocol    = "tcp"
+    cidr_blocks = [for ip in aws_lb.this.subnet_mapping[*].private_ipv4_address : "${ip}/32"]
+    description = "Allow ingress from SFTP traffic from NLB"
+  }
+
+  egress {
+    from_port   = local.sftp_port
+    to_port     = local.sftp_port
+    protocol    = "tcp"
+    cidr_blocks = [for ip in aws_lb.this.subnet_mapping[*].private_ipv4_address : "${ip}/32"]
+    description = "Allow egress from SFTP traffic from NLB"
   }
 }
 
@@ -166,13 +217,13 @@ resource "aws_transfer_user" "eft_user" {
   server_id = aws_transfer_server.this.id
   role      = aws_iam_role.eft_user.arn
 
-  user_name = "eft"
+  user_name = local.eft_user_username
 
   home_directory_type = "LOGICAL"
 
   home_directory_mappings {
     entry  = "/"
-    target = "/${aws_s3_bucket.this.id}/$${Transfer:UserName}"
+    target = "/${aws_s3_bucket.this.id}/${local.eft_user_username}"
   }
 }
 
@@ -190,14 +241,12 @@ resource "aws_vpc_endpoint" "this" {
   ip_address_type = "ipv4"
 
   private_dns_enabled = false
-  security_group_ids = [
-    "sg-0a7fae0583d971701", # TODO: Create SG for NLB -> SG -> Transfer Server
-  ]
-  service_name      = "com.amazonaws.us-east-1.transfer.server"
-  subnet_ids        = local.available_endpoint_subnets[*].id
-  vpc_endpoint_type = "Interface"
-  vpc_id            = local.vpc_id
-  tags              = { Name = "${local.full_name}-sftp-endpoint" }
+  security_group_ids  = [aws_security_group.vpc_endpoint.id]
+  service_name        = "com.amazonaws.us-east-1.transfer.server"
+  subnet_ids          = local.available_endpoint_subnets[*].id
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = local.vpc_id
+  tags                = { Name = "${local.full_name}-sftp-endpoint" }
 
   dns_options {
     dns_record_ip_type = "ipv4"

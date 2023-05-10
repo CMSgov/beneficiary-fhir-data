@@ -37,7 +37,7 @@ data "aws_subnet" "this" {
   }
 }
 
-data "aws_network_interface" "this" {
+data "aws_network_interface" "vpc_endpoint" {
   for_each = toset(aws_vpc_endpoint.this.network_interface_ids)
   id       = each.key
 }
