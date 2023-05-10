@@ -242,8 +242,4 @@ resource "aws_vpc_endpoint" "this" {
   vpc_endpoint_type   = "Interface"
   vpc_id              = local.vpc_id
   tags                = { Name = "${local.full_name}-sftp-endpoint" }
-
-  dns_options {
-    dns_record_ip_type = "ipv4"
-  }
 }
