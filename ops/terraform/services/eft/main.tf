@@ -157,14 +157,14 @@ resource "aws_security_group" "nlb" {
     from_port       = local.sftp_port
     to_port         = local.sftp_port
     protocol        = "tcp"
-    cidr_blocks     = [data.aws_vpc.this.cidr_block] # TODO: Determine full CIDR in BFD-2561
+    cidr_blocks     = [data.aws_vpc.this.cidr_block]
     description     = "Allow ingress from SFTP traffic"
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
   }
 
   egress {
-    from_port   = local.sftp_port # TODO: Determine correct port in BFD-2561
-    to_port     = local.sftp_port # TODO: Determine correct port in BFD-2561
+    from_port   = local.sftp_port
+    to_port     = local.sftp_port
     protocol    = "tcp"
     cidr_blocks = [for ip in values(data.aws_network_interface.vpc_endpoint)[*].private_ip : "${ip}/32"]
   }
