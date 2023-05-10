@@ -18,6 +18,14 @@ locals {
     role           = local.service
   }
 
+  nonsensitive_common_map = zipmap(
+    data.aws_ssm_parameters_by_path.nonsensitive_common.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values)
+  )
+  nonsensitive_common_config = {
+    for key, value in local.nonsensitive_common_map
+    : split("/", key)[5] => value
+  }
   sensitive_service_map = zipmap(
     data.aws_ssm_parameters_by_path.sensitive_service.names,
     nonsensitive(data.aws_ssm_parameters_by_path.sensitive_service.values)
@@ -26,11 +34,26 @@ locals {
     for key, value in local.sensitive_service_map : split("/", key)[5] => value
   }
 
+  vpc_name = local.nonsensitive_common_config["vpc_name"]
+
   subnet_ip_reservations = jsondecode(
     local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
   )
 
   sftp_port = 22
+
+  # For some reason, the transfer server endpoint service does not support us-east-1b and instead
+  # opts to support us-east-1d. In order to enable support for this sub-az in the future
+  # automatically (if transfer server VPC endpoints begin to support 1c), we filter our desired
+  # subnets against the supported availability zones taking only those that belong to supported azs
+  available_endpoint_azs = setintersection(
+    data.aws_vpc_endpoint_service.transfer_server.availability_zones,
+    values(data.aws_subnet.this)[*].availability_zone
+  )
+  available_endpoint_subnets = [
+    for subnet in values(data.aws_subnet.this)
+    : subnet if contains(local.available_endpoint_azs, subnet.availability_zone)
+  ]
 }
 
 resource "aws_ec2_subnet_cidr_reservation" "this" {
@@ -77,5 +100,46 @@ resource "aws_security_group" "this" {
     to_port     = local.sftp_port # TODO: Determine correct port in BFD-2561
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.this.cidr_block]
+  }
+}
+
+resource "aws_transfer_server" "this" {
+  domain        = "S3"
+  endpoint_type = "VPC_ENDPOINT"
+  # host_key               = "" # TODO: Provide host key via SSM
+  identity_provider_type = "SERVICE_MANAGED"
+  logging_role           = aws_iam_role.logs.arn
+  protocols = [
+    "SFTP",
+  ]
+  security_policy_name = "TransferSecurityPolicy-2020-06"
+  tags                 = { Name = "${local.full_name}-sftp" }
+
+  endpoint_details {
+    vpc_endpoint_id = aws_vpc_endpoint.this.id
+  }
+
+  protocol_details {
+    passive_ip                  = "AUTO"
+    set_stat_option             = "DEFAULT"
+    tls_session_resumption_mode = "ENFORCED"
+  }
+}
+
+resource "aws_vpc_endpoint" "this" {
+  ip_address_type = "ipv4"
+
+  private_dns_enabled = false
+  security_group_ids = [
+    "sg-0a7fae0583d971701", # TODO: Create SG for NLB -> SG -> Transfer Server
+  ]
+  service_name      = "com.amazonaws.us-east-1.transfer.server"
+  subnet_ids        = local.available_endpoint_subnets[*].id
+  vpc_endpoint_type = "Interface"
+  vpc_id            = local.vpc_id
+  tags              = { Name = "${local.full_name}-sftp-endpoint" }
+
+  dns_options {
+    dns_record_ip_type = "ipv4"
   }
 }
