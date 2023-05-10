@@ -106,6 +106,7 @@ resource "aws_instance" "this" {
     sqs_queue_name       = var.sqs_queue_name
     node_lambda_name     = var.node_lambda_name
     test_host            = var.test_host
+    locust_tags          = var.locust_tags
     initial_worker_nodes = var.initial_worker_nodes
     node_spawn_time      = var.node_spawn_time
     max_spawned_nodes    = var.max_spawned_nodes

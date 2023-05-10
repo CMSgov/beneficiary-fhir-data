@@ -467,64 +467,66 @@ any trailing characters after `PORT` as well.
 ### How to Run a Static Load Test Using the `bfd-run-server-load` Jenkins Job
 
 1. Ensure you are connected to the CMS VPN
-2. Navigate to the Jenkins CloudBees instance in your web browser and sign-in
-3. From the main page, select "bfd". A list of jobs should load
-4. From this list of jobs, click on "bfd-run-server-load". A new page should load showing the "Stage
+1. Navigate to the Jenkins CloudBees instance in your web browser and sign-in
+1. From the main page, select "bfd". A list of jobs should load
+1. From this list of jobs, click on "bfd-run-server-load". A new page should load showing the "Stage
    View" and a list of actions on the left side of the screen
-5. Click on "Build with Parameters" on the left side of the screen. A new page should load showing a
+1. Click on "Build with Parameters" on the left side of the screen. A new page should load showing a
    variety of input fields
-6. Choose the desired SDLC environment to load test from the "ENVIRONMENT" dropdown list
-7. Adjust the default parameters according to the desired load test. For this particular case, the
+1. Choose the desired SDLC environment to load test from the "ENVIRONMENT" dropdown list
+1. Adjust the default parameters according to the desired load test. For this particular case, the
    default values will _need to be changed_:
+   1. Set `LOCUST_TAGS` to the space-delimited list of locust tests to run if they are 
+      annotated with ANY of the given @tag(s)
    1. Set `INITIAL_WORKER_NODES` to the number of worker nodes/Lambdas desired _in total_
-   2. Set `MAX_SPAWNED_NODES` equal to `INITIAL_WORKER_NODES`
-   3. Set `MAX_SPAWNED_USERS` to the desired number of simulated users _in total_
-      1. Note that a ratio of 10 simulated users to 1 worker node should be followed for best
-         performance
-   4. Set `USER_SPAWN_RATE` equal to `MAX_SPAWNED_USERS` if no ramp-up is desired
-   5. Unselect `STOP_ON_SCALING` if the load test should _not_ stop when a scaling event is
+   1. Set `MAX_SPAWNED_NODES` equal to `INITIAL_WORKER_NODES`
+   1. Set `MAX_SPAWNED_USERS` to the desired number of simulated users _in total_
+     1. Note that a ratio of 10 simulated users to 1 worker node should be followed for best
+        performance
+   1. Set `USER_SPAWN_RATE` equal to `MAX_SPAWNED_USERS` if no ramp-up is desired
+   1. Unselect `STOP_ON_SCALING` if the load test should _not_ stop when a scaling event is
       encountered -- for a static test, this should probably be false
-   6. Deselect `STOP_ON_NODE_LIMIT` to ensure that the load test does not end immediately due to the
+   1. Deselect `STOP_ON_NODE_LIMIT` to ensure that the load test does not end immediately due to the
       node limit being hit
-8. Click "Build" at the bottom of the page. The page from Step #4 should load again, however an
+1. Click "Build" at the bottom of the page. The page from Step #4 should load again, however an
    in-progress build should appear in the "Build History" list on the left side of the screen
-9. Click on the _build number_ of the in-progress build. A new page should load showing an overview
+1. Click on the _build number_ of the in-progress build. A new page should load showing an overview
    of the current build
-10. Click on "Console Output" on the left side of the screen. A new page should load showing
+1. Click on "Console Output" on the left side of the screen. A new page should load showing
     realtime log output from the job
-11. Monitor the log output until the following prompt appears in the output:
+1. Monitor the log output until the following prompt appears in the output:
 
     ```
     Once the run is finished, click either Abort or Proceed to cleanup the test
     Proceed or Abort
     ```
 
-12. Scroll up in the log output and find the line starting with:
+1. Scroll up in the log output and find the line starting with:
 
     ```
     aws_instance.this[0]: Creation complete after...
     ```
 
-13. Note the instance ID within square brackets -- use this later to follow the log output from the
+1. Note the instance ID within square brackets -- use this later to follow the log output from the
     controller in CloudWatch
-14. In your web browser, navigate to AWS and sign-in (if necessary)
-15. Navigate to Services > CloudWatch
-16. Navigate to "Log groups" by clicking on the link in the navigation tree
-17. Search for "server-load-controller.log" and select the corresponding log group in the SDLC
+1. In your web browser, navigate to AWS and sign-in (if necessary)
+1. Navigate to Services > CloudWatch
+1. Navigate to "Log groups" by clicking on the link in the navigation tree
+1. Search for "server-load-controller.log" and select the corresponding log group in the SDLC
     environment currently under test
-18. Refresh the log group until a log stream with the name of the instance ID noted down in Step 13
+1. Refresh the log group until a log stream with the name of the instance ID noted down in Step 13
     appears
-19. Open the log stream corresponding to the instance ID noted down in Step 13
-20. Monitor the log continuously by clicking "Resume" at the bottom of the log output. The log
+1. Open the log stream corresponding to the instance ID noted down in Step 13
+1. Monitor the log continuously by clicking "Resume" at the bottom of the log output. The log
     should automatically update in realtime as the load test runs. You may need to continuously
     scroll to view the log
-21. Wait until the load tests finish running. If at anytime something goes wrong, return to the
+1. Wait until the load tests finish running. If at anytime something goes wrong, return to the
     running Jenkins job and click either the "Proceed" or "Abort" prompt in the log output to
     immediately end the test and start cleaning up
-22. Once Locust prints the summary table and has finished, indicated by the "Locust master process
+1. Once Locust prints the summary table and has finished, indicated by the "Locust master process
     has stopped" message, return to the Jenkins job and click "Proceed". This will cleanup the test,
     destroying the controller instance and stopping any orphaned Lambda nodes
-23. View the stats of the run under the following log groups (the log stream corresponding to the
+1. View the stats of the run under the following log groups (the log stream corresponding to the
     current run will be named according to the instance ID noted down in Step 13). Note
     "{ENVIRONMENT}" should be replaced with the environment under test (i.e. "test"):
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_exceptions.csv
