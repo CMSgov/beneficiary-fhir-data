@@ -23,27 +23,33 @@ import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
+import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -99,11 +105,39 @@ public class SpringConfiguration {
   static final String BLUEBUTTON_R4_RESOURCE_PROVIDERS = "bluebuttonR4ResourceProviders";
 
   /**
-   * Set this to <code>true</code> to have Hibernate log a ton of info on the SQL statements being
-   * run and each session's performance. Be sure to also adjust the related logging levels in
-   * Wildfly or whatever (see <code>server-config.sh</code> for details).
+   * Set this to {@code true} to have Hibernate log a ton of info on the SQL statements being run
+   * and each session's performance. Be sure to also adjust the related logging levels in Wildfly or
+   * whatever (see {@code server-config.sh} for details).
    */
   private static final boolean HIBERNATE_DETAILED_LOGGING = false;
+
+  /**
+   * Attribute name used to expose the source {@link ConfigLoader} for use by {@link
+   * SpringConfiguration}. Avoids the need to recreate an instance there if one has already been
+   * created for use here or define a static field to hold it.
+   */
+  static final String CONFIG_LOADER_CONTEXT_NAME = "ConfigLoaderInstance";
+
+  /**
+   * The {@link Bean#name()} for the {@link Boolean} indicating if PAC data should be queryable
+   * using old MBI hash.
+   */
+  public static final String PAC_OLD_MBI_HASH_ENABLED = "PacOldMbiHashEnabled";
+
+  /**
+   * Exposes our {@link ConfigLoader} instance as a singleton to components in the application. If
+   * one has already been created for use in a {@link ConfigPropertySource} and added to the {@link
+   * ServletContext} we simply return that one. Otherwise we create a new one.
+   *
+   * @param servletContext used to look for config loader attribute
+   * @return the config object
+   */
+  @Bean
+  public ConfigLoader configLoader(@Autowired ServletContext servletContext) {
+    return servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME) != null
+        ? (ConfigLoader) servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME)
+        : createConfigLoader(System::getenv);
+  }
 
   /**
    * Sets up the application's database connection.
@@ -262,41 +296,17 @@ public class SpringConfiguration {
   }
 
   /**
-   * Determines if the fhir resources related to partially adjudicated claims data should be
-   * accessible via the fhir api service.
-   *
-   * @return True if the resources should be available to consume, False otherwise.
-   */
-  private static boolean isPacResourcesEnabled() {
-    return Boolean.TRUE
-        .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.pac.enabled", "false"));
-  }
-
-  /**
    * Determines if the fhir resources related to partially adjudicated claims data will accept
    * {@link Mbi#getOldHash()} values for queries. This is off by default but when enabled will
    * simplify rotation of hash values.
    *
+   * @param enabled injected property indicating if feature is enabled
    * @return True if the resources should use oldHash values in queries, False otherwise.
    */
-  public static boolean isPacOldMbiHashEnabled() {
-    return Boolean.TRUE
-        .toString()
-        .equalsIgnoreCase(System.getProperty("bfdServer.pac.oldMbiHash.enabled", "false"));
-  }
-
-  /**
-   * Determines the type of claim sources to enable for constructing PAC resources ({@link
-   * org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}.
-   *
-   * @return The {@link Set} of enabled source types (i.e. FISS/MCS).
-   */
-  public static Set<String> getEnabledPacResourceTypes() {
-    return Stream.of(System.getProperty("bfdServer.pac.claimSourceTypes", "").split(","))
-        .filter(Strings::isNotBlank)
-        .map(String::toLowerCase)
-        .collect(Collectors.toSet());
+  @Bean(name = PAC_OLD_MBI_HASH_ENABLED)
+  Boolean isPacOldMbiHashEnabled(
+      @Value("${bfdServer.pac.oldMbiHash.enabled:false}") Boolean enabled) {
+    return enabled;
   }
 
   /**
@@ -307,6 +317,11 @@ public class SpringConfiguration {
    * @param r4EOBResourceProvider the r4 eob resource provider
    * @param r4ClaimResourceProvider the r4 claim resource provider
    * @param r4ClaimResponseResourceProvider the r4 claim response resource provider
+   * @param pacEnabled Determines if the fhir resources related to partially adjudicated claims data
+   *     should be accessible via the fhir api service.
+   * @param claimSourceTypeNames Determines the type of claim sources to enable for constructing PAC
+   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
+   *     org.hl7.fhir.r4.model.ClaimResponse}.
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
@@ -315,14 +330,20 @@ public class SpringConfiguration {
       R4CoverageResourceProvider r4CoverageResourceProvider,
       R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
       R4ClaimResourceProvider r4ClaimResourceProvider,
-      R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider) {
+      R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider,
+      @Value("${bfdServer.pac.enabled:false}") Boolean pacEnabled,
+      @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
-    if (isPacResourcesEnabled()) {
-      Set<String> allowedResourceTypes = getEnabledPacResourceTypes();
+    if (pacEnabled) {
+      Set<String> allowedResourceTypes =
+          Stream.of(claimSourceTypeNames.split(","))
+              .filter(Strings::isNotBlank)
+              .map(String::toLowerCase)
+              .collect(Collectors.toSet());
 
       // If there are no enabled source types, this endpoint will never return anything, so don't
       // add it
@@ -340,21 +361,22 @@ public class SpringConfiguration {
    * Creates a {@link MetricRegistry} for the application, which can be used to collect statistics
    * on the application's performance.
    *
+   * @param config used to look up configuration values
    * @return the metric registry
    */
   @Bean
-  public MetricRegistry metricRegistry() {
+  public MetricRegistry metricRegistry(ConfigLoader config) {
     MetricRegistry metricRegistry = new MetricRegistry();
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    String newRelicMetricKey = System.getenv("NEW_RELIC_METRIC_KEY");
+    String newRelicMetricKey = config.stringValue("NEW_RELIC_METRIC_KEY", null);
 
     if (newRelicMetricKey != null) {
-      String newRelicAppName = System.getenv("NEW_RELIC_APP_NAME");
-      String newRelicMetricHost = System.getenv("NEW_RELIC_METRIC_HOST");
-      String newRelicMetricPath = System.getenv("NEW_RELIC_METRIC_PATH");
-      String rawNewRelicPeriod = System.getenv("NEW_RELIC_METRIC_PERIOD");
+      String newRelicAppName = config.stringValue("NEW_RELIC_APP_NAME", null);
+      String newRelicMetricHost = config.stringValue("NEW_RELIC_METRIC_HOST", null);
+      String newRelicMetricPath = config.stringValue("NEW_RELIC_METRIC_PATH", null);
+      String rawNewRelicPeriod = config.stringValue("NEW_RELIC_METRIC_PERIOD", null);
 
       int newRelicPeriod;
       try {
@@ -439,5 +461,20 @@ public class SpringConfiguration {
     } else {
       return NPIOrgLookup.createNpiOrgLookupForProduction();
     }
+  }
+
+  /**
+   * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
+   * information. The provided function is used to look up environment variables so that these can
+   * be simulated in tests without having to fork a process.
+   *
+   * <p>{@see LayeredConfiguration#createConfigLoader} for possible sources of configuration
+   * variables.
+   *
+   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @return appropriately configured {@link ConfigLoader}
+   */
+  public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
+    return LayeredConfiguration.createConfigLoader(Map.of(), getenv);
   }
 }

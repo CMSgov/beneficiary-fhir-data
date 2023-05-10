@@ -36,6 +36,11 @@
 			<version>${flyway.version}</version>
 		</dependency>
 		<dependency>
+			<!-- Used to interact with AWS' SSM service -->
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>ssm</artifactId>
+		</dependency>
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
 				 Java. -->
 			<groupId>org.slf4j</groupId>
@@ -51,7 +56,13 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
-    
+
+		<dependency>
+			<!-- Used to parse and read hex encoded data. -->
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -84,6 +95,18 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>localstack</artifactId>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -39,7 +39,6 @@
 				<exclude>com.fasterxml.jackson.module:jackson-module-parameter-names:jar:*</exclude>
 				<exclude>com.fasterxml.jackson.module:jackson-module-blackbird:jar:*</exclude>
 				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-joda:jar:*</exclude>
-				<exclude>joda-time:joda-time:jar:*</exclude>
 				<exclude>io.dropwizard:dropwizard-util:jar:*</exclude>
 				<exclude>io.dropwizard:dropwizard-validation:jar:*</exclude>
 				<exclude>org.hibernate.validator:hibernate-validator:*</exclude>

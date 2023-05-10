@@ -30,18 +30,6 @@
 		<bash.exe>bash</bash.exe>
 	</properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- The hapi-fhir-structures-dstu3 dependency tries to pull in a too-early 
-					version of this library (1.1) that isn't compatible with our other dependencies. -->
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>${commons-codec.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<dependency>
 			<!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
