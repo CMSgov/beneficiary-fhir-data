@@ -206,12 +206,6 @@ resource "aws_transfer_server" "this" {
   endpoint_details {
     vpc_endpoint_id = aws_vpc_endpoint.this.id
   }
-
-  protocol_details {
-    passive_ip                  = "AUTO"
-    set_stat_option             = "DEFAULT"
-    tls_session_resumption_mode = "ENFORCED"
-  }
 }
 
 resource "aws_transfer_user" "eft_user" {
