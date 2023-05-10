@@ -40,7 +40,7 @@ locals {
   subnet_ip_reservations = jsondecode(
     local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
   )
-  host_key              = local.sensitive_service_config["sftp_transfer_server_host_key"]
+  host_key              = local.sensitive_service_config["sftp_transfer_server_host_private_key"]
   eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
   eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
 
