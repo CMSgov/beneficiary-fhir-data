@@ -1,6 +1,6 @@
 resource "aws_iam_role" "logs" {
   name        = "${local.full_name}-logs"
-  description = "Role allowing the ${aws_transfer_server.this.id} Transfer Server to write logs"
+  description = "Role allowing the ${local.full_name}-sftp Transfer Server to write logs"
 
   assume_role_policy = jsonencode(
     {

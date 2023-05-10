@@ -172,7 +172,7 @@ resource "aws_security_group" "nlb" {
 
 resource "aws_security_group" "vpc_endpoint" {
   name        = "${local.full_name}-vpc-endpoint"
-  description = "Allow ingress from ${aws_lb.this.name}"
+  description = "Allow ingress and egress from ${aws_lb.this.name}"
   vpc_id      = local.vpc_id
   tags        = { Name = "${local.full_name}-vpc-endpoint" }
 
