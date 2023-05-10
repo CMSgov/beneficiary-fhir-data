@@ -47,8 +47,8 @@ public class S3DirectoryDaoIT {
       assertEquals(List.of(), s3Dao.readFileNames());
 
       // add a couple of files
-      String aTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
-      String bTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
+      String aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
+      String bTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
 
       // now the files show up in the list
       assertEquals(
@@ -70,7 +70,7 @@ public class S3DirectoryDaoIT {
       assertFileExists(s3Dao.cacheFilePath("b.txt", bTag1));
 
       // update one of the files so it has new contents and new eTag
-      String aTag2 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-2");
+      String aTag2 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-2");
       assertNotEquals(aTag2, aTag1);
 
       // download and verify the updated file contents
@@ -124,8 +124,8 @@ public class S3DirectoryDaoIT {
       s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, true);
 
       // add a couple of files
-      aTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
-      bTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
+      aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
+      bTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
 
       // verify the file contents
       assertEquals(
@@ -171,8 +171,8 @@ public class S3DirectoryDaoIT {
       s3Dao = new S3DirectoryDao(s3Client, s3Bucket, s3Directory, cacheDirectoryPath, false);
 
       // add a couple of files
-      aTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
-      bTag1 = uploadFileToString(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
+      aTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "a.txt", "AAA-1");
+      bTag1 = uploadFileToBucket(s3Client, s3Bucket, s3Directory + "b.txt", "BBB-1");
 
       // verify the file contents
       assertEquals(
@@ -238,7 +238,7 @@ public class S3DirectoryDaoIT {
    * @return eTag assigned to the file by S3
    * @throws IOException pass through if anything fails
    */
-  private String uploadFileToString(
+  private String uploadFileToBucket(
       S3Client s3Client, String bucket, String objectKey, String fileData) throws IOException {
     uploadJsonToBucket(
         s3Client, bucket, objectKey, ByteSource.wrap(fileData.getBytes(StandardCharsets.UTF_8)));
