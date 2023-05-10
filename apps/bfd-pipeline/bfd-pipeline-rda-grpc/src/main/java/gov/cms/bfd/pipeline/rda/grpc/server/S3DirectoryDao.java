@@ -412,8 +412,8 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Read {@link HeadObjectResponse} metadata for the given S3 key. Recognize the possible case of object not
-   * found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   * Read {@link HeadObjectResponse} metadata for the given S3 key. Recognize the possible case of
+   * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
    *
    * @param fileName the simple file name for the object
    * @param s3Key the S3 object key
