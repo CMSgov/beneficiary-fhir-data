@@ -7,6 +7,7 @@ PG_NAME="${PG_NAME:-fhirdb}"
 PG_HOST="${PG_HOST:-}"
 PG_PORT="${PG_PORT:-5432}"
 PG_USER="${PG_USER:-}"
+PG_ENV="${PG_ENV:-test}"
 PSQL_ARGS="${PSQL_ARGS:-}"
 
 usage() {
@@ -126,14 +127,7 @@ if ! token="$(aws rds generate-db-auth-token --hostname "$PG_HOST" --port "$PG_P
   exit 1
 fi
 
-aws sts get-caller-identity
-
 # run psql
 export PGPASSWORD="$token"
 
-exec psql "host=$PG_HOST dbname=$PG_NAME user=$PG_USER" "$PSQL_ARGS"
-# if [[ -n $PSQL_ARGS ]]; then
-#   exec psql "sslmode=require" -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_NAME" "$PSQL_ARGS"
-# else
-#   exec psql "sslmode=require" -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_NAME"
-# fi
+psql "host=$PG_HOST dbname=$PG_NAME user=$PG_USER port=$PG_PORT sslmode=verify-full sslrootcert=./rds-combined-ca-bundle.pem" "$PSQL_ARGS"

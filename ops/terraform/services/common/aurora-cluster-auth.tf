@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "db_auth_role_trust_policy" {
       identifiers = ["arn:aws:iam::${local.account_id}:root"]
     }
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "sts:RoleSessionName"
       values   = ["$${aws:username}"]
     }
@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "db_rds_connect" {
     effect  = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:${local.region}:${local.account_id}:dbuser:*/*$${aws:username}"
+      "arn:aws:rds-db:${local.region}:${local.account_id}:dbuser:*/*"
     ]
   }
 }
