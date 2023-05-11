@@ -1,11 +1,11 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import com.amazonaws.regions.Regions;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The server is intended for
@@ -78,7 +78,7 @@ public class RdaServerApp {
               .fissClaimJsonFile(config.readableFileOption("file.fiss").orElse(null))
               .mcsClaimJsonFile(config.readableFileOption("file.mcs").orElse(null))
               .s3Bucket(config.stringOption("s3.bucket").orElse(null))
-              .s3Region(config.enumOption("s3.region", Regions::fromName).orElse(null))
+              .s3Region(config.stringOption("s3.region").map(Region::of).orElse(null))
               .s3Directory(config.stringOption("s3.directory").orElse(""))
               .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
               .build();

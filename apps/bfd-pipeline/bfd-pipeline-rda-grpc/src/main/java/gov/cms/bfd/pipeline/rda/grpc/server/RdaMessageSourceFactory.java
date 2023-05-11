@@ -3,8 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
 import static java.lang.String.format;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.base.Strings;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
@@ -19,6 +17,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * Interface for objects that can provide information required by {@link RdaService} to generate
@@ -68,7 +68,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     /** NDJSON mcs claim data for the RDI Server. */
     @Nullable private final CharSource mcsClaimJson;
     /** AWS region containing our S3 bucket. */
-    @Nullable private final Regions s3Region;
+    @Nullable private final Region s3Region;
     /** Name of our S3 bucket. */
     @Nullable private final String s3Bucket;
     /** Optional directory name within our S3 bucket. */
@@ -138,8 +138,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
               : RdaService.Version.builder()
                   .version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION))
                   .build();
-      final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
-      final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
+      final Region region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
+      final S3Client s3Client = SharedS3Utilities.createS3Client(region);
       final String directory = s3Directory == null ? "" : s3Directory;
       final boolean useTempDirectoryForCache = Strings.isNullOrEmpty(s3CacheDirectory);
       final Path cacheDirectory =

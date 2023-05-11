@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import com.amazonaws.regions.Regions;
+import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.REGION_DEFAULT;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.zaxxer.hikari.HikariDataSource;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * Program to load RDA API NDJSON data files into a database from either a local file or from an S3
@@ -169,7 +171,7 @@ public class LoadRdaJsonApp {
     /** The name of the MCS file to read from at the source. */
     private final Optional<File> mcsFile;
     /** The S3 region to use if the source is an S3 connection. */
-    private final Optional<Regions> s3Region;
+    private final Optional<Region> s3Region;
     /** The S3 bucket to use if the source is an S3 connection. */
     private final Optional<String> s3Bucket;
     /** Optional directory name within our S3 bucket. */
@@ -197,7 +199,9 @@ public class LoadRdaJsonApp {
       rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
-      s3Region = options.enumOption("s3.region", Regions::fromName);
+      s3Region =
+          Optional.of(
+              Region.of(options.stringOption("s3.region").orElse(REGION_DEFAULT.toString())));
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
     }

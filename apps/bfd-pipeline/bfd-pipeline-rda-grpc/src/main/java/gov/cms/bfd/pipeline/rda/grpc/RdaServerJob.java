@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import com.amazonaws.regions.Regions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -21,6 +20,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * PipelineJob implementation that runs a mock RDA API server using the gRPC in-process mode. Since
@@ -175,7 +175,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         @Nullable Duration runInterval,
         @Nullable Long randomSeed,
         @Nullable Integer randomMaxClaims,
-        @Nullable Regions s3Region,
+        @Nullable Region s3Region,
         @Nullable String s3Bucket,
         @Nullable String s3Directory,
         @Nullable String s3CacheDirectory) {
