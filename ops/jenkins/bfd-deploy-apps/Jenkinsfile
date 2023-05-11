@@ -236,7 +236,9 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def pipelineAmiOverride = [ami_id_override: params.pipeline_ami_override.trim()]
+                        def pipelineAmiOverride = (params.pipeline_ami_override?.trim())
+                                                  ? [ami_id_override: params.pipeline_ami_override?.trim()]
+                                                  : []
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
