@@ -236,7 +236,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def pipelineAmiOverride = (params.pipeline_ami_override?.trim())
+                        def terraformVars = (params.pipeline_ami_override?.trim())
                                                   ? [ami_id_override: params.pipeline_ami_override?.trim()]
                                                   : []
                         lock(resource: lockResource) {
@@ -244,7 +244,7 @@ spec:
                             terraform.deployTerraservice(
                             env: trimmedEnv,
                             directory: 'ops/terraform/services/pipeline',
-                            tfVars: pipelineAmiOverride
+                            tfVars: terraformVars
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
