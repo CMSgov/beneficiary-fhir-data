@@ -265,7 +265,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def serverAmiOverride = params.server_ami_override.trim()
+                        def serverAmi = params.server_ami.trim()
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                                 dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
@@ -278,7 +278,7 @@ spec:
                                     // Gathering terraform plan
                                     echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
                                     sh "terraform plan \
-                                    -var='fhir_ami=${serverAmiOverride}' \
+                                    -var='fhir_ami=${serverAmi}' \
                                     -var='ssh_key_name=bfd-${trimmedEnv}' \
                                     -var='git_branch_name=${gitBranchName}' \
                                     -var='git_commit_id=${gitCommitId}' \
