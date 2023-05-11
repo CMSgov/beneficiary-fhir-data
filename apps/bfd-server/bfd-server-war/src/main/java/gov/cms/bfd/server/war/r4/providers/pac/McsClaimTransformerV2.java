@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -189,7 +188,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             })
         .filter(Objects::nonNull)
         .sorted(Comparator.comparing(Claim.DiagnosisComponent::getSequence))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -243,7 +242,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             })
         .filter(Objects::nonNull)
         .sorted(Comparator.comparing(Claim.ItemComponent::getSequence))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -273,6 +272,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                             mods.get(index).get(),
                             null)
                         .setVersion(String.valueOf(index + 1))))
-        .collect(Collectors.toList());
+        .toList();
   }
 }

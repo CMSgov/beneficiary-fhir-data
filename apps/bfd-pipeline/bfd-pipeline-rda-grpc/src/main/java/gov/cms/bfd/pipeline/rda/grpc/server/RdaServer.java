@@ -3,8 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.ThrowableAction;
 import gov.cms.bfd.pipeline.rda.grpc.ThrowableConsumer;
-import gov.cms.mpsm.rda.v1.FissClaimChange;
-import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -164,26 +162,10 @@ public class RdaServer {
      * Instantiates a new configuration. If {@code serviceConfig} is not null it is used otherwise
      * the other parameters are used to build a config.
      *
-     * @param version optional version
-     * @param fissSourceFactory optional fiss source factory
-     * @param mcsSourceFactory optional mcs source factory
-     * @param serviceConfig optional config used to create {@link RdaService}
+     * @param serviceConfig config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      */
-    BaseConfig(
-        @Nullable RdaService.Version version,
-        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-        @Nullable RdaMessageSourceFactory.Config serviceConfig,
-        Set<String> authorizedTokens) {
-      if (serviceConfig == null) {
-        serviceConfig =
-            RdaMessageSourceFactory.Config.builder()
-                .version(version)
-                .fissSourceFactory(fissSourceFactory)
-                .mcsSourceFactory(mcsSourceFactory)
-                .build();
-      }
+    BaseConfig(RdaMessageSourceFactory.Config serviceConfig, Set<String> authorizedTokens) {
       this.serviceConfig = serviceConfig;
       this.authorizedTokens = authorizedTokens;
     }
@@ -215,24 +197,18 @@ public class RdaServer {
      * Creates a new configuration. If {@code serviceConfig} is not null it is used otherwise the
      * other parameters are used to build a config.
      *
-     * @param version optional version
-     * @param fissSourceFactory optional fiss source factory
-     * @param mcsSourceFactory optional mcs source factory
-     * @param serviceConfig optional config used to create {@link RdaService}
+     * @param serviceConfig config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      * @param hostname the hostname
      * @param port the port
      */
     @Builder
     private LocalConfig(
-        @Nullable RdaService.Version version,
-        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-        @Nullable RdaMessageSourceFactory.Config serviceConfig,
+        RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
         String hostname,
         int port) {
-      super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
+      super(serviceConfig, authorizedTokens);
       this.hostname = Strings.isNullOrEmpty(hostname) ? "localhost" : hostname;
       this.port = port;
     }
@@ -271,22 +247,16 @@ public class RdaServer {
      * Instantiates a new configuration. If {@code serviceConfig} is not null it is used otherwise
      * the other parameters are used to build a config.
      *
-     * @param version optional version
-     * @param fissSourceFactory optional fiss source factory
-     * @param mcsSourceFactory optional mcs source factory
-     * @param serviceConfig optional config used to create {@link RdaService}
+     * @param serviceConfig config used to create {@link RdaService}
      * @param authorizedTokens the authorized tokens
      * @param serverName optional server name
      */
     @Builder
     private InProcessConfig(
-        @Nullable RdaService.Version version,
-        @Nullable MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        @Nullable MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-        @Nullable RdaMessageSourceFactory.Config serviceConfig,
+        RdaMessageSourceFactory.Config serviceConfig,
         @NonNull @Singular Set<String> authorizedTokens,
         @Nullable String serverName) {
-      super(version, fissSourceFactory, mcsSourceFactory, serviceConfig, authorizedTokens);
+      super(serviceConfig, authorizedTokens);
       this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;
     }
 

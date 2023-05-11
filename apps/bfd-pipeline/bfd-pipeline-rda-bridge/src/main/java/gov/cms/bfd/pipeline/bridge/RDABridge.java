@@ -338,8 +338,8 @@ public class RDABridge {
               sink.write(message.get());
               ++claimsWritten;
             }
-          } catch (IllegalStateException e) {
-            throw new IllegalStateException("Failed to parse entry #" + data.getEntryNumber());
+          } catch (Exception e) {
+            throw new IllegalStateException("Failed to parse entry #" + data.getEntryNumber(), e);
           }
         }
 

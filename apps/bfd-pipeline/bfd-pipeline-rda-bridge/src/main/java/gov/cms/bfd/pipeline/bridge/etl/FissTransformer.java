@@ -16,9 +16,11 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import gov.cms.mpsm.rda.v1.fiss.FissRevenueLine;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -32,6 +34,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 @RequiredArgsConstructor
 public class FissTransformer extends AbstractTransformer {
 
+  /** Hardcoded date values that can't be extracted from RIF */
+  public static final String DEFAULT_HARDCODED_DATE = "1970-01-01";
   /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id. */
   private final Map<String, BeneficiaryData> mbiMap;
   /** Constant value used within the code. */
@@ -50,20 +54,19 @@ public class FissTransformer extends AbstractTransformer {
 
     int lineNumber = getLineNumber(data, Fiss.CLM_LINE_NUM);
 
-    if (message.getMessage() instanceof FissClaimChange) {
+    if (message.getMessage() instanceof FissClaimChange storedClaim) {
       // There is an existing claim from a previous run
-      FissClaimChange storedClaim = (FissClaimChange) message.getMessage();
-
       if (message.getLineNumber() == (lineNumber - 1)) {
         // If it's the next sequential line number, add to previous claim
-        message.setMessage(addToExistingClaim(storedClaim, data));
+        message.setMessage(addToExistingClaim(lineNumber, storedClaim, data));
         message.setLineNumber(lineNumber);
         claimToReturn = null;
       } else if (lineNumber == 1) {
         // If the line number is 1, it's a new claim, return the old, store the new
         claimToReturn = storedClaim;
         message.setLineNumber(1);
-        message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId, fileName));
+        message.setMessage(
+            transformNewClaim(sequenceNumber, lineNumber, data, mbiSampler, sampleId, fileName));
       } else {
         // If it's not the next claim or a new one starting at 1, then something is wrong.
         throw new IllegalStateException(
@@ -80,7 +83,8 @@ public class FissTransformer extends AbstractTransformer {
       }
 
       message.setLineNumber(lineNumber);
-      message.setMessage(transformNewClaim(sequenceNumber, data, mbiSampler, sampleId, fileName));
+      message.setMessage(
+          transformNewClaim(sequenceNumber, lineNumber, data, mbiSampler, sampleId, fileName));
       claimToReturn = null;
     }
 
@@ -92,15 +96,17 @@ public class FissTransformer extends AbstractTransformer {
    *
    * <p>Not currently implemented for FISS claims.
    *
+   * @param lineNumber The lineNumber for the claim
    * @param fissClaimChange The claim to add line items to
    * @param data The data to grab new line items from
    * @return The newly constructed claim with additional line items added
    */
   @VisibleForTesting
-  FissClaimChange addToExistingClaim(FissClaimChange fissClaimChange, Parser.Data<String> data) {
+  FissClaimChange addToExistingClaim(
+      int lineNumber, FissClaimChange fissClaimChange, Parser.Data<String> data) {
     FissClaim.Builder claimBuilder = fissClaimChange.getClaim().toBuilder();
 
-    // Not currently implemented for FISS claims, just store the same claim
+    claimBuilder.addFissRevenueLines(buildRevenueLines(lineNumber, data));
 
     return fissClaimChange.toBuilder().setClaim(claimBuilder.build()).build();
   }
@@ -109,8 +115,9 @@ public class FissTransformer extends AbstractTransformer {
    * Creates a new claim from the given {@link Parser.Data}.
    *
    * @param sequenceNumber The sequence number of the current claim
+   * @param lineNumber The lineNumber for the claim
    * @param data The {@link Parser.Data} to pull claim data for building the claim
-   * @param mbiSampler The {@link DataSampler} of the mbis
+   * @param mbiSampler The {@link DataSampler} of the MBIs
    * @param sampleId The sample of ids
    * @param fileName The name of the file the data was extracted from
    * @return A new claim built from parsing the given {@link Parser.Data}
@@ -118,6 +125,7 @@ public class FissTransformer extends AbstractTransformer {
   @VisibleForTesting
   FissClaimChange transformNewClaim(
       WrappedCounter sequenceNumber,
+      int lineNumber,
       Parser.Data<String> data,
       DataSampler<String> mbiSampler,
       int sampleId,
@@ -141,10 +149,10 @@ public class FissTransformer extends AbstractTransformer {
             .setCurrLoc1Unrecognized("?")
             .setCurrLoc2Unrecognized("?")
             .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING)
-            .setCurrTranDtCymd("1970-01-01")
+            .setCurrTranDtCymd(DEFAULT_HARDCODED_DATE)
             .setFedTaxNb("XX-XXXXXXX")
             .setIntermediaryNb("?")
-            .setRecdDtCymd("1970-01-01");
+            .setRecdDtCymd(DEFAULT_HARDCODED_DATE);
 
     // Build beneZ payer object
     FissBeneZPayer.Builder payerBuilder = FissBeneZPayer.newBuilder().setRdaPosition(1);
@@ -173,6 +181,7 @@ public class FissTransformer extends AbstractTransformer {
 
     claimBuilder.addFissPayers(FissPayer.newBuilder().setBeneZPayer(payerBuilder.build()).build());
 
+    data.get(Fiss.CLM_DRG_CD).ifPresent(claimBuilder::setDrgCd);
     data.get(Fiss.ADMTG_DGNS_CD).ifPresent(claimBuilder::setAdmDiagCode);
     consumeIf(
         data.get(Fiss.CLM_FREQ_CD).orElse(null),
@@ -198,6 +207,8 @@ public class FissTransformer extends AbstractTransformer {
 
     addDiagCodes(claimBuilder, data);
     addProcCodes(claimBuilder, data);
+
+    claimBuilder.addFissRevenueLines(buildRevenueLines(lineNumber, data));
 
     FissClaim claim = claimBuilder.build();
     return FissClaimChange.newBuilder()
@@ -228,31 +239,16 @@ public class FissTransformer extends AbstractTransformer {
    * @return The corresponding {@link FissClaimTypeIndicator} for the extracted file
    */
   private FissClaimTypeIndicator getClaimTypeEnum(String fileName) {
-    FissClaimTypeIndicator indicator;
-
-    switch (fileName.trim()) {
-      case "inpatient":
-        indicator = FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT;
-        break;
-      case "outpatient":
-        indicator = FissClaimTypeIndicator.CLAIM_TYPE_OUTPATIENT;
-        break;
-      case "home":
-      case "hha":
-        // Home and HHA are synonymous in this context
-        indicator = FissClaimTypeIndicator.CLAIM_TYPE_HOME_HEALTH;
-        break;
-      case "hospice":
-        indicator = FissClaimTypeIndicator.CLAIM_TYPE_HOSPICE;
-        break;
-      case "snf":
-        indicator = FissClaimTypeIndicator.CLAIM_TYPE_SNF;
-        break;
-      default:
-        indicator = FissClaimTypeIndicator.UNRECOGNIZED;
-    }
-
-    return indicator;
+    return switch (fileName.trim()) {
+      case "inpatient" -> FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT;
+      case "outpatient" -> FissClaimTypeIndicator.CLAIM_TYPE_OUTPATIENT;
+      case "home", "hha" ->
+      // Home and HHA are synonymous in this context
+      FissClaimTypeIndicator.CLAIM_TYPE_HOME_HEALTH;
+      case "hospice" -> FissClaimTypeIndicator.CLAIM_TYPE_HOSPICE;
+      case "snf" -> FissClaimTypeIndicator.CLAIM_TYPE_SNF;
+      default -> FissClaimTypeIndicator.UNRECOGNIZED;
+    };
   }
 
   /**
@@ -335,5 +331,40 @@ public class FissTransformer extends AbstractTransformer {
                                   .orElse(""))
                           .build()));
     }
+  }
+
+  /**
+   * Maps RIF data to a {@link FissRevenueLine} object.
+   *
+   * @param lineNumber The line number of the claim
+   * @param data The {@link Parser.Data} to pull procedure codes from
+   * @return The created {@link FissRevenueLine} objects.
+   */
+  FissRevenueLine buildRevenueLines(int lineNumber, Parser.Data<String> data) {
+    FissRevenueLine.Builder builder =
+        FissRevenueLine.newBuilder()
+            .setRdaPosition(lineNumber)
+            .setHcpcInd("A")
+            .setApcHcpcsApc("00000")
+            .setNonBillRevCodeEnum(FissNonBillRevCode.NON_BILL_ESRD)
+            .setServDtCymd(DEFAULT_HARDCODED_DATE)
+            .setServDtCymdText(DEFAULT_HARDCODED_DATE);
+
+    data.get(Fiss.REV_CNTR).ifPresent(builder::setRevCd);
+    consumeIf(
+        data.get(Fiss.LINE_SRVC_CNT).orElse(null),
+        NumberUtils::isDigits,
+        value -> builder.setRevUnitsBilled(Integer.parseInt(value)));
+    consumeIf(
+        data.get(Fiss.REV_CNTR_UNIT_CNT).orElse(null),
+        NumberUtils::isDigits,
+        value -> builder.setRevServUnitCnt(Integer.parseInt(value)));
+    data.get(Fiss.HCPCS_1_MDFR_CD).ifPresent(builder::setHcpcModifier);
+    data.get(Fiss.HCPCS_2_MDFR_CD).ifPresent(builder::setHcpcModifier2);
+    data.get(Fiss.HCPCS_3_MDFR_CD).ifPresent(builder::setHcpcModifier3);
+    data.get(Fiss.HCPCS_4_MDFR_CD).ifPresent(builder::setHcpcModifier4);
+    data.get(Fiss.HCPCS_CD).ifPresent(builder::setHcpcCd);
+
+    return builder.build();
   }
 }

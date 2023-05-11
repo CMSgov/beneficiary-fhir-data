@@ -3,12 +3,10 @@ package gov.cms.bfd.pipeline.rda.grpc.apps;
 import com.amazonaws.regions.Regions;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
-import com.google.common.io.Files;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
-import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
@@ -84,10 +82,7 @@ public class LoadRdaJsonApp {
 
       var serviceConfig = config.createMessageSourceFactoryConfig();
 
-      try (var messageSourceFactory = serviceConfig.createMessageSourceFactory()) {
-        checkConnectivity("FISS", messageSourceFactory::createFissMessageSource);
-        checkConnectivity("MCS", messageSourceFactory::createMcsMessageSource);
-      }
+      checkConnectivity(serviceConfig);
 
       RdaServer.LocalConfig.builder()
           .serviceConfig(serviceConfig)
@@ -123,17 +118,21 @@ public class LoadRdaJsonApp {
   }
 
   /**
-   * Checks that we can make a viable connection to the source.
+   * Checks that we can make a viable connection to each claim source. Creates a {@link
+   * RdaMessageSourceFactory} then verifies that it can interact with each type of claim source.
    *
-   * @param claimType The type of claims the tested source serves
-   * @param factory A {@link MessageSource.Factory} for creating message sources.
-   * @param <TMessage> the type of objects returned by the message sources
+   * @param serviceConfig used to create a {@link RdaMessageSourceFactory}
    * @throws Exception If there was an issue connecting to the message source.
    */
-  private static <TMessage> void checkConnectivity(
-      String claimType, MessageSource.Factory<TMessage> factory) throws Exception {
-    try (MessageSource<?> source = factory.apply(0)) {
-      LOGGER.info("checking for {} claims: {}", claimType, source.hasNext());
+  private static void checkConnectivity(RdaMessageSourceFactory.Config serviceConfig)
+      throws Exception {
+    try (var messageSourceFactory = serviceConfig.createMessageSourceFactory()) {
+      try (var source = messageSourceFactory.createFissMessageSource(0)) {
+        LOGGER.info("checking for FISS claims: {}", source.hasNext());
+      }
+      try (var source = messageSourceFactory.createMcsMessageSource(0)) {
+        LOGGER.info("checking for MCS claims: {}", source.hasNext());
+      }
     }
   }
 
@@ -256,9 +255,8 @@ public class LoadRdaJsonApp {
      */
     private RdaMessageSourceFactory.Config createMessageSourceFactoryConfig() {
       return RdaMessageSourceFactory.Config.builder()
-          .version(RdaService.Version.builder().version(RdaService.RDA_PROTO_VERSION).build())
-          .fissClaimJson(fissFile.map(Files::asByteSource).orElse(null))
-          .mcsClaimJson(mcsFile.map(Files::asByteSource).orElse(null))
+          .fissClaimJsonFile(fissFile.orElse(null))
+          .mcsClaimJsonFile(mcsFile.orElse(null))
           .s3Bucket(s3Bucket.orElse(null))
           .s3Region(s3Region.orElse(null))
           .s3Directory(s3Directory.orElse(null))
@@ -266,7 +264,7 @@ public class LoadRdaJsonApp {
     }
 
     /**
-     * This function creates the pipeline jobs for Fiss and Mcs claims from the app state.
+     * This function creates the pipeline jobs for FISS and MCS claims from the app state.
      *
      * @param jobConfig the RDA options to load
      * @param appState the pipeline application state

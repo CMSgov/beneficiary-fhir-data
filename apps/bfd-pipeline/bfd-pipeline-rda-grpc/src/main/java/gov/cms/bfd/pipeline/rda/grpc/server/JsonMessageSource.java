@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -69,14 +68,14 @@ public class JsonMessageSource<T> implements MessageSource<T> {
 
   /**
    * Produce a JsonMessageSource that parses the NDJSON contents of the specified {@link
-   * ByteSource}.
+   * CharSource}.
    *
-   * @param byteSource source of a NDJSON file containing message objects
+   * @param charSource source of a NDJSON file containing message objects
    * @param parser the parser to convert a line of JSON into an object
    */
-  public JsonMessageSource(ByteSource byteSource, Parser<T> parser) {
+  public JsonMessageSource(CharSource charSource, Parser<T> parser) {
     try {
-      reader = new BufferedReader(new InputStreamReader(byteSource.openStream()));
+      reader = charSource.openBufferedStream();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

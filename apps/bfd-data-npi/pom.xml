@@ -46,11 +46,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-javadoc-plugin</artifactId>
-			<version>${javadoc.version}</version>
-		</dependency>
-		<dependency>
 			<!-- Common utility classes -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
