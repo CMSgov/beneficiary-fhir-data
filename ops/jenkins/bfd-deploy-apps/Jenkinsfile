@@ -265,7 +265,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def serverAmi = params.server_ami.trim()
+                        def serverAmi = params.server_ami?.trim()
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                                 dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
