@@ -3,14 +3,14 @@ set -eo pipefail
 PROGNAME=${0##*/}
 
 BFD_ACCT_NUM="${BFD_ACCT_NUM:-}"
-DB_ENDPOINT="${DB_ENDPOINT:-}"
-DB_PORT="${DB_PORT:-5432}"
-DB_USERNAME="${DB_USERNAME:-}"
+PG_NAME="${PG_NAME:-fhirdb}"
+PG_HOST="${PG_HOST:-}"
+PG_PORT="${PG_PORT:-5432}"
+PG_USER="${PG_USER:-}"
 PSQL_ARGS="${PSQL_ARGS:-}"
-DATABASE="${DATABASE:-fhirdb}"
 
 usage() {
-  echo -e "Usage: $PROGNAME [-h|--help] [-h|--host DB_ENDPOINT] [-p|--port DB_PORT] [-u|--username DB_USERNAME] [-x|--extra-args PSQL_ARGS] [DATABASE]"
+  echo -e "Usage: $PROGNAME [-h|--help] [-h|--host PG_HOST] [-p|--port PG_PORT] [-u|--username PG_USER] [-x|--extra-args PSQL_ARGS] [PG_NAME]"
 }
 
 help_message() {
@@ -26,13 +26,12 @@ help_message() {
 
   Options:
   -h, --help  Display this help message and exit.
-  -H, --host DB_CLUSTER_ENDPOINT
-    The endpoint of the database cluster. This is the endpoint you would use to connect to the database using psql.
-    Note this is not the cluster identifier or an individual instance endpoint or ID.
-  -p, --port DB_PORT
-    Where 'DB_PORT' is the port of the database you want to connect to.
-  -u, --username DB_USERNAME
-    Where 'DB_USERNAME' is your EUA.
+  -H, --host PG_CLUSTER_ENDPOINT
+    The endpoint of the cluster. This is the 'host' you would connect to with psql.
+  -p, --port PG_PORT
+    Where 'PG_PORT' is the port of the PG_NAME you want to connect to.
+  -u, --username PG_USER
+    Where 'PG_USER' is your EUA.
   -x, --extra-args PSQL_ARGS
     Where PSQL_ARGS are any additional options you want to pass to psql.
 
@@ -45,12 +44,12 @@ while [[ -n $1 ]]; do
     -h | --help)
       help_message; exit ;;
     -a | --account) shift; export BFD_ACCT_NUM="$1" ;;
-    -e | --env) shift; export DB_ENV="$1" ;;
-    -H | --host) shift; export DB_ENDPOINT="$1" ;;
-    -p | --port) shift; export DB_PORT="$1" ;;
-    -u | --username) shift; export DB_USERNAME="$1" ;;
+    -e | --env) shift; export PG_ENV="$1" ;;
+    -H | --host) shift; export PG_HOST="$1" ;;
+    -p | --port) shift; export PG_PORT="$1" ;;
+    -u | --username) shift; export PG_USER="$1" ;;
     -x | --extra-args) shift; export PSQL_ARGS="$1" ;;
-    *) export DATABASE="$1"
+    *) export PG_NAME="$1"
   esac
   shift
 done
@@ -74,18 +73,18 @@ if ! command -v psql >/dev/null 2>&1; then
 fi
 
 # check args
-if [[ -z $DB_ENDPOINT ]]; then
+if [[ -z $PG_HOST ]]; then
   usage
-  echo "Missing required argument: DB_ENDPOINT"
+  echo "Missing required argument: PG_HOST"
   exit 1
 fi
 
-if [[ -z $DB_USERNAME ]]; then
-  DB_USERNAME="$(get_username)"
-  if [[ -z $DB_USERNAME ]]; then
+if [[ -z $PG_USER ]]; then
+  PG_USER="$(get_username)"
+  if [[ -z $PG_USER ]]; then
     # try prompting for username
-    read -rp "Enter your EUA: " DB_USERNAME
-    if [[ -z $DB_USERNAME ]]; then
+    read -rp "Enter your EUA: " PG_USER
+    if [[ -z $PG_USER ]]; then
       usage
       echo "Please provide a username."
       exit 1
@@ -93,9 +92,9 @@ if [[ -z $DB_USERNAME ]]; then
   fi
 fi
 
-if [[ -z $DATABASE ]]; then
+if [[ -z $PG_NAME ]]; then
   usage
-  echo "Missing required argument: DATABASE"
+  echo "Missing required argument: PG_NAME"
   exit 1
 fi
 
@@ -105,33 +104,36 @@ if [[ -z $BFD_ACCT_NUM ]]; then
   exit 1
 fi
 
-if [[ -z $DB_ENV ]]; then
+if [[ -z $PG_ENV ]]; then
   usage
-  echo "Missing required argument: DB_ENV"
+  echo "Missing required argument: PG_ENV"
   exit 1
 fi
 
 # Assume the role
-ROLE_ARN="arn:aws:iam::$BFD_ACCT_NUM:role/bfd-${DATABASE}-${DB_ENV}-auth"
-CREDS=$(aws sts assume-role --role-arn "$ROLE_ARN" --role-session-name "$DB_USERNAME" --query "Credentials" --output json)
+ROLE_ARN="arn:aws:iam::$BFD_ACCT_NUM:role/bfd-${PG_NAME}-${PG_ENV}-auth"
+CREDS=$(aws sts assume-role --role-arn "$ROLE_ARN" --role-session-name "$PG_USER" --query "Credentials" --output json)
 
 # Extract creds
-unset AWS_PROFILE
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r ".AccessKeyId")
 export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r ".SecretAccessKey")
 export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r ".SessionToken")
 
 # fetch token
-if ! token="$(aws rds generate-db-auth-token --hostname "$DB_ENDPOINT" --port "$DB_PORT" --username "$DB_USERNAME")"; then
-  echo "Failed to fetch token. Are you sure you have an active MFA session? Are you using the correct endpoint? Is your username correct?"
+if ! token="$(aws rds generate-db-auth-token --hostname "$PG_HOST" --port "$PG_PORT" --username "$PG_USER")"; then
+  echo "Failed to fetch token. Are you sure you have an active MFA session? Is your username correct?"
   exit 1
 fi
 
+aws sts get-caller-identity
+
 # run psql
 export PGPASSWORD="$token"
-if [[ -n $PSQL_ARGS ]]; then
-  exec psql -h "$DB_ENDPOINT" -p "$DB_PORT" -U "$DB_USERNAME" -d "$DATABASE" "$PSQL_ARGS"
-else
-  exec psql -h "$DB_ENDPOINT" -p "$DB_PORT" -U "$DB_USERNAME" -d "$DATABASE"
-fi
+
+exec psql "host=$PG_HOST dbname=$PG_NAME user=$PG_USER" "$PSQL_ARGS"
+# if [[ -n $PSQL_ARGS ]]; then
+#   exec psql "sslmode=require" -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_NAME" "$PSQL_ARGS"
+# else
+#   exec psql "sslmode=require" -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_NAME"
+# fi

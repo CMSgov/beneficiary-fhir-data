@@ -6,7 +6,7 @@
 
 ## POLICY DOCS
 # allow assume role (require MFA and a matching role session name)
-data "aws_iam_policy_document" "db_auth_assume_role_policy" {
+data "aws_iam_policy_document" "db_auth_role_trust_policy" {
   count = local.is_ephemeral_env ? 0 : 1
   statement {
     effect  = "Allow"
@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "db_rds_connect" {
     effect  = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:${local.region}:${local.account_id}:dbuser:*/$${aws:username}"
+      "arn:aws:rds-db:${local.region}:${local.account_id}:dbuser:*/*$${aws:username}"
     ]
   }
 }
@@ -120,7 +120,7 @@ resource "aws_iam_group_policy_attachment" "db_users" {
 resource "aws_iam_role" "db_auth" {
   count              = local.is_ephemeral_env ? 0 : 1
   name               = "bfd-fhirdb-${local.env}-auth"
-  assume_role_policy = data.aws_iam_policy_document.db_auth_assume_role_policy[0].json
+  assume_role_policy = data.aws_iam_policy_document.db_auth_role_trust_policy[0].json
 }
 
 # Policy allowing the rds-db:connect action, as well as allowing assumed role users to describe clusters and endpoints.
