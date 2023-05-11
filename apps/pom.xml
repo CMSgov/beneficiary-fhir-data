@@ -652,6 +652,10 @@ checkJavaFormat
 							<its.db.password>${its.db.password}</its.db.password>
 							<its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
 						</systemPropertyVariables>
+						<includes>
+							<include>**/*IT.java</include>
+							<include>**/*E2E.java</include>
+						</includes>
 
 						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
 						<environmentVariables>

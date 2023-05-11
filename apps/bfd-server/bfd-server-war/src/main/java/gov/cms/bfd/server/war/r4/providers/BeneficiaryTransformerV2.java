@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -14,7 +16,6 @@ import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -27,50 +28,52 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
-final class BeneficiaryTransformerV2 {
-  /**
-   * Transforms a {@link Beneficiary} into a {@link Patient}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
-   *     request headers
-   * @param addHistoricalMbis whether to add historical MBIs as extensions to the transformed
-   *     Patient; the beneficiary must have been called using a join against the bene history table
-   *     in order to do this
-   * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
-   */
-  @Trace
-  public static Patient transform(
-      MetricRegistry metricRegistry,
-      Beneficiary beneficiary,
-      RequestHeaders requestHeader,
-      boolean addHistoricalMbis) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(BeneficiaryTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-    Patient patient = transform(beneficiary, requestHeader, addHistoricalMbis);
-    timer.stop();
+@Component
+public class BeneficiaryTransformerV2 {
 
-    return patient;
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** Enumerates the options for the currency of an {@link Identifier}. */
+  public enum CurrencyIdentifier {
+    /** Represents a current identifier. */
+    CURRENT,
+    /** Represents a historic identifier. */
+    HISTORIC;
+  }
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   */
+  public BeneficiaryTransformerV2(MetricRegistry metricRegistry) {
+    requireNonNull(metricRegistry);
+    this.metricRegistry = metricRegistry;
   }
 
   /**
    * Transforms a {@link Beneficiary} into a {@link Patient}.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
+   * <p>Implicitly does not add mbi historical extensions to the response. Should be used for
+   * beneficiaries that do not join on the history table during the db query that finds the
+   * beneficiary data (i.e. does not have the data for beneficiaryHistories on the beneficiary
+   * model).
+   *
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
    *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  @Trace
-  public static Patient transform(
-      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
-    return transform(metricRegistry, beneficiary, requestHeader, false);
+  public Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
+    return transform(beneficiary, requestHeader, false);
   }
 
   /**
@@ -82,9 +85,15 @@ final class BeneficiaryTransformerV2 {
    * @param addHistoricalMbiExtensions the add historical mbi extensions
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(
+  @Trace
+  public Patient transform(
       Beneficiary beneficiary, RequestHeaders requestHeader, boolean addHistoricalMbiExtensions) {
-    Objects.requireNonNull(beneficiary);
+    Timer.Context timer =
+        metricRegistry
+            .timer(MetricRegistry.name(BeneficiaryTransformerV2.class.getSimpleName(), "transform"))
+            .time();
+
+    requireNonNull(beneficiary);
 
     Patient patient = new Patient();
 
@@ -240,6 +249,7 @@ final class BeneficiaryTransformerV2 {
 
     // Last Updated => Patient.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
+    timer.stop();
     return patient;
   }
 
@@ -251,7 +261,7 @@ final class BeneficiaryTransformerV2 {
    * @param patient the patient to add the historical mbi extensions to
    * @param beneficiary the beneficiary to get the historical data from
    */
-  private static void addHistoricalMbiExtensions(Patient patient, Beneficiary beneficiary) {
+  private void addHistoricalMbiExtensions(Patient patient, Beneficiary beneficiary) {
     Set<String> uniqueHistoricalMbis = new HashSet<>();
     Extension historicalIdentifier =
         TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
@@ -299,7 +309,7 @@ final class BeneficiaryTransformerV2 {
    * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
    * @param mbiPeriod the value for {@link Period}
    */
-  private static void addUnhashedIdentifier(
+  private void addUnhashedIdentifier(
       Patient patient,
       String value,
       String system,
@@ -338,7 +348,7 @@ final class BeneficiaryTransformerV2 {
    * @param patient the FHIR {@link Patient} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
+  private void transformMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     addPatientExtension(
         patient, CcwCodebookVariable.DUAL_01, beneficiary.getMedicaidDualEligibilityJanCode());
@@ -381,13 +391,5 @@ final class BeneficiaryTransformerV2 {
         value ->
             patient.addExtension(
                 TransformerUtilsV2.createExtensionCoding(patient, ccwVariable, value)));
-  }
-
-  /** Enumerates the options for the currency of an {@link Identifier}. */
-  public static enum CurrencyIdentifier {
-    /** Represents a current identifier. */
-    CURRENT,
-    /** Represents a historic identifier. */
-    HISTORIC;
   }
 }
