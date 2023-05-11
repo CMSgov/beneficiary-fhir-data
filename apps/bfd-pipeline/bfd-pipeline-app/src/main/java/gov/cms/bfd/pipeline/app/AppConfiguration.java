@@ -1,8 +1,5 @@
 package gov.cms.bfd.pipeline.app;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.regions.Regions;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
@@ -23,7 +20,7 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import io.micrometer.cloudwatch.CloudWatchConfig;
+import io.micrometer.cloudwatch2.CloudWatchConfig;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
@@ -32,6 +29,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * Models the configuration options for the application.
@@ -39,8 +39,7 @@ import org.apache.commons.codec.binary.Hex;
  * <p>Note that, in addition to the configuration specified here, the application must also be
  * provided with credentials that can be used to access the specified S3 bucket. For that, the
  * application supports all of the mechanisms that are supported by {@link
- * DefaultAWSCredentialsProviderChain}, which include environment variables, EC2 instance profiles,
- * etc.
+ * DefaultCredentialsProvider}, which include environment variables, EC2 instance profiles, etc.
  */
 public final class AppConfiguration extends BaseAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
@@ -466,8 +465,8 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * them.
    *
    * <p>As a convenience, this method will also verify that AWS credentials were provided, such that
-   * {@link DefaultAWSCredentialsProviderChain} can load them. If not, an {@link
-   * AppConfigurationException} will be thrown.
+   * {@link DefaultCredentialsProvider} can load them. If not, an {@link AppConfigurationException}
+   * will be thrown.
    *
    * @return the {@link AppConfiguration} instance represented by the configuration provided to this
    *     application via the environment variables
@@ -580,14 +579,14 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     }
 
     /*
-     * Just for convenience: make sure DefaultAWSCredentialsProviderChain
+     * Just for convenience: make sure DefaultCredentialsProvider
      * has whatever it needs.
      */
     try {
-      DefaultAWSCredentialsProviderChain awsCredentialsProvider =
-          new DefaultAWSCredentialsProviderChain();
-      awsCredentialsProvider.getCredentials();
-    } catch (AmazonClientException e) {
+      DefaultCredentialsProvider awsCredentialsProvider =
+          DefaultCredentialsProvider.builder().build();
+      awsCredentialsProvider.resolveCredentials();
+    } catch (SdkClientException e) {
       /*
        * The credentials provider should throw this if it can't find what
        * it needs.
@@ -595,7 +594,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       throw new AppConfigurationException(
           String.format(
               "Missing configuration for AWS credentials (for %s).",
-              DefaultAWSCredentialsProviderChain.class.getName()),
+              DefaultCredentialsProvider.class.getName()),
           e);
     }
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
@@ -684,7 +683,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
         .ifPresent(mockServerConfig::randomSeed);
     readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt)
         .ifPresent(mockServerConfig::randomMaxClaims);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Regions::fromName)
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region::of)
         .ifPresent(mockServerConfig::s3Region);
     readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(mockServerConfig::s3Bucket);

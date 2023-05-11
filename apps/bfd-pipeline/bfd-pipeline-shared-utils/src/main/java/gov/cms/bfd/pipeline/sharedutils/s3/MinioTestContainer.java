@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * MinioContainer is a testcontainer object for configuring minio to use as an S3 bucket;
@@ -48,12 +48,12 @@ public abstract class MinioTestContainer {
   }
 
   /**
-   * Creates (as needed) a new {@link AmazonS3} minio client.
+   * Creates (as needed) a new {@link S3Client} minio client.
    *
-   * @return the {@link AmazonS3} minio client to use
+   * @return the {@link S3Client} minio client to use
    */
-  public static AmazonS3 createS3MinioClient() {
-    return SharedS3Utilities.createS3MinioClient(Regions.AP_EAST_1, minioConfig);
+  public static S3Client createS3MinioClient() {
+    return SharedS3Utilities.createS3MinioClient(Region.AP_EAST_1, minioConfig, S3Client.class);
   }
 
   /** support manual stop of {@link DockerComposeContainer} testcontainer. */

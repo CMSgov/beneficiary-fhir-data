@@ -3,8 +3,6 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.synthetic;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
@@ -33,19 +31,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
 public final class SyntheaRifLoadJobIT extends MinioTestContainer {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client = createS3MinioClient();
+  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -92,16 +94,12 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    Bucket bucket = null;
+    String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options =
-          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -113,7 +111,10 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
               new DataSetManifestEntry("beneficiary.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
-      /* create {@link PreValidationProperties} that includes a bene_id that is already in db */
+      /*
+       * create {@link PreValidationProperties} that includes a bene_id that is
+       * already in db
+       */
       PreValidationProperties preValProps = new PreValidationProperties();
       preValProps.setBeneIdStart(-1000006); // this one exists in db...should trigger failure
       preValProps.setBeneIdEnd(-1000010);
@@ -173,29 +174,49 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/0_manifest.xml"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/0_manifest.xml")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/beneficiary.rif"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/beneficiary.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/carrier.rif"));
-
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/carrier.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
     } finally {
-      if (bucket != null) {
+      if (StringUtils.isNotBlank(bucket)) {
         DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
       }
     }
@@ -225,16 +246,12 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
             StaticRifResource.SAMPLE_SYNTHEA_BENES2021),
         CcwRifLoadTestUtils.getLoadOptions());
 
-    Bucket bucket = null;
+    String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options =
-          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -246,7 +263,10 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
               new DataSetManifestEntry("beneficiary.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
-      /* create {@link PreValidationProperties} that includes a bene_id that is already in db */
+      /*
+       * create {@link PreValidationProperties} that includes a bene_id that is
+       * already in db
+       */
       PreValidationProperties preValProps = new PreValidationProperties();
       preValProps.setBeneIdStart(-1000006); // this one exists in db...but OK since idempotent mode
       preValProps.setBeneIdEnd(-1000010);
@@ -293,7 +313,8 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       assertEquals(1, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
 
-      // Verify that the datasets were moved to their respective 'completed' locations.
+      // Verify that the datasets were moved to their respective 'completed'
+      // locations.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
@@ -307,29 +328,51 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/0_manifest.xml"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/0_manifest.xml")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
+
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/beneficiary.rif"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/beneficiary.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
       assertTrue(
-          s3Client.doesObjectExist(
-              bucket.getName(),
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                  + "/"
-                  + manifest.getTimestampText()
-                  + "/carrier.rif"));
+          s3Client
+                  .headObject(
+                      HeadObjectRequest.builder()
+                          .bucket(bucket)
+                          .key(
+                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                                  + "/"
+                                  + manifest.getTimestampText()
+                                  + "/carrier.rif")
+                          .build())
+                  .sdkHttpResponse()
+                  .statusCode()
+              == HttpStatus.SC_OK);
 
     } finally {
-      if (bucket != null) {
+      if (StringUtils.isNotBlank(bucket)) {
         DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
       }
     }
@@ -416,17 +459,16 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
    *     resource lists, should be in the order of the manifest
    */
   private void putSampleFilesInTestBucket(
-      AmazonS3 s3Client,
-      Bucket bucket,
+      S3Client s3Client,
+      String bucket,
       String location,
       DataSetManifest manifest,
       List<URL> resourcesToAdd) {
-    s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, location));
+    DataSetTestUtilities.putObject(s3Client, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket, manifest, manifest.getEntries().get(index), resource, location));
+      DataSetTestUtilities.putObject(
+          s3Client, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
   }
