@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.app;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.MICROMETER_CW_ALLOWED_METRIC_NAMES;
 
 import ch.qos.logback.classic.LoggerContext;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
@@ -28,7 +27,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
-import io.micrometer.cloudwatch.CloudWatchMeterRegistry;
+import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
@@ -53,6 +52,7 @@ import org.postgresql.core.BaseConnection;
 import org.postgresql.jdbc.PgConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 
 /**
  * The main application/driver/entry point for the ETL system, which will pull any data stored in
@@ -120,7 +120,7 @@ public final class PipelineApplication {
       LOGGER.info("Adding CloudWatchMeterRegistry...");
       final var cloudWatchRegistry =
           new CloudWatchMeterRegistry(
-              cloudwatchRegistryConfig, micrometerClock, new AmazonCloudWatchAsyncClient());
+              cloudwatchRegistryConfig, micrometerClock, CloudWatchAsyncClient.builder().build());
       cloudWatchRegistry
           .config()
           .meterFilter(

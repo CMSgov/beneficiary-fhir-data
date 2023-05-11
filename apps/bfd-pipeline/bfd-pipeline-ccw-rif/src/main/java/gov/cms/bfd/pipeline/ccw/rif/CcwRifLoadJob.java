@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -33,6 +31,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 /**
  * This {@link PipelineJob} checks for and, if found, processes data that has been pushed from CMS'
@@ -190,7 +190,8 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   @Override
   public boolean isInterruptible() {
     /*
-     * TODO This would be a good enhancement: making this class properly interruptible. This would
+     * TODO This would be a good enhancement: making this class properly
+     * interruptible. This would
      * allow us to shut things down quickly when a load is running.
      */
     return false;
@@ -260,11 +261,14 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         String.valueOf(manifestToProcess.isSyntheticData()));
 
     /*
-     * The {@link DataSetManifest} can have an optional element {@link PreValidationProperties}
-     * which contains elements that can be used to preform a pre-validation verification prior
+     * The {@link DataSetManifest} can have an optional element {@link
+     * PreValidationProperties}
+     * which contains elements that can be used to preform a pre-validation
+     * verification prior
      * to beginning the actual processing (loading) of data.
      *
-     * For example, checking if a range of bene_id(s) will cause a database key constraint
+     * For example, checking if a range of bene_id(s) will cause a database key
+     * constraint
      * violation during an INSERT operation. However, if running in idempotent
      * mode, it will be acceptable to run 'as is' since this is probably a re-run
      * of a previous load and does not represent a pure INSERT(ing) of data.
@@ -275,9 +279,12 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
     }
 
     /*
-     * If pre-validation succeeded, then normal processing continues; however, if it has failed
-     * (currently only Synthea has pre-validation), then we'll skip over the normal processing
-     * and go directly to where the manifest and associated RIF files are (re-)moved from the
+     * If pre-validation succeeded, then normal processing continues; however, if it
+     * has failed
+     * (currently only Synthea has pre-validation), then we'll skip over the normal
+     * processing
+     * and go directly to where the manifest and associated RIF files are (re-)moved
+     * from the
      * incoming bucket folder.
      */
     if (preValidationOK) {
@@ -338,8 +345,10 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
       rifFiles.stream().forEach(f -> f.cleanupTempFile());
     } else {
       /*
-       * If here, Synthea pre-validation has failed; we want to move the S3 incoming files
-       * to a failed folder; so instead of moving files to a done folder we'll just replace
+       * If here, Synthea pre-validation has failed; we want to move the S3 incoming
+       * files
+       * to a failed folder; so instead of moving files to a done folder we'll just
+       * replace
        * the manifest's notion of its Done folder to a Failed folder.
        */
       manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
@@ -370,32 +379,28 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         String.format(
             "%s/%s/", manifest.getManifestKeyIncomingLocation(), manifest.getTimestampText());
 
-    ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
-    s3BucketListRequest.setBucketName(options.getS3BucketName());
-    s3BucketListRequest.setPrefix(dataSetKeyPrefix);
-    if (options.getS3ListMaxKeys().isPresent())
-      s3BucketListRequest.setMaxKeys(options.getS3ListMaxKeys().get());
+    ListObjectsV2Request.Builder s3BucketListRequestBuilder =
+        ListObjectsV2Request.builder().bucket(options.getS3BucketName()).prefix(dataSetKeyPrefix);
+    if (options.getS3ListMaxKeys().isPresent()) {
+      s3BucketListRequestBuilder.maxKeys(options.getS3ListMaxKeys().get());
+    }
 
     Set<String> dataSetObjectNames = new HashSet<>();
-    ListObjectsV2Result s3ObjectListing;
-    do {
-      s3ObjectListing = s3TaskManager.getS3Client().listObjectsV2(s3BucketListRequest);
+    ListObjectsV2Iterable s3ObjectListingPaginator =
+        s3TaskManager.getS3Client().listObjectsV2Paginator(s3BucketListRequestBuilder.build());
 
-      /*
-       * Pull the object names from the keys that were returned, by
-       * stripping the timestamp prefix and slash from each of them.
-       */
-      Set<String> namesForObjectsInPage =
-          s3ObjectListing.getObjectSummaries().stream()
-              .map(s -> s.getKey())
-              .peek(s -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", s, manifest))
-              .map(k -> k.substring(dataSetKeyPrefix.length()))
-              .collect(Collectors.toSet());
-      dataSetObjectNames.addAll(namesForObjectsInPage);
+    /*
+     * Pull the object names from the keys that were returned, by
+     * stripping the timestamp prefix and slash from each of them.
+     */
 
-      // On to the next page! (If any.)
-      s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
-    } while (s3ObjectListing.isTruncated());
+    Set<String> namesForObjectsInPage =
+        s3ObjectListingPaginator.stream()
+            .flatMap(s -> s.contents().stream())
+            .peek(o -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.key(), manifest))
+            .map(o -> o.key().substring(dataSetKeyPrefix.length()))
+            .collect(Collectors.toSet());
+    dataSetObjectNames.addAll(namesForObjectsInPage);
 
     for (DataSetManifestEntry manifestEntry : manifest.getEntries()) {
       if (!dataSetObjectNames.contains(manifestEntry.getName())) {

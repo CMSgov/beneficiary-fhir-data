@@ -1,15 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
- * Uses an {@link AmazonS3} client and a bucket name to simplify creation of {@link MessageSource}s
+ * Uses an {@link S3Client} client and a bucket name to simplify creation of {@link MessageSource}s
  * that read FISS or MCS claims from the bucket.
  */
 @Slf4j
