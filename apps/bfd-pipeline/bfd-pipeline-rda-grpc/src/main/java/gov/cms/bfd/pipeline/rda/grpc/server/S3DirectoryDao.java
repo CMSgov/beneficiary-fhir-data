@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletionException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -442,7 +443,8 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return the meta data
    * @throws IOException with {@link FileNotFoundException} or an AWS runtime exception
    */
-  private GetObjectResponse downloadS3Object(String s3Key, Path tempDataFile) {
+  private GetObjectResponse downloadS3Object(String s3Key, Path tempDataFile)
+      throws FileNotFoundException {
     /* Gather information needed to prepare the S3TransferManager */
     String bucketLocation =
         s3Client
@@ -466,7 +468,18 @@ public class S3DirectoryDao implements AutoCloseable {
             .addTransferListener(LoggingTransferListener.create())
             .build();
 
-    FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
-    return downloadFile.completionFuture().join().response();
+    try {
+      FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
+      return downloadFile.completionFuture().join().response();
+    } catch (CompletionException e) {
+      final var cause = e.getCause();
+      if (cause instanceof NoSuchKeyException || cause instanceof NoSuchBucketException) {
+        final var fileName = convertS3KeyToFileName(s3Key);
+        final var fileNotFound = new FileNotFoundException(fileName);
+        fileNotFound.addSuppressed(e);
+        throw fileNotFound;
+      }
+      throw e;
+    }
   }
 }
