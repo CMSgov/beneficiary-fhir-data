@@ -109,7 +109,8 @@ spec:
 
         string(
         name: 'pipeline_ami_override',
-        description: 'The AMI ID to deploy pipeline from'
+        description: 'The AMI ID to deploy pipeline from',
+        defaultValue: null
         )
 
         string(
