@@ -218,7 +218,7 @@ spec:
                                 error('Migrator deployment failed')
                             }
                         }
-                      } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
