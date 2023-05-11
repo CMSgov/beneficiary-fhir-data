@@ -114,7 +114,7 @@ spec:
         )
 
         string(
-        name: 'server_ami',
+        name: 'server_ami_override',
         description: 'The AMI ID to deploy server from',
         defaultValue: null
         )
