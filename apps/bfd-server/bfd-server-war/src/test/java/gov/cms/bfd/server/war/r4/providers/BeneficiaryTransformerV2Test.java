@@ -60,6 +60,8 @@ public final class BeneficiaryTransformerV2Test {
   private static Beneficiary beneficiary = null;
   /** Patient under test. */
   private static Patient patient = null;
+  /** The class under test. */
+  private static BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
   /**
    * Sets up the test, including parsing the beneficiary from a file and adjusting some of its
@@ -67,6 +69,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @BeforeEach
   public void setup() {
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(new MetricRegistry());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -115,8 +118,7 @@ public final class BeneficiaryTransformerV2Test {
    * @param reqHeaders the request headers
    */
   private void createPatient(RequestHeaders reqHeaders) {
-    Patient genPatient =
-        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders, true);
+    Patient genPatient = beneficiaryTransformerV2.transform(beneficiary, reqHeaders, true);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genPatient);
     patient = parser.parseResource(Patient.class, json);
@@ -398,10 +400,9 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
-   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
-   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with a reference year field not found.
+   * Verifies that {@link BeneficiaryTransformerV2#transform(Beneficiary, RequestHeaders)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a reference year field not found.
    */
   @Test
   public void shouldNotHaveReferenceYearExtension() {
@@ -421,8 +422,7 @@ public final class BeneficiaryTransformerV2Test {
     newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
     Patient genPatient =
-        BeneficiaryTransformerV2.transform(
-            new MetricRegistry(), newBeneficiary, RequestHeaders.getHeaderWrapper());
+        beneficiaryTransformerV2.transform(newBeneficiary, RequestHeaders.getHeaderWrapper());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genPatient);
     Patient newPatient = parser.parseResource(Patient.class, json);
@@ -563,7 +563,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchAddressWithAddrHeader() {
-    RequestHeaders reqHdr = getRHwithIncldAddrFldHdr("true");
+    RequestHeaders reqHdr = getHeaderWithAddressFieldsSetTo("true");
     createPatient(reqHdr);
     assertNotNull(patient);
     List<Address> addrList = patient.getAddress();
@@ -588,10 +588,8 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
-   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
-   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
+   * Verifies that {@link BeneficiaryTransformerV2#transform(Beneficiary, RequestHeaders)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
   @Disabled
   @Test
@@ -615,25 +613,13 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS}
-   * set to the given value.
-   *
-   * @param value of all include identifier values
-   * @return RequestHeaders instance derived from value
-   */
-  public static RequestHeaders getRHwithIncldIdentityHdr(String value) {
-    return RequestHeaders.getHeaderWrapper(
-        R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, value);
-  }
-
-  /**
    * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS}
    * set to the given value.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value
    */
-  public static RequestHeaders getRHwithIncldAddrFldHdr(String value) {
+  public static RequestHeaders getHeaderWithAddressFieldsSetTo(String value) {
     return RequestHeaders.getHeaderWrapper(
         R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, value);
   }
