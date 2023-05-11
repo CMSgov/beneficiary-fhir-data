@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -100,9 +100,10 @@ public class FissClaimStreamCallerIT {
   public void basicCall() throws Exception {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
-        .fissSourceFactory(
-            sequenceNumber ->
-                new JsonMessageSource<>(List.of(CLAIM_1, CLAIM_2), JsonMessageSource.fissParser()))
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .fissClaimJsonList(List.of(CLAIM_1, CLAIM_2))
+                .build())
         .build()
         .runWithChannelParam(
             channel -> {
@@ -138,8 +139,11 @@ public class FissClaimStreamCallerIT {
   public void sequenceNumbers() throws Exception {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
-        .fissSourceFactory(
-            sequenceNumber -> new RandomFissClaimSource(1000L, 14).skipTo(sequenceNumber))
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .randomClaimConfig(
+                    RandomClaimGeneratorConfig.builder().seed(1000).maxToSend(14).build())
+                .build())
         .build()
         .runWithChannelParam(
             channel -> {

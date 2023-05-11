@@ -82,14 +82,10 @@ public class RandomFissClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  /**
-   * Validates that the sequence numbers generated for claims are sequential and start at 1.
-   *
-   * @throws Exception indicates test failure
-   */
+  /** Validates that the sequence numbers generated for claims are sequential and start at 1. */
   @Test
-  public void sequenceNumbers() throws Exception {
-    MessageSource<FissClaimChange> source = new RandomFissClaimSource(0, 7);
+  public void sequenceNumbers() {
+    RandomFissClaimSource source = new RandomFissClaimSource(0, 7);
     assertEquals(1L, source.next().getSeq());
     source.skipTo(4);
     assertEquals(4L, source.next().getSeq());
@@ -106,7 +102,7 @@ public class RandomFissClaimSourceTest {
    * @param source the source
    * @throws Exception the exception
    */
-  private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(MessageSource<?> source) throws Exception {
     try {
       source.next();
       fail("expected exception");
