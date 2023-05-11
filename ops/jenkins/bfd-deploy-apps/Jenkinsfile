@@ -103,7 +103,8 @@ spec:
 
         string(
         name: 'migrator_ami_override',
-        description: 'The AMI ID to deploy migrator from'
+        description: 'The AMI ID to deploy migrator from',
+        defaultValue: null
         )
 
         string(
