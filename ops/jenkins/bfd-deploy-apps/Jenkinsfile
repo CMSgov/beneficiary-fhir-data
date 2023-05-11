@@ -113,8 +113,9 @@ spec:
         )
 
         string(
-        name: 'server_ami_override',
-        description: 'The AMI ID to deploy server from'
+        name: 'server_ami',
+        description: 'The AMI ID to deploy server from',
+        defaultValue: null
         )
 
         booleanParam(
