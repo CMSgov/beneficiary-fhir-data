@@ -441,7 +441,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    */
   private static boolean hasCcwRifLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
-        appRunConsumer, PipelineJobExecutor.JobRunSummary::isSuccessString, CcwRifLoadJob.class);
+        appRunConsumer, PipelineJobRunner.JobRunSummary::isSuccessString, CcwRifLoadJob.class);
   }
 
   /**
@@ -454,7 +454,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   private static boolean hasRdaFissLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
         appRunConsumer,
-        PipelineJobExecutor.JobRunSummary::isSuccessString,
+        PipelineJobRunner.JobRunSummary::isSuccessString,
         RdaFissClaimLoadJob.class);
   }
 
@@ -467,9 +467,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    */
   private static boolean hasRdaMcsLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
-        appRunConsumer,
-        PipelineJobExecutor.JobRunSummary::isSuccessString,
-        RdaMcsClaimLoadJob.class);
+        appRunConsumer, PipelineJobRunner.JobRunSummary::isSuccessString, RdaMcsClaimLoadJob.class);
   }
 
   /**
@@ -481,7 +479,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    */
   private static boolean hasCcwRifLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
-        appRunConsumer, PipelineJobExecutor.JobRunSummary::isFailureString, CcwRifLoadJob.class);
+        appRunConsumer, PipelineJobRunner.JobRunSummary::isFailureString, CcwRifLoadJob.class);
   }
 
   /**

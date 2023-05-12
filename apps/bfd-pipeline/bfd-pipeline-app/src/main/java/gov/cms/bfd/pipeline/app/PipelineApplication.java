@@ -220,7 +220,7 @@ public final class PipelineApplication {
     }
 
     final var executor =
-        new PipelineExecutor(
+        new PipelineManager(
             millis -> {
               Thread.sleep(millis);
               return null;
@@ -459,11 +459,11 @@ public final class PipelineApplication {
    * </ul>
    *
    * @param metrics the {@link MetricRegistry} to log out before the application exits
-   * @param pipelineExecutor the {@link PipelineExecutor} to be gracefully shut down before the
+   * @param pipelineManager the {@link PipelineManager} to be gracefully shut down before the
    *     application exits
    */
   private static void registerShutdownHook(
-      MetricRegistry metrics, PipelineExecutor pipelineExecutor) {
+      MetricRegistry metrics, PipelineManager pipelineManager) {
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
@@ -474,14 +474,14 @@ public final class PipelineApplication {
                    * processing.
                    */
                   LOGGER.info("Application is shutting down...");
-                  pipelineExecutor.stop();
-                  pipelineExecutor.awaitCompletion();
+                  pipelineManager.stop();
+                  pipelineManager.awaitCompletion();
                   LOGGER.info("Job processing stopped.");
 
-                  if (pipelineExecutor.getError() != null) {
+                  if (pipelineManager.getError() != null) {
                     LOGGER.error(
                         "Application encountered exception: message={}",
-                        pipelineExecutor.getError().getMessage());
+                        pipelineManager.getError().getMessage());
                   }
 
                   // Ensure that the final metrics get logged.

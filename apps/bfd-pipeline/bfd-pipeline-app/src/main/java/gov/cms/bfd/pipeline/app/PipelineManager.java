@@ -1,9 +1,11 @@
 package gov.cms.bfd.pipeline.app;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.time.Clock;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -11,22 +13,26 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.utils.ThreadFactoryBuilder;
 
 @Slf4j
-public class PipelineExecutor implements PipelineJobExecutor.Tracker {
+public class PipelineManager implements PipelineJobRunner.Tracker {
+  public static final int MAX_COMPLETED_JOBS = 100;
   private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
   private final Clock clock;
   private final ImmutableList<PipelineJob> jobs;
   private final ExecutorService threadPool;
   private final CountDownLatch latch;
   private final AtomicLong idGenerator = new AtomicLong(1);
+  private final LinkedList<PipelineJobRunner.JobRunSummary> completedJobs;
+  private final boolean interruptable;
   private ImmutableList<Future<Void>> runningJobFutures;
   private boolean isRunning;
   private Exception error;
 
-  public PipelineExecutor(
+  public PipelineManager(
       ThrowingFunction<Void, Long, InterruptedException> sleeper,
       Clock clock,
       List<PipelineJob> jobs) {
@@ -40,6 +46,8 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
                 .daemonThreads(false)
                 .build());
     latch = new CountDownLatch(jobs.size());
+    completedJobs = new LinkedList<>();
+    interruptable = jobs.stream().allMatch(PipelineJob::isInterruptible);
   }
 
   public synchronized void start() {
@@ -48,19 +56,23 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
     }
     var futures = ImmutableList.<Future<Void>>builder();
     for (PipelineJob job : jobs) {
-      var jobExecutor = new PipelineJobExecutor(job, sleeper, clock, this);
+      var jobExecutor = new PipelineJobRunner(job, sleeper, clock, this);
       var future = threadPool.submit(jobExecutor);
       futures.add(future);
     }
     runningJobFutures = futures.build();
     isRunning = true;
-    assert latch.getCount() == runningJobFutures.size();
   }
 
   public synchronized void stop() {
     if (isRunning) {
-      var unscheduled = threadPool.shutdownNow();
-      assert unscheduled.size() == 0;
+      if (interruptable) {
+        var unscheduled = threadPool.shutdownNow();
+        assert unscheduled.size() == 0;
+      } else {
+        log.info("stopping but must wait for uninterruptible jobs to complete on their own");
+        threadPool.shutdown();
+      }
       isRunning = false;
     }
   }
@@ -89,13 +101,14 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
     }
   }
 
+  @Nullable
   public synchronized Exception getError() {
     return error;
   }
 
   @Override
-  public synchronized boolean isRunning() {
-    return isRunning;
+  public synchronized boolean jobsCanRun() {
+    return isRunning && error == null;
   }
 
   @Override
@@ -106,8 +119,12 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   }
 
   @Override
-  public void completedRun(PipelineJobExecutor.JobRunSummary summary) {
+  public synchronized void completedRun(PipelineJobRunner.JobRunSummary summary) {
     log.info("job run complete: {}", summary);
+    if (completedJobs.size() > MAX_COMPLETED_JOBS) {
+      completedJobs.removeFirst();
+    }
+    completedJobs.addLast(summary);
   }
 
   @Override
@@ -121,7 +138,7 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   }
 
   @Override
-  public synchronized void stoppingDueToExecption(PipelineJob job, Exception exception) {
+  public synchronized void stoppingDueToException(PipelineJob job, Exception exception) {
     log.error("Job execution failed: type={} exception={}", job.getType(), exception.getMessage());
     if (this.error == null) {
       this.error = exception;
@@ -139,5 +156,10 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   public void stopped(PipelineJob job) {
     log.info("Job stopped: " + job.getType());
     latch.countDown();
+  }
+
+  @VisibleForTesting
+  List<PipelineJobRunner.JobRunSummary> getCompletedJobs() {
+    return completedJobs;
   }
 }
