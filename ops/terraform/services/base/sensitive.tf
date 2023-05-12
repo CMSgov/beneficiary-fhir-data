@@ -1,6 +1,7 @@
 locals {
+  # NOTE: ephemeral environments do not include specific, sensitive values; ephemeral.eyaml is a non-existent file
   eyaml_file = local.is_ephemeral_env ? "ephemeral.eyaml" : "${local.env}.eyaml"
-  eyaml      = data.external.eyaml.result
+  eyaml      = local.is_ephemeral_env ? {} : data.external.eyaml[0].result
 
   common_sensitive   = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "common") && value != "UNDEFINED" }
   migrator_sensitive = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "migrator") && value != "UNDEFINED" }
@@ -9,7 +10,9 @@ locals {
   eft_sensitive      = { for key, value in local.eyaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "eft") && value != "UNDEFINED" }
 }
 
+# NOTE: ephemeral environments do not include specific, sensitive values
 data "external" "eyaml" {
+  count   = local.is_ephemeral_env ? 0 : 1
   program = ["${path.module}/scripts/read-and-decrypt-eyaml.sh", local.eyaml_file]
 }
 
@@ -21,6 +24,8 @@ resource "aws_ssm_parameter" "common_sensitive" {
   overwrite = true
   type      = "SecureString"
   value     = each.value
+
+  tags = {}
 }
 
 resource "aws_ssm_parameter" "migrator_sensitive" {
@@ -31,6 +36,8 @@ resource "aws_ssm_parameter" "migrator_sensitive" {
   overwrite = true
   type      = "SecureString"
   value     = each.value
+
+  tags = {}
 }
 
 resource "aws_ssm_parameter" "pipeline_sensitive" {
@@ -41,6 +48,8 @@ resource "aws_ssm_parameter" "pipeline_sensitive" {
   overwrite = true
   type      = "SecureString"
   value     = each.value
+
+  tags = {}
 }
 
 resource "aws_ssm_parameter" "server_sensitive" {
@@ -51,6 +60,8 @@ resource "aws_ssm_parameter" "server_sensitive" {
   overwrite = true
   type      = "SecureString"
   value     = each.value
+
+  tags = {}
 }
 
 resource "aws_ssm_parameter" "eft_sensitive" {
@@ -61,4 +72,6 @@ resource "aws_ssm_parameter" "eft_sensitive" {
   overwrite = true
   type      = "SecureString"
   value     = each.value
+
+  tags = {}
 }

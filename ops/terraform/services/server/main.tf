@@ -9,7 +9,7 @@ locals {
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
-    Environment    = local.env
+    Environment    = local.data_env
     Terraform      = true
     tf_module_root = "ops/terraform/services/${local.service}"
   }
@@ -51,10 +51,9 @@ locals {
   launch_template_instance_type  = local.nonsensitive_service_config["launch_template_instance_type"]
   launch_template_volume_size_gb = local.nonsensitive_service_config["launch_template_volume_size_gb"]
 
-  # ephemeral environment determination is based on the existence of the ephemeral_environment_seed
-  # in the common hierarchy
-  seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)
-  is_ephemeral_env = local.seed_env == null ? false : true
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  seed_env         = local.is_ephemeral_env ? reverse(split("-", local.env))[0] : ""
+  data_env         = local.is_ephemeral_env ? local.seed_env : local.env
 
   env_config = {
     default_tags = local.default_tags,

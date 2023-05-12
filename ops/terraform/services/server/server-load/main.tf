@@ -1,6 +1,6 @@
 locals {
   default_tags = {
-    Environment    = local.env
+    Environment    = local.data_env
     Layer          = local.layer
     Name           = "bfd-${local.env}-${local.service}"
     application    = "bfd"
@@ -13,9 +13,14 @@ locals {
 
   account_id             = data.aws_caller_identity.current.account_id
   availability_zone_name = var.create_locust_instance ? data.aws_availability_zones.this.names[random_integer.this[0].result] : ""
+  established_envs       = ["test", "prod-sbx", "prod"]
   env                    = terraform.workspace
-  layer                  = "app"
-  service                = "server-load"
+  is_ephemeral_env       = !(contains(local.established_envs, local.env))
+  seed_env               = local.is_ephemeral_env ? reverse(split("-", local.env))[0] : ""
+  data_env               = local.is_ephemeral_env ? local.seed_env : local.env
+
+  layer   = "app"
+  service = "server-load"
 
   queue_name = "bfd-${local.env}-${local.service}"
 
