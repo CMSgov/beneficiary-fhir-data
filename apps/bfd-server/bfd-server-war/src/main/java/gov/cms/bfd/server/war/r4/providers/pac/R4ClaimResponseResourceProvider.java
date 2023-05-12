@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -18,6 +19,18 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
   /** The map of claim types. */
   private static final Map<String, ResourceTypeV2<ClaimResponse, ?>> claimTypeMap =
       ImmutableMap.of("fiss", ClaimResponseTypeV2.F, "mcs", ClaimResponseTypeV2.M);
+
+  /**
+   * Instantiates a new R4 claim response resource provider. This should be called by spring during
+   * component initialization.
+   *
+   * @param metricRegistry the metric registry bean
+   * @param samhsaMatcher the samhsa matcher bean
+   */
+  public R4ClaimResponseResourceProvider(
+      MetricRegistry metricRegistry, R4ClaimSamhsaMatcher samhsaMatcher) {
+    super(metricRegistry, samhsaMatcher);
+  }
 
   /** {@inheritDoc} */
   @Override

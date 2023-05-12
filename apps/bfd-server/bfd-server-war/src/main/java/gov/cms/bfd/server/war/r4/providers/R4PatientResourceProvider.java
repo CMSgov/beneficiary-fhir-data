@@ -113,7 +113,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
   /**
-   * Instantiates a new patient resource provider.
+   * Instantiates a new {@link R4PatientResourceProvider}.
    *
    * <p>Spring will wire this class during the initial component scan, so this constructor should
    * only be explicitly called by tests.

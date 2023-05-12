@@ -7,6 +7,10 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +35,27 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mocked input id value. */
   @Mock IdType eobId;
 
+  /** The mock metric registry. */
+  @Mock private MetricRegistry metricRegistry;
+  /** The mock samhsa matcher. */
+  @Mock private R4EobSamhsaMatcher samhsaMatcher;
+  /** The mock loaded filter manager. */
+  @Mock private LoadedFilterManager loadedFilterManager;
+  /** The mock drug code display lookup entity. */
+  @Mock private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  /** The mock npi org lookup entity. */
+  @Mock private NPIOrgLookup npiOrgLookup;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    eobProvider = new R4ExplanationOfBenefitResourceProvider();
+    eobProvider =
+        new R4ExplanationOfBenefitResourceProvider(
+            metricRegistry,
+            loadedFilterManager,
+            samhsaMatcher,
+            drugCodeDisplayLookup,
+            npiOrgLookup);
     lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
   }
 
