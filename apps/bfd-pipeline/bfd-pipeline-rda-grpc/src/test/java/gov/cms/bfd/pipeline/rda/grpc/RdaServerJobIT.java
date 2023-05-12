@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
@@ -39,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /** Integration tests for the RDA server. */
 public class RdaServerJobIT extends MinioTestContainer {
@@ -61,6 +60,9 @@ public class RdaServerJobIT extends MinioTestContainer {
   /** The MCS claim transformer to test the server data. */
   private final McsClaimTransformer mcsTransformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+
+  /** only need a single instance of the S3 client. */
+  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Tests the server job in {@link RdaServerJob.Config.ServerMode#Random} configuration (generating
@@ -130,29 +132,26 @@ public class RdaServerJobIT extends MinioTestContainer {
    */
   @Test
   public void testS3() throws Exception {
-    AmazonS3 s3Client = createS3Client(REGION_DEFAULT);
-    Bucket bucket = null;
+    String bucket = null;
     S3DirectoryDao s3Dao = null;
     Path cacheDirectoryPath = null;
     try {
       bucket = createTestBucket(s3Client);
       final String directoryPath = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao =
-          new S3DirectoryDao(s3Client, bucket.getName(), directoryPath, cacheDirectoryPath, true);
+      s3Dao = new S3DirectoryDao(s3Client, bucket, directoryPath, cacheDirectoryPath, true);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
               .serverName(SERVER_NAME)
-              .s3Bucket(bucket.getName())
+              .s3Bucket(bucket)
               .s3Directory(directoryPath)
               .s3CacheDirectory(cacheDirectoryPath.toString())
               .build();
       final String fissObjectKey = RdaS3JsonMessageSourceFactory.createValidFissKeyForTesting();
       final String mcsObjectKey = RdaS3JsonMessageSourceFactory.createValidMcsKeyForTesting();
-      uploadJsonToBucket(
-          s3Client, bucket.getName(), directoryPath + fissObjectKey, fissClaimsSource);
-      uploadJsonToBucket(s3Client, bucket.getName(), directoryPath + mcsObjectKey, mcsClaimsSource);
+      uploadJsonToBucket(s3Client, bucket, directoryPath + fissObjectKey, fissClaimsSource);
+      uploadJsonToBucket(s3Client, bucket, directoryPath + mcsObjectKey, mcsClaimsSource);
 
       final RdaServerJob job = new RdaServerJob(config);
       final ExecutorService exec = Executors.newCachedThreadPool();

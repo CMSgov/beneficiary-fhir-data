@@ -52,6 +52,13 @@
     {
       "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-tran-dt-cymd",
       "valueDate": "1970-01-02"
+    },
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
+      "valueCoding": {
+        "system": "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
+        "code": "gr"
+      }
     }
   ],
   "identifier": [
@@ -92,5 +99,68 @@
   "request": {
     "reference": "Claim/f-123456"
   },
-  "outcome": "queued"
+  "outcome": "queued",
+  "item": [
+    {
+      "adjudication": [
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+                "code": "denialreason",
+                "display": "Denial Reason"
+              }
+            ]
+          },
+          "reason": {
+            "coding": [
+              {
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-rarc",
+                "code": "rarc"
+              }
+            ]
+          }
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+                "code": "denialreason",
+                "display": "Denial Reason"
+              }
+            ]
+          },
+          "reason": {
+            "coding": [
+              {
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-carc",
+                "code": "car"
+              }
+            ]
+          }
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+                "code": "denialreason",
+                "display": "Denial Reason"
+              }
+            ]
+          },
+          "reason": {
+            "coding": [
+              {
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-cagc",
+                "code": "ca"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
 }

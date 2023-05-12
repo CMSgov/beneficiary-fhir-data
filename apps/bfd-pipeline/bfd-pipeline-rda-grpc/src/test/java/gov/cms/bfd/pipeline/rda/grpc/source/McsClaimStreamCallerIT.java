@@ -3,7 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -32,8 +33,11 @@ public class McsClaimStreamCallerIT {
   public void basicCall() throws Exception {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
-        .mcsSourceFactory(
-            sequenceNumber -> new RandomMcsClaimSource(1000L, 2).skipTo(sequenceNumber))
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .randomClaimConfig(
+                    RandomClaimGeneratorConfig.builder().seed(1000).maxToSend(2).build())
+                .build())
         .build()
         .runWithChannelParam(
             channel -> {
@@ -63,8 +67,11 @@ public class McsClaimStreamCallerIT {
   public void sequenceNumbers() throws Exception {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
-        .mcsSourceFactory(
-            sequenceNumber -> new RandomMcsClaimSource(1000L, 14).skipTo(sequenceNumber))
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .randomClaimConfig(
+                    RandomClaimGeneratorConfig.builder().seed(1000).maxToSend(14).build())
+                .build())
         .build()
         .runWithChannelParam(
             channel -> {

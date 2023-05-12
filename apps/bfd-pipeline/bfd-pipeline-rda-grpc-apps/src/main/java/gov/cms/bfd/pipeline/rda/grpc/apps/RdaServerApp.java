@@ -1,12 +1,11 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import com.amazonaws.regions.Regions;
-import com.google.common.io.Files;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The server is intended for
@@ -58,9 +57,8 @@ public class RdaServerApp {
      * Configures the S3bucket for connectivity for Fiss and Mcs claims.
      *
      * @param args that are sent in
-     * @throws Exception if there is a connectivity issue to S3
      */
-    private Config(String[] args) throws Exception {
+    private Config(String[] args) {
       final ConfigLoader config =
           ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
       final var defaultRandomSeed = System.currentTimeMillis();
@@ -72,17 +70,15 @@ public class RdaServerApp {
               .maxUniqueMbis(config.intOption("random.max.mbi").orElse(0))
               .maxUniqueClaimIds(config.intOption("random.max.claimId").orElse(0))
               .useTimestampForErrorSeed(true)
+              .maxToSend(config.intValue("maxToSend", 5_000))
               .build();
       final var messageSourceFactoryConfig =
           RdaMessageSourceFactory.Config.builder()
-              .randomMaxClaims(config.intValue("maxToSend", 5_000))
               .randomClaimConfig(randomClaimConfig)
-              .fissClaimJson(
-                  config.readableFileOption("file.fiss").map(Files::asByteSource).orElse(null))
-              .mcsClaimJson(
-                  config.readableFileOption("file.mcs").map(Files::asByteSource).orElse(null))
+              .fissClaimJsonFile(config.readableFileOption("file.fiss").orElse(null))
+              .mcsClaimJsonFile(config.readableFileOption("file.mcs").orElse(null))
               .s3Bucket(config.stringOption("s3.bucket").orElse(null))
-              .s3Region(config.enumOption("s3.region", Regions::fromName).orElse(null))
+              .s3Region(config.stringOption("s3.region").map(Region::of).orElse(null))
               .s3Directory(config.stringOption("s3.directory").orElse(""))
               .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
               .build();

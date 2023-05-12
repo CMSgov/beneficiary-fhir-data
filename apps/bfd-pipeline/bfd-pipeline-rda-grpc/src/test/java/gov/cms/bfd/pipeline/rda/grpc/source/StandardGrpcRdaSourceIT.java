@@ -15,7 +15,7 @@ import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -423,10 +423,10 @@ public class StandardGrpcRdaSourceIT {
    */
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
-        .fissSourceFactory(
-            sequenceNumber ->
-                new JsonMessageSource<>(
-                    List.of(SOURCE_CLAIM_1, SOURCE_CLAIM_2), JsonMessageSource.fissParser()));
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .fissClaimJsonList(List.of(SOURCE_CLAIM_1, SOURCE_CLAIM_2))
+                .build());
   }
 
   /**
