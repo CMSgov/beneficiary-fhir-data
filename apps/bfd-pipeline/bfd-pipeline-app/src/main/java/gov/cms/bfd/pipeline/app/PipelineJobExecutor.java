@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +79,13 @@ public class PipelineJobExecutor implements Callable<Void> {
 
   @Data
   public static class JobRunSummary {
+    private static final Pattern SUCCESS_REGEX =
+        Pattern.compile(
+            String.format("%s \\[id=.*outcome=([^,]+)", JobRunSummary.class.getSimpleName()));
+    private static final Pattern FAILURE_REGEX =
+        Pattern.compile(
+            String.format("%s \\[id=.*failure=([^,]+)", JobRunSummary.class.getSimpleName()));
+
     private final long id;
     private final PipelineJob<?> job;
     private final Instant startTime;
@@ -85,10 +93,25 @@ public class PipelineJobExecutor implements Callable<Void> {
     private final Optional<PipelineJobOutcome> outcome;
     private final Optional<Exception> exception;
 
+    public static boolean isSuccessString(String logString) {
+      var m = SUCCESS_REGEX.matcher(logString);
+      return m.find() && !m.group(1).equals(".empty");
+    }
+
+    public static boolean isFailureString(String logString) {
+      var m = SUCCESS_REGEX.matcher(logString);
+      return m.find() && !m.group(1).equals(".empty");
+    }
+
+    public static boolean isSummaryString(String logString) {
+      return isSuccessString(logString) || isFailureString(logString);
+    }
+
     @Override
     public String toString() {
       return new StringBuilder()
-          .append("PipelineJobRecord [id=")
+          .append(getClass().getSimpleName())
+          .append(" [id=")
           .append(id)
           .append(", jobType=")
           .append(job.getType())
