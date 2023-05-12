@@ -53,7 +53,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Creates a put request for the specified S3 bucket.
+   * Sends a PUT request to AWS for the specified S3 bucket and manifest.
    *
    * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
@@ -67,7 +67,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Create put request within a given bucket for a manifest at a keyed location.
+   * Sends a PUT request to AWS for the given bucket and a manifest at a specified location.
    *
    * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
@@ -83,7 +83,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Create put request within a given bucket for a manifest at a keyed location.
+   * Sends a PUT request to AWS for the given bucket for a manifest at a keyed location.
    *
    * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
@@ -121,7 +121,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Creates a put request, placing the items within the {@link
+   * Sends a PUT request to AWS, placing the items within the {@link
    * CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key inside the given bucket.
    *
    * @param s3Client the {@link S3Client} client to use
@@ -146,7 +146,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Creates a put request, placing the items within the location key inside the given bucket.
+   * Sends a PUT request to AWS, placing the items within the location key inside the given bucket.
    *
    * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in
@@ -169,7 +169,8 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Creates a put request for the specified S3 bucket.
+   * Sends a PUT request containing the manifest objects to AWS for the specified S3 bucket at a
+   * keyed location
    *
    * @param s3Client the {@link S3Client} client to use
    * @param bucket the name of the bucket to place the new object in

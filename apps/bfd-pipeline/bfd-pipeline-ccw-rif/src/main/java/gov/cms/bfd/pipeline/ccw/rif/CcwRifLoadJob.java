@@ -190,9 +190,8 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
   @Override
   public boolean isInterruptible() {
     /*
-     * TODO This would be a good enhancement: making this class properly
-     * interruptible. This would
-     * allow us to shut things down quickly when a load is running.
+     * TODO: This would be a good enhancement: making this class properly interruptible. This would allow us to
+     * shut things down quickly when a load is running.
      */
     return false;
   }
@@ -261,15 +260,12 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
         String.valueOf(manifestToProcess.isSyntheticData()));
 
     /*
-     * The {@link DataSetManifest} can have an optional element {@link
-     * PreValidationProperties}
-     * which contains elements that can be used to preform a pre-validation
-     * verification prior
-     * to beginning the actual processing (loading) of data.
+     * The {@link DataSetManifest} can have an optional element {@linkPreValidationProperties}
+     * which contains elements that can be used to preform a pre-validation verification
+     * prior to beginning the actual processing (loading) of data.
      *
      * For example, checking if a range of bene_id(s) will cause a database key
-     * constraint
-     * violation during an INSERT operation. However, if running in idempotent
+     * constraint violation during an INSERT operation. However, if running in idempotent
      * mode, it will be acceptable to run 'as is' since this is probably a re-run
      * of a previous load and does not represent a pure INSERT(ing) of data.
      */
@@ -280,12 +276,9 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
 
     /*
      * If pre-validation succeeded, then normal processing continues; however, if it
-     * has failed
-     * (currently only Synthea has pre-validation), then we'll skip over the normal
-     * processing
-     * and go directly to where the manifest and associated RIF files are (re-)moved
-     * from the
-     * incoming bucket folder.
+     * has failed (currently only Synthea has pre-validation), then we'll skip over the normal
+     * processing and go directly to where the manifest and associated RIF files are (re-)moved
+     * from the incoming bucket folder.
      */
     if (preValidationOK) {
       List<S3RifFile> rifFiles =
@@ -345,10 +338,8 @@ public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments
       rifFiles.stream().forEach(f -> f.cleanupTempFile());
     } else {
       /*
-       * If here, Synthea pre-validation has failed; we want to move the S3 incoming
-       * files
-       * to a failed folder; so instead of moving files to a done folder we'll just
-       * replace
+       * If here, Synthea pre-validation has failed; we want to move the S3 incoming files
+       * to a failed folder; so instead of moving files to a done folder we'll just replace
        * the manifest's notion of its Done folder to a Failed folder.
        */
       manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);

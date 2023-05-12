@@ -113,9 +113,8 @@ public final class SharedS3Utilities {
    */
   public static <T extends AwsClient> T createS3MinioClient(
       Region awsS3Region, S3MinioConfig minioConfig, Class<T> type) {
-    // Uses BasicCredentials to connect to the minio client and gets the
-    // username,password, and
-    // address from the minioconfig
+    // Uses BasicCredentials to connect to the minio client and gets the username, password,
+    // and address from the minioconfig
     AwsCredentials credentials =
         AwsBasicCredentials.create(minioConfig.minioUserName, minioConfig.minioPassword);
 
@@ -156,8 +155,7 @@ public final class SharedS3Utilities {
    */
   public static S3AsyncClient createS3AsyncMinioClient(
       Region awsS3Region, S3MinioConfig minioConfig) {
-    // Uses BasicCredentials to connect to the minio client and gets the
-    // username,password, and
+    // Uses BasicCredentials to connect to the minio client and gets the username, password, and
     // address from the minioconfig
     return createS3MinioClient(awsS3Region, minioConfig, S3AsyncClient.class);
   }
@@ -187,8 +185,7 @@ public final class SharedS3Utilities {
       createBucketRequest = CreateBucketRequest.builder().bucket(bucketName).build();
       s3Client.createBucket(createBucketRequest);
     } else {
-      // per CMS security constraints, even ephemeral buckets should be configured
-      // for:
+      // per CMS security constraints, even ephemeral buckets should be configured for:
       // - no public access
       // - support only TLS-enabled connections
       // - data is encrypted

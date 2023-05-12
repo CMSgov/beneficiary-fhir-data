@@ -112,8 +112,7 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
       /*
-       * create {@link PreValidationProperties} that includes a bene_id that is
-       * already in db
+       * create {@link PreValidationProperties} that includes a bene_id that is already in db
        */
       PreValidationProperties preValProps = new PreValidationProperties();
       preValProps.setBeneIdStart(-1000006); // this one exists in db...should trigger failure
@@ -313,8 +312,7 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       assertEquals(1, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
 
-      // Verify that the datasets were moved to their respective 'completed'
-      // locations.
+      // Verify that the datasets were moved to their respective 'completed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,

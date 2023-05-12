@@ -450,11 +450,11 @@ public class S3DirectoryDao implements AutoCloseable {
         s3Client
             .getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build())
             .locationConstraintAsString();
-    // bucketLocation is null if the location is us-east-1, so we need to handle that result
+    // locationConstraintAsString() returns null if the location is us-east-1, so handle that case
     // specifically
-    Region region =
-        Region.of(
-            StringUtils.isNotBlank(bucketLocation) ? bucketLocation : Region.US_EAST_1.toString());
+    bucketLocation =
+        StringUtils.isNotBlank(bucketLocation) ? bucketLocation : Region.US_EAST_1.toString();
+    Region region = Region.of(bucketLocation);
     S3TransferManager s3TransferManager =
         DefaultS3TransferManager.builder()
             .s3Client(SharedS3Utilities.createS3AsyncClient(region))
