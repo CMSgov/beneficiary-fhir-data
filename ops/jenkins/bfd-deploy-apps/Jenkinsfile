@@ -303,6 +303,13 @@ spec:
                                     tfVars: terraformVars
                             )
 
+                            // Deploy the API requests Insights Lambda
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server'
+                            )
+
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
                                     env: trimmedEnv,
