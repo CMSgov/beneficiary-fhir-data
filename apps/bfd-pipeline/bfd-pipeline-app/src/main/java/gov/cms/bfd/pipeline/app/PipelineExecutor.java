@@ -18,7 +18,7 @@ import software.amazon.awssdk.utils.ThreadFactoryBuilder;
 public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
   private final Clock clock;
-  private final ImmutableList<PipelineJob<?>> jobs;
+  private final ImmutableList<PipelineJob> jobs;
   private final ExecutorService threadPool;
   private final CountDownLatch latch;
   private final AtomicLong idGenerator = new AtomicLong(1);
@@ -29,7 +29,7 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   public PipelineExecutor(
       ThrowingFunction<Void, Long, InterruptedException> sleeper,
       Clock clock,
-      List<PipelineJob<?>> jobs) {
+      List<PipelineJob> jobs) {
     this.sleeper = sleeper;
     this.clock = clock;
     this.jobs = ImmutableList.copyOf(jobs);
@@ -47,7 +47,7 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
       throw new IllegalStateException("start has already been called");
     }
     var futures = ImmutableList.<Future<Void>>builder();
-    for (PipelineJob<?> job : jobs) {
+    for (PipelineJob job : jobs) {
       var jobExecutor = new PipelineJobExecutor(job, sleeper, clock, this);
       var future = threadPool.submit(jobExecutor);
       futures.add(future);
@@ -99,7 +99,7 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   }
 
   @Override
-  public long beginningRun(PipelineJob<?> job) {
+  public long beginningRun(PipelineJob job) {
     final var runId = idGenerator.getAndIncrement();
     log.info("Job run beginning: type={} id={}", job.getType(), runId);
     return runId;
@@ -111,17 +111,17 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   }
 
   @Override
-  public void sleeping(PipelineJob<?> job) {
+  public void sleeping(PipelineJob job) {
     log.debug("Job sleeping: type={}", job.getType());
   }
 
   @Override
-  public void stoppingDueToInterrupt(PipelineJob<?> job) {
+  public void stoppingDueToInterrupt(PipelineJob job) {
     log.info("Job interrupted: type={}", job.getType());
   }
 
   @Override
-  public synchronized void stoppingDueToExecption(PipelineJob<?> job, Exception exception) {
+  public synchronized void stoppingDueToExecption(PipelineJob job, Exception exception) {
     log.error("Job execution failed: type={} exception={}", job.getType(), exception.getMessage());
     if (this.error == null) {
       this.error = exception;
@@ -131,12 +131,12 @@ public class PipelineExecutor implements PipelineJobExecutor.Tracker {
   }
 
   @Override
-  public void stoppingNormally(PipelineJob<?> job) {
+  public void stoppingNormally(PipelineJob job) {
     log.debug("Job stopping: " + job.getType());
   }
 
   @Override
-  public void stopped(PipelineJob<?> job) {
+  public void stopped(PipelineJob job) {
     log.info("Job stopped: " + job.getType());
     latch.countDown();
   }

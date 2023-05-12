@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class PipelineJobExecutor implements Callable<Void> {
-  private final PipelineJob<?> job;
+  private final PipelineJob job;
   private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
   private final Clock clock;
   private final Tracker tracker;
@@ -87,7 +87,7 @@ public class PipelineJobExecutor implements Callable<Void> {
             String.format("%s \\[id=.*failure=([^,]+)", JobRunSummary.class.getSimpleName()));
 
     private final long id;
-    private final PipelineJob<?> job;
+    private final PipelineJob job;
     private final Instant startTime;
     private final Instant stopTime;
     private final Optional<PipelineJobOutcome> outcome;
@@ -101,10 +101,6 @@ public class PipelineJobExecutor implements Callable<Void> {
     public static boolean isFailureString(String logString) {
       var m = SUCCESS_REGEX.matcher(logString);
       return m.find() && !m.group(1).equals(".empty");
-    }
-
-    public static boolean isSummaryString(String logString) {
-      return isSuccessString(logString) || isFailureString(logString);
     }
 
     @Override
@@ -131,18 +127,18 @@ public class PipelineJobExecutor implements Callable<Void> {
   public interface Tracker {
     boolean isRunning();
 
-    long beginningRun(PipelineJob<?> job);
+    long beginningRun(PipelineJob job);
 
     void completedRun(JobRunSummary summary);
 
-    void sleeping(PipelineJob<?> job);
+    void sleeping(PipelineJob job);
 
-    void stoppingDueToInterrupt(PipelineJob<?> job);
+    void stoppingDueToInterrupt(PipelineJob job);
 
-    void stoppingDueToExecption(PipelineJob<?> job, Exception error);
+    void stoppingDueToExecption(PipelineJob job, Exception error);
 
-    void stoppingNormally(PipelineJob<?> job);
+    void stoppingNormally(PipelineJob job);
 
-    void stopped(PipelineJob<?> job);
+    void stopped(PipelineJob job);
   }
 }

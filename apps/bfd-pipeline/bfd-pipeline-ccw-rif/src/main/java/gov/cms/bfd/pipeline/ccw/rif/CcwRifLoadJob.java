@@ -11,7 +11,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
@@ -67,7 +66,7 @@ import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
  * created. Within each of those directories will be manifest files and the RIF files that they
  * reference.
  */
-public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments> {
+public final class CcwRifLoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
   /** Shortcut for calculating GIGA (filesize). */

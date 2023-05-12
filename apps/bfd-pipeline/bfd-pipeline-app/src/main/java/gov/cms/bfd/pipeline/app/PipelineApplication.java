@@ -303,9 +303,9 @@ public final class PipelineApplication {
    * @param jobs all {@link PipelineJob} to test
    * @return true if any test failed
    */
-  private static boolean anySmokeTestFailed(List<PipelineJob<?>> jobs) {
+  private static boolean anySmokeTestFailed(List<PipelineJob> jobs) {
     boolean anyTestFailed = false;
-    for (PipelineJob<?> job : jobs) {
+    for (PipelineJob job : jobs) {
       try {
         LOGGER.info("smoke test running: job={}", job.getType());
         if (job.isSmokeTestSuccessful()) {
@@ -332,12 +332,12 @@ public final class PipelineApplication {
    * @param pooledDataSource our {@link javax.sql.DataSource}
    * @return list of {@link PipelineJob}s to be registered
    */
-  private static List<PipelineJob<?>> createAllJobs(
+  private static List<PipelineJob> createAllJobs(
       AppConfiguration appConfig,
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource) {
-    final var jobs = new ArrayList<PipelineJob<?>>();
+    final var jobs = new ArrayList<PipelineJob>();
 
     /*
      * Create and register the other jobs.
@@ -400,7 +400,7 @@ public final class PipelineApplication {
    * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
-  private static PipelineJob<?> createCcwRifLoadJob(
+  private static PipelineJob createCcwRifLoadJob(
       CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
