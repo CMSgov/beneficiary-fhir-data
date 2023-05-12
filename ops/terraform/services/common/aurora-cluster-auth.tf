@@ -30,13 +30,12 @@ data "aws_iam_policy_document" "db_auth_role_trust_policy" {
 
 # allow rds-db:connect (no global conditions are available for this action)
 data "aws_iam_policy_document" "db_rds_connect" {
-  count = local.is_ephemeral_env ? 0 : 1
   statement {
     sid     = "AllowRdsDbConnect"
     effect  = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:${local.region}:${local.account_id}:dbuser:*/*"
+      "arn:aws:rds-db:${local.region}:${local.account_id}:dbuser:${aws_rds_cluster.aurora_cluster.cluster_resource_id}/*"
     ]
   }
 }
@@ -78,7 +77,7 @@ data "aws_iam_policy_document" "db_allow_assume" {
 data "aws_iam_policy_document" "db_auth_role_policy_combined" {
   count = local.is_ephemeral_env ? 0 : 1
   source_policy_documents = [
-    data.aws_iam_policy_document.db_rds_connect[0].json,
+    data.aws_iam_policy_document.db_rds_connect.json,
     data.aws_iam_policy_document.db_describe_clusters[0].json
   ]
 }
@@ -129,4 +128,23 @@ resource "aws_iam_role_policy" "db_auth" {
   name   = "bfd-fhirdb-${local.env}-auth"
   role   = aws_iam_role.db_auth[0].id
   policy = data.aws_iam_policy_document.db_auth_role_policy_combined[0].json
+}
+
+# Policy allowing the rds-db:connect action for an ephemeral cluster
+resource "aws_iam_policy" "db_auth_ephemeral" {
+  count       = local.is_ephemeral_env ? 1 : 0
+  name        = "bfd-fhirdb-${local.env}-${local.seed_env}-auth"
+  description = "Role policy allowing db connect action for ${local.env} ephemeral cluster"
+  policy      = data.aws_iam_policy_document.db_rds_connect.json
+}
+
+# attach the ephemeral policy to the auth role
+data "aws_iam_role" "db_auth" {
+  count = local.is_ephemeral_env ? 1 : 0
+  name  = "bfd-fhirdb-${local.seed_env}-auth"
+}
+resource "aws_iam_role_policy_attachment" "db_auth" {
+  count      = local.is_ephemeral_env ? 1 : 0
+  role       = data.aws_iam_role.db_auth[0].name
+  policy_arn = aws_iam_policy.db_auth_ephemeral[0].arn
 }
