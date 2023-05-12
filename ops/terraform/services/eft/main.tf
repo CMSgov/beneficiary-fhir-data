@@ -64,7 +64,8 @@ locals {
 }
 
 resource "aws_s3_bucket" "this" {
-  bucket_prefix = local.full_name
+  bucket = local.full_name
+  tags   = { Name = local.full_name }
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
