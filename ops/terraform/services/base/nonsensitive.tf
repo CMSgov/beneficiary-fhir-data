@@ -10,8 +10,7 @@ locals {
   # Normal precedence. Values stored in YAML files.
   yaml_file = contains(local.established_envs, local.env) ? "${local.env}.yaml" : "ephemeral.yaml"
   yaml = yamldecode(templatefile("${path.module}/values/${local.yaml_file}", {
-    env      = local.env
-    seed_env = local.seed_env
+    env = local.env
   }))
   common_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "common") && value != "UNDEFINED" }
   migrator_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") && value != "UNDEFINED" }
