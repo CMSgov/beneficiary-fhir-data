@@ -7,8 +7,6 @@ locals {
   # NOTE: null values are illegal, so we must strip them out if they should exist
   common_nonsensitive_override = { for key, value in local.common_nonsensitive_override_raw : key => value if value != null }
 
-  kms_key_alias = local.is_ephemeral_env ? "alias/bfd-${local.seed_env}-cmk" : "alias/bfd-${local.env}-cmk"
-
   # Normal precedence. Values stored in YAML files.
   yaml_file = contains(local.established_envs, local.env) ? "${local.env}.yaml" : "ephemeral.yaml"
   yaml = yamldecode(templatefile("${path.module}/values/${local.yaml_file}", {

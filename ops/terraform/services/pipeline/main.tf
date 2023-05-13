@@ -1,8 +1,12 @@
 locals {
+  env              = terraform.workspace
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = local.env != local.seed_env
+  is_prod          = local.env == "prod"
+
   account_id        = data.aws_caller_identity.current.account_id
-  env               = terraform.workspace
   layer             = "data"
-  established_envs  = ["test", "prod-sbx", "prod"]
   create_etl_user   = local.is_prod || var.force_etl_user_creation
   create_slis       = contains(local.established_envs, local.env) || var.force_sli_creation
   create_dashboard  = contains(local.established_envs, local.env) || var.force_dashboard_creation
@@ -15,7 +19,7 @@ locals {
   legacy_service = "etl"
 
   default_tags = {
-    Environment    = local.data_env
+    Environment    = local.seed_env
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
@@ -32,12 +36,6 @@ locals {
 
   nonsensitive_rda_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_rda.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_rda.values))
   nonsensitive_rda_service_config = { for key, value in local.nonsensitive_rda_service_map : split("/", key)[6] => value }
-
-  # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
-  is_prod          = local.env == "prod"
-  seed_env         = local.is_ephemeral_env ? reverse(split("-", local.env))[0] : ""
-  data_env         = local.is_ephemeral_env ? local.seed_env : local.env
 
   logging_bucket  = "bfd-${local.env}-logs-${local.account_id}"
   pipeline_bucket = "bfd-${local.env}-etl-${local.account_id}"

@@ -1,15 +1,18 @@
 locals {
   env              = terraform.workspace
   established_envs = ["test", "prod-sbx", "prod"]
-  azs              = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  legacy_service   = "fhir"
-  service          = "server"
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = local.env != local.seed_env
+
+  azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  legacy_service = "fhir"
+  service        = "server"
 
   default_tags = {
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
-    Environment    = local.data_env
+    Environment    = local.seed_env
     Terraform      = true
     tf_module_root = "ops/terraform/services/${local.service}"
   }
@@ -50,10 +53,6 @@ locals {
   asg_instance_warmup_time       = local.nonsensitive_service_config["asg_instance_warmup_time"]
   launch_template_instance_type  = local.nonsensitive_service_config["launch_template_instance_type"]
   launch_template_volume_size_gb = local.nonsensitive_service_config["launch_template_volume_size_gb"]
-
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
-  seed_env         = local.is_ephemeral_env ? reverse(split("-", local.env))[0] : ""
-  data_env         = local.is_ephemeral_env ? local.seed_env : local.env
 
   env_config = {
     default_tags = local.default_tags,

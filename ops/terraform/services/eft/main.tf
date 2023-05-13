@@ -2,7 +2,11 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   vpc_id     = data.aws_vpc.this.id
 
-  env       = terraform.workspace
+  env              = terraform.workspace
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = local.env != local.seed_env
+
   service   = "eft"
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
@@ -11,7 +15,7 @@ locals {
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
-    Environment    = local.env
+    Environment    = local.seed_env
     Terraform      = true
     tf_module_root = "ops/terraform/services/${local.service}"
     Layer          = local.layer

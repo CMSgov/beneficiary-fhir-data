@@ -1,12 +1,8 @@
 locals {
-
-  established_envs = ["test", "prod-sbx", "prod"]
-
   env              = terraform.workspace
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
-
-  seed_env = local.is_ephemeral_env ? reverse(split("-", local.env))[0] : ""
-  data_env = local.is_ephemeral_env ? local.seed_env : local.env
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = local.env != local.seed_env
 
   service        = "common"
   legacy_service = "admin"
@@ -29,7 +25,7 @@ locals {
   logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
 
   default_tags = {
-    Environment    = local.data_env
+    Environment    = local.seed_env
     application    = "bfd"
     business       = "oeda"
     stack          = local.env

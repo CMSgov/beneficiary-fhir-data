@@ -1,7 +1,7 @@
 locals {
 
   default_tags = {
-    Environment    = local.data_env
+    Environment    = local.seed_env
     Layer          = local.layer
     Name           = "bfd-${local.env}-${local.service}"
     application    = "bfd"
@@ -12,15 +12,13 @@ locals {
     tf_module_root = "ops/terraform/services/migrator"
   }
 
-  established_envs  = ["test", "prod-sbx", "prod"]
   env              = terraform.workspace
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = local.env != local.seed_env
 
-  seed_env         = local.is_ephemeral_env ? reverse(split("-", local.env))[0] : ""
-  data_env         = local.is_ephemeral_env ? local.seed_env : local.env
-
-  service          = "migrator"
-  layer            = "data"
+  service = "migrator"
+  layer   = "data"
 
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
