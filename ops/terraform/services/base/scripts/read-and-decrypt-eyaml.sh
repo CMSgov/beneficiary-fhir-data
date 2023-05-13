@@ -3,8 +3,9 @@
 # encrypted yaml files. As of this writing, this targets the ansible-vault
 # encryption mechanism, and depends on access to the appropriate SSM
 # Parameter Store hierarchy to resolve the password.
+#
 # This is intended for use in local development as well as by automated
-# terraform worke flows that incorporate an external data source:
+# terraform work flows that incorporate an external data source:
 # https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/data_source
 #
 # Globals:
@@ -17,16 +18,21 @@
 EYAML_FILE="$(basename "$1" | sed 's/\.eyaml//').eyaml"
 SSM_VAULT_PASSWORD_PATH="/bfd/mgmt/jenkins/sensitive/ansible_vault_password"
 
-# temporarily store vault password
-aws ssm get-parameter \
-    --region us-east-1 \
-    --output text \
-    --with-decryption \
-    --query 'Parameter.Value' \
-    --name "$SSM_VAULT_PASSWORD_PATH" > vault.password
 
-# decrypt desired eyaml file to stdout, reformat as JSON, and explicitly cast all values to strings
-ansible-vault decrypt --vault-password-file vault.password "values/${EYAML_FILE}" --output - | yq eval -o=j | jq 'with_entries(.value |= tostring)'
+if test -f "values/${EYAML_FILE}"; then
+    # temporarily store vault password
+    aws ssm get-parameter \
+        --region us-east-1 \
+        --output text \
+        --with-decryption \
+        --query 'Parameter.Value' \
+        --name "$SSM_VAULT_PASSWORD_PATH" > vault.password
+
+    # decrypt desired eyaml file to stdout, reformat as JSON, and explicitly cast all values to strings
+    ansible-vault decrypt --vault-password-file vault.password "values/${EYAML_FILE}" --output - | yq eval -o=j | jq 'with_entries(.value |= tostring)'
+else
+    echo '{}'
+fi
 
 #######################################
 # Ensure temporary ansible-vault password file is destroyed.
