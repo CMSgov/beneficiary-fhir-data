@@ -8,7 +8,7 @@ locals {
   common_nonsensitive_override = { for key, value in local.common_nonsensitive_override_raw : key => value if value != null }
 
   # Normal precedence. Values stored in YAML files.
-  yaml_file = contains(local.established_envs, local.env) ? "${local.env}.yaml" : "ephemeral.yaml"
+  yaml_file = local.is_ephemeral_env ? "ephemeral.yaml" : "${local.env}.yaml"
   yaml = yamldecode(templatefile("${path.module}/values/${local.yaml_file}", {
     env = local.env
   }))
