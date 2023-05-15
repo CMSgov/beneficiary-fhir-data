@@ -104,10 +104,11 @@ resource "aws_ec2_subnet_cidr_reservation" "this" {
 }
 
 resource "aws_lb" "this" {
-  name               = "${local.full_name}-nlb"
-  internal           = true
-  load_balancer_type = "network"
-  tags               = { Name = "${local.full_name}-nlb" }
+  name                             = "${local.full_name}-nlb"
+  internal                         = true
+  enable_cross_zone_load_balancing = true
+  load_balancer_type               = "network"
+  tags                             = { Name = "${local.full_name}-nlb" }
 
   dynamic "subnet_mapping" {
     for_each = local.subnet_ip_reservations
