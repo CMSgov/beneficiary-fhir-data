@@ -1,17 +1,14 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +16,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 
 /** Handles the execution and management of S3-related tasks. */
 public final class S3TaskManager {
@@ -29,9 +29,9 @@ public final class S3TaskManager {
   /** The extraction options. */
   private final ExtractionOptions options;
   /** The amazon s3 client. */
-  private final AmazonS3 s3Client;
+  private final S3Client s3Client;
   /** The s3 transfer manager. */
-  private final TransferManager s3TransferManager;
+  private final S3TransferManager s3TransferManager;
   /** The executor for file downloads. */
   private final TaskExecutor downloadTasksExecutor;
   /** The executor for file moves. */
@@ -53,8 +53,11 @@ public final class S3TaskManager {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3Client = S3Utilities.createS3Client(options);
-    this.s3TransferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
+    this.s3Client = SharedS3Utilities.createS3Client(options.getS3Region());
+    this.s3TransferManager =
+        DefaultS3TransferManager.builder()
+            .s3Client(SharedS3Utilities.createS3AsyncClient(options.getS3Region()))
+            .build();
 
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
     this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);
@@ -62,20 +65,20 @@ public final class S3TaskManager {
   }
 
   /**
-   * Gets the {@link #s3Client}.
+   * Gets the {@link S3Client}.
    *
-   * @return the {@link AmazonS3} client being used by this {@link S3TaskManager}
+   * @return the {@link S3Client} client being used by this {@link S3TaskManager}
    */
-  public AmazonS3 getS3Client() {
+  public S3Client getS3Client() {
     return s3Client;
   }
 
   /**
    * Gets the {@link #s3TransferManager}.
    *
-   * @return the Amazon S3 {@link TransferManager} being used by this {@link S3TaskManager}
+   * @return the Amazon S3 {@link S3TransferManager} being used by this {@link S3TaskManager}
    */
-  public TransferManager getS3TransferManager() {
+  public S3TransferManager getS3TransferManager() {
     return s3TransferManager;
   }
 
@@ -158,7 +161,7 @@ public final class S3TaskManager {
         LOGGER.info("All in-progress downloads are complete.");
       }
 
-      s3TransferManager.shutdownNow();
+      s3TransferManager.close();
     } catch (InterruptedException e) {
       // We're not expecting interrupts here, so go boom.
       throw new BadCodeMonkeyException(e);

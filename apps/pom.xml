@@ -77,9 +77,9 @@
 
 		<micrometer.version>1.10.6</micrometer.version>
 		<metrics.version>4.2.18</metrics.version>
-		<dropwizard-metrics-newrelic.version>0.8.0</dropwizard-metrics-newrelic.version>
+		<dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
 		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>1.12.455</aws-java-sdk-bom.version>
+		<aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
 		<spring-data-jpa.version>2.7.11</spring-data-jpa.version>
 		<spring-framework.version>5.3.23</spring-framework.version>
 
@@ -235,7 +235,7 @@
 			<dependency>
 				<!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
 				<groupId>io.micrometer</groupId>
-				<artifactId>micrometer-registry-cloudwatch</artifactId>
+				<artifactId>micrometer-registry-cloudwatch2</artifactId>
 				<version>${micrometer.version}</version>
 			</dependency>
 			<dependency>
@@ -271,8 +271,8 @@
 					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
 				<!-- When checking for dependencies to upgrade, java-sdk-swf-libraries will show up, however
 				the AWS SDK Bom contains an older version for unknown reasons, so it can be ignored. -->
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-bom</artifactId>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
 				<version>${aws-java-sdk-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
@@ -652,6 +652,10 @@ checkJavaFormat
 							<its.db.password>${its.db.password}</its.db.password>
 							<its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
 						</systemPropertyVariables>
+						<includes>
+							<include>**/*IT.java</include>
+							<include>**/*E2E.java</include>
+						</includes>
 
 						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
 						<environmentVariables>
