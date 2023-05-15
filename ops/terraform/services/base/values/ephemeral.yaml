@@ -15,8 +15,9 @@
 
 ## COMMON RDS CONFIGURATION
 /bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
-/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-${seed_env}-aurora-cluster
 /bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: false
+/bfd/${env}/common/nonsensitive/rds_instance_count: 2
 
 # MIGRATOR CONFIGURATION
 /bfd/${env}/migrator/nonsensitive/instance_type: m5.large
