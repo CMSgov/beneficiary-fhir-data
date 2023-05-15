@@ -25,7 +25,8 @@ locals {
   insights_database     = "${local.insights_db_prefix}-${local.env}"
   insights_table        = "${local.insights_table_prefix}_${replace(local.env, "-", "_")}_${replace(local.service, "-", "_")}"
 
-  vpc_name                   = "bfd-${local.env}-vpc"
+  # TODO: This should be done by a dynamic lookup to SSM instead...
+  vpc_name                   = "bfd-${local.seed_env}-vpc"
   queue_name                 = "bfd-${local.env}-${local.service}"
   pipeline_signal_queue_name = "bfd-${local.env}-${local.service}-signal"
 
