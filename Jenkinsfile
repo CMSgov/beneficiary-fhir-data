@@ -225,6 +225,20 @@ try {
 				}
 			}
 
+                        stage('Deploy Common to TEST') {
+                                currentStage = env.STAGE_NAME
+                                lock(resource: 'env_test') {
+                                        milestone(label: 'stage_deploy_test_common_start')
+                                        container('bfd-cbc-build') {
+                                                awsAuth.assumeRole()
+                                                terraform.deployTerraservice(
+                                                        env: bfdEnv,
+                                                        directory: "ops/terraform/services/common"
+                                                )
+                                         }
+                                 }
+                        }
+
 			stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
@@ -355,6 +369,24 @@ try {
 				}
 			}
 
+                        stage('Deploy Common to PROD-SBX') {
+                                currentStage = env.STAGE_NAME
+                                if (willDeployToProdEnvs) {
+                                        lock(resource: 'env_prod_sbx') {
+                                                milestone(label: 'stage_deploy_prod_sbx_common_start')
+            			                container('bfd-cbc-build') {
+                                                        awsAuth.assumeRole()
+                                                        terraform.deployTerraservice(
+                                                                env: bfdEnv,
+                                                                directory: "ops/terraform/services/common"
+                                                        )
+                                                }
+                                        }
+                                } else {
+                                        org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+                                }
+                        }
+
 			stage('Deploy Migrator to PROD-SBX') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
@@ -471,6 +503,24 @@ try {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 				}
 			}
+
+                        stage('Deploy Common to PROD') {
+                                currentStage = env.STAGE_NAME
+                                if (willDeployToProdEnvs) {
+                                        lock(resource: 'env_prod') {
+                                                milestone(label: 'stage_deploy_prod_common_start')
+                                                container('bfd-cbc-build') {
+                                                        awsAuth.assumeRole()
+                                                        terraform.deployTerraservice(
+                                                                env: bfdEnv,
+                                                                directory: "ops/terraform/services/common"
+                                                        )
+                                                }
+                                        }
+                                } else {
+                                        org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+                                }
+                        }
 
 			stage('Deploy Migrator to PROD') {
 				currentStage = env.STAGE_NAME
