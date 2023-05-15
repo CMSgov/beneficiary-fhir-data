@@ -195,6 +195,32 @@ spec:
             }
         }
 
+        stage('Deploy Common') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/common'
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
+                    }
+                }
+            }
+        }
+
+
         stage('Deploy Migrator') {
             steps {
                 script {
