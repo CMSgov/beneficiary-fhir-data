@@ -52,6 +52,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -248,6 +249,8 @@ public final class RifLoader {
      * always run in a consistent manner.
      */
 
+    final var error = new AtomicReference<Exception>();
+
     // Define the Consumer that will handle each batch.
     Consumer<List<RifRecordEvent<?>>> batchProcessor =
         recordsBatch -> {
@@ -257,18 +260,30 @@ public final class RifLoader {
            * constructor), this will block if too many tasks are already
            * pending. That's desirable behavior, as it prevents
            * OutOfMemoryErrors.
+           *
+           * The error handler will store the first exception encountered in
+           * the AtomicReference and discard any others.  We only need one to
+           * terminate the pipeline.
            */
-          processAsync(loadExecutor, recordsBatch, loadedFileId, resultHandler);
+          processAsync(
+              loadExecutor,
+              recordsBatch,
+              loadedFileId,
+              resultHandler,
+              e -> error.compareAndSet(null, e));
         };
 
     // Collect records into batches and submit each to batchProcessor.
+    // Any exception will trigger a clean shutdown of the stream.
     try {
       if (options.getRecordBatchSize() > 1) {
         BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
+            .takeWhile(record -> error.get() == null) // stop if an exception is thrown
             .forEach(batchProcessor);
       } else {
         dataToLoad
             .getRecords()
+            .takeWhile(record -> error.get() == null) // stop if an exception is thrown
             .map(
                 record -> {
                   List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
@@ -278,9 +293,11 @@ public final class RifLoader {
             .forEach(batchProcessor);
       }
     } catch (Exception e) {
-      LOGGER.error("Encountered an issue while parsing file batches (RifLoader), load failed.");
+      LOGGER.error(
+          "Encountered an issue while parsing file batches (RifLoader), load failed. {}",
+          e.getMessage());
       timerDataSetFile.stop();
-      throw e;
+      error.compareAndSet(null, e);
     }
 
     // Wait for all submitted batches to complete.
@@ -294,23 +311,18 @@ public final class RifLoader {
                 "%s failed to complete processing the records in time: '%s'.",
                 this.getClass().getSimpleName(), dataToLoad));
     } catch (InterruptedException e) {
-      // Interrupts should not be used on this thread, so go boom.
-      throw new RuntimeException(e);
+      LOGGER.error("Encountered an unexpected InterruptedException, load failed.");
+      error.compareAndSet(null, e);
     }
 
     /*
-     * If any batch load tripped a fatal error, we should throw an exception
-     * on this thread to kill the pipeline. Exceptions thrown from the batch thread with the
-     * error are ignored/lost, so have this synchronized boolean signal to do this specifically on the main thread.
-     * We also can't use a passed-in error handler from up the execution chain or else the pipeline manager shutdown procedure
-     * waits for this thread to shut down, which is waiting on the above 72-hour timeout before it unblocks.
-     *
-     * FUTURE: If we wish to be more discerning about recoverable errors, we could return false here which will
-     * allow the pipeline to continue operating if an error is considered non-fatal (it also currently moves the failed files
-     * to "Done" instead of "Failed", which would need to be fixed.)
+     * If any batch load tripped a fatal error, we call the error handler.
+     * The stream will have already cleanly halted processing.
      */
-    if (fatalFailure.get()) {
-      throw new IllegalStateException("Fatal error during rif file processing.");
+    final Exception ex = error.get();
+    if (ex != null) {
+      LOGGER.error("terminated by exception: message={}", ex.getMessage(), ex);
+      errorHandler.accept(ex);
     }
 
     LOGGER.info("Processed '{}'.", dataToLoad);
@@ -326,12 +338,14 @@ public final class RifLoader {
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
    * @param resultHandler the {@link Consumer} to notify when the batch completes successfully
+   * @param errorHandler used to pass through exceptions encountered during processing
    */
   private void processAsync(
       BlockingThreadPoolExecutor loadExecutor,
       List<RifRecordEvent<?>> recordsBatch,
       long loadedFileId,
-      Consumer<RifRecordLoadResult> resultHandler) {
+      Consumer<RifRecordLoadResult> resultHandler,
+      Consumer<Exception> errorHandler) {
     loadExecutor.submit(
         () -> {
           RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
@@ -382,8 +396,7 @@ public final class RifLoader {
                 .mark(1);
 
             LOGGER.error("Error caught when processing async batch!", failure);
-            // Cannot use errorHandler here, as it will cause a long wait before shutdown
-            fatalFailure.set(true);
+            errorHandler.accept(failure);
           }
         });
   }
