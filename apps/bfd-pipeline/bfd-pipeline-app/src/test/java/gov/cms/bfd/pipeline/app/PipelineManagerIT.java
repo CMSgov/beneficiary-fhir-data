@@ -17,30 +17,29 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link PipelineManager}. */
 public final class PipelineManagerIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
-
+  /** Sleep function that keeps the sleep time short for testing. */
   private static final ThrowingFunction<Void, Long, InterruptedException> SLEEPER =
       millis -> {
-        Thread.sleep(Math.min(10, millis));
+        Thread.sleep(Math.min(5, millis));
         return null;
       };
 
+  /** We don't care about timestamps in these tests so we can just use system clock. */
   private final Clock clock = Clock.systemUTC();
 
   /** Verifies that {@link PipelineManager} runs a successful mock one-shot job, as expected. */
   @Test
   public void runSuccessfulMockOneshotJob() {
     // Since this has no schedule it will run once and then exit.
-    MockJob mockJob = new MockJob(Optional.empty(), () -> PipelineJobOutcome.WORK_DONE);
+    final var mockJob = new MockJob(Optional.empty(), true, () -> PipelineJobOutcome.WORK_DONE);
 
-    PipelineManager pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
     pipelineManager.start();
     pipelineManager.awaitCompletion();
 
@@ -56,14 +55,15 @@ public final class PipelineManagerIT {
     final var error = new RuntimeException("boom");
 
     // Since this has no schedule it will run once and then exit.
-    MockJob mockJob =
+    final var mockJob =
         new MockJob(
             Optional.empty(),
+            true,
             () -> {
               throw error;
             });
 
-    PipelineManager pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
     pipelineManager.start();
     pipelineManager.awaitCompletion();
 
@@ -71,20 +71,19 @@ public final class PipelineManagerIT {
     var jobSummary = pipelineManager.getCompletedJobs().get(0);
     assertEquals(Optional.empty(), jobSummary.getOutcome());
     assertEquals(Optional.of(error), jobSummary.getException());
+    assertEquals(error, pipelineManager.getError());
   }
 
-  /**
-   * Verifies that {@link PipelineManager} runs a successful mock scheduled job, as expected.
-   *
-   * @throws Exception Any unhandled {@link Exception}s will cause this test case to fail.
-   */
+  /** Verifies that {@link PipelineManager} runs a successful mock scheduled job, as expected. */
   @Test
   public void runSuccessfulScheduledJob() {
-    MockJob mockJob =
+    final var mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(10, ChronoUnit.MILLIS)),
+            true,
             () -> PipelineJobOutcome.WORK_DONE);
-    PipelineManager pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
     pipelineManager.start();
 
     // Wait until a completed iteration of the mock job can be found.
@@ -107,26 +106,46 @@ public final class PipelineManagerIT {
 
     assertTrue(mockJobSummary.isPresent());
     assertEquals(Optional.of(PipelineJobOutcome.WORK_DONE), mockJobSummary.get().getOutcome());
+    assertNull(pipelineManager.getError());
   }
 
-  /** Verifies that {@link PipelineManager} runs a failing mock scheduled job, as expected. */
+  /**
+   * Verifies that {@link PipelineManager} runs a mock scheduled job until it fails and them shuts
+   * down, as expected.
+   */
   @Test
   public void runFailingScheduledJob() {
     final var error = new RuntimeException("boom");
 
-    MockJob mockJob =
+    final var runCount = new AtomicInteger();
+    final var mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(10, ChronoUnit.MILLIS)),
+            true,
             () -> {
-              throw error;
+              if (runCount.incrementAndGet() >= 3) {
+                throw error;
+              } else {
+                return PipelineJobOutcome.WORK_DONE;
+              }
             });
 
-    PipelineManager pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
     pipelineManager.start();
     pipelineManager.awaitCompletion();
 
-    assertEquals(1, pipelineManager.getCompletedJobs().size());
-    var jobSummary = pipelineManager.getCompletedJobs().get(0);
+    final var summaries = pipelineManager.getCompletedJobs();
+    assertEquals(3, summaries.size());
+
+    var jobSummary = summaries.get(0);
+    assertEquals(Optional.of(PipelineJobOutcome.WORK_DONE), jobSummary.getOutcome());
+    assertEquals(Optional.empty(), jobSummary.getException());
+
+    jobSummary = summaries.get(1);
+    assertEquals(Optional.of(PipelineJobOutcome.WORK_DONE), jobSummary.getOutcome());
+    assertEquals(Optional.empty(), jobSummary.getException());
+
+    jobSummary = summaries.get(2);
     assertEquals(Optional.empty(), jobSummary.getOutcome());
     assertEquals(Optional.of(error), jobSummary.getException());
     assertEquals(error, pipelineManager.getError());
@@ -139,11 +158,13 @@ public final class PipelineManagerIT {
    */
   @Test
   public void runInterruptableJobsThenStop() throws Exception {
+    // lets the main thread know the job has started
     final var latch = new CountDownLatch(1);
 
-    MockJob mockJob =
+    final var mockJob =
         new MockJob(
             Optional.empty(),
+            true,
             () -> {
               // sync up with the test thread
               latch.countDown();
@@ -153,7 +174,7 @@ public final class PipelineManagerIT {
               return PipelineJobOutcome.WORK_DONE;
             });
 
-    PipelineManager pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
     pipelineManager.start();
 
     // wait until we know the job has started
@@ -176,12 +197,13 @@ public final class PipelineManagerIT {
   /** Verifies that {@link PipelineManager#stop()} works with uninterruptible jobs. */
   @Test
   public void runUninterruptibleJobsThenStop() {
-    MockJob mockJob =
+    final var mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
             false,
             () -> PipelineJobOutcome.WORK_DONE);
-    PipelineManager pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
     pipelineManager.start();
 
     // Wait until the mock job has started.
@@ -213,28 +235,17 @@ public final class PipelineManagerIT {
      * Constructs a new {@link MockJob} instance.
      *
      * @param schedule the value to use for {@link #getSchedule()}
-     * @param interruptible the value to use for {@link #isInterruptible()}
+     * @param interruptable the value to use for {@link #isInterruptible()}
      * @param jobResultProducer the {@link Callable} that will create the values to use for {@link
      *     #call()}
      */
     public MockJob(
         Optional<PipelineJobSchedule> schedule,
-        boolean interruptible,
+        boolean interruptable,
         Callable<Object> jobResultProducer) {
       this.schedule = schedule;
-      this.interruptible = interruptible;
+      this.interruptible = interruptable;
       this.jobResultProducer = jobResultProducer;
-    }
-
-    /**
-     * Constructs a new {@link MockJob} instance.
-     *
-     * @param schedule the value to use for {@link #getSchedule()}
-     * @param jobResultProducer the {@link Callable} that will create the values to use for {@link
-     *     #call()}
-     */
-    public MockJob(Optional<PipelineJobSchedule> schedule, Callable<Object> jobResultProducer) {
-      this(schedule, true, jobResultProducer);
     }
 
     @Override

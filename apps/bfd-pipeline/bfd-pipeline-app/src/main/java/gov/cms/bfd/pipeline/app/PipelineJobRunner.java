@@ -17,10 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class PipelineJobRunner implements Callable<Void> {
-  private final PipelineJob job;
-  private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
-  private final Clock clock;
+  /** Object that tracks the status of all job runs. */
   private final Tracker tracker;
+  /** The job we run. */
+  private final PipelineJob job;
+  /** Function used to sleep. Parameterized for use by unit tests. */
+  private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
+  /** Used to get timestamps. Parameterized for use by unit tests. */
+  private final Clock clock;
 
   /**
    * Runs the job according to its schedule. If the job has no schedule simply runs the job once.
@@ -38,17 +42,22 @@ public class PipelineJobRunner implements Callable<Void> {
               .map(s -> Duration.of(s.getRepeatDelay(), s.getRepeatDelayUnit()))
               .map(Duration::toMillis)
               .orElse(0L);
+      PipelineJobOutcome lastOutcome = null;
       while (tracker.jobsCanRun()) {
-        final var outcome = runJob();
+        lastOutcome = runJob();
         if (repeatMillis <= 0
             || !tracker.jobsCanRun()
-            || outcome == PipelineJobOutcome.INTERRUPTED) {
+            || lastOutcome == PipelineJobOutcome.INTERRUPTED) {
           break;
         }
         tracker.sleeping(job);
         sleeper.apply(repeatMillis);
       }
-      tracker.stoppingNormally(job);
+      if (lastOutcome == PipelineJobOutcome.INTERRUPTED) {
+        tracker.stoppingDueToInterrupt(job);
+      } else {
+        tracker.stoppingNormally(job);
+      }
     } catch (InterruptedException ex) {
       tracker.stoppingDueToInterrupt(job);
     } catch (Exception ex) {
@@ -108,7 +117,7 @@ public class PipelineJobRunner implements Callable<Void> {
         Pattern.compile(
             String.format("%s \\[id=.*failure=([^,]+)", JobRunSummary.class.getSimpleName()));
 
-    /** Job id. */
+    /** Id for this job run. Assigned by {@link Tracker#beginningRun}. */
     private final long id;
     /** The job. */
     private final PipelineJob job;
@@ -116,15 +125,15 @@ public class PipelineJobRunner implements Callable<Void> {
     private final Instant startTime;
     /** When the run stopped. */
     private final Instant stopTime;
-    /** The outcome if job was successful. */
+    /** The outcome if run was successful. */
     private final Optional<PipelineJobOutcome> outcome;
-    /** The exception if job failed. */
+    /** The exception if run failed. */
     private final Optional<Exception> exception;
 
     /**
-     * Used by {@link PipelineManagerIT} to detect successful job run log lines.
+     * Used by integration tests to detect successful job run log lines.
      *
-     * @param logString line from log file
+     * @param logString line from log file to check
      * @return true if the line indicates a job was successful
      */
     public static boolean isSuccessString(String logString) {
@@ -133,9 +142,9 @@ public class PipelineJobRunner implements Callable<Void> {
     }
 
     /**
-     * Used by {@link PipelineManagerIT} to detect failed job run log lines.
+     * Used by integration tests to detect failed job run log lines.
      *
-     * @param logString line from log file
+     * @param logString line from log file to check
      * @return true if the line indicates a job failed
      */
     public static boolean isFailureString(String logString) {
@@ -164,21 +173,67 @@ public class PipelineJobRunner implements Callable<Void> {
     }
   }
 
+  /** Interface for objects that manage {@link PipelineJobRunner} instances. */
   public interface Tracker {
+    /**
+     * Callable to determine if it is ok to run the job again. Used to allow jobs to shutdown
+     * cleanly when any job fails or the pipeline app is shutting down.
+     *
+     * @return true if it's ok to run again
+     */
     boolean jobsCanRun();
 
+    /**
+     * Notifies the tracker that a new job run is starting and to obtain an unique id for the run.
+     *
+     * @param job the job that is starting
+     * @return unique id for this run
+     */
     long beginningRun(PipelineJob job);
 
+    /**
+     * Notifies the tracker that a job has completed and the outcome of the run.
+     *
+     * @param summary summaries the outcome of the run
+     */
     void completedRun(JobRunSummary summary);
 
+    /**
+     * Notifies the tracker that a job is sleeping between runs.
+     *
+     * @param job the job that is sleeping
+     */
     void sleeping(PipelineJob job);
 
+    /**
+     * Notifies the tracker that a job is stopping because it caught an {@link InterruptedException}
+     * while waiting to run again or while the job was running.
+     *
+     * @param job the job that is stopping
+     */
     void stoppingDueToInterrupt(PipelineJob job);
 
+    /**
+     * Notifies the tracker that a job is stopping because it threw an exception during a run.
+     *
+     * @param job the job that is stopping
+     * @param error the exception that was thrown
+     */
     void stoppingDueToException(PipelineJob job, Exception error);
 
+    /**
+     * Notifies the tracker that a job is stopping because it has completed a run and doesn't have a
+     * schedule for running multiple times.
+     *
+     * @param job the job that is stopping
+     */
     void stoppingNormally(PipelineJob job);
 
+    /**
+     * Notifies the tracker that a job has stopped.
+     *
+     * @param job the job that has stopped
+     */
     void stopped(PipelineJob job);
   }
 }
