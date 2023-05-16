@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -29,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -64,9 +65,26 @@ public final class CoverageResourceProvider implements IResourceProvider {
   /** The entity manager. */
   private EntityManager entityManager;
   /** The Metric registry. */
-  private MetricRegistry metricRegistry;
+  private final MetricRegistry metricRegistry;
   /** The Loaded filter manager. */
-  private LoadedFilterManager loadedFilterManager;
+  private final LoadedFilterManager loadedFilterManager;
+
+  /**
+   * Instantiates a new {@link CoverageResourceProvider}.
+   *
+   * <p>Spring will wire this class during the initial component scan, so this constructor should
+   * only be explicitly called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param loadedFilterManager the loaded filter manager
+   */
+  public CoverageResourceProvider(
+      MetricRegistry metricRegistry, LoadedFilterManager loadedFilterManager) {
+    requireNonNull(metricRegistry);
+    requireNonNull(loadedFilterManager);
+    this.metricRegistry = metricRegistry;
+    this.loadedFilterManager = loadedFilterManager;
+  }
 
   /**
    * Sets the {@link #entityManager}.
@@ -76,26 +94,6 @@ public final class CoverageResourceProvider implements IResourceProvider {
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
-  }
-
-  /**
-   * Sets the {@link #metricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
-  @Inject
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
-
-  /**
-   * Sets the {@link #loadedFilterManager}.
-   *
-   * @param loadedFilterManager the {@link LoadedFilterManager} to use
-   */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
   }
 
   /** {@inheritDoc} */

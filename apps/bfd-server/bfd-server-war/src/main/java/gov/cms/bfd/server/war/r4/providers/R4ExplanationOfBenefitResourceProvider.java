@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -48,7 +50,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -83,15 +84,45 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   /** The entity manager. */
   private EntityManager entityManager;
   /** The metric registry. */
-  private MetricRegistry metricRegistry;
+  private final MetricRegistry metricRegistry;
   /** The samhsa matcher. */
-  private R4EobSamhsaMatcher samhsaMatcher;
+  private final R4EobSamhsaMatcher samhsaMatcher;
   /** The loaded filter manager. */
-  private LoadedFilterManager loadedFilterManager;
+  private final LoadedFilterManager loadedFilterManager;
   /** The drug code display lookup entity. */
-  private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** The npi org lookup entity. */
-  private NPIOrgLookup npiOrgLookup;
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
+   *
+   * <p>Spring will wire this class during the initial component scan, so this constructor should
+   * only be explicitly called by tests.
+   *
+   * @param metricRegistry the metric registry bean
+   * @param loadedFilterManager the loaded filter manager bean
+   * @param samhsaMatcher the samhsa matcher bean
+   * @param drugCodeDisplayLookup the drug code display lookup bean
+   * @param npiOrgLookup the npi org lookup bean
+   */
+  public R4ExplanationOfBenefitResourceProvider(
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      R4EobSamhsaMatcher samhsaMatcher,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+    requireNonNull(metricRegistry);
+    requireNonNull(loadedFilterManager);
+    requireNonNull(samhsaMatcher);
+    requireNonNull(drugCodeDisplayLookup);
+    requireNonNull(npiOrgLookup);
+    this.metricRegistry = metricRegistry;
+    this.loadedFilterManager = loadedFilterManager;
+    this.samhsaMatcher = samhsaMatcher;
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+    this.npiOrgLookup = npiOrgLookup;
+  }
 
   /**
    * Sets the {@link #entityManager}.
@@ -101,56 +132,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
-  }
-
-  /**
-   * Sets the {@link #metricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
-  @Inject
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
-
-  /**
-   * Sets the {@link #samhsaMatcher}.
-   *
-   * @param samhsaMatcher the {@link R4EobSamhsaMatcher} to use
-   */
-  @Inject
-  public void setSamhsaFilterer(R4EobSamhsaMatcher samhsaMatcher) {
-    this.samhsaMatcher = samhsaMatcher;
-  }
-
-  /**
-   * Sets the {@link #loadedFilterManager}.
-   *
-   * @param loadedFilterManager the {@link LoadedFilterManager} to use
-   */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
-  }
-
-  /**
-   * Sets the {@link #drugCodeDisplayLookup}.
-   *
-   * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use
-   */
-  @Inject
-  public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
-    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
-  }
-
-  /**
-   * Sets the {@link #npiOrgLookup}.
-   *
-   * @param npiOrgLookup the {@link NPIOrgLookup} to use
-   */
-  @Inject
-  public void setNpiOrgLookup(NPIOrgLookup npiOrgLookup) {
-    this.npiOrgLookup = npiOrgLookup;
   }
 
   /** {@inheritDoc} */
