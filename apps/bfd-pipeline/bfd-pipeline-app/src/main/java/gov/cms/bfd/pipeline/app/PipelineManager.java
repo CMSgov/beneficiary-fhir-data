@@ -42,7 +42,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     threadPool =
         Executors.newCachedThreadPool(
             new ThreadFactoryBuilder()
-                .threadNamePrefix("PipelineExecutor-")
+                .threadNamePrefix(getClass().getSimpleName())
                 .daemonThreads(false)
                 .build());
     latch = new CountDownLatch(jobs.size());
