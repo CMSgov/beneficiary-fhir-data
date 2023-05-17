@@ -826,14 +826,12 @@ public class TransformerUtilsV2Test {
     claim.setLastUpdated(Instant.now());
 
     fhirContext = FhirContext.forR4();
+    DMEClaimTransformerV2 dmeClaimTransformerV2 =
+        new DMEClaimTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     genEob =
-        DMEClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            dmeClaim);
+        dmeClaimTransformerV2.transform(
+            new TransformerContext(null, Optional.empty(), null, null), dmeClaim);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 

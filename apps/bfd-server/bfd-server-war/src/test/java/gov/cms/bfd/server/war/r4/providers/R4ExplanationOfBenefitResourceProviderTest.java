@@ -46,6 +46,24 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mock npi org lookup entity. */
   @Mock private NPIOrgLookup npiOrgLookup;
 
+  // Mock transformers
+  /** The mock transformer for carrier claims. */
+  @Mock private CarrierClaimTransformerV2 carrierClaimTransformerV2;
+  /** The mock transformer for dme claims. */
+  @Mock private DMEClaimTransformerV2 dmeClaimTransformer;
+  /** The mock transformer for hha claims. */
+  @Mock private HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The mock transformer for hospice claims. */
+  @Mock private HospiceClaimTransformerV2 hospiceClaimTransformer;
+  /** The mock transformer for inpatient claims. */
+  @Mock private InpatientClaimTransformerV2 inpatientClaimTransformer;
+  /** The mock transformer for outpatient claims. */
+  @Mock private OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  /** The mock transformer for part D events claims. */
+  @Mock private PartDEventTransformerV2 partDEventTransformer;
+  /** The mock transformer for snf claims. */
+  @Mock private SNFClaimTransformerV2 snfClaimTransformerV2;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
@@ -55,7 +73,15 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             loadedFilterManager,
             samhsaMatcher,
             drugCodeDisplayLookup,
-            npiOrgLookup);
+            npiOrgLookup,
+            carrierClaimTransformerV2,
+            dmeClaimTransformer,
+            hhaClaimTransformer,
+            hospiceClaimTransformer,
+            inpatientClaimTransformer,
+            outpatientClaimTransformer,
+            partDEventTransformer,
+            snfClaimTransformerV2);
     lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
   }
 

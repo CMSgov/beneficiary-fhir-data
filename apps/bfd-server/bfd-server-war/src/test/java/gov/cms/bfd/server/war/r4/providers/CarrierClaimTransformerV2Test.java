@@ -57,6 +57,22 @@ public class CarrierClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  CarrierClaimTransformerV2 carrierClaimTransformer;
+
+  /**
+   * Sets the test class up before each test.
+   *
+   * @throws IOException shouldnt be thrown
+   */
+  @BeforeEach
+  public void setup() throws IOException {
+    carrierClaimTransformer =
+        new CarrierClaimTransformerV2(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+  }
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -89,7 +105,7 @@ public class CarrierClaimTransformerV2Test {
   public void before() throws IOException {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2.transform(
+        carrierClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
@@ -114,7 +130,7 @@ public class CarrierClaimTransformerV2Test {
 
     assertMatches(
         claim,
-        CarrierClaimTransformerV2.transform(
+        carrierClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
@@ -133,7 +149,7 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
-        CarrierClaimTransformerV2.transform(
+        carrierClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),
@@ -742,7 +758,7 @@ public class CarrierClaimTransformerV2Test {
 
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2.transform(
+        carrierClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
@@ -1332,7 +1348,7 @@ public class CarrierClaimTransformerV2Test {
     claimWithoutNpi.setLastUpdated(Instant.now());
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
     ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2.transform(
+        carrierClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),

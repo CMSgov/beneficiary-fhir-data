@@ -55,6 +55,8 @@ public final class DMEClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  DMEClaimTransformerV2 dmeClaimTransformer;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -85,10 +87,12 @@ public final class DMEClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    dmeClaimTransformer =
+        new DMEClaimTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    DMEClaimTransformerV2 DMEClaimTransformerV2 = new DMEClaimTransformerV2();
     ExplanationOfBenefit genEob =
-        DMEClaimTransformerV2.transform(
+        dmeClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
@@ -1243,7 +1247,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
-        DMEClaimTransformerV2.transform(
+        dmeClaimTransformer.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.of(false),

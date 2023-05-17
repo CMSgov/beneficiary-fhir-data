@@ -1,8 +1,11 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -29,6 +32,30 @@ import org.hl7.fhir.r4.model.Quantity;
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 final class DMEClaimTransformerV2 {
 
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   */
+  public DMEClaimTransformerV2(
+      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    requireNonNull(metricRegistry);
+    requireNonNull(drugCodeDisplayLookup);
+    this.metricRegistry = metricRegistry;
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+  }
+
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
@@ -38,10 +65,9 @@ final class DMEClaimTransformerV2 {
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
@@ -62,7 +88,7 @@ final class DMEClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
+  private ExplanationOfBenefit transformClaim(
       TransformerContext transformerContext, DMEClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
@@ -177,7 +203,7 @@ final class DMEClaimTransformerV2 {
    * @param eob the eob to add information to
    * @param transformerContext the transformer context
    */
-  private static void handleClaimLines(
+  private void handleClaimLines(
       DMEClaim claimGroup, ExplanationOfBenefit eob, TransformerContext transformerContext) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
@@ -386,9 +412,7 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          transformerContext
-              .getDrugCodeDisplayLookup()
-              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
@@ -437,7 +461,7 @@ final class DMEClaimTransformerV2 {
    *     ExplanationOfBenefit
    * @param optVal The {@link String} value associated with the ExplanationOfBenefit
    */
-  static void addExtension(
+  void addExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
     optVal.ifPresent(
         value ->
@@ -454,7 +478,7 @@ final class DMEClaimTransformerV2 {
    *     ExplanationOfBenefit
    * @param optVal The {@link Character} value associated with the ExplanationOfBenefit
    */
-  static void addCodeExtension(
+  void addCodeExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<Character> optVal) {
     optVal.ifPresent(
         value ->
@@ -471,7 +495,7 @@ final class DMEClaimTransformerV2 {
    *     ExplanationOfBenefit
    * @param optVal The {@link BigDecimal} value associated with the ExplanationOfBenefit
    */
-  static void addDecimalExtension(
+  void addDecimalExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
     if (optVal.isPresent()) {
       eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get()));

@@ -95,6 +95,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public static Stream<Arguments> data() throws IOException {
     // Load and transform the various claim types for testing
 
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    MetricRegistry metricRegistry = new MetricRegistry();
+    DMEClaimTransformerV2 dmeClaimTransformerV2 =
+        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    CarrierClaimTransformerV2 carrierClaimTransformerV2 =
+        new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+
     ExplanationOfBenefit inpatientEob =
         InpatientClaimTransformerV2.transform(
             new TransformerContext(
@@ -116,13 +125,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String outpatientClaimType = TransformerUtilsV2.getClaimType(outpatientEob).toString();
 
     ExplanationOfBenefit dmeEob =
-        DMEClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(DMEClaim.class));
+        dmeClaimTransformerV2.transform(
+            new TransformerContext(null, Optional.empty(), null, null), getClaim(DMEClaim.class));
     String dmeClaimType = TransformerUtilsV2.getClaimType(dmeEob).toString();
 
     ExplanationOfBenefit hhaEob =
@@ -156,7 +160,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String snfClaimType = TransformerUtilsV2.getClaimType(snfEob).toString();
 
     ExplanationOfBenefit carrierEob =
-        CarrierClaimTransformerV2.transform(
+        carrierClaimTransformerV2.transform(
             new TransformerContext(
                 new MetricRegistry(),
                 Optional.empty(),
