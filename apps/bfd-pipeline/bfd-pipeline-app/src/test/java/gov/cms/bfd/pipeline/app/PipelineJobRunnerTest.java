@@ -127,7 +127,8 @@ public class PipelineJobRunnerTest {
     doReturn(true).when(tracker).jobsCanRun();
 
     // Execute the runner.  Simulates job being interrupted.
-    doThrow(InterruptedException.class).when(job).call();
+    final var interrupt = new InterruptedException();
+    doThrow(interrupt).when(job).call();
     assertNull(runner.call());
 
     // Verify expected calls were made to the tracker.
@@ -147,8 +148,8 @@ public class PipelineJobRunnerTest {
             job,
             Instant.ofEpochMilli(1),
             Instant.ofEpochMilli(2),
-            Optional.of(PipelineJobOutcome.INTERRUPTED),
-            Optional.empty());
+            Optional.empty(),
+            Optional.of(interrupt));
     assertEquals(List.of(expectedSummary), summaries);
   }
 

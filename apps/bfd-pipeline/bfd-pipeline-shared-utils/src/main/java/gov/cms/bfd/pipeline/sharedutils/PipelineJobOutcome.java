@@ -15,10 +15,5 @@ public enum PipelineJobOutcome {
    * Indicates that the {@link PipelineJob} completed successfully, having processed some data or
    * done whatever work needed doing (as opposed to {@link #NOTHING_TO_DO}.
    */
-  WORK_DONE,
-
-  /**
-   * Indicates that the {@link PipelineJob} ended due to an {@link java.lang.InterruptedException}.
-   */
-  INTERRUPTED;
+  WORK_DONE;
 }

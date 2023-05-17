@@ -42,22 +42,15 @@ public class PipelineJobRunner implements Callable<Void> {
               .map(s -> Duration.of(s.getRepeatDelay(), s.getRepeatDelayUnit()))
               .map(Duration::toMillis)
               .orElse(0L);
-      PipelineJobOutcome lastOutcome = null;
       while (tracker.jobsCanRun()) {
-        lastOutcome = runJob();
-        if (repeatMillis <= 0
-            || !tracker.jobsCanRun()
-            || lastOutcome == PipelineJobOutcome.INTERRUPTED) {
+        runJob();
+        if (repeatMillis <= 0 || !tracker.jobsCanRun()) {
           break;
         }
         tracker.sleeping(job);
         sleeper.apply(repeatMillis);
       }
-      if (lastOutcome == PipelineJobOutcome.INTERRUPTED) {
-        tracker.stoppingDueToInterrupt(job);
-      } else {
-        tracker.stoppingNormally(job);
-      }
+      tracker.stoppingNormally(job);
     } catch (InterruptedException ex) {
       tracker.stoppingDueToInterrupt(job);
     } catch (Exception ex) {
@@ -71,18 +64,15 @@ public class PipelineJobRunner implements Callable<Void> {
   /**
    * Runs the job once and reports its outcome to the {@link Tracker}.
    *
-   * @return the job's outcome
    * @throws Exception passed through if the job terminates with an exception
    */
-  private PipelineJobOutcome runJob() throws Exception {
+  private void runJob() throws Exception {
     final var id = tracker.beginningRun(job);
     final var startTime = clock.instant();
     PipelineJobOutcome outcome = null;
     Exception exception = null;
     try {
       outcome = job.call();
-    } catch (InterruptedException ex) {
-      outcome = PipelineJobOutcome.INTERRUPTED;
     } catch (Exception ex) {
       exception = ex;
     }
@@ -102,7 +92,6 @@ public class PipelineJobRunner implements Callable<Void> {
     if (exception != null) {
       throw exception;
     }
-    return outcome;
   }
 
   /** Summarizes the results of a job run. */

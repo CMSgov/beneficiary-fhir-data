@@ -189,8 +189,9 @@ public final class PipelineManagerIT {
     // verify the job was interrupted
     assertEquals(1, pipelineManager.getCompletedJobs().size());
     var jobSummary = pipelineManager.getCompletedJobs().get(0);
-    assertEquals(Optional.of(PipelineJobOutcome.INTERRUPTED), jobSummary.getOutcome());
-    assertEquals(Optional.empty(), jobSummary.getException());
+    assertEquals(Optional.empty(), jobSummary.getOutcome());
+    assertEquals(
+        Optional.of(InterruptedException.class), jobSummary.getException().map(Object::getClass));
     assertNull(pipelineManager.getError());
   }
 
