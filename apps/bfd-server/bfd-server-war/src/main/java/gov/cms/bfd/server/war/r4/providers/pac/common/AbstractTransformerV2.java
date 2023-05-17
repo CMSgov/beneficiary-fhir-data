@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
+import static gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2.convertToDate;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -9,7 +11,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,9 +47,7 @@ public class AbstractTransformerV2 {
    * @return The converted {@link Date} object.
    */
   protected static Date localDateToDate(LocalDate localDate) {
-    return localDate == null
-        ? null
-        : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    return localDate == null ? null : convertToDate(localDate);
   }
 
   /**

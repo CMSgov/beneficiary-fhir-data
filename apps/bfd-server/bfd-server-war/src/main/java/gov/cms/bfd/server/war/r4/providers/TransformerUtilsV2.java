@@ -202,7 +202,7 @@ public final class TransformerUtilsV2 {
    * @param localDate the {@link LocalDate} to convert
    * @return a {@link Date} version of the specified {@link LocalDate}
    */
-  static Date convertToDate(LocalDate localDate) {
+  public static Date convertToDate(LocalDate localDate) {
     return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
 
