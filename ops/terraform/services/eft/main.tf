@@ -44,6 +44,14 @@ locals {
   host_key              = local.sensitive_service_config["sftp_transfer_server_host_private_key"]
   eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
   eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
+  eft_bucket_partners   = jsondecode(local.sensitive_service_config["partners_with_bucket_access"])
+  eft_bucket_partners_iam = {
+    for partner in local.eft_bucket_partners :
+    partner => {
+      bucket_iam_assumer_arn = local.sensitive_service_config["partner_iam_assumer_arn_${partner}"]
+      bucket_home_path       = trim(local.sensitive_service_config["partner_bucket_home_path_${partner}"], "/")
+    }
+  }
 
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22

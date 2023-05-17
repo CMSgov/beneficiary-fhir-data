@@ -99,3 +99,96 @@ resource "aws_iam_policy" "eft_user" {
     }
   )
 }
+
+resource "aws_iam_role" "partner_bucket_role" {
+  for_each = local.eft_bucket_partners_iam
+
+  name = "${local.full_name}-${each.key}-bucket-role"
+  description = join("", [
+    "Role granting cross-account permissions to partner-specific folder for ${each.key} within ",
+    "the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
+  ])
+
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = "sts:AssumeRole"
+          Principal = {
+            AWS = each.value.bucket_iam_entity_arn
+          }
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = [aws_iam_policy.partner_bucket_access[each.key].arn]
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_policy" "partner_bucket_access" {
+  for_each = local.eft_bucket_partners_iam
+
+  name = "${local.full_name}-${each.key}-allow-eft-s3-path"
+  description = join("", [
+    "Allows ${each.key} to access their specific EFT data when this policy's corresponding IAM ",
+    "role is assumed by ${each.key}"
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowListingOfPartnerHomePath"
+          Effect = "Allow"
+          Action = [
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+          ]
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = ["${each.value.bucket_home_path}*"]
+            }
+          }
+        },
+        {
+          Sid    = "AllowPartnerAccessToHomePath"
+          Effect = "Allow"
+          Action = [
+            "s3:AbortMultipartUpload",
+            "s3:DeleteObject",
+            "s3:DeleteObjectVersion",
+            "s3:GetObject",
+            "s3:GetObjectAcl",
+            "s3:GetObjectVersion",
+            "s3:GetObjectVersionAcl",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:PutObjectVersionAcl"
+          ],
+          Resource = [
+            "${aws_s3_bucket.this.arn}/${each.value.bucket_home_path}*"
+          ]
+        },
+        {
+          Action = [
+            "kms:Encrypt",
+            "kms:Decrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey",
+          ]
+          Effect = "Allow"
+          Resource = [
+            local.kms_key_id
+          ]
+          Sid = "AllowEncryptionAndDecryptionOfS3Files"
+        },
+      ]
+    }
+  )
+}
