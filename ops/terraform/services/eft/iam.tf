@@ -116,7 +116,7 @@ resource "aws_iam_role" "partner_bucket_role" {
           Effect = "Allow"
           Action = "sts:AssumeRole"
           Principal = {
-            AWS = each.value.bucket_iam_entity_arn
+            AWS = each.value.bucket_iam_assumer_arn
           }
         },
       ]
