@@ -175,6 +175,8 @@ resource "aws_iam_policy" "partner_bucket_access" {
           ]
         },
         {
+          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
+          Effect = "Allow"
           Action = [
             "kms:Encrypt",
             "kms:Decrypt",
@@ -182,11 +184,9 @@ resource "aws_iam_policy" "partner_bucket_access" {
             "kms:GenerateDataKey*",
             "kms:DescribeKey",
           ]
-          Effect = "Allow"
           Resource = [
             local.kms_key_id
           ]
-          Sid = "AllowEncryptionAndDecryptionOfS3Files"
         },
       ]
     }
