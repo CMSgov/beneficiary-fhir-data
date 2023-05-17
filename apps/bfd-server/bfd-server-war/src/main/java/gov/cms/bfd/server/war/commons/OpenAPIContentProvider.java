@@ -176,4 +176,47 @@ public final class OpenAPIContentProvider {
           + "<li><code>123</code> (just a resource\u0027s ID)</li>"
           + "<li><code>beneficiary/123</code> (a relative identity)</li>"
           + "<li><code>http://example.com/beneficiary/123 (an absolute identity)</code></li>";
+
+  /**
+   * Open API content short description for /Patient's partially aducated claim MBI ID to be used.
+   */
+  public static final String PAC_MBI = "The patient identifier to search for.";
+  /** Open API content value for /Patient's partially aducated claim MBI ID to be used. */
+  public static final String PAC_MBI_VALUE =
+      "Fetch <i>Beneficiary<i/> data using a FHIR <i>MBI<i/> identifier; an MBI"
+          + " represents the medicare benficiary ID, or as much of that"
+          + " defined by the FHIR specification as:"
+          + "<p><code>"
+          + "A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),"
+          + " '-', with a length limit of 11 characters."
+          + "The MBI ID has the following characters for each position:"
+          + "Position 1 - numeric values 1 thru 9"
+          + "Position 2 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
+          + "Position 3 - alpha-numeric values 0 thru 9 and A thru Z (minus S, L, O, I, B, Z)"
+          + "Position 4 - numeric values 0 thru 9"
+          + "Position 5 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
+          + "Position 6 - alpha-numeric values 0 thru 9 and A thru Z (minus S, L, O, I, B, Z)"
+          + "Position 7 - numeric values 0 thru 9"
+          + "Position 8 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
+          + "Position 9 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
+          + "Position 10 - numeric values 0 thru 9"
+          + "Position 11 - numeric values 0 thru 9</code></p><p>"
+          + "This class contains that MBI, and can optionally also contain hashed version to prevent PII exposure"
+          + " The following are all valid values for MBI, and all might"
+          + " represent the same resource:</p><ul>"
+          + "<li><code>9AB2WW3GR44</code> (unhashed MBI)</li>"
+          + "<li><code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)</li>"
+          + "<li><code>1S00E00HA26 (synthetic MBI)</code></li>";
+
+  /**
+   * Open API content short description for /Patient's partially aducated claim MBI ID being hashed
+   * or not.
+   */
+  public static final String PAC_IS_HASHED =
+      "A boolean indicating whether or not the MBI is hashed.";
+  /** Open API content value for /Patient's partially aducated claim MBI ID being hashed or not. */
+  public static final String PAC_IS_HASHED_VALUE =
+      "<p/>Setting this flag to <i>true</i>, modifies the request to provide hashed MBI data ifrom the response."
+          + "<p/>Example:<ul>"
+          + "<li>&isHashed=true</li>";
 }
