@@ -184,4 +184,12 @@ public final class QueryLoggingListenerTest {
 
     assertEquals(QueryType.MBI_CACHE, QueryType.computeQueryType(queryInfo));
   }
+
+  /** Verifies that {@link QueryType#CHECK_CLAIMS_MASK} works as expected. */
+  @Test
+  public void computeQueryType_CHECK_CLAIMS_MASK() {
+    QueryInfo queryInfo = new QueryInfo("select * from check_claims_mask(1234)");
+
+    assertEquals(QueryType.CHECK_CLAIMS_MASK, QueryType.computeQueryType(queryInfo));
+  }
 }

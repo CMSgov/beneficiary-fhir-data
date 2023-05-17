@@ -192,6 +192,9 @@ public final class QueryLoggingListener implements QueryExecutionListener {
             s.contains(" from beneficiary_monthly ")
                 && s.contains("year_month=")
                 && s.contains("partd_contract_number_id="))),
+
+    /** Represents query that invokes the check_claims_mask function. */
+    CHECK_CLAIMS_MASK("check_claims_mask", (s -> s.contains("check_claims_mask"))),
     /**
      * Represents Hibernate PostgreSQL dialect's probing for sequences in the associated database.
      * This query is automatically executed at least once when establishing a database connection.
