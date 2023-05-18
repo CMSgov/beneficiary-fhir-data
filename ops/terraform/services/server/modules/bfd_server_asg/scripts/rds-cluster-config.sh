@@ -2,7 +2,7 @@
 #######################################
 # Results in two calls to the AWS RDS APIs for describe-db-clusters and describe-db-instances.
 # Returns a well-formatted json object including the following keys:
-# "DBClusterIdentifier", "Endpoint", "ReaderEndpoint", "WriterAZ", and "WriterNode".
+# "DBClusterIdentifier", "Endpoint", "ReaderEndpoint", "WriterAZ", "WriterNode" and "CustomEndpoint".
 #
 # This exists to accommodate the desire for placing write-intensive workloads in the same AZ as the
 # writer node. As of May 2022, the data source for DB instances does not expose the `IsClusterWriter`
@@ -12,6 +12,7 @@
 #
 # Globals:
 #   CLUSTER_IDENTIFIER mapped to the "$1" positional argument
+#   BFD_ENV mapped to the "$2" positional argument
 #   CLUSTER a modified json object from the aws rds describe-db-clusters command
 #   WRITER_NODE a string representing the writer node's db-instance-identifier
 #   WRITER_AZ a string representing the writer node's availability zone
@@ -23,10 +24,15 @@
 set -euo pipefail
 
 CLUSTER_IDENTIFIER="$1"
+BFD_ENV="$2"
+
+ENDPOINT_IDENTIFIER="bfd-${BFD_ENV}-beta-reader"
 
 CLUSTER="$(aws rds describe-db-clusters \
     --query 'DBClusters[].{DBClusterIdentifier:DBClusterIdentifier,Endpoint:Endpoint,ReaderEndpoint:ReaderEndpoint,Members:DBClusterMembers}[0]' \
     --db-cluster-identifier "$CLUSTER_IDENTIFIER")"
+
+CUSTOM_ENDPOINT="$(aws rds describe-db-cluster-endpoints --db-cluster-identifier "$CLUSTER_IDENTIFIER" | jq -r --arg endpoint "$ENDPOINT_IDENTIFIER" '.[][] | select(.DBClusterEndpointIdentifier == $endpoint).Endpoint')"
 
 WRITER_NODE="$(jq -r '.Members[] | select(.IsClusterWriter == true) | .DBInstanceIdentifier' <<<"$CLUSTER")"
 
@@ -34,4 +40,6 @@ WRITER_AZ="$(aws rds describe-db-instances --db-instance-identifier "$WRITER_NOD
 
 WRITER_CONFIG="$(jq --null-input --arg writer_node "$WRITER_NODE" --arg writer_az "$WRITER_AZ" '{ WriterNode: $writer_node, WriterAZ: $writer_az }')"
 
-jq --argjson obj "$WRITER_CONFIG" '. += $obj | del(.Members)' <<<$CLUSTER
+# Construct the final object keeping just "DBClusterIdentifier", "Endpoint", "ReaderEndpoint", "WriterAZ" from the $CLUSTER
+# Add the objects representing "WriterNode" and "CustomEndpoint"
+jq --argjson obj1 "$WRITER_CONFIG" --arg str1 "$CUSTOM_ENDPOINT"   '. += $obj1 | . += { "CustomEndpoint": $str1 } | del(.Members)' <<<$CLUSTER
