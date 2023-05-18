@@ -286,8 +286,6 @@ try {
 
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
-
-						awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,
 							directory: "ops/terraform/services/server",
@@ -450,7 +448,6 @@ try {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
 						container('bfd-cbc-build') {
-							
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
