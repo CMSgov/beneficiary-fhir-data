@@ -26,32 +26,49 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
+@Component
 final class CoverageTransformerV2 {
+
+  /** Helper to record metric information. */
+  private final MetricRegistry metricRegistry;
+
+  /**
+   * Instantiates a new {@link CoverageTransformerV2}.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   */
+  public CoverageTransformerV2(MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
+  }
+
   /**
    * Transforms a beneficiary and medicare segment into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param medicareSegment the {@link MedicareSegment} to generate a {@link Coverage} resource for
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
    * @return the {@link Coverage} resource that was generated
    */
   @Trace
-  public static Coverage transform(
-      MetricRegistry metricRegistry, MedicareSegment medicareSegment, Beneficiary beneficiary) {
+  public Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
     Objects.requireNonNull(medicareSegment);
     Objects.requireNonNull(beneficiary);
 
     switch (medicareSegment) {
       case PART_A:
-        return transformPartA(metricRegistry, beneficiary);
+        return transformPartA(beneficiary);
       case PART_B:
-        return transformPartB(metricRegistry, beneficiary);
+        return transformPartB(beneficiary);
       case PART_C:
-        return transformPartC(metricRegistry, beneficiary);
+        return transformPartC(beneficiary);
       case PART_D:
-        return transformPartD(metricRegistry, beneficiary);
+        return transformPartD(beneficiary);
       default:
         throw new BadCodeMonkeyException();
     }
@@ -60,30 +77,27 @@ final class CoverageTransformerV2 {
   /**
    * Transforms a beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
   @Trace
-  public static List<IBaseResource> transform(
-      MetricRegistry metricRegistry, Beneficiary beneficiary) {
+  public List<IBaseResource> transform(Beneficiary beneficiary) {
     return Arrays.stream(MedicareSegment.values())
-        .map(s -> transform(metricRegistry, s, beneficiary))
+        .map(s -> transform(s, beneficiary))
         .collect(Collectors.toList());
   }
 
   /**
    * Transforms a medicare part A beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_A} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_A} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartA(MetricRegistry metricRegistry, Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext(metricRegistry, "part_a");
+  private Coverage transformPartA(Beneficiary beneficiary) {
+    Timer.Context timer = getTimerContext("part_a");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -140,14 +154,13 @@ final class CoverageTransformerV2 {
   /**
    * Transforms a medicare part B beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_B} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_B} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartB(MetricRegistry metricRegistry, Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext(metricRegistry, "part_b");
+  private Coverage transformPartB(Beneficiary beneficiary) {
+    Timer.Context timer = getTimerContext("part_b");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -198,14 +211,13 @@ final class CoverageTransformerV2 {
   /**
    * Transforms a medicare part C beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_C} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartC(MetricRegistry metricRegistry, Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext(metricRegistry, "part_c");
+  private Coverage transformPartC(Beneficiary beneficiary) {
+    Timer.Context timer = getTimerContext("part_c");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -253,14 +265,13 @@ final class CoverageTransformerV2 {
   /**
    * Transforms a medicare part D beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartD(MetricRegistry metricRegistry, Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext(metricRegistry, "part_d");
+  private Coverage transformPartD(Beneficiary beneficiary) {
+    Timer.Context timer = getTimerContext("part_d");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -368,7 +379,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformHMOIndicator(Coverage coverage, Beneficiary beneficiary) {
+  private void transformHMOIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
     addCoverageCodeExtension(
         coverage, CcwCodebookVariable.HMO_IND_01, beneficiary.getHmoIndicatorJanInd());
@@ -402,7 +413,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTC_PLAN_TYPE_CD_01, beneficiary.getPartCPlanTypeJanCode());
@@ -436,7 +447,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void tranformsPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void tranformsPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTC_PBP_ID_01, beneficiary.getPartCPbpNumberJanId());
@@ -470,7 +481,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTC_CNTRCT_ID_01, beneficiary.getPartCContractNumberJanId());
     addCoverageExtension(
@@ -504,8 +515,7 @@ final class CoverageTransformerV2 {
    * @param coverage the {@link Coverage} to generate
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    */
-  private static void transformEntitlementBuyInIndicators(
-      Coverage coverage, Beneficiary beneficiary) {
+  private void transformEntitlementBuyInIndicators(Coverage coverage, Beneficiary beneficiary) {
 
     // Medicare Entitlement Buy In Indicator
     addCoverageCodeExtension(
@@ -541,8 +551,7 @@ final class CoverageTransformerV2 {
    * @param coverage the {@link Coverage} to generate
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    */
-  private static void transformEntitlementDualEligibility(
-      Coverage coverage, Beneficiary beneficiary) {
+  private void transformEntitlementDualEligibility(Coverage coverage, Beneficiary beneficiary) {
 
     // Monthly Medicare-Medicaid dual eligibility codes
     addCoverageExtension(
@@ -578,7 +587,7 @@ final class CoverageTransformerV2 {
    * @param coverage the {@link Coverage} to generate
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    */
-  private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Part D Retiree Drug Subsidy Indicators
     addCoverageCodeExtension(
         coverage, CcwCodebookVariable.RDSIND01, beneficiary.getPartDRetireeDrugSubsidyJanInd());
@@ -612,8 +621,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformPartDLowIncomeCostShareGroup(
-      Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDLowIncomeCostShareGroup(Coverage coverage, Beneficiary beneficiary) {
     // Monthly cost sharing group
     addCoverageExtension(
         coverage,
@@ -671,7 +679,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
     addCoverageExtension(
         coverage, CcwCodebookVariable.SGMTID01, beneficiary.getPartDSegmentNumberJanId());
@@ -705,7 +713,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTDPBPID01, beneficiary.getPartDPbpNumberJanId());
@@ -739,7 +747,7 @@ final class CoverageTransformerV2 {
    * @param coverage the FHIR {@link Coverage} resource to add to
    * @param beneficiary the value for {@link Beneficiary}
    */
-  private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTDCNTRCT01, beneficiary.getPartDContractNumberJanId());
@@ -773,7 +781,7 @@ final class CoverageTransformerV2 {
    * @param coverage The {@link Coverage} to Coverage details
    * @param terminationCode The {@link Character} that denotes if Part is active
    */
-  static void setCoverageStatus(Coverage coverage, Optional<Character> terminationCode) {
+  void setCoverageStatus(Coverage coverage, Optional<Character> terminationCode) {
     if (terminationCode.isPresent() && terminationCode.get().equals('0')) {
       coverage.setStatus(CoverageStatus.ACTIVE);
     } else {
@@ -787,7 +795,7 @@ final class CoverageTransformerV2 {
    *
    * @param coverage The {@link Coverage} to Coverage details
    */
-  static void setTypeAndIssuer(Coverage coverage) {
+  void setTypeAndIssuer(Coverage coverage) {
     coverage.setType(
         new CodeableConcept()
             .addCoding(
@@ -808,7 +816,7 @@ final class CoverageTransformerV2 {
    * @param value The value associated with the {@link CoverageClass}
    * @param name The name associated with the {@link CoverageClass}
    */
-  static void createCoverageClass(
+  void createCoverageClass(
       Coverage coverage, CoverageClass coverageClass, String value, Optional<String> name) {
 
     if (value == null || value.isEmpty()) {
@@ -845,8 +853,7 @@ final class CoverageTransformerV2 {
    * @param coverage The {@link Coverage} to Coverage details
    * @param policyRelationship The {@link SubscriberPolicyRelationship} associated with the Coverage
    */
-  static void setCoverageRelationship(
-      Coverage coverage, SubscriberPolicyRelationship policyRelationship) {
+  void setCoverageRelationship(Coverage coverage, SubscriberPolicyRelationship policyRelationship) {
     coverage.setRelationship(
         new CodeableConcept()
             .addCoding(
@@ -865,7 +872,7 @@ final class CoverageTransformerV2 {
    * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the Coverage
    * @param optVal The {@link String} value associated with the Coverage
    */
-  static void addCoverageExtension(
+  void addCoverageExtension(
       Coverage coverage, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
     optVal.ifPresent(
         value ->
@@ -882,7 +889,7 @@ final class CoverageTransformerV2 {
    * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the Coverage
    * @param optVal The {@link Character} value associated with the Coverage
    */
-  static void addCoverageCodeExtension(
+  void addCoverageCodeExtension(
       Coverage coverage, CcwCodebookVariable ccwVariable, Optional<Character> optVal) {
     optVal.ifPresent(
         value ->
@@ -899,7 +906,7 @@ final class CoverageTransformerV2 {
    * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the Coverage
    * @param optVal The {@link BigDecimal} value associated with the Coverage
    */
-  static void addCoverageDecimalExtension(
+  void addCoverageDecimalExtension(
       Coverage coverage, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
     optVal.ifPresent(
         value ->
@@ -910,11 +917,10 @@ final class CoverageTransformerV2 {
   /**
    * Constructs a Timer context {@link Timer.Context} suitable for measuring compute duration.
    *
-   * @param metricRegistry The EtricRegistry passed into the transformer {@link MetricRegistry}
    * @param partId The context string {@link String}
    * @return the timer context
    */
-  static Timer.Context getTimerContext(MetricRegistry metricRegistry, String partId) {
+  Timer.Context getTimerContext(String partId) {
     return metricRegistry
         .timer(
             MetricRegistry.name(CoverageTransformerV2.class.getSimpleName(), "transform", partId))

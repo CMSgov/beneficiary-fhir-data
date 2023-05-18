@@ -68,6 +68,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   private final MetricRegistry metricRegistry;
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
+  /** The coverage transformer. */
+  private final CoverageTransformerV2 coverageTransformer;
 
   /**
    * Instantiates a new {@link R4CoverageResourceProvider}.
@@ -77,13 +79,18 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    *
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
+   * @param coverageTransformer the coverage transformer
    */
   public R4CoverageResourceProvider(
-      MetricRegistry metricRegistry, LoadedFilterManager loadedFilterManager) {
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      CoverageTransformerV2 coverageTransformer) {
     requireNonNull(metricRegistry);
     requireNonNull(loadedFilterManager);
+    requireNonNull(coverageTransformer);
     this.metricRegistry = metricRegistry;
     this.loadedFilterManager = loadedFilterManager;
+    this.coverageTransformer = coverageTransformer;
   }
 
   /**
@@ -164,8 +171,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
-    Coverage coverage =
-        CoverageTransformerV2.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
+    Coverage coverage = coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
     return coverage;
   }
 
@@ -205,7 +211,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
-      coverages = CoverageTransformerV2.transform(metricRegistry, beneficiaryEntity);
+      coverages = coverageTransformer.transform(beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
