@@ -26,7 +26,7 @@ set -euo pipefail
 CLUSTER_IDENTIFIER="$1"
 BFD_ENV="$2"
 
-ENDPOINT_IDENTIFIER="bfd-${BFD_ENV}-beta-reader"
+ENDPOINT_IDENTIFIER="bfd-${BFD_ENV}-ro"
 
 CLUSTER="$(aws rds describe-db-clusters \
     --query 'DBClusters[].{DBClusterIdentifier:DBClusterIdentifier,Endpoint:Endpoint,ReaderEndpoint:ReaderEndpoint,Members:DBClusterMembers}[0]' \
