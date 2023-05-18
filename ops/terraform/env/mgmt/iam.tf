@@ -399,3 +399,106 @@ resource "aws_iam_group_policy_attachment" "app_engineers_bfd_ssm_ro" {
   group      = aws_iam_group.app_engineers.id
   policy_arn = aws_iam_policy.bfd_ssm_ro.arn
 }
+
+# PACA / RDA
+resource "aws_iam_group" "paca_engineers" {
+  name = "bfd-paca-app-engineers"
+  path = "/"
+}
+
+resource "aws_iam_policy" "rda_ec2_instance_manager" {
+  name        = "bfd-rda-pipeline-ec2-instance-manager"
+  description = "Allow management of RDA pipeline instances"
+  path        = "/"
+  policy      = <<-POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "RDAPipelineInstanceAdmin",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:us-east-1:${local.account_id}:instance/*-pipeline-rda"
+            ]
+        }
+    ]
+}
+POLICY
+}
+
+resource "aws_iam_policy" "rda_ssm_ro" {
+  description = "Allow reading RDA pipeline SSM hierarchies"
+  name        = "bfd-rda-pipeline-ssm-parameters-ro"
+  path        = "/"
+  policy      = <<-POLICY
+{
+  "Statement": [
+    {
+      "Action": [
+        "ssm:GetParametersByPath",
+        "ssm:GetParameters",
+        "ssm:GetParameter"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/*/pipeline/rda/*"
+      ]
+    },
+    {
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "${local.kms_key_id}",
+        "${local.test_kms_key_id}",
+        "${local.prod_sbx_kms_key_id}",
+        "${local.prod_kms_key_id}"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}
+POLICY
+
+}
+
+# allow paca engineers to manage rda pipeline instances
+resource "aws_iam_group_policy_attachment" "paca_engineers_ec2_instance_manager" {
+  group      = aws_iam_group.paca_engineers.id
+  policy_arn = aws_iam_policy.rda_ec2_instance_manager.arn
+}
+
+# allow paca engineers to run integration tests
+resource "aws_iam_group_policy_attachment" "paca_engineers_s3_integration_tests" {
+  group      = aws_iam_group.paca_engineers.id
+  policy_arn = aws_iam_policy.s3_integration_tests.arn
+}
+
+# allow paca engineers to read rda pipeline ssm hierarchies
+resource "aws_iam_group_policy_attachment" "paca_engineers_ssm_ro" {
+  group      = aws_iam_group.paca_engineers.id
+  policy_arn = aws_iam_policy.rda_ssm_ro.arn
+}
+
+# allow paca engineers common AWS console access
+resource "aws_iam_group_policy_attachment" "paca_engineers_autoscaling_ro" {
+  group      = aws_iam_group.paca_engineers.id
+  policy_arn = "arn:aws:iam::aws:policy/AutoScalingReadOnlyAccess"
+}
+
+resource "aws_iam_group_policy_attachment" "paca_engineers_ec2_ro" {
+  group      = aws_iam_group.paca_engineers.id
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+}
+
+resource "aws_iam_group_policy_attachment" "paca_engineers_vpc_ro" {
+  group      = aws_iam_group.paca_engineers.id
+  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCReadOnlyAccess"
+}
