@@ -29,7 +29,7 @@ spec:
     stage('Run Build Apps') {
       steps {
         script {
-          def jobToRun = "../bfd-build-apps/${env.BRANCH_NAME}"
+          def jobToRun = "bfd-build-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
           build job: jobToRun, parameters: [string(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")], wait: false
         }
