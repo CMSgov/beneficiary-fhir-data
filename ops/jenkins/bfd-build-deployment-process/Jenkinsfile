@@ -2,7 +2,7 @@
 
 /**
  * <p>
- * This script will be run by Jenkins when building deploying apps and app AMIs to the traditional, non-ephemeral environment.
+ * This script will be run by Jenkins when building deploying apps and app AMIs to the traditional, non-ephemeral environments.
  * </p>
  */
 
