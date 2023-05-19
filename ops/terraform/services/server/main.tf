@@ -2,7 +2,7 @@ locals {
   env              = terraform.workspace
   established_envs = ["test", "prod-sbx", "prod"]
   seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-  is_ephemeral_env = local.env != local.seed_env
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
 
   azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service = "fhir"
