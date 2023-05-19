@@ -1,3 +1,14 @@
+#!/usr/bin/env groovy
+
+/**
+ * <p>
+ * This script will be run by Jenkins when building deploying apps and app AMIs to the traditional, non-ephemeral environment.
+ * </p>
+ */
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def amiIds
+
 pipeline {
     agent {
         kubernetes {
@@ -121,16 +132,12 @@ spec:
       }
     }
 
-    stage('Run Deploy To Test') {
+    stage('Run Deploy To Prod-SBX') {
       steps {
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
-            awsAuth.assumeRole()
-
-            // Find the most current AMI IDs (if any).
-            amiIds = null
-            amiIds = scriptForDeploys.findAmis()
+          awsAuth.assumeRole()
 
           build job:
                 jobToRun,
@@ -147,16 +154,12 @@ spec:
       }
     }
 
-    stage('Run Deploy To Test') {
+    stage('Run Deploy To PROD') {
       steps {
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
-            awsAuth.assumeRole()
-
-            // Find the most current AMI IDs (if any).
-            amiIds = null
-            amiIds = scriptForDeploys.findAmis()
+          awsAuth.assumeRole()
 
           build job:
                 jobToRun,
