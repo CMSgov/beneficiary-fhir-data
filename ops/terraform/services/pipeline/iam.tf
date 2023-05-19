@@ -236,7 +236,11 @@ resource "aws_iam_policy" "etl_s3_rda_paths_rw" {
         {
           "Sid" : "ETLRWKMS",
           "Action" : [
-            "kms:Decrypt"
+            "kms:Decrypt",
+            "kms:Encypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey"
           ],
           "Effect" : "Allow",
           "Resource" : [
