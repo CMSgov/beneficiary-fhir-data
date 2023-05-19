@@ -121,7 +121,7 @@ spec:
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
-                wait: false,
+                wait: false
         }
       }
     }
