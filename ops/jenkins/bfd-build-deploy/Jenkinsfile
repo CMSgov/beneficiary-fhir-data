@@ -68,6 +68,23 @@ spec:
       }
     }
 
+      /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+          value if the build is a PR as the BRANCH_NAME var is populated with the build
+          name during PR builds.
+      */
+      stage('Set Branch Name') {
+        steps {
+          script {
+            currentStage = env.STAGE_NAME
+            if (env.BRANCH_NAME.startsWith('PR')) {
+              gitBranchName = env.CHANGE_BRANCH
+            } else {
+              gitBranchName = env.BRANCH_NAME
+          }
+        }
+      }
+    }
+
     stage('Run Build Apps') {
       steps {
         script {
@@ -104,7 +121,7 @@ spec:
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
-                wait: false
+                wait: false,
         }
       }
     }
