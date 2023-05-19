@@ -29,24 +29,6 @@ spec:
         description: 'The BFD Environment to deploy apps to'
         )
 
-        string(
-        name: 'migrator_ami_override',
-        description: 'The AMI ID to deploy migrator from',
-        defaultValue: null
-        )
-
-        string(
-        name: 'pipeline_ami_override',
-        description: 'The AMI ID to deploy pipeline from',
-        defaultValue: null
-        )
-
-        string(
-        name: 'server_ami',
-        description: 'The AMI ID to deploy server from',
-        defaultValue: null
-        )
-
         booleanParam(
         name: 'force_migrator_deployment',
         description: 'When true, force the migrator to deploy.',
