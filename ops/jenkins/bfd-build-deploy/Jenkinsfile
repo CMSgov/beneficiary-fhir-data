@@ -22,7 +22,7 @@ spec:
   parameters {
         booleanParam(name: 'verbose_mvn_logging',
         description: 'When true, `mvn` will produce verbose logs.',
-        defaultValue: false),
+        defaultValue: false)
 
         string(
         name: 'env',
