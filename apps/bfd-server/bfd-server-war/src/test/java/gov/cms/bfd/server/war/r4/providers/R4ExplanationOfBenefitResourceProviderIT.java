@@ -38,7 +38,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import java.io.IOException;
@@ -112,12 +111,13 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
-    hhaClaimTransformer = new HHAClaimTransformerV2();
-    hospiceClaimTransformer = new HospiceClaimTransformerV2();
-    inpatientClaimTransformer = new InpatientClaimTransformerV2();
-    outpatientClaimTransformer = new OutpatientClaimTransformerV2();
-    partDEventTransformer = new PartDEventTransformerV2();
-    snfClaimTransformerV2 = new SNFClaimTransformerV2();
+    hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
+    hospiceClaimTransformer = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
+    inpatientClaimTransformer = new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
+    outpatientClaimTransformer =
+        new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+    partDEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    snfClaimTransformerV2 = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
   }
 
   /**
@@ -444,15 +444,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    assertEobEquals(
-        OutpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim),
-        eob);
+    OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
+        new OutpatientClaimTransformerV2(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+    assertEobEquals(outpatientClaimTransformerV2.transform(claim), eob);
   }
 
   /**
@@ -1469,14 +1466,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .get();
 
     // Compare result to transformed EOB
+    PartDEventTransformerV2 partDEventTransformer =
+        new PartDEventTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertEobEquals(
-        PartDEventTransformerV2.transform(
-            new TransformerContext(
-                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            partDEvent),
+        partDEventTransformer.transform(partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -2068,24 +2062,16 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .findFirst()
             .get();
 
-    // TODO: Remove the dependencies from this
-    TransformerContext transformerContext =
-        new TransformerContext(
-            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-            Optional.of(false),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
-
     ExplanationOfBenefit expectedEob =
         switch (claimType) {
-          case CARRIER -> carrierClaimTransformer.transform(transformerContext, claim);
-          case DME -> dmeClaimTransformer.transform(transformerContext, claim);
-          case HHA -> hhaClaimTransformer.transform(transformerContext, claim);
-          case HOSPICE -> hospiceClaimTransformer.transform(transformerContext, claim);
-          case INPATIENT -> inpatientClaimTransformer.transform(transformerContext, claim);
-          case OUTPATIENT -> outpatientClaimTransformer.transform(transformerContext, claim);
-          case PDE -> partDEventTransformer.transform(transformerContext, claim);
-          case SNF -> snfClaimTransformerV2.transform(transformerContext, claim);
+          case CARRIER -> carrierClaimTransformer.transform(claim, false);
+          case DME -> dmeClaimTransformer.transform(claim, false);
+          case HHA -> hhaClaimTransformer.transform(claim);
+          case HOSPICE -> hospiceClaimTransformer.transform(claim);
+          case INPATIENT -> inpatientClaimTransformer.transform(claim);
+          case OUTPATIENT -> outpatientClaimTransformer.transform(claim);
+          case PDE -> partDEventTransformer.transform(claim);
+          case SNF -> snfClaimTransformerV2.transform(claim);
         };
 
     assertEobEquals(expectedEob, searchResults);

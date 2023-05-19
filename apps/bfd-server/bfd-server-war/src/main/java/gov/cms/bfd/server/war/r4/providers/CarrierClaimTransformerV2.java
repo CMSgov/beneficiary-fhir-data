@@ -14,7 +14,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -66,13 +65,13 @@ public class CarrierClaimTransformerV2 {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -83,7 +82,7 @@ public class CarrierClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim(transformerContext, (CarrierClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
@@ -93,12 +92,11 @@ public class CarrierClaimTransformerV2 {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
-   * @param transformerContext the {@link TransformerContext} to transform
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private ExplanationOfBenefit transformClaim(
-      TransformerContext transformerContext, CarrierClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -325,7 +323,7 @@ public class CarrierClaimTransformerV2 {
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
       // tax num should be as a extension
-      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
+      if (includeTaxNumbers) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));

@@ -21,14 +21,12 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -103,80 +101,46 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     CarrierClaimTransformerV2 carrierClaimTransformerV2 =
         new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+    HHAClaimTransformerV2 hhaClaimTransformerV2 =
+        new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
+    InpatientClaimTransformerV2 inpatientClaimTransformerV2 =
+        new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
+    OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
+        new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+    PartDEventTransformerV2 partDEventTransformer =
+        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    SNFClaimTransformerV2 snfClaimTransformerV2 =
+        new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
 
     ExplanationOfBenefit inpatientEob =
-        InpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(InpatientClaim.class));
+        inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class));
     String inpatientClaimType = TransformerUtilsV2.getClaimType(inpatientEob).toString();
 
     ExplanationOfBenefit outpatientEob =
-        OutpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(OutpatientClaim.class));
+        outpatientClaimTransformerV2.transform(getClaim(OutpatientClaim.class));
     String outpatientClaimType = TransformerUtilsV2.getClaimType(outpatientEob).toString();
 
-    ExplanationOfBenefit dmeEob =
-        dmeClaimTransformerV2.transform(
-            new TransformerContext(null, Optional.empty(), null, null), getClaim(DMEClaim.class));
+    ExplanationOfBenefit dmeEob = dmeClaimTransformerV2.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtilsV2.getClaimType(dmeEob).toString();
 
-    ExplanationOfBenefit hhaEob =
-        HHAClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(HHAClaim.class));
+    ExplanationOfBenefit hhaEob = hhaClaimTransformerV2.transform(getClaim(HHAClaim.class));
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
+    HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
+        new HospiceClaimTransformerV2(
+            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
     ExplanationOfBenefit hospiceEob =
-        HospiceClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(HospiceClaim.class));
+        hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class));
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();
 
-    ExplanationOfBenefit snfEob =
-        SNFClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(SNFClaim.class));
+    ExplanationOfBenefit snfEob = snfClaimTransformerV2.transform(getClaim(SNFClaim.class));
     String snfClaimType = TransformerUtilsV2.getClaimType(snfEob).toString();
 
     ExplanationOfBenefit carrierEob =
-        carrierClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(CarrierClaim.class));
+        carrierClaimTransformerV2.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
-    ExplanationOfBenefit pdeEob =
-        PartDEventTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            getClaim(PartDEvent.class));
+    ExplanationOfBenefit pdeEob = partDEventTransformer.transform(getClaim(PartDEvent.class));
 
     String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();
 

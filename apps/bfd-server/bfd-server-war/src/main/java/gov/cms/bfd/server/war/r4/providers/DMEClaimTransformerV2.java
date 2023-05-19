@@ -13,7 +13,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -28,8 +27,10 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
+@Component
 final class DMEClaimTransformerV2 {
 
   /** The Metric registry. */
@@ -59,13 +60,13 @@ final class DMEClaimTransformerV2 {
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -74,7 +75,7 @@ final class DMEClaimTransformerV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim(transformerContext, (DMEClaim) claim);
+    ExplanationOfBenefit eob = transformClaim(includeTaxNumbers, (DMEClaim) claim);
 
     timer.stop();
     return eob;
@@ -83,13 +84,12 @@ final class DMEClaimTransformerV2 {
   /**
    * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the CCW {@link TransformerContext} to transform
+   * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
    * @param claimGroup the CCW {@link DMEClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(
-      TransformerContext transformerContext, DMEClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(boolean includeTaxNumbers, DMEClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -191,7 +191,7 @@ final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob, transformerContext);
+    handleClaimLines(claimGroup, eob, includeTaxNumbers);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
@@ -201,10 +201,10 @@ final class DMEClaimTransformerV2 {
    *
    * @param claimGroup the claim group with the lines to get data from
    * @param eob the eob to add information to
-   * @param transformerContext the transformer context
+   * @param includeTaxNumbers whether to include tax numbers
    */
   private void handleClaimLines(
-      DMEClaim claimGroup, ExplanationOfBenefit eob, TransformerContext transformerContext) {
+      DMEClaim claimGroup, ExplanationOfBenefit eob, boolean includeTaxNumbers) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -286,7 +286,7 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
 
-      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
+      if (includeTaxNumbers) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));

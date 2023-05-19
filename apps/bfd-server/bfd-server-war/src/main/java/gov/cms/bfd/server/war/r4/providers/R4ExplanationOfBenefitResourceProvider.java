@@ -33,7 +33,6 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -570,20 +569,16 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    */
   private ExplanationOfBenefit transformEobClaim(
       Object claimEntity, ClaimTypeV2 eobIdType, boolean includeTaxNumbers) {
-    // TODO: remove the dependencies from here, they are injected into the transformers in v2
-    TransformerContext transformerContext =
-        new TransformerContext(
-            metricRegistry, Optional.of(includeTaxNumbers), drugCodeDisplayLookup, npiOrgLookup);
 
     return switch (eobIdType) {
-      case CARRIER -> carrierClaimTransformer.transform(transformerContext, claimEntity);
-      case DME -> dmeClaimTransformer.transform(transformerContext, claimEntity);
-      case HHA -> hhaClaimTransformer.transform(transformerContext, claimEntity);
-      case HOSPICE -> hospiceClaimTransformer.transform(transformerContext, claimEntity);
-      case INPATIENT -> inpatientClaimTransformer.transform(transformerContext, claimEntity);
-      case OUTPATIENT -> outpatientClaimTransformer.transform(transformerContext, claimEntity);
-      case PDE -> partDEventTransformer.transform(transformerContext, claimEntity);
-      case SNF -> snfClaimTransformerV2.transform(transformerContext, claimEntity);
+      case CARRIER -> carrierClaimTransformer.transform(claimEntity, includeTaxNumbers);
+      case DME -> dmeClaimTransformer.transform(claimEntity, includeTaxNumbers);
+      case HHA -> hhaClaimTransformer.transform(claimEntity);
+      case HOSPICE -> hospiceClaimTransformer.transform(claimEntity);
+      case INPATIENT -> inpatientClaimTransformer.transform(claimEntity);
+      case OUTPATIENT -> outpatientClaimTransformer.transform(claimEntity);
+      case PDE -> partDEventTransformer.transform(claimEntity);
+      case SNF -> snfClaimTransformerV2.transform(claimEntity);
     };
   }
 
