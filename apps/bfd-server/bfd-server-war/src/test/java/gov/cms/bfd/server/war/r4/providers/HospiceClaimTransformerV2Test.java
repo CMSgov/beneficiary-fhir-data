@@ -424,7 +424,12 @@ public final class HospiceClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-30"), eob.getBillablePeriod().getEnd());
   }
 
-  /** Tests that the billable period is not set if claim query code is null. */
+  /**
+   * Tests that the billable period is not set if claim query code is null.
+   *
+   * @throws Exception should not be thrown
+   */
+  @Test
   public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
