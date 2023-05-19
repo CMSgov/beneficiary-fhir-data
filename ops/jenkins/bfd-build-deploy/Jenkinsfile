@@ -85,15 +85,19 @@ spec:
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
+          // Find the most current AMI IDs (if any).
+					amiIds = null
+					amiIds = scriptForDeploys.findAmis()
+
           build job:
                 jobToRun,
                 parameters: [
                   string(name: "env", value: "${params.env}"),
-                  string(name: "migrator_ami_override", value: "${params.migrator_ami_override}"),
-                  string(name: "pipeline_ami_override", value: "${params.pipeline_ami_override}"),
-                  string(name: "server_ami", value: "${params.pipeline_ami_override}"),
+                  string(name: "migrator_ami_override", value: "${amiIds.bfdMigratorAmiId}"),
+                  string(name: "pipeline_ami_override", value: "${amiIds.bfdPipelineAmiId}"),
+                  string(name: "server_ami", value: "${amiIds.bfdServerAmiId}"),
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
-                  string(name: "server_regression_image_override", value: "${params.server_regression_image_override}"),
+                  string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
                 wait: false
         }
