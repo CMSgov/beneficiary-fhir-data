@@ -230,3 +230,9 @@ module "bfd_pipeline_slo_alarms" {
   warning_sns_override    = var.warning_sns_override
   warning_ok_sns_override = var.warning_ok_sns_override
 }
+
+# TODO: Remove post BFD-2554
+moved {
+  from = module.bfd_pipeline_slis
+  to = module.bfd_pipeline_slis[0]
+}
