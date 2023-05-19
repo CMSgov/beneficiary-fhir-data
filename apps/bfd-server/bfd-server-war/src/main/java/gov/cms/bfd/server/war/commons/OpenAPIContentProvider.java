@@ -47,9 +47,7 @@ public final class OpenAPIContentProvider {
           + "<p/>Examples:<ul>"
           + "<li>&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01</li>"
           + "<li>&_lastUpdated=gt2023-01-02</li>"
-          + "<li>&_lastUpdated=lt2023-05-01</li></ul><p/>"
-          + "<a href=\"https://localhost:9876/v2/fhir/docs/foo.html\">"
-          + "See BFD Documentation for _lastUpdated</a><p/>";
+          + "<li>&_lastUpdated=lt2023-05-01</li></ul><p/>";
 
   /** Open API content short description for /Patient's Part D contract ID to be used. */
   public static final String PATIENT_PARTD_CONTRACT_SHORT = "Part D coverage contract identifier";
