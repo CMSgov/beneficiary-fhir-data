@@ -1,3 +1,14 @@
+#!/usr/bin/env groovy
+
+/**
+ * <p>
+ * This script will be run by Jenkins when building deploying apps and app AMIs to ephemeral environments.
+ * </p>
+ */
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def amiIds
+
 pipeline {
     agent {
         kubernetes {
