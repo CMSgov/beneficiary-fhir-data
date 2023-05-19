@@ -313,11 +313,14 @@ spec:
                             )
 
                             // Deploy the API requests Insights Lambda
-                            awsAuth.assumeRole()
-                            terraform.deployTerraservice(
+                            // TODO: Better support ephemeral environments in the future as desired
+                            if (bfdEnv in ["test", "prod-sbx", "prod"]) {
+                                awsAuth.assumeRole()
+                                terraform.deployTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server/insights/api-requests'
                                 )
+                            }
 
                             awsAuth.assumeRole()
                             hasRegressionRunSucceeded = serverScripts.runServerRegression(
