@@ -438,8 +438,10 @@ resource "aws_iam_policy" "rda_ssm_ro" {
   path        = "/"
   policy      = <<-POLICY
 {
+  "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "ReadRDAPipelineSSMParameters",
       "Action": [
         "ssm:GetParametersByPath",
         "ssm:GetParameters",
@@ -451,6 +453,7 @@ resource "aws_iam_policy" "rda_ssm_ro" {
       ]
     },
     {
+      "Sid": "AllowKeyUsage",
       "Action": [
         "kms:Decrypt"
       ],
@@ -462,8 +465,7 @@ resource "aws_iam_policy" "rda_ssm_ro" {
         "${local.prod_kms_key_id}"
       ]
     }
-  ],
-  "Version": "2012-10-17"
+  ]
 }
 POLICY
 
