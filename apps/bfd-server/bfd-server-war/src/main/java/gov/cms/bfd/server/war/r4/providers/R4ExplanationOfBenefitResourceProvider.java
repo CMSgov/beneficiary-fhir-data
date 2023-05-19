@@ -88,10 +88,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   private final R4EobSamhsaMatcher samhsaMatcher;
   /** The loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
-  /** The drug code display lookup entity. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-  /** The npi org lookup entity. */
-  private final NPIOrgLookup npiOrgLookup;
 
   /** The transformer for carrier claims. */
   private final CarrierClaimTransformerV2 carrierClaimTransformer;
@@ -119,8 +115,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param metricRegistry the metric registry bean
    * @param loadedFilterManager the loaded filter manager bean
    * @param samhsaMatcher the samhsa matcher bean
-   * @param drugCodeDisplayLookup the drug code display lookup bean
-   * @param npiOrgLookup the npi org lookup bean
    * @param carrierClaimTransformer the carrier claim transformer
    * @param dmeClaimTransformer the dme claim transformer
    * @param hhaClaimTransformer the hha claim transformer
@@ -134,8 +128,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       R4EobSamhsaMatcher samhsaMatcher,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       CarrierClaimTransformerV2 carrierClaimTransformer,
       DMEClaimTransformerV2 dmeClaimTransformer,
       HHAClaimTransformerV2 hhaClaimTransformer,
@@ -145,11 +137,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       PartDEventTransformerV2 partDEventTransformer,
       SNFClaimTransformerV2 snfClaimTransformerV2) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    ;
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.carrierClaimTransformer = requireNonNull(carrierClaimTransformer);
     this.dmeClaimTransformer = requireNonNull(dmeClaimTransformer);
     this.hhaClaimTransformer = requireNonNull(hhaClaimTransformer);

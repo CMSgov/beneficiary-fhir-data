@@ -41,10 +41,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Mock private R4EobSamhsaMatcher samhsaMatcher;
   /** The mock loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
-  /** The mock drug code display lookup entity. */
-  @Mock private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-  /** The mock npi org lookup entity. */
-  @Mock private NPIOrgLookup npiOrgLookup;
 
   // Mock transformers
   /** The mock transformer for carrier claims. */
@@ -72,8 +68,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             metricRegistry,
             loadedFilterManager,
             samhsaMatcher,
-            drugCodeDisplayLookup,
-            npiOrgLookup,
             carrierClaimTransformerV2,
             dmeClaimTransformer,
             hhaClaimTransformer,
