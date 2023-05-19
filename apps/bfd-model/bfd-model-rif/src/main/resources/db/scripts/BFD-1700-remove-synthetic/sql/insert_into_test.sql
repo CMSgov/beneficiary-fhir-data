@@ -3,7 +3,7 @@
 
 BEGIN TRANSACTION;
 
-TRUNCATE beneficiaries, beneficiaries_history, beneficiaries_history_invalid_beneficiaries, beneficiary_monthly, carrier_claim_lines, carrier_claims, dme_claim_lines, dme_claims, hha_claim_lines, hha_claims, hospice_claim_lines, hospice_claims, inpatient_claim_lines, inpatient_claims, medicare_beneficiaryid_history, medicare_beneficiaryid_history_invalid_beneficiaries, outpatient_claim_lines, outpatient_claims, partd_events, snf_claim_lines, snf_claims;
+TRUNCATE beneficiaries, beneficiaries_history, beneficiaries_history_invalid_beneficiaries, beneficiary_monthly, carrier_claim_lines, carrier_claims, dme_claim_lines, dme_claims, hha_claim_lines, hha_claims, hospice_claim_lines, hospice_claims, inpatient_claim_lines, inpatient_claims, outpatient_claim_lines, outpatient_claims, partd_events, snf_claim_lines, snf_claims;
 
 \copy beneficiaries from 'beneficiaries.csv' delimiter ',' csv header;
 \copy beneficiaries_history from 'beneficiaries_history.csv' delimiter ',' csv header;
@@ -19,8 +19,6 @@ TRUNCATE beneficiaries, beneficiaries_history, beneficiaries_history_invalid_ben
 \copy hospice_claim_lines from 'hospice_claim_lines.csv' delimiter ',' csv header;
 \copy inpatient_claims from 'inpatient_claims.csv' delimiter ',' csv header;
 \copy inpatient_claim_lines from 'inpatient_claim_lines.csv' delimiter ',' csv header;
-\copy medicare_beneficiaryid_history from 'medicare_beneficiaryid_history.csv' delimiter ',' csv header;
-\copy medicare_beneficiaryid_history_invalid_beneficiaries from 'medicare_beneficiaryid_history_invalid_beneficiaries.csv' delimiter ',' csv header;
 \copy outpatient_claims from 'outpatient_claims.csv' delimiter ',' csv header;
 \copy outpatient_claim_lines from 'outpatient_claim_lines.csv' delimiter ',' csv header;
 \copy partd_events from 'partd_events.csv' delimiter ',' csv header;

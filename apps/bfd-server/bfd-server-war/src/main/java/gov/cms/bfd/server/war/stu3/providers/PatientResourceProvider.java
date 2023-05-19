@@ -172,11 +172,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
+    if (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers()) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
@@ -655,7 +652,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
 
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
@@ -895,11 +892,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
+    if (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers()) {
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,7 +10,12 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.util.Arrays;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -203,5 +209,20 @@ public class PatientResourceProviderTest {
             InvalidRequestException.class,
             () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
     assertEquals("Unsupported identifier system: bad-system", exception.getLocalizedMessage());
+  }
+
+  /** Verifies that {@link Beneficiary} throws an exception when empty. */
+  public void decomposeBeneficiaryFromRif() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    assertNotNull(beneficiary);
   }
 }

@@ -26,7 +26,6 @@ import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -616,7 +615,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -798,7 +796,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -858,7 +855,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 

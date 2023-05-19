@@ -7,7 +7,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -140,15 +139,20 @@ final class BeneficiaryTransformerV2 {
 
     // NOTE - No longer returning any HCIN value(s) in V2
 
-    /* Only add this if we know the beneficiary was queried in such a way that the bene history / medicare_beneficiaryid_history
-     * tables were left joined, such that the beneficiary model object has the historical MBI data to draw from
-     * Otherwise JPA will complain. */
+    /*
+     * Only add this if we know the beneficiary was queried in such a way that the
+     * bene history
+     * table was left joined, such that the beneficiary model object has the
+     * historical MBI data to draw from
+     * Otherwise JPA will complain.
+     */
     if (addHistoricalMbiExtensions) {
       addHistoricalMbiExtensions(patient, beneficiary);
     }
 
     // support header includeAddressFields from downstream components e.g. BB2
-    // per requirement of BFD-379, BB2 always send header includeAddressFields = False
+    // per requirement of BFD-379, BB2 always send header includeAddressFields =
+    // False
     Boolean addrHdrVal =
         requestHeader.getValue(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
 
@@ -256,16 +260,6 @@ final class BeneficiaryTransformerV2 {
     Extension historicalIdentifier =
         TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
     String currentMbi = beneficiary.getMedicareBeneficiaryId().orElse("");
-
-    // Add historical MBI data found in medicare_beneficiaryid_history
-    for (MedicareBeneficiaryIdHistory mbiHistory :
-        beneficiary.getMedicareBeneficiaryIdHistories()) {
-
-      if (mbiHistory.getMedicareBeneficiaryId().isPresent()) {
-        uniqueHistoricalMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
-      }
-      TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
-    }
 
     // Add historical MBI data found in beneficiaries_history
     for (BeneficiaryHistory mbiHistory : beneficiary.getBeneficiaryHistories()) {

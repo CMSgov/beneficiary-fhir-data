@@ -176,25 +176,6 @@ WHERE
   bene_id IN ('-201', '-202', '-203', '-204', '-207', '-208', '-209', '-210', '-211', '-212', '-213', '-214', '-215', '-216', '-217', '-218', '-219', '-220', '-221', '-222', '-223', '-400', '-401', '-403', '-410', '-88880000000001')
   OR bene_id NOT LIKE '-%';
 
-
--- medicare_beneficiaryid_history_invalid_beneficiaries
-
-SELECT COUNT(*) AS medicare_beneficiaryid_history_invalid_beneficiaries
-FROM medicare_beneficiaryid_history_invalid_beneficiaries
-WHERE
-  bene_id IN ('-201', '-202', '-203', '-204', '-207', '-208', '-209', '-210', '-211', '-212', '-213', '-214', '-215', '-216', '-217', '-218', '-219', '-220', '-221', '-222', '-223', '-400', '-401', '-403', '-410', '-88880000000001')
-  OR bene_id NOT LIKE '-%';
-
-
--- medicare_beneficiaryid_history
-
-SELECT COUNT(*) AS medicare_beneficiaryid_history
-FROM medicare_beneficiaryid_history
-WHERE
-  bene_id IN ('-201', '-202', '-203', '-204', '-207', '-208', '-209', '-210', '-211', '-212', '-213', '-214', '-215', '-216', '-217', '-218', '-219', '-220', '-221', '-222', '-223', '-400', '-401', '-403', '-410', '-88880000000001')
-  OR bene_id NOT LIKE '-%';
-
-
 -- partd_events
 
 SELECT COUNT(*) AS partd_events

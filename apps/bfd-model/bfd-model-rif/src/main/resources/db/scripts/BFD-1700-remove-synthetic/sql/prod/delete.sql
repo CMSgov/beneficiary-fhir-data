@@ -173,23 +173,6 @@ FROM beneficiaries_history_invalid_beneficiaries
 WHERE
   bene_id IN ('-201', '-202', '-203', '-204', '-207', '-208', '-209', '-210', '-211', '-212', '-213', '-214', '-215', '-216', '-217', '-218', '-219', '-220', '-221', '-222', '-223', '-400');
 
-
--- medicare_beneficiaryid_history_invalid_beneficiaries
-
-DELETE
-FROM medicare_beneficiaryid_history_invalid_beneficiaries
-WHERE
-  bene_id IN ('-201', '-202', '-203', '-204', '-207', '-208', '-209', '-210', '-211', '-212', '-213', '-214', '-215', '-216', '-217', '-218', '-219', '-220', '-221', '-222', '-223', '-400');
-
-
--- medicare_beneficiaryid_history
-
-DELETE
-FROM medicare_beneficiaryid_history
-WHERE
-  bene_id IN ('-201', '-202', '-203', '-204', '-207', '-208', '-209', '-210', '-211', '-212', '-213', '-214', '-215', '-216', '-217', '-218', '-219', '-220', '-221', '-222', '-223', '-400');
-
-
 -- partd_events
 
 DELETE

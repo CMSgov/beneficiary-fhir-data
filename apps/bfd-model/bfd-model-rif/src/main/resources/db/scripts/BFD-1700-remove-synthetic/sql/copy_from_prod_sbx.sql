@@ -14,8 +14,6 @@
 \copy hospice_claims to 'hospice_claims.csv' csv header;
 \copy inpatient_claim_lines to 'inpatient_claim_lines.csv' csv header;
 \copy inpatient_claims to 'inpatient_claims.csv' csv header;
-\copy medicare_beneficiaryid_history to 'medicare_beneficiaryid_history.csv' csv header;
-\copy medicare_beneficiaryid_history_invalid_beneficiaries to 'medicare_beneficiaryid_history_invalid_beneficiaries.csv' csv header;
 \copy outpatient_claim_lines to 'outpatient_claim_lines.csv' csv header;
 \copy outpatient_claims to 'outpatient_claims.csv' csv header;
 \copy partd_events to 'partd_events.csv' csv header;

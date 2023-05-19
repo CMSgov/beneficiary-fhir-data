@@ -883,7 +883,8 @@ public class SNFClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object if there is more than we need to fix the focal set to point to the
+    // Only one insurance object if there is more than we need to fix the focal set
+    // to point to the
     // correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());

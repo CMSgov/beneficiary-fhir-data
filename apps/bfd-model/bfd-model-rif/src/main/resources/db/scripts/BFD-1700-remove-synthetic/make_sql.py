@@ -33,7 +33,6 @@ BENE_IDS = {
 # violate foreign key constraints.
 BASE_TABLES = ['beneficiaries_history', 'beneficiary_monthly',
     'beneficiaries_history_invalid_beneficiaries',
-    'medicare_beneficiaryid_history_invalid_beneficiaries', 'medicare_beneficiaryid_history',
     'partd_events', 'beneficiaries']
 
 # Tables supporting claims, where the first has a bene_id column and a clm_id column, and the

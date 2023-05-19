@@ -95,7 +95,25 @@
           } ]
         },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "value" : "9AB2WW3GR44"
+        "value" : "543217066"
+      }, {
+        "type" : {
+          "coding" : [ {
+            "extension" : [ {
+              "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+              "valueCoding" : {
+                "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "code" : "historic",
+                "display" : "Historic"
+              }
+            } ],
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "MC",
+            "display" : "Patient's Medicare number"
+          } ]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "value" : "9AB2WW3GR"
       }, {
         "type" : {
           "coding" : [ {
