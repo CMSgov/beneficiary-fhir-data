@@ -62,6 +62,7 @@ spec:
             gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/, '')
 
             // Load the child Jenkinsfiles.
+            scriptForApps = load('apps/build.groovy')
             scriptForDeploys = load('ops/deploy-ccs.groovy')
         }
       }
