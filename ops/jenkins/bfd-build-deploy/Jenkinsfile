@@ -46,7 +46,26 @@ spec:
     skipDefaultCheckout()
   }
 
+
   stages {
+    stage('Prepare') {
+      steps {
+        script {
+            // Address limitations resulting from CVE-2022-24767
+            sh 'git config --global --add safe.directory "$WORKSPACE"'
+
+            // Get the current commit id
+            gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+            // Get the remote repo url. This assumes we are using git+https not git+ssh.
+            gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/, '')
+
+            // Load the child Jenkinsfiles.
+            scriptForDeploys = load('ops/deploy-ccs.groovy')
+        }
+      }
+    }
+
     stage('Run Build Apps') {
       steps {
         script {
@@ -67,13 +86,11 @@ spec:
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
-          scriptForDeploys = load('ops/deploy-ccs.groovy')
+            awsAuth.assumeRole()
 
-          awsAuth.assumeRole()
-
-          // Find the most current AMI IDs (if any).
-					amiIds = null
-					amiIds = scriptForDeploys.findAmis()
+            // Find the most current AMI IDs (if any).
+            amiIds = null
+            amiIds = scriptForDeploys.findAmis()
 
           build job:
                 jobToRun,
