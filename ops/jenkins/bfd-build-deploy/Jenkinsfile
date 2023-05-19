@@ -62,7 +62,7 @@ spec:
       }
     }
 
-    stage('Run Build Apps') {
+    stage('Run Deploy Apps') {
       steps {
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
