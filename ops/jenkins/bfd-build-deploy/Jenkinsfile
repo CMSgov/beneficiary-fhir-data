@@ -48,11 +48,6 @@ spec:
         )
   }
 
-  options {
-    skipDefaultCheckout()
-  }
-
-
   stages {
     stage('Prepare') {
       steps {
