@@ -15,7 +15,8 @@ void deployTerraservice(Map args = [:]) {
     tfVars = args.tfVars ?: [:]
 
     // format terraform variables
-    terraformVariables = tfVars.collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
+    terraformVariables = tfVars.findAll { it.value != '' && it.value != null }
+                               .collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
 
     dir("${workspace}/${serviceDirectory}") {
         // Debug output terraform version
