@@ -133,7 +133,7 @@ resource "aws_iam_role_policy" "db_auth" {
 # Policy allowing the rds-db:connect action for an ephemeral cluster
 resource "aws_iam_policy" "db_auth_ephemeral" {
   count       = local.is_ephemeral_env ? 1 : 0
-  name        = "bfd-fhirdb-${local.env}-${local.seed_env}-auth"
+  name        = "bfd-fhirdb-${local.env}-auth"
   description = "Role policy allowing db connect action for ${local.env} ephemeral cluster"
   policy      = data.aws_iam_policy_document.db_rds_connect.json
 }
