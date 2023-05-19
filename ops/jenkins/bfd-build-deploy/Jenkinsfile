@@ -31,7 +31,7 @@ spec:
         script {
           def jobToRun = "/bfd-build-apps"
 
-          build job: jobToRun, parameters: [string(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")]
+          build job: jobToRun, parameters: [string(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")], wait: false
         }
       }
     }
