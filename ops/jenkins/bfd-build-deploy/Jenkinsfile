@@ -22,7 +22,46 @@ spec:
   parameters {
         booleanParam(name: 'verbose_mvn_logging',
         description: 'When true, `mvn` will produce verbose logs.',
-        defaultValue: false)
+        defaultValue: false),
+
+        string(
+        name: 'env',
+        description: 'The BFD Environment to deploy apps to'
+        )
+
+        string(
+        name: 'migrator_ami_override',
+        description: 'The AMI ID to deploy migrator from',
+        defaultValue: null
+        )
+
+        string(
+        name: 'pipeline_ami_override',
+        description: 'The AMI ID to deploy pipeline from',
+        defaultValue: null
+        )
+
+        string(
+        name: 'server_ami',
+        description: 'The AMI ID to deploy server from',
+        defaultValue: null
+        )
+
+        booleanParam(
+        name: 'force_migrator_deployment',
+        description: 'When true, force the migrator to deploy.',
+        defaultValue: false
+        )
+
+        string(
+        name: 'server_regression_image_override',
+        description: 'Overrides the Docker image tag used when deploying the server-regression lambda',
+        defaultValue: null
+        )
+  }
+
+  options {
+    skipDefaultCheckout()
   }
 
   stages {
@@ -31,7 +70,32 @@ spec:
         script {
           def jobToRun = "bfd-build-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
-          build job: jobToRun, parameters: [string(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")], wait: false
+          build job:
+            jobToRun,
+            parameters: [
+              booleanParam(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")
+            ],
+            wait: false
+        }
+      }
+    }
+
+    stage('Run Build Apps') {
+      steps {
+        script {
+          def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
+
+          build job:
+                jobToRun,
+                parameters: [
+                  string(name: "env", value: "${params.env}"),
+                  string(name: "migrator_ami_override", value: "${params.migrator_ami_override}"),
+                  string(name: "pipeline_ami_override", value: "${params.pipeline_ami_override}"),
+                  string(name: "server_ami", value: "${params.pipeline_ami_override}"),
+                  booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
+                  string(name: "server_regression_image_override", value: "${params.server_regression_image_override}"),
+                ],
+                wait: false
         }
       }
     }
