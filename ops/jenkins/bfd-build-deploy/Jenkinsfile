@@ -19,4 +19,21 @@ spec:
     }
   }
 
+  parameters {
+        booleanParam(name: 'verbose_mvn_logging',
+        description: 'When true, `mvn` will produce verbose logs.',
+        defaultValue: false)
+  }
+
+  stages {
+    stage('Run Build Apps') {
+      steps {
+        script {
+          def jobToRun = "/bfd-build-apps/${env.BRANCH_NAME}"
+
+          build job: jobToRun, parameters: {"verbose_mvn_logging": params.verbose_mvn_logging}, wait: false
+        }
+      }
+    }
+  }
 }
