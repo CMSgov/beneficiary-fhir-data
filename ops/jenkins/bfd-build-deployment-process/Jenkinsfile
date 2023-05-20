@@ -137,8 +137,6 @@ spec:
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
-          awsAuth.assumeRole()
-
           build job:
                 jobToRun,
                 parameters: [
@@ -158,8 +156,6 @@ spec:
       steps {
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
-
-          awsAuth.assumeRole()
 
           build job:
                 jobToRun,
