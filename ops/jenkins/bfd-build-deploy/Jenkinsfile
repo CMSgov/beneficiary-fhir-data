@@ -116,11 +116,11 @@ spec:
         script {
           def jobToRun = "bfd-deploy-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
 
-            awsAuth.assumeRole()
+          awsAuth.assumeRole()
 
-            // Find the most current AMI IDs (if any).
-            amiIds = null
-            amiIds = scriptForDeploys.findAmis()
+          // Find the most current AMI IDs (if any).
+          amiIds = null
+          amiIds = scriptForDeploys.findAmis()
 
           build job:
                 jobToRun,
