@@ -2,7 +2,11 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   vpc_id     = data.aws_vpc.this.id
 
-  env       = terraform.workspace
+  env              = terraform.workspace
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
+
   service   = "eft"
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
@@ -11,7 +15,7 @@ locals {
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
-    Environment    = local.env
+    Environment    = local.seed_env
     Terraform      = true
     tf_module_root = "ops/terraform/services/${local.service}"
     Layer          = local.layer
@@ -34,7 +38,6 @@ locals {
     for key, value in local.sensitive_service_map : split("/", key)[5] => value
   }
 
-  data_env      = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", local.env)
   kms_key_alias = local.nonsensitive_common_config["kms_key_alias"]
   vpc_name      = local.nonsensitive_common_config["vpc_name"]
 
@@ -55,7 +58,7 @@ locals {
 
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22
-  logging_bucket = "bfd-${local.data_env}-logs-${local.account_id}"
+  logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
 
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future

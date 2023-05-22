@@ -169,7 +169,12 @@ public class HHAClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2015-06-23"), eob.getBillablePeriod().getEnd());
   }
 
-  /** Tests that the billable period is not set if claim query code is null. */
+  /**
+   * Tests that the billable period is not set if claim query code is null.
+   *
+   * @throws Exception should not be thrown
+   */
+  @Test
   public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -197,15 +202,18 @@ public class HHAClaimTransformerV2Test {
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
 
-    // We just want to make sure it is not set
-    assertNull(eob.getBillablePeriod());
     Extension extension =
         eob.getBillablePeriod()
             .getExtensionByUrl("https://bluebutton.cms.gov/resources/variables/claim_query_cd");
     assertNull(extension);
   }
 
-  /** Tests that the billable period is set if optional claim query code is not empty. */
+  /**
+   * Tests that the billable period is set if optional claim query code is not empty.
+   *
+   * @throws Exception should not be thrown
+   */
+  @Test
   public void shouldSetBillablePeriodWithNonEmptyClaimQueryCode() throws Exception {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
