@@ -20,7 +20,7 @@
 /bfd/prod/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
 
 # MIGRATOR CONFIGURATION
-/bfd/prod/migrator/nonsensitive/instance_type: c6i.4xlarge
+/bfd/prod/migrator/nonsensitive/instance_type: m6i.large
 /bfd/prod/migrator/nonsensitive/volume_size: 100
 /bfd/prod/migrator/nonsensitive/sqs_queue_name: bfd-prod-migrator
 /bfd/prod/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
