@@ -48,12 +48,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging 
-				frameworks in Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
 			<!-- Used to monitor performance and other statistics at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
@@ -67,7 +61,6 @@
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Used to parse and read the RIF data files. -->

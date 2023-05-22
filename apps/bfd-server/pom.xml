@@ -15,10 +15,6 @@
 		A parent POM for the bfd-server-* projects, which provide a FHIR-compliant API for querying Medicare beneficiary data.
 	</description>
 
-	<properties>
-		<hapi-fhir.version>6.4.4</hapi-fhir.version>
-	</properties>
-
 	<modules>
 		<module>bfd-server-launcher-sample</module>
 		<module>bfd-server-launcher</module>

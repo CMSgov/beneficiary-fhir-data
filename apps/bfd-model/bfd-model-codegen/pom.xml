@@ -16,10 +16,6 @@
 		classes and parsing code based on field layouts defined in Excel.
 	</description>
 
-	<properties>
-		<auto-service.version>1.0.1</auto-service.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<!-- The annotations are in a separate project, to avoid forcing all of 
@@ -48,7 +44,6 @@
 			<!-- Makes programmatically generating Java sources much simpler. -->
 			<groupId>com.squareup</groupId>
 			<artifactId>javapoet</artifactId>
-			<version>${javapoet.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -92,7 +92,7 @@
 						in integration tests. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>${maven.dependency.plugin.version}</version>
 					<configuration>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
@@ -128,7 +128,7 @@
 								only. It has no influence on the Maven build itself. -->
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
+							<version>${lifecycle.mapping.version}</version>
 							<configuration>
 								<lifecycleMappingMetadata>
 									<pluginExecutions>
@@ -136,7 +136,7 @@
 											<pluginExecutionFilter>
 												<groupId>org.apache.maven.plugins</groupId>
 												<artifactId>maven-dependency-plugin</artifactId>
-												<versionRange>[1.0.0,)</versionRange>
+												<versionRange>${lifecycle.mapping.versionRange}</versionRange>
 												<goals>
 													<goal>copy</goal>
 												</goals>

@@ -15,21 +15,6 @@
 		The primary WAR for the BFD Server project. Provides a FHIR API.
 	</description>
 
-	<properties>
-		<datasource-proxy.version>1.9</datasource-proxy.version>
-		<jersey.version>2.25.1</jersey.version>
-
-		<!-- Configure the BFD Server, as it will be run via the exec
-			plugin. These settings are pulled out as POM properties so that they can
-			be adjusted via profiles. -->
-		<its.bfdServer.jvmargs>-Xmx4g</its.bfdServer.jvmargs>
-
-		<!-- Should work out of the box on Linux, but likely needs to be customized
-			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
-			for details. -->
-		<bash.exe>bash</bash.exe>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -150,7 +135,7 @@
 			<!-- Used for CORS support -->
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
-			<version>1.0.1</version>
+			<version>${cors.filter.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>servlet-api</artifactId>
@@ -323,7 +308,7 @@
 			<!-- Used for Bloom filters -->
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sketch_2.12</artifactId>
-			<version>3.4.0</version>
+			<version>${org.apache.spark.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
@@ -353,14 +338,14 @@
 						This ensures that it is included in install, deploy, etc. operations. -->
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.12</version>
+					<version>${build.helper.maven.plugin.version}</version>
 				</plugin>
 				<plugin>
 					<!-- Use the dependency plugin to copy the test dependency artifacts, 
 						for use in ITs. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>${maven.dependency.plugin.version}</version>
 					<configuration>
 						<artifactItems>
 							<artifactItem>
@@ -382,12 +367,12 @@
 						scripts, which will start and stop the BFD Server for use in testing. -->
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.5.0</version>
+					<version>${exec.maven.plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M5</version>
+					<version>${maven.surefire.plugin.version}</version>
 					<configuration>
 						<!-- for grpc ITs, need testcontainers to startup/teardown without reuse -->
 						<parallel>classesAndMethods</parallel>
@@ -546,7 +531,7 @@
 								only. It has no influence on the Maven build itself. -->
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
+							<version>${lifecycle.mapping.version}</version>
 							<configuration>
 								<lifecycleMappingMetadata>
 									<pluginExecutions>
@@ -554,7 +539,7 @@
 											<pluginExecutionFilter>
 												<groupId>org.codehaus.mojo</groupId>
 												<artifactId>build-helper-maven-plugin</artifactId>
-												<versionRange>[1.12,)</versionRange>
+												<versionRange>${lifecycle.mapping.versionRange}</versionRange>
 												<goals>
 													<goal>reserve-network-port</goal>
 												</goals>
@@ -567,7 +552,7 @@
 											<pluginExecutionFilter>
 												<groupId>org.codehaus.mojo</groupId>
 												<artifactId>exec-maven-plugin</artifactId>
-												<versionRange>[1.5.0,)</versionRange>
+												<versionRange>${exec.maven.plugin.versionRange}</versionRange>
 												<goals>
 													<goal>java</goal>
 												</goals>

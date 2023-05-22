@@ -42,14 +42,12 @@
                 for details. -->
         <groupId>com.zaxxer</groupId>
         <artifactId>HikariCP</artifactId>
-        <version>${hikari.version}</version>
     </dependency>
     <dependency>
         <!-- Provides a sane facade for the giant mess of incompatible logging
             frameworks in Java. -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
     </dependency>
 </dependencies>
 

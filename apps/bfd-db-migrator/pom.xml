@@ -13,10 +13,6 @@
 
 	<description>An application integrated with Flyway and Hibernate responsible for executing database migrations and validations against BFD datastores.</description>
 
-	<properties>
-		<reflections.version>0.10.2</reflections.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<!-- contains the JPA entities for writing to the database -->
@@ -37,28 +33,10 @@
 			<version>${reflections.version}</version>
 		</dependency>
 		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
-				 Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<!-- An implementation of the JCL API that routes everything through to SLF4J,
-				 instead. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-		</dependency>
-		<dependency>
 			<!-- An implementation of the Log4J API that routes everything through to SLF4J,
 				 instead. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything to SLF4J,
-				 instead. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>jul-to-slf4j</artifactId>
 		</dependency>
 		<dependency>
 			<!-- Logback is used as the logging target/backend for SLF4J during runtime: all logging
@@ -71,21 +49,11 @@
 				 ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-json-classic</artifactId>
-			<!-- TODO: consider managing this in the bfd-parent's pom.xml -->
-			<version>0.1.5</version>
 		</dependency>
 		<dependency>
 			<!-- Required by logback-json-classic. -->
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-jackson</artifactId>
-			<!-- TODO: consider managing this in the bfd-parent's pom.xml -->
-			<version>0.1.5</version>
-		</dependency>
-		<dependency>
-			<!-- Required by logback-jackson. -->
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson-databind.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides utility code and dependencies that are shared by (more or
@@ -93,19 +61,6 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-shared-utils</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager
-				class. -->
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>${flyway.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
-                    for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.newrelic.telemetry</groupId>
@@ -125,7 +80,6 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
@@ -145,7 +99,6 @@
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>${awaitility.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -157,7 +110,6 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -174,7 +126,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>${maven.assembly.plugin.version}</version>
 					<configuration>
 						<appendAssemblyId>false</appendAssemblyId>
 						<descriptors>
@@ -185,7 +137,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>${maven.dependency.plugin.version}</version>
 					<!-- Unpack the assembly for use in ITs. -->
 					<configuration>
 						<overWriteReleases>false</overWriteReleases>
@@ -270,7 +222,7 @@
 								only. It has no influence on the Maven build itself. -->
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
+							<version>${lifecycle.mapping.version}</version>
 							<configuration>
 								<lifecycleMappingMetadata>
 									<pluginExecutions>
@@ -278,7 +230,7 @@
 											<pluginExecutionFilter>
 												<groupId>org.apache.maven.plugins</groupId>
 												<artifactId>maven-dependency-plugin</artifactId>
-												<versionRange>[1.0.0,)</versionRange>
+												<versionRange>${lifecycle.mapping.versionRange}</versionRange>
 												<goals>
 													<goal>copy</goal>
 												</goals>

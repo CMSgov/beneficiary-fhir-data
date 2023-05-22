@@ -35,13 +35,6 @@
         </dependency>
 
         <dependency>
-            <!-- Provides a sane facade for the giant mess of incompatible logging
-                    frameworks in Java. -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-
-        <dependency>
             <!-- Used to run our unit and integration tests. -->
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

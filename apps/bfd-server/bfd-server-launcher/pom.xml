@@ -15,11 +15,6 @@
 		A Java JAR and assembly zip that packages up a Jetty runtime/launcher for the BFD Server WAR.
 	</description>
 
-	<properties>
-		<!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
-		<jetty.version>10.0.14</jetty.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<!-- The newrelic.jar javaagent dependency -->
@@ -58,12 +53,6 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<!-- An implementation of the JCL API that routes everything through to
-				SLF4J, instead. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-		</dependency>
-		<dependency>
 			<!-- An implementation of the Log4J API that routes everything through
 				to SLF4J, instead. -->
 			<groupId>org.slf4j</groupId>
@@ -87,19 +76,16 @@
 				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-json-classic</artifactId>
-			<version>0.1.5</version>
 		</dependency>
 		<dependency>
 			<!-- Required by logback-json-classic. -->
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-jackson</artifactId>
-			<version>0.1.5</version>
 		</dependency>
 		<dependency>
 			<!-- Required by logback-jackson. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson-databind.version}</version>
 		</dependency>
 
 		<dependency>
@@ -119,14 +105,9 @@
 			<!-- Used in tests to verify that requests work as expected. -->
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.14</version>
+			<version>${org.apache.httpcomponents.httpclient.version}</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
+			<!--Had to take our exclusion of commons-logging because it was failing -->
 		</dependency>
 		<dependency>
 			<!-- Used for launching the server with Jetty 10. -->
@@ -138,7 +119,6 @@
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>${awaitility.version}</version>
 			<scope>test</scope>
 		</dependency>
         <dependency>
@@ -155,7 +135,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>${maven.assembly.plugin.version}</version>
 					<configuration>
 						<appendAssemblyId>false</appendAssemblyId>
 						<descriptors>
@@ -169,7 +149,7 @@
 						tests. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>${maven.dependency.plugin.version}</version>
 					<configuration>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>

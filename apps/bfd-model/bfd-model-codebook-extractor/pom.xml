@@ -15,17 +15,7 @@
 		Converts the CCW Data Dictionary codebook PDFs to XML.
 	</description>
 
-	<properties>
-		<itextpdf.version>5.5.13.3</itextpdf.version>
-	</properties>
-
 	<dependencies>
-		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging
-				frameworks in Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
 		<dependency>
 			<!-- Logback is used as the logging target/backend for SLF4J: all logging
 				events will be sent to it. -->
@@ -66,7 +56,7 @@
 						process. -->
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.6.0</version>
+					<version>${exec.maven.plugin.version}</version>
 					<configuration>
 						<mainClass>gov.cms.bfd.model.codebook.extractor.CodebookPdfToXmlApp</mainClass>
 						<arguments>
@@ -89,7 +79,7 @@
 						only. It has no influence on the Maven build itself. -->
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
+					<version>${lifecycle.mapping.version}</version>
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
@@ -97,7 +87,7 @@
 									<pluginExecutionFilter>
 										<groupId>org.codehaus.mojo</groupId>
 										<artifactId>exec-maven-plugin</artifactId>
-										<versionRange>[1.6.0,)</versionRange>
+										<versionRange>${lifecycle.mapping.versionRange}</versionRange>
 										<goals>
 											<goal>java</goal>
 										</goals>

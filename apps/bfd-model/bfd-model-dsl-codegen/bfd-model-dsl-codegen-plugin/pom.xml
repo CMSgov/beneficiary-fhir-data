@@ -18,13 +18,6 @@
         Provides maven plugin code generator to create JPA entity classes and data transformation classes for RDA API data based on a YAML config file.
     </description>
 
-    <properties>
-        <maven-plugin-api.version>3.9.1</maven-plugin-api.version>
-        <maven-core.version>3.9.1</maven-core.version>
-        <maven-plugin-annotations.version>3.8.2</maven-plugin-annotations.version>
-        <maven.plugin.version>3.7.1</maven.plugin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <!-- plugin interfaces and base classes -->
@@ -52,13 +45,13 @@
             <!-- used to validate data model before using it for code generation -->
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>8.0.0.Final</version>
+            <version>${hibernate.validator.version}</version>
         </dependency>
         <dependency>
             <!-- required by hibernate-validator -->
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.el</artifactId>
-            <version>4.0.2</version>
+            <version>${jakarta.el.version}</version>
         </dependency>
 
         <!-- Pulls in library of classes that are used for actual data copying so that plugin can reference them when generating code that calls them. -->
@@ -83,7 +76,6 @@
             <!-- Makes programmatically generating Java sources much simpler. -->
             <groupId>com.squareup</groupId>
             <artifactId>javapoet</artifactId>
-            <version>${javapoet.version}</version>
         </dependency>
 
         <dependency>
