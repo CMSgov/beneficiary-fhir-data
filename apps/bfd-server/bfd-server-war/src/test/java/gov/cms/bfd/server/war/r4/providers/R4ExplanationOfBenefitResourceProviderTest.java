@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +39,24 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Mock private R4EobSamhsaMatcher samhsaMatcher;
   /** The mock loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
-  /** The mock drug code display lookup entity. */
-  @Mock private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-  /** The mock npi org lookup entity. */
-  @Mock private NPIOrgLookup npiOrgLookup;
+
+  // Mock transformers
+  /** The mock transformer for carrier claims. */
+  @Mock private CarrierClaimTransformerV2 carrierClaimTransformerV2;
+  /** The mock transformer for dme claims. */
+  @Mock private DMEClaimTransformerV2 dmeClaimTransformer;
+  /** The mock transformer for hha claims. */
+  @Mock private HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The mock transformer for hospice claims. */
+  @Mock private HospiceClaimTransformerV2 hospiceClaimTransformer;
+  /** The mock transformer for inpatient claims. */
+  @Mock private InpatientClaimTransformerV2 inpatientClaimTransformer;
+  /** The mock transformer for outpatient claims. */
+  @Mock private OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  /** The mock transformer for part D events claims. */
+  @Mock private PartDEventTransformerV2 partDEventTransformer;
+  /** The mock transformer for snf claims. */
+  @Mock private SNFClaimTransformerV2 snfClaimTransformerV2;
 
   /** Sets up the test class. */
   @BeforeEach
@@ -54,8 +66,14 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             metricRegistry,
             loadedFilterManager,
             samhsaMatcher,
-            drugCodeDisplayLookup,
-            npiOrgLookup);
+            carrierClaimTransformerV2,
+            dmeClaimTransformer,
+            hhaClaimTransformer,
+            hospiceClaimTransformer,
+            inpatientClaimTransformer,
+            outpatientClaimTransformer,
+            partDEventTransformer,
+            snfClaimTransformerV2);
     lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
   }
 

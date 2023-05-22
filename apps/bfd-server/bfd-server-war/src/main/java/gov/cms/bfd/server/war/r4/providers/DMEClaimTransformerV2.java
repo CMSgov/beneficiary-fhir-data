@@ -1,8 +1,11 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -10,7 +13,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -25,30 +27,55 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
+@Component
 final class DMEClaimTransformerV2 {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   */
+  public DMEClaimTransformerV2(
+      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    requireNonNull(metricRegistry);
+    requireNonNull(drugCodeDisplayLookup);
+    this.metricRegistry = metricRegistry;
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+  }
 
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim(transformerContext, (DMEClaim) claim);
+    ExplanationOfBenefit eob = transformClaim(includeTaxNumbers, (DMEClaim) claim);
 
     timer.stop();
     return eob;
@@ -57,13 +84,12 @@ final class DMEClaimTransformerV2 {
   /**
    * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the CCW {@link TransformerContext} to transform
+   * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
    * @param claimGroup the CCW {@link DMEClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      TransformerContext transformerContext, DMEClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(boolean includeTaxNumbers, DMEClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -165,7 +191,7 @@ final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob, transformerContext);
+    handleClaimLines(claimGroup, eob, includeTaxNumbers);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
@@ -175,10 +201,10 @@ final class DMEClaimTransformerV2 {
    *
    * @param claimGroup the claim group with the lines to get data from
    * @param eob the eob to add information to
-   * @param transformerContext the transformer context
+   * @param includeTaxNumbers whether to include tax numbers
    */
-  private static void handleClaimLines(
-      DMEClaim claimGroup, ExplanationOfBenefit eob, TransformerContext transformerContext) {
+  private void handleClaimLines(
+      DMEClaim claimGroup, ExplanationOfBenefit eob, boolean includeTaxNumbers) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -260,7 +286,7 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
 
-      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
+      if (includeTaxNumbers) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
@@ -386,9 +412,7 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          transformerContext
-              .getDrugCodeDisplayLookup()
-              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
@@ -437,7 +461,7 @@ final class DMEClaimTransformerV2 {
    *     ExplanationOfBenefit
    * @param optVal The {@link String} value associated with the ExplanationOfBenefit
    */
-  static void addExtension(
+  void addExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
     optVal.ifPresent(
         value ->
@@ -454,7 +478,7 @@ final class DMEClaimTransformerV2 {
    *     ExplanationOfBenefit
    * @param optVal The {@link Character} value associated with the ExplanationOfBenefit
    */
-  static void addCodeExtension(
+  void addCodeExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<Character> optVal) {
     optVal.ifPresent(
         value ->
@@ -471,7 +495,7 @@ final class DMEClaimTransformerV2 {
    *     ExplanationOfBenefit
    * @param optVal The {@link BigDecimal} value associated with the ExplanationOfBenefit
    */
-  static void addDecimalExtension(
+  void addDecimalExtension(
       ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
     if (optVal.isPresent()) {
       eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get()));
