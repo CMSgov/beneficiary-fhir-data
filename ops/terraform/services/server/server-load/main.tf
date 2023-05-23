@@ -37,7 +37,7 @@ locals {
   kms_key_id       = data.aws_kms_key.cmk.key_id
 
   ami_id                     = data.aws_ami.main.id
-  instance_type              = "m5.large"
+  instance_type              = "m6i.large"
   volume_size                = "40"
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
