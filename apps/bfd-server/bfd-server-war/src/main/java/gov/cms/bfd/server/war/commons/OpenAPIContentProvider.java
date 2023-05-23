@@ -34,6 +34,8 @@ public final class OpenAPIContentProvider {
   public static final String PATIENT_START_INDEX_VALUE =
       "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset"
           + " (starting point) into the list of elements for the <i>Request</i>."
+          + "It is optional and defaults to 1 if not supplied."
+          + "A value 0 is not allowed and negative indices are not currently supported."
           + "<p/>Example:<ul>"
           + "<li>startIndex=100</li>";
 
@@ -151,7 +153,7 @@ public final class OpenAPIContentProvider {
   public static final String EOB_EXCLUDE_SAMSHA_VALUE =
       "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA)"
           + " is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation."
-          + "<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims ifrom the response."
+          + "<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response."
           + "<p/>Example:<ul>"
           + "<li>&excludeSAMHSA=true</li>";
 
@@ -199,7 +201,6 @@ public final class OpenAPIContentProvider {
           + "Position 9 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
           + "Position 10 - numeric values 0 thru 9"
           + "Position 11 - numeric values 0 thru 9</code></p><p>"
-          + "This class contains that MBI, and can optionally also contain hashed version to prevent PII exposure"
           + " The following are all valid values for MBI, and all might"
           + " represent the same resource:</p><ul>"
           + "<li><code>9AB2WW3GR44</code> (unhashed MBI)</li>"
@@ -214,7 +215,28 @@ public final class OpenAPIContentProvider {
       "A boolean indicating whether or not the MBI is hashed.";
   /** Open API content value for /Patient's partially aducated claim MBI ID being hashed or not. */
   public static final String PAC_IS_HASHED_VALUE =
-      "<p/>Setting this flag to <i>true</i>, modifies the request to provide hashed MBI data ifrom the response."
+      "<p/>Setting this flag to <i>true</i>, indicates to the API that the mbi parameter in the same request is a hashed MBI rather than an unhashed MBI."
           + "<p/>Example:<ul>"
           + "<li>&isHashed=true</li>";
+
+  /**
+   * Open API short description for /Patient's Partially Aducidaced claims data; provides a URI for the 'next' set
+   * of data.
+   */
+  public static final String PAC_CLAIM_TYPE_SHORT = "A list of BFD partially adjudicated claim types to include";
+
+  /**
+   * Open API content value for /Patient's Partially Aducidaced claims data; provides a URI for the 'next' set of
+   * data.
+   */
+  public static final String PAC_CLAIM_TYPE_VALUE =
+          "A list of one or more comma-separated claim types to be included in the request;"
+                  + " within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified"
+                  + " claim types will be checked."
+                  + "<p/>Supported Claim Type values:<ul>"
+                  + "<li>fiss</li>"
+                  + "<li>mcs</li>"
+                  + "<p/>Examples:<ul>"
+                  + "<li>type=fiss,mcs</li>"
+                  + "<li>type=fiss</li>";
 }
