@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
@@ -20,7 +19,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -65,6 +63,8 @@ public final class HospiceClaimTransformerV2Test {
   private ExplanationOfBenefit eob = null;
   /** The parsed claim used to generate the EOB and for validating with. */
   private HospiceClaim claim = null;
+  /** The transformer under test. */
+  private HospiceClaimTransformerV2 hospiceClaimTransformerV2;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -73,6 +73,9 @@ public final class HospiceClaimTransformerV2Test {
    */
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
+    hospiceClaimTransformerV2 =
+        new HospiceClaimTransformerV2(
+            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -84,24 +87,16 @@ public final class HospiceClaimTransformerV2Test {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    createEOB(Optional.of(false));
+    createEOB();
   }
 
   /**
    * Creates an eob for the test.
    *
-   * @param includeTaxNumber whether to include tax numbers
    * @throws IOException if there is an issue reading the test file
    */
-  private void createEOB(Optional<Boolean> includeTaxNumber) throws IOException {
-    ExplanationOfBenefit genEob =
-        HospiceClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                includeTaxNumber,
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+  private void createEOB() throws IOException {
+    ExplanationOfBenefit genEob = hospiceClaimTransformerV2.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -127,15 +122,7 @@ public final class HospiceClaimTransformerV2Test {
    */
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
-    assertMatches(
-        claim,
-        HospiceClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim));
+    assertMatches(claim, hospiceClaimTransformerV2.transform(claim));
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -424,7 +411,12 @@ public final class HospiceClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("2014-01-30"), eob.getBillablePeriod().getEnd());
   }
 
-  /** Tests that the billable period is not set if claim query code is null. */
+  /**
+   * Tests that the billable period is not set if claim query code is null.
+   *
+   * @throws Exception should not be thrown
+   */
+  @Test
   public void shouldNotSetBillablePeriodWithNullClaimQueryCode() throws Exception {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -440,14 +432,7 @@ public final class HospiceClaimTransformerV2Test {
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob =
-        HospiceClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = hospiceClaimTransformerV2.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

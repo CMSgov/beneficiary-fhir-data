@@ -4,45 +4,62 @@ This module is the _service_ responsible for defining a BFD environment through 
 This is supported by a [terraform workspaces-enabled](https://www.terraform.io/language/state/workspaces) state.
 **If you're manipulating this state manually, you must verify that you're operating in the appropriate workspace for the targeted environment.**
 
-## General
-
-### Overview
+## Overview
 
 Configuration management can get away from us, becoming wildly complex if there isn't a conscious effort to _keep things simple_.
 While simplicity is in the eye of the beholder, this module seeks to be as simple as possible and no simpler.
 To that end, this module will _primarily_ be composed of three files, `sensitive.tf`, `nonsensitive.tf`, and `ephemeral.tf`.
 The former two terraform files deal with sensitive and nonsensitive values, respectively, while `ephemeral.tf` applies exclusively to ephemeral environments.
 
-Additional terraform instructions are housed in somewhat canonical, expected files, e.g. `main.tf`, `variables.tf`, etc.
-In general, this modules takes configuration settings from specific, yaml-formatted files stored in the [values directory](.values), and stores them under the appropriate AWS SSM Parameter Store hierarchy.
+Additional terraform instructions are located in the canonical _or_ expected files, e.g. `main.tf`, `variables.tf`, etc.
+In general, terraform reads encrypted **and** plaintext yaml-encoded _<key>:<value>_ pairs from specific files found in the [values directory](.values) and translates them into the appropriate AWS SSM Parameter Store Hierarchies.
 
+For more general documentation on formatting and usage, expand the sections under [Additional Information](#additional-information) below.
+
+## Environments 
 Each environment is configured in a terraform workspace, named for the environment it defines.
-There are four, known _established environments_ (`local.established_envs`) with their respective configurations coming from appropriately named, environment-specific yaml and eyaml files found in the aforementioned values directory.
-Ephemeral environments use a combination of the values stored in the `ephemeral.yaml` and effectively copy necessary values from their _seed_ environments. 
+Environments can generally be classified as _established_ or _ephemeral_.
 
-**As of early September 2022, ephemeral environment support is limited. Please work with BFD engineers working in the infrastructure space if you need ephemeral environment support.**
+### Established Environments
+There are four, known _established environments_ (`local.established_envs`) with their respective configuration coming from appropriately named, environment-specific yaml and eyaml files found in the aforementioned values directory.
+Practically speaking, this module configures the path-to-production established environments of `test`, `prod-sbx`, and `prod`.
+These environments are not only established but they endure: they are **not** ephemeral nor temporary.
 
-To summarize, terraform reads encrypted **and** plaintext yaml-encoded _<key>:<value>_ pairs and stores environment-specific AWS SSM Parameter Store _<parameter-path>:<parameter-value>_ pairs.
+Each of the established environments has specific yaml and eyaml files in the values directory specific to their configuration.
+These environments may act as a _seed_ or source environment for ephemeral environment creation described below.
 
-For more general documentation on formatting and usage, expand the `More...` below.
+### Ephemeral Environments
+**As of mid May 2023, ephemeral environment supported remains limited. Please work with BFD engineers working in the infrastructure space if you need ephemeral environment support.**
+
+Ephemeral environments use the values stored in `values/ephemeral.yaml` for some of their configuration but they generally yield to the _seed_ environment configuration for the more consequential inputs.
+These environments effectively copy the values from their seed environment's AWS SSM Parameters as defined in the `ephemeral.tf`.
+
+Terraform identifies the ephemeral environment's seed from the workspace name itself.
+This module expects that all workspace environment names will end in one of `test`, `prod-sbx`, or `prod`.
+
+As of mid May 2023, there are few controls to enforce this, but the hazard of getting this _wrong_ is only wasted time in receiving unhelpful errors in attempting to create ephemeral environments.
+Historically, the seed environment was derived from an unusual terraform input variable `var.ephemeral_environment_seed` that was only required on the first execution of terraform.
+
+## Additional Information
 
 <details><summary>More...</summary>
 
 ### Known Limitations
-AWS SSM Parameter Store has very limited support for storing non-string values in plain-text (`nonsensitive`) data and virtually no options for storing encrypted (`sensitive`)data.
+AWS SSM Parameter Store has very limited support for storing non-string values in plain-text (`nonsensitive`) data and virtually no options for storing encrypted non-string (`sensitive`) data.
 This forces us to handle some data that would more naturally be represented as collections like maps and arrays as formatted string types.
 To work with this, you might consider using spaces to delimit your collection and parse accordingly, which can easily be achieved using yaml's `>` _folding block_ for multi-line strings.
 Other techniques might involve storing more complex data in formats that are more machine-readable, like JSON.
-However between writing a JSON string to yaml here and being fetched from AWS SSM Parameter Store, it will be in an _escaped_ format and the data will need to be pre-processed.
-`jq`'s `fromjson` function is especially handy for this kind of conversion.
+Between storing JSON strings in the yaml context here and being fetching those values from AWS SSM Parameter Store, it will be in an _escaped_ format and the data will likely need special handling, e.g. `jq`'s `fromjson` function may be handy in these circumstances.
 
 ### Formatting and Validation
 
-As of mid-January 2023, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
+As of mid-May 2023, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
+- All workspaces must end in one of the three path-to-production established environments of `test`, `prod-sbx`, or `prod`
+- Ephemeral environment workspace should generally be of a pattern similar to `<jira-id>-<env>`, e.g. `2544-test`, `2544-prod-sbx`, `2554-prod`.
 - hierarchies or paths generally conform to a 4 or 5 tuple prefix and leaf format, e.g.
   - `/bfd/${env}/${group}/${sensitivity}/${leaf}`
   - `/bfd/${env}/${group}/${subgroup}/${sensitivity}/${leaf}`
-- `${env}` is typically one of `test`, `prod-sbx`, or `prod` but limited support for ephemeral environments exists. Guidance on ephemeral environment naming conventions is forthcoming.
+- `${env}` is typically one of `test`, `prod-sbx`, `prod` or ephemeral format `<jira-id>-<env>`, e.g. `2544-test`
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
 - `${subgroup}` is optional, as of January 2023, examples include `ccw`, `rda`, `shared`
 - `${sensitivity}` must be one of `sensitive` when encrypted or `nonsensitive` when in plain text
@@ -112,7 +129,6 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_ephemeral_environment_seed"></a> [ephemeral\_environment\_seed](#input\_ephemeral\_environment\_seed) | The model for a novel ephemeral environment. **Required** for new ephemeral environments. | `string` | `null` | no |
 | <a name="input_ephemeral_rds_snapshot_id_override"></a> [ephemeral\_rds\_snapshot\_id\_override](#input\_ephemeral\_rds\_snapshot\_id\_override) | Specify DB Cluster Snapshot ID from `ephemeral_environment_seed`. Defaults to latest snapshot from the seed cluster on initial definition, falls back to previously specified snapshot on subsequent execution. | `string` | `null` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
@@ -143,9 +159,11 @@ https://terraform-docs.io/user-guide/configuration/
 |------|------|
 | [aws_ssm_parameter.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.eft_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.ephemeral_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.ephemeral_migrator](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.ephemeral_pipeline](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.ephemeral_server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.migrator_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.migrator_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.pipeline_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |

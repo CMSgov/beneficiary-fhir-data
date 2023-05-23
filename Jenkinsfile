@@ -286,7 +286,13 @@ try {
 
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
-						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds)
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server",
+							tfVars: [
+								ami_id_override: amiIds.bfdServerAmiId
+							]
+						)
 
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
@@ -443,7 +449,13 @@ try {
 						milestone(label: 'stage_deploy_prod_sbx_start')
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
-							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds)
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server",
+								tfVars: [
+									ami_id_override: amiIds.bfdServerAmiId
+								]
+							)
 
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
@@ -581,7 +593,13 @@ try {
 
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
-							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds)
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server",
+								tfVars: [
+									ami_id_override: amiIds.bfdServerAmiId
+								]
+							)
 
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
