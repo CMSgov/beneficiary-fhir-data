@@ -20,6 +20,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.internal.crt.S3CrtAsyncClient;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
@@ -96,9 +97,7 @@ public final class SharedS3Utilities {
     if (minioConfig.useMinio) {
       return createS3AsyncMinioClient(awsS3Region, minioConfig);
     }
-    S3AsyncClient s3AsyncClient =
-        S3AsyncClient.builder().defaultsMode(DefaultsMode.STANDARD).region(awsS3Region).build();
-    return s3AsyncClient;
+    return S3CrtAsyncClient.builder().region(awsS3Region).build();
   }
 
   /**
