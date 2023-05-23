@@ -8,13 +8,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -55,6 +52,8 @@ public final class DMEClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  DMEClaimTransformerV2 dmeClaimTransformer;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -85,16 +84,11 @@ public final class DMEClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    dmeClaimTransformer =
+        new DMEClaimTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    DMEClaimTransformerV2 DMEClaimTransformerV2 = new DMEClaimTransformerV2();
-    ExplanationOfBenefit genEob =
-        DMEClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1237,19 +1231,11 @@ public final class DMEClaimTransformerV2Test {
    * Serializes the EOB and prints to the command line.
    *
    * @throws FHIRException if there is an issue with transforming the claim
-   * @throws IOException if there is an issue with reading the test file
    */
   @Disabled
   @Test
-  public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob =
-        DMEClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            generateClaim());
+  public void serializeSampleARecord() throws FHIRException {
+    ExplanationOfBenefit eob = dmeClaimTransformer.transform(generateClaim(), false);
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

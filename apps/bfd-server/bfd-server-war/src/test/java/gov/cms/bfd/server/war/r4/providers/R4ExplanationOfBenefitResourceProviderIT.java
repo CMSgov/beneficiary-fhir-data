@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
@@ -37,7 +38,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import java.io.IOException;
@@ -68,6 +68,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the {@link R4ExplanationOfBenefitResourceProvider}. */
@@ -75,6 +76,49 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
 
   /** Parameter name for excluding SAMHSA. */
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
+
+  /** The transformer for carrier claims. */
+  private CarrierClaimTransformerV2 carrierClaimTransformer;
+  /** The transformer for dme claims. */
+  private DMEClaimTransformerV2 dmeClaimTransformer;
+  /** The transformer for hha claims. */
+  private HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The transformer for hospice claims. */
+  private HospiceClaimTransformerV2 hospiceClaimTransformer;
+  /** The transformer for inpatient claims. */
+  private InpatientClaimTransformerV2 inpatientClaimTransformer;
+  /** The transformer for outpatient claims. */
+  private OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  /** The transformer for part D events claims. */
+  private PartDEventTransformerV2 partDEventTransformer;
+  /** The transformer for snf claims. */
+  private SNFClaimTransformerV2 snfClaimTransformerV2;
+
+  /**
+   * Sets the test resources up for comparing the data.
+   *
+   * @throws IOException the io exception
+   */
+  @BeforeEach
+  public void setup() throws IOException {
+
+    MetricRegistry metricRegistry =
+        PipelineTestUtils.get().getPipelineApplicationState().getMetrics();
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+
+    carrierClaimTransformer =
+        new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+    dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
+    hospiceClaimTransformer = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
+    inpatientClaimTransformer = new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
+    outpatientClaimTransformer =
+        new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+    partDEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    snfClaimTransformerV2 = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+  }
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
@@ -400,15 +444,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    assertEobEquals(
-        OutpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim),
-        eob);
+    OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
+        new OutpatientClaimTransformerV2(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
+    assertEobEquals(outpatientClaimTransformerV2.transform(claim), eob);
   }
 
   /**
@@ -1425,14 +1466,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .get();
 
     // Compare result to transformed EOB
+    PartDEventTransformerV2 partDEventTransformer =
+        new PartDEventTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertEobEquals(
-        PartDEventTransformerV2.transform(
-            new TransformerContext(
-                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            partDEvent),
+        partDEventTransformer.transform(partDEvent),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -1772,8 +1810,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
    * @param searchResults the search results
    * @param loadedRecords the loaded records
    */
-  private static void assertEachEob(Bundle searchResults, List<Object> loadedRecords)
-      throws IOException {
+  private void assertEachEob(Bundle searchResults, List<Object> loadedRecords) throws IOException {
     compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords);
     compareEob(ClaimTypeV2.DME, searchResults, loadedRecords);
     compareEob(ClaimTypeV2.HHA, searchResults, loadedRecords);
@@ -2015,7 +2052,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
    * @param searchResults the search results
    * @param loadedRecords the loaded records
    */
-  public static void compareEob(
+  public void compareEob(
       ClaimTypeV2 claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords)
       throws IOException {
     Object claim =
@@ -2025,17 +2062,19 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .findFirst()
             .get();
 
-    assertEobEquals(
-        claimType
-            .getTransformer()
-            .transform(
-                new TransformerContext(
-                    PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-                    Optional.of(false),
-                    FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                    NPIOrgLookup.createNpiOrgLookupForTesting()),
-                claim),
-        searchResults);
+    ExplanationOfBenefit expectedEob =
+        switch (claimType) {
+          case CARRIER -> carrierClaimTransformer.transform(claim, false);
+          case DME -> dmeClaimTransformer.transform(claim, false);
+          case HHA -> hhaClaimTransformer.transform(claim);
+          case HOSPICE -> hospiceClaimTransformer.transform(claim);
+          case INPATIENT -> inpatientClaimTransformer.transform(claim);
+          case OUTPATIENT -> outpatientClaimTransformer.transform(claim);
+          case PDE -> partDEventTransformer.transform(claim);
+          case SNF -> snfClaimTransformerV2.transform(claim);
+        };
+
+    assertEobEquals(expectedEob, searchResults);
   }
 
   /**
@@ -2045,8 +2084,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
    * @param searchResults the search results
    * @param loadedRecords the loaded records
    */
-  public static void compareEob(
-      ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords) throws IOException {
+  public void compareEob(ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords)
+      throws IOException {
     // Find desired claim in the bundle
     List<ExplanationOfBenefit> eobs = filterToClaimType(searchResults, claimType);
 

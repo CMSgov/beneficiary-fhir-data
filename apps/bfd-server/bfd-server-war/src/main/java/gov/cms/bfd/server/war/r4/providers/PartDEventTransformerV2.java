@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -10,7 +12,6 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
@@ -27,22 +28,45 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
+@Component
 final class PartDEventTransformerV2 {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   */
+  public PartDEventTransformerV2(
+      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  }
+
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
@@ -50,8 +74,7 @@ final class PartDEventTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob =
-        transformClaim((PartDEvent) claim, transformerContext.getDrugCodeDisplayLookup());
+    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
 
     timer.stop();
     return eob;
@@ -61,12 +84,10 @@ final class PartDEventTransformerV2 {
    * Transforms a specified {@link PartDEvent} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link PartDEvent} to transform
-   * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to return FDA Drug Codes
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
-  private static ExplanationOfBenefit transformClaim(
-      PartDEvent claimGroup, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  private ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
