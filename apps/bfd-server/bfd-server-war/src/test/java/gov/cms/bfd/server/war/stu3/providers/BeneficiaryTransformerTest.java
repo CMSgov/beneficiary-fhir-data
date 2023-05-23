@@ -132,24 +132,14 @@ public final class BeneficiaryTransformerTest {
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "someHICNhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
-    // FIXME
-    /*
-     *
-     * pwd
-     * assertValuesInPatientIdentifiers(
-     * patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-     * "3456789");
-     */
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
-    // FIXME
-    /*
-     * assertValuesInPatientIdentifiers(
-     * patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-     * "9AB2WW3GR44");
-     */
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
   }
 
   /**
@@ -235,17 +225,14 @@ public final class BeneficiaryTransformerTest {
         break;
       }
     }
-    // FIXME
-    /*
-     * assertEquals(
-     * identifierFound,
-     * true,
-     * "Identifier "
-     * + identifierSystem
-     * + " value = "
-     * + identifierValue
-     * + " does not match an expected value.");
-     */
+    assertEquals(
+        identifierFound,
+        true,
+        "Identifier "
+            + identifierSystem
+            + " value = "
+            + identifierValue
+            + " does not match an expected value.");
   }
 
   /**

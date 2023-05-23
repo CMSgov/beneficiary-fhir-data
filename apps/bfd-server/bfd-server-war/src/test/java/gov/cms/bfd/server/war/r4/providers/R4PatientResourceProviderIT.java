@@ -46,13 +46,12 @@ import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link R4PatientResourceProvider}. */
 public final class R4PatientResourceProviderIT extends ServerRequiredTest {
-
   /**
    * A list of expected historical mbis for adding to the sample A loaded data (as data coming back
    * from the endpoint will have this added in the resource provider).
    */
   private static final List<String> standardExpectedHistoricalMbis =
-      List.of("9AB2WW3GR44", "3456689");
+      List.of("9AB2WW3GR44", "543217066", "3456689");
 
   /**
    * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
@@ -75,7 +74,6 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     Patient patient =
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
-    // FIXME
     comparePatient(beneficiary, patient, standardExpectedHistoricalMbis);
   }
 
@@ -580,8 +578,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
   /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns the historical MBI
    * values in the response when searching by historic (non-current) MBI hash. The search should
-   * look in both the medicare_beneficiaryid_history and beneficiaries_history for historical MBIs
-   * to include in the response.
+   * look in the beneficiaries_history for historical MBIs to include in the response.
    *
    * <p>Context: The Patient endpoint (v2) supports looking up a Patient by MBI using any MBI
    * (hashed) that the patient has ever been associated with, functionality needed for cases where
@@ -597,8 +594,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     List<String> historicUnhashedMbis = new ArrayList<>();
-    // historic MBI from the medicare_beneficiaryid_history table (loaded from
-    // sample-a-medicarebeneficiaryidhistory.txt)
+    // historic MBI from the beneficiaries_history table (loaded from
+    // sample-a-beneficiaryhistory.txt)
     historicUnhashedMbis.add("9AB2WW3GR44");
     // historic MBIs from the beneficiaries_history table (loaded from
     // sample-a-beneficiaryhistory.txt)
@@ -633,9 +630,8 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
-    // Check both history entries are present in identifiers plus one for the bene
-    // id
-    // and one for the current unhashed mbi
+    // Check both history entries are present in identifiers plus one for the
+    // bene id and one for the current unhashed mbi
     assertEquals(5, patientFromSearchResult.getIdentifier().size());
     List<Identifier> historicalIds =
         patientFromSearchResult.getIdentifier().stream()
@@ -656,9 +652,6 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
             .toList();
 
     for (String mbi : historicUnhashedMbis) {
-      assertTrue(true);
-      // FIXME
-
       assertTrue(
           historicalIds.stream().anyMatch(h -> h.getValue().equals(mbi)),
           "Missing historical mbi: " + mbi);
@@ -1526,8 +1519,7 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     // The ID returned from the FHIR client differs from the transformer. It adds
     // URL information.
     // Here we verify that the resource it is pointing to is the same, and then set
-    // up to do a deep
-    // compare of the rest
+    // up to do a deep compare of the rest
     assertTrue(patient.getId().endsWith(expected.getId()));
     patient.setIdElement(expected.getIdElement());
 
@@ -1535,12 +1527,9 @@ public final class R4PatientResourceProviderIT extends ServerRequiredTest {
     assertNotNull(patient.getMeta().getLastUpdated());
     patient.getMeta().setLastUpdatedElement(expected.getMeta().getLastUpdatedElement());
 
-    // Add the identifiers that wont be present in the expected due to not going
-    // through the
-    // resource provider that adds historical mbis
+    // Add the identifiers that won't be present in the expected due to not going
+    // through the resource provider that adds historical mbis
     addHistoricalExtensions(expected, expectedHistoricalMbis);
-    // FIXME
-    assertTrue(true);
     assertTrue(expected.equalsDeep(patient));
   }
 

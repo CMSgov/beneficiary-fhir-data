@@ -1142,8 +1142,8 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
 
     List<String> historicUnhashedMbis = new ArrayList<>();
     /*
-     * Historic MBI from the medicare_beneficiaryid_history table (loaded from
-     * sample-a-medicarebeneficiaryidhistory.txt)
+     * Historic MBI from the beneficiaries_history table (loaded from
+     * sample-a-beneficiaryhistory.txt)
      */
     historicUnhashedMbis.add("9AB2WW3GR44");
     // current MBI from the beneficiaries table (loaded from
@@ -1204,13 +1204,9 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
             .toList();
 
     for (String mbi : historicUnhashedMbis) {
-      assertTrue(true);
-      // FIXME
-      /*
-       * assertTrue(
-       * historicalIds.stream().anyMatch(h -> h.getValue().equals(mbi)),
-       * "Missing historical mbi: " + mbi);
-       */
+      assertTrue(
+          historicalIds.stream().anyMatch(h -> h.getValue().equals(mbi)),
+          "Missing historical mbi: " + mbi);
     }
 
     Identifier currentMbiFromSearch =

@@ -203,9 +203,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     // the endpoint Id.
     String endpointResponse = endpointOperation.get();
     writeFile(endpointResponse, generateFileName(targetResponseDir, endpointId));
-
-    // FIXME
-    // assertJsonDiffIsEmpty(endpointId);
+    assertJsonDiffIsEmpty(endpointId);
   }
 
   /**
