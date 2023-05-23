@@ -16,7 +16,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import java.io.IOException;
@@ -57,6 +56,8 @@ public class CarrierClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  CarrierClaimTransformerV2 carrierClaimTransformer;
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -87,15 +88,13 @@ public class CarrierClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    carrierClaimTransformer =
+        new CarrierClaimTransformerV2(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
     claim = generateClaim();
-    ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -112,15 +111,7 @@ public class CarrierClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException, IOException {
     CarrierClaim claim = generateClaim();
 
-    assertMatches(
-        claim,
-        CarrierClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim));
+    assertMatches(claim, carrierClaimTransformer.transform(claim, false));
   }
 
   /**
@@ -132,14 +123,7 @@ public class CarrierClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob =
-        CarrierClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            generateClaim());
+    ExplanationOfBenefit eob = carrierClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
@@ -741,14 +725,7 @@ public class CarrierClaimTransformerV2Test {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1331,14 +1308,7 @@ public class CarrierClaimTransformerV2Test {
 
     claimWithoutNpi.setLastUpdated(Instant.now());
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
-    ExplanationOfBenefit genEob =
-        CarrierClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claimWithoutNpi);
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claimWithoutNpi, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);

@@ -1650,6 +1650,7 @@ public final class TransformerUtilsV2 {
        * FIXME: Due to a bug in HAPI-FHIR described here
        * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not working
        * correctly.
+       * TODO: Above bug should be fixed as of 1/1/20; re-investigate this
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);

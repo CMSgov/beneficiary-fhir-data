@@ -1,8 +1,12 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -10,7 +14,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -22,25 +25,55 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.springframework.stereotype.Component;
 
 /**
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
+@Component
 public class CarrierClaimTransformerV2 {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   */
+  public CarrierClaimTransformerV2(
+      MetricRegistry metricRegistry,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  }
 
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(
                 MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
@@ -49,7 +82,7 @@ public class CarrierClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim(transformerContext, (CarrierClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
@@ -59,12 +92,11 @@ public class CarrierClaimTransformerV2 {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
-   * @param transformerContext the {@link TransformerContext} to transform
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      TransformerContext transformerContext, CarrierClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -268,7 +300,7 @@ public class CarrierClaimTransformerV2 {
             C4BBPractitionerIdentifierType.NPI,
             C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
             line.getOrganizationNpi().get(),
-            transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(line.getOrganizationNpi()));
+            npiOrgLookup.retrieveNPIOrgDisplay(line.getOrganizationNpi()));
       }
 
       // CARR_LINE_RDCD_PMT_PHYS_ASTN_C => ExplanationOfBenefit.item.adjudication
@@ -291,7 +323,7 @@ public class CarrierClaimTransformerV2 {
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
       // tax num should be as a extension
-      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
+      if (includeTaxNumbers) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(
                 eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
@@ -375,9 +407,7 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          transformerContext
-              .getDrugCodeDisplayLookup()
-              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
