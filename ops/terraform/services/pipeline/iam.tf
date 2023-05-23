@@ -225,3 +225,61 @@ EOF
   name                 = "bfd-${local.env}-bfd_${local.service}-role"
   path                 = "/"
 }
+
+resource "aws_iam_policy" "etl_s3_rda_paths_rw" {
+  name        = "bfd-${local.env}-${local.service}-etl-s3-rda-paths-rw"
+  description = "Read and Write objects within RDA paths"
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "ETLRWKMS",
+          "Action" : [
+            "kms:Decrypt",
+            "kms:Encypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            local.kms_key_id
+          ]
+        },
+        {
+          "Sid" : "ETLRWBucketList",
+          "Action" : [
+            "s3:ListBucket"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            aws_s3_bucket.this.arn
+          ]
+        },
+        {
+          "Sid" : "ETLRWBucketActions",
+          "Action" : [
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "${aws_s3_bucket.this.arn}/RDA-Synthetic/*",
+            "${aws_s3_bucket.this.arn}/rda_api_messages/*"
+          ]
+        }
+      ]
+  })
+}
+
+# attach the rda s3 policy to the paca engineer group
+data "aws_iam_group" "paca_engineers" {
+  group_name = "bfd-paca-app-engineers"
+}
+
+resource "aws_iam_group_policy_attachment" "etl_s3_rda_paths_rw" {
+  group      = data.aws_iam_group.paca_engineers.group_name
+  policy_arn = aws_iam_policy.etl_s3_rda_paths_rw.arn
+}

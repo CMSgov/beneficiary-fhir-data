@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 data "aws_ecr_authorization_token" "token" {}
 
 data "aws_kms_key" "cmk" {
-  key_id = "alias/bfd-${local.env}-cmk" # TODO: replace ssm lookup
+  key_id = "alias/bfd-${local.seed_env}-cmk" # TODO: Consider replacing with ssm lookup
 }
 
 data "aws_vpc" "main" {

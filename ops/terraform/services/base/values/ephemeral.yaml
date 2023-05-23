@@ -1,23 +1,14 @@
 ---
 # COMMON CONFIGURATION
-## NOTE: select `test` environment resources in-use to avoid per-environment creation of more complex resources
-##       and provide isolation of development, ephemeral environments from production workloads
-/bfd/${env}/common/nonsensitive/enterprise_tools_security_group: bfd-test-enterprise-tools
-/bfd/${env}/common/nonsensitive/management_security_group: bfd-test-remote-management
-/bfd/${env}/common/nonsensitive/vpc_name: bfd-test-vpc
-/bfd/${env}/common/nonsensitive/vpn_security_group: bfd-test-vpn-private
-
 /bfd/${env}/common/nonsensitive/env_name_std: ${env}
-/bfd/${env}/common/nonsensitive/key_pair: bfd-${seed_env}
-/bfd/${env}/common/nonsensitive/kms_key_alias: alias/bfd-${seed_env}-cmk
 /bfd/${env}/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
 /bfd/${env}/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 
 ## COMMON RDS CONFIGURATION
 /bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
-/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-${seed_env}-aurora-cluster
-/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: false
-/bfd/${env}/common/nonsensitive/rds_instance_count: 2
+/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: true
+/bfd/${env}/common/nonsensitive/rds_instance_count: 1
 
 # MIGRATOR CONFIGURATION
 /bfd/${env}/migrator/nonsensitive/instance_type: m5.large
