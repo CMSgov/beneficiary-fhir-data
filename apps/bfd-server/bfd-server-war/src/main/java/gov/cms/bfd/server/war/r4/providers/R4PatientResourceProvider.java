@@ -395,7 +395,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
           @Description(
-              shortDefinition = "Part D coverage contract identifier",
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_SHORT,
               value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
           TokenParam coverageId,
       String cursor,

@@ -284,8 +284,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           ReferenceParam mbi,
       @OptionalParam(name = "type")
           @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_CLAIM_TYPE_SHORT,
-              value = OpenAPIContentProvider.EOB_CLAIM_TYPE_VALUE)
+              shortDefinition = OpenAPIContentProvider.PAC_CLAIM_TYPE_SHORT,
+              value = OpenAPIContentProvider.PAC_CLAIM_TYPE_VALUE)
           TokenAndListParam types,
       @OptionalParam(name = "startIndex")
           @Description(

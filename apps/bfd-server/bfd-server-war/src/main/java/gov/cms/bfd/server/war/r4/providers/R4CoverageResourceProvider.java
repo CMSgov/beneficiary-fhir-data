@@ -124,9 +124,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
-  public Coverage read(@Description(
-          shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
-          value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE) @IdParam IdType coverageId) {
+  public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
     }
