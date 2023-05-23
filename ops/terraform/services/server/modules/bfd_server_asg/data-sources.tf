@@ -21,6 +21,7 @@ data "aws_rds_cluster" "rds" {
 data "external" "rds" {
   program = [
     "${path.module}/scripts/rds-cluster-config.sh", # helper script
-    data.aws_rds_cluster.rds.cluster_identifier     # verified, positional argument to script
+    data.aws_rds_cluster.rds.cluster_identifier,    # verified, positional argument to script
+    local.env                                       # environment name, almost exclusively here to provide beta reader functionality for production
   ]
 }

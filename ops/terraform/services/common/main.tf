@@ -1,5 +1,9 @@
 locals {
-  env            = terraform.workspace
+  env              = terraform.workspace
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
+
   service        = "common"
   legacy_service = "admin"
   layer          = "data"
@@ -14,16 +18,14 @@ locals {
     us-west-2 = "arn:aws:iam::797873946194:root"
   }
 
-  # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
-  seed_env         = lookup(local.nonsensitive_config, "ephemeral_environment_seed", null)
-  is_ephemeral_env = local.seed_env == null ? false : true
 
-  # TODO: support ephemeral environments... which bucket should the ephemeral environment use for its admin bucket?
+  # TODO: To finalize ephemeral environment support,
+  # we need to clarify the logging and admin bucket relationships
   admin_bucket   = "bfd-${local.env}-admin-${local.account_id}"
   logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
 
   default_tags = {
-    Environment    = local.env
+    Environment    = local.seed_env
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
@@ -63,69 +65,4 @@ locals {
   kms_key_alias = local.nonsensitive_config["kms_key_alias"]
   kms_key_id    = data.aws_kms_key.cmk.arn
   vpc_name      = local.nonsensitive_config["vpc_name"]
-}
-
-data "aws_availability_zones" "main" {}
-
-data "aws_caller_identity" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_vpc" "main" {
-  filter {
-    name   = "tag:Name"
-    values = [local.vpc_name]
-  }
-}
-
-data "aws_subnet" "data" {
-  count             = 3
-  vpc_id            = data.aws_vpc.main.id
-  availability_zone = data.aws_availability_zones.main.names[count.index]
-
-  filter {
-    name   = "tag:Layer"
-    values = ["data"]
-  }
-}
-
-data "aws_ssm_parameters_by_path" "nonsensitive" {
-  path = "/bfd/${local.env}/${local.service}/nonsensitive"
-}
-
-data "aws_ssm_parameters_by_path" "sensitive" {
-  path            = "/bfd/${local.env}/${local.service}/sensitive"
-  with_decryption = true
-}
-
-data "aws_security_group" "vpn" {
-  vpc_id = data.aws_vpc.main.id
-  filter {
-    name   = "tag:Name"
-    values = [local.vpn_security_group]
-  }
-}
-
-data "aws_security_group" "management" {
-  vpc_id = data.aws_vpc.main.id
-  filter {
-    name   = "tag:Name"
-    values = [local.management_security_group]
-  }
-}
-
-data "aws_security_group" "tools" {
-  vpc_id = data.aws_vpc.main.id
-  filter {
-    name   = "tag:Name"
-    values = [local.enterprise_tools_security_group]
-  }
-}
-
-data "aws_kms_key" "cmk" {
-  key_id = local.kms_key_alias
-}
-
-data "aws_iam_role" "monitoring" {
-  name = "rds-monitoring-role"
 }

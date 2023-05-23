@@ -1,8 +1,12 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
@@ -12,7 +16,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -23,26 +26,55 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.stereotype.Component;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
  * resources.
  */
+@Component
 public class OutpatientClaimTransformerV2 {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   */
+  public OutpatientClaimTransformerV2(
+      MetricRegistry metricRegistry,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  }
 
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(
                 MetricRegistry.name(
                     OutpatientClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -52,7 +84,7 @@ public class OutpatientClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim, transformerContext);
+    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim);
 
     timer.stop();
     return eob;
@@ -62,12 +94,10 @@ public class OutpatientClaimTransformerV2 {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
-   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      OutpatientClaim claimGroup, TransformerContext transformerContext) {
+  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -190,7 +220,7 @@ public class OutpatientClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -405,9 +435,7 @@ public class OutpatientClaimTransformerV2 {
       TransformerUtilsV2.addNationalDrugCode(
           item,
           line.getNationalDrugCode(),
-          transformerContext
-              .getDrugCodeDisplayLookup()
-              .retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
