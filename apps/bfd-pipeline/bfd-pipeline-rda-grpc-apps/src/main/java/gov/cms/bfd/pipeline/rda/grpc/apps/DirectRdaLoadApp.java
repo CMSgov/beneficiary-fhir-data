@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -140,7 +141,10 @@ public class DirectRdaLoadApp {
             .batchSize(options.intValue("job.batchSize", 1))
             .writeThreads(options.intValue("job.writeThreads", 1))
             .rdaVersion(
-                RdaVersion.builder().versionString(options.stringValue("rda.version")).build())
+                RdaVersion.builder()
+                    .versionString(
+                        options.stringValue("rda.version", "^" + RdaService.RDA_PROTO_VERSION))
+                    .build())
             .sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
     options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
     options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
