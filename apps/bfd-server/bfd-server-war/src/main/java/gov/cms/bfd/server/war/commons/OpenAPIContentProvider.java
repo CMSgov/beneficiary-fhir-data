@@ -220,23 +220,24 @@ public final class OpenAPIContentProvider {
           + "<li>&isHashed=true</li>";
 
   /**
-   * Open API short description for /Patient's Partially Aducidaced claims data; provides a URI for the 'next' set
-   * of data.
+   * Open API short description for /Patient's Partially Aducidaced claims data; provides a URI for
+   * the 'next' set of data.
    */
-  public static final String PAC_CLAIM_TYPE_SHORT = "A list of BFD partially adjudicated claim types to include";
+  public static final String PAC_CLAIM_TYPE_SHORT =
+      "A list of BFD partially adjudicated claim types to include";
 
   /**
-   * Open API content value for /Patient's Partially Aducidaced claims data; provides a URI for the 'next' set of
-   * data.
+   * Open API content value for /Patient's Partially Aducidaced claims data; provides a URI for the
+   * 'next' set of data.
    */
   public static final String PAC_CLAIM_TYPE_VALUE =
-          "A list of one or more comma-separated claim types to be included in the request;"
-                  + " within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified"
-                  + " claim types will be checked."
-                  + "<p/>Supported Claim Type values:<ul>"
-                  + "<li>fiss</li>"
-                  + "<li>mcs</li>"
-                  + "<p/>Examples:<ul>"
-                  + "<li>type=fiss,mcs</li>"
-                  + "<li>type=fiss</li>";
+      "A list of one or more comma-separated claim types to be included in the request;"
+          + " within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified"
+          + " claim types will be checked."
+          + "<p/>Supported Claim Type values:<ul>"
+          + "<li>fiss</li>"
+          + "<li>mcs</li>"
+          + "<p/>Examples:<ul>"
+          + "<li>type=fiss,mcs</li>"
+          + "<li>type=fiss</li>";
 }
