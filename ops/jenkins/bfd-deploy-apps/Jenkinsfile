@@ -114,7 +114,7 @@ spec:
         )
 
         string(
-        name: 'server_ami',
+        name: 'server_ami_override',
         description: 'The AMI ID to deploy server from',
         defaultValue: null
         )
@@ -291,31 +291,17 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def serverAmi = params.server_ami?.trim()
+                        def terraformVars = (params.server_ami_override?.trim())
+                                                  ? [ami_id_override: params.server_ami_override?.trim()]
+                                                  : []
                         lock(resource: lockResource) {
+                            // Deploy the Server
                             awsAuth.assumeRole()
-                                dir("${workspace}/ops/terraform/env/${trimmedEnv}/stateless") {
-                                    // Debug output terraform version
-                                    sh "terraform --version"
-
-                                    // Initilize terraform
-                                    sh "terraform init -no-color"
-
-                                    // Gathering terraform plan
-                                    echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                                    sh "terraform plan \
-                                    -var='fhir_ami=${serverAmi}' \
-                                    -var='ssh_key_name=bfd-${trimmedEnv}' \
-                                    -var='git_branch_name=${gitBranchName}' \
-                                    -var='git_commit_id=${gitCommitId}' \
-                                    -no-color -out=tfplan"
-
-                                    // Apply Terraform plan
-                                    echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                                    sh "terraform apply \
-                                    -no-color -input=false tfplan"
-                                    echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-                                }
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server',
+                                    tfVars: terraformVars
+                            )
 
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
@@ -326,27 +312,30 @@ spec:
                                     ]
                             )
 
-                            // Deploy the API requests Insights Lambda
-                            awsAuth.assumeRole()
-                            terraform.deployTerraservice(
+                            // TODO: Better support ephemeral environments in the future as desired, post BFD-2554
+                            if (bfdEnv in ["test", "prod-sbx", "prod"]) {
+                                // Deploy the API requests Insights Lambda
+                                awsAuth.assumeRole()
+                                terraform.deployTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server/insights/api-requests'
                                 )
 
-                            awsAuth.assumeRole()
-                            hasRegressionRunSucceeded = serverScripts.runServerRegression(
+                                // Deploy the API regression suite
+                                awsAuth.assumeRole()
+                                hasRegressionRunSucceeded = serverScripts.runServerRegression(
                                     bfdEnv: trimmedEnv,
                                     gitBranchName: gitBranchName
                                 )
-
-                            if (hasRegressionRunSucceeded) {
-                                println 'Regression suite passed, proceeding to next stage...'
-                            } else {
-                                try {
-                                    input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
-                                    echo "Regression suite failure in '${trimmedEnv}' has been accepted by operator. Proceeding to next stage..."
-                                } catch (err) {
-                                    error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
+                                if (hasRegressionRunSucceeded) {
+                                    println 'Regression suite passed, proceeding to next stage...'
+                                } else {
+                                    try {
+                                        input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+                                        echo "Regression suite failure in '${trimmedEnv}' has been accepted by operator. Proceeding to next stage..."
+                                    } catch (err) {
+                                        error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
+                                    }
                                 }
                             }
                         }

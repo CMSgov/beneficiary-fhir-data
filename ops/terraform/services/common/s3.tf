@@ -43,8 +43,8 @@ resource "aws_s3_bucket_logging" "this" {
 
 resource "aws_s3_bucket_acl" "this" {
   # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
-  # resource will fail to apply for ephemeral environments
-  # TODO: Replace/resolve this in BFD-2554
+  # resource will fail to apply for ephemeral environments (new buckets)
+  # FIXME: Replace/resolve this before accepting BFD-2554
   count = local.is_ephemeral_env ? 0 : 1
 
   bucket = aws_s3_bucket.this.id

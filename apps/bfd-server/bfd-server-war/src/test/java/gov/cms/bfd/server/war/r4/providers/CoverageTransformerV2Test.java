@@ -58,9 +58,13 @@ public final class CoverageTransformerV2Test {
           .appendPattern("dd-MMM-yyyy")
           .toFormatter();
 
+  /** The transformer under test. */
+  private CoverageTransformerV2 coverageTransformer;
+
   /** Sets up the test dependencies shared across each test. */
   @BeforeEach
   public void setup() {
+    coverageTransformer = new CoverageTransformerV2(new MetricRegistry());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -241,9 +245,7 @@ public final class CoverageTransformerV2Test {
     newBeneficiary.setLastUpdated(calen.getTime().toInstant());
     newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
-    Coverage newCoverage =
-        CoverageTransformerV2.transform(
-            new MetricRegistry(), MedicareSegment.PART_A, newBeneficiary);
+    Coverage newCoverage = coverageTransformer.transform(MedicareSegment.PART_A, newBeneficiary);
     checkForNoYearlyDate(newCoverage);
   }
 
@@ -779,10 +781,9 @@ public final class CoverageTransformerV2Test {
    * @param showJson {@code true} if the json should be printed to stdout
    * @throws FHIRException if there is an issue transforming the coverage
    */
-  public static void transformCoverage(MedicareSegment medSeg, boolean showJson)
-      throws FHIRException {
+  public void transformCoverage(MedicareSegment medSeg, boolean showJson) throws FHIRException {
     if (currSegment == null || currSegment != medSeg) {
-      coverage = CoverageTransformerV2.transform(new MetricRegistry(), medSeg, beneficiary);
+      coverage = coverageTransformer.transform(medSeg, beneficiary);
       currSegment = medSeg;
     }
     if (showJson && coverage != null) {

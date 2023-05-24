@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -17,14 +16,12 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -61,6 +58,8 @@ public class SNFClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  SNFClaimTransformerV2 snfClaimTransformer;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -89,15 +88,11 @@ public class SNFClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    snfClaimTransformer =
+        new SNFClaimTransformerV2(
+            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
     claim = generateClaim();
-    ExplanationOfBenefit genEob =
-        SNFClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -459,14 +454,7 @@ public class SNFClaimTransformerV2Test {
             .map(r -> (SNFClaim) r)
             .findFirst()
             .get();
-    ExplanationOfBenefit genEob =
-        SNFClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1620,14 +1608,7 @@ public class SNFClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob =
-        SNFClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            generateClaim());
+    ExplanationOfBenefit eob = snfClaimTransformer.transform(generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

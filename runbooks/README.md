@@ -29,6 +29,11 @@ Table of Contents
    * [Load the target table from the staging table.](./how-to-load-cloudwatch-historical-data.md#load-the-target-table-from-the-staging-table)
    * [Verify the load.](./how-to-load-cloudwatch-historical-data.md#verify-the-load)
 
+* [How to Manually Adjust Scheduled RDS Application Autoscaling](./how-to-manually-adjust-scheduled-rds-application-autoscaling.md#how-to-manually-adjust-scheduled-rds-application-autoscaling)
+   * [View All Scheduled Scaling Events](./how-to-manually-adjust-scheduled-rds-application-autoscaling.md#view-all-scheduled-scaling-events)
+   * [Suspend/Disable Scheduled Scaling Events](./how-to-manually-adjust-scheduled-rds-application-autoscaling.md#suspenddisable-scheduled-scaling-events)
+   * [Unsuspend/Enable Scheduled Scaling Events](./how-to-manually-adjust-scheduled-rds-application-autoscaling.md#unsuspendenable-scheduled-scaling-events)
+
 * [How to Clone an RDS Cluster with Terraform](./how-to-clone-rds-cluster-with-terraform.md#how-to-clone-an-rds-cluster-with-terraform)
    * [Software Requirements](./how-to-clone-rds-cluster-with-terraform.md#software-requirements)
    * [Configuring an Ephemeral Environment](./how-to-clone-rds-cluster-with-terraform.md#configuring-an-ephemeral-environment)

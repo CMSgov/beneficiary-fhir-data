@@ -376,11 +376,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
               LocalDate serviceDate = revenueLine.getServiceDate();
               if (serviceDate != null) {
-                itemComponent.setServiced(
-                    new DateType(
-                        serviceDate.getYear(),
-                        serviceDate.getMonthValue(),
-                        serviceDate.getDayOfMonth()));
+                itemComponent.setServiced(new DateType(localDateToDate(serviceDate)));
               }
 
               if (Strings.isNotBlank(revenueLine.getHcpcCd())

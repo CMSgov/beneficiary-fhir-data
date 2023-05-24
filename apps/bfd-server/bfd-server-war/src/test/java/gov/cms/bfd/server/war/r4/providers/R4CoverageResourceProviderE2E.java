@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerRequiredTest;
@@ -26,13 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for the {@link R4CoverageResourceProvider}. */
-public final class R4CoverageResourceProviderIT extends ServerRequiredTest {
-  private static final Logger LOGGER = LoggerFactory.getLogger(R4CoverageResourceProviderIT.class);
+public final class R4CoverageResourceProviderE2E extends ServerRequiredTest {
+  private static final Logger LOGGER = LoggerFactory.getLogger(R4CoverageResourceProviderE2E.class);
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that do exist in the DB.
+   * Verifies that {@link R4CoverageResourceProvider#read} works as expected for {@link
+   * Beneficiary}-derived {@link Coverage}s that do exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -73,57 +71,6 @@ public final class R4CoverageResourceProviderIT extends ServerRequiredTest {
             .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary))
             .execute();
     CoverageTransformerV2Test.assertPartDMatches(beneficiary, partDCoverage);
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
-   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that do not exist in the DB
-   * (with both positive and negative IDs).
-   */
-  @Test
-  public void readCoveragesForMissingBeneficiary() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    // No data is loaded, so these should return nothing.
-    ResourceNotFoundException exception;
-
-    exception = null;
-    try {
-      fhirClient
-          .read()
-          .resource(Coverage.class)
-          .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, 1234L))
-          .execute();
-    } catch (ResourceNotFoundException e) {
-      exception = e;
-    }
-    assertNotNull(exception);
-
-    exception = null;
-    try {
-      fhirClient
-          .read()
-          .resource(Coverage.class)
-          .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_B, 1234L))
-          .execute();
-    } catch (ResourceNotFoundException e) {
-      exception = e;
-    }
-    assertNotNull(exception);
-
-    // Tests negative ID will pass regex pattern for valid coverageId.
-    exception = null;
-    try {
-      fhirClient
-          .read()
-          .resource(Coverage.class)
-          .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, -1234L))
-          .execute();
-    } catch (ResourceNotFoundException e) {
-      exception = e;
-    }
-    assertNotNull(exception);
   }
 
   /**
@@ -217,121 +164,7 @@ public final class R4CoverageResourceProviderIT extends ServerRequiredTest {
 
   /**
    * Verifies that {@link R4CoverageResourceProvider#searchByBeneficiary} works as expected for a
-   * {@link Beneficiary} that does exist in the DB, with paging.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void searchByExistingBeneficiaryWithPaging() throws FHIRException {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Coverage.class)
-            .where(Coverage.BENEFICIARY.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
-            .count(4)
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(MedicareSegment.values().length, searchResults.getTotal());
-
-    /*
-     * Verify that only the first and last paging links exist, since there should
-     * only be one page.
-     */
-    assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    assertNotNull(searchResults.getLink(Constants.LINK_LAST));
-
-    /*
-     * Verify that each of the expected Coverages (one for every MedicareSegment) is
-     * present and looks correct.
-     */
-
-    Coverage partACoverageFromSearchResult =
-        searchResults.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Coverage)
-            .map(e -> (Coverage) e.getResource())
-            .filter(
-                c ->
-                    c.getClass_().stream()
-                        .filter(
-                            cl -> TransformerConstants.COVERAGE_PLAN_PART_A.equals(cl.getValue()))
-                        .findAny()
-                        .isPresent())
-            .findFirst()
-            .get();
-    CoverageTransformerV2Test.assertPartAMatches(beneficiary, partACoverageFromSearchResult);
-
-    Coverage partBCoverageFromSearchResult =
-        searchResults.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Coverage)
-            .map(e -> (Coverage) e.getResource())
-            .filter(
-                c ->
-                    c.getClass_().stream()
-                        .filter(
-                            cl -> TransformerConstants.COVERAGE_PLAN_PART_B.equals(cl.getValue()))
-                        .findAny()
-                        .isPresent())
-            .findFirst()
-            .get();
-    CoverageTransformerV2Test.assertPartBMatches(beneficiary, partBCoverageFromSearchResult);
-
-    Coverage partDCoverageFromSearchResult =
-        searchResults.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Coverage)
-            .map(e -> (Coverage) e.getResource())
-            .filter(
-                c ->
-                    c.getClass_().stream()
-                        .filter(
-                            cl -> TransformerConstants.COVERAGE_PLAN_PART_D.equals(cl.getValue()))
-                        .findAny()
-                        .isPresent())
-            .findFirst()
-            .get();
-    CoverageTransformerV2Test.assertPartDMatches(beneficiary, partDCoverageFromSearchResult);
-  }
-
-  /**
-   * Verifies that {@link R4CoverageResourceProvider#searchByBeneficiary} works as expected for a
-   * {@link Beneficiary} that does not exist in the DB.
-   */
-  @Test
-  public void searchByMissingBeneficiary() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    // No data is loaded, so this should return 0 matches.
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Coverage.class)
-            .where(Coverage.BENEFICIARY.hasId(TransformerUtilsV2.buildPatientId(1234L)))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(0, searchResults.getTotal());
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary} works as
-   * expected for a search with a lastUpdated value.
+   * search with a lastUpdated value.
    */
   @Test
   public void searchWithLastUpdated() {

@@ -25,6 +25,8 @@
 	<logger name="gov.cms.bfd.pipeline.app.PipelineManager" level="info" />
 	<logger name="gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob" level="info" />
 	<logger name="gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore" level="info" />
+	<!-- Prevents some noisy nonsense running locally -->
+	<logger name="software.amazon.awssdk.profiles.internal.ProfileFileReader" level="error" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->

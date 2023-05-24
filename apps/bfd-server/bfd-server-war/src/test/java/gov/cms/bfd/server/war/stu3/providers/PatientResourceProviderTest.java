@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +36,15 @@ public class PatientResourceProviderTest {
   /** The mocked input id value. */
   @Mock IdType patientId;
 
+  /** The mock metric registry. */
+  @Mock private MetricRegistry metricRegistry;
+  /** The mock loaded filter manager. */
+  @Mock private LoadedFilterManager loadedFilterManager;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    patientProvider = new PatientResourceProvider();
+    patientProvider = new PatientResourceProvider(metricRegistry, loadedFilterManager);
     lenient().when(patientId.getVersionIdPartAsLong()).thenReturn(null);
   }
 
