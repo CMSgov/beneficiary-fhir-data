@@ -35,6 +35,8 @@ public class LayeredConfigurationIT {
   void shouldLayerConfigurationSources() throws IOException {
     // define everything we will need to include in our config
     final var ssmBasePath = "/test/";
+    final var ssmCommonPath = ssmBasePath + "common/";
+    final var ssmSpecificPath = ssmBasePath + "specific/";
     final var ssmRegion = localstack.getRegion();
     final var ssmEndpoint = localstack.getEndpointOverride(LocalStackContainer.Service.SSM);
     final var ssmAccessKey = localstack.getAccessKey();
@@ -46,20 +48,24 @@ public class LayeredConfigurationIT {
     final var nameC = baseName + "c";
     final var nameD = baseName + "d";
     final var nameE = baseName + "e";
+    final var nameF = baseName + "f";
     final var nameZ = baseName + "z";
 
     // a comes from system property
     // b comes from env variable
     // c comes from property file
-    // d comes from ssm
-    // e comes from defaults
+    // d comes from ssm specific
+    // e comes from ssm common
+    // f comes from defaults
     // z is undefined
     final var systemProperties =
         ImmutableMap.<String, String>builder().put(nameA, "a-system-property").build();
     final var envVars =
         ImmutableMap.<String, String>builder()
             .put(LayeredConfiguration.ENV_VAR_KEY_SSM_REGION, ssmRegion)
-            .put(LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH, ssmBasePath)
+            .put(
+                LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH,
+                ssmCommonPath + "," + ssmSpecificPath)
             .put(LayeredConfiguration.ENV_VAR_KEY_SSM_ENDPOINT, ssmEndpoint.toString())
             .put(LayeredConfiguration.ENV_VAR_KEY_SSM_ACCESS_KEY, ssmAccessKey)
             .put(LayeredConfiguration.ENV_VAR_KEY_SSM_SECRET_KEY, ssmSecretKey)
@@ -73,12 +79,20 @@ public class LayeredConfigurationIT {
             .put(nameB, "b-file-property")
             .put(nameC, "c-file-property")
             .build();
-    final var ssmParameters =
+    final var ssmSpecificParameters =
         ImmutableMap.<String, String>builder()
-            .put(nameA, "a-ssm-parameter")
-            .put(nameB, "b-ssm-parameter")
-            .put(nameC, "c-ssm-parameter")
-            .put(nameD, "d-ssm-parameter")
+            .put(nameA, "a-ssm-specific-parameter")
+            .put(nameB, "b-ssm-specific-parameter")
+            .put(nameC, "c-ssm-specific-parameter")
+            .put(nameD, "d-ssm-specific-parameter")
+            .build();
+    final var ssmCommonParameters =
+        ImmutableMap.<String, String>builder()
+            .put(nameA, "a-ssm-common-parameter")
+            .put(nameB, "b-ssm-common-parameter")
+            .put(nameC, "c-ssm-common-parameter")
+            .put(nameD, "d-ssm-common-parameter")
+            .put(nameE, "e-ssm-common-parameter")
             .build();
     final var defaultValues =
         ImmutableMap.<String, String>builder()
@@ -87,6 +101,7 @@ public class LayeredConfigurationIT {
             .put(nameC, "c-default")
             .put(nameD, "d-default")
             .put(nameE, "e-default")
+            .put(nameF, "f-default")
             .build();
 
     try {
@@ -99,10 +114,18 @@ public class LayeredConfigurationIT {
                   StaticCredentialsProvider.create(
                       AwsBasicCredentials.create(ssmAccessKey, ssmSecretKey)))
               .build();
-      for (Map.Entry<String, String> entry : ssmParameters.entrySet()) {
+      for (Map.Entry<String, String> entry : ssmCommonParameters.entrySet()) {
         ssmClient.putParameter(
             PutParameterRequest.builder()
-                .name(ssmBasePath + entry.getKey())
+                .name(ssmCommonPath + entry.getKey())
+                .value(entry.getValue())
+                .type(ParameterType.STRING)
+                .build());
+      }
+      for (Map.Entry<String, String> entry : ssmSpecificParameters.entrySet()) {
+        ssmClient.putParameter(
+            PutParameterRequest.builder()
+                .name(ssmSpecificPath + entry.getKey())
                 .value(entry.getValue())
                 .type(ParameterType.STRING)
                 .build());
@@ -126,8 +149,9 @@ public class LayeredConfigurationIT {
       assertEquals("a-system-property", config.stringValue(nameA));
       assertEquals("b-env-var", config.stringValue(nameB));
       assertEquals("c-file-property", config.stringValue(nameC));
-      assertEquals("d-ssm-parameter", config.stringValue(nameD));
-      assertEquals("e-default", config.stringValue(nameE));
+      assertEquals("d-ssm-specific-parameter", config.stringValue(nameD));
+      assertEquals("e-ssm-common-parameter", config.stringValue(nameE));
+      assertEquals("f-default", config.stringValue(nameF));
       assertEquals(Optional.empty(), config.stringOption(nameZ));
 
     } finally {

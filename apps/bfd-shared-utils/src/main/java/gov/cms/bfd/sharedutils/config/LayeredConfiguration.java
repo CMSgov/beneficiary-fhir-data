@@ -111,8 +111,10 @@ public final class LayeredConfiguration {
       final var parameterStore =
           new AwsParameterStoreClient(
               ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
-      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath);
-      configBuilder.addMap(parametersMap);
+      for (String singlePath : ssmPath.split(",")) {
+        final var parametersMap = parameterStore.loadParametersAtPath(singlePath);
+        configBuilder.addMap(parametersMap);
+      }
     }
 
     // load properties from file if configured
