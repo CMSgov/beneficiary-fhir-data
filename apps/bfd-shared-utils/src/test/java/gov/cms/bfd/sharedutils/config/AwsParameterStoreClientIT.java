@@ -63,7 +63,7 @@ public class AwsParameterStoreClientIT {
     final var expectedParameters =
         ImmutableMap.<String, String>builder().put("port", "18").put("mascot", "alpaca");
 
-    final var batchSize = 4;
+    final var batchSize = AwsParameterStoreClient.DEFAULT_BATCH_SIZE;
 
     // Insert extra parameters so that we can test batching .
     for (int i = 1; i < 2 * batchSize; ++i) {

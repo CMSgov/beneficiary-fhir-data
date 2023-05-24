@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.ssm.model.Parameter;
 @AllArgsConstructor
 public class AwsParameterStoreClient {
   /** Suggested default value to use for batch size. */
-  public static final int DEFAULT_BATCH_SIZE = 100;
+  public static final int DEFAULT_BATCH_SIZE = 10;
 
   /** Used to fetch parameters from AWS parameter store. */
   private final SsmClient ssmClient;
