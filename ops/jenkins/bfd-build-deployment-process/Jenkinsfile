@@ -74,7 +74,7 @@ spec:
       }
     }
 
-    /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+    /* This stage switches the gitBranchName (needed for our CCS downstream stages)
           value if the build is a PR as the BRANCH_NAME var is populated with the build
           name during PR builds.
     */
