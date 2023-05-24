@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.AllArgsConstructor;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
@@ -221,6 +222,7 @@ public final class PipelineManagerIT {
   }
 
   /** This mock {@link PipelineJob} returns a specified result. */
+  @AllArgsConstructor
   private static class MockJob implements PipelineJob {
     /** Represents the job type for this mock job. */
     public static final PipelineJobType JOB_TYPE = new PipelineJobType(MockJob.class);
@@ -231,23 +233,6 @@ public final class PipelineManagerIT {
     private final boolean interruptible;
     /** The {@link Callable} that will create the values to use for {@link #call()}. */
     private final Callable<Object> jobResultProducer;
-
-    /**
-     * Constructs a new {@link MockJob} instance.
-     *
-     * @param schedule the value to use for {@link #getSchedule()}
-     * @param interruptable the value to use for {@link #isInterruptible()}
-     * @param jobResultProducer the {@link Callable} that will create the values to use for {@link
-     *     #call()}
-     */
-    public MockJob(
-        Optional<PipelineJobSchedule> schedule,
-        boolean interruptable,
-        Callable<Object> jobResultProducer) {
-      this.schedule = schedule;
-      this.interruptible = interruptable;
-      this.jobResultProducer = jobResultProducer;
-    }
 
     @Override
     public Optional<PipelineJobSchedule> getSchedule() {

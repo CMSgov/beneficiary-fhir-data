@@ -219,7 +219,7 @@ public final class PipelineApplication {
       System.exit(EXIT_CODE_SMOKE_TEST_FAILURE);
     }
 
-    final var executor =
+    final var pipelineManager =
         new PipelineManager(
             millis -> {
               Thread.sleep(millis);
@@ -227,12 +227,12 @@ public final class PipelineApplication {
             },
             Clock.systemUTC(),
             jobs);
-    registerShutdownHook(appMetrics, executor);
+    registerShutdownHook(appMetrics, pipelineManager);
 
-    executor.start();
+    pipelineManager.start();
     LOGGER.info("Job processing started.");
 
-    executor.awaitCompletion();
+    pipelineManager.awaitCompletion();
   }
 
   /**

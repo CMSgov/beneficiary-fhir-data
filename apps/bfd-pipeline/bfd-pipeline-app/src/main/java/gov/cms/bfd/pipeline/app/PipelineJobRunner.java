@@ -173,7 +173,7 @@ public class PipelineJobRunner implements Callable<Void> {
     boolean jobsCanRun();
 
     /**
-     * Notifies the tracker that a new job run is starting and to obtain an unique id for the run.
+     * Notifies the tracker that a new job run is starting obtains unique id for the run.
      *
      * @param job the job that is starting
      * @return unique id for this run
@@ -212,7 +212,7 @@ public class PipelineJobRunner implements Callable<Void> {
 
     /**
      * Notifies the tracker that a job is stopping because it has completed a run and doesn't have a
-     * schedule for running multiple times.
+     * schedule for running multiple times or was told not to run again by {@link #jobsCanRun}.
      *
      * @param job the job that is stopping
      */
