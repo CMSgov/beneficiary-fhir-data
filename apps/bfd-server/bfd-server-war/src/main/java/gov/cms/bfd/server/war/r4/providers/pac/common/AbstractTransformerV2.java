@@ -1,14 +1,16 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
+import static gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2.convertToDate;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,9 +47,7 @@ public class AbstractTransformerV2 {
    * @return The converted {@link Date} object.
    */
   protected static Date localDateToDate(LocalDate localDate) {
-    return localDate == null
-        ? null
-        : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    return localDate == null ? null : convertToDate(localDate);
   }
 
   /**
@@ -284,6 +284,19 @@ public class AbstractTransformerV2 {
   protected static CodeableConcept createCodeableConcept(C4BBSupportingInfoType infoType) {
     return new CodeableConcept(
         new Coding(infoType.getSystem(), infoType.toCode(), infoType.getDisplay()));
+  }
+
+  /**
+   * Creates a {@link CodeableConcept} containing the {@link C4BBAdjudicationDiscriminator} data.
+   *
+   * @param discriminator The {@link C4BBAdjudicationDiscriminator} type to use in the {@link
+   *     CodeableConcept}.
+   * @return A {@link CodeableConcept} object containing the data.
+   */
+  protected static CodeableConcept createCodeableConcept(
+      C4BBAdjudicationDiscriminator discriminator) {
+    return new CodeableConcept(
+        new Coding(discriminator.getSystem(), discriminator.toCode(), discriminator.getDisplay()));
   }
 
   /**

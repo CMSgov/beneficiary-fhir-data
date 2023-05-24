@@ -1,41 +1,51 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.CreateBucketRequest;
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
-import com.amazonaws.services.s3.model.HeadBucketRequest;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PublicAccessBlockConfiguration;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.services.s3.model.SSEAlgorithm;
-import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
-import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
-import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
-import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
-import com.amazonaws.services.s3.model.SetPublicAccessBlockRequest;
-import com.amazonaws.waiters.WaiterParameters;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.signer.AwsS3V4Signer;
+import software.amazon.awssdk.awscore.AwsClient;
+import software.amazon.awssdk.awscore.defaultsmode.DefaultsMode;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.internal.crt.S3CrtAsyncClient;
+import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
+import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
+import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryptionConfiguration;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
+import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
 /** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
 public final class SharedS3Utilities {
   /** The default AWS {@link Region} to interact with. */
-  public static final Regions REGION_DEFAULT = Regions.US_EAST_1;
+  public static final Region REGION_DEFAULT = Region.US_EAST_1;
   /** The bucket prefix for AWS. */
   private static final String BUCKET_NAME_PREFIX = "bb-test";
   /** The bucket policy for AWS. */
@@ -57,55 +67,107 @@ public final class SharedS3Utilities {
           + "}";
 
   /**
-   * Creates a AmazonS3 that connects to either a local Minio or real Amazon S3 based on the
+   * Creates a S3Client that connects to either a local Minio or real Amazon S3 based on the
    * MinioConfig singleton's useMinio value.
    *
-   * @param awsS3Region the AWS {@link Regions} that should be used when interacting with S3
-   * @return the {@link AmazonS3} client to use
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
+   * @return the {@link S3Client} client to use
    */
-  public static AmazonS3 createS3Client(Regions awsS3Region) {
+  public static S3Client createS3Client(Region awsS3Region) {
     S3MinioConfig minioConfig = S3MinioConfig.Singleton();
 
     if (minioConfig.useMinio) {
-      return createS3MinioClient(awsS3Region, minioConfig);
+      return createS3MinioClient(awsS3Region, minioConfig, S3Client.class);
     }
-    AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(awsS3Region).build();
+    S3Client s3Client =
+        S3Client.builder().defaultsMode(DefaultsMode.STANDARD).region(awsS3Region).build();
     return s3Client;
+  }
+
+  /**
+   * Creates an S3AsyncClient that connects to either a local Minio or real Amazon S3 based on the
+   * MinioConfig singleton's useMinio value.
+   *
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
+   * @return the {@link S3Client} client to use
+   */
+  public static S3AsyncClient createS3AsyncClient(Region awsS3Region) {
+    S3MinioConfig minioConfig = S3MinioConfig.Singleton();
+
+    if (minioConfig.useMinio) {
+      return createS3AsyncMinioClient(awsS3Region, minioConfig);
+    }
+    return S3CrtAsyncClient.builder().region(awsS3Region).build();
   }
 
   /**
    * Creates and returns a new s3 client via minio.
    *
-   * @param awsS3Region the AWS {@link Regions} that should be used when interacting with S3
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
    * @param minioConfig passes the minioConfig to use
-   * @return the {@link AmazonS3} minio client to use
+   * @param <T> the return type of the {@link AwsClient}
+   * @param type the class type of the {@link AwsClient}, either {@link S3Client} or {@link
+   *     S3AsyncClient}
+   * @return the {@link S3Client} minio client to use
    */
-  public static AmazonS3 createS3MinioClient(Regions awsS3Region, S3MinioConfig minioConfig) {
-    // Uses BasicCredentials to connect to the minio client and gets the username,password, and
+  public static <T extends AwsClient> T createS3MinioClient(
+      Region awsS3Region, S3MinioConfig minioConfig, Class<T> type) {
+    // Uses BasicCredentials to connect to the minio client and gets the
+    // username,password, and
     // address from the minioconfig
-    AWSCredentials credentials =
-        new BasicAWSCredentials(minioConfig.minioUserName, minioConfig.minioPassword);
+    AwsCredentials credentials =
+        AwsBasicCredentials.create(minioConfig.minioUserName, minioConfig.minioPassword);
 
-    ClientConfiguration clientConfiguration = new ClientConfiguration();
-    clientConfiguration.setSignerOverride("AWSS3V4SignerType");
+    ClientOverrideConfiguration.Builder overrideConfig =
+        ClientOverrideConfiguration.builder()
+            .putAdvancedOption(SdkAdvancedClientOption.SIGNER, AwsS3V4Signer.create());
+    S3Configuration.Builder s3ConfigBuilder =
+        S3Configuration.builder().pathStyleAccessEnabled(true);
 
-    return AmazonS3ClientBuilder.standard()
-        .withEndpointConfiguration(
-            new AwsClientBuilder.EndpointConfiguration(
-                minioConfig.minioEndpointAddress, awsS3Region.name()))
-        .withPathStyleAccessEnabled(true)
-        .withClientConfiguration(clientConfiguration)
-        .withCredentials(new AWSStaticCredentialsProvider(credentials))
-        .build();
+    if (S3AsyncClient.class.isAssignableFrom(type)) {
+      return type.cast(
+          S3AsyncClient.builder()
+              .serviceConfiguration(s3ConfigBuilder.build())
+              .overrideConfiguration(overrideConfig.build())
+              .defaultsMode(DefaultsMode.STANDARD)
+              .region(awsS3Region)
+              .endpointOverride(URI.create(minioConfig.minioEndpointAddress))
+              .credentialsProvider(StaticCredentialsProvider.create(credentials))
+              .build());
+    }
+    return type.cast(
+        S3Client.builder()
+            .serviceConfiguration(s3ConfigBuilder.build())
+            .overrideConfiguration(overrideConfig.build())
+            .defaultsMode(DefaultsMode.STANDARD)
+            .region(awsS3Region)
+            .endpointOverride(URI.create(minioConfig.minioEndpointAddress))
+            .credentialsProvider(StaticCredentialsProvider.create(credentials))
+            .build());
+  }
+
+  /**
+   * Creates and returns a new async s3 client via minio.
+   *
+   * @param awsS3Region the AWS {@link Region} that should be used when interacting with S3
+   * @param minioConfig passes the minioConfig to use
+   * @return the {@link S3Client} minio client to use
+   */
+  public static S3AsyncClient createS3AsyncMinioClient(
+      Region awsS3Region, S3MinioConfig minioConfig) {
+    // Uses BasicCredentials to connect to the minio client and gets the
+    // username,password, and
+    // address from the minioconfig
+    return createS3MinioClient(awsS3Region, minioConfig, S3AsyncClient.class);
   }
 
   /**
    * Creates a new test bucket with a name based on the current user and a random number.
    *
-   * @param s3Client the {@link AmazonS3} client to use
-   * @return a new, random {@link Bucket} for use in an integration test
+   * @param s3Client the {@link S3Client} client to use
+   * @return the bucket name of a new, random {@link Bucket} for use in an integration test
    */
-  public static Bucket createTestBucket(AmazonS3 s3Client) {
+  public static String createTestBucket(S3Client s3Client) {
     String username = System.getProperty("user.name");
 
     if (Strings.isNullOrEmpty(username)) {
@@ -119,143 +181,140 @@ public final class SharedS3Utilities {
 
     // if not running S3 inside minio (i.e., vs. real AWS S3 buckets), then we need
     // to be observant of CMS security constraints; inside minio, not so much!
-    Bucket bucket = null;
-
+    CreateBucketRequest createBucketRequest = null;
     if (S3MinioConfig.Singleton().useMinio) {
-      bucket = s3Client.createBucket(bucketName);
+      createBucketRequest = CreateBucketRequest.builder().bucket(bucketName).build();
+      s3Client.createBucket(createBucketRequest);
     } else {
-      // per CMS security constraints, even ephemeral buckets should be configured for:
-      //  - no public access
-      //  - support only TLS-enabled connections
-      //  - data is encrypted
-      bucket =
-          s3Client.createBucket(
-              new CreateBucketRequest(bucketName)
-                  .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
+      // per CMS security constraints, even ephemeral buckets should be configured
+      // for:
+      // - no public access
+      // - support only TLS-enabled connections
+      // - data is encrypted
+      createBucketRequest =
+          CreateBucketRequest.builder()
+              .bucket(bucketName)
+              .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL.toString())
+              .build();
+      s3Client.createBucket(createBucketRequest);
 
       // block everything public related
-      s3Client.setPublicAccessBlock(
-          new SetPublicAccessBlockRequest()
-              .withBucketName(bucketName)
-              .withPublicAccessBlockConfiguration(
-                  new PublicAccessBlockConfiguration()
-                      .withBlockPublicAcls(true)
-                      .withIgnorePublicAcls(true)
-                      .withBlockPublicPolicy(true)
-                      .withRestrictPublicBuckets(true)));
+      PublicAccessBlockConfiguration publicAccessBlockConfiguration =
+          PublicAccessBlockConfiguration.builder()
+              .blockPublicAcls(true)
+              .ignorePublicAcls(true)
+              .blockPublicPolicy(true)
+              .restrictPublicBuckets(true)
+              .build();
 
-      // bucket encryption using: AES256 and default S3 key id
-      s3Client.setBucketEncryption(
-          new SetBucketEncryptionRequest()
-              .withBucketName(bucketName)
-              .withServerSideEncryptionConfiguration(
-                  new ServerSideEncryptionConfiguration()
-                      .withRules(
-                          new ServerSideEncryptionRule()
-                              .withApplyServerSideEncryptionByDefault(
-                                  new ServerSideEncryptionByDefault()
-                                      .withSSEAlgorithm(SSEAlgorithm.AES256)))));
+      PutPublicAccessBlockRequest putPublicAccessBlockRequest =
+          PutPublicAccessBlockRequest.builder()
+              .bucket(bucketName)
+              .publicAccessBlockConfiguration(publicAccessBlockConfiguration)
+              .build();
+      s3Client.putPublicAccessBlock(putPublicAccessBlockRequest);
+
+      ServerSideEncryptionByDefault serverSideEncryptionByDefault =
+          ServerSideEncryptionByDefault.builder().sseAlgorithm(ServerSideEncryption.AES256).build();
+      ServerSideEncryptionRule serverSideEncryptionRule =
+          ServerSideEncryptionRule.builder()
+              .applyServerSideEncryptionByDefault(serverSideEncryptionByDefault)
+              .build();
+      ServerSideEncryptionConfiguration serverSideEncryptionConfiguration =
+          ServerSideEncryptionConfiguration.builder().rules(serverSideEncryptionRule).build();
+      PutBucketEncryptionRequest putBucketEncryptionRequest =
+          PutBucketEncryptionRequest.builder()
+              .bucket(bucketName)
+              .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
+              .build();
+      s3Client.putBucketEncryption(putBucketEncryptionRequest);
 
       // we'll shortcut this with a JSON policy
       final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
-      s3Client.setBucketPolicy(bucketName, tlsPolicy);
+      PutBucketPolicyRequest putBucketPolicyRequest =
+          PutBucketPolicyRequest.builder().bucket(bucketName).policy(tlsPolicy).build();
+      s3Client.putBucketPolicy(putBucketPolicyRequest);
     }
-
-    waitForBucketToExist(s3Client, bucketName);
-    return bucket;
+    S3Waiter s3Waiter = s3Client.waiter();
+    HeadBucketRequest bucketRequestWait = HeadBucketRequest.builder().bucket(bucketName).build();
+    s3Waiter.waitUntilBucketExists(bucketRequestWait);
+    return bucketName;
   }
 
   /**
    * Deletes a bucket created by {@link #createTestBucket} along with all of its contents.
    *
-   * @param s3Client the {@link AmazonS3} client to use
-   * @param bucket the {@link Bucket} client to delete along with all of its contents
+   * @param s3Client the {@link S3Client} client to use
+   * @param bucketName the name of the bucket to delete along with all of its contents
    */
-  public static void deleteTestBucket(AmazonS3 s3Client, Bucket bucket) {
-    if (bucket == null) {
+  public static void deleteTestBucket(S3Client s3Client, String bucketName) {
+    if (Strings.isNullOrEmpty(bucketName)) {
       return;
     }
-    final String bucketName = bucket.getName();
     if (!bucketName.startsWith(BUCKET_NAME_PREFIX)) {
       throw new IllegalArgumentException("only buckets created by this class can be deleted");
     }
 
-    ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
-    s3BucketListRequest.setBucketName(bucketName);
-    ListObjectsV2Result s3ObjectListing;
-    do {
-      s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
+    ListObjectsV2Request listObjectsV2Request =
+        ListObjectsV2Request.builder().bucket(bucketName).build();
+    Consumer<S3Object> deleteObject =
+        s3Object -> {
+          DeleteObjectRequest request =
+              DeleteObjectRequest.builder().bucket(bucketName).key(s3Object.key()).build();
+          s3Client.deleteObject(request);
+        };
+    onListObjectsV2Stream(s3Client, listObjectsV2Request, deleteObject);
 
-      for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
-        s3Client.deleteObject(bucketName, objectSummary.getKey());
-        waitForObjectToNotExist(s3Client, bucketName, objectSummary.getKey());
-      }
+    DeleteBucketRequest deleteBucketRequest =
+        DeleteBucketRequest.builder().bucket(bucketName).build();
+    s3Client.deleteBucket(deleteBucketRequest);
+  }
 
-      s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
-    } while (s3ObjectListing.isTruncated());
-    s3Client.deleteBucket(bucketName);
+  /**
+   * Auto-paginates through the S3Objects returned from the given {@link ListObjectsV2Request} and
+   * consumes them via a {@link Consumer}.
+   *
+   * @param s3Client the {@link S3Client} client to use
+   * @param listObjectsV2Request the {@link ListObjectsV2Request} request to retrieve the s3 objects
+   *     over which to paginate and consume
+   * @param s3ObjectConsumer the {@link Consumer} to consume the s3Objects
+   */
+  public static void onListObjectsV2Stream(
+      S3Client s3Client,
+      ListObjectsV2Request listObjectsV2Request,
+      Consumer<S3Object> s3ObjectConsumer) {
+    ListObjectsV2Iterable listObjectsV2Paginator =
+        s3Client.listObjectsV2Paginator(listObjectsV2Request);
+
+    listObjectsV2Paginator.stream()
+        .flatMap(s -> s.contents().stream())
+        .forEach(k -> s3ObjectConsumer.accept(k));
   }
 
   /**
    * Uploads a JSON resource to an S3 bucket and waits for it to be fully available.
    *
-   * @param s3Client the {@link AmazonS3} client to use
+   * @param s3Client the {@link S3Client} client to use
    * @param bucketName the name of the bucket to store the object in
    * @param objectKey the key for the object
    * @param bytes a {@link ByteSource} referencing the json text
    * @throws IOException if there is an issue opening the input byte source stream
    */
   public static void uploadJsonToBucket(
-      AmazonS3 s3Client, String bucketName, String objectKey, ByteSource bytes) throws IOException {
+      S3Client s3Client, String bucketName, String objectKey, ByteSource bytes) throws IOException {
     try (InputStream input = bytes.openStream()) {
-      ObjectMetadata metadata = new ObjectMetadata();
-      metadata.setContentType("application/json");
-      metadata.setContentLength(bytes.size());
-      s3Client.putObject(bucketName, objectKey, input, metadata);
+      PutObjectRequest putObjectRequest =
+          PutObjectRequest.builder()
+              .contentType("application/json")
+              .contentLength(bytes.size())
+              .bucket(bucketName)
+              .key(objectKey)
+              .build();
+      s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(input, bytes.size()));
     }
-    waitForObjectToExist(s3Client, bucketName, objectKey);
-  }
-
-  /**
-   * Note: S3's API is eventually consistent. This method waits for a new object to longer exist.
-   *
-   * @param s3Client the {@link AmazonS3} client to use
-   * @param bucketName the name of the bucket to store the object in
-   * @param objectKey the key for the object
-   */
-  public static void waitForObjectToExist(AmazonS3 s3Client, String bucketName, String objectKey) {
-    s3Client
-        .waiters()
-        .objectExists()
-        .run(new WaiterParameters<>(new GetObjectMetadataRequest(bucketName, objectKey)));
-  }
-
-  /**
-   * Note: S3's API is eventually consistent. This method waits for a deleted object to no longer
-   * exist.
-   *
-   * @param s3Client the {@link AmazonS3} client to use
-   * @param bucketName the name of the bucket to store the object in
-   * @param objectKey the key for the object
-   */
-  public static void waitForObjectToNotExist(
-      AmazonS3 s3Client, String bucketName, String objectKey) {
-    s3Client
-        .waiters()
-        .objectNotExists()
-        .run(new WaiterParameters<>(new GetObjectMetadataRequest(bucketName, objectKey)));
-  }
-
-  /**
-   * Note: S3's API is eventually consistent. This method waits for a new bucket to exist.
-   *
-   * @param s3Client the {@link AmazonS3} client to use
-   * @param bucketName the name of the bucket to store the object in
-   */
-  public static void waitForBucketToExist(AmazonS3 s3Client, String bucketName) {
-    s3Client
-        .waiters()
-        .bucketExists()
-        .run(new WaiterParameters<>(new HeadBucketRequest(bucketName)));
+    S3Waiter s3Waiter = s3Client.waiter();
+    HeadObjectRequest headRequestWait =
+        HeadObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+    s3Waiter.waitUntilObjectExists(headRequestWait);
   }
 }

@@ -17,14 +17,12 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -59,6 +57,8 @@ public final class OutpatientClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  OutpatientClaimTransformerV2 outpatientClaimTransformer;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -89,15 +89,13 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    outpatientClaimTransformer =
+        new OutpatientClaimTransformerV2(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            NPIOrgLookup.createNpiOrgLookupForTesting());
     claim = generateClaim();
-    ExplanationOfBenefit genEob =
-        OutpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            claim);
+    ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1466,14 +1464,7 @@ public final class OutpatientClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob =
-        OutpatientClaimTransformerV2.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(false),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
-            generateClaim());
+    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

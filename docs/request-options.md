@@ -9,6 +9,8 @@ Future versions of BFD may apply some of these options automatically,
 Some data fields are optional; they're only included when the request is configured to do so.
 
 * HTTP Header: `IncludeIdentifiers`
+    * Note: This is only supported in v1; this header will have no effect in v2. V2 will always return unhashed MBIs,
+  and does not return HICNs with or without the header.
     * Operations: all `/Patient` requests
     * Default value: `false`
     * Supported values: `false`, `true`, `hicn`, `mbi`

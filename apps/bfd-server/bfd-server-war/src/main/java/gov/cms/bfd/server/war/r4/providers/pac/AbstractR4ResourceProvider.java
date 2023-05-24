@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -86,6 +85,19 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private Set<String> enabledSourceTypes = new HashSet<>();
 
   /**
+   * Initializes the resource provider beans via spring injection. These should be passed from the
+   * child class constructor.
+   *
+   * @param metricRegistry the metric registry bean
+   * @param samhsaMatcher the samhsa matcher bean
+   */
+  protected AbstractR4ResourceProvider(
+      MetricRegistry metricRegistry, R4ClaimSamhsaMatcher samhsaMatcher) {
+    this.metricRegistry = metricRegistry;
+    this.samhsaMatcher = samhsaMatcher;
+  }
+
+  /**
    * Sets the {@link #entityManager}.
    *
    * @param entityManager a JPA {@link EntityManager} connected to the application's database
@@ -93,26 +105,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
-  }
-
-  /**
-   * Sets the {@link #metricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
-  @Inject
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
-
-  /**
-   * Sets the {@link #samhsaMatcher}.
-   *
-   * @param samhsaMatcher the {@link R4ClaimSamhsaMatcher} to use
-   */
-  @Inject
-  public void setSamhsaFilterer(R4ClaimSamhsaMatcher samhsaMatcher) {
-    this.samhsaMatcher = samhsaMatcher;
   }
 
   /** Initiates the provider's dependencies. */

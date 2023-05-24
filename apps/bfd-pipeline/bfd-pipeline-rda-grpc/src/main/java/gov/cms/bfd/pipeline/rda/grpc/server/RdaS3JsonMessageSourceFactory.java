@@ -1,15 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteSource;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
- * Uses an {@link AmazonS3} client and a bucket name to simplify creation of {@link MessageSource}s
+ * Uses an {@link S3Client} client and a bucket name to simplify creation of {@link MessageSource}s
  * that read FISS or MCS claims from the bucket.
  */
 @Slf4j
@@ -43,10 +43,10 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
     this.s3Dao = s3Dao;
     fissFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Dao, FISS_PREFIX, FILE_SUFFIX, this::readFissClaimChanges, FissClaimChange::getSeq);
+            s3Dao, FISS_PREFIX, FILE_SUFFIX, this::readFissClaimChanges);
     mcsFactory =
         new S3BucketMessageSourceFactory<>(
-            s3Dao, MCS_PREFIX, FILE_SUFFIX, this::readMcsClaimChanges, McsClaimChange::getSeq);
+            s3Dao, MCS_PREFIX, FILE_SUFFIX, this::readMcsClaimChanges);
   }
 
   @Override
@@ -57,13 +57,13 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
   @Override
   public MessageSource<FissClaimChange> createFissMessageSource(long startingSequenceNumber)
       throws Exception {
-    return fissFactory.apply(startingSequenceNumber);
+    return fissFactory.createMessageSource(startingSequenceNumber);
   }
 
   @Override
   public MessageSource<McsClaimChange> createMcsMessageSource(long startingSequenceNumber)
       throws Exception {
-    return mcsFactory.apply(startingSequenceNumber);
+    return mcsFactory.createMessageSource(startingSequenceNumber);
   }
 
   /**
@@ -104,7 +104,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
    * @return a MessageSource that reads and parses the data
    */
   private MessageSource<FissClaimChange> readFissClaimChanges(String ndjsonObjectKey) {
-    return createMessageSource(ndjsonObjectKey, JsonMessageSource::parseFissClaimChange);
+    return createMessageSource(ndjsonObjectKey, JsonMessageSource.fissParser());
   }
 
   /**
@@ -114,7 +114,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
    * @return a MessageSource that reads and parses the data
    */
   private MessageSource<McsClaimChange> readMcsClaimChanges(String ndjsonObjectKey) {
-    return createMessageSource(ndjsonObjectKey, JsonMessageSource::parseMcsClaimChange);
+    return createMessageSource(ndjsonObjectKey, JsonMessageSource.mcsParser());
   }
 
   /**
@@ -132,8 +132,9 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
         s3Dao.getS3BucketName(),
         ndjsonObjectKey);
     try {
-      ByteSource byteSource = s3Dao.downloadFile(ndjsonObjectKey);
-      return new JsonMessageSource<>(byteSource, parser);
+      final var byteSource = s3Dao.downloadFile(ndjsonObjectKey);
+      final var charSource = byteSource.asCharSource(StandardCharsets.UTF_8);
+      return new JsonMessageSource<>(charSource, parser);
     } catch (IOException ex) {
       throw new RuntimeException(
           String.format("error while downloading file from S3 bucket: key=%s", ndjsonObjectKey),

@@ -3,7 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -32,9 +33,11 @@ public class McsClaimStreamCallerIT {
   public void basicCall() throws Exception {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
-        .mcsSourceFactory(
-            sequenceNumber ->
-                new RandomMcsClaimSource(1000L, 2).toClaimChanges().skip(sequenceNumber - 1))
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .randomClaimConfig(
+                    RandomClaimGeneratorConfig.builder().seed(1000).maxToSend(2).build())
+                .build())
         .build()
         .runWithChannelParam(
             channel -> {
@@ -45,12 +48,12 @@ public class McsClaimStreamCallerIT {
 
               RdaMcsClaim claim = transform(results.next());
               assertTrue(claim.getIdrClmHdIcn().length() > 0);
-              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
               assertTrue(claim.getIdrClmHdIcn().length() > 0);
-              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertEquals(Long.valueOf(2), claim.getSequenceNumber());
               assertFalse(results.hasNext());
             });
   }
@@ -64,15 +67,17 @@ public class McsClaimStreamCallerIT {
   public void sequenceNumbers() throws Exception {
     RdaServer.InProcessConfig.builder()
         .serverName(getClass().getSimpleName())
-        .mcsSourceFactory(
-            sequenceNumber ->
-                new RandomMcsClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber - 1))
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .randomClaimConfig(
+                    RandomClaimGeneratorConfig.builder().seed(1000).maxToSend(14).build())
+                .build())
         .build()
         .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller();
               final GrpcResponseStream<McsClaimChange> results =
-                  caller.callService(channel, CallOptions.DEFAULT, 10L);
+                  caller.callService(channel, CallOptions.DEFAULT, 9L);
               assertEquals(Long.valueOf(10), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(11), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());

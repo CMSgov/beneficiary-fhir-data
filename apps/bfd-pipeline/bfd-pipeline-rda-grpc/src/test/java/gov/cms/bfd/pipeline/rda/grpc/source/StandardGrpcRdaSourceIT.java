@@ -15,10 +15,9 @@ import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
-import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -42,82 +41,102 @@ import org.junit.jupiter.api.Test;
 public class StandardGrpcRdaSourceIT {
   /** Example paid claim. */
   private static final String SOURCE_CLAIM_1 =
-      "{"
-          + "  \"rdaClaimKey\": \"63843470id\","
-          + "  \"dcn\": \"63843470\","
-          + "  \"intermediaryNb\": \"53412\","
-          + "  \"hicNo\": \"916689703543\","
-          + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
-          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
-          + "  \"currLoc2Unrecognized\": \"uma\","
-          + "  \"totalChargeAmount\": \"3.75\","
-          + "  \"currTranDtCymd\": \"2021-03-20\","
-          + "  \"principleDiag\": \"uec\","
-          + "  \"mbi\": \"c1ihk7q0g3i\","
-          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_INPATIENT\","
-          + "  \"fissProcCodes\": ["
-          + "    {"
-          + "      \"procCd\": \"uec\","
-          + "      \"procFlag\": \"nli\","
-          + "      \"rdaPosition\": 1"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"egkkkw\","
-          + "      \"procFlag\": \"hsw\","
-          + "      \"procDt\": \"2021-02-03\","
-          + "      \"rdaPosition\": 2"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"zhaj\","
-          + "      \"procDt\": \"2021-01-07\","
-          + "      \"rdaPosition\": 3"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"ods\","
-          + "      \"procDt\": \"2021-01-03\","
-          + "      \"rdaPosition\": 4"
-          + "    }"
-          + "  ],"
-          + "  \"medaProvId\": \"oducjgzt67joc\""
-          + "}";
+      """
+      {
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq": "1",
+        "changeType": "CHANGE_TYPE_UPDATE",
+        "rdaClaimKey": "63843470id",
+        "dcn": "63843470",
+        "intermediaryNb": "53412",
+        "claim": {
+          "rdaClaimKey": "63843470id",
+          "dcn": "63843470",
+          "intermediaryNb": "53412",
+          "hicNo": "916689703543",
+          "currStatusEnum": "CLAIM_STATUS_PAID",
+          "currLoc1Enum": "PROCESSING_TYPE_MANUAL",
+          "currLoc2Unrecognized": "uma",
+          "totalChargeAmount": "3.75",
+          "currTranDtCymd": "2021-03-20",
+          "principleDiag": "uec",
+          "mbi": "c1ihk7q0g3i",
+          "clmTypIndEnum": "CLAIM_TYPE_INPATIENT",
+          "fissProcCodes": [
+            {
+              "procCd": "uec",
+              "procFlag": "nli",
+              "rdaPosition": 1
+            },
+            {
+              "procCd": "egkkkw",
+              "procFlag": "hsw",
+              "procDt": "2021-02-03",
+              "rdaPosition": 2
+            },
+            {
+              "procCd": "zhaj",
+              "procDt": "2021-01-07",
+              "rdaPosition": 3
+            },
+            {
+              "procCd": "ods",
+              "procDt": "2021-01-03",
+              "rdaPosition": 4
+            }
+          ],
+          "medaProvId": "oducjgzt67joc"
+        }
+      }
+      """
+          .replaceAll("\n", "");
   /** Example rejected claim. */
   private static final String SOURCE_CLAIM_2 =
-      "{"
-          + "  \"rdaClaimKey\": \"2643602id\","
-          + "  \"dcn\": \"2643602\","
-          + "  \"intermediaryNb\": \"24153\","
-          + "  \"hicNo\": \"640930211775\","
-          + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
-          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
-          + "  \"currLoc2Unrecognized\": \"p6s\","
-          + "  \"totalChargeAmount\": \"55.91\","
-          + "  \"recdDtCymd\": \"2021-05-14\","
-          + "  \"currTranDtCymd\": \"2020-12-21\","
-          + "  \"principleDiag\": \"egnj\","
-          + "  \"npiNumber\": \"5764657700\","
-          + "  \"mbi\": \"0vtc7u321x0\","
-          + "  \"clmTypIndEnum\": \"CLAIM_TYPE_OUTPATIENT\","
-          + "  \"fedTaxNb\": \"2845244764\","
-          + "  \"fissProcCodes\": ["
-          + "    {"
-          + "      \"procCd\": \"egnj\","
-          + "      \"procDt\": \"2021-05-13\","
-          + "      \"rdaPosition\": 1"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"vvqtwoz\","
-          + "      \"procDt\": \"2021-04-29\","
-          + "      \"rdaPosition\": 2"
-          + "    },"
-          + "    {"
-          + "      \"procCd\": \"fipyd\","
-          + "      \"procFlag\": \"g\","
-          + "      \"rdaPosition\": 3"
-          + "    }"
-          + "  ]"
-          + "}";
-  /** Example of two claims separated by a line. */
-  private final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
+      """
+      {
+        "timestamp": "2022-01-25T15:02:35Z",
+        "seq": "2",
+        "changeType": "CHANGE_TYPE_UPDATE",
+        "rdaClaimKey": "2643602id",
+        "dcn": "2643602",
+        "intermediaryNb": "24153",
+        "claim": {
+          "rdaClaimKey": "2643602id",
+          "dcn": "2643602",
+          "intermediaryNb": "24153",
+          "hicNo": "640930211775",
+          "currStatusEnum": "CLAIM_STATUS_REJECT",
+          "currLoc1Enum": "PROCESSING_TYPE_OFFLINE",
+          "currLoc2Unrecognized": "p6s",
+          "totalChargeAmount": "55.91",
+          "recdDtCymd": "2021-05-14",
+          "currTranDtCymd": "2020-12-21",
+          "principleDiag": "egnj",
+          "npiNumber": "5764657700",
+          "mbi": "0vtc7u321x0",
+          "clmTypIndEnum": "CLAIM_TYPE_OUTPATIENT",
+          "fedTaxNb": "2845244764",
+          "fissProcCodes": [
+            {
+              "procCd": "egnj",
+              "procDt": "2021-05-13",
+              "rdaPosition": 1
+            },
+            {
+              "procCd": "vvqtwoz",
+              "procDt": "2021-04-29",
+              "rdaPosition": 2
+            },
+            {
+              "procCd": "fipyd",
+              "procFlag": "g",
+              "rdaPosition": 3
+            }
+          ]
+        }
+      }
+      """
+          .replaceAll("\n", "");
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
@@ -168,7 +187,7 @@ public class StandardGrpcRdaSourceIT {
           + "    \"rdaPosition\" : 3\n"
           + "  } ],\n"
           + "  \"revenueLines\" : [ ],\n"
-          + "  \"sequenceNumber\" : 0,\n"
+          + "  \"sequenceNumber\" : 1,\n"
           + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
   /** Example rejected claim. */
@@ -217,7 +236,7 @@ public class StandardGrpcRdaSourceIT {
           + "  } ],\n"
           + "  \"receivedDate\" : \"2021-05-14\",\n"
           + "  \"revenueLines\" : [ ],\n"
-          + "  \"sequenceNumber\" : 1,\n"
+          + "  \"sequenceNumber\" : 2,\n"
           + "  \"totalChargeAmount\" : 55.91\n"
           + "}";
 
@@ -404,12 +423,10 @@ public class StandardGrpcRdaSourceIT {
    */
   private RdaServer.LocalConfig.LocalConfigBuilder createServerConfig() {
     return RdaServer.LocalConfig.builder()
-        .fissSourceFactory(
-            sequenceNumber ->
-                WrappedClaimSource.wrapFissClaims(
-                    new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
-                    clock,
-                    sequenceNumber - 1));
+        .serviceConfig(
+            RdaMessageSourceFactory.Config.builder()
+                .fissClaimJsonList(List.of(SOURCE_CLAIM_1, SOURCE_CLAIM_2))
+                .build());
   }
 
   /**
@@ -458,7 +475,6 @@ public class StandardGrpcRdaSourceIT {
               .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized int writeMessage(String dataVersion, FissClaimChange message)
         throws ProcessingException {
@@ -471,7 +487,6 @@ public class StandardGrpcRdaSourceIT {
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void checkErrorCount() {
       // Do nothing
@@ -482,17 +497,14 @@ public class StandardGrpcRdaSourceIT {
       return object.getClaim().getRdaClaimKey();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void updateLastSequenceNumber(long lastSequenceNumber) {}
 
-    /** {@inheritDoc} */
     @Override
     public long getSequenceNumberForObject(FissClaimChange object) {
       return object.getSeq();
     }
 
-    /** {@inheritDoc} */
     @Nonnull
     @Override
     public Optional<RdaChange<RdaFissClaim>> transformMessage(
@@ -505,23 +517,19 @@ public class StandardGrpcRdaSourceIT {
       return Optional.of(change);
     }
 
-    /** {@inheritDoc} */
     @Override
     public int writeClaims(Collection<RdaChange<RdaFissClaim>> objects) throws ProcessingException {
       throw new UnsupportedOperationException();
     }
 
-    /** {@inheritDoc} */
     @Override
     public int getProcessedCount() throws ProcessingException {
       return 0;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void shutdown(Duration waitTime) throws ProcessingException {}
 
-    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {}
 

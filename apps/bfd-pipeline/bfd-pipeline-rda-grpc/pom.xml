@@ -176,7 +176,7 @@
             illegal reflection access (JDK9+) in certain circumstances -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>${mockito.version}</version>
+            <version>${mockito-inline.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -202,6 +202,15 @@
             <artifactId>testcontainers</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3-transfer-manager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-pipeline-shared-utils</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

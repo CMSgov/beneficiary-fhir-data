@@ -26,19 +26,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to interact with AWS' S3 service, which is where RIF files
-				from the CCW will arrive, when an ETL pipeline is running in production. -->
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
 			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
 			<groupId>com.zaxxer</groupId>
@@ -104,7 +91,7 @@
                         illegal reflection access (JDK9+) in certain circumstances -->
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
-			<version>${mockito.version}</version>
+			<version>${mockito-inline.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

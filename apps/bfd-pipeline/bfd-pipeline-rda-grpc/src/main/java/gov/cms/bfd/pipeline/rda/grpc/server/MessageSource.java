@@ -1,11 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import java.util.function.Predicate;
-
 /**
- * Interface for objects that produce FissClaim objects from some source (e.g. a file, an array, a
+ * Interface for objects that produce message objects from some source (e.g. a file, an array, a
  * database, etc). Mirrors the Iterator protocol but allows for unwrapped exceptions to be passed
- * through to the caller and adds a close() method for proper cleanup.
+ * through to the caller. Also adds a method to skip ahead in the stream and a close() method for
+ * proper cleanup.
  */
 public interface MessageSource<T> extends AutoCloseable {
   /**
@@ -32,42 +31,9 @@ public interface MessageSource<T> extends AutoCloseable {
    * Used when creating random or json based sources to skip past some records to reach a specific
    * desired sequence number record.
    *
-   * @param numberToSkip number of records to skip past
+   * @param startingSequenceNumber desired next sequence number
    * @return this source after skipping the records
    * @throws Exception if there is an issue getting the next claim
    */
-  default MessageSource<T> skip(long numberToSkip) throws Exception {
-    while (numberToSkip-- > 0 && hasNext()) {
-      next();
-    }
-    return this;
-  }
-
-  /**
-   * Filters objects from this source to only include objects for which the predicate returns true.
-   *
-   * @param predicate returns true for objects to keep and false for objects to skip
-   * @return filtered version of this source
-   */
-  default MessageSource<T> filter(Predicate<T> predicate) {
-    return new FilteredMessageSource<>(this, predicate);
-  }
-
-  /**
-   * Used to define lambdas that can create a {@link MessageSource} instance for a given starting
-   * sequence number.
-   *
-   * @param <T> the type
-   */
-  @FunctionalInterface
-  interface Factory<T> {
-    /**
-     * Applies a function to the supplied input.
-     *
-     * @param sequenceNumber the sequence number
-     * @return the message source
-     * @throws Exception if there is any issue applying the function
-     */
-    MessageSource<T> apply(long sequenceNumber) throws Exception;
-  }
+  MessageSource<T> skipTo(long startingSequenceNumber) throws Exception;
 }

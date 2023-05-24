@@ -405,6 +405,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
                 entityManager.merge(change.getClaim());
                 insertCount += getInsertCount(change.getClaim());
               } else {
+                // We would expect this to have been filtered by the RdaSource so it is safe
+                // to stop processing with an exception here.
                 throw new IllegalArgumentException(
                     "RDA API DELETE changes are not currently supported");
               }

@@ -33,15 +33,14 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to interact with AWS' S3 service -->
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3-transfer-manager</artifactId>
+		</dependency>
+		<!-- Allows use of AWS common runtime client for file copying, which has improved performance -->
+		<dependency>
+			<groupId>software.amazon.awssdk.crt</groupId>
+			<artifactId>aws-crt</artifactId>
+			<version>${aws.crt.version}</version>
 		</dependency>
 
 		<dependency>
@@ -154,7 +153,7 @@
                         illegal reflection access (JDK9+) in certain circumstances -->
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
-			<version>${mockito.version}</version>
+			<version>${mockito-inline.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

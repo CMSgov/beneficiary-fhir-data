@@ -20,7 +20,7 @@
 /bfd/prod-sbx/common/nonsensitive/vpn_security_group: bfd-prod-sbx-vpn-private
 
 # MIGRATOR CONFIGURATION
-/bfd/prod-sbx/migrator/nonsensitive/instance_type: m5.large
+/bfd/prod-sbx/migrator/nonsensitive/instance_type: m6i.xlarge
 /bfd/prod-sbx/migrator/nonsensitive/volume_size: 100
 /bfd/prod-sbx/migrator/nonsensitive/sqs_queue_name: bfd-prod-sbx-migrator
 /bfd/prod-sbx/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
@@ -39,7 +39,7 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
-/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: true
 /bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 7
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 5
@@ -89,3 +89,24 @@
   {"alias":"client_ab2d_imp","certificate":"files/client_data_server_ab2d_imp_certificate.pem"},
   {"alias":"client_act_pentest_sbx","certificate":"files/client_data_server_act_pentest_certificate.pem"}
   ]
+/bfd/${env}/server/nonsensitive/lb_is_public: true
+/bfd/${env}/server/nonsensitive/lb_ingress_port: 443
+/bfd/${env}/server/nonsensitive/lb_egress_port: 7443
+# NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
+# Terraservice into a list
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
+  [
+  "bfd-prod-sbx-to-ab2d-dev", "bfd-prod-sbx-to-ab2d-impl", "bfd-prod-sbx-to-ab2d-sbx",
+  "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx",
+  "bfd-prod-sbx-to-bcda-opensbx", "bfd-prod-sbx-vpc-to-bluebutton-impl",
+  "bfd-prod-sbx-vpc-to-bluebutton-test", "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc",
+  "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc"
+  ]
+/bfd/${env}/server/nonsensitive/asg_min_instance_count: 3
+/bfd/${env}/server/nonsensitive/asg_max_instance_count: 24
+/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: 12
+/bfd/${env}/server/nonsensitive/asg_desired_instance_count: 3
+/bfd/${env}/server/nonsensitive/asg_instance_warmup_time: 430
+/bfd/${env}/server/nonsensitive/launch_template_instance_type: c6i.4xlarge
+/bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 60
+

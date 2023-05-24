@@ -14,8 +14,6 @@ public class RdaRandomMessageSourceFactory implements RdaMessageSourceFactory {
   private final RdaService.Version version;
   /** Source of records for {@link RdaService#getFissClaims} and {@link RdaService#getMcsClaims}. */
   private final RandomClaimGeneratorConfig config;
-  /** Maximum number of claims of each type to return. */
-  private final int maxToSend;
 
   @Override
   public RdaService.Version getVersion() {
@@ -24,16 +22,12 @@ public class RdaRandomMessageSourceFactory implements RdaMessageSourceFactory {
 
   @Override
   public MessageSource<FissClaimChange> createFissMessageSource(long startingSequenceNumber) {
-    return new RandomFissClaimSource(config, maxToSend)
-        .toClaimChanges()
-        .filter(change -> change.getSeq() >= startingSequenceNumber);
+    return new RandomFissClaimSource(config).skipTo(startingSequenceNumber);
   }
 
   @Override
   public MessageSource<McsClaimChange> createMcsMessageSource(long startingSequenceNumber) {
-    return new RandomMcsClaimSource(config, maxToSend)
-        .toClaimChanges()
-        .filter(change -> change.getSeq() >= startingSequenceNumber);
+    return new RandomMcsClaimSource(config).skipTo(startingSequenceNumber);
   }
 
   @Override

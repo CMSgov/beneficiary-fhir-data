@@ -20,7 +20,7 @@
 /bfd/prod/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
 
 # MIGRATOR CONFIGURATION
-/bfd/prod/migrator/nonsensitive/instance_type: m5.large
+/bfd/prod/migrator/nonsensitive/instance_type: m6i.large
 /bfd/prod/migrator/nonsensitive/volume_size: 100
 /bfd/prod/migrator/nonsensitive/sqs_queue_name: bfd-prod-migrator
 /bfd/prod/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
@@ -39,7 +39,7 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
-/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: true
 /bfd/${env}/pipeline/ccw/nonsensitive/instance_type: c6i.4xlarge
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 7
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 5
@@ -78,3 +78,22 @@
   {"alias":"client_ab2d_prod","certificate":"files/client_data_server_ab2d_prod_certificate.pem"},
   {"alias":"client_ab2d_prod_validation","certificate":"files/client_data_server_ab2d_prod_validation_certificate.pem"}
   ]
+/bfd/${env}/server/nonsensitive/lb_is_public: false
+/bfd/${env}/server/nonsensitive/lb_ingress_port: 443
+/bfd/${env}/server/nonsensitive/lb_egress_port: 7443
+# NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
+# Terraservice into a list
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
+  [
+  "bfd-prod-vpc-to-dpc-prod-vpc",
+  "bfd-prod-vpc-to-bluebutton-prod",
+  "bfd-prod-vpc-to-bcda-prod-vpc",
+  "bfd-prod-to-ab2d-prod"
+  ]
+/bfd/${env}/server/nonsensitive/asg_min_instance_count: 6
+/bfd/${env}/server/nonsensitive/asg_max_instance_count: 24
+/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: 12
+/bfd/${env}/server/nonsensitive/asg_desired_instance_count: 6
+/bfd/${env}/server/nonsensitive/asg_instance_warmup_time: 430
+/bfd/${env}/server/nonsensitive/launch_template_instance_type: c6i.4xlarge
+/bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 250

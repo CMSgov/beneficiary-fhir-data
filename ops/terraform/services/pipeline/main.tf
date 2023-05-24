@@ -1,11 +1,16 @@
 locals {
+  env              = terraform.workspace
+  established_envs = ["test", "prod-sbx", "prod"]
+  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
+  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  is_prod          = local.env == "prod"
+
   account_id        = data.aws_caller_identity.current.account_id
-  env               = terraform.workspace
   layer             = "data"
-  established_envs  = ["test", "prod-sbx", "prod"]
   create_etl_user   = local.is_prod || var.force_etl_user_creation
+  create_slis       = contains(local.established_envs, local.env) || var.force_sli_creation
   create_dashboard  = contains(local.established_envs, local.env) || var.force_dashboard_creation
-  create_slo_alarms = contains(local.established_envs, local.env) || var.force_slo_alarms_creation
+  create_slo_alarms = (contains(local.established_envs, local.env) || var.force_slo_alarms_creation) && local.create_slis
   jdbc_suffix       = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
@@ -14,7 +19,7 @@ locals {
   legacy_service = "etl"
 
   default_tags = {
-    Environment    = local.env
+    Environment    = local.seed_env
     application    = "bfd"
     business       = "oeda"
     stack          = local.env
@@ -31,11 +36,6 @@ locals {
 
   nonsensitive_rda_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_rda.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_rda.values))
   nonsensitive_rda_service_config = { for key, value in local.nonsensitive_rda_service_map : split("/", key)[6] => value }
-
-  # ephemeral environment determination is based on the existence of the ephemeral_environment_seed in the common hierarchy
-  seed_env         = lookup(local.nonsensitive_common_config, "ephemeral_environment_seed", null)
-  is_ephemeral_env = local.seed_env == null ? false : true
-  is_prod          = local.env == "prod"
 
   logging_bucket  = "bfd-${local.env}-logs-${local.account_id}"
   pipeline_bucket = "bfd-${local.env}-etl-${local.account_id}"
@@ -191,7 +191,7 @@ resource "aws_instance" "pipeline" {
   metadata_options {
     http_endpoint               = "enabled"
     http_put_response_hop_limit = 1
-    http_tokens                 = "optional"
+    http_tokens                 = "required"
   }
 
   root_block_device {
@@ -205,6 +205,8 @@ resource "aws_instance" "pipeline" {
 }
 
 module "bfd_pipeline_slis" {
+  count = local.create_slis ? 1 : 0
+
   source          = "./modules/bfd_pipeline_slis"
   account_id      = local.account_id
   aws_kms_key_arn = local.kms_key_id
@@ -227,4 +229,10 @@ module "bfd_pipeline_slo_alarms" {
   alert_ok_sns_override   = var.alert_ok_sns_override
   warning_sns_override    = var.warning_sns_override
   warning_ok_sns_override = var.warning_ok_sns_override
+}
+
+# TODO: Remove post BFD-2554
+moved {
+  from = module.bfd_pipeline_slis
+  to = module.bfd_pipeline_slis[0]
 }

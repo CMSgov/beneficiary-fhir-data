@@ -1,10 +1,9 @@
 package gov.cms.bfd.pipeline.app;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
@@ -18,9 +17,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
-import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
@@ -43,6 +41,9 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -59,7 +60,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   private static final int SIGTERM = 15;
 
   /** only need a single instance of the S3 client. */
-  private static AmazonS3 s3Client = createS3MinioClient();
+  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
@@ -72,7 +73,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
     LOGGER.info("s3Client: " + s3Client.toString());
-    ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
+    ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder("foo");
     String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();
     appRunBuilder.environment().put("JAVA_HOME", javaHome);
@@ -105,7 +106,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     Process appProcess = null;
     try {
       // Start the app.
-      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
+      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder("foo");
       appRunBuilder.redirectErrorStream(true);
       appProcess = appRunBuilder.start();
 
@@ -139,7 +140,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    Bucket bucket = null;
+    String bucket = null;
     Process appProcess = null;
     try {
       // Create the (empty) bucket to run against.
@@ -176,7 +177,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
-      if (bucket != null) s3Client.deleteBucket(bucket.getName());
+      if (StringUtils.isNotBlank(bucket))
+        s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
     }
   }
 
@@ -193,7 +195,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    Bucket bucket = null;
+    String bucket = null;
     Process appProcess = null;
     try {
       /*
@@ -210,19 +212,19 @@ public final class PipelineApplicationIT extends MinioTestContainer {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifest,
-              manifest.getEntries().get(1),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(0),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetTestUtilities.putObject(
+          s3Client,
+          bucket,
+          manifest,
+          manifest.getEntries().get(1),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Start the app.
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
@@ -255,7 +257,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket))
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
     }
   }
 
@@ -270,9 +273,12 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
+      final var randomClaimConfig =
+          RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(30).build();
+      final var serviceConfig =
+          RdaMessageSourceFactory.Config.builder().randomClaimConfig(randomClaimConfig).build();
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges())
-          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges())
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {
@@ -300,6 +306,16 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                           + appRunConsumer.getStdoutContents(),
                       e);
                 }
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer, "processed 30 objects in", RdaFissClaimLoadJob.class),
+                    "FISS job processed all claims");
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer, "processed 30 objects in", RdaMcsClaimLoadJob.class),
+                    "MCS job processed all claims");
 
                 // Stop the application.
                 sendSigterm(appProcess.get());
@@ -315,8 +331,8 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   }
 
   /**
-   * Verifies that when there is an exception starting the server, the correct error is output and
-   * the process can exit successfully.
+   * Verifies that when there is an exception while running the RDA jobs they complete normally
+   * after logging their exception.
    *
    * @throws Exception indicates a test failure
    */
@@ -326,15 +342,15 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
+      final var randomClaimConfig =
+          RandomClaimGeneratorConfig.builder().seed(12345).maxToSend(100).build();
+      final var serviceConfig =
+          RdaMessageSourceFactory.Config.builder()
+              .randomClaimConfig(randomClaimConfig)
+              .throwExceptionAfterCount(25)
+              .build();
       RdaServer.LocalConfig.builder()
-          .fissSourceFactory(
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
-          .mcsSourceFactory(
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+          .serviceConfig(serviceConfig)
           .build()
           .runWithPortParam(
               port -> {
@@ -362,6 +378,16 @@ public final class PipelineApplicationIT extends MinioTestContainer {
                           + appRunConsumer.getStdoutContents(),
                       e);
                 }
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer, "StatusRuntimeException", RdaFissClaimLoadJob.class),
+                    "FISS job terminated by grpc exception");
+
+                assertTrue(
+                    hasJobRecordMatching(
+                        appRunConsumer, "StatusRuntimeException", RdaMcsClaimLoadJob.class),
+                    "MCS job terminated by grpc exception");
 
                 // Stop the application.
                 sendSigterm(appProcess.get());
@@ -620,14 +646,14 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   /**
    * Creates a ProcessBuilder configured for an CCS/RIF pipeline test.
    *
-   * @param bucket the S3 {@link Bucket} that the application will be configured to pull RIF data
-   *     from
+   * @param bucket the name of the S3 bucket that the application will be configured to pull RIF
+   *     data from
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
-  private static ProcessBuilder createCcwRifAppProcessBuilder(Bucket bucket) {
+  private static ProcessBuilder createCcwRifAppProcessBuilder(String bucket) {
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
 
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket);
     appRunBuilder
         .environment()
         .put(
@@ -652,8 +678,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
-    // This is an arbitrary value for the RDA Version for these tests.
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_VERSION, "~0.0.1");
 
     return appRunBuilder;
   }

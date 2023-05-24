@@ -1,18 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
-import gov.cms.mpsm.rda.v1.fiss.FissClaim;
-import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,14 +18,16 @@ import java.util.NoSuchElementException;
  * A {@link MessageSource} implementation that produces objects from NDJSON data. The grpc-java
  * library includes a JsonFormat class that can be used to convert gRPC message objects into JSON
  * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
+ *
+ * @param <T> the message type
  */
 public class JsonMessageSource<T> implements MessageSource<T> {
   /** The JSON parser. */
   private final Parser<T> parser;
   /** Reads files from the file system. */
   private final BufferedReader reader;
-  /** The next line to read. */
-  private String line;
+  /** The next message to return. */
+  private T nextMessage;
 
   /**
    * Produce a JsonMessageSource that parses the provided NDJSON data.
@@ -69,14 +68,14 @@ public class JsonMessageSource<T> implements MessageSource<T> {
 
   /**
    * Produce a JsonMessageSource that parses the NDJSON contents of the specified {@link
-   * ByteSource}.
+   * CharSource}.
    *
-   * @param byteSource source of a NDJSON file containing message objects
+   * @param charSource source of a NDJSON file containing message objects
    * @param parser the parser to convert a line of JSON into an object
    */
-  public JsonMessageSource(ByteSource byteSource, Parser<T> parser) {
+  public JsonMessageSource(CharSource charSource, Parser<T> parser) {
     try {
-      reader = new BufferedReader(new InputStreamReader(byteSource.openStream()));
+      reader = charSource.openBufferedStream();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -84,55 +83,45 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * This method fits the signature of Parser&lt;FissClaim&gt;.
+   * Returns a {@link Parser} instance for parsing {@link FissClaimChange} JSON.
    *
-   * @param jsonString JSON to be parsed
-   * @return a FissClaim object
-   * @throws Exception any error caused by invalid JSON
+   * @return the parser
    */
-  public static FissClaim parseFissClaim(String jsonString) throws Exception {
-    FissClaim.Builder claim = FissClaim.newBuilder();
-    JsonFormat.parser().merge(jsonString, claim);
-    return claim.build();
+  public static Parser<FissClaimChange> fissParser() {
+    return new Parser<>() {
+      @Override
+      public FissClaimChange parseJson(String jsonString) throws Exception {
+        FissClaimChange.Builder claim = FissClaimChange.newBuilder();
+        JsonFormat.parser().merge(jsonString, claim);
+        return claim.build();
+      }
+
+      @Override
+      public long sequenceNumberOf(FissClaimChange message) {
+        return message.getSeq();
+      }
+    };
   }
 
   /**
-   * This method fits the signature of Parser&lt;McsClaim&gt;.
+   * Returns a {@link Parser} instance for parsing {@link McsClaimChange} JSON.
    *
-   * @param jsonString JSON to be parsed
-   * @return a McsClaim object
-   * @throws Exception any error caused by invalid JSON
+   * @return the parser
    */
-  public static McsClaim parseMcsClaim(String jsonString) throws Exception {
-    McsClaim.Builder claim = McsClaim.newBuilder();
-    JsonFormat.parser().merge(jsonString, claim);
-    return claim.build();
-  }
+  public static Parser<McsClaimChange> mcsParser() {
+    return new Parser<>() {
+      @Override
+      public McsClaimChange parseJson(String jsonString) throws Exception {
+        McsClaimChange.Builder claim = McsClaimChange.newBuilder();
+        JsonFormat.parser().merge(jsonString, claim);
+        return claim.build();
+      }
 
-  /**
-   * This method fits the signature of Parser&lt;FissClaimChange&gt;.
-   *
-   * @param jsonString JSON to be parsed
-   * @return a ClaimChange object
-   * @throws Exception any error caused by invalid JSON
-   */
-  public static FissClaimChange parseFissClaimChange(String jsonString) throws Exception {
-    FissClaimChange.Builder claim = FissClaimChange.newBuilder();
-    JsonFormat.parser().merge(jsonString, claim);
-    return claim.build();
-  }
-
-  /**
-   * This method fits the signature of Parser&lt;McsClaimChange&gt;.
-   *
-   * @param jsonString JSON to be parsed
-   * @return a ClaimChange object
-   * @throws Exception any error caused by invalid JSON
-   */
-  public static McsClaimChange parseMcsClaimChange(String jsonString) throws Exception {
-    McsClaimChange.Builder claim = McsClaimChange.newBuilder();
-    JsonFormat.parser().merge(jsonString, claim);
-    return claim.build();
+      @Override
+      public long sequenceNumberOf(McsClaimChange message) {
+        return message.getSeq();
+      }
+    };
   }
 
   /**
@@ -153,24 +142,29 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     return builder.build();
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public MessageSource<T> skipTo(long startingSequenceNumber) throws Exception {
+    while (hasNext() && parser.sequenceNumberOf(nextMessage) < startingSequenceNumber) {
+      next();
+    }
+    return this;
+  }
+
   @Override
   public boolean hasNext() throws Exception {
     return advance();
   }
 
-  /** {@inheritDoc} */
   @Override
   public T next() throws Exception {
     if (!advance()) {
       throw new NoSuchElementException();
     }
-    final T claim = parser.parseJson(line);
-    line = null;
-    return claim;
+    final var answer = nextMessage;
+    nextMessage = null;
+    return answer;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void close() throws Exception {
     reader.close();
@@ -182,11 +176,14 @@ public class JsonMessageSource<T> implements MessageSource<T> {
    * @return if there is a next line from the reader
    * @throws IOException there is an issue reading from the reader
    */
-  private boolean advance() throws IOException {
-    if (line == null) {
-      line = reader.readLine();
+  private boolean advance() throws Exception {
+    if (nextMessage == null) {
+      final var line = reader.readLine();
+      if (line != null) {
+        nextMessage = parser.parseJson(line);
+      }
     }
-    return line != null;
+    return nextMessage != null;
   }
 
   /**
@@ -196,7 +193,6 @@ public class JsonMessageSource<T> implements MessageSource<T> {
    *
    * @param <T> the type parameter
    */
-  @FunctionalInterface
   public interface Parser<T> {
     /**
      * Parses JSON from the specified string.
@@ -206,5 +202,13 @@ public class JsonMessageSource<T> implements MessageSource<T> {
      * @throws Exception if there is a parse exception
      */
     T parseJson(String jsonString) throws Exception;
+
+    /**
+     * Extracts the sequence number from a parsed message.
+     *
+     * @param message message containing a sequence number
+     * @return the sequence number
+     */
+    long sequenceNumberOf(T message);
   }
 }

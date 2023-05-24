@@ -70,16 +70,16 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn com.coveo:fmt-maven-plugin:check
+        run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
-  
+
   mvn-verify:
     runs-on: ubuntu-20.04
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
       - name: 'Configure AWS credentials'
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-java
@@ -119,7 +119,7 @@ jobs:
       - name: 'Run Maven Build'
         run: mvn --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
         working-directory: ./apps
-      
+
       - name: Login to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" \

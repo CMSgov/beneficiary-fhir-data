@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -37,6 +39,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +50,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -82,15 +84,45 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   /** The entity manager. */
   private EntityManager entityManager;
   /** The metric registry. */
-  private MetricRegistry metricRegistry;
+  private final MetricRegistry metricRegistry;
   /** The samhsa matcher. */
-  private Stu3EobSamhsaMatcher samhsaMatcher;
+  private final Stu3EobSamhsaMatcher samhsaMatcher;
   /** The loaded filter manager. */
-  private LoadedFilterManager loadedFilterManager;
+  private final LoadedFilterManager loadedFilterManager;
   /** The drug code display lookup entity. */
-  private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** The npi org lookup entity. */
-  private NPIOrgLookup npiOrgLookup;
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
+   *
+   * <p>Spring will wire this class during the initial component scan, so this constructor should
+   * only be explicitly called by tests.
+   *
+   * @param metricRegistry the metric registry bean
+   * @param loadedFilterManager the loaded filter manager bean
+   * @param samhsaMatcher the samhsa matcher bean
+   * @param drugCodeDisplayLookup the drug code display lookup bean
+   * @param npiOrgLookup the npi org lookup bean
+   */
+  public ExplanationOfBenefitResourceProvider(
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      Stu3EobSamhsaMatcher samhsaMatcher,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+    requireNonNull(metricRegistry);
+    requireNonNull(loadedFilterManager);
+    requireNonNull(samhsaMatcher);
+    requireNonNull(drugCodeDisplayLookup);
+    requireNonNull(npiOrgLookup);
+    this.metricRegistry = metricRegistry;
+    this.loadedFilterManager = loadedFilterManager;
+    this.samhsaMatcher = samhsaMatcher;
+    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+    this.npiOrgLookup = npiOrgLookup;
+  }
 
   /**
    * Sets the {@link #entityManager}.
@@ -100,56 +132,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
-  }
-
-  /**
-   * Sets the {@link #metricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
-  @Inject
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
-
-  /**
-   * Sets the {@link #samhsaMatcher}.
-   *
-   * @param samhsaMatcher the {@link Stu3EobSamhsaMatcher} to use
-   */
-  @Inject
-  public void setSamhsaFilterer(Stu3EobSamhsaMatcher samhsaMatcher) {
-    this.samhsaMatcher = samhsaMatcher;
-  }
-
-  /**
-   * Sets the {@link #loadedFilterManager}.
-   *
-   * @param loadedFilterManager the {@link LoadedFilterManager} to use
-   */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
-  }
-
-  /**
-   * Sets the {@link #drugCodeDisplayLookup}.
-   *
-   * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use
-   */
-  @Inject
-  public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
-    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
-  }
-
-  /**
-   * Sets the {@link #npiOrgLookup}.
-   *
-   * @param npiOrgLookup the {@link NPIOrgLookup} to use
-   */
-  @Inject
-  public void setNpiOrgLookup(NPIOrgLookup npiOrgLookup) {
-    this.npiOrgLookup = npiOrgLookup;
   }
 
   /** {@inheritDoc} */
@@ -350,12 +332,17 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
+    // See if we have claims data for the beneficiary.
+    BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
+    LOGGER.debug(
+        String.format("BitSet for V1 claims, bene_id %d: %s", beneficiaryId, bitSet.toString()));
+
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimType.CARRIER))
+    if (claimTypes.contains(ClaimType.CARRIER) && bitSet.get(QueryUtils.CARRIER_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.CARRIER,
@@ -363,7 +350,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.DME))
+    }
+    if (claimTypes.contains(ClaimType.DME) && bitSet.get(QueryUtils.DME_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.DME,
@@ -371,7 +359,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.HHA))
+    }
+    if (claimTypes.contains(ClaimType.HHA) && bitSet.get(QueryUtils.HHA_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.HHA,
@@ -379,7 +368,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.HOSPICE))
+    }
+    if (claimTypes.contains(ClaimType.HOSPICE) && bitSet.get(QueryUtils.HOSPICE_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
@@ -387,7 +377,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.INPATIENT))
+    }
+    if (claimTypes.contains(ClaimType.INPATIENT) && bitSet.get(QueryUtils.INPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
@@ -395,7 +386,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.OUTPATIENT))
+    }
+    if (claimTypes.contains(ClaimType.OUTPATIENT) && bitSet.get(QueryUtils.OUTPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
@@ -403,7 +395,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.PDE))
+    }
+    if (claimTypes.contains(ClaimType.PDE) && bitSet.get(QueryUtils.PART_D_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.PDE,
@@ -411,7 +404,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
-    if (claimTypes.contains(ClaimType.SNF))
+    }
+    if (claimTypes.contains(ClaimType.SNF) && bitSet.get(QueryUtils.SNF_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimType.SNF,
@@ -419,6 +413,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
               Optional.of(includeTaxNumbers),
               drugCodeDisplayLookup,
               npiOrgLookup));
+    }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
       filterSamhsa(eobs);

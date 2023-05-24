@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -21,8 +23,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
@@ -31,12 +31,12 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +47,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -82,15 +81,71 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   /** The entity manager. */
   private EntityManager entityManager;
   /** The metric registry. */
-  private MetricRegistry metricRegistry;
+  private final MetricRegistry metricRegistry;
   /** The samhsa matcher. */
-  private R4EobSamhsaMatcher samhsaMatcher;
+  private final R4EobSamhsaMatcher samhsaMatcher;
   /** The loaded filter manager. */
-  private LoadedFilterManager loadedFilterManager;
-  /** The drug code display lookup entity. */
-  private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-  /** The npi org lookup entity. */
-  private NPIOrgLookup npiOrgLookup;
+  private final LoadedFilterManager loadedFilterManager;
+
+  /** The transformer for carrier claims. */
+  private final CarrierClaimTransformerV2 carrierClaimTransformer;
+  /** The transformer for dme claims. */
+  private final DMEClaimTransformerV2 dmeClaimTransformer;
+  /** The transformer for hha claims. */
+  private final HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The transformer for hospice claims. */
+  private final HospiceClaimTransformerV2 hospiceClaimTransformer;
+  /** The transformer for inpatient claims. */
+  private final InpatientClaimTransformerV2 inpatientClaimTransformer;
+  /** The transformer for outpatient claims. */
+  private final OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  /** The transformer for part D events claims. */
+  private final PartDEventTransformerV2 partDEventTransformer;
+  /** The transformer for snf claims. */
+  private final SNFClaimTransformerV2 snfClaimTransformerV2;
+
+  /**
+   * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
+   *
+   * <p>Spring will wire this class during the initial component scan, so this constructor should
+   * only be explicitly called by tests.
+   *
+   * @param metricRegistry the metric registry bean
+   * @param loadedFilterManager the loaded filter manager bean
+   * @param samhsaMatcher the samhsa matcher bean
+   * @param carrierClaimTransformer the carrier claim transformer
+   * @param dmeClaimTransformer the dme claim transformer
+   * @param hhaClaimTransformer the hha claim transformer
+   * @param hospiceClaimTransformer the hospice claim transformer
+   * @param inpatientClaimTransformer the inpatient claim transformer
+   * @param outpatientClaimTransformer the outpatient claim transformer
+   * @param partDEventTransformer the part d event transformer
+   * @param snfClaimTransformerV2 the snf claim transformer v 2
+   */
+  public R4ExplanationOfBenefitResourceProvider(
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      R4EobSamhsaMatcher samhsaMatcher,
+      CarrierClaimTransformerV2 carrierClaimTransformer,
+      DMEClaimTransformerV2 dmeClaimTransformer,
+      HHAClaimTransformerV2 hhaClaimTransformer,
+      HospiceClaimTransformerV2 hospiceClaimTransformer,
+      InpatientClaimTransformerV2 inpatientClaimTransformer,
+      OutpatientClaimTransformerV2 outpatientClaimTransformer,
+      PartDEventTransformerV2 partDEventTransformer,
+      SNFClaimTransformerV2 snfClaimTransformerV2) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.samhsaMatcher = requireNonNull(samhsaMatcher);
+    this.carrierClaimTransformer = requireNonNull(carrierClaimTransformer);
+    this.dmeClaimTransformer = requireNonNull(dmeClaimTransformer);
+    this.hhaClaimTransformer = requireNonNull(hhaClaimTransformer);
+    this.hospiceClaimTransformer = requireNonNull(hospiceClaimTransformer);
+    this.inpatientClaimTransformer = requireNonNull(inpatientClaimTransformer);
+    this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
+    this.partDEventTransformer = requireNonNull(partDEventTransformer);
+    this.snfClaimTransformerV2 = requireNonNull(snfClaimTransformerV2);
+  }
 
   /**
    * Sets the {@link #entityManager}.
@@ -100,56 +155,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
-  }
-
-  /**
-   * Sets the {@link #metricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
-  @Inject
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
-
-  /**
-   * Sets the {@link #samhsaMatcher}.
-   *
-   * @param samhsaMatcher the {@link R4EobSamhsaMatcher} to use
-   */
-  @Inject
-  public void setSamhsaFilterer(R4EobSamhsaMatcher samhsaMatcher) {
-    this.samhsaMatcher = samhsaMatcher;
-  }
-
-  /**
-   * Sets the {@link #loadedFilterManager}.
-   *
-   * @param loadedFilterManager the {@link LoadedFilterManager} to use
-   */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
-  }
-
-  /**
-   * Sets the {@link #drugCodeDisplayLookup}.
-   *
-   * @param drugCodeDisplayLookup the {@link FdaDrugCodeDisplayLookup} to use
-   */
-  @Inject
-  public void setdrugCodeDisplayLookup(FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
-    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
-  }
-
-  /**
-   * Sets the {@link #npiOrgLookup}.
-   *
-   * @param npiOrgLookup the {@link NPIOrgLookup} to use
-   */
-  @Inject
-  public void setNpiOrgLookup(NPIOrgLookup npiOrgLookup) {
-    this.npiOrgLookup = npiOrgLookup;
   }
 
   /** {@inheritDoc} */
@@ -236,17 +241,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
 
-    ExplanationOfBenefit eob =
-        eobIdType
-            .get()
-            .getTransformer()
-            .transform(
-                new TransformerContext(
-                    metricRegistry,
-                    Optional.of(includeTaxNumbers),
-                    drugCodeDisplayLookup,
-                    npiOrgLookup),
-                claimEntity);
+    ExplanationOfBenefit eob = transformEobClaim(claimEntity, eobIdType.get(), includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -347,91 +342,80 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
+    // See if we have claims data for the beneficiary.
+    BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
+    LOGGER.debug(
+        String.format("BitSet for V2 claims, bene_id %d: %s", beneficiaryId, bitSet.toString()));
+
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimTypeV2.CARRIER)) {
+    if (claimTypes.contains(ClaimTypeV2.CARRIER) && bitSet.get(QueryUtils.CARRIER_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.CARRIER,
               findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.DME)) {
+    if (claimTypes.contains(ClaimTypeV2.DME) && bitSet.get(QueryUtils.DME_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.HHA)) {
+    if (claimTypes.contains(ClaimTypeV2.HHA) && bitSet.get(QueryUtils.HHA_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.HHA,
               findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
+    if (claimTypes.contains(ClaimTypeV2.HOSPICE) && bitSet.get(QueryUtils.HOSPICE_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.HOSPICE,
               findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
+    if (claimTypes.contains(ClaimTypeV2.INPATIENT) && bitSet.get(QueryUtils.INPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.INPATIENT,
               findClaimTypeByPatient(
                   ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
+    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT) && bitSet.get(QueryUtils.OUTPATIENT_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.OUTPATIENT,
               findClaimTypeByPatient(
                   ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.PDE)) {
+    if (claimTypes.contains(ClaimTypeV2.PDE) && bitSet.get(QueryUtils.PART_D_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.PDE,
               findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
-    if (claimTypes.contains(ClaimTypeV2.SNF)) {
+    if (claimTypes.contains(ClaimTypeV2.SNF) && bitSet.get(QueryUtils.SNF_HAS_DATA)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.SNF,
               findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+              Optional.of(includeTaxNumbers)));
     }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
@@ -563,6 +547,29 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   }
 
   /**
+   * Transforms the eob claim to the specified type.
+   *
+   * @param claimEntity the claim entity to transform
+   * @param eobIdType the eob claim type
+   * @param includeTaxNumbers whether to include tax numbers
+   * @return the transformed explanation of benefit
+   */
+  private ExplanationOfBenefit transformEobClaim(
+      Object claimEntity, ClaimTypeV2 eobIdType, boolean includeTaxNumbers) {
+
+    return switch (eobIdType) {
+      case CARRIER -> carrierClaimTransformer.transform(claimEntity, includeTaxNumbers);
+      case DME -> dmeClaimTransformer.transform(claimEntity, includeTaxNumbers);
+      case HHA -> hhaClaimTransformer.transform(claimEntity);
+      case HOSPICE -> hospiceClaimTransformer.transform(claimEntity);
+      case INPATIENT -> inpatientClaimTransformer.transform(claimEntity);
+      case OUTPATIENT -> outpatientClaimTransformer.transform(claimEntity);
+      case PDE -> partDEventTransformer.transform(claimEntity);
+      case SNF -> snfClaimTransformerV2.transform(claimEntity);
+    };
+  }
+
+  /**
    * Transform a list of claims to a list of {@link ExplanationOfBenefit} objects.
    *
    * <p>TODO: This should likely not exist in the provider class and be moved somewhere else like a
@@ -571,27 +578,14 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param claimType the {@link ClaimTypeV2} being transformed
    * @param claims the claims/events to transform
    * @param includeTaxNumbers whether to include tax numbers in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
    *     claim/event
    */
   @Trace
   private List<ExplanationOfBenefit> transformToEobs(
-      ClaimTypeV2 claimType,
-      List<?> claims,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      ClaimTypeV2 claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
     return claims.stream()
-        .map(
-            c ->
-                claimType
-                    .getTransformer()
-                    .transform(
-                        new TransformerContext(
-                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
-                        c))
+        .map(c -> transformEobClaim(c, claimType, includeTaxNumbers.orElse(false)))
         .collect(Collectors.toList());
   }
 

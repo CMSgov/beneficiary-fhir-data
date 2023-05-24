@@ -1,25 +1,17 @@
 ---
 # COMMON CONFIGURATION
-## NOTE: select `test` environment resources in-use to avoid per-environment creation of more complex resources
-##       and provide isolation of development, ephemeral environments from production workloads
-/bfd/${env}/common/nonsensitive/enterprise_tools_security_group: bfd-test-enterprise-tools
-/bfd/${env}/common/nonsensitive/management_security_group: bfd-test-remote-management
-/bfd/${env}/common/nonsensitive/vpc_name: bfd-test-vpc
-/bfd/${env}/common/nonsensitive/vpn_security_group: bfd-test-vpn-private
-
 /bfd/${env}/common/nonsensitive/env_name_std: ${env}
-/bfd/${env}/common/nonsensitive/key_pair: bfd-${seed_env}
-/bfd/${env}/common/nonsensitive/kms_key_alias: alias/bfd-${seed_env}-cmk
 /bfd/${env}/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
 /bfd/${env}/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1
 
 ## COMMON RDS CONFIGURATION
 /bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
 /bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
-/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: false
+/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: true
+/bfd/${env}/common/nonsensitive/rds_instance_count: 1
 
 # MIGRATOR CONFIGURATION
-/bfd/${env}/migrator/nonsensitive/instance_type: m5.large
+/bfd/${env}/migrator/nonsensitive/instance_type: m6i.large
 /bfd/${env}/migrator/nonsensitive/volume_size: 100
 /bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-${env}-migrator
 /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: *newRelicMetricHost
@@ -40,7 +32,7 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: false
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
-/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: true
 /bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 7
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 5
@@ -64,3 +56,19 @@
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_directory: ''
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_inproc_server_s3_region: ''
+
+# SERVER CONFIGURATION
+/bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: *newRelicMetricHost
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: *newRelicMetricPath
+/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
+/bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
+## SERVER+MTLS CONFIGURATION
+/bfd/${env}/server/nonsensitive/lb_is_public: false
+/bfd/${env}/server/nonsensitive/lb_ingress_port: 443
+/bfd/${env}/server/nonsensitive/lb_egress_port: 7443
+# NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
+# Terraservice into a list. The ephemeral variant is purposefully empty to ensure there are no
+# peerings to ephemeral environments
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
+  []

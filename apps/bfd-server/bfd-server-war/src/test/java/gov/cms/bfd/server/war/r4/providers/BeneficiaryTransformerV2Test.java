@@ -60,6 +60,8 @@ public final class BeneficiaryTransformerV2Test {
   private static Beneficiary beneficiary = null;
   /** Patient under test. */
   private static Patient patient = null;
+  /** The class under test. */
+  private static BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
   /**
    * Sets up the test, including parsing the beneficiary from a file and adjusting some of its
@@ -67,6 +69,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @BeforeEach
   public void setup() {
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(new MetricRegistry());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -115,8 +118,7 @@ public final class BeneficiaryTransformerV2Test {
    * @param reqHeaders the request headers
    */
   private void createPatient(RequestHeaders reqHeaders) {
-    Patient genPatient =
-        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
+    Patient genPatient = beneficiaryTransformerV2.transform(beneficiary, reqHeaders, true);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genPatient);
     patient = parser.parseResource(Patient.class, json);
@@ -137,7 +139,6 @@ public final class BeneficiaryTransformerV2Test {
   @Disabled
   @Test
   public void shouldOutputMbiHistory() {
-    createPatient(getRHwithIncldIdentityHdr("mbi"));
     assertNotNull(patient);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
   }
@@ -175,26 +176,6 @@ public final class BeneficiaryTransformerV2Test {
         patient.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
-  }
-
-  /**
-   * Tests that the transformer sets the expected number of identifiers when mbi is not returned.
-   */
-  @Test
-  public void shouldHaveKnownIdentifiersNoMbiHistory() {
-    assertEquals(2, patient.getIdentifier().size());
-  }
-
-  /**
-   * Tests that the transformer sets the expected number of identifiers when mbi is returned.
-   *
-   * <p>TODO: This doesnt seem like a great test since the number is the same as the test above
-   * without mbi?
-   */
-  @Test
-  public void shouldHaveKnownIdentifiersWithMbiHistory() {
-    createPatient(getRHwithIncldIdentityHdr("mbi"));
-    assertEquals(2, patient.getIdentifier().size());
   }
 
   /** Tests that the transformer sets the expected member identifier values. */
@@ -253,15 +234,14 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Tests that the transformer sets the expected medicare extensions and values when include mbi is
-   * set.
+   * Tests that the transformer sets the expected medicare extensions and values when mbi history
+   * exists.
    */
   @Test
   public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
-    createPatient(getRHwithIncldIdentityHdr("mbi"));
 
     List<Identifier> patientIdentList = patient.getIdentifier();
-    assertEquals(2, patientIdentList.size());
+    assertEquals(4, patientIdentList.size());
 
     ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
 
@@ -304,14 +284,6 @@ public final class BeneficiaryTransformerV2Test {
 
     compareIdentList.add(ident);
 
-    /*
-     * We have implemented a rule that for a valid MBI history record it has to have an end date; if
-     * no end date then the MBI has probably been provided by the CURRENT MBI extension. the
-     * following code is therefore commented out until the current Sample_A rif data provides a
-     * valid MedicareBeneficiaryIdHistory record.
-     */
-
-    /*
     extension =
         new Extension(
             "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
@@ -331,7 +303,18 @@ public final class BeneficiaryTransformerV2Test {
         .setDisplay("Patient's Medicare number")
         .addExtension(extension);
     compareIdentList.add(ident);
-    */
+
+    ident = new Identifier();
+    ident
+        .setValue("3456689")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+    compareIdentList.add(ident);
 
     assertEquals(compareIdentList.size(), patientIdentList.size());
     for (int i = 0; i < compareIdentList.size(); i++) {
@@ -417,10 +400,9 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
-   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
-   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with a reference year field not found.
+   * Verifies that {@link BeneficiaryTransformerV2#transform(Beneficiary, RequestHeaders)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a reference year field not found.
    */
   @Test
   public void shouldNotHaveReferenceYearExtension() {
@@ -440,8 +422,7 @@ public final class BeneficiaryTransformerV2Test {
     newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
     Patient genPatient =
-        BeneficiaryTransformerV2.transform(
-            new MetricRegistry(), newBeneficiary, RequestHeaders.getHeaderWrapper());
+        beneficiaryTransformerV2.transform(newBeneficiary, RequestHeaders.getHeaderWrapper());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genPatient);
     Patient newPatient = parser.parseResource(Patient.class, json);
@@ -582,7 +563,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchAddressWithAddrHeader() {
-    RequestHeaders reqHdr = getRHwithIncldAddrFldHdr("true");
+    RequestHeaders reqHdr = getHeaderWithAddressFieldsSetTo("true");
     createPatient(reqHdr);
     assertNotNull(patient);
     List<Address> addrList = patient.getAddress();
@@ -607,10 +588,8 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
-   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
-   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
+   * Verifies that {@link BeneficiaryTransformerV2#transform(Beneficiary, RequestHeaders)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
   @Disabled
   @Test
@@ -634,25 +613,13 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
-   * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS}
-   * set to the given value.
-   *
-   * @param value of all include identifier values
-   * @return RequestHeaders instance derived from value
-   */
-  public static RequestHeaders getRHwithIncldIdentityHdr(String value) {
-    return RequestHeaders.getHeaderWrapper(
-        R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, value);
-  }
-
-  /**
    * Gets a header wrapper with {@link R4PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS}
    * set to the given value.
    *
    * @param value of all include address fields values
    * @return RequestHeaders instance derived from value
    */
-  public static RequestHeaders getRHwithIncldAddrFldHdr(String value) {
+  public static RequestHeaders getHeaderWithAddressFieldsSetTo(String value) {
     return RequestHeaders.getHeaderWrapper(
         R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, value);
   }

@@ -1,5 +1,5 @@
 data "aws_kms_key" "cmk" {
-  key_id = "alias/bfd-${local.env}-cmk"
+  key_id = "alias/bfd-${local.seed_env}-cmk"
 }
 
 data "archive_file" "lambda_src" {

@@ -11,9 +11,8 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -30,7 +29,6 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.grpc.StatusRuntimeException;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
@@ -47,7 +45,8 @@ import org.junit.jupiter.api.Test;
 public class RdaLoadJobIT {
 
   /** Arbitrary RDA API version to use for testing. */
-  private static final String ARBITRARY_RDA_VERSION = "0.0.1";
+  private static final RdaService.Version ARBITRARY_RDA_VERSION =
+      RdaService.Version.builder().version("0.0.1").build();
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   /** The test fiss claim source. */
@@ -89,7 +88,7 @@ public class RdaLoadJobIT {
   @Test
   public void fissClaimsAreValid() throws Exception {
     final ImmutableList<FissClaimChange> expectedClaims =
-        JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
+        JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource.fissParser());
     final FissClaimTransformer transformer =
         new FissClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (FissClaimChange claim : expectedClaims) {
@@ -114,8 +113,11 @@ public class RdaLoadJobIT {
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);
           RdaServer.LocalConfig.builder()
-              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
-              .fissSourceFactory(fissJsonSource(fissClaimJson))
+              .serviceConfig(
+                  RdaMessageSourceFactory.Config.builder()
+                      .version(ARBITRARY_RDA_VERSION)
+                      .fissClaimJsonList(fissClaimJson)
+                      .build())
               .build()
               .runWithPortParam(
                   port -> {
@@ -125,7 +127,7 @@ public class RdaLoadJobIT {
                     job.call();
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
-              JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
+              JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource.fissParser());
           List<RdaFissClaim> claims = getRdaFissClaims(transactionManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaFissClaim resultClaim : claims) {
@@ -162,8 +164,11 @@ public class RdaLoadJobIT {
                   .get(badClaimIndex)
                   .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
           RdaServer.LocalConfig.builder()
-              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
-              .fissSourceFactory(fissJsonSource(badFissClaimJson))
+              .serviceConfig(
+                  RdaMessageSourceFactory.Config.builder()
+                      .version(ARBITRARY_RDA_VERSION)
+                      .fissClaimJsonList(badFissClaimJson)
+                      .build())
               .build()
               .runWithPortParam(
                   port -> {
@@ -194,7 +199,7 @@ public class RdaLoadJobIT {
   @Test
   public void mcsClaimsAreValid() throws Exception {
     final ImmutableList<McsClaimChange> expectedClaims =
-        JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
+        JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource.mcsParser());
     final McsClaimTransformer transformer =
         new McsClaimTransformer(clock, MbiCache.computedCache(new IdHasher.Config(1, "testing")));
     for (McsClaimChange claim : expectedClaims) {
@@ -219,9 +224,12 @@ public class RdaLoadJobIT {
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);
           RdaServer.InProcessConfig.builder()
+              .serviceConfig(
+                  RdaMessageSourceFactory.Config.builder()
+                      .version(ARBITRARY_RDA_VERSION)
+                      .mcsClaimJsonList(mcsClaimJson)
+                      .build())
               .serverName(RdaServerJob.Config.DEFAULT_SERVER_NAME)
-              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
-              .mcsSourceFactory(mcsJsonSource(mcsClaimJson))
               .build()
               .runWithNoParam(
                   () -> {
@@ -231,7 +239,7 @@ public class RdaLoadJobIT {
                     job.call();
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
-              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
+              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource.mcsParser());
           List<RdaMcsClaim> claims = getRdaMcsClaims(transactionManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (RdaMcsClaim resultClaim : claims) {
@@ -264,14 +272,12 @@ public class RdaLoadJobIT {
               claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
           assertTrue(fullBatchSize > 0);
           RdaServer.LocalConfig.builder()
-              .version(RdaService.Version.builder().version(ARBITRARY_RDA_VERSION).build())
-              .mcsSourceFactory(
-                  ignored ->
-                      new ExceptionMessageSource<>(
-                          new JsonMessageSource<>(
-                              mcsClaimJson, JsonMessageSource::parseMcsClaimChange),
-                          claimsToSendBeforeThrowing,
-                          () -> new IOException("oops")))
+              .serviceConfig(
+                  RdaMessageSourceFactory.Config.builder()
+                      .version(ARBITRARY_RDA_VERSION)
+                      .mcsClaimJsonList(mcsClaimJson)
+                      .throwExceptionAfterCount(claimsToSendBeforeThrowing)
+                      .build())
               .build()
               .runWithPortParam(
                   port -> {
@@ -394,39 +400,14 @@ public class RdaLoadJobIT {
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(1))
             .batchSize(BATCH_SIZE)
-            .rdaVersion(RdaVersion.builder().versionString("~" + ARBITRARY_RDA_VERSION).build())
+            .rdaVersion(
+                RdaVersion.builder()
+                    .versionString("~" + ARBITRARY_RDA_VERSION.getVersion())
+                    .build())
             .build(),
         rdaSourceConfig.build(),
         new RdaServerJob.Config(),
         0,
         new IdHasher.Config(100, "thisisjustatest"));
-  }
-
-  /**
-   * Creates a Fiss source factory for the claim json data.
-   *
-   * @param claimJson the claim json
-   * @return the source factory
-   */
-  private MessageSource.Factory<FissClaimChange> fissJsonSource(List<String> claimJson) {
-    // resource - This is a factory method, resource handling is done later
-    //noinspection resource
-    return sequenceNumber ->
-        new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange)
-            .skip(sequenceNumber - 1);
-  }
-
-  /**
-   * Creates a MCS source factory for the claim json data.
-   *
-   * @param claimJson the claim json
-   * @return the source factory
-   */
-  private MessageSource.Factory<McsClaimChange> mcsJsonSource(List<String> claimJson) {
-    // resource - This is a factory method, resource handling is done later
-    //noinspection resource
-    return sequenceNumber ->
-        new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange)
-            .skip(sequenceNumber - 1);
   }
 }

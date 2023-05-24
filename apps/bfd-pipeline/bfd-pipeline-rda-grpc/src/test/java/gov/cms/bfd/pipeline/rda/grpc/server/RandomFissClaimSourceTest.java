@@ -35,8 +35,12 @@ public class RandomFissClaimSourceTest {
   public void oneMaxToReturn() throws Exception {
     RandomFissClaimSource source = new RandomFissClaimSource(0, 1);
     assertTrue(source.hasNext());
-    FissClaim claim = source.next();
+    FissClaimChange change = source.next();
+    FissClaim claim = change.getClaim();
     assertTrue(claim.getDcn().length() > 0);
+    assertEquals(change.getDcn(), claim.getDcn());
+    assertEquals(change.getIntermediaryNb(), claim.getIntermediaryNb());
+    assertEquals(change.getRdaClaimKey(), claim.getRdaClaimKey());
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
@@ -51,33 +55,43 @@ public class RandomFissClaimSourceTest {
   public void threeMaxToReturn() throws Exception {
     RandomFissClaimSource source = new RandomFissClaimSource(0, 3);
     assertTrue(source.hasNext());
-    FissClaim claim = source.next();
+    FissClaimChange change = source.next();
+    FissClaim claim = change.getClaim();
     assertTrue(claim.getDcn().length() > 0);
+    assertEquals(change.getDcn(), claim.getDcn());
+    assertEquals(change.getIntermediaryNb(), claim.getIntermediaryNb());
+    assertEquals(change.getRdaClaimKey(), claim.getRdaClaimKey());
 
     assertTrue(source.hasNext());
-    claim = source.next();
+    change = source.next();
+    claim = change.getClaim();
     assertTrue(claim.getDcn().length() > 0);
+    assertEquals(change.getDcn(), claim.getDcn());
+    assertEquals(change.getIntermediaryNb(), claim.getIntermediaryNb());
+    assertEquals(change.getRdaClaimKey(), claim.getRdaClaimKey());
 
     assertTrue(source.hasNext());
-    claim = source.next();
+    change = source.next();
+    claim = change.getClaim();
     assertTrue(claim.getDcn().length() > 0);
+    assertEquals(change.getDcn(), claim.getDcn());
+    assertEquals(change.getIntermediaryNb(), claim.getIntermediaryNb());
+    assertEquals(change.getRdaClaimKey(), claim.getRdaClaimKey());
 
     assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  /**
-   * Validates that the sequence numbers generated for claims is sequential.
-   *
-   * @throws Exception indicates test failure
-   */
+  /** Validates that the sequence numbers generated for claims are sequential and start at 1. */
   @Test
-  public void sequenceNumbers() throws Exception {
-    MessageSource<FissClaimChange> source =
-        new RandomFissClaimSource(0, 7).toClaimChanges().skip(4);
+  public void sequenceNumbers() {
+    RandomFissClaimSource source = new RandomFissClaimSource(0, 7);
+    assertEquals(1L, source.next().getSeq());
+    source.skipTo(4);
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());
     assertEquals(6L, source.next().getSeq());
+    assertEquals(7L, source.next().getSeq());
     assertFalse(source.hasNext());
   }
 
@@ -88,7 +102,7 @@ public class RandomFissClaimSourceTest {
    * @param source the source
    * @throws Exception the exception
    */
-  private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(MessageSource<?> source) throws Exception {
     try {
       source.next();
       fail("expected exception");

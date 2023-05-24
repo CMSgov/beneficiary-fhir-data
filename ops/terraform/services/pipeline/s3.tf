@@ -29,20 +29,31 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
+  # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
+  # resource will fail to apply for ephemeral environments (new buckets)
+  # FIXME: Replace/resolve this before accepting BFD-2554
   count = local.is_ephemeral_env ? 0 : 1
 
   bucket        = aws_s3_bucket.this.id
   target_bucket = local.logging_bucket
+
   # TODO: correct the target prefix by adding a trailing '/'
   target_prefix = "${local.legacy_service}_s3_access_logs"
 }
 
 resource "aws_s3_bucket_acl" "this" {
+  # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
+  # resource will fail to apply for ephemeral environments
+  # FIXME: Replace/resolve this after accepting BFD-2554
+  count = local.is_ephemeral_env ? 0 : 1
+
   bucket = aws_s3_bucket.this.id
   acl    = "private"
 }
 
 resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
+  count = local.create_slis ? 1 : 0
+
   bucket = aws_s3_bucket.this.id
 
   lambda_function {
@@ -50,8 +61,8 @@ resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
       "s3:ObjectCreated:*",
     ]
     filter_prefix       = "Incoming/"
-    id                  = "${module.bfd_pipeline_slis.lambda_name}-incoming"
-    lambda_function_arn = module.bfd_pipeline_slis.lambda_arn
+    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-incoming"
+    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
   }
 
   lambda_function {
@@ -59,7 +70,7 @@ resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
       "s3:ObjectCreated:*",
     ]
     filter_prefix       = "Done/"
-    id                  = "${module.bfd_pipeline_slis.lambda_name}-done"
-    lambda_function_arn = module.bfd_pipeline_slis.lambda_arn
+    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-done"
+    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
   }
 }

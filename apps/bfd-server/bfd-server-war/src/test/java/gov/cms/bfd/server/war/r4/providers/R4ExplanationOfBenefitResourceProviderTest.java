@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +33,47 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mocked input id value. */
   @Mock IdType eobId;
 
+  /** The mock metric registry. */
+  @Mock private MetricRegistry metricRegistry;
+  /** The mock samhsa matcher. */
+  @Mock private R4EobSamhsaMatcher samhsaMatcher;
+  /** The mock loaded filter manager. */
+  @Mock private LoadedFilterManager loadedFilterManager;
+
+  // Mock transformers
+  /** The mock transformer for carrier claims. */
+  @Mock private CarrierClaimTransformerV2 carrierClaimTransformerV2;
+  /** The mock transformer for dme claims. */
+  @Mock private DMEClaimTransformerV2 dmeClaimTransformer;
+  /** The mock transformer for hha claims. */
+  @Mock private HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The mock transformer for hospice claims. */
+  @Mock private HospiceClaimTransformerV2 hospiceClaimTransformer;
+  /** The mock transformer for inpatient claims. */
+  @Mock private InpatientClaimTransformerV2 inpatientClaimTransformer;
+  /** The mock transformer for outpatient claims. */
+  @Mock private OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  /** The mock transformer for part D events claims. */
+  @Mock private PartDEventTransformerV2 partDEventTransformer;
+  /** The mock transformer for snf claims. */
+  @Mock private SNFClaimTransformerV2 snfClaimTransformerV2;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    eobProvider = new R4ExplanationOfBenefitResourceProvider();
+    eobProvider =
+        new R4ExplanationOfBenefitResourceProvider(
+            metricRegistry,
+            loadedFilterManager,
+            samhsaMatcher,
+            carrierClaimTransformerV2,
+            dmeClaimTransformer,
+            hhaClaimTransformer,
+            hospiceClaimTransformer,
+            inpatientClaimTransformer,
+            outpatientClaimTransformer,
+            partDEventTransformer,
+            snfClaimTransformerV2);
     lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
   }
 

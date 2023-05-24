@@ -3,18 +3,22 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
 import static java.lang.String.format;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
+import com.google.common.io.Files;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import java.io.File;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * Interface for objects that can provide information required by {@link RdaService} to generate
@@ -59,14 +63,12 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @Builder.Default
     private final RandomClaimGeneratorConfig randomClaimConfig =
         RandomClaimGeneratorConfig.builder().build();
-    /** The maximum number of claims to be returned when operating in {@code Random} mode. */
-    private final int randomMaxClaims;
     /** NDJSON fiss claim data for the RDA Server. */
-    @Nullable private final ByteSource fissClaimJson;
+    @Nullable private final CharSource fissClaimJson;
     /** NDJSON mcs claim data for the RDI Server. */
-    @Nullable private final ByteSource mcsClaimJson;
+    @Nullable private final CharSource mcsClaimJson;
     /** AWS region containing our S3 bucket. */
-    @Nullable private final Regions s3Region;
+    @Nullable private final Region s3Region;
     /** Name of our S3 bucket. */
     @Nullable private final String s3Bucket;
     /** Optional directory name within our S3 bucket. */
@@ -75,47 +77,37 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @Nullable private final String s3CacheDirectory;
     /** Optional hard coded version. */
     @Nullable private final RdaService.Version version;
-    /** Optional hard coded factory for creating FISS claim message sources. */
-    @Nullable private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
-    /** Optional hard coded factory for creating MCS claim message sources. */
-    @Nullable private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
+    /**
+     * If positive this causes all generated {@link MessageSource}s to be wrapped in {@link
+     * ExceptionMessageSource} with {@see ExceptionMessageSource#countBeforeThrow} set to this
+     * value.
+     */
+    int throwExceptionAfterCount;
 
     /**
      * Creates an instance based on which set of configuration values have been provided when
      * building this config. Possible instances are (in priority and based on which options were
-     * provided): {@link RdaBasicMessageSourceFactory} using hard coded values, {@link
-     * RdaJsonMessageSourceFactory} using provided NDJSON data, {@link
+     * provided): {@link RdaJsonMessageSourceFactory} using provided NDJSON data, {@link
      * RdaS3JsonMessageSourceFactory} using an S3 bucket, or {@link RdaRandomMessageSourceFactory}
-     * if no other options applied.
+     * if no other options applied. Optionally (if {@link #throwExceptionAfterCount} is positive)
+     * wraps factory in a {@link RdaExceptionMessageSourceFactory}.
      *
      * @return the instance
      * @throws Exception pass through any exceptions
      */
     public RdaMessageSourceFactory createMessageSourceFactory() throws Exception {
-      if (fissSourceFactory != null || mcsSourceFactory != null) {
-        return createBasicMessageSourceFactory();
-      } else if (fissClaimJson != null || mcsClaimJson != null) {
-        return createJsonMessageSourceFactory();
+      RdaMessageSourceFactory factory;
+      if (fissClaimJson != null || mcsClaimJson != null) {
+        factory = createJsonMessageSourceFactory();
       } else if (s3Bucket != null) {
-        return createS3MessageSourceFactory();
+        factory = createS3MessageSourceFactory();
       } else {
-        return createRandomMessageSourceFactory();
+        factory = createRandomMessageSourceFactory();
       }
-    }
-
-    /**
-     * Creates {@link RdaBasicMessageSourceFactory} using hard coded version and/or factories.
-     *
-     * @return the instance
-     */
-    private RdaMessageSourceFactory createBasicMessageSourceFactory() {
-      final RdaService.Version version =
-          this.version != null ? this.version : RdaService.Version.builder().build();
-      final MessageSource.Factory<FissClaimChange> fissFactory =
-          this.fissSourceFactory != null ? this.fissSourceFactory : EmptyMessageSource.factory();
-      final MessageSource.Factory<McsClaimChange> mcsFactory =
-          this.mcsSourceFactory != null ? this.mcsSourceFactory : EmptyMessageSource.factory();
-      return new RdaBasicMessageSourceFactory(version, fissFactory, mcsFactory);
+      if (throwExceptionAfterCount > 0) {
+        factory = new RdaExceptionMessageSourceFactory(factory, throwExceptionAfterCount);
+      }
+      return factory;
     }
 
     /**
@@ -126,8 +118,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     private RdaMessageSourceFactory createJsonMessageSourceFactory() {
       final RdaService.Version version =
           this.version != null ? this.version : RdaService.Version.builder().build();
-      ByteSource fissJson = fissClaimJson != null ? fissClaimJson : ByteSource.empty();
-      ByteSource mcsJson = mcsClaimJson != null ? mcsClaimJson : ByteSource.empty();
+      CharSource fissJson = fissClaimJson != null ? fissClaimJson : CharSource.empty();
+      CharSource mcsJson = mcsClaimJson != null ? mcsClaimJson : CharSource.empty();
       log.info(
           "serving claims using {} with data from files",
           RdaJsonMessageSourceFactory.class.getSimpleName());
@@ -146,8 +138,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
               : RdaService.Version.builder()
                   .version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION))
                   .build();
-      final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
-      final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
+      final Region region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
+      final S3Client s3Client = SharedS3Utilities.createS3Client(region);
       final String directory = s3Directory == null ? "" : s3Directory;
       final boolean useTempDirectoryForCache = Strings.isNullOrEmpty(s3CacheDirectory);
       final Path cacheDirectory =
@@ -178,10 +170,65 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
                   .build();
       log.info(
           "serving no more than {} claims using {} with seed {}",
-          randomMaxClaims,
+          randomClaimConfig.getMaxToSend(),
           RdaRandomMessageSourceFactory.class.getSimpleName(),
           randomClaimConfig.getSeed());
-      return new RdaRandomMessageSourceFactory(version, randomClaimConfig, randomMaxClaims);
+      return new RdaRandomMessageSourceFactory(version, randomClaimConfig);
+    }
+
+    /** This static class allows us to add methods to the builder generated by lombok. */
+    // Lombok uses this class for the builder but IDEA doesn't seem to realize that.
+    @SuppressWarnings("unused")
+    public static class ConfigBuilder {
+      /**
+       * Optionally add a {@link CharSource} constructed by combining the provided JSON strings as a
+       * source of FISS claim data.
+       *
+       * @param jsonChanges JSON for {@link FissClaimChange} objects
+       * @return this builder
+       */
+      public ConfigBuilder fissClaimJsonList(List<String> jsonChanges) {
+        return fissClaimJson(CharSource.wrap(String.join("\n", jsonChanges)));
+      }
+
+      /**
+       * Optionally add a {@link CharSource} constructed by combining the provided JSON strings as a
+       * source of MCS claim data.
+       *
+       * @param jsonChanges JSON for {@link McsClaimChange} objects
+       * @return this builder
+       */
+      public ConfigBuilder mcsClaimJsonList(List<String> jsonChanges) {
+        return mcsClaimJson(CharSource.wrap(String.join("\n", jsonChanges)));
+      }
+
+      /**
+       * Optionally add a UTF-8 encoded {@link File} as a source of FISS claim data. The argument
+       * can be null so that this can be called when a file may or may not be available.
+       *
+       * @param ndjsonFile null or a valid {@link File} containing ndjson data
+       * @return this builder
+       */
+      public ConfigBuilder fissClaimJsonFile(@Nullable File ndjsonFile) {
+        if (ndjsonFile != null) {
+          fissClaimJson(Files.asCharSource(ndjsonFile, StandardCharsets.UTF_8));
+        }
+        return this;
+      }
+
+      /**
+       * Optionally add a UTF-8 encoded {@link File} as a source of MCS claim data. The argument can
+       * be null so that this can be called when a file may or may not be available.
+       *
+       * @param ndjsonFile null or a valid {@link File} containing ndjson data
+       * @return this builder
+       */
+      public ConfigBuilder mcsClaimJsonFile(@Nullable File ndjsonFile) {
+        if (ndjsonFile != null) {
+          mcsClaimJson(Files.asCharSource(ndjsonFile, StandardCharsets.UTF_8));
+        }
+        return this;
+      }
     }
   }
 }

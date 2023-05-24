@@ -13,14 +13,14 @@
 /bfd/test/common/nonsensitive/rds_iam_database_authentication_enabled: true
 /bfd/test/common/nonsensitive/rds_cluster_identifier: bfd-test-aurora-cluster
 /bfd/test/common/nonsensitive/rds_instance_class: db.r5.12xlarge
-/bfd/test/common/nonsensitive/rds_instance_count: 3
+/bfd/test/common/nonsensitive/rds_instance_count: 2
 /bfd/test/common/nonsensitive/rds_master_username: bfduser
 /bfd/test/common/nonsensitive/rds_security_group: bfd-test-aurora-cluster
 /bfd/test/common/nonsensitive/vpc_name: bfd-test-vpc
 /bfd/test/common/nonsensitive/vpn_security_group: bfd-test-vpn-private
 
 # MIGRATOR CONFIGURATION
-/bfd/test/migrator/nonsensitive/instance_type: m5.large
+/bfd/test/migrator/nonsensitive/instance_type: m6i.large
 /bfd/test/migrator/nonsensitive/volume_size: 100
 /bfd/test/migrator/nonsensitive/sqs_queue_name: bfd-test-migrator
 /bfd/test/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
@@ -39,7 +39,7 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
-/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: false
+/bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: true
 /bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 7
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 5
@@ -75,3 +75,19 @@
   {"alias":"client_bluebutton_frontend_test","certificate":"files/client_data_server_bluebutton_frontend_test_certificate.pem"},
   {"alias":"client_performance_tester","certificate":"files/client_data_server_performance_tester_certificate.pem"}
   ]
+/bfd/${env}/server/nonsensitive/lb_is_public: false
+/bfd/${env}/server/nonsensitive/lb_ingress_port: 443
+/bfd/${env}/server/nonsensitive/lb_egress_port: 7443
+# NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
+# Terraservice into a list
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
+  [
+  "bfd-test-vpc-to-bluebutton-test"
+  ]
+/bfd/${env}/server/nonsensitive/asg_min_instance_count: 6
+/bfd/${env}/server/nonsensitive/asg_max_instance_count: 24
+/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: 12
+/bfd/${env}/server/nonsensitive/asg_desired_instance_count: 6
+/bfd/${env}/server/nonsensitive/asg_instance_warmup_time: 430
+/bfd/${env}/server/nonsensitive/launch_template_instance_type: c6i.4xlarge
+/bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 60

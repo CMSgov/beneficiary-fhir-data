@@ -20,6 +20,11 @@ data "aws_sns_topic" "warning_ok_sns" {
   name  = local.warning_ok_sns_name
 }
 
+# TODO: [PACA-1029] Remove when Claim/ClaimResponse SLOs have been verified
+data "aws_sns_topic" "bfd_test_sns" {
+  name  = local.bfd_test_slack_sns
+}
+
 data "external" "client_ssls_by_partner" {
   for_each = local.metrics
 

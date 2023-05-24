@@ -6,6 +6,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,10 +29,15 @@ public class CoverageResourceProviderTest {
   /** The mocked input id value. */
   @Mock IdType coverageId;
 
+  /** The Metric registry. */
+  @Mock private MetricRegistry metricRegistry;
+  /** The Loaded filter manager. */
+  @Mock private LoadedFilterManager loadedFilterManager;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    coverageProvider = new CoverageResourceProvider();
+    coverageProvider = new CoverageResourceProvider(metricRegistry, loadedFilterManager);
     lenient().when(coverageId.getVersionIdPartAsLong()).thenReturn(null);
   }
 

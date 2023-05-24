@@ -1,8 +1,11 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
@@ -10,7 +13,6 @@ import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -20,29 +22,51 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Quantity;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
+@Component
 public class HHAClaimTransformerV2 {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param npiOrgLookup the npi org lookup
+   */
+  public HHAClaimTransformerV2(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+  }
+
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  ExplanationOfBenefit transform(Object claim) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim, transformerContext);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
 
     timer.stop();
     return eob;
@@ -52,12 +76,10 @@ public class HHAClaimTransformerV2 {
    * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HHAClaim} to transform
-   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      HHAClaim claimGroup, TransformerContext transformerContext) {
+  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -129,7 +151,7 @@ public class HHAClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
