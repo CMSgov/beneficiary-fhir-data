@@ -1,10 +1,8 @@
-import json
 import os
 import re
 import sys
-from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import unquote
 
 import boto3
@@ -12,9 +10,6 @@ from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
-JENKINS_TARGET_JOB_NAME = os.environ.get("JENKINS_TARGET_JOB_NAME", "")
-JENKINS_JOB_RUNNER_QUEUE = os.environ.get("JENKINS_JOB_RUNNER_QUEUE", "")
-ONGOING_LOAD_QUEUE = os.environ.get("ONGOING_LOAD_QUEUE", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
@@ -28,9 +23,6 @@ BOTO_CONFIG = Config(
 try:
     s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
     etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
-    sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)
-    jenkins_job_runner_queue = sqs_resource.get_queue_by_name(QueueName=JENKINS_JOB_RUNNER_QUEUE)
-    ongoing_load_queue = sqs_resource.get_queue_by_name(QueueName=ONGOING_LOAD_QUEUE)
 except Exception as exc:
     print(
         f"Unrecoverable exception occurred when attempting to create boto3 clients/resources: {exc}"
@@ -73,79 +65,6 @@ class RifFileType(str, Enum):
     OUTPATIENT = "outpatient"
     PDE = "pde"
     SNF = "snf"
-
-
-@dataclass
-class OngoingLoadQueueMessage:
-    """Represents a message in the ongoing load queue that acts as a sentinel indicating a
-    particular group is currently being loaded. This Lambda checks for the existence of these
-    messages in the queue, and will only start/stop the CCW pipeline instance depending on the
-    existence of such messages"""
-
-    load_type: PipelineLoadType
-    load_group: str
-    message_id: Optional[str] = None
-    receipt_handle: Optional[str] = None
-
-
-@dataclass
-class JenkinsJobRunnerQueueMessage:
-    """Represents the message that should be posted to the Jenkins job runner queue to invoke a
-    Jenkins job"""
-
-    job: str
-    parameters: "JenkinsTerraserviceJobParameters"
-
-
-@dataclass
-class JenkinsTerraserviceJobParameters:
-    """Represents the parameters for the BFD Pipeline Deploy Terraservice Jenkins Pipeline/job"""
-
-    env: str
-    create_ccw_pipeline_instance: bool
-
-
-def _get_ongoing_load_queue_messages(timeout: int = 1) -> list[OngoingLoadQueueMessage]:
-    responses = ongoing_load_queue.receive_messages(WaitTimeSeconds=timeout)
-
-    def load_json_safe(json_str: str) -> Optional[dict[str, str]]:
-        try:
-            return json.loads(json_str)
-        except json.JSONDecodeError:
-            return None
-        except TypeError:
-            return None
-
-    raw_messages = [
-        (response.message_id, response.receipt_handle, load_json_safe(response.body))
-        for response in responses
-    ]
-    filtered_messages = [
-        OngoingLoadQueueMessage(
-            load_type=PipelineLoadType(message["load_type"]),
-            load_group=message["load_group"],
-            message_id=message_id,
-            receipt_handle=message_receipt,
-        )
-        for message_id, message_receipt, message in raw_messages
-        if message is not None and "load_type" in message and "load_group" in message
-    ]
-
-    return filtered_messages
-
-
-def _post_ongoing_load_message(load_type: PipelineLoadType, group_timestamp: str):
-    ongoing_load_queue.send_message(
-        MessageBody=json.dumps(
-            asdict(OngoingLoadQueueMessage(load_type=load_type, load_group=group_timestamp))
-        )
-    )
-
-
-def _remove_ongoing_load_message(message_id: str, message_receipt: str):
-    ongoing_load_queue.delete_messages(
-        Entries=[{"Id": message_id, "ReceiptHandle": message_receipt}]
-    )
 
 
 def _is_pipeline_load_complete(load_type: PipelineLoadType, group_timestamp: str) -> bool:
@@ -196,16 +115,7 @@ def _is_incoming_folder_empty(load_type: PipelineLoadType, group_timestamp: str)
 
 
 def handler(event: Any, context: Any):
-    if not all(
-        [
-            REGION,
-            BFD_ENVIRONMENT,
-            JENKINS_TARGET_JOB_NAME,
-            JENKINS_JOB_RUNNER_QUEUE,
-            ONGOING_LOAD_QUEUE,
-            ETL_BUCKET_ID,
-        ]
-    ):
+    if not all([REGION, BFD_ENVIRONMENT, ETL_BUCKET_ID]):
         print("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -244,45 +154,7 @@ def handler(event: Any, context: Any):
         group_timestamp = match.group(3)
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
-            # check queue for any ongoing load corresponding to the current load
-            if any(
-                msg.load_group == group_timestamp and msg.load_type == pipeline_load_type
-                for msg in _get_ongoing_load_queue_messages(timeout=5)
-            ):
-                print(
-                    f"The group {group_timestamp} has already been handled, and the CCW pipeline"
-                    " instance should be running. Stopping..."
-                )
-                return
-
-            # post a message to the ongoing load queue to stop further, unnecessary, deployments
-            print(
-                f"Posting message to {ONGOING_LOAD_QUEUE} queue indicating there is an ongoing"
-                f" data load for group {group_timestamp}"
-            )
-            _post_ongoing_load_message(
-                load_type=pipeline_load_type, group_timestamp=group_timestamp
-            )
-            print("Message posted successfully")
-
-            # we only want to deploy the Pipeline terraservice, creating the CCW pipeline instance,
-            # if the pipeline is not already running. there's a possibility the CCW pipeline
-            # instance gets recreated if the Pipeline terraservice definition has been updated
-            # between two separate, but concurrent, data loads, and if the CCW instance is recreated
-            # in the middle of a load it could cause data integrity issues. we avoid this by
-            # ensuring the queue is empty, excluding messages for this current load, before posting
-            # to the job queue.
-            if any(
-                msg.load_group != group_timestamp or msg.load_type != pipeline_load_type
-                for msg in _get_ongoing_load_queue_messages(timeout=5)
-            ):
-                print(
-                    "There are other data loads either queued up or being currently loaded by the"
-                    " BFD CCW Pipeline, so it does not need to be started. Stopping..."
-                )
-                return
-
-            print("Message posted successfully")
+            pass
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
             and _is_pipeline_load_complete(
@@ -292,41 +164,7 @@ def handler(event: Any, context: Any):
                 load_type=pipeline_load_type, group_timestamp=group_timestamp
             )
         ):
-            # remove the message(s) in the ongoing load queue corresponding to the current group
-            print(
-                f"S3 Event and location of group {group_timestamp}'s data in S3 indicates data load"
-                f" for group {group_timestamp} has completed. Cleaning up messages in"
-                f" {ONGOING_LOAD_QUEUE} queue corresponding to group {group_timestamp}..."
-            )
-            # this might seem odd -- assuming the "locking" logic for the INCOMING case above is
-            # sound, there should only be one single message per-group; unfortunately, AWS SQS isn't
-            # _quite_ realtime enough for this to be the case, and it is possible that if this
-            # Lambda is invoked concurrently quickly enough (such as in the case where multiple
-            # files are uploaded simultaneously) that multiple SQS messages get posted for a single
-            # group. there's not much we can do about this other than ensure we delete _all_
-            # possible messages
-            group_load_msgs = [
-                msg
-                for msg in _get_ongoing_load_queue_messages(timeout=5)
-                if msg.load_type == pipeline_load_type and msg.load_group == group_timestamp
-            ]
-            for msg in group_load_msgs:
-                assert msg.message_id and msg.receipt_handle
-                _remove_ongoing_load_message(
-                    message_id=msg.message_id, message_receipt=msg.receipt_handle
-                )
-            print("Cleanup successful")
-
-            # now, check if the ongoing load queue is empty. we only want to stop the CCW pipeline
-            # instance if there are no more data loads for it to handle.
-            if _get_ongoing_load_queue_messages(timeout=5):
-                print(
-                    "There are still ongoing loads queued up for the BFD CCW Pipeline to process."
-                    " Stopping..."
-                )
-                return
-
-            print("Message posted successfully")
+            pass
         else:
             print(
                 f"The location of data in S3 bucket {ETL_BUCKET_ID} for the current group"

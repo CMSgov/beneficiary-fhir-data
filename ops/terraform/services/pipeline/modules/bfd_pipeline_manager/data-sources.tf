@@ -21,8 +21,3 @@ data "archive_file" "lambda_src" {
     filename = "pipeline_manager.py"
   }
 }
-
-data "aws_sqs_queue" "jenkins_job_queue" {
-  name = "bfd-mgmt-run-jenkins-job"
-}
-
