@@ -1,3 +1,4 @@
+import calendar
 import itertools
 import os
 import re
@@ -242,8 +243,11 @@ def handler(event: Any, context: Any):
                 for data_load in all_incoming_data_loads
                 if data_load.timestamp > datetime.utcnow()
             ):
+                action_name = (
+                    f"scale_out_at_{calendar.timegm(future_load.timestamp.utctimetuple())}"
+                )
                 if _try_schedule_pipeline_asg_action(
-                    scheduled_action_name=f"scale_out_at_{future_load.name}",
+                    scheduled_action_name=action_name,
                     start_time=future_load.timestamp,
                     desired_capacity=1,
                 ):
