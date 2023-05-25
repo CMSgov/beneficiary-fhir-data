@@ -188,10 +188,13 @@ def handler(event: Any, context: Any):
         pipeline_data_status = PipelineDataStatus(match.group(2))
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
-            # Retreive _all_ incoming data loads from both synthetic and non-synthetic loads
+            # Retrieve _all_ incoming data loads from both synthetic and non-synthetic loads
             all_incoming_data_loads = _get_all_valid_incoming_groups_before_date()
 
             if not all_incoming_data_loads:
+                # This should never happen as we can only get here if the Lambda was started by a
+                # file being moved to Incoming and that file matches valid RIFs; still, this is a
+                # good signal that something is _wrong_
                 print("No incoming data loads were discovered, exiting...")
                 return
 
