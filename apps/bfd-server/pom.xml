@@ -15,6 +15,18 @@
 		A parent POM for the bfd-server-* projects, which provide a FHIR-compliant API for querying Medicare beneficiary data.
 	</description>
 
+	<properties>
+		<!-- Configure the BFD Server, as it will be run via the exec
+			plugin. These settings are pulled out as POM properties so that they can
+			be adjusted via profiles. -->
+		<its.bfdServer.jvmargs>-Xmx4g</its.bfdServer.jvmargs>
+
+		<!-- Should work out of the box on Linux, but likely needs to be customized
+			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
+			for details. -->
+		<bash.exe>bash</bash.exe>
+	</properties>
+
 	<modules>
 		<module>bfd-server-launcher-sample</module>
 		<module>bfd-server-launcher</module>

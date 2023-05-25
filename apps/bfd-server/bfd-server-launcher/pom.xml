@@ -64,6 +64,10 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
 
 		<dependency>
 			<!-- Logback is used as the logging target/backend for SLF4J during runtime:
@@ -107,7 +111,12 @@
 			<artifactId>httpclient</artifactId>
 			<version>${org.apache.httpcomponents.httpclient.version}</version>
 			<scope>test</scope>
-			<!--Had to take our exclusion of commons-logging because it was failing -->
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<!-- Used for launching the server with Jetty 10. -->
