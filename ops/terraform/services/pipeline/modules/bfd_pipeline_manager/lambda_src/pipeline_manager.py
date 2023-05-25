@@ -153,7 +153,7 @@ def _try_schedule_pipeline_asg_action(
         AutoScalingGroupName=PIPELINE_ASG_NAME,
         ScheduledActionName=scheduled_action_name,
         StartTime=f"{start_time.replace(microsecond=0).isoformat()}Z",
-        DesiredCapacity=1,
+        DesiredCapacity=desired_capacity,
     )
 
     return True
