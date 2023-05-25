@@ -40,3 +40,32 @@ reprocess it will be made again in the future.
 to be marked as `unresolved`, and the job will try to ingest it again the next time it starts up.
 
 ## RdaServer
+
+The `RdaServer` class provides an implementation of the RDA API server for use in testing or to populate data in the
+prod-sbx environment.  Provides static methods to launch the RDA API server either listening on a local port or
+using gRPC "in-process" mode.  The static methods automatically release resources once the server is no longer in use.
+
+The mock server can serve claim updates for FISS or MCS (or both) in one of three modes:
+
+* NDJSON files on local disk
+* NDJSON files in an S3 bucket
+* Randomly generated claim updates
+
+The server can optionally insert random validation errors into the claim updates to facilitate pipeline testing.
+NDJSON files must be in protobuf JSON format (exported using `com.google.protobuf.util.JsonFormat`) with one
+claim update per line.  Updates should be in increasing sequence number order.
+
+When reading NDJSON files from an S3 bucket all of the files must be in the same logical directory and must have names
+matching this regex: `^(fiss|mcs)(-(\d+)-(\d+))?\.ndjson(\.gz)?$`.  The prefix denotes the type of claims in the file
+and the numbers (if present) denote the range of sequence numbers in the file.  Multiple files can be provided.
+Using smaller files can improve responsiveness when a client requests a non-zero starting sequence number.
+Gzipped files are automatically decompressed as they are read. 
+
+S3 data files are downloaded to a local directory before being streamed to clients.  They can be stored in a permanent
+directory or in a temporary directory.  See `gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory.Config`
+for details.
+
+## RdaServerJob
+
+A `PipelineJob` implementation that runs an in-process `RdaServer` to serve either S3 or random claim updates. 
+This is used in the `prod-sbx` environment to populate the database with Synthea data.
