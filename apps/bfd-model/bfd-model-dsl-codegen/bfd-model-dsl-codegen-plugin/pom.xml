@@ -15,7 +15,8 @@
     <packaging>maven-plugin</packaging>
 
     <description>
-        Provides maven plugin code generator to create JPA entity classes and data transformation classes for RDA API data based on a YAML config file.
+        Provides maven plugin code generator to create JPA entity classes and data transformation classes for RDA API
+        data based on a YAML config file.
     </description>
 
     <dependencies>

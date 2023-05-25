@@ -1,117 +1,117 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>gov.cms.bfd</groupId>
-		<artifactId>bfd-pipeline-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-pipeline-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>bfd-pipeline-shared-utils</artifactId>
-	<packaging>jar</packaging>
+    <artifactId>bfd-pipeline-shared-utils</artifactId>
+    <packaging>jar</packaging>
 
-	<description>
-		Framework and utility code shared across the BFD Pipeline application.
-	</description>
+    <description>
+        Framework and utility code shared across the BFD Pipeline application.
+    </description>
 
-	<dependencies>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-rif</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-rda</artifactId>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rif</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rda</artifactId>
+        </dependency>
 
-		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+        <dependency>
+            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
 
-		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging
-				frameworks in Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
-			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-core</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
-				at runtime. -->
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-jvm</artifactId>
-		</dependency>
+        <dependency>
+            <!-- Provides a sane facade for the giant mess of incompatible logging
+                frameworks in Java. -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+                at runtime. -->
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jvm</artifactId>
+        </dependency>
 
-		<dependency>
-			<!-- Used to serialize and deserialize objects to JSON. -->
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
+        <dependency>
+            <!-- Used to serialize and deserialize objects to JSON. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
-		<dependency>
-			<!-- Hibernate's JPA implementation is used to load data into the BFD applications'
-				database. -->
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-		</dependency>
+        <dependency>
+            <!-- Hibernate's JPA implementation is used to load data into the BFD applications'
+                database. -->
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
 
-		<!-- Compile time only -->
-		<dependency>
-			<!-- this allows the construction of POJOs without a lot of boilerplate code -->
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <!-- Compile time only -->
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<!-- Used to run our unit and integration tests. -->
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Used to create mock objects for unit tests. -->
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Configures mockito to use the inline implementation, which allows mocking
+        <dependency>
+            <!-- Used to run our unit and integration tests. -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to create mock objects for unit tests. -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Configures mockito to use the inline implementation, which allows mocking
                         of final classes, etc.  Without this, the fallback implementation results in
                         illegal reflection access (JDK9+) in certain circumstances -->
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Adds convenience features for working with mocks in tests -->
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- Add support for testcontainers -->
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers</artifactId>
-			<version>${testcontainers.version}</version>
-		</dependency>
-	</dependencies>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Adds convenience features for working with mocks in tests -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Add support for testcontainers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-		</plugins>
-	</build>
+    <build>
+        <pluginManagement>
+            <plugins>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+        </plugins>
+    </build>
 
 </project>
