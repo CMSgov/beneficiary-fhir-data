@@ -299,8 +299,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           String hashed,
       @OptionalParam(name = "excludeSAMHSA")
           @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_SHORT,
-              value = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_VALUE)
+              shortDefinition = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_SHORT,
+              value = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_VALUE)
           String samhsa,
       @OptionalParam(name = Constants.PARAM_LASTUPDATED)
           @Description(
@@ -309,8 +309,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           DateRangeParam lastUpdated,
       @OptionalParam(name = "service-date")
           @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_SERVICE_DATE_SHORT,
-              value = OpenAPIContentProvider.EOB_SERVICE_DATE_VALUE)
+              shortDefinition = OpenAPIContentProvider.PAC_SERVICE_DATE_SHORT,
+              value = OpenAPIContentProvider.PAC_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
       RequestDetails requestDetails) {
     if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {

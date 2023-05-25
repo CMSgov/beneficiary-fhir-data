@@ -79,7 +79,7 @@ public final class OpenAPIContentProvider {
           + "<li>_has:Coverage.rfrncyr=2023</li>";
 
   /**
-   * Open API short descriptionfor /Patient's Part D event data; provides a URI for the 'next' set
+   * Open API short description for /Patient's Part D event data; provides a URI for the 'next' set
    * of data.
    */
   public static final String PATIENT_PARTD_CURSOR_SHORT = "The cursor used for result pagination";
@@ -94,7 +94,7 @@ public final class OpenAPIContentProvider {
           + "<li>cursor=200</li>";
 
   /**
-   * Open API short descriptionfor /Patient's Part D event data; provides a URI for the 'next' set
+   * Open API short description for /Patient's Part D event data; provides a URI for the 'next' set
    * of data.
    */
   public static final String EOB_CLAIM_TYPE_SHORT = "A list of BFD claim types to include";
@@ -103,9 +103,8 @@ public final class OpenAPIContentProvider {
    * data.
    */
   public static final String EOB_CLAIM_TYPE_VALUE =
-      "A list of one or more comma-separated claim types to be included in the request;"
-          + " within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified"
-          + " claim types will be checked."
+      "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types. "
+          + "This is optional and defaults to * (all types);"
           + "<p/>Supported Claim Type values:<ul>"
           + "<li>carrier</li>"
           + "<li>inpatient</li>"
@@ -115,14 +114,13 @@ public final class OpenAPIContentProvider {
           + "<li>snf</li>"
           + "<li>dme</li>"
           + "<li>partd</li></ul><p>"
-          + "BFD also supports a wildcard claims type denoted by an &#42; ; this includes all claim types in the filter."
           + "<p/>Examples:<ul>"
           + "<li>type=carrier,inpatient,snf,dme</li>"
           + "<li>type=outpatient</li>"
           + "<li>type=&#42;</li>";
 
   /**
-   * Open API short descriptionfor /Patient's Part D event data; provides a URI for the 'next' set
+   * Open API short description for /Patient's Part D event data; provides a URI for the 'next' set
    * of data.
    */
   public static final String EOB_SERVICE_DATE_SHORT =
@@ -141,7 +139,7 @@ public final class OpenAPIContentProvider {
           + "<li>&_service-date=lt2023-05-01</li></ul>";
 
   /**
-   * Open API short descriptionfor /Patient's Part D event data; provides a URI for the 'next' set
+   * Open API short description for /Patient's Part D event data; provides a URI for the 'next' set
    * of data.
    */
   public static final String EOB_EXCLUDE_SAMSHA_SHORT =
@@ -240,4 +238,42 @@ public final class OpenAPIContentProvider {
           + "<p/>Examples:<ul>"
           + "<li>type=fiss,mcs</li>"
           + "<li>type=fiss</li>";
+
+  /**
+   * Open API short description for /Patient's Partially Adjudicated Claims data; provides a URI for
+   * the 'next' set of data.
+   */
+  public static final String PAC_EXCLUDE_SAMSHA_SHORT =
+      "If <i>true</i>, exclude any (all) SAMHSA-related claims";
+  /**
+   * Open API content value for /Patient's Partially Adjudicated Claims data; provides a URI for the
+   * 'next' set of data.
+   */
+  public static final String PAC_EXCLUDE_SAMSHA_VALUE =
+      "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA)"
+          + " is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation."
+          + "<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response."
+          + "<i>ClaimResponse</i> doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between <i>ClaimResponse</i> and <i>Claim</i>, "
+          + "any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data."
+          + "<p/>Example:<ul>"
+          + "<li>&excludeSAMHSA=true</li>";
+
+  /**
+   * Open API short description for /Patient's Partially Adjudicated Claims data; provides a URI for
+   * the 'next' set of data.
+   */
+  public static final String PAC_SERVICE_DATE_SHORT =
+      "Include claims whose date fall within the given range";
+  /**
+   * Open API content value for /Patient's Partially Adjudicated Claims data; provides a URI for the
+   * 'next' set of data.
+   */
+  public static final String PAC_SERVICE_DATE_VALUE =
+      "Only satisfy the Search request if a claim\u0027s Date"
+          + " falls within a specified <i>DateRange<i/>. A DateRange can include both"
+          + " lo and hi date values, only a lo date value, or only a hi date value."
+          + "<p/>Examples:<ul>"
+          + "<li>&service-date=gt2023-01-02&service-date=lt2023-05-01</li>"
+          + "<li>&service-date=gt2023-01-02</li>"
+          + "<li>&_service-date=lt2023-05-01</li></ul>";
 }

@@ -38,7 +38,7 @@
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.<p/>Example:<ul><li>startIndex=100</li>"
+        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.It is optional and defaults to 1 if not supplied.A value 0 is not allowed and negative indices are not currently supported.<p/>Example:<ul><li>startIndex=100</li>"
       } ]
     }, {
       "type" : "ExplanationOfBenefit",
@@ -61,7 +61,7 @@
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
-        "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims ifrom the response.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
+        "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
       }, {
         "name" : "service-date",
         "type" : "date",
@@ -69,11 +69,11 @@
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.<p/>Example:<ul><li>startIndex=100</li>"
+        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.It is optional and defaults to 1 if not supplied.A value 0 is not allowed and negative indices are not currently supported.<p/>Example:<ul><li>startIndex=100</li>"
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of one or more comma-separated claim types to be included in the request; within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified claim types will be checked.<p/>Supported Claim Type values:<ul><li>carrier</li><li>inpatient</li><li>outpatient</li><li>hha</li><li>hospice</li><li>snf</li><li>dme</li><li>partd</li></ul><p>BFD also supports a wildcard claims type denoted by an &#42; ; this includes all claim types in the filter.<p/>Examples:<ul><li>type=carrier,inpatient,snf,dme</li><li>type=outpatient</li><li>type=&#42;</li>"
+        "documentation" : "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types. This is optional and defaults to * (all types);<p/>Supported Claim Type values:<ul><li>carrier</li><li>inpatient</li><li>outpatient</li><li>hha</li><li>hospice</li><li>snf</li><li>dme</li><li>partd</li></ul><p><p/>Examples:<ul><li>type=carrier,inpatient,snf,dme</li><li>type=outpatient</li><li>type=&#42;</li>"
       } ]
     }, {
       "type" : "OperationDefinition",
@@ -124,7 +124,7 @@
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.<p/>Example:<ul><li>startIndex=100</li>"
+        "documentation" : "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset (starting point) into the list of elements for the <i>Request</i>.It is optional and defaults to 1 if not supplied.A value 0 is not allowed and negative indices are not currently supported.<p/>Example:<ul><li>startIndex=100</li>"
       }, {
         "name" : "startIndex",
         "type" : "string",
