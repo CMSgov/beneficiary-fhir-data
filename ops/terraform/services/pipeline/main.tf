@@ -144,20 +144,19 @@ resource "aws_launch_template" "this" {
   # FIXME: Use merged object instead of specific variant when RDA adopts ASG pattern
   for_each = local.ccw_pipeline_config
 
-  name                   = each.value.name
-  description            = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
-  vpc_security_group_ids = [aws_security_group.app.id, local.vpn_security_group_id, local.ent_tools_sg_id]
-  key_name               = local.nonsensitive_common_config["key_pair"]
-  image_id               = local.ami_id
-  instance_type          = each.value.instance_type
+  name          = each.value.name
+  description   = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
+  key_name      = local.nonsensitive_common_config["key_pair"]
+  image_id      = local.ami_id
+  instance_type = each.value.instance_type
 
-  user_data = templatefile("${path.module}/user-data.sh.tftpl", {
+  user_data = base64encode(templatefile("${path.module}/user-data.sh.tftpl", {
     account_id        = local.account_id
     env               = local.env
     pipeline_bucket   = aws_s3_bucket.this.bucket
     pipeline_instance = each.value.instance_name
     writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
-  })
+  }))
 
   instance_initiated_shutdown_behavior = "stop"
   disable_api_termination              = false
@@ -169,6 +168,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_carrier_ip_address = false
+    security_groups              = [aws_security_group.app.id, local.vpn_security_group_id, local.ent_tools_sg_id]
   }
 
   placement {
@@ -226,14 +226,14 @@ resource "aws_autoscaling_group" "this" {
   # FIXME: Use merged object instead of specific variant when RDA adopts ASG pattern
   for_each = local.ccw_pipeline_config
 
-  name             = each.value.name
-  desired_capacity = 0
-  max_size         = 1
-  min_size         = 0
+  name                = each.value.name
+  vpc_zone_identifier = [data.aws_subnet.main.id]
+  desired_capacity    = 0
+  max_size            = 1
+  min_size            = 0
 
   health_check_grace_period = 300
   health_check_type         = "EC2"
-  vpc_zone_identifier       = [data.aws_subnet.main.id]
 
   launch_template {
     name    = aws_launch_template.this[each.key].name
