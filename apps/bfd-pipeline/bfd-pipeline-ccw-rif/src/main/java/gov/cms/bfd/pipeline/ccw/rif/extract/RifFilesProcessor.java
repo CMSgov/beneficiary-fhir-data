@@ -16,8 +16,6 @@ import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimParser;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimParser;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistoryParser;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimParser;
 import gov.cms.bfd.model.rif.PartDEvent;
@@ -87,12 +85,6 @@ public final class RifFilesProcessor {
       isGrouped = false;
       recordParser =
           (fileEvent, csvRecords) -> buildBeneficiaryHistoryEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY) {
-      final var rifParser = new MedicareBeneficiaryIdHistoryParser();
-      isGrouped = false;
-      recordParser =
-          (fileEvent, csvRecords) ->
-              buildMedicareBeneficiaryIdHistoryEvent(fileEvent, csvRecords, rifParser);
     } else if (file.getFileType() == RifFileType.PDE) {
       final var rifParser = new PartDEventParser();
       isGrouped = false;
@@ -261,36 +253,6 @@ public final class RifFilesProcessor {
         recordAction,
         beneficiaryHistoryRow.getBeneficiaryId(),
         beneficiaryHistoryRow);
-  }
-
-  /**
-   * Builds a medicare beneficiary id history event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
-   *     must be from a {@link RifFileType#MEDICARE_BENEFICIARY_ID_HISTORY} {@link RifFile}
-   * @param parser {@link MedicareBeneficiaryIdHistoryParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<MedicareBeneficiaryIdHistory>
-      buildMedicareBeneficiaryIdHistoryEvent(
-          RifFileEvent fileEvent,
-          List<CSVRecord> csvRecords,
-          MedicareBeneficiaryIdHistoryParser parser) {
-    if (csvRecords.size() != 1) throw new BadCodeMonkeyException();
-    CSVRecord csvRecord = csvRecords.get(0);
-
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecord.toString());
-
-    RecordAction recordAction = RecordAction.INSERT;
-    MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistoryRow =
-        parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<MedicareBeneficiaryIdHistory>(
-        fileEvent,
-        csvRecords,
-        recordAction,
-        medicareBeneficiaryIdHistoryRow.getBeneficiaryId().get(),
-        medicareBeneficiaryIdHistoryRow);
   }
 
   /**

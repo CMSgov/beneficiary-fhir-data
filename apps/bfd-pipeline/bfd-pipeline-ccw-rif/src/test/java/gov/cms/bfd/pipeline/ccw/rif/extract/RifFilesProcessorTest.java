@@ -17,7 +17,6 @@ import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimLine;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.PartDEvent;
@@ -192,42 +191,6 @@ public final class RifFilesProcessorTest {
       assertEquals(
           LocalDate.of(1995, Month.MARCH, 17), beneficiaryHistory0.getMbiObsoleteDate().get());
     }
-  }
-
-  /**
-   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
-   * StaticRifResource#SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY}.
-   */
-  @Test
-  public void process1MedicareBeneficiaryIdHistoryRecord() {
-    RifFilesEvent filesEvent =
-        new RifFilesEvent(
-            Instant.now(),
-            false,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.toRifFile());
-    RifFilesProcessor processor = new RifFilesProcessor();
-    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
-
-    assertEquals(
-        StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.getRecordCount(),
-        rifEventsList.size());
-
-    RifRecordEvent<?> rifRecordEvent0 = rifEventsList.get(0);
-    assertEquals(
-        StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.getRifFileType(),
-        rifRecordEvent0.getFileEvent().getFile().getFileType());
-    assertNotNull(rifRecordEvent0.getRecord());
-    assertTrue(rifRecordEvent0.getRecord() instanceof MedicareBeneficiaryIdHistory);
-    MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistory =
-        (MedicareBeneficiaryIdHistory) rifRecordEvent0.getRecord();
-
-    assertEquals(567834L, medicareBeneficiaryIdHistory.getBeneficiaryId().get());
-    assertEquals(
-        LocalDate.of(2011, Month.APRIL, 16),
-        medicareBeneficiaryIdHistory.getMbiEffectiveDate().get());
-    assertEquals("9AB2WW3GR44", medicareBeneficiaryIdHistory.getMedicareBeneficiaryId().get());
   }
 
   /**
