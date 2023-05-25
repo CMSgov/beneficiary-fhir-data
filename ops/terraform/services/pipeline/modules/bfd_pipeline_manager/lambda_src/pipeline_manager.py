@@ -250,42 +250,41 @@ def handler(event: Any, context: Any):
                         "Pipeline is already scheduled to scale-out for future data load"
                         f" {future_load.name}"
                     )
-        elif (
-            pipeline_data_status == PipelineDataStatus.DONE
-            and not _get_all_valid_incoming_loads_before_date(
-                time_cutoff=datetime.utcnow() + timedelta(minutes=10)
-            )
-        ):
+        elif pipeline_data_status == PipelineDataStatus.DONE:
+            five_minutes_from_now = datetime.utcnow() + timedelta(minutes=5)
+            if _get_all_valid_incoming_loads_before_date(time_cutoff=five_minutes_from_now):
+                # If there are any valid incoming data loads (or future loads within the next 5
+                # minutes), then the Pipeline still has work to do and should not be scaled-in
+                print("The Pipeline is still loading data from Incoming, exiting...")
+                return
+
             # If there are no valid incoming data loads/groups that should be loaded within the next
-            # ten minutes in any of the Incoming folders, then we know that the Pipeline has
+            # five minutes in any of the Incoming folders, then we know that the Pipeline has
             # successfully loaded everything it needs to (since this Lambda was invoked by the
             # Pipeline moving the last file to the Done folder). We can now tell the Pipeline to
-            # scale-in within the next ten minutes:
+            # scale-in within the next five minutes:
             print(
                 "No valid, non-future data loads were discovered to be ingested by the Pipeline"
-                " within the next ten minutes. Trying to schedule an action to scale-in the"
+                " within the next five minutes. Trying to schedule an action to scale-in the"
                 " Pipeline to stop it..."
             )
 
             # This is a temporary workaround for a lack of good signaling between the Pipeline and
             # its ASG as to when the Pipeline instance can gracefully be stopped. Until such a time
-            # that the Pipeline can signal that it has finished, we give the Pipeline 10 minutes to
+            # that the Pipeline can signal that it has finished, we give the Pipeline 5 minutes to
             # run any final tasks it needs to after finishing data load before scaling it in
             # TODO: Replace this when the Pipeline is able to signal it can be stopped
-            ten_minutes_from_now = datetime.utcnow() + timedelta(minutes=10)
             if _try_schedule_pipeline_asg_action(
-                scheduled_action_name="scale_in_in_ten_minutes",
-                start_time=ten_minutes_from_now,
+                scheduled_action_name="scale_in_in_five_minutes",
+                start_time=five_minutes_from_now,
                 desired_capacity=0,
             ):
                 print(
-                    f"Scheduled the Pipeline to scale-in at {ten_minutes_from_now.isoformat()} UTC"
+                    f"Scheduled the Pipeline to scale-in at {five_minutes_from_now.isoformat()} UTC"
                     " as all valid, non-future Incoming data loads have been completed"
                 )
             else:
                 print(
-                    "The Pipeline is already scheduled to scale-in within the next ten minutes or"
+                    "The Pipeline is already scheduled to scale-in within the next five minutes or"
                     " its ASG's desired capacity is already set to 0"
                 )
-        else:
-            print("The Pipeline is still loading data from Incoming, exiting...")
