@@ -22,8 +22,8 @@ resource "aws_lambda_function" "this" {
 
   description = join("", [
     "Invoked whenever a new file appears in either the root or Synthetic Done/ and Incoming/ ",
-    "paths of the ${local.env} S3 Bucket, this Lambda runs the ${local.jenkins_target_job_name} ",
-    "Jenkins job through the ${local.jenkins_job_queue_name} SQS queue"
+    "paths of the ${local.env} S3 Bucket, this Lambda applies ASG Scheduled Actions to the ",
+    "${var.ccw_pipeline_asg_details.name} ASG for auto-scaling"
   ])
 
   tags = {
