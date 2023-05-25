@@ -1,244 +1,241 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>gov.cms.bfd</groupId>
-		<artifactId>bfd-server-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-server-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>bfd-server-war</artifactId>
-	<packaging>war</packaging>
+    <artifactId>bfd-server-war</artifactId>
+    <packaging>war</packaging>
 
-	<description>
-		The primary WAR for the BFD Server project. Provides a FHIR API.
-	</description>
+    <description>
+        The primary WAR for the BFD Server project. Provides a FHIR API.
+    </description>
 
-	<properties>
-		<datasource-proxy.version>1.9</datasource-proxy.version>
-		<jersey.version>2.25.1</jersey.version>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- The hapi-fhir-structures-dstu3 dependency tries to pull in a too-early
+                    version of this library (1.1) that isn't compatible with our other dependencies. -->
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-		<!-- Configure the BFD Server, as it will be run via the exec
-			plugin. These settings are pulled out as POM properties so that they can
-			be adjusted via profiles. -->
-		<its.bfdServer.jvmargs>-Xmx4g</its.bfdServer.jvmargs>
+    <dependencies>
+        <dependency>
+            <!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-server-shared-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+                for details. -->
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Provides the JPA entities used to represent the BFD data in the database. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rif</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rda</artifactId>
+        </dependency>
 
-		<!-- Should work out of the box on Linux, but likely needs to be customized
-			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
-			for details. -->
-		<bash.exe>bash</bash.exe>
-	</properties>
+        <dependency>
+            <!-- At least one "structures" JAR must also be included -->
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-dstu3</artifactId>
+            <version>${hapi-fhir.version}</version>
+            <exclusions>
+                <!-- Need the newer but compatible version from com.newrelic.telemetry -->
+                <exclusion>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-	<dependencies>
-		<dependency>
-			<!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-server-shared-utils</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
-				for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Provides the JPA entities used to represent the BFD data in the database. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-rif</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-rda</artifactId>
-		</dependency>
-		
-		<dependency>
-			<!-- At least one "structures" JAR must also be included -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${hapi-fhir.version}</version>
-			<exclusions>
-				<!-- Need the newer but compatible version from com.newrelic.telemetry -->
-				<exclusion>
-					<groupId>com.squareup.okhttp3</groupId>
-					<artifactId>okhttp</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<!-- At least one "structures" JAR must also be included -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-r4</artifactId>
-			<version>${hapi-fhir.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-				<!-- Need the newer but compatible version from com.newrelic.telemetry -->
-				<exclusion>
-					<groupId>com.squareup.okhttp3</groupId>
-					<artifactId>okhttp</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<!-- This dependency includes the server HAPI-FHIR classes -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-server</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
-		<dependency>
-			<!-- This dependency includes the client HAPI-FHIR classes -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-client</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
-		<dependency>
-			<!-- This dependency includes the base HAPI-FHIR classes -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-base</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
+        <dependency>
+            <!-- At least one "structures" JAR must also be included -->
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+            <version>${hapi-fhir.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <!-- Need the newer but compatible version from com.newrelic.telemetry -->
+                <exclusion>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-		<dependency>
-			<!-- Needed for comparing JSON files to obtain the diff. See
-				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
-			<groupId>com.flipkart.zjsonpatch</groupId>
-			<artifactId>zjsonpatch</artifactId>
-			<version>${zjsonpatch.version}</version>
-			<scope>test</scope>
-			<!-- Don't let the jackson transitive dependency versions be determined by
-			     this test dependency -->
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <dependency>
+            <!-- This dependency includes the server HAPI-FHIR classes -->
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-server</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
+        <dependency>
+            <!-- This dependency includes the client HAPI-FHIR classes -->
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
+        <dependency>
+            <!-- This dependency includes the base HAPI-FHIR classes -->
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
 
-		<dependency>
-			<!-- Needed for JEE/Servlet support -->
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<!-- Used for CORS support -->
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-			<version>1.0.1</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<!-- Provides the @Inject annotation. Does NOT provide dependency injection;
-				just the standardized annotation for it. -->
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-			<version>1</version>
-		</dependency>
-		<dependency>
-			<!-- We mostly use Spring to ensure that our JPA EntityManagers are properly 
-				managed. -->
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-		</dependency>
-		<dependency>
-			<!-- We're really not using much of the Spring Data JPA framework; we 
-				mostly just need its Hibernate JPA glue. -->
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-jpa</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
-				at runtime. -->
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-jvm</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Provides a Servlet filter which has meters for status codes, a counter 
-				for the number of active requests, and a timer for request duration. Enabled 
-				via `web.xml`. -->
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-servlet</artifactId>
-			<version>${metrics.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
-				via `web.xml`. -->
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-servlets</artifactId>
-			<version>${metrics.version}</version>
-		</dependency>
-
-		<dependency>
-			<!-- Allows us to provide New Relic with additional information on requests. -->
-			<groupId>com.newrelic.agent.java</groupId>
-			<artifactId>newrelic-api</artifactId>
-			<version>${newrelic.agent.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.newrelic.telemetry</groupId>
-			<artifactId>dropwizard-metrics-newrelic</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.newrelic.telemetry</groupId>
-			<artifactId>telemetry-http-okhttp</artifactId>
-		</dependency>
-		
-		<dependency>
-			<!-- Used to parse and read various CSV data resources. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- BFD runs against PostgreSQL in production. -->
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-		</dependency>
-
-                <dependency>
-                    <!-- this allows the construction of POJOs without a lot of boilerplate code -->
-                    <!-- providd because it's only needed at compile time -->
-                    <groupId>org.projectlombok</groupId>
-                    <artifactId>lombok</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-
-		<dependency>
-			<!-- Used to proxy JDBC usage, for monitoring. -->
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
-			<version>${datasource-proxy.version}</version>
-		</dependency>
-
-		<dependency>
-			<!-- The test framework used for unit and integration tests. -->
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
+        <dependency>
+            <!-- Needed for comparing JSON files to obtain the diff. See
+                 https://github.com/flipkart-incubator/zjsonpatch for details. -->
+            <groupId>com.flipkart.zjsonpatch</groupId>
+            <artifactId>zjsonpatch</artifactId>
+            <version>${zjsonpatch.version}</version>
             <scope>test</scope>
-			<!-- exclude Junit from including its version of hamcrest -->
+            <!-- Don't let the jackson transitive dependency versions be determined by
+                 this test dependency -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <!-- Needed for JEE/Servlet support -->
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <!-- Used for CORS support -->
+            <groupId>org.ebaysf.web</groupId>
+            <artifactId>cors-filter</artifactId>
+            <version>${cors.filter.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <!-- Provides the @Inject annotation. Does NOT provide dependency injection;
+                just the standardized annotation for it. -->
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
+            <!-- We mostly use Spring to ensure that our JPA EntityManagers are properly
+                managed. -->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <!-- We're really not using much of the Spring Data JPA framework; we
+                mostly just need its Hibernate JPA glue. -->
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+                at runtime. -->
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jvm</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Provides a Servlet filter which has meters for status codes, a counter
+                for the number of active requests, and a timer for request duration. Enabled
+                via `web.xml`. -->
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlet</artifactId>
+            <version>${metrics.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
+                via `web.xml`. -->
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
+            <version>${metrics.version}</version>
+        </dependency>
+
+        <dependency>
+            <!-- Allows us to provide New Relic with additional information on requests. -->
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-api</artifactId>
+            <version>${newrelic.agent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.newrelic.telemetry</groupId>
+            <artifactId>dropwizard-metrics-newrelic</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.newrelic.telemetry</groupId>
+            <artifactId>telemetry-http-okhttp</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- Used to parse and read various CSV data resources. -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- BFD runs against PostgreSQL in production. -->
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <!-- providd because it's only needed at compile time -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <!-- Used to proxy JDBC usage, for monitoring. -->
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
+            <version>${datasource-proxy.version}</version>
+        </dependency>
+
+        <dependency>
+            <!-- The test framework used for unit and integration tests. -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+            <!-- exclude Junit from including its version of hamcrest -->
             <exclusions>
                 <exclusion>
                     <groupId>org.hamcrest</groupId>
@@ -246,24 +243,24 @@
                 </exclusion>
             </exclusions>
         </dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-params</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
-                <dependency>
-                        <!-- Mockito utilities for JUnit / Jupiter. -->
-                        <groupId>org.mockito</groupId>
-                        <artifactId>mockito-junit-jupiter</artifactId>
-                        <version>${mockito.version}</version>
-                        <scope>test</scope>
-                </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Mockito utilities for JUnit / Jupiter. -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
         <!-- This will get hamcrest-core automatically -->
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -271,309 +268,309 @@
             <version>${hamcrest-library.version}</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-server-openapi</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Logging backend for tests.  -->
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- The builds for this and other BFD projects use HSQL in tests. -->
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<!-- Only used by tests, but still has to be packaged in WAR. -->
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<!-- Provides sample data used in tests. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-rif-samples</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Used to load sample data in tests. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-ccw-rif</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-   			 <groupId>commons-io</groupId>
-  			 <artifactId>commons-io</artifactId>
-			 <version>${commons.io.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Used for Bloom filters -->
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-sketch_2.12</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-shared-test-utils</artifactId>
-			<version>${project.version}</version>
-			<!-- Scope cannot be test due to SpringConfiguration using test classes, fix that to properly scope this -->
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-shared-test-utils</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency> 
-			<groupId>gov.cms.bfd.data.fda.utility</groupId> 
-			<artifactId>bfd-data-fda</artifactId> 
-			<version>1.0-SNAPSHOT</version> 
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-server-openapi</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Logging backend for tests.  -->
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- The builds for this and other BFD projects use HSQL in tests. -->
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <!-- Only used by tests, but still has to be packaged in WAR. -->
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <!-- Provides sample data used in tests. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rif-samples</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to load sample data in tests. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-pipeline-ccw-rif</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons.io.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Used for Bloom filters -->
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sketch_2.12</artifactId>
+            <version>${org.apache.spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-shared-test-utils</artifactId>
+            <version>${project.version}</version>
+            <!-- Scope cannot be test due to SpringConfiguration using test classes, fix that to properly scope this -->
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-pipeline-shared-test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd.data.fda.utility</groupId>
+            <artifactId>bfd-data-fda</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<!-- When its 'attach-artifact' goal is run, this plugin will attach 
-						the server management scripts that should be used to run this project's WAR. 
-						This ensures that it is included in install, deploy, etc. operations. -->
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.12</version>
-				</plugin>
-				<plugin>
-					<!-- Use the dependency plugin to copy the test dependency artifacts, 
-						for use in ITs. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
-					<configuration>
-						<artifactItems>
-							<artifactItem>
-								<!-- Unpack the BFD Server Launcher (whitelabeled Jetty) assembly zip into
-									this project's build directory, for use in ITs. -->
-								<groupId>${project.groupId}</groupId>
-								<artifactId>bfd-server-launcher</artifactId>
-								<version>${project.version}</version>
-								<type>zip</type>
-								<outputDirectory>${project.build.directory}/server-work</outputDirectory>
-							</artifactItem>
-						</artifactItems>
-						<overWriteReleases>false</overWriteReleases>
-						<overWriteSnapshots>true</overWriteSnapshots>
-					</configuration>
-				</plugin>
-				<plugin>
-					<!-- The exec plugin can be used in child modules to run the 'src/main/config/server-*.sh'
-						scripts, which will start and stop the BFD Server for use in testing. -->
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.5.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M5</version>
-					<configuration>
-						<!-- for grpc ITs, need testcontainers to startup/teardown without reuse -->
-						<parallel>classesAndMethods</parallel>
-						<forkCount>1</forkCount>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Use the dependency plugin to copy and unpack the test dependency artifacts, 
-					for use in ITs. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>server-copy-artifacts</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Copy the key/trust stores over to target for easier access in the tests. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-server-resources</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/server-work</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${basedir}/../dev/ssl-stores</directory>
-									<includes>
-										<include>server-keystore.jks</include>
-										<include>server-truststore.jks</include>
-									</includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Reserve random available ports for the server to use. -->
-						<id>reserve-server-ports</id>
-						<goals>
-							<goal>reserve-network-port</goal>
-						</goals>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<outputFile>${project.build.directory}/server-work/server-ports.properties</outputFile>
-							<minPortNumber>8000</minPortNumber>
-							<maxPortNumber>9999</maxPortNumber>
-							<randomPort>true</randomPort>
-							<portNames>
-								<portName>server.port.https</portName>
-							</portNames>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Launch a Java web server hosting the BFD Server; only used when called
-					manually for quick testing locally. The server will serve HTTPS on a random port,
-					and the FHIR server will be hosted at the root ("/") context. Run
-					`mvn package org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start
-					the server. -->
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>server-start</id>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${bash.exe}</executable>
-							<arguments>
-								<argument>${project.basedir}/src/main/config/server-start.sh</argument>
-								<argument>-j</argument>
-								<argument>${java.home}</argument>
-								<argument>-m</argument>
-								<argument>${its.bfdServer.jvmargs}</argument>
-								<argument>-t</argument>
-								<argument>${project.build.directory}</argument>
-								<argument>-u</argument>
-								<argument>${its.db.url}</argument>
-								<argument>-e</argument>
-								<argument>-p</argument>
-								<argument>${local.pac.enabled}</argument>
-								<argument>-o</argument>
-								<argument>${local.pac.oldMbiHash.enabled}</argument>
-								<argument>-s</argument>
-								<argument>${local.pac.claimSourceTypes}</argument>
-							</arguments>
-							<environmentVariables>
-								<TZ>UTC</TZ>
-							</environmentVariables>
-						</configuration>
-					</execution>
-					<execution>
-						<id>server-stop</id>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${bash.exe}</executable>
-							<arguments>
-								<argument>${project.basedir}/src/main/config/server-stop.sh</argument>
-								<argument>-t</argument>
-								<argument>${project.build.directory}</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
-						process. -->
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <!-- When its 'attach-artifact' goal is run, this plugin will attach
+                        the server management scripts that should be used to run this project's WAR.
+                        This ensures that it is included in install, deploy, etc. operations. -->
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build.helper.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <!-- Use the dependency plugin to copy the test dependency artifacts,
+                        for use in ITs. -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven.dependency.plugin.version}</version>
+                    <configuration>
+                        <artifactItems>
+                            <artifactItem>
+                                <!-- Unpack the BFD Server Launcher (whitelabeled Jetty) assembly zip into
+                                    this project's build directory, for use in ITs. -->
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>bfd-server-launcher</artifactId>
+                                <version>${project.version}</version>
+                                <type>zip</type>
+                                <outputDirectory>${project.build.directory}/server-work</outputDirectory>
+                            </artifactItem>
+                        </artifactItems>
+                        <overWriteReleases>false</overWriteReleases>
+                        <overWriteSnapshots>true</overWriteSnapshots>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <!-- The exec plugin can be used in child modules to run the 'src/main/config/server-*.sh'
+                        scripts, which will start and stop the BFD Server for use in testing. -->
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${exec.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <!-- for grpc ITs, need testcontainers to startup/teardown without reuse -->
+                        <parallel>classesAndMethods</parallel>
+                        <forkCount>1</forkCount>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Use the dependency plugin to copy and unpack the test dependency artifacts,
+                    for use in ITs. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>server-copy-artifacts</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Copy the key/trust stores over to target for easier access in the tests. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-server-resources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/server-work</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/../dev/ssl-stores</directory>
+                                    <includes>
+                                        <include>server-keystore.jks</include>
+                                        <include>server-truststore.jks</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Reserve random available ports for the server to use. -->
+                        <id>reserve-server-ports</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <outputFile>${project.build.directory}/server-work/server-ports.properties</outputFile>
+                            <minPortNumber>8000</minPortNumber>
+                            <maxPortNumber>9999</maxPortNumber>
+                            <randomPort>true</randomPort>
+                            <portNames>
+                                <portName>server.port.https</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Launch a Java web server hosting the BFD Server; only used when called
+                    manually for quick testing locally. The server will serve HTTPS on a random port,
+                    and the FHIR server will be hosted at the root ("/") context. Run
+                    `mvn package org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start
+                    the server. -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>server-start</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${bash.exe}</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/main/config/server-start.sh</argument>
+                                <argument>-j</argument>
+                                <argument>${java.home}</argument>
+                                <argument>-m</argument>
+                                <argument>${its.bfdServer.jvmargs}</argument>
+                                <argument>-t</argument>
+                                <argument>${project.build.directory}</argument>
+                                <argument>-u</argument>
+                                <argument>${its.db.url}</argument>
+                                <argument>-e</argument>
+                                <argument>-p</argument>
+                                <argument>${local.pac.enabled}</argument>
+                                <argument>-o</argument>
+                                <argument>${local.pac.oldMbiHash.enabled}</argument>
+                                <argument>-s</argument>
+                                <argument>${local.pac.claimSourceTypes}</argument>
+                            </arguments>
+                            <environmentVariables>
+                                <TZ>UTC</TZ>
+                            </environmentVariables>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>server-stop</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${bash.exe}</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/main/config/server-stop.sh</argument>
+                                <argument>-t</argument>
+                                <argument>${project.build.directory}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
+                        process. -->
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-	<profiles>
-		<profile>
-			<!-- This profile will only be active for builds inside of Eclipse (managed
-				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
-			<id>m2e-manage-executions</id>
-			<activation>
-				<property>
-					<name>m2e.version</name>
-				</property>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<!--This plugin's configuration is used to store Eclipse m2e settings
-								only. It has no influence on the Maven build itself. -->
-							<groupId>org.eclipse.m2e</groupId>
-							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
-							<configuration>
-								<lifecycleMappingMetadata>
-									<pluginExecutions>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>org.codehaus.mojo</groupId>
-												<artifactId>build-helper-maven-plugin</artifactId>
-												<versionRange>[1.12,)</versionRange>
-												<goals>
-													<goal>reserve-network-port</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<ignore/>
-											</action>
-										</pluginExecution>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>org.codehaus.mojo</groupId>
-												<artifactId>exec-maven-plugin</artifactId>
-												<versionRange>[1.5.0,)</versionRange>
-												<goals>
-													<goal>java</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<execute>
-													<runOnIncremental>false</runOnIncremental>
-													<runOnConfiguration>true</runOnConfiguration>
-												</execute>
-											</action>
-										</pluginExecution>
-									</pluginExecutions>
-								</lifecycleMappingMetadata>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <!-- This profile will only be active for builds inside of Eclipse (managed
+                by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+            <id>m2e-manage-executions</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <!--This plugin's configuration is used to store Eclipse m2e settings
+                                only. It has no influence on the Maven build itself. -->
+                            <groupId>org.eclipse.m2e</groupId>
+                            <artifactId>lifecycle-mapping</artifactId>
+                            <version>${lifecycle.mapping.version}</version>
+                            <configuration>
+                                <lifecycleMappingMetadata>
+                                    <pluginExecutions>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.codehaus.mojo</groupId>
+                                                <artifactId>build-helper-maven-plugin</artifactId>
+                                                <versionRange>${lifecycle.mapping.versionRange}</versionRange>
+                                                <goals>
+                                                    <goal>reserve-network-port</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.codehaus.mojo</groupId>
+                                                <artifactId>exec-maven-plugin</artifactId>
+                                                <versionRange>${exec.maven.plugin.versionRange}</versionRange>
+                                                <goals>
+                                                    <goal>java</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <execute>
+                                                    <runOnIncremental>false</runOnIncremental>
+                                                    <runOnConfiguration>true</runOnConfiguration>
+                                                </execute>
+                                            </action>
+                                        </pluginExecution>
+                                    </pluginExecutions>
+                                </lifecycleMappingMetadata>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
 </project>
