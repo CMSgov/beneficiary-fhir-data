@@ -52,3 +52,36 @@ resource "aws_iam_policy" "logs" {
 }
 EOF
 }
+
+resource "aws_iam_role" "this" {
+  name        = local.lambda_full_name
+  path        = "/"
+  description = "Role for ${local.lambda_full_name} Lambda"
+
+  assume_role_policy = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      }
+    }
+  ]
+}
+EOF
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "s3_attach_lambda_role" {
+  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.s3.arn
+}
+
+resource "aws_iam_role_policy_attachment" "logs_attach_lambda_role" {
+  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.logs.arn
+}
