@@ -89,9 +89,13 @@ def _get_all_valid_incoming_loads_before_date(
     time_cutoff: Optional[datetime] = None,
 ) -> set[TimestampedDataLoad]:
     rif_types_group_str = "|".join([e.value for e in RifFileType])
+    # We get all objects in both the non-synthetic and synthetic incoming folders within the S3
+    # Bucket; chain() will flatten the resulting iterable so that it's a single iterable of bucket
+    # objects
     incoming_objects = itertools.chain.from_iterable(
         etl_bucket.objects.filter(Prefix=prefix) for prefix in INCOMING_BUCKET_PREFIXES
     )
+    # We then filter out any objects that are not valid RIF files
     incoming_rifs = [
         str(object.key)
         for object in incoming_objects
@@ -101,6 +105,9 @@ def _get_all_valid_incoming_loads_before_date(
         )
         is not None
     ]
+    # Finally, valid data loads/groups are extracted by regex matching the data load timestamp
+    # folder within each object's key and taking the match. Using a set automatically ensures the
+    # resulting loads are unique
     valid_data_loads = {
         TimestampedDataLoad(
             load_type=(
