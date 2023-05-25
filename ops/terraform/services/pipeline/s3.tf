@@ -52,61 +52,35 @@ resource "aws_s3_bucket_acl" "this" {
 }
 
 resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
-  count = local.create_slis ? 1 : 0
-
   bucket = aws_s3_bucket.this.id
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Incoming/"
-    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-incoming"
-    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+  # Lambda function notifications for the BFD Pipeline SLIs Lambda
+  dynamic "lambda_function" {
+    for_each = {
+      for prefix in ["Incoming", "Done"] : "${prefix}/" => lower(prefix)
+      if local.create_slis # Only create notifications for SLIs lambda if it's being created
+    }
+
+    content {
+      events              = ["s3:ObjectCreated:*"]
+      filter_prefix       = lambda_function.key
+      id                  = "${module.bfd_pipeline_slis[0].lambda_name}-${lambda_function.value}"
+      lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+    }
   }
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Done/"
-    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-done"
-    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
-  }
+  # Lambda function notifications for the BFD Pipeline Manager Lambda
+  dynamic "lambda_function" {
+    for_each = {
+      for prefix in ["Incoming", "Done", "Synthetic/Incoming", "Synthetic/Done"] : "${prefix}/" => lower(replace(prefix, "/", "-"))
+      if local.pipeline_variant_configs.ccw.enabled # Only create if CCW pipeline is enabled
+    }
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Incoming/"
-    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-incoming"
-    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
-  }
-
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Done/"
-    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-done"
-    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
-  }
-
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Synthetic/Incoming/"
-    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-synthetic-incoming"
-    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
-  }
-
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Synthetic/Done/"
-    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-synthetic-done"
-    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
+    content {
+      events              = ["s3:ObjectCreated:*"]
+      filter_prefix       = lambda_function.key
+      id                  = "${module.bfd_pipeline_manager[0].lambda_name}-${lambda_function.value}"
+      lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
+    }
   }
 }
