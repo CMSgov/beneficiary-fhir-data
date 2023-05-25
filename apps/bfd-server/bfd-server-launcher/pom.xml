@@ -106,7 +106,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-			<!-- Used in tests to verify that requests work as expected. -->
+            <!-- Used in tests to verify that requests work as expected. -->
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${org.apache.httpcomponents.httpclient.version}</version>
