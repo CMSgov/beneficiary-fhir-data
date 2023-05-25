@@ -3,7 +3,6 @@ locals {
   region = data.aws_region.current.name
 
   kms_key_arn      = data.aws_kms_key.env_cmk.arn
-  mgmt_kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
 
   lambda_full_name = "bfd-${local.env}-pipeline-manager"
 }

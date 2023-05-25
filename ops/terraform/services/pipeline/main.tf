@@ -379,7 +379,6 @@ module "bfd_pipeline_manager" {
   account_id      = local.account_id
   etl_bucket_id   = aws_s3_bucket.this.id
   env_kms_key_id  = data.aws_kms_key.cmk.key_id
-  mgmt_kms_key_id = data.aws_kms_key.mgmt_cmk.key_id
 }
 
 # TODO: Remove post BFD-2554

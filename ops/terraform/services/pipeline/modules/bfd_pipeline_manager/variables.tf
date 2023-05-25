@@ -13,11 +13,6 @@ variable "env_kms_key_id" {
   type        = string
 }
 
-variable "mgmt_kms_key_id" {
-  description = "The ID of the mgmt environment's KMS key to use"
-  type        = string
-}
-
 variable "ccw_pipeline_asg_details" {
   description = "Details about the BFD CCW Pipeline ASG"
   type        = object({ arn = string, name = string })
