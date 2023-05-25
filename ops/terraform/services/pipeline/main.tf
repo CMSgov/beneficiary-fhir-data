@@ -380,8 +380,8 @@ module "bfd_pipeline_manager" {
   etl_bucket_id  = aws_s3_bucket.this.id
   env_kms_key_id = data.aws_kms_key.cmk.key_id
   ccw_pipeline_asg_details = {
-    arn  = aws_autoscaling_group.this.arn
-    name = aws_autoscaling_group.this.name
+    arn  = aws_autoscaling_group.this["ccw"].arn
+    name = aws_autoscaling_group.this["ccw"].name
   }
 }
 
