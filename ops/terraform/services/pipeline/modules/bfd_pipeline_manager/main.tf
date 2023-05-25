@@ -2,7 +2,7 @@ locals {
   env    = terraform.workspace
   region = data.aws_region.current.name
 
-  kms_key_arn      = data.aws_kms_key.env_cmk.arn
+  kms_key_arn = data.aws_kms_key.env_cmk.arn
 
   lambda_full_name = "bfd-${local.env}-pipeline-manager"
 }
@@ -41,8 +41,9 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      ETL_BUCKET_ID   = data.aws_s3_bucket.etl.id
+      BFD_ENVIRONMENT   = local.env
+      ETL_BUCKET_ID     = data.aws_s3_bucket.etl.id
+      PIPELINE_ASG_NAME = var.ccw_pipeline_asg_details.name
     }
   }
 
