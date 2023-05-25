@@ -1,16 +1,22 @@
+import itertools
 import os
 import re
 import sys
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import unquote
 
 import boto3
 from botocore.config import Config
 
+INCOMING_BUCKET_PREFIXES = ["Incoming/", "Synthetic/Incoming/"]
+
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
+PIPELINE_ASG_NAME = os.environ.get("PIPELINE_ASG_NAME", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -22,6 +28,7 @@ BOTO_CONFIG = Config(
 
 try:
     s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
+    autoscaling_client = boto3.client("autoscaling", config=BOTO_CONFIG)
     etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
 except Exception as exc:
     print(
@@ -30,16 +37,14 @@ except Exception as exc:
     sys.exit(0)
 
 
-class PipelineLoadType(str, Enum):
+class PipelineLoadType(Enum):
     """Represents the possible types of data loads: either the data load is non-synthetic, meaning
     that it contains production data and was placed within the root-level Incoming/Done folders of
     the ETL bucket, or it is synthetic, meaning that it contains non-production, testing data and
-    was placed within the Incoming/Done folders within the Synthetic folder of the ETL bucket. The
-    value of each enum represents the name of the Incoming/Done folders' parent directory, with
-    empty string indicating that those paths have no parent"""
+    was placed within the Incoming/Done folders within the Synthetic folder of the ETL bucket."""
 
-    NON_SYNTHETIC = ""
-    SYNTHETIC = "Synthetic"
+    NON_SYNTHETIC = 0
+    SYNTHETIC = 1
 
 
 class PipelineDataStatus(str, Enum):
@@ -67,51 +72,82 @@ class RifFileType(str, Enum):
     SNF = "snf"
 
 
-def _is_pipeline_load_complete(load_type: PipelineLoadType, group_timestamp: str) -> bool:
-    done_prefix = (
-        "/".join(
-            # Filters out any falsey elements, which will remove any empty strings from the joined
-            # string
-            filter(
-                None,
-                [load_type.capitalize(), PipelineDataStatus.DONE.capitalize(), group_timestamp],
-            )
-        )
-        + "/"
+@dataclass(frozen=True, eq=True)
+class TimestampedDataLoad:
+    """Represents a "group" of RIF files (known as a "data load"). These groups are organized within
+    a folder/subkey in S3 which is a timestamp in ISO format"""
+
+    load_type: PipelineLoadType
+    name: str
+
+    @property
+    def timestamp(self) -> datetime:
+        return datetime.fromisoformat(self.name.removesuffix("Z"))
+
+
+def _get_all_valid_incoming_groups_before_date(
+    time_cutoff: Optional[datetime] = None,
+) -> set[TimestampedDataLoad]:
+    rif_types_group_str = "|".join([e.value for e in RifFileType])
+    incoming_objects = itertools.chain.from_iterable(
+        etl_bucket.objects.filter(Prefix=prefix) for prefix in INCOMING_BUCKET_PREFIXES
     )
-    # Returns the file names of all text files within the "done" folder for the current bucket
-    finished_rifs = [
-        str(object.key).removeprefix(done_prefix)
-        for object in etl_bucket.objects.filter(Prefix=done_prefix)
-        if str(object.key).endswith(".txt") or str(object.key).endswith(".csv")
+    incoming_rifs = [
+        str(object.key)
+        for object in incoming_objects
+        if re.match(
+            pattern=rf".*({rif_types_group_str})_.*(txt|csv)",
+            string=str(object.key),
+        )
+        is not None
     ]
-
-    # We check for all RIFs _except_ beneficiary history as beneficiary history is a RIF type not
-    # expected to exist in CCW-provided loads -- it only appears in synthetic loads
-    rif_types_to_check = [e for e in RifFileType if e != RifFileType.BENEFICIARY_HISTORY]
-
-    # Check, for each rif file type, if any finished rif has the corresponding rif type prefix.
-    # Essentially, this ensures that all non-optional (excluding beneficiary history) RIF types have
-    # been loaded and exist in the Done/ folder
-    return all(
-        any(rif_type.value in rif_file_name.lower() for rif_file_name in finished_rifs)
-        for rif_type in rif_types_to_check
-    )
-
-
-def _is_incoming_folder_empty(load_type: PipelineLoadType, group_timestamp: str) -> bool:
-    incoming_key_prefix = (
-        "/".join(
-            filter(
-                None,
-                [load_type.capitalize(), PipelineDataStatus.INCOMING.capitalize(), group_timestamp],
-            )
+    valid_groups = {
+        TimestampedDataLoad(
+            load_type=(
+                PipelineLoadType.SYNTHETIC
+                if object_key.startswith("Synthetic")
+                else PipelineLoadType.NON_SYNTHETIC
+            ),
+            name=group_name_match.group(1),
         )
-        + "/"
-    )
-    incoming_objects = list(etl_bucket.objects.filter(Prefix=incoming_key_prefix))
+        for object_key in incoming_rifs
+        if (group_name_match := re.search(pattern=r"([\d\-:TZ]+)/", string=object_key)) is not None
+    }
 
-    return len(incoming_objects) == 0
+    if not time_cutoff:
+        return valid_groups
+
+    return {d for d in valid_groups if d.timestamp < time_cutoff}
+
+
+def _try_schedule_pipeline_asg_action(
+    scheduled_action_name: str, start_time: datetime, desired_capacity: int
+) -> bool:
+    # If either the desired scheduled action already exists or if the desired capacity for this
+    # scheduled action is already set on the ASG, we do not need to create a scheduled action;
+    # return False to indicate that no action was scheduled
+    if (
+        autoscaling_client.describe_scheduled_actions(
+            AutoScalingGroupName=PIPELINE_ASG_NAME,
+            ScheduledActionNames=[scheduled_action_name],
+        )["ScheduledUpdateGroupActions"]
+        or autoscaling_client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+        )["AutoScalingGroups"][0]["DesiredCapacity"]
+        == desired_capacity
+    ):
+        return False
+
+    # We know now that this scheduled action has not yet been scheduled and the desired capacity is
+    # not met, so schedule the action and return True to indicate an action was scheduled
+    autoscaling_client.put_scheduled_update_group_action(
+        AutoScalingGroupName=PIPELINE_ASG_NAME,
+        ScheduledActionName=scheduled_action_name,
+        StartTime=f"{start_time.replace(microsecond=0).isoformat()}Z",
+        DesiredCapacity=1,
+    )
+
+    return True
 
 
 def handler(event: Any, context: Any):
@@ -141,7 +177,7 @@ def handler(event: Any, context: Any):
     # "<Synthetic/>/<Incoming/Done>/<ISO date format>/<file name>".
     if match := re.search(
         pattern=(
-            rf"^({PipelineLoadType.SYNTHETIC.value}){{0,1}}/{{0,1}}"
+            rf"^(Synthetic){{0,1}}/{{0,1}}"
             rf"({status_group_str})/"
             rf"([\d\-:TZ]+)/"
             rf".*({rif_types_group_str}).*$"
@@ -149,25 +185,102 @@ def handler(event: Any, context: Any):
         string=decoded_file_key,
         flags=re.IGNORECASE,
     ):
-        pipeline_load_type = PipelineLoadType(match.group(1) or "")
         pipeline_data_status = PipelineDataStatus(match.group(2))
-        group_timestamp = match.group(3)
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
-            pass
+            # Retreive _all_ incoming data loads from both synthetic and non-synthetic loads
+            all_incoming_data_loads = _get_all_valid_incoming_groups_before_date()
+
+            if not all_incoming_data_loads:
+                print("No incoming data loads were discovered, exiting...")
+                return
+
+            print(
+                f"Discovered {len(all_incoming_data_loads)} incoming data loads waiting to be"
+                " ingested or being ingested by the Pipeline. Attempting to schedule scale-out for"
+                " the times specified by each data load group..."
+            )
+
+            # If there are any loads that are timestamped prior to now, immediately schedule a
+            # scale-out for the next minute:
+            if any(
+                data_load.timestamp < datetime.utcnow() for data_load in all_incoming_data_loads
+            ):
+                next_minute = datetime.utcnow() + timedelta(minutes=1)
+                # Only schedule a new action to scale out if we haven't already done so
+                if _try_schedule_pipeline_asg_action(
+                    scheduled_action_name="scale_out_immediately",
+                    start_time=next_minute,
+                    desired_capacity=1,
+                ):
+                    print(
+                        "Scheduled the Pipeline to start immediately at"
+                        f" {next_minute.isoformat()} UTC"
+                    )
+                else:
+                    print(
+                        "Pipeline is already scheduled to start within the next minute or its"
+                        " desired capacity is already 1"
+                    )
+
+            # Then, for any _future_ loads, we schedule an ASG scale-out for the time specified by
+            # the data load
+            for future_load in (
+                data_load
+                for data_load in all_incoming_data_loads
+                if data_load.timestamp > datetime.utcnow()
+            ):
+                if _try_schedule_pipeline_asg_action(
+                    scheduled_action_name=f"scale_out_at_{future_load.name}",
+                    start_time=future_load.timestamp,
+                    desired_capacity=1,
+                ):
+                    print(
+                        "Scheduled the Pipeline to start in the future at"
+                        f" {future_load.timestamp.isoformat()} UTC for future data load"
+                        f" {future_load.name}"
+                    )
+                else:
+                    print(
+                        "Pipeline is already scheduled to scale-out for future data load"
+                        f" {future_load.name}"
+                    )
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
-            and _is_pipeline_load_complete(
-                load_type=pipeline_load_type, group_timestamp=group_timestamp
-            )
-            and _is_incoming_folder_empty(
-                load_type=pipeline_load_type, group_timestamp=group_timestamp
+            and not _get_all_valid_incoming_groups_before_date(
+                time_cutoff=datetime.utcnow() + timedelta(minutes=10)
             )
         ):
-            pass
-        else:
+            # If there are no valid incoming data loads/groups that should be loaded within the next
+            # ten minutes in any of the Incoming folders, then we know that the Pipeline has
+            # successfully loaded everything it needs to (since this Lambda was invoked by the
+            # Pipeline moving the last file to the Done folder). We can now tell the Pipeline to
+            # scale-in within the next ten minutes:
             print(
-                f"The location of data in S3 bucket {ETL_BUCKET_ID} for the current group"
-                f" ({group_timestamp}) does not indicate that the data load has finished."
-                " Stopping..."
+                "No valid, non-future data loads were discovered to be ingested by the Pipeline"
+                " within the next ten minutes. Trying to schedule an action to scale-in the"
+                " Pipeline to stop it..."
             )
+
+            # This is a temporary workaround for a lack of good signaling between the Pipeline and
+            # its ASG as to when the Pipeline instance can gracefully be stopped. Until such a time
+            # that the Pipeline can signal that it has finished, we give the Pipeline 10 minutes to
+            # run any final tasks it needs to after finishing data load before scaling it in
+            # TODO: Replace this when the Pipeline is able to signal it can be stopped
+            ten_minutes_from_now = datetime.utcnow() + timedelta(minutes=10)
+            if _try_schedule_pipeline_asg_action(
+                scheduled_action_name="scale_in_in_ten_minutes",
+                start_time=ten_minutes_from_now,
+                desired_capacity=0,
+            ):
+                print(
+                    f"Scheduled the Pipeline to scale-in at {ten_minutes_from_now.isoformat()} UTC"
+                    " as all valid, non-future Incoming data loads have been completed"
+                )
+            else:
+                print(
+                    "The Pipeline is already scheduled to scale-in within the next ten minutes or"
+                    " its ASG's desired capacity is already set to 0"
+                )
+        else:
+            print("The Pipeline is still loading data from Incoming, exiting...")
