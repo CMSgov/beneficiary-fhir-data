@@ -25,6 +25,40 @@ resource "aws_iam_policy" "s3" {
 EOF
 }
 
+resource "aws_iam_policy" "autoscaling" {
+  name = "${local.lambda_full_name}-autoscaling"
+  description = join("", [
+    "Permissions for the ${local.lambda_full_name} Lambda to describe ASGs and their Scheduled ",
+    "Actions and to put Scheduled Actions to the ${var.ccw_pipeline_asg_details.name} ASG"
+  ])
+
+  # Unfortunately, both describe actions do not support any sort of resource restriction or
+  # conditions 
+  policy = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPutScheduledActionsForPiplineASG",
+      "Effect": "Allow",
+      "Action": "autoscaling:PutScheduledUpdateGroupAction",
+      "Resource": "${var.ccw_pipeline_asg_details.arn}"
+    },
+    {
+      "Sid": "AllowDescribingScheduledActionsAndAutoScalingGroups",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeScheduledActions"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+
 resource "aws_iam_policy" "logs" {
   name = "${local.lambda_full_name}-logs"
   description = join("", [
@@ -79,6 +113,11 @@ EOF
 resource "aws_iam_role_policy_attachment" "s3_attach_lambda_role" {
   role       = aws_iam_role.this.name
   policy_arn = aws_iam_policy.s3.arn
+}
+
+resource "aws_iam_role_policy_attachment" "autoscaling_attach_lambda_role" {
+  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.autoscaling.arn
 }
 
 resource "aws_iam_role_policy_attachment" "logs_attach_lambda_role" {
