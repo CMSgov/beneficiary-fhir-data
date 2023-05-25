@@ -85,7 +85,7 @@ class TimestampedDataLoad:
         return datetime.fromisoformat(self.name.removesuffix("Z"))
 
 
-def _get_all_valid_incoming_groups_before_date(
+def _get_all_valid_incoming_loads_before_date(
     time_cutoff: Optional[datetime] = None,
 ) -> set[TimestampedDataLoad]:
     rif_types_group_str = "|".join([e.value for e in RifFileType])
@@ -101,7 +101,7 @@ def _get_all_valid_incoming_groups_before_date(
         )
         is not None
     ]
-    valid_groups = {
+    valid_data_loads = {
         TimestampedDataLoad(
             load_type=(
                 PipelineLoadType.SYNTHETIC
@@ -114,10 +114,12 @@ def _get_all_valid_incoming_groups_before_date(
         if (group_name_match := re.search(pattern=r"([\d\-:TZ]+)/", string=object_key)) is not None
     }
 
+    # If no time cutoff was specified we return all data loads, including future data loads
     if not time_cutoff:
-        return valid_groups
+        return valid_data_loads
 
-    return {d for d in valid_groups if d.timestamp < time_cutoff}
+    # Else, we return only valid data loads that should be loaded prior to the given time cutoff
+    return {d for d in valid_data_loads if d.timestamp < time_cutoff}
 
 
 def _try_schedule_pipeline_asg_action(
@@ -189,7 +191,7 @@ def handler(event: Any, context: Any):
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
             # Retrieve _all_ incoming data loads from both synthetic and non-synthetic loads
-            all_incoming_data_loads = _get_all_valid_incoming_groups_before_date()
+            all_incoming_data_loads = _get_all_valid_incoming_loads_before_date()
 
             if not all_incoming_data_loads:
                 # This should never happen as we can only get here if the Lambda was started by a
@@ -250,7 +252,7 @@ def handler(event: Any, context: Any):
                     )
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
-            and not _get_all_valid_incoming_groups_before_date(
+            and not _get_all_valid_incoming_loads_before_date(
                 time_cutoff=datetime.utcnow() + timedelta(minutes=10)
             )
         ):
