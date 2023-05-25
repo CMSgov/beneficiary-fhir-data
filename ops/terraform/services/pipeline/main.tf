@@ -376,9 +376,13 @@ module "bfd_pipeline_manager" {
 
   source = "./modules/bfd_pipeline_manager"
 
-  account_id      = local.account_id
-  etl_bucket_id   = aws_s3_bucket.this.id
-  env_kms_key_id  = data.aws_kms_key.cmk.key_id
+  account_id     = local.account_id
+  etl_bucket_id  = aws_s3_bucket.this.id
+  env_kms_key_id = data.aws_kms_key.cmk.key_id
+  ccw_pipeline_asg_details = {
+    arn  = aws_autoscaling_group.this.arn
+    name = aws_autoscaling_group.this.name
+  }
 }
 
 # TODO: Remove post BFD-2554
