@@ -79,8 +79,8 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
       "s3:ObjectCreated:*",
     ]
     filter_prefix       = "Incoming/"
-    id                  = "${module.bfd_pipeline_manager.lambda_name}-incoming"
-    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-incoming"
+    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
   }
 
   lambda_function {
@@ -88,8 +88,8 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
       "s3:ObjectCreated:*",
     ]
     filter_prefix       = "Done/"
-    id                  = "${module.bfd_pipeline_manager.lambda_name}-done"
-    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-done"
+    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
   }
 
   lambda_function {
@@ -97,8 +97,8 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
       "s3:ObjectCreated:*",
     ]
     filter_prefix       = "Synthetic/Incoming/"
-    id                  = "${module.bfd_pipeline_manager.lambda_name}-synthetic-incoming"
-    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-synthetic-incoming"
+    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
   }
 
   lambda_function {
@@ -106,7 +106,7 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
       "s3:ObjectCreated:*",
     ]
     filter_prefix       = "Synthetic/Done/"
-    id                  = "${module.bfd_pipeline_manager.lambda_name}-synthetic-done"
-    lambda_function_arn = module.bfd_pipeline_manager.lambda_arn
+    id                  = "${module.bfd_pipeline_manager[0].lambda_name}-synthetic-done"
+    lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
   }
 }

@@ -369,6 +369,11 @@ module "bfd_pipeline_slo_alarms" {
 }
 
 module "bfd_pipeline_manager" {
+  # For now, this module only supports the CCW-variant of the pipeline and so should not be included
+  # if the CCW pipeline is disabled
+  # TODO: Remove when RDA pipeline supports on-demand mechanisms
+  count = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
+
   source = "./modules/bfd_pipeline_manager"
 
   account_id      = local.account_id
