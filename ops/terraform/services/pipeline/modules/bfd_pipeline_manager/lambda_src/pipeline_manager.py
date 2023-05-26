@@ -101,7 +101,7 @@ def _get_all_valid_incoming_loads_before_date(
         str(object.key)
         for object in incoming_objects
         if re.match(
-            pattern=rf".*({rif_types_group_str})_.*(txt|csv)",
+            pattern=rf".*({rif_types_group_str}).*(txt|csv)",
             string=str(object.key),
         )
         is not None
