@@ -34,7 +34,7 @@ resource "aws_lambda_function" "this" {
   source_code_hash = data.archive_file.lambda_src.output_base64sha256
   architectures    = ["x86_64"]
   handler          = "pipeline_manager.handler"
-  memory_size      = 128
+  memory_size      = 256
   package_type     = "Zip"
   runtime          = "python3.9"
   timeout          = 300
