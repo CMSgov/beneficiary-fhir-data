@@ -215,14 +215,22 @@ def handler(event: Any, context: Any):
                     " corresponding Incoming data load and will be removed"
                 )
                 for invalid_action in invalid_scheduled_actions:
-                    autoscaling_client.delete_scheduled_action(
-                        AutoScalingGroupName=PIPELINE_ASG_NAME,
-                        ScheduledActionName=invalid_action["ScheduledActionName"],
-                    )
-                    print(
-                        f"Scheduled action {invalid_action['ScheduledActionName']} successfully"
-                        " deleted"
-                    )
+                    try:
+                        autoscaling_client.delete_scheduled_action(
+                            AutoScalingGroupName=PIPELINE_ASG_NAME,
+                            ScheduledActionName=invalid_action["ScheduledActionName"],
+                        )
+                        print(
+                            f"Scheduled action {invalid_action['ScheduledActionName']} successfully"
+                            " deleted"
+                        )
+                    except autoscaling_client.exceptions.ClientError as ex:
+                        print(
+                            "An error occurred when attempting to delete the scheduled action"
+                            f" {invalid_action['ScheduledActionName']}. It is likely that this"
+                            " scheduled action has already been removed by another invocation of"
+                            f" this Lambda. Err: {str(ex)}"
+                        )
 
             if not all_incoming_data_loads:
                 print("No incoming data loads were discovered, exiting...")
