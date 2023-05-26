@@ -201,6 +201,7 @@ def handler(event: Any, context: Any):
                 scheduled_action
                 for scheduled_action in applied_scheduled_actions["ScheduledUpdateGroupActions"]
                 if "ScheduledActionName" in scheduled_action
+                and scheduled_action["ScheduledActionName"].startswith("scale_out_at_")
                 and scheduled_action["ScheduledActionName"] not in valid_scheduled_action_names
             ]
 
