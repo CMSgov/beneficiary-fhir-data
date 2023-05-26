@@ -62,6 +62,7 @@ containing the array index of that detail record when it was received from the R
 | fiss_diagnosis_codes | fiss_diag_codes     | FissDiagnosisCode     | fiss_diagnosis_code.proto |
 | fiss_payers          | fiss_payers         | FissPayer             | fiss_payer.proto          |
 | fiss_proc_codes      | fiss_proc_codes     | FissProcedureCode     | fiss_procedure_code.proto |
+| fiss_revenue_lines   | fiss_revenue_lines  | FissRevenueLine       | fiss_revenue_line.proto   |
 
 
 This diagram shows all of the FISS related tables along with their primary keys.
@@ -69,18 +70,18 @@ This diagram shows all of the FISS related tables along with their primary keys.
 ```
                                     ┌─────────────┐
                                     │ fiss_claims │
-                         ┌──────────► - dcn       │
+                         ┌──────────► - claim_id  │
                          │          └─────────────┘
-                      dcn│
+                claim_id │
                          │
                          │
-          ┌──────────────┴───────┬────────────────────┬────────────────┐
-          │                      │                    │                │
-┌─────────┴─────────┐ ┌──────────┴───────────┐ ┌──────┴──────┐ ┌───────┴─────────┐
-│ fiss_audit_trails │ │ fiss_diagnosis_codes │ │fiss_payers  │ │ fiss_proc_codes │
-│ - dcn             │ │ - dcn                │ │- dcn        │ │ - dcn           │
-│ - priority        │ │ - priority           │ │- priority   │ │ - priority      │
-└───────────────────┘ └──────────────────────┘ └─────────────┘ └─────────────────┘
+          ┌──────────────┴───────┬────────────────────┬────────────────--┐───────--------------┐
+          │                      │                    │                  │                     │
+┌─────────┴─────────┐ ┌──────────┴───────────┐ ┌──────┴──────--┐ ┌───────┴─────────┐ ┌───────--┴────────--┐
+│ fiss_audit_trails │ │ fiss_diagnosis_codes │ │fiss_payers    │ │ fiss_proc_codes │ │ fiss_revenue_lines │
+│ - claim_id        │ │ - claim_id           │ │- claim_id     │ │ - claim_id      │ │ - claim_id         │
+│ - rda_position    │ │ - rda_position       │ │- rda_position │ │ - rda_position  │ │ - rda_position     │
+└───────────────────┘ └──────────────────────┘ └─────────────--┘ └─────────────────┘ └───────────────---──┘
 ```
 
 ## MCS Claims
@@ -109,31 +110,31 @@ This diagram shows all of the MCS related tables along with their primary keys.
                                ┌─────────────────────┐
                                │ mcs_adjustments     │
                           ┌────┤ - idr_clm_hd_icn    │
-                          │    │ - priority          │
+                          │    │ - rda_position      │
                           │    └─────────────────────┘
                           │
                           │    ┌─────────────────────┐
                           │    │ mcs_audits          │
                           ├────┤ - idr_clm_hd_icn    │
-                          │    │ - priority          │
+                          │    │ - rda_position      │
                           │    └─────────────────────┘
                           │
 ┌──────────────────┐      │    ┌─────────────────────┐
 │ mcs_claims       │      │    │ mcs_details         │
 │ - idr_clm_hd_icn ◄──────┼────┤ - idr_clm_hd_icn    │
-└──────────────────┘      │    │ - priority          │
+└──────────────────┘      │    │ - rda_position      │
                           │    └─────────────────────┘
                           │
                           │    ┌─────────────────────┐
                           │    │ mcs_diagnosis_codes │
                           ├────┤ - idr_clm_hd_icn    │
-                          │    │ - priority          │
+                          │    │ - rda_position      │
                           │    └─────────────────────┘
                           │
                           │    ┌─────────────────────┐
                           │    │ mcs_locations       │
                           └────┤ - idr_clm_hd_icn    │
-                               │ - priority          │
+                               │ - rda_position      │
                                └─────────────────────┘
 ```
 
@@ -168,4 +169,4 @@ The table has a compound primary key:
 
 - claim_type: Either F for FISS or M for MCS.
 - sequence_number: The sequence number of the claim update.
-- claim_id: dcn value for FISS or idr_clm_hd_icn value for MCS
+- claim_id: claim_id value for FISS or idr_clm_hd_icn value for MCS
