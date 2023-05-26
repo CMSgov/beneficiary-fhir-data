@@ -39,7 +39,7 @@ resource "aws_iam_policy" "autoscaling" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "AllowPutScheduledActionsForPiplineASG",
+      "Sid": "AllowPutAndDeleteScheduledActionsForPipelineASG",
       "Effect": "Allow",
       "Action": [
         "autoscaling:PutScheduledUpdateGroupAction",
