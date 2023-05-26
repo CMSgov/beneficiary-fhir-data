@@ -248,18 +248,15 @@ def handler(event: Any, context: Any):
                 data_load.timestamp < datetime.utcnow() for data_load in all_incoming_data_loads
             ):
                 next_minute = datetime.utcnow() + timedelta(minutes=1)
+                current_desired_capacity = autoscaling_client.describe_auto_scaling_groups(
+                    AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+                )["AutoScalingGroups"][0]["DesiredCapacity"]
                 # Only schedule a new action to scale out if we haven't already done so and only if
                 # the ASG does not have its desired capacity set to 1 already
-                if (
-                    _try_schedule_pipeline_asg_action(
-                        scheduled_action_name="scale_out_immediately",
-                        start_time=next_minute,
-                        desired_capacity=1,
-                    )
-                    and autoscaling_client.describe_auto_scaling_groups(
-                        AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-                    )["AutoScalingGroups"][0]["DesiredCapacity"]
-                    != 1
+                if current_desired_capacity != 1 and _try_schedule_pipeline_asg_action(
+                    scheduled_action_name="scale_out_immediately",
+                    start_time=next_minute,
+                    desired_capacity=1,
                 ):
                     print(
                         "Scheduled the Pipeline to start immediately at"
@@ -320,16 +317,13 @@ def handler(event: Any, context: Any):
             # that the Pipeline can signal that it has finished, we give the Pipeline 5 minutes to
             # run any final tasks it needs to after finishing data load before scaling it in
             # TODO: Replace this when the Pipeline is able to signal it can be stopped
-            if (
-                _try_schedule_pipeline_asg_action(
-                    scheduled_action_name="scale_in_in_five_minutes",
-                    start_time=five_minutes_from_now,
-                    desired_capacity=0,
-                )
-                and autoscaling_client.describe_auto_scaling_groups(
-                    AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-                )["AutoScalingGroups"][0]["DesiredCapacity"]
-                != 0
+            current_desired_capacity = autoscaling_client.describe_auto_scaling_groups(
+                AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+            )["AutoScalingGroups"][0]["DesiredCapacity"]
+            if current_desired_capacity != 0 and _try_schedule_pipeline_asg_action(
+                scheduled_action_name="scale_in_in_five_minutes",
+                start_time=five_minutes_from_now,
+                desired_capacity=0,
             ):
                 print(
                     f"Scheduled the Pipeline to scale-in at {five_minutes_from_now.isoformat()} UTC"
