@@ -77,7 +77,7 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
     }
 
     content {
-      events              = ["s3:ObjectCreated:*"]
+      events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
       filter_prefix       = lambda_function.key
       id                  = "${module.bfd_pipeline_manager[0].lambda_name}-${lambda_function.value}"
       lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
