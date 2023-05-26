@@ -15,7 +15,6 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -23,6 +22,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -95,18 +96,6 @@ public final class BeneficiaryTransformerV2Test {
 
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
 
-    // Add the MBI history records to the Beneficiary.
-    Set<MedicareBeneficiaryIdHistory> beneficiaryMbis =
-        parsedRecords.stream()
-            .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
-            .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(
-                r ->
-                    (r.getBeneficiaryId().isPresent()
-                        && r.getBeneficiaryId().get().longValue()
-                            == beneficiary.getBeneficiaryId()))
-            .collect(Collectors.toSet());
-    beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
     assertThat(beneficiary, is(notNullValue()));
 
     createPatient(RequestHeaders.getHeaderWrapper());
@@ -240,8 +229,19 @@ public final class BeneficiaryTransformerV2Test {
   @Test
   public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
 
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss.SSS");
+    FhirContext fhirContext = FhirContext.forR4();
+    String dtStr = sdf.format(new Date());
+    String fn = String.format("/Users/colinchristophermackenzie/dev/foobar/%s-expected.txt", dtStr);
+
+    try (PrintWriter out = new PrintWriter(new FileWriter(fn))) {
+      out.write(fhirContext.newJsonParser().encodeResourceToString(patient));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
     List<Identifier> patientIdentList = patient.getIdentifier();
-    assertEquals(4, patientIdentList.size());
+    assertEquals(5, patientIdentList.size());
 
     ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
 
@@ -295,6 +295,18 @@ public final class BeneficiaryTransformerV2Test {
     ident = new Identifier();
     ident
         .setValue("9AB2WW3GR44")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+    compareIdentList.add(ident);
+
+    ident = new Identifier();
+    ident
+        .setValue("543217066")
         .setSystem("http://hl7.org/fhir/sid/us-mbi")
         .getType()
         .addCoding()

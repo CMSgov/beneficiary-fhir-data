@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
@@ -502,9 +501,7 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     ServerTestUtils.get()
         .loadData(
             Arrays.asList(
-                StaticRifResource.SAMPLE_A_BENES,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
     IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
@@ -555,9 +552,7 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     ServerTestUtils.get()
         .loadData(
             Arrays.asList(
-                StaticRifResource.SAMPLE_A_BENES,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
     IGenericClient fhirClient = createFhirClient("true");
 
     Bundle searchResults = null;

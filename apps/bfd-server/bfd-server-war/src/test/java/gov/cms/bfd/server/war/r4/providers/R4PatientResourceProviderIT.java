@@ -17,7 +17,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -174,8 +173,7 @@ public final class R4PatientResourceProviderIT {
   /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns the historical MBI
    * values in the response when searching by historic (non-current) MBI hash. The search should
-   * look in both the medicare_beneficiaryid_history and beneficiaries_history for historical MBIs
-   * to include in the response.
+   * look in beneficiaries_history for historical MBIs to include in the response.
    *
    * <p>Context: The Patient endpoint (v2) supports looking up a Patient by MBI using any MBI
    * (hashed) that the patient has ever been associated with, functionality needed for cases where
@@ -189,11 +187,7 @@ public final class R4PatientResourceProviderIT {
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     List<String> historicUnhashedMbis = new ArrayList<>();
-    // historic MBI from the medicare_beneficiaryid_history table (loaded from
-    // sample-a-medicarebeneficiaryidhistory.txt)
     historicUnhashedMbis.add("9AB2WW3GR44");
-    // historic MBIs from the beneficiaries_history table (loaded from
-    // sample-a-beneficiaryhistory.txt)
     historicUnhashedMbis.add("3456689");
     // current MBI from the beneficiaries table (loaded from sample-a-beneficiaries.txt)
     String currentUnhashedMbi = "3456789";
@@ -204,17 +198,11 @@ public final class R4PatientResourceProviderIT {
             .map(r -> (BeneficiaryHistory) r)
             .findAny()
             .orElse(null);
-    MedicareBeneficiaryIdHistory medicareBeneHistoryEntry =
-        parsedRecords.stream()
-            .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
-            .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .findAny()
-            .orElse(null);
+
     TokenParam identifier =
         new TokenParam(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, TEST_HASH);
 
     // Add history items to test bene as if they had returned from the db
-    testBene.getMedicareBeneficiaryIdHistories().add(medicareBeneHistoryEntry);
     testBene.getBeneficiaryHistories().add(beneHistoryEntry);
 
     Bundle searchResults =
