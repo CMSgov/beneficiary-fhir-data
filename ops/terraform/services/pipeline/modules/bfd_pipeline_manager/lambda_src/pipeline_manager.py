@@ -133,23 +133,16 @@ def _get_all_valid_incoming_loads_before_date(
 def _try_schedule_pipeline_asg_action(
     scheduled_action_name: str, start_time: datetime, desired_capacity: int
 ) -> bool:
-    # If either the desired scheduled action already exists or if the desired capacity for this
-    # scheduled action is already set on the ASG, we do not need to create a scheduled action;
+    # If the desired scheduled action already exists we do not need to create a scheduled action;
     # return False to indicate that no action was scheduled
-    if (
-        autoscaling_client.describe_scheduled_actions(
-            AutoScalingGroupName=PIPELINE_ASG_NAME,
-            ScheduledActionNames=[scheduled_action_name],
-        )["ScheduledUpdateGroupActions"]
-        or autoscaling_client.describe_auto_scaling_groups(
-            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-        )["AutoScalingGroups"][0]["DesiredCapacity"]
-        == desired_capacity
-    ):
+    if autoscaling_client.describe_scheduled_actions(
+        AutoScalingGroupName=PIPELINE_ASG_NAME,
+        ScheduledActionNames=[scheduled_action_name],
+    )["ScheduledUpdateGroupActions"]:
         return False
 
-    # We know now that this scheduled action has not yet been scheduled and the desired capacity is
-    # not met, so schedule the action and return True to indicate an action was scheduled
+    # We know now that this scheduled action has not yet been scheduled, so schedule the action and
+    # return True to indicate an action was scheduled
     autoscaling_client.put_scheduled_update_group_action(
         AutoScalingGroupName=PIPELINE_ASG_NAME,
         ScheduledActionName=scheduled_action_name,
@@ -207,6 +200,40 @@ def handler(event: Any, context: Any):
                 # good signal that something is _wrong_
                 print("No incoming data loads were discovered, exiting...")
                 return
+
+            # First, cleanup any scheduled actions for Incoming loads that no longer exist:
+            applied_scheduled_actions = autoscaling_client.describe_scheduled_actions(
+                AutoScalingGroupName=PIPELINE_ASG_NAME
+            )
+            valid_scheduled_action_names = [
+                f"scale_out_at_{calendar.timegm(incoming_load.timestamp.utctimetuple())}"
+                for incoming_load in all_incoming_data_loads
+            ]
+            invalid_scheduled_actions = [
+                scheduled_action
+                for scheduled_action in applied_scheduled_actions["ScheduledUpdateGroupActions"]
+                if "ScheduledActionName" in scheduled_action
+                and scheduled_action["ScheduledActionName"] not in valid_scheduled_action_names
+            ]
+
+            if invalid_scheduled_actions:
+                # If invalid_scheduled_actions is not empty, this means that there are actions
+                # scheduled on the Pipeline ASG to scale-out that correspond to Incoming loads that
+                # no longer exist. These scheduled actions should be removed:
+                print(
+                    "The scheduled actions"
+                    f" {[a['ScheduledActionName'] for a in invalid_scheduled_actions]} have no"
+                    " corresponding Incoming data load and will be removed"
+                )
+                for invalid_action in invalid_scheduled_actions:
+                    autoscaling_client.delete_scheduled_action(
+                        AutoScalingGroupName=PIPELINE_ASG_NAME,
+                        ScheduledActionName=invalid_action["ScheduledActionName"],
+                    )
+                    print(
+                        f"Scheduled action {invalid_action['ScheduledActionName']} successfully"
+                        " deleted"
+                    )
 
             print(
                 f"Discovered {len(all_incoming_data_loads)} incoming data loads waiting to be"
