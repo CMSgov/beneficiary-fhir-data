@@ -175,21 +175,24 @@ public final class R4PatientResourceProviderIT {
    * values in the response when searching by historic (non-current) MBI hash. The search should
    * look in beneficiaries_history for historical MBIs to include in the response.
    *
-   * <p>Context: The Patient endpoint (v2) supports looking up a Patient by MBI using any MBI
-   * (hashed) that the patient has ever been associated with, functionality needed for cases where
-   * the patient's MBI has changed but the caller does not have the new data. The new MBI is
-   * returned in the response; however BFD should also return the historical MBI data to allow the
-   * caller to verify the new MBI and the old MBI are associated with the same Patient.
+   * <p>Context: The Patient endpoint (v2) supports looking up a Patient by MBI using any MBI_NUM
+   * that the patient has ever been associated with; this functionality needed for cases where the
+   * patient's MBI has changed but the caller does not have the new data. The new MBI is returned in
+   * the response; however BFD should also return historical MBI data to allow the caller to verify
+   * the new MBI_NUM and the old MBI_NUM are associated with the same bene_id.
    */
   @Test
   public void searchForExistingPatientByMbiHashHasHistoricMbis() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-
+    /*
+     * Historic MBI from the beneficiaries_history table (loaded from
+     * sample-a-beneficiaryhistory.txt)
+     */
     List<String> historicUnhashedMbis = new ArrayList<>();
-    historicUnhashedMbis.add("9AB2WW3GR44");
     historicUnhashedMbis.add("3456689");
-    // current MBI from the beneficiaries table (loaded from sample-a-beneficiaries.txt)
+    // current MBI from the beneficiaries table (loaded from
+    // sample-a-beneficiaries.txt)
     String currentUnhashedMbi = "3456789";
 
     BeneficiaryHistory beneHistoryEntry =
@@ -212,9 +215,8 @@ public final class R4PatientResourceProviderIT {
     assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
-    // Check both history entries are present in identifiers plus one for the bene id
-    // and one for the current unhashed mbi
-    assertEquals(4, patientFromSearchResult.getIdentifier().size());
+    // Check history entries are present in identifiers.
+    assertEquals(3, patientFromSearchResult.getIdentifier().size());
     List<Identifier> historicalIds =
         patientFromSearchResult.getIdentifier().stream()
             .filter(

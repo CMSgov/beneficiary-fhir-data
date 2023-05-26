@@ -1125,13 +1125,13 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
   /**
    * Verifies that {@link PatientResourceProvider#searchByIdentifier} returns the historical MBI
    * values in the response when searching by historic (non-current) MBI hash. The search should
-   * look in the medicare_beneficiaryid_history for historical MBIs to include in the response when
-   * IncludeIdentifiers is set to true in the header.
+   * look in beneficiaries_history for historical MBIs to include in the response.
    *
-   * <p>Context: The v1 Patient endpoint supports historical MBI lookups for Patients where current
-   * data will be returned if a previous MBI associated with that patient is used as an identifier
-   * in the call. The historical MBIs for that patient should be returned along with the payload to
-   * allow a caller to double check the current MBI and historical MBI relate to the same patient.
+   * <p>Context: The Patient endpoint supports looking up a Patient by MBI using any MBI_NUM that
+   * the patient has ever been associated with; this functionality needed for cases where the
+   * patient's MBI has changed but the caller does not have the new data. The new MBI is returned in
+   * the response; however BFD should also return historical MBI data to allow the caller to verify
+   * the new MBI_NUM and the old MBI_NUM are associated with the same bene_id.
    */
   @Test
   public void searchForExistingPatientByMbiHashHasHistoricMbis() {
@@ -1142,11 +1142,14 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
 
     List<String> historicUnhashedMbis = new ArrayList<>();
     /*
-     * Historic MBI from the medicare_beneficiaryid_history table (loaded from
-     * sample-a-medicarebeneficiaryidhistory.txt)
+     * Historic MBI from the beneficiaries_history table (loaded from
+     * sample-a-beneficiaryhistory.txt)
      */
+    historicUnhashedMbis.add("3456689");
     historicUnhashedMbis.add("9AB2WW3GR44");
-    // current MBI from the beneficiaries table (loaded from sample-a-beneficiaries.txt)
+    historicUnhashedMbis.add("543217066");
+    // current MBI from the beneficiaries table (loaded from
+    // sample-a-beneficiaries.txt)
     String currentUnhashedMbi = "3456789";
 
     BeneficiaryHistory bh =
@@ -1176,16 +1179,18 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 
     /*
-     * V1 returns a lot of stuff with IncludeIdentifiers=true, so lets review the entries:
-     * 8 total Identifier entries:
+     * V1 returns a lot of stuff with IncludeIdentifiers=true, so lets review:
+     * 12 total Identifier entries:
      *
-     * 1 entry for the bene id
-     * 1 entry for hashed current MBI
-     * 1 entry for unhashed current MBI
-     * 1 entry for historical MBI values from only medicare_beneficiaryid_history
-     * 4 entries for HICN values
+     * 1 entry for bene_id
+     * 1 entry for hicn-hash
+     * 1 entry for mbi-hash
+     * 1 entry for us-medicare (current)
+     * 4 entries us-medicare (historic)
+     * 1 entry for us-mbi (current)
+     * 3 entries for us-mbi (historic)
      */
-    assertEquals(8, patientFromSearchResult.getIdentifier().size());
+    assertEquals(12, patientFromSearchResult.getIdentifier().size());
     List<Identifier> historicalIds =
         patientFromSearchResult.getIdentifier().stream()
             .filter(
@@ -1765,13 +1770,14 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
     assertEquals(
         String.valueOf(expectedBene.getBeneficiaryId()),
         patientFromSearchResult.getIdElement().getIdPart());
-
     /*
-     * Verify that the unhashed MBIs are present, as expected. Note that checking for more than just
-     * one MBI and verifying that they're all unique is a regression test for BFD-525.
+     * Verify that the unhashed MBIs are present, as expected. Note that checking
+     * for more than just
+     * one MBI and verifying that they're all unique is a regression test for
+     * BFD-525.
      */
     assertEquals(
-        3,
+        4,
         patientFromSearchResult.getIdentifier().stream()
             .filter(
                 i ->
@@ -1788,7 +1794,8 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
   @Test
   public void searchByPartDContractWithoutYear() {
     /*
-     * TODO Once AB2D has switched to always specifying the year, this needs to become an invalid
+     * TODO Once AB2D has switched to always specifying the year, this needs to
+     * become an invalid
      * request and this test will need to be updated to reflect that, then.
      */
 

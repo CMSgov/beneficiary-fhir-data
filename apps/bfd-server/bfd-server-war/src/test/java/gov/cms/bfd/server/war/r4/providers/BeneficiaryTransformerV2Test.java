@@ -22,8 +22,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -160,7 +158,8 @@ public final class BeneficiaryTransformerV2Test {
   /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
-    // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
+    // The base CanonicalType doesn't seem to compare correctly so lets convert it
+    // to a string
     assertTrue(
         patient.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
@@ -228,18 +227,6 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
-
-    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss.SSS");
-    FhirContext fhirContext = FhirContext.forR4();
-    String dtStr = sdf.format(new Date());
-    String fn = String.format("/Users/colinchristophermackenzie/dev/foobar/%s-expected.txt", dtStr);
-
-    try (PrintWriter out = new PrintWriter(new FileWriter(fn))) {
-      out.write(fhirContext.newJsonParser().encodeResourceToString(patient));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
     List<Identifier> patientIdentList = patient.getIdentifier();
     assertEquals(5, patientIdentList.size());
 
