@@ -133,22 +133,17 @@ def _get_all_valid_incoming_loads_before_date(
 def _try_schedule_pipeline_asg_action(
     scheduled_action_name: str, start_time: datetime, desired_capacity: int
 ) -> bool:
-    # If the desired scheduled action already exists we do not need to create a scheduled action;
-    # return False to indicate that no action was scheduled
-    if autoscaling_client.describe_scheduled_actions(
-        AutoScalingGroupName=PIPELINE_ASG_NAME,
-        ScheduledActionNames=[scheduled_action_name],
-    )["ScheduledUpdateGroupActions"]:
+    # We try to schedule the requested action, and if the AWS API returns an error indicating that
+    # the scheduled action exists we return false indicating so
+    try:
+        autoscaling_client.put_scheduled_update_group_action(
+            AutoScalingGroupName=PIPELINE_ASG_NAME,
+            ScheduledActionName=scheduled_action_name,
+            StartTime=f"{start_time.replace(microsecond=0).isoformat()}Z",
+            DesiredCapacity=desired_capacity,
+        )
+    except autoscaling_client.exceptions.AlreadyExistsFault:
         return False
-
-    # We know now that this scheduled action has not yet been scheduled, so schedule the action and
-    # return True to indicate an action was scheduled
-    autoscaling_client.put_scheduled_update_group_action(
-        AutoScalingGroupName=PIPELINE_ASG_NAME,
-        ScheduledActionName=scheduled_action_name,
-        StartTime=f"{start_time.replace(microsecond=0).isoformat()}Z",
-        DesiredCapacity=desired_capacity,
-    )
 
     return True
 
