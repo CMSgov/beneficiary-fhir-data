@@ -194,13 +194,6 @@ def handler(event: Any, context: Any):
             # Retrieve _all_ incoming data loads from both synthetic and non-synthetic loads
             all_incoming_data_loads = _get_all_valid_incoming_loads_before_date()
 
-            if not all_incoming_data_loads:
-                # This should never happen as we can only get here if the Lambda was started by a
-                # file being moved to Incoming and that file matches valid RIFs; still, this is a
-                # good signal that something is _wrong_
-                print("No incoming data loads were discovered, exiting...")
-                return
-
             # First, cleanup any scheduled actions for Incoming loads that no longer exist:
             applied_scheduled_actions = autoscaling_client.describe_scheduled_actions(
                 AutoScalingGroupName=PIPELINE_ASG_NAME
@@ -234,6 +227,10 @@ def handler(event: Any, context: Any):
                         f"Scheduled action {invalid_action['ScheduledActionName']} successfully"
                         " deleted"
                     )
+
+            if not all_incoming_data_loads:
+                print("No incoming data loads were discovered, exiting...")
+                return
 
             print(
                 f"Discovered {len(all_incoming_data_loads)} incoming data loads waiting to be"
