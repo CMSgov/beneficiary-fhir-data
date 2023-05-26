@@ -41,7 +41,10 @@ resource "aws_iam_policy" "autoscaling" {
     {
       "Sid": "AllowPutScheduledActionsForPiplineASG",
       "Effect": "Allow",
-      "Action": "autoscaling:PutScheduledUpdateGroupAction",
+      "Action": [
+        "autoscaling:PutScheduledUpdateGroupAction",
+        "autoscaling:DeleteScheduledAction"
+      ],
       "Resource": "${var.ccw_pipeline_asg_details.arn}"
     },
     {
