@@ -88,8 +88,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
-    // assertEquals(8, patient.getIdentifier().size(), "Number of identifiers should
-    // be 8");
+    assertEquals(12, patient.getIdentifier().size(), "Number of identifiers should be 8");
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
@@ -156,7 +155,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
-    assertEquals(8, patient.getIdentifier().size(), "Number of identifiers should be 6");
+    assertEquals(8, patient.getIdentifier().size(), "Number of identifiers should be 8");
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");

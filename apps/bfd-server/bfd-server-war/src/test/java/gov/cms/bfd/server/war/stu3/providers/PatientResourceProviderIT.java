@@ -1125,7 +1125,8 @@ public final class PatientResourceProviderIT extends ServerRequiredTest {
   /**
    * Verifies that {@link PatientResourceProvider#searchByIdentifier} returns the historical MBI
    * values in the response when searching by historic (non-current) MBI hash. The search should
-   * look in beneficiaries_history for historical MBIs to include in the response.
+   * look in beneficiaries_history for historical MBIs to include in the response when
+   * IncludeIdentifiers is set to true in the header.
    *
    * <p>Context: The Patient endpoint supports looking up a Patient by MBI using any MBI_NUM that
    * the patient has ever been associated with; this functionality needed for cases where the
