@@ -1,38 +1,38 @@
 # `bfd_pipeline_manager` Sub-module
 
 This submodule defines a Lambda and its corresponding infrastructure. This Lambda,
-`bfd-${env}-pipeline-manager`, "manages" the BFD Pipeline Terraservice; it is invoked when new files
-are created in the `env`'s corresponding S3 pipeline/ETL bucket at specific paths:
+`bfd-${env}-pipeline-manager`, "manages" the BFD Pipeline instances for the CCW-variant of the BFD
+Pipeline; it is invoked when new files are created in the `env`'s corresponding S3 pipeline/ETL
+bucket at specific paths:
 
 - `Synthetic/Incoming/`
 - `Synthetic/Done/`
 - `Incoming/`
 - `Done/`
 
-Objects uploaded to or moved to these paths in the ETL bucket will invoke this Lambda, which will
-then determine if the BFD CCW Pipeline should be started or not. This depends on a few factors:
+Objects uploaded to, moved to, or removed from these paths in the ETL bucket will invoke this
+Lambda, which will then determine if the BFD CCW Pipeline should be started or not via
+[scheduled actions](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scheduled-scaling.html)
+applied to its AutoScaling Group. In more detail:
 
-- If the file was uploaded to either of the `Incoming` folders, and there are no _ongoing_ or
-  _queued_ data loads _at all_ (including other groups), the `bfd-deploy-pipeline-terraservice`
-  Jenkins pipeline is started using the `bfd-job-broker` with the arguments set to _create_ the CCW
-  Pipeline instance
+- If the file was uploaded to either of the `Incoming` folders, this `env`'s an action to scale-out
+  a single instance is scheduled on the CCW BFD Pipeline's ASG. This action is scheduled either
+  immediately if the file belongs to a data load timestamped in the past or it is scheduled for the
+  time specified by the file's data load in the future. This means that incoming loads that should
+  be loaded immediately will start the Pipeline immediately, and those that should be loaded in the
+  future will start the Pipeline when they need to be loaded
+- If the file was _removed_ from either of the `Incoming` folders _and_ there are no other files
+  within that file's data load in its `Incoming` folder, then the corresponding ASG Scheduled Action
+  is **removed** from the BFD Pipeline ASG such that it will no longer scale-out for a non-existant
+  data load
 - Else, if the file was uploaded to either of the `Done` folders, there are no files in the
-  corresponding `Incoming` folder, all non-optional RIF files are present in the `Done` folder,
-  _and_ there are no ongoing loads _at all_ (including other groups), the
-  `bfd-deploy-pipeline-terraservice` Jenkins pipeline is started using the `bfd-job-broker` with the
-  arguments set to _destroy_ the CCW Pipeline instance
+  corresponding `Incoming` folder, _and_ there are no other data loads in `Incoming` timestamped for
+  _within the next five minutes_, an action to scale-in the BFD Pipeline in the next five minutes is
+  scheduled on the CCW BFD Pipeline ASG
 
-In short, this Lambda indirectly invokes a Jenkins pipeline that will either _create_ or _destroy_
-the CCW Pipeline instance for the current `env`, thus ensuring the CCW Pipeline instance is only
-running when there is data queued up for load into that `env`. As a side effect of using Terraform
-to do this management, the `pipeline` Terraservice will be _deployed_ whenever the CCW Pipeline
-instance needs to start or stop.
-
-Note that the branch from which this Lambda/module was deployed from remains consistent, such that
-whatever branch this module was deployed from will be the branch variant of the
-`bfd-deploy-pipeline-terraservice` that is invoked. For established environments, this will
-generally remain `master`, but this allows for consistency when using ephemeral environments that
-may be based upon non-`master` branches.
+In short, this Lambda reacts to signaling from the CCW Pipeline S3 Bucket and _manages_ the state of
+the CCW Pipeline EC2 instance through its ASG. With this Lambda, the CCW Pipeline should only run
+when there is data to load.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
