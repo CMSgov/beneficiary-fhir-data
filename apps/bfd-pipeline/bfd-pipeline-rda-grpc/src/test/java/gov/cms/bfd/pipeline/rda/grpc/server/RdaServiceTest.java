@@ -123,7 +123,7 @@ public class RdaServiceTest {
 
     serviceSpy.getFissClaims(mockRequest, mockFissObserver);
 
-    verify(mockFissResponder, times(1)).sendResponses();
+    verify(mockFissResponder, times(1)).start();
     verify(mockFissObserver, times(0)).onError(any(Exception.class));
   }
 
@@ -139,7 +139,7 @@ public class RdaServiceTest {
 
     RdaService serviceSpy = spy(new RdaService(mockRdaMessageSourceFactory));
 
-    doThrow(originalException).when(mockFissResponder).sendResponses();
+    doThrow(originalException).when(mockFissResponder).start();
 
     doReturn(mockFissResponder)
         .when(serviceSpy)
@@ -147,7 +147,7 @@ public class RdaServiceTest {
 
     serviceSpy.getFissClaims(mockRequest, mockFissObserver);
 
-    verify(mockFissResponder, times(1)).sendResponses();
+    verify(mockFissResponder, times(1)).start();
 
     ArgumentCaptor<StatusException> captor = ArgumentCaptor.forClass(StatusException.class);
 
@@ -169,7 +169,7 @@ public class RdaServiceTest {
 
     serviceSpy.getMcsClaims(mockRequest, mockMcsObserver);
 
-    verify(mockMcsResponder, times(1)).sendResponses();
+    verify(mockMcsResponder, times(1)).start();
     verify(mockMcsObserver, times(0)).onError(any(Exception.class));
   }
 
@@ -185,13 +185,13 @@ public class RdaServiceTest {
 
     RdaService serviceSpy = spy(new RdaService(mockRdaMessageSourceFactory));
 
-    doThrow(originalException).when(mockMcsResponder).sendResponses();
+    doThrow(originalException).when(mockMcsResponder).start();
 
     doReturn(mockMcsResponder).when(serviceSpy).createMcsResponder(mockMcsObserver, mockMcsSource);
 
     serviceSpy.getMcsClaims(mockRequest, mockMcsObserver);
 
-    verify(mockMcsResponder, times(1)).sendResponses();
+    verify(mockMcsResponder, times(1)).start();
 
     ArgumentCaptor<StatusException> captor = ArgumentCaptor.forClass(StatusException.class);
 
