@@ -314,6 +314,11 @@ def handler(event: Any, context: Any):
                     if is_future_load
                     else "scale_out_immediately"
                 )
+                print(
+                    f"Data load {data_load} has no data in Incoming; it has either been loaded or"
+                    " removed by an external operator. Trying to remove corresponding scheduled"
+                    f" action {invalid_scheduled_action_name}..."
+                )
                 try:
                     autoscaling_client.delete_scheduled_action(
                         AutoScalingGroupName=PIPELINE_ASG_NAME,
