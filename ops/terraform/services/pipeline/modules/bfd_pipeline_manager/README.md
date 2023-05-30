@@ -23,8 +23,8 @@ applied to its AutoScaling Group. In more detail:
   future will start the Pipeline when they need to be loaded
 - If the file was _removed_ from either of the `Incoming` folders _and_ there are no other files
   within that file's data load in its `Incoming` folder, then the corresponding ASG Scheduled Action
-  is **removed** from the BFD Pipeline ASG such that it will no longer scale-out for a non-existant
-  data load
+  is **removed** from the BFD Pipeline ASG such that it will no longer scale-out for a data load
+  that no longer exists
 - Else, if the file was uploaded to either of the `Done` folders, there are no files in the
   corresponding `Incoming` folder, _and_ there are no other data loads in `Incoming` timestamped for
   _within the next five minutes_, an action to scale-in the BFD Pipeline in the next five minutes is
