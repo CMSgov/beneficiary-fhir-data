@@ -12,8 +12,6 @@ from urllib.parse import unquote
 import boto3
 from botocore.config import Config
 
-INCOMING_BUCKET_PREFIXES = ["Incoming/", "Synthetic/Incoming/"]
-
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
@@ -38,14 +36,25 @@ except Exception as exc:
     sys.exit(0)
 
 
-class PipelineLoadType(Enum):
+class S3EventType(str, Enum):
+    """Represents the types of S3 events that this Lambda is invoked by and supports. The value of
+    each Enum is a substring that is matched for on the "eventName" property of an invocation
+    event"""
+
+    OBJECT_CREATED = "ObjectCreated"
+    OBJECT_REMOVED = "ObjectRemoved"
+
+
+class PipelineLoadType(str, Enum):
     """Represents the possible types of data loads: either the data load is non-synthetic, meaning
     that it contains production data and was placed within the root-level Incoming/Done folders of
     the ETL bucket, or it is synthetic, meaning that it contains non-production, testing data and
-    was placed within the Incoming/Done folders within the Synthetic folder of the ETL bucket."""
+    was placed within the Incoming/Done folders within the Synthetic folder of the ETL bucket. The
+    value of each enum represents the name of the Incoming/Done folders' parent directory, with
+    empty string indicating that those paths have no parent"""
 
-    NON_SYNTHETIC = 0
-    SYNTHETIC = 1
+    NON_SYNTHETIC = ""
+    SYNTHETIC = "Synthetic"
 
 
 class PipelineDataStatus(str, Enum):
@@ -89,12 +98,22 @@ class TimestampedDataLoad:
 def _get_all_valid_incoming_loads_before_date(
     time_cutoff: Optional[datetime] = None,
 ) -> set[TimestampedDataLoad]:
+    incoming_bucket_prefixes = [
+        "/".join(
+            filter(
+                None,
+                [load_type.value, PipelineDataStatus.INCOMING.capitalize()],
+            )
+        )
+        + "/"
+        for load_type in PipelineLoadType
+    ]
     rif_types_group_str = "|".join([e.value for e in RifFileType])
     # We get all objects in both the non-synthetic and synthetic incoming folders within the S3
     # Bucket; chain() will flatten the resulting iterable so that it's a single iterable of bucket
     # objects
     incoming_objects = itertools.chain.from_iterable(
-        etl_bucket.objects.filter(Prefix=prefix) for prefix in INCOMING_BUCKET_PREFIXES
+        etl_bucket.objects.filter(Prefix=prefix) for prefix in incoming_bucket_prefixes
     )
     # We then filter out any objects that are not valid RIF files
     incoming_rifs = [
@@ -130,6 +149,25 @@ def _get_all_valid_incoming_loads_before_date(
     return {d for d in valid_data_loads if d.timestamp < time_cutoff}
 
 
+def _is_incoming_folder_empty(data_load: TimestampedDataLoad) -> bool:
+    incoming_key_prefix = (
+        "/".join(
+            filter(
+                None,
+                [
+                    data_load.load_type.capitalize(),
+                    PipelineDataStatus.INCOMING.capitalize(),
+                    data_load.name,
+                ],
+            )
+        )
+        + "/"
+    )
+    incoming_objects = list(etl_bucket.objects.filter(Prefix=incoming_key_prefix))
+
+    return len(incoming_objects) == 0
+
+
 def _try_schedule_pipeline_asg_action(
     scheduled_action_name: str, start_time: datetime, desired_capacity: int
 ) -> bool:
@@ -163,6 +201,20 @@ def handler(event: Any, context: Any):
         return
 
     try:
+        event_type_str = record["eventName"]
+        event_type: S3EventType
+        if S3EventType.OBJECT_CREATED in event_type_str:
+            event_type = S3EventType.OBJECT_CREATED
+        elif S3EventType.OBJECT_REMOVED in event_type_str:
+            event_type = S3EventType.OBJECT_REMOVED
+        else:
+            print(f"Event type {event_type_str} is unsupported. Exiting...")
+            return
+    except KeyError as ex:
+        print(f"The incoming event record did not contain the type of S3 event: {ex}")
+        return
+
+    try:
         file_key: str = record["s3"]["object"]["key"]
     except KeyError as ex:
         print(f"No bucket file found in event notification: {ex}")
@@ -183,117 +235,116 @@ def handler(event: Any, context: Any):
         string=decoded_file_key,
         flags=re.IGNORECASE,
     ):
+        pipeline_load_type = PipelineLoadType(match.group(1) or "")
         pipeline_data_status = PipelineDataStatus(match.group(2))
+        data_load = TimestampedDataLoad(load_type=pipeline_load_type, name=match.group(3))
+        is_future_load = data_load.timestamp >= datetime.utcnow()
+
+        # Log the various bits of data extracted from the invoking event to aid debugging:
+        print(f"Invoked at: {datetime.utcnow().isoformat()} UTC")
+        print(f"S3 Object Key: {decoded_file_key}")
+        print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
+        print(f"RIF type: {RifFileType(match.group(4)).name}")
+        print(f"Load Type: {pipeline_load_type.name}")
+        print(f"Data Load: {data_load.name}")
 
         if pipeline_data_status == PipelineDataStatus.INCOMING:
-            # Retrieve _all_ incoming data loads from both synthetic and non-synthetic loads
-            all_incoming_data_loads = _get_all_valid_incoming_loads_before_date()
+            if event_type == S3EventType.OBJECT_CREATED:
+                # A load was added to Incoming (or files were added to a new load, the distinction
+                # doesn't really matter); add a scheduled action for scale-out in the future if it's
+                # a future load or immediately if the load is timestamped in the past
 
-            # First, cleanup any scheduled actions for Incoming loads that no longer exist:
-            applied_scheduled_actions = autoscaling_client.describe_scheduled_actions(
-                AutoScalingGroupName=PIPELINE_ASG_NAME
-            )
-            valid_scheduled_action_names = [
-                f"scale_out_at_{calendar.timegm(incoming_load.timestamp.utctimetuple())}"
-                for incoming_load in all_incoming_data_loads
-            ]
-            invalid_scheduled_actions = [
-                scheduled_action
-                for scheduled_action in applied_scheduled_actions["ScheduledUpdateGroupActions"]
-                if "ScheduledActionName" in scheduled_action
-                and scheduled_action["ScheduledActionName"].startswith("scale_out_at_")
-                and scheduled_action["ScheduledActionName"] not in valid_scheduled_action_names
-            ]
-
-            if invalid_scheduled_actions:
-                # If invalid_scheduled_actions is not empty, this means that there are actions
-                # scheduled on the Pipeline ASG to scale-out that correspond to Incoming loads that
-                # no longer exist. These scheduled actions should be removed:
-                print(
-                    "The scheduled actions"
-                    f" {[a['ScheduledActionName'] for a in invalid_scheduled_actions]} have no"
-                    " corresponding Incoming data load and will be removed"
+                scheduled_action_time = (
+                    data_load.timestamp
+                    if is_future_load
+                    else datetime.utcnow() + timedelta(minutes=1)
                 )
-                for invalid_action in invalid_scheduled_actions:
-                    try:
-                        autoscaling_client.delete_scheduled_action(
-                            AutoScalingGroupName=PIPELINE_ASG_NAME,
-                            ScheduledActionName=invalid_action["ScheduledActionName"],
-                        )
-                        print(
-                            f"Scheduled action {invalid_action['ScheduledActionName']} successfully"
-                            " deleted"
-                        )
-                    except autoscaling_client.exceptions.ClientError as ex:
-                        print(
-                            "An error occurred when attempting to delete the scheduled action"
-                            f" {invalid_action['ScheduledActionName']}. It is likely that this"
-                            " scheduled action has already been removed by another invocation of"
-                            f" this Lambda. Err: {str(ex)}"
-                        )
+                scheduled_action_name = (
+                    f"scale_out_at_{calendar.timegm(data_load.timestamp.utctimetuple())}"
+                    if is_future_load
+                    else "scale_out_immediately"
+                )
 
-            if not all_incoming_data_loads:
-                print("No incoming data loads were discovered, exiting...")
+                # For immediate scale outs we do not want to set a scheduled action if the desired
+                # capacity is already at 1; so, if this is not a future load we check the desired
+                # capacity and exit if it's already at 1
+                if (
+                    not is_future_load
+                    and autoscaling_client.describe_auto_scaling_groups(
+                        AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+                    )["AutoScalingGroups"][0]["DesiredCapacity"]
+                    == 1
+                ):
+                    print("Pipeline ASG desired capacity is already at 1. Exiting...")
+                    return
+
+                if _try_schedule_pipeline_asg_action(
+                    scheduled_action_name=scheduled_action_name,
+                    start_time=scheduled_action_time,
+                    desired_capacity=1,
+                ):
+                    print(
+                        "Scheduled the Pipeline to start"
+                        f" {'in the future' if is_future_load else 'immediately'} at"
+                        f" {scheduled_action_time.isoformat()} UTC"
+                    )
+                else:
+                    print(
+                        f"The scheduled action {scheduled_action_name} was already scheduled on the"
+                        f" Pipeline's ASG for data load {data_load.name}. Exiting..."
+                    )
+            elif event_type == S3EventType.OBJECT_REMOVED:
+                # If an object is removed from Incoming, that could mean that the Pipeline loaded
+                # the data load it was from _or_ an operator removed the data load manually. Either
+                # case, we want to check if this load is now completely gone from Incoming and
+                # remove any corresponding scheduled actions if so so the Pipeline doesn't scale
+                # unnecessarily.
+                if not _is_incoming_folder_empty(data_load=data_load):
+                    print(
+                        f"The data load {data_load.name} has not yet been fully removed from"
+                        " Incoming. Exiting..."
+                    )
+                    return
+
+                # The invoking event was for the last file in this load being removed from Incoming;
+                # remove the data load's corresponding scheduled action, if it exists:
+                invalid_scheduled_action_name = (
+                    f"scale_out_at_{calendar.timegm(data_load.timestamp.utctimetuple())}"
+                    if is_future_load
+                    else "scale_out_immediately"
+                )
+                try:
+                    autoscaling_client.delete_scheduled_action(
+                        AutoScalingGroupName=PIPELINE_ASG_NAME,
+                        ScheduledActionName=invalid_scheduled_action_name,
+                    )
+                    print(f"Scheduled action {invalid_scheduled_action_name} successfully deleted")
+                except autoscaling_client.exceptions.ClientError as ex:
+                    print(
+                        "An error occurred when attempting to delete the scheduled action"
+                        f" {invalid_scheduled_action_name}. It is likely that this scheduled action"
+                        f" had already been invoked and the data load {data_load.name} has already"
+                        " been loaded successfully."
+                    )
+        elif (
+            pipeline_data_status == PipelineDataStatus.DONE
+            and event_type == S3EventType.OBJECT_CREATED
+        ):
+            # If the invoking event was from a file being created in Done, we can assume that a
+            # Pipeline Data Load is either in-progress or being completed (as the Pipeline will move
+            # Incoming files to Done when they are finished loading); we only want to schedule the
+            # Pipeline to scale-in when there is no ongoing data load and there are no upcoming
+            # future loads in the _immediate_ future
+
+            if not _is_incoming_folder_empty(data_load=data_load):
+                # If the invoking file's data load has corresponding data yet to still be loaded
+                # waiting in Incoming/, that means that this particular data load is not yet
+                # finished and there's no further work to do. This avoids the relatively expensive
+                # operation of scanning all data loads that's done below since we _know_ this data
+                # load is not done yet
+                print(f"The data load {data_load.name} has not yet been fully loaded. Exiting...")
                 return
 
-            print(
-                f"Discovered {len(all_incoming_data_loads)} incoming data loads waiting to be"
-                " ingested or being ingested by the Pipeline. Attempting to schedule scale-out for"
-                " the times specified by each data load group..."
-            )
-
-            # If there are any loads that are timestamped prior to now, immediately schedule a
-            # scale-out for the next minute:
-            if any(
-                data_load.timestamp < datetime.utcnow() for data_load in all_incoming_data_loads
-            ):
-                next_minute = datetime.utcnow() + timedelta(minutes=1)
-                current_desired_capacity = autoscaling_client.describe_auto_scaling_groups(
-                    AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-                )["AutoScalingGroups"][0]["DesiredCapacity"]
-                # Only schedule a new action to scale out if we haven't already done so and only if
-                # the ASG does not have its desired capacity set to 1 already
-                if current_desired_capacity != 1 and _try_schedule_pipeline_asg_action(
-                    scheduled_action_name="scale_out_immediately",
-                    start_time=next_minute,
-                    desired_capacity=1,
-                ):
-                    print(
-                        "Scheduled the Pipeline to start immediately at"
-                        f" {next_minute.isoformat()} UTC"
-                    )
-                else:
-                    print(
-                        "Pipeline is already scheduled to start within the next minute or its"
-                        " desired capacity is already 1"
-                    )
-
-            # Then, for any _future_ loads, we schedule an ASG scale-out for the time specified by
-            # the data load
-            for future_load in (
-                data_load
-                for data_load in all_incoming_data_loads
-                if data_load.timestamp > datetime.utcnow()
-            ):
-                action_name = (
-                    f"scale_out_at_{calendar.timegm(future_load.timestamp.utctimetuple())}"
-                )
-                if _try_schedule_pipeline_asg_action(
-                    scheduled_action_name=action_name,
-                    start_time=future_load.timestamp,
-                    desired_capacity=1,
-                ):
-                    print(
-                        "Scheduled the Pipeline to start in the future at"
-                        f" {future_load.timestamp.isoformat()} UTC for future data load"
-                        f" {future_load.name}"
-                    )
-                else:
-                    print(
-                        "Pipeline is already scheduled to scale-out for future data load"
-                        f" {future_load.name}"
-                    )
-        elif pipeline_data_status == PipelineDataStatus.DONE:
             five_minutes_from_now = datetime.utcnow() + timedelta(minutes=5)
             if _get_all_valid_incoming_loads_before_date(time_cutoff=five_minutes_from_now):
                 # If there are any valid incoming data loads (or future loads within the next 5
