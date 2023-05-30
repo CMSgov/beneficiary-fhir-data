@@ -58,11 +58,7 @@ public class GrpcResponseStream<TResponse> implements AutoCloseable {
    */
   @Override
   public void close() {
-    if (!complete.get()) {
-      if (!cancelled.get()) {
-        cancelStream("auto-cancel on close");
-      }
-    }
+    cancelStreamImpl("auto-cancel on close");
   }
 
   /**
@@ -83,6 +79,7 @@ public class GrpcResponseStream<TResponse> implements AutoCloseable {
       }
       return hasNext;
     } catch (StatusRuntimeException ex) {
+      complete.set(true);
       if (ProcessingException.isInterrupted(ex)) {
         throw new StreamInterruptedException(ex);
       } else if (isStreamResetException(ex)) {
@@ -108,6 +105,7 @@ public class GrpcResponseStream<TResponse> implements AutoCloseable {
     try {
       return resultsIterator.next();
     } catch (StatusRuntimeException ex) {
+      complete.set(true);
       if (ProcessingException.isInterrupted(ex)) {
         throw new StreamInterruptedException(ex);
       } else if (isStreamResetException(ex)) {
@@ -125,7 +123,19 @@ public class GrpcResponseStream<TResponse> implements AutoCloseable {
    * @param reason a description of why the stream is being cancelled
    */
   public void cancelStream(String reason) {
-    if (!complete.get()) {
+    cancelStreamImpl(reason);
+  }
+
+  /**
+   * Cancels the RPC call with the specified reason message. This stops processing of the stream and
+   * informs the server of the cancellation. Does nothing if stream has already completed.
+   * Implemented separately so that external tests don't fail because {@link #cancelStream} is
+   * called internally.
+   *
+   * @param reason a description of why the stream is being cancelled
+   */
+  private void cancelStreamImpl(String reason) {
+    if (!complete.get() && !cancelled.get()) {
       // the null cause is safe because the gRPC considers it optional
       clientCall.cancel(reason, null);
       cancelled.set(true);
