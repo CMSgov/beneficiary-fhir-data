@@ -385,3 +385,5 @@ def handler(event: Any, context: Any):
                     "The Pipeline is already scheduled to scale-in within the next five minutes or"
                     " its ASG's desired capacity is already set to 0"
                 )
+        else:
+            print("Unsupported invocation. Exiting...")
