@@ -132,7 +132,7 @@ def _get_all_valid_incoming_loads_before_date(
         TimestampedDataLoad(
             load_type=(
                 PipelineLoadType.SYNTHETIC
-                if object_key.startswith("Synthetic")
+                if object_key.startswith(PipelineLoadType.SYNTHETIC)
                 else PipelineLoadType.NON_SYNTHETIC
             ),
             name=group_name_match.group(1),
