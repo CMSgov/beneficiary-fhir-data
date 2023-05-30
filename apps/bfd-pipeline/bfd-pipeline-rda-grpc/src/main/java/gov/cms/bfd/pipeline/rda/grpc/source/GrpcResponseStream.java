@@ -6,6 +6,7 @@ import io.grpc.ClientCall;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Wrapper around a gRPC blocking iterator and ClientCall that allows the client to traverse the
@@ -15,7 +16,7 @@ import java.util.Iterator;
  *
  * @param <TResponse> the type of objects returned by the RPC
  */
-public class GrpcResponseStream<TResponse> {
+public class GrpcResponseStream<TResponse> implements AutoCloseable {
   /**
    * When the RDA API drops its connection during idle time an exception is thrown by the gRPC
    * runtime that includes with {@link Status#getCode()} returning {@link Status#INTERNAL} and this
@@ -28,6 +29,10 @@ public class GrpcResponseStream<TResponse> {
   private final ClientCall<?, ?> clientCall;
   /** An Iterator over the response stream. */
   private final Iterator<TResponse> resultsIterator;
+  /** True if we have consumed entire stream. */
+  private final AtomicBoolean complete;
+  /** True if client has cancelled the stream. */
+  private final AtomicBoolean cancelled;
 
   /**
    * Constructs a GrpcResponseStream object using the specified ClientCall and Iterator. The
@@ -41,6 +46,23 @@ public class GrpcResponseStream<TResponse> {
   public GrpcResponseStream(ClientCall<?, ?> clientCall, Iterator<TResponse> resultsIterator) {
     this.clientCall = clientCall;
     this.resultsIterator = resultsIterator;
+    complete = new AtomicBoolean();
+    cancelled = new AtomicBoolean();
+  }
+
+  /**
+   * Just cancel the stream if we have not consumed the whole stream and client has not already
+   * cancelled the stream.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public void close() {
+    if (!complete.get()) {
+      if (!cancelled.get()) {
+        cancelStream("auto-cancel on close");
+      }
+    }
   }
 
   /**
@@ -49,12 +71,17 @@ public class GrpcResponseStream<TResponse> {
    *
    * @return true if and only if there is an object ready to be processed by next()
    * @throws StreamInterruptedException if the stream threw an InterruptedException
+   * @throws DroppedConnectionException if the connection is dropped by server
    * @throws StatusRuntimeException if the stream threw an exception
    */
   public boolean hasNext()
       throws StreamInterruptedException, DroppedConnectionException, StatusRuntimeException {
     try {
-      return resultsIterator.hasNext();
+      final var hasNext = resultsIterator.hasNext();
+      if (!hasNext) {
+        complete.set(true);
+      }
+      return hasNext;
     } catch (StatusRuntimeException ex) {
       if (ProcessingException.isInterrupted(ex)) {
         throw new StreamInterruptedException(ex);
@@ -73,6 +100,7 @@ public class GrpcResponseStream<TResponse> {
    *
    * @return the next available object from the stream
    * @throws StreamInterruptedException if the stream threw an InterruptedException
+   * @throws DroppedConnectionException if the connection is dropped by server
    * @throws StatusRuntimeException if the stream threw an exception
    */
   public TResponse next()
@@ -92,13 +120,16 @@ public class GrpcResponseStream<TResponse> {
 
   /**
    * Cancels the RPC call with the specified reason message. This stops processing of the stream and
-   * informs the server of the cancellation.
+   * informs the server of the cancellation. Does nothing if stream has already completed.
    *
    * @param reason a description of why the stream is being cancelled
    */
   public void cancelStream(String reason) {
-    // the null cause is safe because the gRPC considers it optional
-    clientCall.cancel(reason, null);
+    if (!complete.get()) {
+      // the null cause is safe because the gRPC considers it optional
+      clientCall.cancel(reason, null);
+      cancelled.set(true);
+    }
   }
 
   /**
@@ -129,7 +160,6 @@ public class GrpcResponseStream<TResponse> {
       super(cause);
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized StatusRuntimeException getCause() {
       return (StatusRuntimeException) super.getCause();
@@ -150,7 +180,6 @@ public class GrpcResponseStream<TResponse> {
       super(cause);
     }
 
-    /** {@inheritDoc} */
     @Override
     public synchronized StatusRuntimeException getCause() {
       return (StatusRuntimeException) super.getCause();

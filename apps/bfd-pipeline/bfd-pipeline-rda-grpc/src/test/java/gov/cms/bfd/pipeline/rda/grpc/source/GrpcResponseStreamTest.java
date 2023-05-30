@@ -12,12 +12,15 @@ import io.grpc.ClientCall;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.Iterator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Unit tests for {@link GrpcResponseStream}. */
+@ExtendWith(MockitoExtension.class)
 public class GrpcResponseStreamTest {
   /** Mock iterator used by the response stream. */
   @Mock private Iterator<Integer> iterator;
@@ -29,8 +32,13 @@ public class GrpcResponseStreamTest {
   /** Sets up the test stream and mocks. */
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     stream = new GrpcResponseStream<>(clientCall, iterator);
+  }
+
+  /** Closes the stream created by {@link #setUp}. */
+  @AfterEach
+  void tearDown() {
+    stream.close();
   }
 
   /** Verify that {@link GrpcResponseStream#hasNext()} passes through non-interrupt exceptions. */
@@ -59,7 +67,11 @@ public class GrpcResponseStreamTest {
     }
   }
 
-  /** Verify that {@link GrpcResponseStream#hasNext()} wraps {@link InterruptedException}s. */
+  /**
+   * Verify that {@link GrpcResponseStream#hasNext()} wraps {@link InterruptedException}s.
+   *
+   * @throws DroppedConnectionException pass through checked exception
+   */
   @Test
   public void testThatHasNextWrapsInterrupts() throws DroppedConnectionException {
     StatusRuntimeException status =
@@ -73,7 +85,11 @@ public class GrpcResponseStreamTest {
     }
   }
 
-  /** Verify that {@link GrpcResponseStream#next()} wraps {@link InterruptedException}s. */
+  /**
+   * Verify that {@link GrpcResponseStream#next()} wraps {@link InterruptedException}s.
+   *
+   * @throws StreamInterruptedException pass through checked exception
+   */
   @Test
   public void testThatNextWrapsInterrupts() throws DroppedConnectionException {
     StatusRuntimeException status =
@@ -90,6 +106,8 @@ public class GrpcResponseStreamTest {
   /**
    * Verify that {@link GrpcResponseStream#hasNext()} wraps exceptions that indicate a supported
    * type of dropped connection.
+   *
+   * @throws StreamInterruptedException pass through checked exception
    */
   @Test
   public void testThatHasNextWrapsDroppedConnections() throws StreamInterruptedException {
@@ -108,6 +126,8 @@ public class GrpcResponseStreamTest {
   /**
    * Verify that {@link GrpcResponseStream#hasNext()} wraps exceptions that indicate a supported
    * type of dropped connection.
+   *
+   * @throws StreamInterruptedException pass through checked exception
    */
   @Test
   public void testThatNextWrapsDroppedConnections() throws StreamInterruptedException {

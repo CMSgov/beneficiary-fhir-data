@@ -401,6 +401,8 @@ public class DLQGrpcRdaSourceTest {
     // In the end, 1 sequence should have been deleted (5), and the other marked obsolete (15)
     assertEquals(expectedResult, actualResult);
 
+    verify(mockStreamA).close();
+    verify(mockStreamB).close();
     verify(mockDao, times(2))
         .updateState(anyLong(), any(MessageError.ClaimType.class), any(MessageError.Status.class));
     verify(mockDao)
