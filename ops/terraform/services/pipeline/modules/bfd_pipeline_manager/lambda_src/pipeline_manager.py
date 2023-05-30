@@ -245,6 +245,7 @@ def handler(event: Any, context: Any):
         print(f"S3 Object Key: {decoded_file_key}")
         print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
         print(f"RIF type: {RifFileType(match.group(4)).name}")
+        print(f"Load Status: {pipeline_data_status.name}")
         print(f"Load Type: {pipeline_load_type.name}")
         print(f"Data Load: {data_load.name}")
 
