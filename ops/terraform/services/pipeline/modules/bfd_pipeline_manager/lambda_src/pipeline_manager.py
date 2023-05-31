@@ -104,13 +104,7 @@ def _get_all_valid_incoming_loads_before_date(
     time_cutoff: Optional[datetime] = None,
 ) -> set[TimestampedDataLoad]:
     incoming_bucket_prefixes = [
-        "/".join(
-            filter(
-                None,
-                [load_type.value, PipelineDataStatus.INCOMING.capitalize()],
-            )
-        )
-        + "/"
+        "/".join(filter(None, [load_type.value, PipelineDataStatus.INCOMING])) + "/"
         for load_type in PipelineLoadType
     ]
     rif_types_group_str = "|".join([e.value for e in RifFileType])
@@ -159,11 +153,7 @@ def _is_incoming_folder_empty(data_load: TimestampedDataLoad) -> bool:
         "/".join(
             filter(
                 None,
-                [
-                    data_load.load_type.capitalize(),
-                    PipelineDataStatus.INCOMING.capitalize(),
-                    data_load.name,
-                ],
+                [data_load.load_type, PipelineDataStatus.INCOMING, data_load.name],
             )
         )
         + "/"
