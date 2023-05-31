@@ -15,11 +15,11 @@ Lambda, which will then determine if the BFD CCW Pipeline should be started or n
 [scheduled actions](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scheduled-scaling.html)
 applied to its AutoScaling Group. In more detail:
 
-- If the file was uploaded to either of the `Incoming` folders, this `env`'s an action to scale-out
-  a single instance is scheduled on the CCW BFD Pipeline's ASG. This action is scheduled either
-  immediately if the file belongs to a data load timestamped in the past or it is scheduled for the
-  time specified by the file's data load in the future. This means that incoming loads that should
-  be loaded immediately will start the Pipeline immediately, and those that should be loaded in the
+- If the file was uploaded to either of the `Incoming` folders, an action to scale-out a single
+  instance is scheduled on the CCW BFD Pipeline's ASG. This action is scheduled either immediately
+  if the file belongs to a data load timestamped in the past or it is scheduled for the time
+  specified by the file's data load in the future. This means that incoming loads that should be
+  loaded immediately will start the Pipeline immediately, and those that should be loaded in the
   future will start the Pipeline when they need to be loaded
 - If the file was _removed_ from either of the `Incoming` folders _and_ there are no other files
   within that file's data load in its `Incoming` folder, then the corresponding ASG Scheduled Action
