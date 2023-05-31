@@ -58,5 +58,8 @@ source "{{ server_load_dir }}/venv/bin/activate"
 # STOP_ON_NODE_LIMIT defaults to true in the server-load application
 {{ (server_load_stop_on_node_limit is defined) | ternary('', '#') }}export STOP_ON_NODE_LIMIT='{{ server_load_stop_on_node_limit | default('', true) }}'
 
+#LOCUST_TAGS defaults to '' in the server-load application
+{{ (server_load_locust_tags is defined) | ternary('', '#') }}export LOCUST_TAGS='{{ server_load_locust_tags | default('', true) }}'
+
 (cd "{{ server_load_dir }}/services/server-load/controller" && \
  python3 controller.py &>> "{{ server_load_dir }}/server-load-controller.log")

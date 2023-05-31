@@ -140,7 +140,8 @@ def _main():
 
     ip_address = socket.gethostbyname(socket.gethostname())
 
-    print(f"Running tests with an annotated @tag including any of the following: {locust_tags}...")
+    if locust_tags:
+        print(f"Running tests with an annotated @tag including any of the following: {locust_tags}...")
 
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):

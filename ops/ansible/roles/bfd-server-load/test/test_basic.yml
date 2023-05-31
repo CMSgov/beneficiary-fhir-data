@@ -51,6 +51,7 @@
         server_load_max_spawned_users: 0
         server_load_test_runtime_limit: 0
         server_load_coasting_time: 0
+        server_load_locust_tags: ""
 
     - name: Ensure Service Is Running
       service:

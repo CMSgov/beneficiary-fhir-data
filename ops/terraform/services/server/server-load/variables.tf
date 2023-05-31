@@ -31,7 +31,7 @@ variable "test_host" {
 variable "locust_tags" {
   description = "Space-delimited. The locust tests with ANY of the given tags will be executed."
   type        = string
-  default     = "eob_test_id_count"
+  default     = null
 }
 
 variable "initial_worker_nodes" {
