@@ -215,7 +215,7 @@
                         <id>build-image</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>dockerBuild</goal>
+                            <goal>${jib.goal}</goal>
                         </goals>
                     </execution>
                 </executions>
