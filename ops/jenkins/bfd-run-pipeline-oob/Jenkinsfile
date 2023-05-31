@@ -120,9 +120,9 @@ aws autoscaling set-desired-capacity --auto-scaling-group-name $asgName --desire
                 + "AWS Console: "
                 + "https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-east-1#AutoScalingGroupDetails:id=${autoScalingGroupName};view=instanceManagement")
 
-          def timeout = params.timeout_minutes.trim().toInteger()
+          def pipelineTimeout = params.timeout_minutes.trim().toInteger()
           try {
-            timeout(time: timeout, unit: 'MINUTES') {
+            timeout(time: pipelineTimeout, unit: 'MINUTES') {
               input ("Once the static ${params.pipeline_variant} pipeline instance is no longer "
                      + "needed, click either Abort or Proceed to cleanup")
             }
