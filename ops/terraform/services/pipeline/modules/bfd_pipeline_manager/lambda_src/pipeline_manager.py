@@ -251,18 +251,6 @@ def handler(event: Any, context: Any):
                 # a future load or immediately if the load is timestamped in the past
 
                 if not is_future_load:
-                    # For immediate scale outs we do not want to set a scheduled action if the
-                    # desired capacity is already at 1; so, if this is not a future load we check
-                    # the desired capacity and exit if it's already at 1
-                    if (
-                        autoscaling_client.describe_auto_scaling_groups(
-                            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-                        )["AutoScalingGroups"][0]["DesiredCapacity"]
-                        == 1
-                    ):
-                        print("Pipeline ASG desired capacity is already at 1. Exiting...")
-                        return
-
                     # We also need to ensure that there are no near-future scale-in scheduled
                     # actions on the ASG so that we can avoid scaling-out and then prematurely
                     # scaling-in
@@ -284,6 +272,18 @@ def handler(event: Any, context: Any):
                             f"No near-future scale-in actions scheduled on {PIPELINE_ASG_NAME}."
                             " Continuing..."
                         )
+
+                    # For immediate scale outs we do not want to set a scheduled action if the
+                    # desired capacity is already at 1; so, if this is not a future load we check
+                    # the desired capacity and exit if it's already at 1
+                    if (
+                        autoscaling_client.describe_auto_scaling_groups(
+                            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+                        )["AutoScalingGroups"][0]["DesiredCapacity"]
+                        == 1
+                    ):
+                        print("Pipeline ASG desired capacity is already at 1. Exiting...")
+                        return
 
                 scheduled_action_time = (
                     data_load.timestamp
