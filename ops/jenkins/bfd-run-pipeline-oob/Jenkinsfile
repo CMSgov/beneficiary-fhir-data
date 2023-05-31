@@ -27,7 +27,7 @@ spec:
     choice(
       name: 'pipeline_variant',
       // TODO: Update with RDA when possible
-      choices: ['ccw']
+      choices: ['ccw'],
       description: 'The variant of BFD Pipeline to run out-of-band'
     )
     string(
