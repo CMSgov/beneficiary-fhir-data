@@ -12,6 +12,10 @@ from urllib.parse import unquote
 import boto3
 from botocore.config import Config
 
+SCALE_IN_FIVE_MINUTES_ACTION_NAME = "scale_in_in_five_minutes"
+SCALE_OUT_IMMEDIATELY_ACTION_NAME = "scale_out_immediately"
+SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX = "scale_out_at_"
+
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
@@ -68,7 +72,8 @@ class PipelineDataStatus(str, Enum):
 
 class RifFileType(str, Enum):
     """Represents all of the possible RIF file types that can be loaded by the BFD ETL Pipeline. The
-    value of each enum is a specific substring that is used to match on each type of file"""
+    value of each enum is a specific substring that is used to match on each type of file
+    """
 
     BENEFICIARY_HISTORY = "beneficiary_history"
     BENEFICIARY = "bene"
@@ -255,30 +260,51 @@ def handler(event: Any, context: Any):
                 # doesn't really matter); add a scheduled action for scale-out in the future if it's
                 # a future load or immediately if the load is timestamped in the past
 
+                if not is_future_load:
+                    # For immediate scale outs we do not want to set a scheduled action if the
+                    # desired capacity is already at 1; so, if this is not a future load we check
+                    # the desired capacity and exit if it's already at 1
+                    if (
+                        autoscaling_client.describe_auto_scaling_groups(
+                            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+                        )["AutoScalingGroups"][0]["DesiredCapacity"]
+                        == 1
+                    ):
+                        print("Pipeline ASG desired capacity is already at 1. Exiting...")
+                        return
+
+                    # We also need to ensure that there are no near-future scale-in scheduled
+                    # actions on the ASG so that we can avoid scaling-out and then prematurely
+                    # scaling-in
+                    print(
+                        "Attempting to delete any near-future scale-in actions on"
+                        f" {PIPELINE_ASG_NAME} to avoid premature scale-in..."
+                    )
+                    try:
+                        autoscaling_client.delete_scheduled_action(
+                            AutoScalingGroupName=PIPELINE_ASG_NAME,
+                            ScheduledActionName=SCALE_IN_FIVE_MINUTES_ACTION_NAME,
+                        )
+                        print(
+                            f"Scheduled action {SCALE_IN_FIVE_MINUTES_ACTION_NAME} successfully"
+                            " deleted. Continuing..."
+                        )
+                    except autoscaling_client.exceptions.ClientError as ex:
+                        print(
+                            f"No near-future scale-in actions scheduled on {PIPELINE_ASG_NAME}."
+                            " Continuing..."
+                        )
+
                 scheduled_action_time = (
                     data_load.timestamp
                     if is_future_load
                     else datetime.utcnow() + timedelta(minutes=1)
                 )
                 scheduled_action_name = (
-                    f"scale_out_at_{calendar.timegm(data_load.timestamp.utctimetuple())}"
+                    f"{SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX}{calendar.timegm(data_load.timestamp.utctimetuple())}"
                     if is_future_load
-                    else "scale_out_immediately"
+                    else SCALE_OUT_IMMEDIATELY_ACTION_NAME
                 )
-
-                # For immediate scale outs we do not want to set a scheduled action if the desired
-                # capacity is already at 1; so, if this is not a future load we check the desired
-                # capacity and exit if it's already at 1
-                if (
-                    not is_future_load
-                    and autoscaling_client.describe_auto_scaling_groups(
-                        AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-                    )["AutoScalingGroups"][0]["DesiredCapacity"]
-                    == 1
-                ):
-                    print("Pipeline ASG desired capacity is already at 1. Exiting...")
-                    return
-
                 if _try_schedule_pipeline_asg_action(
                     scheduled_action_name=scheduled_action_name,
                     start_time=scheduled_action_time,
@@ -310,9 +336,9 @@ def handler(event: Any, context: Any):
                 # The invoking event was for the last file in this load being removed from Incoming;
                 # remove the data load's corresponding scheduled action, if it exists:
                 invalid_scheduled_action_name = (
-                    f"scale_out_at_{calendar.timegm(data_load.timestamp.utctimetuple())}"
+                    f"{SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX}{calendar.timegm(data_load.timestamp.utctimetuple())}"
                     if is_future_load
-                    else "scale_out_immediately"
+                    else SCALE_OUT_IMMEDIATELY_ACTION_NAME
                 )
                 print(
                     f"Data load {data_load} has no data in Incoming; it has either been loaded or"
@@ -378,7 +404,7 @@ def handler(event: Any, context: Any):
                 AutoScalingGroupNames=[PIPELINE_ASG_NAME]
             )["AutoScalingGroups"][0]["DesiredCapacity"]
             if current_desired_capacity != 0 and _try_schedule_pipeline_asg_action(
-                scheduled_action_name="scale_in_in_five_minutes",
+                scheduled_action_name=SCALE_IN_FIVE_MINUTES_ACTION_NAME,
                 start_time=five_minutes_from_now,
                 desired_capacity=0,
             ):
