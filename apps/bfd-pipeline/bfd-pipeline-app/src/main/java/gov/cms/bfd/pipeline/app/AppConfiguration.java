@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
@@ -18,19 +18,21 @@ import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
+import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.Nullable;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 
 /**
@@ -80,9 +82,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
 
-  /** Default value for {@link IdHasher.Config#getCacheSize()}. */
-  private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
-
   /**
    * The name of the environment variable that should be used to indicate whether or not to
    * configure the CCW RIF data load job. Defaults to true to run the job unless disabled.
@@ -108,18 +107,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * The name of the environment variable that should be used to provide the {@link
    * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} value, which is a bit complex; please see
    * its description for details.
-   */
-  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES =
-      "FILTERING_NON_NULL_AND_NON_2023_BENES";
-
-  /**
-   * The default value to use for the {@link #ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES}
-   * configuration environment variable when it is not set.
    *
    * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
    * removed as soon as is reasonable.
    */
-  public static final boolean DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES = true;
+  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES =
+      "FILTERING_NON_NULL_AND_NON_2023_BENES";
 
   /**
    * The name of the environment variable that should be used to provide the number of {@link
@@ -130,11 +123,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * the performance boost from larger batch sizes drops off quickly.
    */
   public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE";
-
-  /**
-   * The default number of {@link RifRecordEvent}s that will be included in each processing batch.
-   */
-  private static final int DEFAULT_RIF_JOB_BATCH_SIZE = 25;
 
   /**
    * The name of the environment variable that should be used to provide the work queue size for the
@@ -151,12 +139,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       "RIF_JOB_QUEUE_SIZE_MULTIPLE";
 
   /**
-   * The default value for the {@link #ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE} environment
-   * variable.
-   */
-  public static final int DEFAULT_RIF_JOB_QUEUE_SIZE_MULTIPLE = 2;
-
-  /**
    * The name of the environment variable that should be used to indicate whether or not to
    * configure the RDA GRPC data load job. Defaults to false to not run the job unless enabled.
    */
@@ -169,49 +151,35 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS = "RDA_JOB_INTERVAL_SECONDS";
 
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
-  public static final int DEFAULT_RDA_JOB_INTERVAL_SECONDS = 300;
-
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getBatchSize()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_BATCH_SIZE = "RDA_JOB_BATCH_SIZE";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_BATCH_SIZE}. */
-  public static final int DEFAULT_RDA_JOB_BATCH_SIZE = 1;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getWriteThreads()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_WRITE_THREADS = "RDA_JOB_WRITE_THREADS";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_WRITE_THREADS}. */
-  public static final int DEFAULT_RDA_JOB_WRITE_THREADS = 1;
 
   /**
    * The name of the environment variable that specifies which type of RDA API server to connect to.
    * {@link RdaSourceConfig#getServerType()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE}. */
-  public static final RdaSourceConfig.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
-      RdaSourceConfig.ServerType.Remote;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getHost()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_HOST}. */
-  public static final String DEFAULT_RDA_GRPC_HOST = "localhost";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getPort()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
-  public static final int DEFAULT_RDA_GRPC_PORT = 443;
 
   /**
    * The name of the environment variable that specifies the name of an in-process mock RDA API
@@ -220,8 +188,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
       "RDA_GRPC_INPROC_SERVER_NAME";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME}. */
-  public static final String DEFAULT_RDA_GRPC_INPROC_SERVER_NAME = "MockRdaServer";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -229,8 +195,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
-  public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -239,20 +203,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
       "RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP";
-  /**
-   * The default value for {@link
-   * AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP}.
-   */
-  public static final int DEFAULT_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
-      (int) Duration.ofMinutes(4).toSeconds();
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getAuthenticationToken()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN}. */
-  public static final String DEFAULT_RDA_GRPC_AUTH_TOKEN = null;
 
   /**
    * The name of the environment variable that should be used to indicate how many RDA messages can
@@ -383,23 +339,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
-   * Instance of {@link MicrometerConfigHelper} used to create a {@link CloudWatchConfig} instance.
-   * Contains the property name to environment variable name mappings for supported {@link
-   * CloudWatchConfig} properties as well as default values for some environment variables.
-   */
-  @VisibleForTesting
-  static final MicrometerConfigHelper MICROMETER_CW_CONFIG_HELPER =
-      new MicrometerConfigHelper(
-          List.of(
-              new MicrometerConfigHelper.PropertyMapping(
-                  "cloudwatch.enabled", ENV_VAR_MICROMETER_CW_ENABLED, Optional.of("false")),
-              new MicrometerConfigHelper.PropertyMapping(
-                  "cloudwatch.namespace", ENV_VAR_MICROMETER_CW_NAMESPACE, Optional.empty()),
-              new MicrometerConfigHelper.PropertyMapping(
-                  "cloudwatch.step", ENV_VAR_MICROMETER_CW_INTERVAL, Optional.of("PT1M"))),
-          System::getenv);
-
-  /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
    */
@@ -409,6 +348,26 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * Serializable.
    */
   @Nullable private final RdaLoadOptions rdaLoadOptions;
+
+  /** All of the default configuration values. These will be used as the last layer in config. */
+  private static final Map<String, String> DEFAULT_CONFIG_VALUES =
+      ImmutableMap.<String, String>builder()
+          .put(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE, "100")
+          .put(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES, "true")
+          .put(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "25")
+          .put(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "2")
+          .put(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "300")
+          .put(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "1")
+          .put(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, "1")
+          .put(ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.Remote.name())
+          .put(ENV_VAR_KEY_RDA_GRPC_HOST, "localhost")
+          .put(ENV_VAR_KEY_RDA_GRPC_PORT, "443")
+          .put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME, "MockRdaServer")
+          .put(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, String.valueOf(Integer.MAX_VALUE))
+          .put(
+              ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
+              String.valueOf(Duration.ofMinutes(4).toSeconds()))
+          .build();
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
@@ -446,7 +405,6 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     return Optional.ofNullable(rdaLoadOptions);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder(super.toString());
@@ -460,38 +418,47 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   }
 
   /**
-   * Per <code>/dev/design-decisions-readme.md</code>, this application accepts its configuration
-   * via environment variables. Read those in, and build an {@link AppConfiguration} instance from
-   * them.
+   * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
+   * information. The provided function is used to look up environment variables so that these can
+   * be simulated in tests without having to fork a process.
+   *
+   * <p>{@see LayeredConfiguration#createConfigLoader} for possible sources of configuration
+   * variables.
+   *
+   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @return appropriately configured {@link ConfigLoader}
+   */
+  static ConfigLoader createConfigLoader(Function<String, String> getenv) {
+    return LayeredConfiguration.createConfigLoader(DEFAULT_CONFIG_VALUES, getenv);
+  }
+
+  /**
+   * Load configuration variables using the provided {@link ConfigLoader} instance and build an
+   * {@link AppConfiguration} instance from them.
    *
    * <p>As a convenience, this method will also verify that AWS credentials were provided, such that
    * {@link DefaultCredentialsProvider} can load them. If not, an {@link AppConfigurationException}
    * will be thrown.
    *
-   * @return the {@link AppConfiguration} instance represented by the configuration provided to this
-   *     application via the environment variables
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     configuration passed to the application are incomplete or incorrect.
+   * @param config used to load configuration values
+   * @return the {@link AppConfiguration} instance
+   * @throws ConfigException will be thrown if the configuration passed to the application are
+   *     incomplete or incorrect.
    */
-  static AppConfiguration readConfigFromEnvironmentVariables() {
-    int hicnHashIterations = readEnvIntPositiveRequired(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
-    byte[] hicnHashPepper = readEnvBytesRequired(ENV_VAR_KEY_HICN_HASH_PEPPER);
-    int hicnHashCacheSize =
-        readEnvIntOptional(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE).orElse(DEFAULT_HICN_HASH_CACHE_SIZE);
+  static AppConfiguration loadConfig(ConfigLoader config) {
+    int hicnHashIterations = config.positiveIntValue(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
+    byte[] hicnHashPepper = config.hexBytes(ENV_VAR_KEY_HICN_HASH_PEPPER);
+    int hicnHashCacheSize = config.intValue(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE);
 
-    int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
-    boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+    int loaderThreads = config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS);
+    boolean idempotencyRequired = config.booleanValue(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
     boolean filteringNonNullAndNon2023Benes =
-        readEnvBooleanOptional(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES)
-            .orElse(DEFAULT_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
-    int rifRecordBatchSize =
-        readEnvIntOptional(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE).orElse(DEFAULT_RIF_JOB_BATCH_SIZE);
-    int rifTaskQueueSizeMultiple =
-        readEnvIntOptional(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
-            .orElse(DEFAULT_RIF_JOB_QUEUE_SIZE_MULTIPLE);
+        config.booleanValue(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
+    int rifRecordBatchSize = config.intValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE);
+    int rifTaskQueueSizeMultiple = config.intValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE);
 
-    MetricOptions metricOptions = readMetricOptionsFromEnvironmentVariables();
-    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables(loaderThreads);
+    MetricOptions metricOptions = loadMetricOptions(config);
+    DatabaseOptions databaseOptions = loadDatabaseOptions(config, loaderThreads);
 
     LoadAppOptions loadOptions =
         new LoadAppOptions(
@@ -506,26 +473,24 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
             rifRecordBatchSize,
             rifTaskQueueSizeMultiple);
 
-    CcwRifLoadOptions ccwRifLoadOptions =
-        readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
+    CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
 
-    RdaLoadOptions rdaLoadOptions =
-        readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
+    RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
     return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 
   /**
-   * Reads database options from environment variables.
+   * Reads database options from the {@link ConfigLoader}.
    *
+   * @param config used to load configuration values
    * @param loaderThreads the number loader threads, to determine fallback value for database max
    *     pool size
    * @return the database options
    */
-  private static DatabaseOptions readDatabaseOptionsFromEnvironmentVariables(int loaderThreads) {
-    // Get the base database options from env vars
-    DatabaseOptions databaseOptions = readDatabaseOptionsFromEnvironmentVariables();
+  private static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
+    DatabaseOptions databaseOptions = loadDatabaseOptions(config);
 
-    Optional<Integer> databaseMaxPoolSize = readEnvIntOptional(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
+    Optional<Integer> databaseMaxPoolSize = config.intOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
 
     if (databaseMaxPoolSize.isPresent() && databaseMaxPoolSize.get() < 1) {
       throw new AppConfigurationException(
@@ -548,21 +513,21 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   }
 
   /**
-   * Reads the ccw rif load options from environment variables.
+   * Reads the ccw rif load options from the {@link ConfigLoader}.
    *
+   * @param config used to load configuration values
    * @param loadOptions the load options to use when creating the {link CcwRifLoadOptions}
    * @return the ccw rif load options
    */
   @Nullable
-  static CcwRifLoadOptions readCcwRifLoadOptionsFromEnvironmentVariables(
-      LoadAppOptions loadOptions) {
-    final boolean enabled = readEnvBooleanOptional(ENV_VAR_KEY_CCW_RIF_JOB_ENABLED).orElse(true);
+  static CcwRifLoadOptions loadCcwRifLoadOptions(ConfigLoader config, LoadAppOptions loadOptions) {
+    final boolean enabled = config.booleanOption(ENV_VAR_KEY_CCW_RIF_JOB_ENABLED).orElse(true);
     if (!enabled) {
       return null;
     }
 
-    final String s3BucketName = readEnvStringRequired(ENV_VAR_KEY_BUCKET);
-    final Optional<String> rifFilterText = readEnvStringOptional(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
+    final String s3BucketName = config.stringValue(ENV_VAR_KEY_BUCKET);
+    final Optional<String> rifFilterText = config.stringOptionEmptyOK(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
     final Optional<RifFileType> allowedRifFileType;
     if (rifFilterText.isPresent()) {
       try {
@@ -578,25 +543,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
       allowedRifFileType = Optional.empty();
     }
 
-    /*
-     * Just for convenience: make sure DefaultCredentialsProvider
-     * has whatever it needs.
-     */
-    try {
-      DefaultCredentialsProvider awsCredentialsProvider =
-          DefaultCredentialsProvider.builder().build();
-      awsCredentialsProvider.resolveCredentials();
-    } catch (SdkClientException e) {
-      /*
-       * The credentials provider should throw this if it can't find what
-       * it needs.
-       */
-      throw new AppConfigurationException(
-          String.format(
-              "Missing configuration for AWS credentials (for %s).",
-              DefaultCredentialsProvider.class.getName()),
-          e);
-    }
+    LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     return new CcwRifLoadOptions(extractionOptions, loadOptions);
   }
@@ -606,155 +553,133 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * of its settings are optional. Because the API may exist in some environments but not others a
    * separate environment variable indicates whether the settings should be loaded.
    *
+   * @param config used to load configuration values
    * @param idHasherConfig the id hasher config
    * @return a valid RdaLoadOptions if job is configured, otherwise null
    */
   @Nullable
-  static RdaLoadOptions readRdaLoadOptionsFromEnvironmentVariables(IdHasher.Config idHasherConfig) {
-    final boolean enabled = readEnvBooleanOptional(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
+  static RdaLoadOptions loadRdaLoadOptions(ConfigLoader config, IdHasher.Config idHasherConfig) {
+    final boolean enabled = config.booleanOption(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
     if (!enabled) {
       return null;
     }
     final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
         AbstractRdaLoadJob.Config.builder()
-            .runInterval(
-                Duration.ofSeconds(
-                    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, Integer::parseInt)
-                        .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)))
-            .batchSize(
-                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE))
-            .writeThreads(
-                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_JOB_WRITE_THREADS));
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, Long::parseLong)
+            .runInterval(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)))
+            .batchSize(config.intValue(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE))
+            .writeThreads(config.intValue(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS));
+    config
+        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM)
         .ifPresent(jobConfig::startingFissSeqNum);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
+    config
+        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM)
         .ifPresent(jobConfig::startingMcsSeqNum);
-    readEnvBooleanOptional(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    config.booleanOption(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
     // Default to the hardcoded RDA version in RdaService, restricted to major version
     jobConfig.rdaVersion(
         RdaVersion.builder()
             .versionString(
-                readEnvStringOptional(ENV_VAR_KEY_RDA_VERSION)
+                config
+                    .stringOption(ENV_VAR_KEY_RDA_VERSION)
                     .orElse("^" + RdaService.RDA_PROTO_VERSION))
             .build());
     jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
     final RdaSourceConfig grpcConfig =
         RdaSourceConfig.builder()
             .serverType(
-                readEnvParsedOptional(
-                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType::valueOf)
-                    .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE))
-            .host(
-                readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST)
-                    .orElse(DEFAULT_RDA_GRPC_HOST))
-            .port(
-                readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_PORT, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_GRPC_PORT))
-            .inProcessServerName(
-                readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME)
-                    .orElse(DEFAULT_RDA_GRPC_INPROC_SERVER_NAME))
-            .maxIdle(
-                Duration.ofSeconds(
-                    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
-                        .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)))
+                config.enumValue(
+                    ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.class))
+            .host(config.stringValue(ENV_VAR_KEY_RDA_GRPC_HOST))
+            .port(config.intValue(ENV_VAR_KEY_RDA_GRPC_PORT))
+            .inProcessServerName(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME))
+            .maxIdle(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)))
             .minIdleTimeBeforeConnectionDrop(
                 Duration.ofSeconds(
-                    readEnvParsedOptional(
-                            ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP, Integer::parseInt)
-                        .orElse(DEFAULT_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
+                    config.intValue(ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
             .authenticationToken(
-                readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN)
-                    .orElse(DEFAULT_RDA_GRPC_AUTH_TOKEN))
+                config.stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN).orElse(null))
             .messageErrorExpirationDays(
-                readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
+                config.intOption(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
             .build();
     final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
     mockServerConfig.serverMode(
-        readEnvParsedOptional(
-                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode::valueOf)
+        config
+            .enumOption(
+                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
             .orElse(RdaServerJob.Config.ServerMode.Random));
     mockServerConfig.serverName(grpcConfig.getInProcessServerName());
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS, Long::parseLong)
+    config
+        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
         .map(Duration::ofSeconds)
         .ifPresent(mockServerConfig::runInterval);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED, Long::parseLong)
+    config
+        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED)
         .ifPresent(mockServerConfig::randomSeed);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt)
+    config
+        .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
         .ifPresent(mockServerConfig::randomMaxClaims);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region::of)
+    config
+        .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
         .ifPresent(mockServerConfig::s3Region);
-    readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
+    config
+        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(mockServerConfig::s3Bucket);
-    readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
+    config
+        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
         .ifPresent(mockServerConfig::s3Directory);
-    final int errorLimit = readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT).orElse(0);
+    final int errorLimit = config.intValue(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT, 0);
 
     return new RdaLoadOptions(
         jobConfig.build(), grpcConfig, mockServerConfig.build(), errorLimit, idHasherConfig);
   }
 
   /**
-   * Checks environment variable to determine if the feed of Micrometer metrics to JMX should be
+   * Checks configuration settings to determine if the feed of Micrometer metrics to JMX should be
    * enabled.
    *
+   * @param config used to load configuration values
    * @return true if the feed should be configured
    */
-  public static boolean isJmxMetricsEnabled() {
-    return readEnvParsedOptional(ENV_VAR_MICROMETER_JMX_ENABLED, Boolean::parseBoolean)
-        .orElse(false);
+  public static boolean isJmxMetricsEnabled(ConfigLoader config) {
+    return config.booleanValue(ENV_VAR_MICROMETER_JMX_ENABLED, false);
   }
 
   /**
    * Creates an implementation of {@link CloudWatchConfig} that looks for environment variables to
-   * find values for properties. Environment variable lookup is done using {@link
-   * #MICROMETER_CW_CONFIG_HELPER}.
+   * find values for properties. Environment variable lookup is done using a {@link
+   * MicrometerConfigHelper}.
    *
+   * @param config used to load configuration values
    * @return an instance of {@link CloudWatchConfig}
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if any
-   *     required properties are missing or if any environment variables have invalid values.
+   * @throws ConfigException thrown if any required properties are missing or if any environment
+   *     variables have invalid values.
    */
-  public static CloudWatchConfig getCloudWatchRegistryConfig() {
-    final CloudWatchConfig config = MICROMETER_CW_CONFIG_HELPER::get;
-    if (config.enabled()) {
-      MICROMETER_CW_CONFIG_HELPER.throwIfConfigurationNotValid(config.validate());
+  public static CloudWatchConfig loadCloudWatchRegistryConfig(ConfigLoader config) {
+    final var micrometerConfigHelper = createMicrometerConfigHelper(config);
+    final CloudWatchConfig cwConfig = micrometerConfigHelper::get;
+    if (cwConfig.enabled()) {
+      micrometerConfigHelper.throwIfConfigurationNotValid(cwConfig.validate());
     }
-    return config;
+    return cwConfig;
   }
 
   /**
-   * Reads an environment variable into bytes so it can be decoded into the appropriate value.
+   * Creates an instance of {@link MicrometerConfigHelper} used to create a {@link CloudWatchConfig}
+   * instance. Contains the property name to environment variable name mappings for supported {@link
+   * CloudWatchConfig} properties as well as default values for some environment variables.
    *
-   * <p>TODO: Hex/DecoderException seems to be using some transient dependency on apache commons
-   * (not the one declared in the pom); may want to fix this. Leaving this out of
-   * BaseAppConfiguration due to this strange dependency.
-   *
-   * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
+   * @param config used to load configuration values
+   * @return the instance
    */
-  private static byte[] readEnvBytesRequired(String environmentVariableName) {
-    Optional<String> environmentVariableValueText =
-        Optional.ofNullable(System.getenv(environmentVariableName));
-    if (!environmentVariableValueText.isPresent()) {
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              environmentVariableName));
-    }
-
-    try {
-      byte[] environmentVariableValue =
-          Hex.decodeHex(environmentVariableValueText.get().toCharArray());
-      return environmentVariableValue;
-    } catch (DecoderException e) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s' (%s)",
-              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
-          e);
-    }
+  static MicrometerConfigHelper createMicrometerConfigHelper(ConfigLoader config) {
+    return new MicrometerConfigHelper(
+        List.of(
+            new MicrometerConfigHelper.PropertyMapping(
+                "cloudwatch.enabled", ENV_VAR_MICROMETER_CW_ENABLED, Optional.of("false")),
+            new MicrometerConfigHelper.PropertyMapping(
+                "cloudwatch.namespace", ENV_VAR_MICROMETER_CW_NAMESPACE, Optional.empty()),
+            new MicrometerConfigHelper.PropertyMapping(
+                "cloudwatch.step", ENV_VAR_MICROMETER_CW_INTERVAL, Optional.of("PT1M"))),
+        varName -> config.stringValue(varName, null));
   }
 }
