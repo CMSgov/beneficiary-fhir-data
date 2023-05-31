@@ -63,7 +63,7 @@ spec:
     lock resource: params.lock_environment_resource ? (params.env.trim() == 'prod-sbx'
                                                         ? 'env_prod_sbx'
                                                         : "env_${params.env.trim()}")
-                                                    : UUID.randomUUID().toString()
+                                                    : "bfd-run-pipeline-oob-${UUID.randomUUID()}"
   }
 
   stages {
