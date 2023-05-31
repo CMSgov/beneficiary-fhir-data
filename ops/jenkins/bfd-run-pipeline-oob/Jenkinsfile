@@ -71,7 +71,7 @@ spec:
       steps {
         script {
           trimmedEnv = params.env.trim()
-          autoScalingGroupName = "bfd-${trimmedEnv}-${params.pipeline_variant}"
+          autoScalingGroupName = "bfd-${trimmedEnv}-pipeline-${params.pipeline_variant}"
           if (params.suspend_scheduled_actions) {
             echo "Suspending scheduled actions on ASG ${autoScalingGroupName}"
 
