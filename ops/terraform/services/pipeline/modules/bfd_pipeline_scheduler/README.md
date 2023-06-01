@@ -1,9 +1,9 @@
-# `bfd_pipeline_manager` Sub-module
+# `bfd_pipeline_scheduler` Sub-module
 
 This submodule defines a Lambda and its corresponding infrastructure. This Lambda,
-`bfd-${env}-pipeline-manager`, "manages" the BFD Pipeline instances for the CCW-variant of the BFD
-Pipeline; it is invoked when new files are created in the `env`'s corresponding S3 pipeline/ETL
-bucket at specific paths:
+`bfd-${env}-pipeline-scheduler`, schedules scale-in/scale-out BFD Pipeline instances for the
+CCW-variant of the BFD Pipeline; it is invoked when new files are created in the `env`'s
+corresponding S3 pipeline/ETL bucket at specific paths:
 
 - `Synthetic/Incoming/`
 - `Synthetic/Done/`
@@ -30,9 +30,9 @@ applied to its AutoScaling Group. In more detail:
   _within the next five minutes_, an action to scale-in the BFD Pipeline in the next five minutes is
   scheduled on the CCW BFD Pipeline ASG
 
-In short, this Lambda reacts to signaling from the CCW Pipeline S3 Bucket and _manages_ the state of
-the CCW Pipeline EC2 instance through its ASG. With this Lambda, the CCW Pipeline should only run
-when there is data to load.
+In short, this Lambda reacts to signaling from the CCW Pipeline S3 Bucket and schedules the CCW
+Pipeline EC2 instance to run or stop through its ASG. With this Lambda, the CCW Pipeline should only
+run when there is data to load.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`

@@ -10,10 +10,10 @@ data "aws_s3_bucket" "etl" {
 
 data "archive_file" "lambda_src" {
   type        = "zip"
-  output_path = "${path.module}/lambda_src/bfd_pipeline_manager.zip"
+  output_path = "${path.module}/lambda_src/bfd_pipeline_scheduler.zip"
 
   source {
-    content  = file("${path.module}/lambda_src/pipeline_manager.py")
-    filename = "pipeline_manager.py"
+    content  = file("${path.module}/lambda_src/pipeline_scheduler.py")
+    filename = "pipeline_scheduler.py"
   }
 }

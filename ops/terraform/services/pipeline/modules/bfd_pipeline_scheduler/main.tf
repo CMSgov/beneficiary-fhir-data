@@ -4,7 +4,7 @@ locals {
 
   kms_key_arn = data.aws_kms_key.env_cmk.arn
 
-  lambda_full_name = "bfd-${local.env}-pipeline-manager"
+  lambda_full_name = "bfd-${local.env}-pipeline-scheduler"
 }
 
 resource "aws_lambda_permission" "this" {
@@ -33,7 +33,7 @@ resource "aws_lambda_function" "this" {
   filename         = data.archive_file.lambda_src.output_path
   source_code_hash = data.archive_file.lambda_src.output_base64sha256
   architectures    = ["x86_64"]
-  handler          = "pipeline_manager.handler"
+  handler          = "pipeline_scheduler.handler"
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"

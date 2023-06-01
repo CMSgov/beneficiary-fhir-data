@@ -368,13 +368,13 @@ module "bfd_pipeline_slo_alarms" {
   warning_ok_sns_override = var.warning_ok_sns_override
 }
 
-module "bfd_pipeline_manager" {
+module "bfd_pipeline_scheduler" {
   # For now, this module only supports the CCW-variant of the pipeline and so should not be included
   # if the CCW pipeline is disabled
   # TODO: Remove when RDA pipeline supports on-demand mechanisms
   count = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
 
-  source = "./modules/bfd_pipeline_manager"
+  source = "./modules/bfd_pipeline_scheduler"
 
   account_id     = local.account_id
   etl_bucket_id  = aws_s3_bucket.this.id

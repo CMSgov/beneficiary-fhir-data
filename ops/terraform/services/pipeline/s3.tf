@@ -69,7 +69,7 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
     }
   }
 
-  # Lambda function notifications for the BFD Pipeline Manager Lambda
+  # Lambda function notifications for the BFD Pipeline Scheduler Lambda
   dynamic "lambda_function" {
     for_each = {
       for prefix in ["Incoming", "Done", "Synthetic/Incoming", "Synthetic/Done"] : "${prefix}/" => lower(replace(prefix, "/", "-"))
@@ -79,8 +79,8 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
     content {
       events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
       filter_prefix       = lambda_function.key
-      id                  = "${module.bfd_pipeline_manager[0].lambda_name}-${lambda_function.value}"
-      lambda_function_arn = module.bfd_pipeline_manager[0].lambda_arn
+      id                  = "${module.bfd_pipeline_scheduler[0].lambda_name}-${lambda_function.value}"
+      lambda_function_arn = module.bfd_pipeline_scheduler[0].lambda_arn
     }
   }
 }
