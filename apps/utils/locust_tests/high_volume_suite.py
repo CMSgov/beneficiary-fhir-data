@@ -65,6 +65,7 @@ class HighVolumeUser(BFDUserBase):
 
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
+    tasks = [Suite]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,6 +81,7 @@ class HighVolumeUser(BFDUserBase):
 
         # Override the value for last_updated with a static value
         self.last_updated = "2022-06-29"
+
 
     @task
     class Suite(TaskSet):
