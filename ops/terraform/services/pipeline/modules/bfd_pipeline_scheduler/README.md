@@ -1,9 +1,9 @@
 # `bfd_pipeline_scheduler` Sub-module
 
 This submodule defines a Lambda and its corresponding infrastructure. This Lambda,
-`bfd-${env}-pipeline-scheduler`, schedules scale-in/scale-out BFD Pipeline instances for the
-CCW-variant of the BFD Pipeline; it is invoked when new files are created in the `env`'s
-corresponding S3 pipeline/ETL bucket at specific paths:
+`bfd-${env}-pipeline-scheduler`, schedules scale-in/scale-out for the CCW-variant of the BFD
+Pipeline; it is invoked when new files are created in the `env`'s corresponding S3 pipeline/ETL
+bucket at specific paths:
 
 - `Synthetic/Incoming/`
 - `Synthetic/Done/`
