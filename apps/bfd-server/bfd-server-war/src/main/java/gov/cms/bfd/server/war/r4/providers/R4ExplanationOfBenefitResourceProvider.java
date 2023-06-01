@@ -273,6 +273,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
+   * @param taxNumbers an {@link OptionalParam} for whether to include tax numbers in the response
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
@@ -311,6 +312,11 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               shortDefinition = OpenAPIContentProvider.EOB_SERVICE_DATE_SHORT,
               value = OpenAPIContentProvider.EOB_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
+      @OptionalParam(name = "includeTaxNumbers")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
+              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
+          String taxNumbers,
       RequestDetails requestDetails) {
     /*
      * startIndex is an optional parameter here because it must be declared in the

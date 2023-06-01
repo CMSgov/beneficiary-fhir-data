@@ -37,6 +37,10 @@
         "type" : "string",
         "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response.<i>ClaimResponse</i> doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between <i>ClaimResponse</i> and <i>Claim</i>, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
       }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "<p/>Setting this flag to <i>true</i>, provides tax number in the EOB transformed data for the response.<p/>Example:<ul><li>&includeTaxNumbers=true</li>"
+      }, {
         "name" : "isHashed",
         "type" : "string",
         "documentation" : "<p/>Setting this flag to <i>true</i>, indicates to the API that the mbi parameter in the same request is a hashed MBI rather than an unhashed MBI.<p/>Example:<ul><li>&isHashed=true</li>"
@@ -75,6 +79,10 @@
         "name" : "excludeSAMHSA",
         "type" : "string",
         "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response.<i>ClaimResponse</i> doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between <i>ClaimResponse</i> and <i>Claim</i>, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
+      }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "<p/>Setting this flag to <i>true</i>, provides tax number in the EOB transformed data for the response.<p/>Example:<ul><li>&includeTaxNumbers=true</li>"
       }, {
         "name" : "isHashed",
         "type" : "string",
@@ -137,6 +145,10 @@
         "name" : "excludeSAMHSA",
         "type" : "string",
         "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
+      }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "<p/>Setting this flag to <i>true</i>, provides tax number in the EOB transformed data for the response.<p/>Example:<ul><li>&includeTaxNumbers=true</li>"
       }, {
         "name" : "patient",
         "type" : "reference",

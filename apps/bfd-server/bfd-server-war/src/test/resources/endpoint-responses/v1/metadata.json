@@ -63,6 +63,10 @@
         "type" : "string",
         "documentation" : "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA) is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response.<p/>Example:<ul><li>&excludeSAMHSA=true</li>"
       }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "<p/>Setting this flag to <i>true</i>, provides tax number in the EOB transformed data for the response.<p/>Example:<ul><li>&includeTaxNumbers=true</li>"
+      }, {
         "name" : "service-date",
         "type" : "date",
         "documentation" : "Only satisfy the Search request if a claim's <i>thru</i> Date falls within a specified <i>DateRange<i/>. A DateRange can include both lo and hi date values, only a lo date value, or only a hi date value.<p/>Examples:<ul><li>&service-date=gt2023-01-02&service-date=lt2023-05-01</li><li>&service-date=gt2023-01-02</li><li>&_service-date=lt2023-05-01</li></ul>"

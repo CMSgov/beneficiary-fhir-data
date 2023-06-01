@@ -277,6 +277,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param samhsa if {@code true}, exclude all SAMHSA-related resources
    * @param lastUpdated range which to include resources last updated within
    * @param serviceDate range which to include resources completed within
+   * @param taxNumbers whether to include tax numbers in the response
    * @param requestDetails the request details
    * @return the bundle
    */
@@ -318,6 +319,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               shortDefinition = OpenAPIContentProvider.PAC_SERVICE_DATE_SHORT,
               value = OpenAPIContentProvider.PAC_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
+      @OptionalParam(name = "includeTaxNumbers")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
+              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
+          String taxNumbers,
       RequestDetails requestDetails) {
     if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
       String mbiString = mbi.getIdPart();
