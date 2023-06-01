@@ -5,6 +5,8 @@ import com.amazonaws.encryptionsdk.CryptoResult
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.persistentMapOf
 import okio.*
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
@@ -66,11 +68,40 @@ class Text(private val bytes: ByteString) {
     fun encrypt(cipher: KmsCipher): Text =
         transform(PlainPrefix, PlainSuffix, CipherPrefix, CipherSuffix, cipher::encrypt)
 
+    fun encrypt(cipher: KmsCipher, secureBlocks: PersistentMap<ByteString, ByteString>): Text =
+        transform(PlainPrefix, PlainSuffix, CipherPrefix, CipherSuffix) {
+            secureBlocks[it] ?: cipher.encrypt(it)
+        }
+
     fun decrypt(cipher: KmsCipher): Text =
         transform(CipherPrefix, CipherSuffix, EmptyString, EmptyString, cipher::decrypt)
 
     fun rewind(cipher: KmsCipher): Text =
         transform(CipherPrefix, CipherSuffix, PlainPrefix, PlainSuffix, cipher::decrypt)
+
+    fun extractSecureBlocks(cipher: KmsCipher): PersistentMap<ByteString, ByteString> {
+        var map = persistentMapOf<ByteString, ByteString>()
+        bytes.toBuffer().use { source ->
+            while (!source.exhausted()) {
+                val start = source.indexOf(CipherPrefix)
+                if (start >= 0) {
+                    source.skip(start)
+                    source.skip(CipherPrefix.size.toLong())
+                    val finish = source.indexOf(CipherSuffix)
+                    if (finish < 0) {
+                        throw IOException("missing " + CipherSuffix.utf8())
+                    }
+                    val cipherText = source.readByteString(finish)
+                    source.skip(CipherSuffix.size.toLong())
+                    val plainText = cipher.decrypt(cipherText)
+                    map = map.put(plainText, cipherText)
+                } else {
+                    break
+                }
+            }
+        }
+        return map
+    }
 
     private fun transform(
         fromPrefix: ByteString,
@@ -90,11 +121,11 @@ class Text(private val bytes: ByteString) {
                     if (finish < 0) {
                         throw IOException("missing " + fromSuffix.utf8())
                     }
-                    val plainText = source.readUtf8(finish)
+                    val fromText = source.readByteString(finish)
                     source.skip(fromSuffix.size.toLong())
-                    val cipherText = op(plainText.encodeUtf8())
+                    val toText = op(fromText)
                     buffer.write(toPrefix)
-                    buffer.write(cipherText)
+                    buffer.write(toText)
                     buffer.write(toSuffix)
                 } else {
                     buffer.write(source.readByteArray())
@@ -202,7 +233,8 @@ fun main(args: Array<String>) {
                 } else if (modified == rewound) {
                     println("File unchanged - leaving original unchanged.")
                 } else {
-                    val encrypted = modified.encrypt(cipher)
+                    val oldSecureBlocks = original.extractSecureBlocks(cipher)
+                    val encrypted = modified.encrypt(cipher, oldSecureBlocks)
                     encrypted.store(File(outputFile).sink())
                 }
             } finally {
