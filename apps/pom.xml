@@ -51,7 +51,6 @@
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
         <module>bfd-db-migrator</module>
-        <module>utils/cipher</module>
     </modules>
 
     <properties>
