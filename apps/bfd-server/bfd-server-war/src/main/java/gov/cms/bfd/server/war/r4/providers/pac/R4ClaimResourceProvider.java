@@ -5,11 +5,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import gov.cms.bfd.server.war.SpringConfiguration;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /** This FHIR {@link IResourceProvider} adds support for R4 {@link Claim} resources. */
@@ -26,10 +28,13 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    *
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
+   * @param oldMbiHashEnabled true if old MBI hash should be used
    */
   public R4ClaimResourceProvider(
-      MetricRegistry metricRegistry, R4ClaimSamhsaMatcher samhsaMatcher) {
-    super(metricRegistry, samhsaMatcher);
+      MetricRegistry metricRegistry,
+      R4ClaimSamhsaMatcher samhsaMatcher,
+      @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled) {
+    super(metricRegistry, samhsaMatcher, oldMbiHashEnabled);
   }
 
   /** {@inheritDoc} */
