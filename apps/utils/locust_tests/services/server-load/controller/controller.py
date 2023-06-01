@@ -128,7 +128,7 @@ def _main():
             "--csv=load",
             "--headless",
         ]
-        + ([f"--tags='{locust_tags}'"] if locust_tags else [])
+        + ([f'--tags="{locust_tags}"'] if locust_tags else [])
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else []),
         cwd="../../../",
         stderr=subprocess.STDOUT,
@@ -141,7 +141,7 @@ def _main():
     ip_address = socket.gethostbyname(socket.gethostname())
 
     if locust_tags:
-        print(f"Running tests with an annotated @tag including any of the following: {locust_tags}...")
+        print(f"Running tests with an annotated @tag including any of the following: {locust_tags}")
 
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):
