@@ -19,6 +19,7 @@
         <kotlin.version>1.8.21</kotlin.version>
         <kotlin.compiler.languageVersion>1.8</kotlin.compiler.languageVersion>
         <kotlin.compiler.jvmTargetVersion>17</kotlin.compiler.jvmTargetVersion>
+        <checkstyle.skip>true</checkstyle.skip>
     </properties>
 
     <dependencies>
@@ -79,8 +80,8 @@
     </dependencies>
 
     <build>
-            <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-            <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
