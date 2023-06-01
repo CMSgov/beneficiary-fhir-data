@@ -26,6 +26,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -97,15 +99,20 @@ public final class PipelineApplication {
     configureUnexpectedExceptionHandlers();
 
     AppConfiguration appConfig = null;
+    ConfigLoader configLoader = null;
     try {
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+      // add any additional sources of configuration variables then load the app config
+      configLoader = AppConfiguration.createConfigLoader(System::getenv);
+      appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
-    } catch (AppConfigurationException e) {
+    } catch (ConfigException | AppConfigurationException e) {
       System.err.println(e.getMessage());
       LOGGER.warn("Invalid app configuration.", e);
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
+    assert appConfig != null;
+    assert configLoader != null;
     final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
     final var appMeters = new CompositeMeterRegistry();
@@ -115,7 +122,8 @@ public final class PipelineApplication {
             Tag.of("host", metricOptions.getHostname().orElse("unknown")),
             Tag.of("appName", metricOptions.getNewRelicAppName().orElse("unknown")));
 
-    final var cloudwatchRegistryConfig = AppConfiguration.getCloudWatchRegistryConfig();
+    final var cloudwatchRegistryConfig =
+        AppConfiguration.loadCloudWatchRegistryConfig(configLoader);
     if (cloudwatchRegistryConfig.enabled()) {
       LOGGER.info("Adding CloudWatchMeterRegistry...");
       final var cloudWatchRegistry =
@@ -129,7 +137,7 @@ public final class PipelineApplication {
       appMeters.add(cloudWatchRegistry);
       LOGGER.info("Added CloudWatchMeterRegistry.");
     }
-    if (AppConfiguration.isJmxMetricsEnabled()) {
+    if (AppConfiguration.isJmxMetricsEnabled(configLoader)) {
       appMeters.add(new JmxMeterRegistry(JmxConfig.DEFAULT, micrometerClock));
       LOGGER.info("Added JmxMeterRegistry.");
     }

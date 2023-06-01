@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -216,11 +217,12 @@ public class RDABridge {
           Sink<MessageOrBuilder> mcsSink =
               sinkMap.get(mcsOutputType).apply(new SinkArguments(mcsOutputPath, mcsSequence))) {
         // Sorting the files so tests are more deterministic
-        List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
+        List<String> fissSources =
+            new ArrayList<>(config.stringValues(AppConfig.Fields.fissSources));
         Collections.sort(fissSources);
 
         // Sorting the files so tests are more deterministic
-        List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
+        List<String> mcsSources = new ArrayList<>(config.stringValues(AppConfig.Fields.mcsSources));
         Collections.sort(mcsSources);
 
         // To get a good spread of data, we'll sample from each file, so each file gets its own
