@@ -49,7 +49,7 @@ spec:
       defaultValue: true,
       description: 'Whether or not AutoScaling Scheduled Actions will be suspended on the BFD '
                    + 'Pipeline AutoScaling Group. If this is false (toggled off), ASG Scheduled '
-                   + 'Actions created by the BFD Pipeline Manager will execute and could '
+                   + 'Actions created by the BFD Pipeline Scheduler will execute and could '
                    + 'potentially destroy the Pipeline created by this Jenkins Pipeline'
     )
   }
