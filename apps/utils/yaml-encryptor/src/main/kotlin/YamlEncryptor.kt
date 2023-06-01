@@ -1,28 +1,21 @@
 package gov.cms.yamlEncryptor
 
 import arrow.core.Option
-import arrow.core.flatMap
 import com.amazonaws.encryptionsdk.AwsCrypto
 import com.amazonaws.encryptionsdk.CryptoResult
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
-import com.google.common.io.CharSink
-import com.google.common.io.CharSource
-import com.google.common.io.CharStreams
-import com.google.common.io.Files
+import com.google.common.io.*
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration
 import kotlinx.collections.immutable.ImmutableCollection
-import kotlinx.collections.immutable.PersistentCollection
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.kms.KmsClient
 import java.io.File
-import java.io.FileReader
-import java.io.FileWriter
 import java.io.Writer
 import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.nio.file.Paths
 import java.util.*
 
 interface Cipher {
@@ -43,12 +36,12 @@ interface Dictionary {
     /**
      * Get a new instance containing values from the file.
      */
-    fun load(file: CharSource): Result<Dictionary>
+    fun load(file: CharSource): Dictionary
 
     /**
      * Write this instance to the file.
      */
-    fun store(file: CharSink): Result<Unit>
+    fun store(file: CharSink)
 
     fun keys(): ImmutableCollection<String>
 
@@ -56,7 +49,7 @@ interface Dictionary {
 
     fun map(f: (String) -> String): Dictionary
 
-    fun encrypt(cipher: Cipher): Result<Dictionary> = runCatching {
+    fun encrypt(cipher: Cipher): Dictionary =
         map { v: String ->
             if (v.startsWith("PLAIN:")) {
                 "CIPHER:" + cipher.encrypt(v.substring(6))
@@ -64,9 +57,8 @@ interface Dictionary {
                 v
             }
         }
-    }
 
-    fun decrypt(cipher: Cipher): Result<Dictionary> = runCatching {
+    fun decrypt(cipher: Cipher): Dictionary =
         map { v: String ->
             if (v.startsWith("CIPHER:")) {
                 cipher.decrypt(v.substring(7))
@@ -76,7 +68,15 @@ interface Dictionary {
                 v
             }
         }
-    }
+
+    fun rewind(cipher: Cipher): Dictionary =
+        map { v: String ->
+            if (v.startsWith("CIPHER:")) {
+                "PLAIN:" + cipher.decrypt(v.substring(7))
+            } else {
+                v
+            }
+        }
 }
 
 class KmsCipher(private val endpoint: String?, keyArn: String) : Cipher {
@@ -114,17 +114,14 @@ class KmsCipher(private val endpoint: String?, keyArn: String) : Cipher {
 class PropertiesDictionary(private val properties: Properties) : Dictionary {
     override fun empty(): Dictionary = PropertiesDictionary(Properties())
 
-    override fun load(file: CharSource): Result<Dictionary> =
-        runCatching {
-            val props = Properties()
-            file.openBufferedStream().use { props.load(it) }
-            PropertiesDictionary(props)
-        }
+    override fun load(file: CharSource): Dictionary {
+        val props = Properties()
+        file.openBufferedStream().use { props.load(it) }
+        return PropertiesDictionary(props)
+    }
 
-    override fun store(file: CharSink): Result<Unit> =
-        runCatching {
-            file.openBufferedStream().use { properties.store(it, "") }
-        }
+    override fun store(file: CharSink) =
+        file.openBufferedStream().use { properties.store(it, "") }
 
     override fun keys(): ImmutableCollection<String> = properties.stringPropertyNames().toPersistentList()
 
@@ -133,7 +130,7 @@ class PropertiesDictionary(private val properties: Properties) : Dictionary {
     override fun map(f: (String) -> String): Dictionary {
         val newProperties = Properties()
         properties.stringPropertyNames().stream().forEach { key ->
-            get(key).onSome { value -> newProperties.setProperty(key, value) }
+            get(key).onSome { value -> newProperties.setProperty(key, f(value)) }
         }
         return PropertiesDictionary(newProperties)
     }
@@ -153,16 +150,44 @@ fun main(args: Array<String>) {
     val keyArn = config.stringValue("keyArn")
     val cipher = KmsCipher(endpoint, keyArn)
     val empty = PropertiesDictionary(Properties())
+    val editor = config.stringValue("EDITOR", "vi");
     val mode = args[0]
     val inputFile = args[1]
     val outputFile = if (args.size == 2) inputFile else args[2]
-    val original = empty.load(Files.asCharSource(File(inputFile), Charsets.UTF_8)).getOrThrow()
-    if (mode == "cat") {
-        val decrypted = original.decrypt(cipher).getOrThrow()
-        val printBuffer = PrintBuffer()
-        decrypted.store(printBuffer).getOrThrow()
-        print(printBuffer.toString())
-    } else if (mode == "encrypt") {
+    when (mode) {
+        "cat" -> {
+            val original = empty.load(Files.asCharSource(File(inputFile), Charsets.UTF_8))
+            val decrypted = original.decrypt(cipher)
+            val printBuffer = PrintBuffer()
+            decrypted.store(printBuffer)
+            print(printBuffer.toString())
+        }
 
+        "encrypt" -> {
+            val original = empty.load(Files.asCharSource(File(inputFile), Charsets.UTF_8))
+            val encrypted = original.encrypt(cipher)
+            encrypted.store(Files.asCharSink(File(outputFile), Charsets.UTF_8))
+        }
+
+        "edit" -> {
+            val cwd = Paths.get(".").toFile()
+            val tempFile = File.createTempFile("edit", ".txt", cwd)
+            val original = empty.load(Files.asCharSource(File(inputFile), Charsets.UTF_8))
+            val rewound = original.rewind(cipher)
+            rewound.store(Files.asCharSink(tempFile, Charsets.UTF_8))
+            ProcessBuilder(listOf(editor, tempFile.path))
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT)
+                .start()
+                .waitFor()
+            val modified = empty.load(Files.asCharSource(tempFile, Charsets.UTF_8))
+            val encrypted = modified.encrypt(cipher)
+            encrypted.store(Files.asCharSink(File(outputFile), Charsets.UTF_8))
+        }
+
+        else -> {
+            println("usage: YamlEncryptor cat|encrypt|edit source [dest]")
+        }
     }
 }
