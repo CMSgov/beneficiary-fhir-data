@@ -3,7 +3,7 @@
 from random import shuffle
 from typing import Dict, List
 
-from locust import events, tag, task
+from locust import events, tag, task, TaskSet
 from locust.env import Environment
 
 from common import data, db, validation
@@ -81,305 +81,307 @@ class HighVolumeUser(BFDUserBase):
         # Override the value for last_updated with a static value
         self.last_updated = "2022-06-29"
 
-    @tag("coverage", "coverage_test_id_count", "v2")
     @task
-    def coverage_test_id_count(self):
-        """Coverage search by ID, Paginated"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Coverage",
-            params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
-            name="/v2/fhir/Coverage search by id / count=10",
-        )
-
-    @tag("coverage", "coverage_test_id_last_updated", "v2")
-    @task
-    def coverage_test_id_last_updated(self):
-        """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Coverage",
-            params={
-                "_lastUpdated": f"gt{self.last_updated}",
-                "beneficiary": self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
-        )
-
-    @tag("coverage", "coverage_test_id", "v2")
-    @task
-    def coverage_test_id(self):
-        """Coverage search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Coverage",
-            params={
-                "beneficiary": self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id",
-        )
-
-    @tag("eob", "eob_test_id_count", "v2")
-    @task
-    def eob_test_id_count(self):
-        """Explanation of Benefit search by ID, Paginated"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/ExplanationOfBenefit",
-            params={
-                "patient": self.bene_ids.pop(),
-                "_count": "10",
-                "_format": "application/fhir+json",
-            },
-            name="/v2/fhir/ExplanationOfBenefit search by id / count=10",
-        )
-
-    @tag("eob", "eob_test_id_include_tax_number_last_updated", "v2")
-    @task
-    def eob_test_id_include_tax_number_last_updated(self):
-        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/ExplanationOfBenefit",
-            params={
-                "_lastUpdated": f"gt{self.last_updated}",
-                "patient": self.bene_ids.pop(),
-                "_IncludeTaxNumbers": "true",
-                "_format": "application/fhir+json",
-            },
-            name="/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
-        )
-
-    @tag("eob", "eob_test_id", "v2")
-    @task
-    def eob_test_id(self):
-        """Explanation of Benefit search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/ExplanationOfBenefit",
-            params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
-            name="/v2/fhir/ExplanationOfBenefit search by id",
-        )
-
-    @tag("patient", "patient_test_coverage_contract", "v2")
-    @task
-    def patient_test_coverage_contract(self):
-        """Patient search by Coverage Contract, paginated"""
-
-        def make_url():
-            contract = self.contract_data.pop()
-            return create_url_path(
-                "/v2/fhir/Patient",
-                {
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": 25,
-                    "_format": "json",
-                },
+    class Suite(TaskSet):
+        @tag("coverage", "coverage_test_id_count", "v2")
+        @task
+        def coverage_test_id_count(self):
+            """Coverage search by ID, Paginated"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/Coverage",
+                params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
+                name="/v2/fhir/Coverage search by id / count=10",
             )
 
-        self.run_task(
-            name="/v2/fhir/Patient search by coverage contract (all pages)",
-            headers={"IncludeIdentifiers": "mbi"},
-            url_callback=make_url,
-        )
+        @tag("coverage", "coverage_test_id_last_updated", "v2")
+        @task
+        def coverage_test_id_last_updated(self):
+            """Coverage search by ID, Last Updated"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/Coverage",
+                params={
+                    "_lastUpdated": f"gt{self.last_updated}",
+                    "beneficiary": self.bene_ids.pop(),
+                },
+                name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
+            )
 
-    @tag("patient", "patient_test_hashed_mbi", "v2")
-    @task
-    def patient_test_hashed_mbi(self):
-        """Patient search by hashed MBI, include identifiers"""
+        @tag("coverage", "coverage_test_id", "v2")
+        @task
+        def coverage_test_id(self):
+            """Coverage search by ID"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/Coverage",
+                params={
+                    "beneficiary": self.bene_ids.pop(),
+                },
+                name="/v2/fhir/Coverage search by id",
+            )
 
-        def make_url():
-            return create_url_path(
-                "/v2/fhir/Patient/",
-                {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+        @tag("eob", "eob_test_id_count", "v2")
+        @task
+        def eob_test_id_count(self):
+            """Explanation of Benefit search by ID, Paginated"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/ExplanationOfBenefit",
+                params={
+                    "patient": self.bene_ids.pop(),
+                    "_count": "10",
+                    "_format": "application/fhir+json",
+                },
+                name="/v2/fhir/ExplanationOfBenefit search by id / count=10",
+            )
+
+        @tag("eob", "eob_test_id_include_tax_number_last_updated", "v2")
+        @task
+        def eob_test_id_include_tax_number_last_updated(self):
+            """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/ExplanationOfBenefit",
+                params={
+                    "_lastUpdated": f"gt{self.last_updated}",
+                    "patient": self.bene_ids.pop(),
+                    "_IncludeTaxNumbers": "true",
+                    "_format": "application/fhir+json",
+                },
+                name="/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
+            )
+
+        @tag("eob", "eob_test_id", "v2")
+        @task
+        def eob_test_id(self):
+            """Explanation of Benefit search by ID"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/ExplanationOfBenefit",
+                params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
+                name="/v2/fhir/ExplanationOfBenefit search by id",
+            )
+
+        @tag("patient", "patient_test_coverage_contract", "v2")
+        @task
+        def patient_test_coverage_contract(self):
+            """Patient search by Coverage Contract, paginated"""
+
+            def make_url():
+                contract = self.contract_data.pop()
+                return create_url_path(
+                    "/v2/fhir/Patient",
+                    {
+                        "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                        "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                        "_count": 25,
+                        "_format": "json",
+                    },
+                )
+
+            self.run_task(
+                name="/v2/fhir/Patient search by coverage contract (all pages)",
+                headers={"IncludeIdentifiers": "mbi"},
+                url_callback=make_url,
+            )
+
+        @tag("patient", "patient_test_hashed_mbi", "v2")
+        @task
+        def patient_test_hashed_mbi(self):
+            """Patient search by hashed MBI, include identifiers"""
+
+            def make_url():
+                return create_url_path(
+                    "/v2/fhir/Patient/",
+                    {
+                        "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                        "_IncludeIdentifiers": "mbi",
+                    },
+                )
+
+            self.run_task(
+                name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
+                url_callback=make_url,
+            )
+
+        @tag("patient", "patient_test_id_include_mbi_last_updated", "v2")
+        @task
+        def patient_test_id_include_mbi_last_updated(self):
+            """Patient search by ID with last updated, include MBI"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/Patient",
+                params={
+                    "_id": self.bene_ids.pop(),
+                    "_format": "application/fhir+json",
                     "_IncludeIdentifiers": "mbi",
+                    "_lastUpdated": f"gt{self.last_updated}",
                 },
+                name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
             )
 
-        self.run_task(
-            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
-            url_callback=make_url,
-        )
+        @tag("patient", "patient_test_id", "v2")
+        @task
+        def patient_test_id(self):
+            """Patient search by ID"""
+            self.run_task_by_parameters(
+                base_path="/v2/fhir/Patient",
+                params={
+                    "_id": self.bene_ids.pop(),
+                    "_format": "application/fhir+json",
+                },
+                name="/v2/fhir/Patient search by id",
+            )
 
-    @tag("patient", "patient_test_id_include_mbi_last_updated", "v2")
-    @task
-    def patient_test_id_include_mbi_last_updated(self):
-        """Patient search by ID with last updated, include MBI"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Patient",
-            params={
-                "_id": self.bene_ids.pop(),
-                "_format": "application/fhir+json",
-                "_IncludeIdentifiers": "mbi",
-                "_lastUpdated": f"gt{self.last_updated}",
-            },
-            name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
-        )
+        @tag("coverage", "coverage_test_id_count_v1", "v1")
+        @task
+        def coverage_test_id_count_v1(self):
+            """Coverage search by ID, Paginated"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/Coverage",
+                params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
+                name="/v1/fhir/Coverage search by id / count=10",
+            )
 
-    @tag("patient", "patient_test_id", "v2")
-    @task
-    def patient_test_id(self):
-        """Patient search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Patient",
-            params={
-                "_id": self.bene_ids.pop(),
-                "_format": "application/fhir+json",
-            },
-            name="/v2/fhir/Patient search by id",
-        )
+        @tag("coverage", "coverage_test_id_last_updated_v1", "v1")
+        @task
+        def coverage_test_id_last_updated_v1(self):
+            """Coverage search by ID, Last Updated"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/Coverage",
+                params={
+                    "_lastUpdated": f"gt{self.last_updated}",
+                    "beneficiary": self.bene_ids.pop(),
+                },
+                name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
+            )
 
-    @tag("coverage", "coverage_test_id_count_v1", "v1")
-    @task
-    def coverage_test_id_count_v1(self):
-        """Coverage search by ID, Paginated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/Coverage",
-            params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
-            name="/v1/fhir/Coverage search by id / count=10",
-        )
-
-    @tag("coverage", "coverage_test_id_last_updated_v1", "v1")
-    @task
-    def coverage_test_id_last_updated_v1(self):
-        """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/Coverage",
-            params={
-                "_lastUpdated": f"gt{self.last_updated}",
-                "beneficiary": self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
-        )
-
-    @tag("eob", "eob_test_id_count_type_pde_v1", "v1")
-    @task
-    def eob_test_id_count_type_pde_v1(self):
-        """Explanation of Benefit search by ID, type PDE, paginated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/ExplanationOfBenefit",
-            params={
-                "patient": self.bene_ids.pop(),
-                "_format": "json",
-                "_count": "50",
-                "_types": "PDE",
-            },
-            name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
-        )
-
-    @tag("eob", "eob_test_id_last_updated_count_v1", "v1")
-    @task
-    def eob_test_id_last_updated_count_v1(self):
-        """Explanation of Benefit search by ID, last updated, paginated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/ExplanationOfBenefit",
-            params={
-                "patient": self.bene_ids.pop(),
-                "_format": "json",
-                "_count": "100",
-                "_lastUpdated": f"gt{self.last_updated}",
-            },
-            name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
-        )
-
-    @tag("eob", "eob_test_id_include_tax_number_last_updated_v1", "v1")
-    @task
-    def eob_test_id_include_tax_number_last_updated_v1(self):
-        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/ExplanationOfBenefit",
-            params={
-                "patient": self.bene_ids.pop(),
-                "_format": "json",
-                "_lastUpdated": f"gt{self.last_updated}",
-                "_IncludeTaxNumbers": "true",
-            },
-            name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
-        )
-
-    @tag("eob", "eob_test_id_last_updated_v1", "v1")
-    @task
-    def eob_test_id_last_updated_v1(self):
-        """Explanation of Benefit search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/ExplanationOfBenefit",
-            params={
-                "patient": self.bene_ids.pop(),
-                "_format": "json",
-                "_lastUpdated": f"gt{self.last_updated}",
-            },
-            name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
-        )
-
-    @tag("eob", "eob_test_id_v1", "v1")
-    @task
-    def eob_test_id_v1(self):
-        """Explanation of Benefit search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/ExplanationOfBenefit",
-            params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
-            name="/v1/fhir/ExplanationOfBenefit search by id",
-        )
-
-    @tag("patient", "patient_test_coverage_contract_v1", "v1")
-    @task
-    def patient_test_coverage_contract_v1(self):
-        """Patient search by coverage contract (all pages)"""
-
-        def make_url():
-            contract = self.contract_data.pop()
-            return create_url_path(
-                "/v1/fhir/Patient",
-                {
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": 25,
+        @tag("eob", "eob_test_id_count_type_pde_v1", "v1")
+        @task
+        def eob_test_id_count_type_pde_v1(self):
+            """Explanation of Benefit search by ID, type PDE, paginated"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/ExplanationOfBenefit",
+                params={
+                    "patient": self.bene_ids.pop(),
                     "_format": "json",
+                    "_count": "50",
+                    "_types": "PDE",
                 },
+                name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
             )
 
-        self.run_task(
-            name="/v1/fhir/Patient search by coverage contract (all pages)",
-            headers={"IncludeIdentifiers": "mbi"},
-            url_callback=make_url,
-        )
+        @tag("eob", "eob_test_id_last_updated_count_v1", "v1")
+        @task
+        def eob_test_id_last_updated_count_v1(self):
+            """Explanation of Benefit search by ID, last updated, paginated"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/ExplanationOfBenefit",
+                params={
+                    "patient": self.bene_ids.pop(),
+                    "_format": "json",
+                    "_count": "100",
+                    "_lastUpdated": f"gt{self.last_updated}",
+                },
+                name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
+            )
 
-    @tag("patient", "patient_test_hashed_mbi_v1", "v1")
-    @task
-    def patient_test_hashed_mbi_v1(self):
-        """Patient search by ID, Last Updated, include MBI, include Address"""
+        @tag("eob", "eob_test_id_include_tax_number_last_updated_v1", "v1")
+        @task
+        def eob_test_id_include_tax_number_last_updated_v1(self):
+            """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/ExplanationOfBenefit",
+                params={
+                    "patient": self.bene_ids.pop(),
+                    "_format": "json",
+                    "_lastUpdated": f"gt{self.last_updated}",
+                    "_IncludeTaxNumbers": "true",
+                },
+                name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
+            )
 
-        def make_url():
-            return create_url_path(
-                "/v1/fhir/Patient/",
-                {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+        @tag("eob", "eob_test_id_last_updated_v1", "v1")
+        @task
+        def eob_test_id_last_updated_v1(self):
+            """Explanation of Benefit search by ID, Last Updated"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/ExplanationOfBenefit",
+                params={
+                    "patient": self.bene_ids.pop(),
+                    "_format": "json",
+                    "_lastUpdated": f"gt{self.last_updated}",
+                },
+                name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
+            )
+
+        @tag("eob", "eob_test_id_v1", "v1")
+        @task
+        def eob_test_id_v1(self):
+            """Explanation of Benefit search by ID"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/ExplanationOfBenefit",
+                params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
+                name="/v1/fhir/ExplanationOfBenefit search by id",
+            )
+
+        @tag("patient", "patient_test_coverage_contract_v1", "v1")
+        @task
+        def patient_test_coverage_contract_v1(self):
+            """Patient search by coverage contract (all pages)"""
+
+            def make_url():
+                contract = self.contract_data.pop()
+                return create_url_path(
+                    "/v1/fhir/Patient",
+                    {
+                        "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                        "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                        "_count": 25,
+                        "_format": "json",
+                    },
+                )
+
+            self.run_task(
+                name="/v1/fhir/Patient search by coverage contract (all pages)",
+                headers={"IncludeIdentifiers": "mbi"},
+                url_callback=make_url,
+            )
+
+        @tag("patient", "patient_test_hashed_mbi_v1", "v1")
+        @task
+        def patient_test_hashed_mbi_v1(self):
+            """Patient search by ID, Last Updated, include MBI, include Address"""
+
+            def make_url():
+                return create_url_path(
+                    "/v1/fhir/Patient/",
+                    {
+                        "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                        "_IncludeIdentifiers": "mbi",
+                    },
+                )
+
+            self.run_task(
+                name="/v1/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
+                url_callback=make_url,
+            )
+
+        @tag("patient", "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
+        @task
+        def patient_test_id_last_updated_include_mbi_include_address_v1(self):
+            """Patient search by ID, Last Updated, include MBI, include Address"""
+            self.run_task_by_parameters(
+                base_path="/v1/fhir/Patient",
+                params={
+                    "_id": self.bene_ids.pop(),
+                    "_lastUpdated": f"gt{self.last_updated}",
                     "_IncludeIdentifiers": "mbi",
+                    "_IncludeTaxNumbers": "true",
                 },
+                name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
             )
 
-        self.run_task(
-            name="/v1/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
-            url_callback=make_url,
-        )
+        @tag("patient", "patient_test_id_v1", "v1")
+        @task
+        def patient_test_id_v1(self):
+            """Patient search by ID"""
 
-    @tag("patient", "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
-    @task
-    def patient_test_id_last_updated_include_mbi_include_address_v1(self):
-        """Patient search by ID, Last Updated, include MBI, include Address"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/Patient",
-            params={
-                "_id": self.bene_ids.pop(),
-                "_lastUpdated": f"gt{self.last_updated}",
-                "_IncludeIdentifiers": "mbi",
-                "_IncludeTaxNumbers": "true",
-            },
-            name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
-        )
+            def make_url():
+                return create_url_path(f"/v1/fhir/Patient/{self.bene_ids.pop()}", {})
 
-    @tag("patient", "patient_test_id_v1", "v1")
-    @task
-    def patient_test_id_v1(self):
-        """Patient search by ID"""
-
-        def make_url():
-            return create_url_path(f"/v1/fhir/Patient/{self.bene_ids.pop()}", {})
-
-        self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
+            self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
