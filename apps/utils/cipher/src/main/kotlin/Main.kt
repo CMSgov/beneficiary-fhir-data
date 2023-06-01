@@ -104,6 +104,19 @@ class Text(private val bytes: ByteString) {
         return Text(buffer.readByteString())
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Text) return false
+
+        return bytes == other.bytes
+    }
+
+    override fun hashCode(): Int {
+        return bytes.hashCode()
+    }
+
+    fun isEmpty(): Boolean = bytes.size == 0 || bytes.utf8().trim().isEmpty()
+
     companion object {
         fun load(file: File): Text = load(file.source())
         fun load(source: Source): Text = source.buffer().use { Text(it.readByteArray().toByteString()) }
@@ -184,8 +197,14 @@ fun main(args: Array<String>) {
                     .start()
                     .waitFor()
                 val modified = Text.load(tempFile)
-                val encrypted = modified.encrypt(cipher)
-                encrypted.store(File(outputFile).sink())
+                if (modified.isEmpty()) {
+                    println("File is empty - leaving original unchanged.")
+                } else if (modified == rewound) {
+                    println("File unchanged - leaving original unchanged.")
+                } else {
+                    val encrypted = modified.encrypt(cipher)
+                    encrypted.store(File(outputFile).sink())
+                }
             } finally {
                 tempFile.delete()
             }
