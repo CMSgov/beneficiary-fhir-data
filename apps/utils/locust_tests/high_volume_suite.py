@@ -62,9 +62,6 @@ class HighVolumeUser(BFDUserBase):
     The tests in this suite generate a large volume of traffic to endpoints that are hit most
     frequently during a peak load event.
     """
-    
-    # Mark this class as abstract so Locust knows it doesn't contain Tasks
-    abstract = True
 
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
