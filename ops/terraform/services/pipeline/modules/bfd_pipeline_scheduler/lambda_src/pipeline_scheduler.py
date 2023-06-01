@@ -244,110 +244,113 @@ def handler(event: Any, context: Any):
         print(f"Load Type: {pipeline_load_type.name}")
         print(f"Data Load: {data_load.name}")
 
-        if pipeline_data_status == PipelineDataStatus.INCOMING:
-            if event_type == S3EventType.OBJECT_CREATED:
-                # A load was added to Incoming (or files were added to a new load, the distinction
-                # doesn't really matter); add a scheduled action for scale-out in the future if it's
-                # a future load or immediately if the load is timestamped in the past
+        if (
+            pipeline_data_status == PipelineDataStatus.INCOMING
+            and event_type == S3EventType.OBJECT_CREATED
+        ):
+            # A load was added to Incoming (or files were added to a new load, the distinction
+            # doesn't really matter); add a scheduled action for scale-out in the future if it's
+            # a future load or immediately if the load is timestamped in the past
 
-                if not is_future_load:
-                    # We also need to ensure that there are no near-future scale-in scheduled
-                    # actions on the ASG so that we can avoid scaling-out and then prematurely
-                    # scaling-in
-                    print(
-                        "Attempting to delete any near-future scale-in actions on"
-                        f" {PIPELINE_ASG_NAME} to avoid premature scale-in..."
-                    )
-                    try:
-                        autoscaling_client.delete_scheduled_action(
-                            AutoScalingGroupName=PIPELINE_ASG_NAME,
-                            ScheduledActionName=SCALE_IN_FIVE_MINUTES_ACTION_NAME,
-                        )
-                        print(
-                            f"Scheduled action {SCALE_IN_FIVE_MINUTES_ACTION_NAME} successfully"
-                            " deleted. Continuing..."
-                        )
-                    except autoscaling_client.exceptions.ClientError as ex:
-                        print(
-                            f"No near-future scale-in actions scheduled on {PIPELINE_ASG_NAME}."
-                            " Continuing..."
-                        )
-
-                    # For immediate scale outs we do not want to set a scheduled action if the
-                    # desired capacity is already at 1; so, if this is not a future load we check
-                    # the desired capacity and exit if it's already at 1
-                    if (
-                        autoscaling_client.describe_auto_scaling_groups(
-                            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-                        )["AutoScalingGroups"][0]["DesiredCapacity"]
-                        == 1
-                    ):
-                        print("Pipeline ASG desired capacity is already at 1. Exiting...")
-                        return
-
-                scheduled_action_time = (
-                    data_load.timestamp
-                    if is_future_load
-                    else datetime.utcnow() + timedelta(minutes=1)
-                )
-                scheduled_action_name = (
-                    f"{SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX}{calendar.timegm(data_load.timestamp.utctimetuple())}"
-                    if is_future_load
-                    else SCALE_OUT_IMMEDIATELY_ACTION_NAME
-                )
-                if _try_schedule_pipeline_asg_action(
-                    scheduled_action_name=scheduled_action_name,
-                    start_time=scheduled_action_time,
-                    desired_capacity=1,
-                ):
-                    print(
-                        "Scheduled the Pipeline to start"
-                        f" {'in the future' if is_future_load else 'immediately'} at"
-                        f" {scheduled_action_time.isoformat()} UTC"
-                    )
-                else:
-                    print(
-                        f"The scheduled action {scheduled_action_name} was already scheduled on the"
-                        f" Pipeline's ASG for data load {data_load.name}. Exiting..."
-                    )
-            elif event_type == S3EventType.OBJECT_REMOVED:
-                # If an object is removed from Incoming, that could mean that the Pipeline loaded
-                # the data load it was from _or_ an operator removed the data load manually. Either
-                # case, we want to check if this load is now completely gone from Incoming and
-                # remove any corresponding scheduled actions if so so the Pipeline doesn't scale
-                # unnecessarily.
-                if not _is_incoming_folder_empty(data_load=data_load):
-                    print(
-                        f"The data load {data_load.name} has not yet been fully removed from"
-                        " Incoming. Exiting..."
-                    )
-                    return
-
-                # The invoking event was for the last file in this load being removed from Incoming;
-                # remove the data load's corresponding scheduled action, if it exists:
-                invalid_scheduled_action_name = (
-                    f"{SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX}{calendar.timegm(data_load.timestamp.utctimetuple())}"
-                    if is_future_load
-                    else SCALE_OUT_IMMEDIATELY_ACTION_NAME
-                )
+            if not is_future_load:
+                # We also need to ensure that there are no near-future scale-in scheduled
+                # actions on the ASG so that we can avoid scaling-out and then prematurely
+                # scaling-in
                 print(
-                    f"Data load {data_load} has no data in Incoming; it has either been loaded or"
-                    " removed by an external operator. Trying to remove corresponding scheduled"
-                    f" action {invalid_scheduled_action_name}..."
+                    "Attempting to delete any near-future scale-in actions on"
+                    f" {PIPELINE_ASG_NAME} to avoid premature scale-in..."
                 )
                 try:
                     autoscaling_client.delete_scheduled_action(
                         AutoScalingGroupName=PIPELINE_ASG_NAME,
-                        ScheduledActionName=invalid_scheduled_action_name,
+                        ScheduledActionName=SCALE_IN_FIVE_MINUTES_ACTION_NAME,
                     )
-                    print(f"Scheduled action {invalid_scheduled_action_name} successfully deleted")
+                    print(
+                        f"Scheduled action {SCALE_IN_FIVE_MINUTES_ACTION_NAME} successfully"
+                        " deleted. Continuing..."
+                    )
                 except autoscaling_client.exceptions.ClientError as ex:
                     print(
-                        "An error occurred when attempting to delete the scheduled action"
-                        f" {invalid_scheduled_action_name}. It is likely that this scheduled action"
-                        f" had already been invoked and the data load {data_load.name} has already"
-                        " been loaded successfully."
+                        f"No near-future scale-in actions scheduled on {PIPELINE_ASG_NAME}."
+                        " Continuing..."
                     )
+
+                # For immediate scale outs we do not want to set a scheduled action if the
+                # desired capacity is already at 1; so, if this is not a future load we check
+                # the desired capacity and exit if it's already at 1
+                if (
+                    autoscaling_client.describe_auto_scaling_groups(
+                        AutoScalingGroupNames=[PIPELINE_ASG_NAME]
+                    )["AutoScalingGroups"][0]["DesiredCapacity"]
+                    == 1
+                ):
+                    print("Pipeline ASG desired capacity is already at 1. Exiting...")
+                    return
+
+            scheduled_action_time = (
+                data_load.timestamp if is_future_load else datetime.utcnow() + timedelta(minutes=1)
+            )
+            scheduled_action_name = (
+                f"{SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX}{calendar.timegm(data_load.timestamp.utctimetuple())}"
+                if is_future_load
+                else SCALE_OUT_IMMEDIATELY_ACTION_NAME
+            )
+            if _try_schedule_pipeline_asg_action(
+                scheduled_action_name=scheduled_action_name,
+                start_time=scheduled_action_time,
+                desired_capacity=1,
+            ):
+                print(
+                    "Scheduled the Pipeline to start"
+                    f" {'in the future' if is_future_load else 'immediately'} at"
+                    f" {scheduled_action_time.isoformat()} UTC"
+                )
+            else:
+                print(
+                    f"The scheduled action {scheduled_action_name} was already scheduled on the"
+                    f" Pipeline's ASG for data load {data_load.name}. Exiting..."
+                )
+        elif (
+            pipeline_data_status == PipelineDataStatus.INCOMING
+            and event_type == S3EventType.OBJECT_REMOVED
+        ):
+            # If an object is removed from Incoming, that could mean that the Pipeline loaded
+            # the data load it was from _or_ an operator removed the data load manually. Either
+            # case, we want to check if this load is now completely gone from Incoming and
+            # remove any corresponding scheduled actions if so so the Pipeline doesn't scale
+            # unnecessarily.
+            if not _is_incoming_folder_empty(data_load=data_load):
+                print(
+                    f"The data load {data_load.name} has not yet been fully removed from"
+                    " Incoming. Exiting..."
+                )
+                return
+
+            # The invoking event was for the last file in this load being removed from Incoming;
+            # remove the data load's corresponding scheduled action, if it exists:
+            invalid_scheduled_action_name = (
+                f"{SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX}{calendar.timegm(data_load.timestamp.utctimetuple())}"
+                if is_future_load
+                else SCALE_OUT_IMMEDIATELY_ACTION_NAME
+            )
+            print(
+                f"Data load {data_load} has no data in Incoming; it has either been loaded or"
+                " removed by an external operator. Trying to remove corresponding scheduled"
+                f" action {invalid_scheduled_action_name}..."
+            )
+            try:
+                autoscaling_client.delete_scheduled_action(
+                    AutoScalingGroupName=PIPELINE_ASG_NAME,
+                    ScheduledActionName=invalid_scheduled_action_name,
+                )
+                print(f"Scheduled action {invalid_scheduled_action_name} successfully deleted")
+            except autoscaling_client.exceptions.ClientError as ex:
+                print(
+                    "An error occurred when attempting to delete the scheduled action"
+                    f" {invalid_scheduled_action_name}. It is likely that this scheduled action"
+                    f" had already been invoked and the data load {data_load.name} has already"
+                    " been loaded successfully."
+                )
         elif (
             pipeline_data_status == PipelineDataStatus.DONE
             and event_type == S3EventType.OBJECT_CREATED
@@ -408,4 +411,7 @@ def handler(event: Any, context: Any):
                     " its ASG's desired capacity is already set to 0"
                 )
         else:
-            print("Unsupported invocation. Exiting...")
+            print(
+                f"Unsupported invocation (data status: {pipeline_data_status.name}, s3 event:"
+                f" {event_type.name}). Exiting..."
+            )
