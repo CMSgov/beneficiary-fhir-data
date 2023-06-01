@@ -384,6 +384,8 @@ class HighVolumeUser(BFDUserBase):
 
         # Override the value for last_updated with a static value
         self.last_updated = "2022-06-29"
+        tasks = [Suite]
+        self.tasks = [Suite]
 
     @task
     def do_nothing(self):
