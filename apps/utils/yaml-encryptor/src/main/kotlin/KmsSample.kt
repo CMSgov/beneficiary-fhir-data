@@ -1,4 +1,4 @@
-package gov.cms.yamlEncryptor
+package gov.cms.kms
 
 import com.amazonaws.encryptionsdk.AwsCrypto
 import com.amazonaws.encryptionsdk.CryptoResult
