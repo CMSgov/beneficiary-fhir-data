@@ -294,11 +294,18 @@ public final class PipelineManagerIT {
 
       // Make sure that the job stopped trying to execute after it failed.
 
-      assertEquals(
-          1,
+      var jobRecords =
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
-              .count());
+              .toList();
+      if (jobRecords.size() != 1) {
+        assertEquals(
+            "",
+            jobRecordStore.getJobRecords().stream()
+                .map(PipelineJobRecord::toString)
+                .collect(Collectors.joining("\n")));
+      }
+      assertEquals(1, jobRecords.size());
     }
   }
 
