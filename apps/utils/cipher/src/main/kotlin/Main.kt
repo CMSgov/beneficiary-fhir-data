@@ -1,4 +1,4 @@
-package gov.cms.kms
+package gov.cms.cipher
 
 import com.amazonaws.encryptionsdk.AwsCrypto
 import com.amazonaws.encryptionsdk.CryptoResult
@@ -18,7 +18,7 @@ import java.util.*
 import kotlin.io.use
 import kotlin.system.exitProcess
 
-val AppName = "Cipherinator"
+val AppName = "cipher"
 
 val PlainPrefix = "<<SECURE>>".encodeUtf8()
 val PlainSuffix = "<</SECURE>>".encodeUtf8()
