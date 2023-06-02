@@ -7,7 +7,8 @@ import java.util.Map;
 /** Extracts a file name. */
 public class FileNameCalculation {
   /** Base url for the nppes download. */
-  private static final String BASE_URL = "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
+  protected static final String BASE_URL =
+      "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
 
   /**
    * Extracts a file name.

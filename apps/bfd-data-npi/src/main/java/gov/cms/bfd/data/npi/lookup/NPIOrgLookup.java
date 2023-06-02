@@ -22,7 +22,7 @@ public class NPIOrgLookup {
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
   /** Hashmap to keep the org names. */
-  private final Map<String, String> npiOrgHashMap = new HashMap<>();
+  private Map<String, String> npiOrgHashMap = new HashMap<>();
 
   /** A field to return the testing org lookup. */
   private static NPIOrgLookup npiOrgLookupForTesting;
@@ -34,11 +34,12 @@ public class NPIOrgLookup {
    * Factory method for creating a {@link NPIOrgLookup } for testing that includes the fake org
    * name.
    *
+   * @throws IOException if there is an issue reading file
    * @return the {@link NPIOrgLookup }
    */
   public static NPIOrgLookup createNpiOrgLookupForTesting() throws IOException {
     if (npiOrgLookupForTesting == null) {
-      npiOrgLookupForTesting = new NPIOrgLookup(true);
+      npiOrgLookupForTesting = new NPIOrgLookup();
     }
 
     return npiOrgLookupForTesting;
@@ -48,23 +49,31 @@ public class NPIOrgLookup {
    * Factory method for creating a {@link NPIOrgLookup } for production that does not include the
    * fake org name.
    *
+   * @throws IOException if there is an issue reading file
    * @return the {@link NPIOrgLookup }
    */
   public static NPIOrgLookup createNpiOrgLookupForProduction() throws IOException {
     if (npiOrgLookupForProduction == null) {
-      npiOrgLookupForProduction = new NPIOrgLookup(false);
+      InputStream npiDataStream = getFileInputStream(App.NPI_RESOURCE);
+      npiOrgLookupForProduction = new NPIOrgLookup(npiDataStream);
     }
 
     return npiOrgLookupForProduction;
   }
 
+  /** Constructs an {@link NPIOrgLookup}. */
+  protected NPIOrgLookup() {
+    npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
+  }
+
   /**
    * Constructs an {@link NPIOrgLookup}.
    *
-   * @param includeFakeNpiOrgName whether to include the fake testing npi org name or not
+   * @param npiDataStream input stream for npi org
+   * @throws IOException if there is an issue reading file
    */
-  private NPIOrgLookup(boolean includeFakeNpiOrgName) throws IOException {
-    readNPIOrgDataFile(includeFakeNpiOrgName);
+  protected NPIOrgLookup(InputStream npiDataStream) throws IOException {
+    npiOrgHashMap = readNPIOrgDataStream(npiDataStream);
   }
 
   /**
@@ -83,8 +92,8 @@ public class NPIOrgLookup {
     }
 
     if (npiOrgHashMap.containsKey(npiNumber.get())) {
-      String npiOrgName = npiOrgHashMap.get(npiNumber.get());
-      return Optional.of(npiOrgName);
+      String npiDisplay = npiOrgHashMap.get(npiNumber.get());
+      return Optional.of(npiDisplay);
     }
 
     return Optional.empty();
@@ -94,37 +103,40 @@ public class NPIOrgLookup {
    * Reads all the npi number and npi org data fields from the NPPES file which was downloaded
    * during the build process.
    *
-   * <p>See {@link gov.cms.bfd.server.war.NPIDataUtilityApp} for details.
-   *
-   * @param includeFakeNPIOrgCode whether to include the fake testing NPI Org
+   * @param inputStream for the npi file
+   * @throws IOException if there is an issue reading file
+   * @return the hashmapped for npis and the npi org names
    */
-  private void readNPIOrgDataFile(boolean includeFakeNPIOrgCode) throws IOException {
-    final InputStream npiOrgStream =
-        App.class.getClassLoader().getResourceAsStream(App.NPI_RESOURCE);
+  protected Map<String, String> readNPIOrgDataStream(InputStream inputStream) throws IOException {
+    Map<String, String> npiProcessedData = new HashMap<String, String>();
 
-    if (npiOrgStream != null) {
-      try (final BufferedReader npiOrgIn =
-          new BufferedReader(new InputStreamReader(npiOrgStream))) {
-        String line = "";
-        while ((line = npiOrgIn.readLine()) != null) {
-          String npiOrgColumns[] = line.split("\t");
-          if (npiOrgColumns.length == 2) {
-            npiOrgHashMap.put(
-                npiOrgColumns[0].replace("\"", ""), npiOrgColumns[1].replace("\"", ""));
-          }
+    try (final InputStream npiStream = inputStream;
+        final BufferedReader npiReader = new BufferedReader(new InputStreamReader(npiStream))) {
+
+      String line = "";
+      while ((line = npiReader.readLine()) != null) {
+        String npiDataColumns[] = line.split("\t");
+        if (npiDataColumns.length == 2) {
+          npiProcessedData.put(
+              npiDataColumns[0].replace("\"", ""), npiDataColumns[1].replace("\"", ""));
         }
-
-      } catch (IOException e) {
-        LOGGER.error("Unable to read NPI data:" + e.getMessage());
-        throw new IOException(e);
       }
-    } else {
-      LOGGER.error("Unable to read stream for NPI Resource");
-      throw new IOException("Unable to read stream for NPI Resource");
+
+    } catch (IOException e) {
+      LOGGER.error("Unable to read NPI data:" + e.getMessage());
+      throw new IOException(e);
     }
 
-    if (includeFakeNPIOrgCode) {
-      npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
-    }
+    return npiProcessedData;
+  }
+
+  /**
+   * Returns a inputStream from file name passed in.
+   *
+   * @param fileName is the file name passed in
+   * @return InputStream of file.
+   */
+  protected static InputStream getFileInputStream(String fileName) {
+    return Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
   }
 }
