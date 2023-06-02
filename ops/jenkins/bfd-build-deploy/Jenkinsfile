@@ -120,7 +120,7 @@ spec:
 
           // Find the most current AMI IDs (if any).
           amiIds = null
-          amiIds = scriptForDeploys.findAmis()
+          amiIds = scriptForDeploys.findAmis(gitBranchName)
 
           build job:
                 jobToRun,

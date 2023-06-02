@@ -53,7 +53,7 @@ class AmiIds implements Serializable {
  * @return a new {@link AmiIds} instance detailing the already-existing, latest AMIs (if any) that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
 */
-def findAmis() {
+def findAmis(String branchName = 'master') {
 	// Replace this lookup either with a lookup in SSM or in a build artifact.
 	return new AmiIds(
 		platinumAmiId: sh(
@@ -66,6 +66,7 @@ def findAmis() {
 		bfdPipelineAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
+			'Name=tag:Branch,Values=${branchName}' \
 			'Name=name,Values=bfd-amzn2-jdk17-etl-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
@@ -73,6 +74,7 @@ def findAmis() {
 		bfdServerAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
+			'Name=tag:Branch,Values=${branchName}' \
 			'Name=name,Values=bfd-amzn2-jdk17-fhir-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
@@ -80,6 +82,7 @@ def findAmis() {
 		bfdMigratorAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
+			'Name=tag:Branch,Values=${branchName}' \
 			'Name=name,Values=bfd-amzn2-jdk17-db-migrator-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
@@ -87,6 +90,7 @@ def findAmis() {
 		bfdServerLoadAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
+			'Name=tag:Branch,Values=${branchName}' \
 			'Name=name,Values=server-load-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
