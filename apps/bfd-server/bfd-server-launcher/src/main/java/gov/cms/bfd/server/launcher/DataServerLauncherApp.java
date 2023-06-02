@@ -6,8 +6,12 @@ import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
@@ -99,9 +103,10 @@ public final class DataServerLauncherApp {
     // Parse the app config.
     AppConfiguration appConfig = null;
     try {
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+      ConfigLoader config = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
+      appConfig = AppConfiguration.loadConfig(config);
       LOGGER.info("Launcher configured: '{}'", appConfig);
-    } catch (AppConfigurationException e) {
+    } catch (ConfigException | AppConfigurationException e) {
       System.err.println(e.getMessage());
       LOGGER.warn("Invalid app configuration.", e);
       System.exit(EXIT_CODE_BAD_CONFIG);
