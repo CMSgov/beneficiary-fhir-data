@@ -3,7 +3,7 @@
 from random import shuffle
 from typing import Dict, List
 
-from locust import events, tag, task, TaskSet
+from locust import events, tag, task
 from locust.env import Environment
 
 from common import data, db, validation
@@ -55,7 +55,32 @@ def _(environment: Environment, **kwargs):
 class TestLoadShape(UserInitAwareLoadShape):
     pass
 
-class Suite(TaskSet):
+
+class HighVolumeUser(BFDUserBase):
+    """High volume load test suite for V2 BFD Server endpoints.
+
+    The tests in this suite generate a large volume of traffic to endpoints that are hit most
+    frequently during a peak load event.
+    """
+
+    # Do we terminate the tests when a test runs out of data and paginated URLs?
+    END_ON_NO_DATA = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bene_ids = MASTER_BENE_IDS.copy()
+        self.contract_data = MASTER_CONTRACT_DATA.copy()
+        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+
+        # Shuffle all the data around so that each HighVolumeUser is _probably_
+        # not requesting the same data.
+        shuffle(self.bene_ids)
+        shuffle(self.contract_data)
+        shuffle(self.hashed_mbis)
+
+        # Override the value for last_updated with a static value
+        self.last_updated = "2022-06-29"
+
     @tag("coverage", "coverage_test_id_count", "v2")
     @task
     def coverage_test_id_count(self):
@@ -358,35 +383,3 @@ class Suite(TaskSet):
             return create_url_path(f"/v1/fhir/Patient/{self.bene_ids.pop()}", {})
 
         self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
-
-class HighVolumeUser(BFDUserBase):
-    """High volume load test suite for V2 BFD Server endpoints.
-
-    The tests in this suite generate a large volume of traffic to endpoints that are hit most
-    frequently during a peak load event.
-    """
-
-    # Do we terminate the tests when a test runs out of data and paginated URLs?
-    END_ON_NO_DATA = False
-    tasks = [Suite]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.bene_ids = MASTER_BENE_IDS.copy()
-        self.contract_data = MASTER_CONTRACT_DATA.copy()
-        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
-
-        # Shuffle all the data around so that each HighVolumeUser is _probably_
-        # not requesting the same data.
-        shuffle(self.bene_ids)
-        shuffle(self.contract_data)
-        shuffle(self.hashed_mbis)
-
-        # Override the value for last_updated with a static value
-        self.last_updated = "2022-06-29"
-        tasks = [Suite]
-        self.tasks = [Suite]
-
-    @task
-    def do_nothing(self):
-        pass
