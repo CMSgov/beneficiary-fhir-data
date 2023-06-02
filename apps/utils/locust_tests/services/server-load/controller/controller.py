@@ -129,7 +129,7 @@ def _main():
             "--headless",
         ]
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
-        + ([f"--tags={locust_tags}"] if locust_tags else []),
+        + list(map(lambda tag: f"--tags={tag}", locust_tags.split())),
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
