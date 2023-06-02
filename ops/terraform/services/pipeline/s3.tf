@@ -70,17 +70,18 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
   }
 
   # Lambda function notifications for the BFD Pipeline Scheduler Lambda
-  dynamic "lambda_function" {
-    for_each = {
-      for prefix in ["Incoming", "Done", "Synthetic/Incoming", "Synthetic/Done"] : "${prefix}/" => lower(replace(prefix, "/", "-"))
-      if local.pipeline_variant_configs.ccw.enabled # Only create if CCW pipeline is enabled
-    }
+  # TODO: Re-enable under BFD-2670
+  # dynamic "lambda_function" {
+  #   for_each = {
+  #     for prefix in ["Incoming", "Done", "Synthetic/Incoming", "Synthetic/Done"] : "${prefix}/" => lower(replace(prefix, "/", "-"))
+  #     if local.pipeline_variant_configs.ccw.enabled # Only create if CCW pipeline is enabled
+  #   }
 
-    content {
-      events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-      filter_prefix       = lambda_function.key
-      id                  = "${module.bfd_pipeline_scheduler[0].lambda_name}-${lambda_function.value}"
-      lambda_function_arn = module.bfd_pipeline_scheduler[0].lambda_arn
-    }
-  }
+  #   content {
+  #     events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
+  #     filter_prefix       = lambda_function.key
+  #     id                  = "${module.bfd_pipeline_scheduler[0].lambda_name}-${lambda_function.value}"
+  #     lambda_function_arn = module.bfd_pipeline_scheduler[0].lambda_arn
+  #   }
+  # }
 }
