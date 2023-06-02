@@ -159,42 +159,30 @@ class HighVolumeUser(BFDUserBase):
     @task
     def patient_test_coverage_contract(self):
         """Patient search by Coverage Contract, paginated"""
-
-        def make_url():
-            contract = self.contract_data.pop()
-            return create_url_path(
-                "/v2/fhir/Patient",
-                {
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": 25,
-                    "_format": "json",
-                },
-            )
-
-        self.run_task(
-            name="/v2/fhir/Patient search by coverage contract (all pages)",
+        contract = self.contract_data.pop()
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Patient",
             headers={"IncludeIdentifiers": "mbi"},
-            url_callback=make_url,
+            params={
+                "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                "_count": 25,
+                "_format": "json",
+            },
+            name="/v2/fhir/Patient search by coverage contract (all pages)"
         )
 
     @tag("patient", "patient_test_hashed_mbi", "v2")
     @task
     def patient_test_hashed_mbi(self):
         """Patient search by hashed MBI, include identifiers"""
-
-        def make_url():
-            return create_url_path(
-                "/v2/fhir/Patient/",
-                {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
-                    "_IncludeIdentifiers": "mbi",
-                },
-            )
-
-        self.run_task(
-            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
-            url_callback=make_url,
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Patient",
+            params={
+                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                "_IncludeIdentifiers": "mbi",
+            },
+            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi"
         )
 
     @tag("patient", "patient_test_id_include_mbi_last_updated", "v2")
@@ -321,42 +309,30 @@ class HighVolumeUser(BFDUserBase):
     @task
     def patient_test_coverage_contract_v1(self):
         """Patient search by coverage contract (all pages)"""
-
-        def make_url():
-            contract = self.contract_data.pop()
-            return create_url_path(
-                "/v1/fhir/Patient",
-                {
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": 25,
-                    "_format": "json",
-                },
-            )
-
-        self.run_task(
-            name="/v1/fhir/Patient search by coverage contract (all pages)",
+        contract = self.contract_data.pop()
+        self.run_task_by_parameters(
+            base_path="/v1/fhir/Patient",
             headers={"IncludeIdentifiers": "mbi"},
-            url_callback=make_url,
+            params={
+                "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                "_count": 25,
+                "_format": "json",
+            },
+            name="/v1/fhir/Patient search by coverage contract (all pages)"
         )
 
     @tag("patient", "patient_test_hashed_mbi_v1", "v1")
     @task
     def patient_test_hashed_mbi_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
-
-        def make_url():
-            return create_url_path(
-                "/v1/fhir/Patient/",
-                {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
-                    "_IncludeIdentifiers": "mbi",
-                },
-            )
-
-        self.run_task(
+        self.run_task_by_parameters(
+            base_path="/v1/fhir/Patient",
+            params={
+                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                "_IncludeIdentifiers": "mbi",
+            },
             name="/v1/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
-            url_callback=make_url,
         )
 
     @tag("patient", "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
