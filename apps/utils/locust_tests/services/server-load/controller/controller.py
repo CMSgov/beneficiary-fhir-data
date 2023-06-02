@@ -42,6 +42,7 @@ asg_name = os.environ.get("ASG_NAME", "")
 test_host = os.environ.get("TEST_HOST", "https://test.bfd.cms.gov")
 region = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 locust_tags = os.environ.get("LOCUST_TAGS", "")
+locust_tags_excluded = os.environ.get("LOCUST_TAGS_EXCLUDED", "")
 # Default dangerous variables to values that will not cause any issues
 initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
 node_spawn_time = int(os.environ.get("NODE_SPAWN_TIME", 10))
@@ -129,7 +130,8 @@ def _main():
             "--headless",
         ]
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
-        + list(map(lambda tag: f"--tags={tag}", locust_tags.split())),
+        + list(map(lambda tag: f"--tags={tag}", locust_tags.split()))
+        + list(map(lambda tag: f"--exclude-tags={tag}", locust_tags_excluded.split())),
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
@@ -141,7 +143,10 @@ def _main():
     ip_address = socket.gethostbyname(socket.gethostname())
 
     if locust_tags:
-        print(f"Running tests with an annotated @tag including any of the following: {locust_tags}")
+        print(f"Running tasks with an annotated @tag including any of the following: {locust_tags}")
+
+    if locust_tags_excluded:
+        print(f"Skipping tasks with an annotated @tag including any of the following: {locust_tags_excluded}")
 
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):

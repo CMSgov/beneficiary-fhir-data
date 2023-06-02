@@ -52,6 +52,7 @@
         server_load_test_runtime_limit: 0
         server_load_coasting_time: 0
         server_load_locust_tags: ""
+        server_load_locust_tags_excluded: ""
 
     - name: Ensure Service Is Running
       service:

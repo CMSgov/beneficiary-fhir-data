@@ -45,7 +45,10 @@ spec:
                         + 'Defaults to latest server-load AMI from `master`')
 
     string(name: 'LOCUST_TAGS',
-           description: 'Space-delimited. Run only the locust tests with ANY of the given @tag(s).')
+           description: 'Space-delimited. Run only the locust tasks with ANY of the given @tag(s).')
+
+   string(name: 'LOCUST_TAGS_EXCLUDED',
+          description: 'Space-delimited. Exclude the locust tasks with ANY of the given @tag(s).')
 
     string(name: 'INITIAL_WORKER_NODES',
            defaultValue: '0',
