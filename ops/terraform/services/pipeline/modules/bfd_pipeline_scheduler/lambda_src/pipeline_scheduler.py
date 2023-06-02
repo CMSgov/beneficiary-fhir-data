@@ -69,6 +69,10 @@ class PipelineDataStatus(str, Enum):
     INCOMING = "Incoming"
     DONE = "Done"
 
+    @classmethod
+    def match_str(cls) -> str:
+        return "|".join([e.value for e in PipelineDataStatus])
+
 
 class RifFileType(str, Enum):
     """Represents all of the possible RIF file types that can be loaded by the BFD ETL Pipeline. The
@@ -85,6 +89,10 @@ class RifFileType(str, Enum):
     PDE = "pde"
     SNF = "snf"
 
+    @classmethod
+    def match_str(cls) -> str:
+        return "|".join([e.value for e in cls])
+
 
 @dataclass(frozen=True, eq=True)
 class TimestampedDataLoad:
@@ -93,6 +101,10 @@ class TimestampedDataLoad:
 
     load_type: PipelineLoadType
     name: str
+
+    @classmethod
+    def match_str(cls) -> str:
+        return r"[\d\-:TZ]+"
 
     @property
     def timestamp(self) -> datetime:
@@ -106,7 +118,6 @@ def _get_all_valid_incoming_loads_before_date(
         "/".join(filter(None, [load_type.value, PipelineDataStatus.INCOMING])) + "/"
         for load_type in PipelineLoadType
     ]
-    rif_types_group_str = "|".join([e.value for e in RifFileType])
     # We get all objects in both the non-synthetic and synthetic incoming folders within the S3
     # Bucket; chain() will flatten the resulting iterable so that it's a single iterable of bucket
     # objects
@@ -118,7 +129,7 @@ def _get_all_valid_incoming_loads_before_date(
         str(object.key)
         for object in incoming_objects
         if re.match(
-            pattern=rf".*({rif_types_group_str}).*(txt|csv)",
+            pattern=rf".*({RifFileType.match_str()}).*(txt|csv)",
             string=str(object.key),
         )
         is not None
@@ -136,7 +147,12 @@ def _get_all_valid_incoming_loads_before_date(
             name=group_name_match.group(1),
         )
         for object_key in incoming_rifs
-        if (group_name_match := re.search(pattern=r"([\d\-:TZ]+)/", string=object_key)) is not None
+        if (
+            group_name_match := re.search(
+                pattern=rf"({TimestampedDataLoad.match_str()})/", string=object_key
+            )
+        )
+        is not None
     }
 
     # If no time cutoff was specified we return all data loads, including future data loads
@@ -157,9 +173,15 @@ def _is_incoming_folder_empty(data_load: TimestampedDataLoad) -> bool:
         )
         + "/"
     )
-    incoming_objects = list(etl_bucket.objects.filter(Prefix=incoming_key_prefix))
 
-    return len(incoming_objects) == 0
+    # We check each object with a matching prefix to see if they match the expected names of RIF
+    # files. If any match, that means there is a valid RIF still within Incoming/. We negate the
+    # result of any() as we're returning if Incoming/ is empty, not if it's non-empty
+    return not any(
+        re.search(pattern=rf".*({RifFileType.match_str()}).*(txt|csv)", string=str(object.key))
+        is not None
+        for object in etl_bucket.objects.filter(Prefix=incoming_key_prefix)
+    )
 
 
 def _try_schedule_pipeline_asg_action(
@@ -220,16 +242,14 @@ def handler(event: Any, context: Any):
     print(f"S3 Object Key: {decoded_file_key}")
     print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
 
-    status_group_str = "|".join([e.value for e in PipelineDataStatus])
-    rif_types_group_str = "|".join([e.value for e in RifFileType])
     # The incoming file's key should match an expected format, as follows:
     # "<Synthetic/>/<Incoming/Done>/<ISO date format>/<file name>".
     match = re.search(
         pattern=(
             rf"^({PipelineLoadType.SYNTHETIC}){{0,1}}/{{0,1}}"
-            rf"({status_group_str})/"
-            rf"([\d\-:TZ]+)/"
-            rf".*({rif_types_group_str}).*$"
+            rf"({PipelineDataStatus.match_str()})/"
+            rf"({TimestampedDataLoad.match_str()})/"
+            rf"f*({RifFileType.match_str()}).*$"
         ),
         string=decoded_file_key,
         flags=re.IGNORECASE,
