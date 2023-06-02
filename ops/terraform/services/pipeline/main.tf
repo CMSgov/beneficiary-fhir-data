@@ -128,20 +128,20 @@ locals {
       }
     }
   }
-  # FIXME: Replace with merged map with all variants when RDA is merged with CCW infrastructure
+  # TODO: Consider replacing with merged map with all variants if RDA variant is updated to be on-demand
   rda_pipeline_config = {
     for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
     if local.pipeline_variant_configs[k].enabled && k == "rda"
   }
-  # FIXME: Replace with merged map with all variants when RDA is merged with CCW infrastructure
+  # TODO: Consider replacing with merged map with all variants if RDA variant is updated to be on-demand
   ccw_pipeline_config = {
     for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
     if local.pipeline_variant_configs[k].enabled && k == "ccw"
   }
 }
 
+# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
 resource "aws_launch_template" "this" {
-  # FIXME: Use merged object instead of specific variant when RDA adopts ASG pattern
   for_each = local.ccw_pipeline_config
 
   name          = each.value.name
@@ -222,8 +222,8 @@ resource "aws_launch_template" "this" {
   }
 }
 
+# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
 resource "aws_autoscaling_group" "this" {
-  # FIXME: Use merged object instead of specific variant when RDA adopts ASG pattern
   for_each = local.ccw_pipeline_config
 
   name                = each.value.name
@@ -266,7 +266,6 @@ resource "aws_autoscaling_group" "this" {
 
 # TODO: Determine if this can be consolidated with the CCW Pipeline's infrastructure
 resource "aws_instance" "pipeline" {
-  # FIXME: Use merged object instead of specific variant when RDA adopts ASG pattern
   for_each = { for server in local.rda_pipeline_config : server.instance_name => server }
 
   ami                                  = local.ami_id
@@ -371,7 +370,7 @@ module "bfd_pipeline_slo_alarms" {
 module "bfd_pipeline_scheduler" {
   # For now, this module only supports the CCW-variant of the pipeline and so should not be included
   # if the CCW pipeline is disabled
-  # TODO: Remove when RDA pipeline supports on-demand mechanisms
+  # TODO: Consider removing when RDA pipeline supports on-demand mechanisms
   count = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
 
   source = "./modules/bfd_pipeline_scheduler"
@@ -383,10 +382,4 @@ module "bfd_pipeline_scheduler" {
     arn  = aws_autoscaling_group.this["ccw"].arn
     name = aws_autoscaling_group.this["ccw"].name
   }
-}
-
-# TODO: Remove post BFD-2554
-moved {
-  from = module.bfd_pipeline_slis
-  to   = module.bfd_pipeline_slis[0]
 }
