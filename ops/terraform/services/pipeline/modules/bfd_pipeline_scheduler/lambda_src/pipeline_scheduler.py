@@ -75,7 +75,6 @@ class RifFileType(str, Enum):
     value of each enum is a specific substring that is used to match on each type of file
     """
 
-    BENEFICIARY_HISTORY = "beneficiary_history"
     BENEFICIARY = "bene"
     CARRIER = "carrier"
     DME = "dme"
