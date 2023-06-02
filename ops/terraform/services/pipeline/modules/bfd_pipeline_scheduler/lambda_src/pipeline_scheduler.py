@@ -71,7 +71,7 @@ class PipelineDataStatus(str, Enum):
 
     @classmethod
     def match_str(cls) -> str:
-        return "|".join([e.value for e in PipelineDataStatus])
+        return "|".join([e.value for e in cls])
 
 
 class RifFileType(str, Enum):
