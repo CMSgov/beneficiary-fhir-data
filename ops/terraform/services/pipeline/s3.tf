@@ -51,26 +51,36 @@ resource "aws_s3_bucket_acl" "this" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
-  count = local.create_slis ? 1 : 0
-
+resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
   bucket = aws_s3_bucket.this.id
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Incoming/"
-    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-incoming"
-    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+  # Lambda function notifications for the BFD Pipeline SLIs Lambda
+  dynamic "lambda_function" {
+    for_each = {
+      for prefix in ["Incoming", "Done"] : "${prefix}/" => lower(prefix)
+      if local.create_slis # Only create notifications for SLIs lambda if it's being created
+    }
+
+    content {
+      events              = ["s3:ObjectCreated:*"]
+      filter_prefix       = lambda_function.key
+      id                  = "${module.bfd_pipeline_slis[0].lambda_name}-${lambda_function.value}"
+      lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+    }
   }
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Done/"
-    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-done"
-    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+  # Lambda function notifications for the BFD Pipeline Scheduler Lambda
+  dynamic "lambda_function" {
+    for_each = {
+      for prefix in ["Incoming", "Done", "Synthetic/Incoming", "Synthetic/Done"] : "${prefix}/" => lower(replace(prefix, "/", "-"))
+      if local.pipeline_variant_configs.ccw.enabled # Only create if CCW pipeline is enabled
+    }
+
+    content {
+      events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
+      filter_prefix       = lambda_function.key
+      id                  = "${module.bfd_pipeline_scheduler[0].lambda_name}-${lambda_function.value}"
+      lambda_function_arn = module.bfd_pipeline_scheduler[0].lambda_arn
+    }
   }
 }
