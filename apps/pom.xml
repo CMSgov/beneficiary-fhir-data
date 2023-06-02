@@ -522,6 +522,13 @@
             </dependency>
 
             <dependency>
+                <!-- Used to parse and read hex encoded data. -->
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+
+            <dependency>
                 <!-- The test framework used for unit and integration tests. -->
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>
