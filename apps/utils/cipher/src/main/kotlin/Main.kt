@@ -15,10 +15,14 @@ import software.amazon.awssdk.services.kms.KmsClient
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.net.URI
+import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.*
+import java.util.stream.Stream
 import kotlin.io.use
 import kotlin.system.exitProcess
+
 
 val AppName = "cipher"
 
@@ -215,8 +219,10 @@ fun main(args: Array<String>) {
         }
 
         "edit" -> {
-            val currentDirectory = Paths.get(".").toFile()
-            val tempFile = File.createTempFile("edit-", ".txt", currentDirectory)
+            val currentDirectory = Paths.get(".")
+            val permissions = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))
+            val tempFile = Files.createTempFile(currentDirectory, "edit-", ".txt", permissions).toFile()
+            tempFile.deleteOnExit()
             try {
                 val original = Text.load(File(inputFile))
                 val rewound = original.rewind(cipher)
