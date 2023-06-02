@@ -265,6 +265,37 @@ resource "aws_autoscaling_group" "this" {
   }
 }
 
+# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
+resource "aws_sns_topic" "s3_events" {
+  for_each = local.ccw_pipeline_config
+
+  name              = "bfd-${local.env}-${each.key}-${local.service}-s3-events"
+  kms_master_key_id = local.kms_key_id
+}
+
+resource "aws_sns_topic_policy" "s3_events" {
+  for_each = local.ccw_pipeline_config
+
+  arn = aws_sns_topic.s3_events[each.key].arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "s3.amazonaws.com" }
+        Action    = "SNS:Publish"
+        Resource  = aws_sns_topic.s3_events[each.key].arn
+        Condition = {
+          ArnLike = {
+            "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
+          }
+        }
+      }
+    ]
+  })
+}
+
 # TODO: Determine if this can be consolidated with the CCW Pipeline's infrastructure
 resource "aws_instance" "pipeline" {
   for_each = { for server in local.rda_pipeline_config : server.instance_name => server }
@@ -342,13 +373,15 @@ resource "aws_instance" "pipeline" {
 }
 
 module "bfd_pipeline_slis" {
-  count = local.create_slis ? 1 : 0
+  depends_on = [aws_sns_topic.s3_events]
+  count      = local.create_slis ? 1 : 0
 
-  source          = "./modules/bfd_pipeline_slis"
-  account_id      = local.account_id
-  aws_kms_key_arn = local.kms_key_id
-  aws_kms_key_id  = local.kms_key_id
-  etl_bucket_id   = aws_s3_bucket.this.id
+  source                   = "./modules/bfd_pipeline_slis"
+  account_id               = local.account_id
+  aws_kms_key_arn          = local.kms_key_id
+  aws_kms_key_id           = local.kms_key_id
+  etl_bucket_id            = aws_s3_bucket.this.id
+  s3_events_sns_topic_name = aws_sns_topic.s3_events["ccw"].name
 }
 
 module "bfd_pipeline_dashboard" {
@@ -371,14 +404,16 @@ module "bfd_pipeline_slo_alarms" {
 module "bfd_pipeline_scheduler" {
   # For now, this module only supports the CCW-variant of the pipeline and so should not be included
   # if the CCW pipeline is disabled
+  depends_on = [aws_sns_topic.s3_events]
   # TODO: Consider removing when RDA pipeline supports on-demand mechanisms
   count = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
 
   source = "./modules/bfd_pipeline_scheduler"
 
-  account_id     = local.account_id
-  etl_bucket_id  = aws_s3_bucket.this.id
-  env_kms_key_id = data.aws_kms_key.cmk.key_id
+  account_id               = local.account_id
+  etl_bucket_id            = aws_s3_bucket.this.id
+  env_kms_key_id           = data.aws_kms_key.cmk.key_id
+  s3_events_sns_topic_name = aws_sns_topic.s3_events["ccw"].name
   ccw_pipeline_asg_details = {
     arn  = aws_autoscaling_group.this["ccw"].arn
     name = aws_autoscaling_group.this["ccw"].name
