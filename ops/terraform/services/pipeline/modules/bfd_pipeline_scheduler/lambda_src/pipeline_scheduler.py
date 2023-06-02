@@ -249,7 +249,7 @@ def handler(event: Any, context: Any):
             rf"^({PipelineLoadType.SYNTHETIC}){{0,1}}/{{0,1}}"
             rf"({PipelineDataStatus.match_str()})/"
             rf"({TimestampedDataLoad.match_str()})/"
-            rf"f*({RifFileType.match_str()}).*$"
+            rf".*({RifFileType.match_str()}).*(txt|csv)$"
         ),
         string=decoded_file_key,
         flags=re.IGNORECASE,
