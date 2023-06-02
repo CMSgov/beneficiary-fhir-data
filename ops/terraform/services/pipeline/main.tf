@@ -228,10 +228,9 @@ resource "aws_autoscaling_group" "this" {
 
   name                = each.value.name
   vpc_zone_identifier = [data.aws_subnet.main.id]
-  # TODO: Address the desired and min capacity in BFD-2670
-  desired_capacity = 1
-  max_size         = 1
-  min_size         = 1
+  desired_capacity    = 0
+  max_size            = 1
+  min_size            = 0
 
   health_check_grace_period = 300
   health_check_type         = "EC2"
