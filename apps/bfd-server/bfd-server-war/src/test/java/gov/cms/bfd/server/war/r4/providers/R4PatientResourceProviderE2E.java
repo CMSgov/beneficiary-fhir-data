@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
@@ -48,7 +47,7 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
    * from the endpoint will have this added in the resource provider).
    */
   private static final List<String> standardExpectedHistoricalMbis =
-      List.of("9AB2WW3GR44", "3456689");
+      List.of("9AB2WW3GR44", "543217066", "3456689");
 
   /**
    * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
@@ -502,9 +501,7 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     ServerTestUtils.get()
         .loadData(
             Arrays.asList(
-                StaticRifResource.SAMPLE_A_BENES,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
     IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
@@ -555,9 +552,7 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     ServerTestUtils.get()
         .loadData(
             Arrays.asList(
-                StaticRifResource.SAMPLE_A_BENES,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
     IGenericClient fhirClient = createFhirClient("true");
 
     Bundle searchResults = null;
@@ -834,9 +829,9 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
    */
   private void comparePatient(
       Patient expected, Patient patient, List<String> expectedHistoricalMbis) {
-    // The ID returned from the FHIR client differs from the transformer.  It adds URL information.
-    // Here we verify that the resource it is pointing to is the same, and then set up to do a deep
-    // compare of the rest
+    // The ID returned from the FHIR client differs from the transformer. It adds
+    // URL information. Verify that the resource it is pointing to is the same,
+    // and then set up to do a deep compare of the rest
     assertTrue(patient.getId().endsWith(expected.getId()));
     patient.setIdElement(expected.getIdElement());
 
@@ -844,10 +839,9 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     assertNotNull(patient.getMeta().getLastUpdated());
     patient.getMeta().setLastUpdatedElement(expected.getMeta().getLastUpdatedElement());
 
-    // Add the identifiers that wont be present in the expected due to not going through the
-    // resource provider that adds historical mbis
+    // Add the identifiers that wont be present in the expected due to not going
+    // through the resource provider that adds historical mbis.
     addHistoricalExtensions(expected, expectedHistoricalMbis);
-
     assertTrue(expected.equalsDeep(patient));
   }
 
