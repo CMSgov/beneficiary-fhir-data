@@ -43,13 +43,12 @@ public final class OpenAPIContentProvider {
   public static final String PATIENT_LAST_UPDATED_SHORT = "When the resource version last changed";
   /** Open API content value for /Patient's lastUpdated parameter. */
   public static final String PATIENT_LAST_UPDATED_VALUE =
-      "Only satisfy the Search if the Beneficiary\u0027s <i>last_updated</i> Date"
-          + " falls within a specified <i>DateRange<i/>. A DateRange can include both"
-          + " lo and hi date values, only a lo date value, or only a hi date value."
-          + "<p/>Examples:<ul>"
-          + "<li>&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01</li>"
-          + "<li>&_lastUpdated=gt2023-01-02</li>"
-          + "<li>&_lastUpdated=lt2023-05-01</li></ul><p/>";
+      """
+    Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
+    A _DateRange_ can be defined by providing:
+      - both low and high date like `&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01`
+      - a _low_ date value like `&_lastUpdated=gt2023-01-02`
+      - a _high_ date value like `&_lastUpdated=lt2023-05-01`""";
 
   /** Open API content short description for /Patient's Part D contract ID to be used. */
   public static final String PATIENT_PARTD_CONTRACT_SHORT = "Part D coverage contract identifier";
