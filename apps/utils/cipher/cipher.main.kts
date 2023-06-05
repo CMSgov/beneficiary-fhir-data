@@ -1,10 +1,14 @@
-package gov.cms.cipher
+@file:DependsOn("io.arrow-kt:arrow-core:1.2.0-RC")
+@file:DependsOn("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.3.5")
+@file:DependsOn("com.amazonaws:aws-encryption-sdk-java:2.4.0")
+@file:DependsOn("software.amazon.awssdk:kms:2.20.74")
+@file:DependsOn("com.squareup.okio:okio:3.3.0")
+//@file:DependsOn("::")
 
 import com.amazonaws.encryptionsdk.AwsCrypto
 import com.amazonaws.encryptionsdk.CryptoResult
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
-import gov.cms.bfd.sharedutils.config.LayeredConfiguration
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
 import okio.*
@@ -19,7 +23,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermissions
 import java.util.*
-import java.util.stream.Stream
 import kotlin.io.use
 import kotlin.system.exitProcess
 
@@ -37,11 +40,12 @@ val EmptyString = ByteString.of()
 fun ByteString.toBuffer(): BufferedSource =
     Buffer().readFrom(ByteArrayInputStream(toByteArray()))
 
-class KmsCipher(private val endpoint: String?, keyArn: String) {
+class KmsCipher(private val endpoint: String?, region:String,keyArn: String) {
     private val crypto = AwsCrypto.standard()
 
     private val keyProvider = KmsMasterKeyProvider.builder()
         .customRegionalClientSupplier(::createKmsClient)
+        .defaultRegion(Region.of(region))
         .buildStrict(keyArn)
 
     private val context = Collections.singletonMap("Application", AppName)
@@ -151,17 +155,15 @@ class Text(private val bytes: ByteString) {
     }
 
     fun isEmpty(): Boolean = bytes.size == 0 || bytes.utf8().trim().isEmpty()
-
-    companion object {
-        fun load(file: File): Text = load(file.source())
-        fun load(source: Source): Text = source.buffer().use { Text(it.readByteArray().toByteString()) }
-    }
 }
+
+fun loadText(source: Source): Text = source.buffer().use { Text(it.readByteArray().toByteString()) }
+fun loadText(file: File): Text = loadText(file.source())
 
 fun usage() {
     println(
         """
-        usage: $AppName cat|encrypt|decrypt|edit source [dest]
+        usage: $AppName [options] cat|encrypt|decrypt|edit source [dest]
         
         If dest is omitted the source file will be overwritten.
         
@@ -178,28 +180,85 @@ fun usage() {
           Default editor is vi.
 
         Note: Both cat and decrypt remove the secure text delimiters so they are not reversible.
+        
+        options:
+        --key arg      : KMS key ARN (REQUIRED)
+        --endpoint uri : Localhost endpoint for simulated KMS
+        
     """.trimIndent()
     )
 }
 
-fun main(args: Array<String>) {
-    if (args.size < 2 || args.size > 3) {
-        usage()
-        exitProcess(1)
+data class Config(
+    val key: String,
+    val endpoint: String?,
+    val region:String,
+    val mode: String,
+    val input: String,
+    val output: String,
+    val editor: String
+)
+
+class UsageErrorException(message:String) : Exception(message)
+
+fun parseArgs(args: Array<String>): Config {
+    var key:String? = null
+    var endpoint:String? = null
+    var region:String = "us-east-1"
+    var mode:String? = null
+    var input:String? = null
+    var output:String? = null
+
+    var i = 0
+    while (i < args.size && args[i].startsWith("--")) {
+        when (args[i]) {
+            "--key" -> {
+                i += 1
+                key = args[i]
+            }
+            "--endpoint" -> {
+                i += 1
+                endpoint = args[i]
+            }
+            "--region" -> {
+                i += 1
+                region = args[i]
+            }
+            else -> {
+                throw UsageErrorException("invalid option ${args[i]}")
+            }
+        }
+        i += 1
     }
 
-    val config = LayeredConfiguration.createConfigLoader(Collections.emptyMap(), System::getenv)
-    val endpoint = config.stringValue(LayeredConfiguration.ENV_VAR_KEY_SSM_ENDPOINT, null)
-    val keyArn = config.stringValue("keyArn")
-    val cipher = KmsCipher(endpoint, keyArn)
-    val editor = config.stringValue("EDITOR", "vi");
+    val remaining = args.size - i
+    if (remaining < 2 || remaining > 3) {
+        throw UsageErrorException("expected 2 or 3 arguments")
+    } else {
+        mode = args[i++]
+        input = args[i++]
+        output = if (i < args.size) args[i] else input
+    }
 
-    val mode = args[0]
-    val inputFile = args[1]
-    val outputFile = if (args.size == 2) inputFile else args[2]
+    if (key == null) {
+        throw UsageErrorException("required --key not provided")
+    }
+
+    val editor = System.getenv("EDITOR") ?: "vi"
+    return Config(key!!, endpoint, region, mode!!, input!!, output!!, editor)
+}
+
+fun main(args: Array<String>) {
+    val config = parseArgs(args)
+    val cipher = KmsCipher(config.endpoint, config.region, config.key)
+    val editor = config.editor
+
+    val mode = config.mode
+    val inputFile = File(config.input)
+    val outputFile = File(config.output)
     when (mode) {
         "cat" -> {
-            val original = Text.load(File(inputFile))
+            val original = loadText(inputFile)
             val decrypted = original.decrypt(cipher)
             val printBuffer = Buffer()
             decrypted.store(printBuffer)
@@ -207,15 +266,15 @@ fun main(args: Array<String>) {
         }
 
         "encrypt" -> {
-            val original = Text.load(File(inputFile))
+            val original = loadText(inputFile)
             val encrypted = original.encrypt(cipher)
-            encrypted.store(File(outputFile).sink())
+            encrypted.store(outputFile.sink())
         }
 
         "decrypt" -> {
-            val original = Text.load(File(inputFile))
+            val original = loadText(inputFile)
             val decrypted = original.decrypt(cipher)
-            decrypted.store(File(outputFile).sink())
+            decrypted.store(outputFile.sink())
         }
 
         "edit" -> {
@@ -224,7 +283,7 @@ fun main(args: Array<String>) {
             val tempFile = Files.createTempFile(currentDirectory, "edit-", ".txt", permissions).toFile()
             tempFile.deleteOnExit()
             try {
-                val original = Text.load(File(inputFile))
+                val original = loadText(inputFile)
                 val rewound = original.rewind(cipher)
                 rewound.store(tempFile.sink())
                 ProcessBuilder(listOf(editor, tempFile.path))
@@ -233,7 +292,7 @@ fun main(args: Array<String>) {
                     .redirectError(ProcessBuilder.Redirect.INHERIT)
                     .start()
                     .waitFor()
-                val modified = Text.load(tempFile)
+                val modified = loadText(tempFile)
                 if (modified.isEmpty()) {
                     println("File is empty - leaving original unchanged.")
                 } else if (modified == rewound) {
@@ -241,7 +300,7 @@ fun main(args: Array<String>) {
                 } else {
                     val oldSecureBlocks = original.extractSecureBlocks(cipher)
                     val encrypted = modified.encrypt(cipher, oldSecureBlocks)
-                    encrypted.store(File(outputFile).sink())
+                    encrypted.store(outputFile.sink())
                 }
             } finally {
                 tempFile.delete()
@@ -252,4 +311,16 @@ fun main(args: Array<String>) {
             usage()
         }
     }
+}
+
+try {
+    main(args)
+} catch (e : UsageErrorException) {
+    println("Usage error: ${e.message}")
+    usage()
+    exitProcess(1)
+} catch (e: Throwable) {
+    println("Caught exception: ${e.message}")
+    e.printStackTrace()
+    exitProcess(2)
 }
