@@ -72,7 +72,7 @@ public final class MigratorApp {
 
     AppConfiguration appConfig = null;
     try {
-      appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+      appConfig = AppConfiguration.loadConfig();
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (AppConfigurationException e) {
       LOGGER.error("Invalid app configuration, shutting down.", e);

@@ -1,7 +1,8 @@
 package gov.cms.bfd.server.launcher;
 
+import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -45,13 +46,13 @@ public final class AppConfiguration implements Serializable {
   /** The port that the server will listen for HTTPS connections on. * */
   private final int port;
   /**
-   * The {@link Path} of the Java keystore (<code>.jks</code> file) containing the private key and
+   * The {@link Path} of the Java keystore ({@code .jks} file) containing the private key and
    * certificate to use for this server. *
    */
   private final String keystore;
   /**
-   * The {@link Path} of the Java trust store (<code>.jks</code> file) containing the client
-   * certificates to use (i.e. trust/authenticate) for this server. *
+   * The {@link Path} of the Java trust store ({@code .jks} file) containing the client certificates
+   * to use (i.e. trust/authenticate) for this server. *
    */
   private final String truststore;
   /** The {@link Path} of the WAR file to run. * */
@@ -124,7 +125,6 @@ public final class AppConfiguration implements Serializable {
     return Paths.get(war);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return "AppConfiguration [port="
@@ -139,108 +139,20 @@ public final class AppConfiguration implements Serializable {
   }
 
   /**
-   * This application accepts its configuration via environment variables. Read those in, and build
-   * an {@link AppConfiguration} instance from them.
+   * Read configuration variables from the provided {@link ConfigLoader} and build an {@link
+   * AppConfiguration} instance from them.
    *
-   * @return the {@link AppConfiguration} instance represented by the configuration provided to this
-   *     application via the environment variables
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     configuration passed to the application are incomplete or incorrect.
+   * @param config the {@link ConfigLoader} to use
+   * @return the created instance
+   * @throws ConfigException if the configuration passed to the application are incomplete or
+   *     incorrect.
    */
-  static AppConfiguration readConfigFromEnvironmentVariables() {
-    Optional<String> host = readEnvVarAsString(ENV_VAR_KEY_HOST);
-    if (host.isPresent() && host.get().trim().isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s'.", ENV_VAR_KEY_HOST));
-
-    int port = readEnvVarAsInt(ENV_VAR_KEY_PORT);
-    if (port < 0)
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s'.", ENV_VAR_KEY_PORT));
-
-    Path war = readEnvVarAsPath(ENV_VAR_KEY_WAR);
-    if (!Files.isReadable(war))
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s'.", ENV_VAR_KEY_WAR));
-
-    Path keystore = readEnvVarAsPath(ENV_VAR_KEY_KEYSTORE);
-    if (!Files.isReadable(keystore))
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s'.", ENV_VAR_KEY_KEYSTORE));
-
-    Path truststore = readEnvVarAsPath(ENV_VAR_KEY_TRUSTSTORE);
-    if (!Files.isReadable(truststore))
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_TRUSTSTORE));
-
+  static AppConfiguration loadConfig(ConfigLoader config) {
+    Optional<String> host = config.stringOption(ENV_VAR_KEY_HOST);
+    int port = config.positiveIntValueZeroOK(ENV_VAR_KEY_PORT);
+    Path war = config.readableFile(ENV_VAR_KEY_WAR).toPath();
+    Path keystore = config.readableFile(ENV_VAR_KEY_KEYSTORE).toPath();
+    Path truststore = config.readableFile(ENV_VAR_KEY_TRUSTSTORE).toPath();
     return new AppConfiguration(host, port, keystore, truststore, war);
-  }
-
-  /**
-   * Reads an optional environment variable as a string. If no environment variable is found,
-   * returns {@link Optional#empty()}.
-   *
-   * @param envVarKey the name of the environment variable to read
-   * @return the specified environment variable's value, as a {@link String}, or {@link
-   *     Optional#empty()} if it's not defined
-   */
-  private static Optional<String> readEnvVarAsString(String envVarKey) {
-    String value = System.getenv(envVarKey);
-    return Optional.ofNullable(value);
-  }
-
-  /**
-   * Reads a required environment variable as an int. Throws an {@link AppConfigurationException} if
-   * not found.
-   *
-   * @param envVarKey the name of the environment variable to read
-   * @return the specified environment variable's value, as an <code>int</code>
-   */
-  private static int readEnvVarAsInt(String envVarKey) {
-    String intText = System.getenv(envVarKey);
-    return Optional.ofNullable(intText)
-        .map(
-            v -> {
-              try {
-                return Integer.parseInt(v);
-              } catch (Throwable t) {
-                return null;
-              }
-            })
-        .orElseThrow(
-            () ->
-                new AppConfigurationException(
-                    String.format(
-                        "Missing or invalid value for configuration environment variable '%s': '%s'.",
-                        envVarKey, intText)));
-  }
-
-  /**
-   * Read a required environment variable as a {@link Path}. Throws an {@link
-   * AppConfigurationException} if not found.
-   *
-   * @param envVarKey the name of the environment variable to read
-   * @return the specified environment variable's value, as a {@link Path}
-   */
-  private static Path readEnvVarAsPath(String envVarKey) {
-    String pathText = System.getenv(envVarKey);
-    return Optional.ofNullable(pathText)
-        .filter(v -> !v.isEmpty())
-        .map(
-            v -> {
-              return Paths.get(pathText);
-            })
-        .orElseThrow(
-            () ->
-                new AppConfigurationException(
-                    String.format(
-                        "Missing or invalid value for configuration environment variable '%s': '%s'.",
-                        envVarKey, pathText)));
   }
 }

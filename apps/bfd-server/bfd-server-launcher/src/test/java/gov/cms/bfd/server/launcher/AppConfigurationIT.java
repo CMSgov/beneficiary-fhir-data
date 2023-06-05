@@ -1,92 +1,67 @@
 package gov.cms.bfd.server.launcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.BufferedReader;
+import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit(ish) tests for {@link AppConfiguration}.
- *
- * <p>Since Java apps can't modify their environment variables at runtime, this class has a {@link
- * #main(String[])} method that the test cases will launch as an application in a separate process.
+ * Unit tests for {@link AppConfiguration}. Has to be an integration test because it depends on the
+ * existence of a war file that isn't present when unit tests are run.
  */
 public final class AppConfigurationIT {
   /**
-   * Verifies that {@link AppConfiguration#readConfigFromEnvironmentVariables()} works as expected
-   * when passed valid configuration environment variables.
-   *
-   * @throws IOException (indicates a test error)
-   * @throws InterruptedException (indicates a test error)
-   * @throws ClassNotFoundException (indicates a test error)
-   * @throws URISyntaxException (indicates a test error)
+   * Verifies that {@link AppConfiguration#loadConfig} works as expected when passed valid
+   * configuration environment variables.
    */
   @Test
-  public void normalUsage()
-      throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {
-    ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
-    testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_PORT, "1");
-    testAppBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_KEYSTORE,
-            getProjectDirectory()
-                .resolve(Paths.get("..", "dev", "ssl-stores", "server-keystore.jks"))
-                .toString());
-    testAppBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_TRUSTSTORE,
-            getProjectDirectory()
-                .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.jks"))
-                .toString());
-    testAppBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_WAR,
-            getProjectDirectory()
-                .resolve(
-                    Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"))
-                .toString());
-    Process testApp = testAppBuilder.start();
+  public void normalUsage() {
+    Map<String, String> envValues = new HashMap<>();
+    envValues.put(AppConfiguration.ENV_VAR_KEY_PORT, "1");
+    envValues.put(
+        AppConfiguration.ENV_VAR_KEY_KEYSTORE,
+        getProjectDirectory()
+            .resolve(Paths.get("..", "dev", "ssl-stores", "server-keystore.jks"))
+            .toString());
+    envValues.put(
+        AppConfiguration.ENV_VAR_KEY_TRUSTSTORE,
+        getProjectDirectory()
+            .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.jks"))
+            .toString());
+    envValues.put(
+        AppConfiguration.ENV_VAR_KEY_WAR,
+        getProjectDirectory()
+            .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"))
+            .toString());
 
-    int testAppExitCode = testApp.waitFor();
-    /*
-     * Only pull the output if things failed, as doing so will break the deserialization happening
-     * below.
-     */
-    String output = "";
-    if (testAppExitCode != 0) output = collectOutput(testApp);
-    assertEquals(0, testAppExitCode, String.format("Wrong exit code. Output[\n%s]\n", output));
+    ConfigLoader config = ConfigLoader.builder().addSingle(envValues::get).build();
 
-    ObjectInputStream testAppOutput = new ObjectInputStream(testApp.getErrorStream());
-    AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
+    AppConfiguration testAppConfig = AppConfiguration.loadConfig(config);
     assertNotNull(testAppConfig);
+    assertEquals(Optional.<String>empty(), testAppConfig.getHost());
     assertEquals(
-        Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_PORT)),
+        Integer.parseInt(envValues.get(AppConfiguration.ENV_VAR_KEY_PORT)),
         testAppConfig.getPort());
     assertEquals(
-        testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEYSTORE),
+        envValues.get(AppConfiguration.ENV_VAR_KEY_KEYSTORE),
         testAppConfig.getKeystore().toString());
     assertEquals(
-        testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUSTSTORE),
+        envValues.get(AppConfiguration.ENV_VAR_KEY_TRUSTSTORE),
         testAppConfig.getTruststore().toString());
     assertEquals(
-        testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_WAR),
-        testAppConfig.getWar().toString());
+        envValues.get(AppConfiguration.ENV_VAR_KEY_WAR), testAppConfig.getWar().toString());
   }
 
   /**
@@ -123,82 +98,18 @@ public final class AppConfigurationIT {
   }
 
   /**
-   * Verifies that {@link AppConfiguration#readConfigFromEnvironmentVariables()} fails as expected
-   * when it's called in an application that hasn't had any of the configuration environment
-   * variables set.
-   *
-   * @throws IOException (indicates a test error)
-   * @throws InterruptedException (indicates a test error)
+   * Verifies that {@link AppConfiguration#loadConfig} fails as expected when it's called with no
+   * configuration environment variables set.
    */
   @Test
-  public void noEnvVarsSpecified() throws IOException, InterruptedException {
-    ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
-    Process testApp = testAppBuilder.start();
-
-    assertNotEquals(0, testApp.waitFor());
-    String testAppError =
-        new BufferedReader(new InputStreamReader(testApp.getErrorStream()))
-            .lines()
-            .collect(Collectors.joining("\n"));
-    assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
-  }
-
-  /**
-   * Create a {@link ProcessBuilder} that will launch {@link #main(String[])} as a separate JVM
-   * process.
-   *
-   * @return a {@link ProcessBuilder} for the main app entry
-   */
-  private static ProcessBuilder createProcessBuilderForTestDriver() {
-    Path java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
-    String classpath = System.getProperty("java.class.path");
-    ProcessBuilder testAppBuilder =
-        new ProcessBuilder(
-            java.toAbsolutePath().toString(),
-            "-classpath",
-            classpath,
-            AppConfigurationIT.class.getName());
-    return testAppBuilder;
-  }
-
-  /**
-   * Collect output from the test app's stdout.
-   *
-   * @param process the {@link Process} to collect the output of
-   * @return the output of the specified {@link Process} in a format suitable for debugging
-   */
-  private static String collectOutput(Process process) {
-    String stderr =
-        new BufferedReader(new InputStreamReader(process.getErrorStream()))
-            .lines()
-            .map(l -> "\t" + l)
-            .collect(Collectors.joining("\n"));
-    String stdout =
-        new BufferedReader(new InputStreamReader(process.getInputStream()))
-            .lines()
-            .map(l -> "\t" + l)
-            .collect(Collectors.joining("\n"));
-    return String.format("STDERR:\n[%s]\nSTDOUT:\n[%s]", stderr, stdout);
-  }
-
-  /**
-   * Calls {@link AppConfiguration#readConfigFromEnvironmentVariables()} and serializes the
-   * resulting {@link AppConfiguration} instance out to {@link System#err}. (Can't use {@link
-   * System#out} as it might have logging noise on it.
-   *
-   * @param args (not used)
-   */
-  public static void main(String[] args) {
-    AppConfiguration appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
-
-    try {
-      // Serialize data object to a file
-      ObjectOutputStream out = new ObjectOutputStream(System.err);
-      out.writeObject(appConfig);
-      out.close();
-    } catch (IOException e) {
-      System.out.printf("Error occurred: %s: '%s'", e.getClass().getName(), e.getMessage());
-      System.exit(2);
-    }
+  public void noEnvVarsSpecified() {
+    Map<String, String> envValues = Collections.emptyMap();
+    ConfigLoader config = ConfigLoader.builder().addSingle(envValues::get).build();
+    ConfigException exception =
+        assertThrows(ConfigException.class, () -> AppConfiguration.loadConfig(config));
+    assertEquals(AppConfiguration.ENV_VAR_KEY_PORT, exception.getName());
+    assertEquals(
+        "Configuration value error: name='BFD_PORT' detail='required option not provided'",
+        exception.getMessage());
   }
 }

@@ -21,18 +21,25 @@ The server can serve several types of data:
 - Pre-generated claims stored in NDJSON files on a local drive.
 - Pre-generated claims stored in NDJSON files in an S3 bucket.
 
-Command line options supported by the server include:
+Command line options are specified using the format `name:value` where name is an option name from the table below.
 
-| Option        | Default   | Description                                                                         |
-|---------------|-----------|-------------------------------------------------------------------------------------|
-| port          | 5003      | Optional TCP port for the server to use for incoming connections.                   |
-| seed          | 5000      | Seed used to initialize PRNG when generating random claims data.                    |
-| maxToSend     | unlimited | Maximum number of claims to send in response to a single API call.                  |
-| fissClaimFile | none      | Path to an NDJSON file to use as source of data for clients requesting FISS claims. |
-| mcsClaimFile  | none      | Path to an NDJSON file to use as source of data for clients requesting MCS claims.  |
-| s3Bucket      | none      | URI for S3 bucket in which to search for NDJSON files containing claims.            |
-| s3Region      | US East   | Name of AWS region containing S3 bucket.                                            |
-| s3Directory   | none      | Directory prefix to use when searching S3 bucket for NDJSON files.                  |
+Valid command line options supported by the server include:
+
+| Option             | Default   | Description                                                                                      |
+|--------------------|-----------|--------------------------------------------------------------------------------------------------|
+| port               | 5003      | Optional TCP port for the server to use for incoming connections.                                |
+| random.seed        | time      | Seed used to initialize PRNG when generating random claims data.                                 |
+| random.verbose     | false     | If true causes random claims to include ALL optional fields in every claim.                      |
+| random.errorRate   | 0         | Number of claims to transmit before returning an invalid one. Useful for testing error handling. |
+| random.max.mbi     | unlimited | Maximum number of unique MBIs to use in random claims.                                           | 
+| random.max.claimId | unlimited | Maximum number of unique claim ids to use in random claims.                                      | 
+| maxToSend          | unlimited | Maximum number of claims to send in response to a single API call.                               |
+| file.fiss          | none      | Path to an NDJSON file to use as source of data for clients requesting FISS claims.              |
+| file.mcs           | none      | Path to an NDJSON file to use as source of data for clients requesting MCS claims.               |
+| s3.bucket          | none      | URI for S3 bucket in which to search for NDJSON files containing claims.                         |
+| s3.region          | us-east-1 | Name of AWS region containing S3 bucket.                                                         |
+| s3.directory       | none      | Directory prefix to use when searching S3 bucket for NDJSON files.                               |
+| s3.cacheDirectory  | temp dir  | Local directory to use for caching files downloaded from S3 bucket.                              |
 
 Order of selection of source for claims is:
 
@@ -61,21 +68,22 @@ Command arguments (both required) are:
 
 Configuration settings and their associated properties are:
 
-| Option                  | Default        | Description                                                         |
-|-------------------------|----------------|---------------------------------------------------------------------|
-| database.url            | none           | JDBC URL to connect to database.                                    |
-| database.user           | none           | User ID to use when authenticating to database.                     |
-| database.password       | none           | Password to use when authenticating to database.                    |
-| database.maxConnections | 5 * threads    | Connection pool size limit.                                         |
-| hash.iterations         | 100            | Number of iterations to use when hashing MBI values.                |
-| hash.pepper             | notarealpepper | Pepper to use when hashing MBI values.                              |
-| job.batchSize           | 1              | Number of claims per batch when writing to database.                |
-| job.writeThreads        | 1              | Number of writer threads to use when writing to the database.       |
-| job.startingFissSeqNum  | 0              | Starting sequence number in call to fetch FISS claims from RDA API. |
-| job.startingMcsSeqNum   | 0              | Starting sequence number in call to fetch MCS claims from RDA API.  |
-| api.host                | localhost      | Host name for connection to RDA API server.                         |
-| api.port                | 5003           | TCP port for connection to RDA API server.                          |
-| job.idleSeconds         | unlimited      | Maximum idle time before closing connection to RDA API server.      |
+| Option                  | Default         | Description                                                         |
+|-------------------------|-----------------|---------------------------------------------------------------------|
+| database.url            | none            | JDBC URL to connect to database.                                    |
+| database.user           | none            | User ID to use when authenticating to database.                     |
+| database.password       | none            | Password to use when authenticating to database.                    |
+| database.maxConnections | 5 * threads     | Connection pool size limit.                                         |
+| hash.iterations         | 100             | Number of iterations to use when hashing MBI values.                |
+| hash.pepper             | notarealpepper  | Pepper to use when hashing MBI values.                              |
+| job.batchSize           | 1               | Number of claims per batch when writing to database.                |
+| job.writeThreads        | 1               | Number of writer threads to use when writing to the database.       |
+| job.startingFissSeqNum  | 0               | Starting sequence number in call to fetch FISS claims from RDA API. |
+| job.startingMcsSeqNum   | 0               | Starting sequence number in call to fetch MCS claims from RDA API.  |
+| api.host                | localhost       | Host name for connection to RDA API server.                         |
+| api.port                | 5003            | TCP port for connection to RDA API server.                          |
+| job.idleSeconds         | unlimited       | Maximum idle time before closing connection to RDA API server.      |
+| rda.version             | current version | Expected RDA API server version string.                             |
 
 ## LoadRdaJsonApp
 

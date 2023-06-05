@@ -21,7 +21,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.server.war.SpringConfiguration;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
@@ -68,12 +67,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Digit}+)");
 
+  /** The metric registry. */
+  private final MetricRegistry metricRegistry;
+  /** The samhsa matcher. */
+  private final R4ClaimSamhsaMatcher samhsaMatcher;
+
+  /** True if old MBI values should be included in queries. */
+  private final Boolean oldMbiHashEnabled;
+
   /** The entity manager. */
   private EntityManager entityManager;
-  /** The metric registry. */
-  private MetricRegistry metricRegistry;
-  /** The samhsa matcher. */
-  private R4ClaimSamhsaMatcher samhsaMatcher;
 
   /** The claim dao for this provider. */
   private ClaimDao claimDao;
@@ -90,11 +93,15 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
+   * @param oldMbiHashEnabled true if old MBI hash should be used
    */
   protected AbstractR4ResourceProvider(
-      MetricRegistry metricRegistry, R4ClaimSamhsaMatcher samhsaMatcher) {
+      MetricRegistry metricRegistry,
+      R4ClaimSamhsaMatcher samhsaMatcher,
+      Boolean oldMbiHashEnabled) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
+    this.oldMbiHashEnabled = oldMbiHashEnabled;
   }
 
   /**
@@ -110,8 +117,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** Initiates the provider's dependencies. */
   @PostConstruct
   public void init() {
-    claimDao =
-        new ClaimDao(entityManager, metricRegistry, SpringConfiguration.isPacOldMbiHashEnabled());
+    claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled);
 
     setResourceType();
   }
