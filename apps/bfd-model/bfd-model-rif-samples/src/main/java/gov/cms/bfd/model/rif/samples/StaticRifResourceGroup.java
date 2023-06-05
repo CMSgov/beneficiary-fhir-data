@@ -11,7 +11,6 @@ public enum StaticRifResourceGroup {
   SAMPLE_A(
       StaticRifResource.SAMPLE_A_BENES,
       StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
-      StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
       StaticRifResource.SAMPLE_A_CARRIER,
       StaticRifResource.SAMPLE_A_PDE,
       StaticRifResource.SAMPLE_A_INPATIENT,
@@ -24,7 +23,6 @@ public enum StaticRifResourceGroup {
   SAMPLE_A_MULTIPLE_CARRIER_LINES(
       StaticRifResource.SAMPLE_A_BENES,
       StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
-      StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
       StaticRifResource.SAMPLE_A_CARRIER_MULTIPLE_LINES,
       StaticRifResource.SAMPLE_A_PDE,
       StaticRifResource.SAMPLE_A_INPATIENT,
@@ -37,7 +35,6 @@ public enum StaticRifResourceGroup {
   SAMPLE_A_FOUR_CHARACTER_DRG_CODE(
       StaticRifResource.SAMPLE_A_BENES,
       StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
-      StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
       StaticRifResource.SAMPLE_A_CARRIER,
       StaticRifResource.SAMPLE_A_PDE,
       StaticRifResource.SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE,
@@ -50,7 +47,6 @@ public enum StaticRifResourceGroup {
   SAMPLE_A_WITHOUT_REFERENCE_YEAR(
       StaticRifResource.SAMPLE_A_BENES_WITHOUT_REFERENCE_YEAR,
       StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
-      StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
       StaticRifResource.SAMPLE_A_CARRIER,
       StaticRifResource.SAMPLE_A_PDE,
       StaticRifResource.SAMPLE_A_INPATIENT,
@@ -131,6 +127,7 @@ public enum StaticRifResourceGroup {
   SAMPLE_HICN_MULT_BENES(
       StaticRifResource.SAMPLE_HICN_MULT_BENES,
       StaticRifResource.SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY);
+
   /** Static Rif Resource. */
   private final StaticRifResource[] resources;
 
