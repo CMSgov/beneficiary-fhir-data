@@ -1,6 +1,6 @@
 """High Volume Load test suite for BFD Server endpoints."""
 
-from random import shuffle, choice
+from random import shuffle
 from typing import Dict, List
 
 from locust import events, tag, task
@@ -179,7 +179,7 @@ class HighVolumeUser(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{choice(self.hashed_mbis)}",
+                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
                 "_IncludeIdentifiers": "mbi",
             },
             name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi"
@@ -329,7 +329,7 @@ class HighVolumeUser(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
-                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{choice(self.hashed_mbis)}",
+                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
                 "_IncludeIdentifiers": "mbi",
             },
             name="/v1/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
