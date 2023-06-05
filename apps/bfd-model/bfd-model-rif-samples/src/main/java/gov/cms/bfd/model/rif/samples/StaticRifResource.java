@@ -48,19 +48,7 @@ public enum StaticRifResource {
   SAMPLE_A_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-a-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
-      3),
-
-  /** Sample A Beneficiary Medicare ID History static rif. */
-  SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY(
-      resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory.txt"),
-      RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
-      1),
-
-  /** Sample A Beneficiary Medicare ID History static rif. */
-  SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA(
-      resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory-extra.txt"),
-      RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
-      1),
+      5),
 
   /** Sample A Carrier static rif. */
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
@@ -134,8 +122,8 @@ public enum StaticRifResource {
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   /**
-   * The ({@code SAMPLE_SYNTHEA_*}) set of test fixture files were generated using <a
-   * href="https://github.com/synthetichealth/synthea/wiki/Getting-Started">Synthea</a>. To recreate
+   * The ({@code SAMPLE_SYNTHEA_*}) set of test fixture files were generated using <a href=
+   * "https://github.com/synthetichealth/synthea/wiki/Getting-Started">Synthea</a>. To recreate
    * these files, perform the following steps after installing Synthea as per the developer
    * instructions in the linked site above:
    *

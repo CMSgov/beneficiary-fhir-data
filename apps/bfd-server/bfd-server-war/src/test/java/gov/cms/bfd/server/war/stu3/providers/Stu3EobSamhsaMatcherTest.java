@@ -13,7 +13,6 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
@@ -148,9 +147,7 @@ public final class Stu3EobSamhsaMatcherTest {
               .map(
                   r -> {
                     // FIXME remove most `else if`s once filtering fully supports all claim types
-                    if (r instanceof Beneficiary) return null;
-                    else if (r instanceof BeneficiaryHistory) return null;
-                    else if (r instanceof MedicareBeneficiaryIdHistory) return null;
+                    if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
                     return TransformerUtils.transformRifRecordToEob(
                         new MetricRegistry(),
