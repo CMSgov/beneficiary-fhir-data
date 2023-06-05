@@ -131,7 +131,7 @@ def _main():
         ]
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
         + list(map(lambda tag: f"--tags={tag}", locust_tags.split()))
-        + list(map(lambda tag: f"--exclude-tags={tag}", locust_tags_excluded.split())),
+        + ([f"--exclude-tags={locust_tags_excluded}"] if locust_tags_excluded else []),
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
