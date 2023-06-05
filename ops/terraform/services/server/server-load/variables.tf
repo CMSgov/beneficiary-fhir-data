@@ -31,13 +31,11 @@ variable "test_host" {
 variable "locust_tags" {
   description = "Space-delimited. The locust tasks with ANY of the given tags will be executed"
   type        = string
-  default     = null
 }
 
 variable "locust_tags_excluded" {
   description = "Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution"
   type        = string
-  default     = null
 }
 
 variable "initial_worker_nodes" {
