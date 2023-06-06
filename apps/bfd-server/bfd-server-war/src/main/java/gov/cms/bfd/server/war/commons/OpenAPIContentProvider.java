@@ -12,32 +12,35 @@ public final class OpenAPIContentProvider {
       "The patient resource identifier (_id) to search for";
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_VALUE =
-      "Fetch <i>Patient<i/> data using a FHIR <i>IdType<i/> identifier; an IdType"
-          + " represents the logical identity for a resource, or as much of that"
-          + " identity that is known. In FHIR, every resource must have a <i>logical ID<i/> which is"
-          + " defined by the FHIR specification as:"
-          + "<p><code>"
-          + "Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),"
-          + " '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID"
-          + " or any other identifier pattern that meets these constraints.)</code></p><p>"
-          + "This class contains that logical ID, and can optionally also contain a relative or absolute URL"
-          + " representing the resource identity; the following are all valid values for IdType, and all might"
-          + " represent the same resource:</p><ul>"
-          + "<li><code>123</code> (just a resource\u0027s ID)</li>"
-          + "<li><code>Patient/123</code> (a relative identity)</li>"
-          + "<li><code>http://example.com/Patient/123 (an absolute identity)</code></li>";
+      """
+    Fetch _Patient_ data using a FHIR _IdType_ identifier; an IdType
+    represents the logical identity for a resource, or as much of that
+    identity that is known. In FHIR, every resource must have a _logical ID_ which is
+    defined by the FHIR specification as:
+
+    `<code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
+    '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
+    or any other identifier pattern that meets these constraints.)</code>`
+
+    This class contains that logical ID, and can optionally also contain a relative or absolute URL
+    representing the resource identity; the following are all valid values for IdType, and all might
+    represent the same resource:
+      - `<code>123</code> (just a resource's ID)`
+      - `<code>Patient/123</code> (a relative identity)`
+      - `<code>http://example.com/Patient/123 (an absolute identity)</code>`""";
 
   /** Open API content short description for /Patient's resource bundle offset. */
   public static final String PATIENT_START_INDEX_SHORT =
       "The starting offset used for result pagination";
   /** Open API content value for /Patient's resource bundle offset. */
   public static final String PATIENT_START_INDEX_VALUE =
-      "When fetching a <i>Bundle Response</i> using pagination, this URL parameter represents an offset"
-          + " (starting point) into the list of elements for the <i>Request</i>."
-          + "It is optional and defaults to 1 if not supplied."
-          + "A value 0 is not allowed and negative indices are not currently supported."
-          + "<p/>Example:<ul>"
-          + "<li>startIndex=100</li>";
+      """
+    When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset
+    (starting point) into the list of elements for the _Request_.
+    It is optional and defaults to 1 if not supplied.
+    A value 0 is not allowed and negative indices are not currently supported.
+    Example:
+       - `startIndex=100`""";
 
   /** Open API content short description for /Patient's lastUpdated parameter. */
   public static final String PATIENT_LAST_UPDATED_SHORT = "When the resource version last changed";
@@ -57,10 +60,11 @@ public final class OpenAPIContentProvider {
    * events.
    */
   public static final String PATIENT_PARTD_CONTRACT_VALUE =
-      "When searching for a Patient\u0027s Part D events information, this resource identifies"
-          + " the Part D contract value that will be used when determining eligibility."
-          + "<p/>Example:<ul>"
-          + "<li>_has:Coverage.extension=ABCD</li>";
+      """
+    When searching for a Patient's Part D events information, this resource identifies
+    the Part D contract value that will be used when determining eligibility.
+    Example:
+       - `_has:Coverage.extension=ABCD`""";
 
   /**
    * Open API short description for /Patient's Part D reference year to be used in determining Part
@@ -72,126 +76,158 @@ public final class OpenAPIContentProvider {
    * events.
    */
   public static final String PATIENT_PARTD_REFYR_VALUE =
-      "When searching for a Patient\u0027s Part D events information, this resource identifies"
-          + " the reference year that will be applied when determining applicable Part D events."
-          + "<p/>Example:<ul>"
-          + "<li>_has:Coverage.rfrncyr=2023</li>";
+      """
+    When searching for a Patient's Part D events information, this resource identifies
+    the reference year that will be applied when determining applicable Part D events.
+    Example:
+       - `_has:Coverage.rfrncyr=2023`""";
 
   /**
-   * Open API short description for /Patient's Part D event data; provides a URI for the 'next' set
+   * Open API short description for /Patient's Part D event data; provides a URI for the `next` set
    * of data.
    */
   public static final String PATIENT_PARTD_CURSOR_SHORT = "The cursor used for result pagination";
   /**
-   * Open API content value for /Patient's Part D event data; provides a URI for the 'next' set of
+   * Open API content value for /Patient's Part D event data; provides a URI for the `next` set of
    * data.
    */
   public static final String PATIENT_PARTD_CURSOR_VALUE =
-      "Provide a pagination cursor for processing Patient\u0027s Part D events information; this resource identifies"
-          + " a numeric offset into a result set."
-          + "<p/>Example:<ul>"
-          + "<li>cursor=200</li>";
+      """
+     Provide a pagination cursor for processing Patient's Part D events information; this resource identifies
+     a numeric offset into a result set.
+     Example:
+        - `cursor=200`""";
 
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_SHORT =
       "Identifier resource for the covered party";
   /** Open API content value for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_VALUE =
-      "Fetch <i>Beneficiary<i/> data using a FHIR <i>IdType<i/> identifier; an IdType"
-          + " represents the logical identity for a resource, or as much of that"
-          + " identity that is known. In FHIR, every resource must have a <i>logical ID<i/> which is"
-          + " defined by the FHIR specification as:"
-          + "<p><code>"
-          + "Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),"
-          + " '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID"
-          + " or any other identifier pattern that meets these constraints.)</code></p><p>"
-          + "This class contains that logical ID, and can optionally also contain a relative or absolute URL"
-          + " representing the resource identity; the following are all valid values for IdType, and all might"
-          + " represent the same resource:</p><ul>"
-          + "<li><code>123</code> (just a resource\u0027s ID)</li>"
-          + "<li><code>beneficiary/123</code> (a relative identity)</li>"
-          + "<li><code>http://example.com/beneficiary/123 (an absolute identity)</code></li>";
+      """
+    Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType
+    represents the logical identity for a resource, or as much of that.
+    identity that is known.
+
+    In FHIR, every resource must have a _logical ID_ which is defined by the FHIR specification as:
+    `<code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
+    '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
+    or any other identifier pattern that meets these constraints.)</code>`
+
+    This class contains that logical ID, and can optionally also contain a relative or absolute URL
+    representing the resource identity; the following are all valid values for IdType, and all might
+    represent the same resource
+
+    Examples:
+      - `<code>123</code> (just a resource's ID)`
+      - `beneficiary/123</code> (a relative identity)`
+      - `<code>http://example.com/beneficiary/123 (an absolute identity)</code>`""";
 
   /** Open API short description for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_SHORT = "A list of BFD claim types to include";
   /** Open API content value for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_VALUE =
-      "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types. "
-          + "This is optional and defaults to * (all types);"
-          + "<p/>Supported Claim Type values:<ul>"
-          + "<li>carrier</li>"
-          + "<li>inpatient</li>"
-          + "<li>outpatient</li>"
-          + "<li>hha</li>"
-          + "<li>hospice</li>"
-          + "<li>snf</li>"
-          + "<li>dme</li>"
-          + "<li>partd</li></ul><p>"
-          + "<p/>Examples:<ul>"
-          + "<li>type=carrier,inpatient,snf,dme</li>"
-          + "<li>type=outpatient</li>"
-          + "<li>type=&#42;</li>";
+      """
+    A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.
+    This is optional and defaults to * (all types);
+    Supported Claim Type values:
+       - `carrier`
+       - `inpatient`
+       - `outpatient`
+       - `hha`
+       - `hospice`
+       - `snf`
+       - `dme`
+       - `partd`
+       - `inpatient`
+       - `inpatient`
+       - `inpatient`
+       - `inpatient`
+
+    Examples:
+       - `type=carrier,inpatient,snf,dme`
+       - `type=outpatient`
+       - `type=*;`""";
 
   /** Open API short description for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_SHORT =
-      "Include claims whose <i>thru date</i> fall within the given range";
+      "Filter claims by the `billable period`. In other words, filter claims whose *through date* fall within the given range";
   /** Open API content value for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_VALUE =
-      "Only satisfy the Search request if a claim\u0027s <i>thru</i> Date"
-          + " falls within a specified <i>DateRange<i/>. A DateRange can include both"
-          + " lo and hi date values, only a lo date value, or only a hi date value."
-          + "<p/>Examples:<ul>"
-          + "<li>&service-date=gt2023-01-02&service-date=lt2023-05-01</li>"
-          + "<li>&service-date=gt2023-01-02</li>"
-          + "<li>&_service-date=lt2023-05-01</li></ul>";
+      """
+   Only satisfy the Search request if a claim's `billable period`.
+   falls within a specified <i>DateRange<i/>. A DateRange can include both
+   low and high date values, only a low date value, or only a high date value.
+   Examples:
+     - `&service-date=gt2023-01-02&service-date=lt2023-05-01`
+     - `&service-date=gt2023-01-02`
+     - `&_service-date=lt2023-05-01`""";
 
   /** Open API short description for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_SHORT =
-      "If <i>true</i>, exclude any (all) SAMHSA-related claims";
+      "If _true_, exclude any (all) SAMHSA-related claims";
   /** Open API content value for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_VALUE =
-      "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA)"
-          + " is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation."
-          + "<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response."
-          + "<p/>Example:<ul>"
-          + "<li>&excludeSAMHSA=true</li>";
+      """
+   The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
+   is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
+   Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
+   Examples:
+      - `&excludeSAMHSA=true`""";
 
-  /** Open API short description for /ExplanationOfBenefit's includeTaxNunbers parameter. */
+  /** Open API short description for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_SHORT =
-      "If <i>true</i>, tax numbers are included in the results.";
-  /** Open API content value for /ExplanationOfBenefit's includeTaxNunbers parameter. */
+      "If `true`, tax numbers are included in the results.";
+  /** Open API content value for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_VALUE =
-      "<p/>Setting this flag to <i>true</i>, provides tax number in the EOB transformed data for the response."
-          + "<p/>Example:<ul>"
-          + "<li>&includeTaxNumbers=true</li>";
+      """
+   Setting this flag to `true`, provides tax number in the EOB transformed data for the response.
+   Example:
+      - `&includeTaxNumbers=true`""";
 
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI = "The patient identifier to search for.";
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
-      "Fetch <i>Beneficiary<i/> data using a FHIR <i>MBI<i/> identifier; an MBI"
-          + " represents the medicare benficiary ID, or as much of that"
-          + " defined by the FHIR specification as:"
-          + "<p><code>"
-          + "A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),"
-          + " '-', with a length limit of 11 characters."
-          + "The MBI ID has the following characters for each position:"
-          + "Position 1 - numeric values 1 thru 9"
-          + "Position 2 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
-          + "Position 3 - alpha-numeric values 0 thru 9 and A thru Z (minus S, L, O, I, B, Z)"
-          + "Position 4 - numeric values 0 thru 9"
-          + "Position 5 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
-          + "Position 6 - alpha-numeric values 0 thru 9 and A thru Z (minus S, L, O, I, B, Z)"
-          + "Position 7 - numeric values 0 thru 9"
-          + "Position 8 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
-          + "Position 9 - alphabetic values A thru Z (minus S, L, O, I, B, Z)"
-          + "Position 10 - numeric values 0 thru 9"
-          + "Position 11 - numeric values 0 thru 9</code></p><p>"
-          + " The following are all valid values for MBI, and all might"
-          + " represent the same resource:</p><ul>"
-          + "<li><code>9AB2WW3GR44</code> (unhashed MBI)</li>"
-          + "<li><code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)</li>"
-          + "<li><code>1S00E00HA26 (synthetic MBI)</code></li>";
+      """
+   Fetch `Beneficiary` data using a FHIR `MBI` identifier; an MBI
+   represents the medicare benficiary ID, or as much of that
+   defined by the FHIR specification as:
+
+   `<code>`
+
+   `A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),`
+   '-', with a length limit of 11 characters.
+   The MBI ID has the following characters for each position:`
+
+   `Position 1 - numeric values 1 through 9`
+
+   `Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+
+   `Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`
+
+   `Position 4 - numeric values 0 through 9`
+
+   `Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+
+   `Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`
+
+   `Position 7 - numeric values 0 through 9`
+
+   `Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+
+   `Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+
+   `Position 10 - numeric values 0 through 9`
+
+   `Position 11 - numeric values 0 through 9`
+
+   `</code>`
+
+   The following are all valid values for MBI, and all might
+   represent the same resource:
+      - `<code>9AB2WW3GR44</code> (unhashed MBI)`
+      - `<code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)`
+      - `<code>1S00E00HA26 (synthetic MBI)</code>`""";
 
   /**
    * Open API content short description for partially adjudicated claim MBI ID being hashed or not.
@@ -200,9 +236,10 @@ public final class OpenAPIContentProvider {
       "A boolean indicating whether or not the MBI is hashed.";
   /** Open API content value for partially aducated claim MBI ID being hashed or not. */
   public static final String PAC_IS_HASHED_VALUE =
-      "<p/>Setting this flag to <i>true</i>, indicates to the API that the mbi parameter in the same request is a hashed MBI rather than an unhashed MBI."
-          + "<p/>Example:<ul>"
-          + "<li>&isHashed=true</li>";
+      """
+    Setting this flag to `true`, provides tax number in the EOB transformed data for the response.
+    Example:
+      - `&isHashed=true`""";
 
   /** Open API short description for partially adjudicated claim type parameter. */
   public static final String PAC_CLAIM_TYPE_SHORT =
@@ -210,39 +247,46 @@ public final class OpenAPIContentProvider {
 
   /** Open API content value for partially adjudicated claim type parameter. */
   public static final String PAC_CLAIM_TYPE_VALUE =
-      "A list of one or more comma-separated claim types to be included in the request;"
-          + " within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified"
-          + " claim types will be checked."
-          + "<p/>Supported Claim Type values:<ul>"
-          + "<li>fiss</li>"
-          + "<li>mcs</li>"
-          + "<p/>Examples:<ul>"
-          + "<li>type=fiss,mcs</li>"
-          + "<li>type=fiss</li>";
+      """
+    A list of one or more comma-separated claim types to be included in the request;
+    within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified
+    claim types will be checked
+
+    Supported Claim Type values:
+      - `fiss`
+      - `mcs`
+
+    Examples:
+      - `type=fiss,mcs`
+      - `type=fiss`""";
 
   /** Open API short description for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_SHORT =
-      "If <i>true</i>, exclude any (all) SAMHSA-related claims";
+      "If `true`, exclude any (all) SAMHSA-related claims";
   /** Open API content value for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_VALUE =
-      "The <i>Substance Abuse and Mental Health Services Administration</i> (SAMHSA)"
-          + " is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation."
-          + "<p/>Setting this flag to <i>true</i>, modifies the request to filter out all SAMSHA-related claims from the response."
-          + "<i>ClaimResponse</i> doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between <i>ClaimResponse</i> and <i>Claim</i>, "
-          + "any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data."
-          + "<p/>Example:<ul>"
-          + "<li>&excludeSAMHSA=true</li>";
+      """
+    The `Substance Abuse and Mental Health Services Administration` (SAMHSA)
+    is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
+    Setting this flag to `true`, modifies the request to filter out all SAMSHA-related claims from the response.
+    `ClaimResponse` doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between `ClaimResponse`
+    and `Claim`, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
+
+    Example:
+      - `&excludeSAMHSA=true`""";
 
   /** Open API short description for partially adjudicated claims data. */
   public static final String PAC_SERVICE_DATE_SHORT =
       "Include claims whose date fall within the given range";
   /** Open API content value for partially adjudicated claims data. */
   public static final String PAC_SERVICE_DATE_VALUE =
-      "Only satisfy the Search request if a claim\u0027s Date"
-          + " falls within a specified <i>DateRange<i/>. A DateRange can include both"
-          + " lo and hi date values, only a lo date value, or only a hi date value."
-          + "<p/>Examples:<ul>"
-          + "<li>&service-date=gt2023-01-02&service-date=lt2023-05-01</li>"
-          + "<li>&service-date=gt2023-01-02</li>"
-          + "<li>&_service-date=lt2023-05-01</li></ul>";
+      """
+    Only satisfy the Search request if a claim's Date
+    falls within a specified <i>DateRange<i/>. A DateRange can include both
+    low and high date values, only a low date value, or only a high date value.
+
+    Examples:
+       - `&service-date=gt2023-01-02&service-date=lt2023-05-01`
+       - `&service-date=gt2023-01-02`
+       - `&_service-date=lt2023-05-01`""";
 }
