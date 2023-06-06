@@ -389,3 +389,10 @@ class HighVolumeUser(BFDUserBase):
 
         # Override the value for last_updated with a static value
         self.last_updated = "2022-06-29"
+
+    def schedule_task(self, task_callable, first=False):
+        try:
+            super.schedule_task(self, task_callable, first)
+        except Exception as e:
+            if "No tasks defined" in str(e):
+                pass
