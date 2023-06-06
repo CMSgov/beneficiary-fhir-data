@@ -55,6 +55,7 @@ def _(environment: Environment, **kwargs):
 class TestLoadShape(UserInitAwareLoadShape):
     pass
 
+@tag('MyTaskSet')
 class MyTaskSet(TaskSet):
     @tag("coverage", "coverage_test_id_count", "v2")
     @task
