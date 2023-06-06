@@ -396,3 +396,5 @@ class HighVolumeUser(BFDUserBase):
         except Exception as e:
             if "No tasks defined" in str(e):
                 pass
+            else:
+                raise e
