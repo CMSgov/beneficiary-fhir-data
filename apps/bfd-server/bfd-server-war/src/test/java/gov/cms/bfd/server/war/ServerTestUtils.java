@@ -18,7 +18,6 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.PartDEvent;
@@ -559,7 +558,6 @@ public final class ServerTestUtils {
             CarrierClaimLine.class,
             CarrierClaim.class,
             BeneficiaryHistory.class,
-            MedicareBeneficiaryIdHistory.class,
             BeneficiaryMonthly.class,
             Beneficiary.class,
             LoadedBatch.class,

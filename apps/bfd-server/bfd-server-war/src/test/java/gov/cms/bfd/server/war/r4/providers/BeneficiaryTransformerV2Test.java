@@ -15,7 +15,6 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -95,18 +94,6 @@ public final class BeneficiaryTransformerV2Test {
 
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
 
-    // Add the MBI history records to the Beneficiary.
-    Set<MedicareBeneficiaryIdHistory> beneficiaryMbis =
-        parsedRecords.stream()
-            .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
-            .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(
-                r ->
-                    (r.getBeneficiaryId().isPresent()
-                        && r.getBeneficiaryId().get().longValue()
-                            == beneficiary.getBeneficiaryId()))
-            .collect(Collectors.toSet());
-    beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
     assertThat(beneficiary, is(notNullValue()));
 
     createPatient(RequestHeaders.getHeaderWrapper());
@@ -171,7 +158,8 @@ public final class BeneficiaryTransformerV2Test {
   /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
-    // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
+    // The base CanonicalType doesn't seem to compare correctly so lets convert it
+    // to a string
     assertTrue(
         patient.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
@@ -239,9 +227,8 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
-
     List<Identifier> patientIdentList = patient.getIdentifier();
-    assertEquals(4, patientIdentList.size());
+    assertEquals(5, patientIdentList.size());
 
     ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
 
@@ -295,6 +282,18 @@ public final class BeneficiaryTransformerV2Test {
     ident = new Identifier();
     ident
         .setValue("9AB2WW3GR44")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+    compareIdentList.add(ident);
+
+    ident = new Identifier();
+    ident
+        .setValue("543217066")
         .setSystem("http://hl7.org/fhir/sid/us-mbi")
         .getType()
         .addCoding()
