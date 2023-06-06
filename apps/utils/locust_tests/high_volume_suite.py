@@ -386,10 +386,6 @@ class HighVolumeUser(BFDUserBase):
 
             TaskSet.user.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
 
-        @task
-        def stop(self):
-            self.interrupt()
-
     @task
     def frontpage(self):
         pass
