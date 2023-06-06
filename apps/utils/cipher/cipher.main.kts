@@ -1,4 +1,3 @@
-@file:DependsOn("io.arrow-kt:arrow-core:1.2.0-RC")
 @file:DependsOn("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.3.5")
 @file:DependsOn("com.amazonaws:aws-encryption-sdk-java:2.4.0")
 @file:DependsOn("software.amazon.awssdk:kms:2.20.74")
@@ -10,8 +9,10 @@ import com.amazonaws.encryptionsdk.CryptoResult
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
 import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import okio.*
+import okio.ByteString.Companion.EMPTY
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import software.amazon.awssdk.regions.Region
@@ -29,18 +30,72 @@ import kotlin.system.exitProcess
 
 val AppName = "cipher"
 
-val PlainPrefix = "<<SECURE>>".encodeUtf8()
-val PlainSuffix = "<</SECURE>>".encodeUtf8()
+enum class Token(val bytes: ByteString) {
+    SecureStart("<<SECURE>>".encodeUtf8()),
+    SecureEnd("<</SECURE>>".encodeUtf8()),
+    CipherStart("<<CIPHER>>".encodeUtf8()),
+    CipherEnd("<</CIPHER>>".encodeUtf8()),
+    None(ByteString.of());
 
-val CipherPrefix = "<<CIPHER>>".encodeUtf8()
-val CipherSuffix = "<</CIPHER>>".encodeUtf8()
+    val endsWith: Token? by lazy {
+        when (this) {
+            SecureStart -> SecureEnd
+            CipherStart -> CipherEnd
+            else -> null
+        }
+    }
 
-val EmptyString = ByteString.of()
+    val text: String by lazy {
+        bytes.utf8()
+    }
+}
+
+val realTokens = persistentListOf(Token.SecureStart, Token.SecureEnd, Token.CipherStart, Token.CipherEnd)
 
 fun ByteString.toBuffer(): BufferedSource =
     Buffer().readFrom(ByteArrayInputStream(toByteArray()))
 
-class KmsCipher(private val endpoint: String?, region:String,keyArn: String) {
+data class BoundedBlock(val endToken: Token, val bytes: ByteString) {
+    override fun toString(): String {
+        return "($endToken: ${bytes.utf8()})"
+    }
+}
+
+fun BufferedSource.nextToken(): BoundedBlock? {
+    if (this.exhausted()) {
+        return null
+    }
+
+    var firstIndex = -1L
+    var firstToken = Token.None
+    for (token in realTokens) {
+        val index = this.indexOf(token.bytes)
+        if (index >= 0) {
+            if (firstIndex < 0 || index < firstIndex) {
+                firstIndex = index
+                firstToken = token
+//                println("$index $token")
+            }
+        }
+    }
+//    println("FOUND $firstIndex $firstToken")
+
+    val result = if (firstIndex < 0L) {
+        val bytes = this.readByteString()
+        BoundedBlock(Token.None, bytes)
+    } else if (firstIndex == 0L) {
+        this.skip(firstToken.bytes.size.toLong())
+        BoundedBlock(firstToken, EMPTY)
+    } else {
+        val bytes = this.readByteString(firstIndex)
+        this.skip(firstToken.bytes.size.toLong())
+        BoundedBlock(firstToken, bytes)
+    }
+//    println(result)
+    return result
+}
+
+class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
     private val crypto = AwsCrypto.standard()
 
     private val keyProvider = KmsMasterKeyProvider.builder()
@@ -70,73 +125,80 @@ class KmsCipher(private val endpoint: String?, region:String,keyArn: String) {
     }
 }
 
+class ParseException(message: String) : Exception(message)
+
 class Text(private val bytes: ByteString) {
     fun store(sink: Sink) = sink.buffer().use { it.write(bytes) }
 
     fun encrypt(cipher: KmsCipher): Text =
-        transform(PlainPrefix, PlainSuffix, CipherPrefix, CipherSuffix, cipher::encrypt)
+        transform(Token.SecureStart, Token.SecureEnd, Token.CipherStart, Token.CipherEnd, cipher::encrypt)
 
     fun encrypt(cipher: KmsCipher, secureBlocks: PersistentMap<ByteString, ByteString>): Text =
-        transform(PlainPrefix, PlainSuffix, CipherPrefix, CipherSuffix) {
+        transform(Token.SecureStart, Token.SecureEnd, Token.CipherStart, Token.CipherEnd) {
             secureBlocks[it] ?: cipher.encrypt(it)
         }
 
     fun decrypt(cipher: KmsCipher): Text =
-        transform(CipherPrefix, CipherSuffix, EmptyString, EmptyString, cipher::decrypt)
+        transform(Token.CipherStart, Token.CipherEnd, Token.None, Token.None, cipher::decrypt)
 
     fun rewind(cipher: KmsCipher): Text =
-        transform(CipherPrefix, CipherSuffix, PlainPrefix, PlainSuffix, cipher::decrypt)
+        transform(Token.CipherStart, Token.CipherEnd, Token.SecureStart, Token.SecureEnd, cipher::decrypt)
 
     fun extractSecureBlocks(cipher: KmsCipher): PersistentMap<ByteString, ByteString> {
         var map = persistentMapOf<ByteString, ByteString>()
         bytes.toBuffer().use { source ->
-            while (!source.exhausted()) {
-                val start = source.indexOf(CipherPrefix)
-                if (start >= 0) {
-                    source.skip(start)
-                    source.skip(CipherPrefix.size.toLong())
-                    val finish = source.indexOf(CipherSuffix)
-                    if (finish < 0) {
-                        throw IOException("missing " + CipherSuffix.utf8())
+            var block = source.nextToken()
+            while (block != null) {
+                if (block.endToken == Token.CipherStart) {
+                    val nextBlock = source.nextToken()
+                    if (nextBlock?.endToken != Token.CipherEnd) {
+                        throw ParseException("unclosed ${block.endToken.text}")
                     }
-                    val cipherText = source.readByteString(finish)
-                    source.skip(CipherSuffix.size.toLong())
+                    val cipherText = nextBlock.bytes
                     val plainText = cipher.decrypt(cipherText)
                     map = map.put(plainText, cipherText)
-                } else {
-                    break
                 }
+                block = source.nextToken()
             }
         }
         return map
     }
 
     private fun transform(
-        fromPrefix: ByteString,
-        fromSuffix: ByteString,
-        toPrefix: ByteString,
-        toSuffix: ByteString,
+        fromStartToken: Token,
+        fromEndToken: Token,
+        toStartToken: Token,
+        toEndToken: Token,
         op: (ByteString) -> ByteString
     ): Text {
         val buffer = Buffer()
         bytes.toBuffer().use { source ->
-            while (!source.exhausted()) {
-                val start = source.indexOf(fromPrefix)
-                if (start >= 0) {
-                    buffer.write(source.readByteArray(start))
-                    source.skip(fromPrefix.size.toLong())
-                    val finish = source.indexOf(fromSuffix)
-                    if (finish < 0) {
-                        throw IOException("missing " + fromSuffix.utf8())
+            var block: BoundedBlock? = source.nextToken()
+            while (block != null) {
+                val b: BoundedBlock = block!!
+                var requiredNextToken: Token? = null
+                if (b.endToken == fromStartToken) {
+                    val nextBlock = source.nextToken()
+                    if (nextBlock?.endToken != fromEndToken) {
+                        throw ParseException("unclosed ${b.endToken.text}")
                     }
-                    val fromText = source.readByteString(finish)
-                    source.skip(fromSuffix.size.toLong())
+                    val fromText = nextBlock.bytes
                     val toText = op(fromText)
-                    buffer.write(toPrefix)
+                    buffer.write(b.bytes)
+                    buffer.write(toStartToken.bytes)
                     buffer.write(toText)
-                    buffer.write(toSuffix)
+                    buffer.write(toEndToken.bytes)
+                    requiredNextToken = null
                 } else {
-                    buffer.write(source.readByteArray())
+                    buffer.write(b.bytes)
+                    buffer.write(b.endToken.bytes)
+                    requiredNextToken = b.endToken.endsWith
+                }
+                block = source.nextToken()
+                if (requiredNextToken != null) {
+                    if (block == null || block!!.endToken != requiredNextToken) {
+                        throw ParseException("unclosed ${requiredNextToken.text}")
+                    }
                 }
             }
         }
@@ -192,22 +254,22 @@ fun usage() {
 data class Config(
     val key: String,
     val endpoint: String?,
-    val region:String,
+    val region: String,
     val mode: String,
     val input: String,
     val output: String,
     val editor: String
 )
 
-class UsageErrorException(message:String) : Exception(message)
+class UsageException(message: String) : Exception(message)
 
 fun parseArgs(args: Array<String>): Config {
-    var key:String? = null
-    var endpoint:String? = null
-    var region:String = "us-east-1"
-    var mode:String? = null
-    var input:String? = null
-    var output:String? = null
+    var key: String? = null
+    var endpoint: String? = null
+    var region: String = "us-east-1"
+    var mode: String? = null
+    var input: String? = null
+    var output: String? = null
 
     var i = 0
     while (i < args.size && args[i].startsWith("--")) {
@@ -216,16 +278,19 @@ fun parseArgs(args: Array<String>): Config {
                 i += 1
                 key = args[i]
             }
+
             "--endpoint" -> {
                 i += 1
                 endpoint = args[i]
             }
+
             "--region" -> {
                 i += 1
                 region = args[i]
             }
+
             else -> {
-                throw UsageErrorException("invalid option ${args[i]}")
+                throw UsageException("invalid option ${args[i]}")
             }
         }
         i += 1
@@ -233,7 +298,7 @@ fun parseArgs(args: Array<String>): Config {
 
     val remaining = args.size - i
     if (remaining < 2 || remaining > 3) {
-        throw UsageErrorException("expected 2 or 3 arguments")
+        throw UsageException("expected 2 or 3 arguments")
     } else {
         mode = args[i++]
         input = args[i++]
@@ -241,7 +306,7 @@ fun parseArgs(args: Array<String>): Config {
     }
 
     if (key == null) {
-        throw UsageErrorException("required --key not provided")
+        throw UsageException("required --key not provided")
     }
 
     val editor = System.getenv("EDITOR") ?: "vi"
@@ -315,12 +380,15 @@ fun main(args: Array<String>) {
 
 try {
     main(args)
-} catch (e : UsageErrorException) {
-    println("Usage error: ${e.message}")
+} catch (e: UsageException) {
+    System.err.println("Usage error: ${e.message}")
     usage()
     exitProcess(1)
-} catch (e: Throwable) {
-    println("Caught exception: ${e.message}")
-    e.printStackTrace()
+} catch (e: ParseException) {
+    System.err.println("Parse error: ${e.message}")
     exitProcess(2)
+} catch (e: Throwable) {
+    System.err.println("Caught exception: ${e.message}")
+    e.printStackTrace()
+    exitProcess(3)
 }
