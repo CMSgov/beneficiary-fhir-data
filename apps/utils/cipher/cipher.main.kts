@@ -1,8 +1,9 @@
+#!/usr/bin/env kotlin
+
 @file:DependsOn("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.3.5")
 @file:DependsOn("com.amazonaws:aws-encryption-sdk-java:2.4.0")
 @file:DependsOn("software.amazon.awssdk:kms:2.20.74")
 @file:DependsOn("com.squareup.okio:okio:3.3.0")
-//@file:DependsOn("::")
 
 import com.amazonaws.encryptionsdk.AwsCrypto
 import com.amazonaws.encryptionsdk.CryptoResult
