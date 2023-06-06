@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -88,6 +90,18 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The enabled source types for this provider. */
   private Set<String> enabledSourceTypes = new HashSet<>();
 
+  /** The fiss claim transformer. */
+  private final FissClaimTransformerV2 fissClaimTransformerV2;
+
+  /** The mcs claim transformer. */
+  private final McsClaimTransformerV2 mcsClaimTransformerV2;
+
+  /** The fiss claim response transformer. */
+  private final FissClaimResponseTransformerV2 fissClaimResponseTransformerV2;
+
+  /** The mcs claim response transformer. */
+  private final McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2;
+
   /**
    * Initializes the resource provider beans via spring injection. These should be passed from the
    * child class constructor.
@@ -95,14 +109,26 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param oldMbiHashEnabled true if old MBI hash should be used
+   * @param fissClaimTransformerV2 is the fiss claim transformer
+   * @param mcsClaimTransformerV2 is the mcs claim transformer
+   * @param fissClaimResponseTransformerV2 is the fiss claim response transformer
+   * @param mcsClaimResponseTransformerV2 is the mcs claim response transformer
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
-      Boolean oldMbiHashEnabled) {
+      Boolean oldMbiHashEnabled,
+      FissClaimTransformerV2 fissClaimTransformerV2,
+      McsClaimTransformerV2 mcsClaimTransformerV2,
+      FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
+      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
+    this.fissClaimTransformerV2 = requireNonNull(fissClaimTransformerV2);
+    this.mcsClaimTransformerV2 = requireNonNull(mcsClaimTransformerV2);
+    this.fissClaimResponseTransformerV2 = requireNonNull(fissClaimResponseTransformerV2);
+    this.mcsClaimResponseTransformerV2 = requireNonNull(mcsClaimResponseTransformerV2);
   }
 
   /**
@@ -210,7 +236,29 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    return claimIdType.getTransformer().transform(metricRegistry, claimEntity, includeTaxNumbers);
+    return getClaim(claimIdType, claimEntity, includeTaxNumbers);
+  }
+
+  /**
+   * Transforms the paca claim to the specified type.
+   *
+   * @param claimIdType the claim type
+   * @param claimEntity the claim entity to transform
+   * @param includeTaxNumbers whether to include tax numbers
+   * @return the transformed explanation of benefit
+   */
+  private T getClaim(
+      ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
+
+    ClaimResponse response;
+    switch (claimIdType.getTypeLabel()) {
+      case "fiss" -> response =
+          fissClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
+      case "mcs" -> response =
+          mcsClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
+      default -> throw new IllegalStateException("Unexpected value: " + claimIdType.getTypeLabel());
+    }
+    return (T) response;
   }
 
   /**
@@ -390,11 +438,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
-              .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
-              .map(
-                  e ->
-                      type.getTransformer()
-                          .transform(metricRegistry, e, bundleOptions.includeTaxNumbers))
+              .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(e))
+              .map(e -> getClaim(type, e, bundleOptions.includeTaxNumbers))
               .collect(Collectors.toList()));
     }
 
@@ -422,18 +467,17 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /**
    * Determines if there are no samhsa entries in the claim.
    *
-   * @param metricRegistry the metric registry
    * @param entity the claim to check
    * @return {@code true} if there are no samhsa entries in the claim
    */
   @VisibleForTesting
-  boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
+  boolean hasNoSamhsaData(Object entity) {
     Claim claim;
 
     if (entity instanceof RdaFissClaim) {
-      claim = FissClaimTransformerV2.transform(metricRegistry, entity, false);
+      claim = fissClaimTransformerV2.transform(entity, false);
     } else if (entity instanceof RdaMcsClaim) {
-      claim = McsClaimTransformerV2.transform(metricRegistry, entity, false);
+      claim = mcsClaimTransformerV2.transform(entity, false);
     } else {
       throw new IllegalArgumentException(
           "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");

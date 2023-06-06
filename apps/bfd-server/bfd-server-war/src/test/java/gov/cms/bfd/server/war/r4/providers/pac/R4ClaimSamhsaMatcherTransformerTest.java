@@ -186,7 +186,10 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setProcCodes(procedures);
 
-    Claim claim = FissClaimTransformerV2.transform(new MetricRegistry(), entity, true);
+    FissClaimTransformerV2 fissClaimTransformerV2 =
+        new FissClaimTransformerV2(new MetricRegistry());
+
+    Claim claim = fissClaimTransformerV2.transform(entity, true);
 
     R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
 
@@ -280,7 +283,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setDetails(procedures);
 
-    Claim claim = McsClaimTransformerV2.transform(new MetricRegistry(), entity, true);
+    McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
+
+    Claim claim = mcsClaimTransformerV2.transform(entity, true);
 
     R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
 

@@ -29,12 +29,27 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param oldMbiHashEnabled true if old MBI hash should be used
+   * @param fissClaimTransformerV2 is the fiss claim transformer
+   * @param mcsClaimTransformerV2 is the mcs claim transformer
+   * @param fissClaimResponseTransformerV2 the fiss claim response transformer
+   * @param mcsClaimResponseTransformerV2 the mcs claim response transformer
    */
   public R4ClaimResourceProvider(
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
-      @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled) {
-    super(metricRegistry, samhsaMatcher, oldMbiHashEnabled);
+      @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
+      FissClaimTransformerV2 fissClaimTransformerV2,
+      McsClaimTransformerV2 mcsClaimTransformerV2,
+      FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
+      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2) {
+    super(
+        metricRegistry,
+        samhsaMatcher,
+        oldMbiHashEnabled,
+        fissClaimTransformerV2,
+        mcsClaimTransformerV2,
+        fissClaimResponseTransformerV2,
+        mcsClaimResponseTransformerV2);
   }
 
   /** {@inheritDoc} */

@@ -20,27 +20,31 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
+@Component
 public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
   /** The metric name. */
-  private static final String METRIC_NAME =
-      MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+  private final String METRIC_NAME;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
    * "CANCELLED". For brevity, the rest are defaulted to "ACTIVE" using {@link
    * Map#getOrDefault(Object, Object)}.
    */
-  private static final Map<String, ClaimResponse.ClaimResponseStatus> STATUS_MAP =
+  private final Map<String, ClaimResponse.ClaimResponseStatus> STATUS_MAP =
       Map.of(
           "r", ClaimResponse.ClaimResponseStatus.CANCELLED,
           "z", ClaimResponse.ClaimResponseStatus.CANCELLED,
           "9", ClaimResponse.ClaimResponseStatus.CANCELLED);
 
   /** The known MCS codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings. */
-  private static final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
+  private final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
       Map.ofEntries(
           Map.entry("a", ClaimResponse.RemittanceOutcome.QUEUED),
           Map.entry("b", ClaimResponse.RemittanceOutcome.QUEUED),
@@ -71,20 +75,26 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
           Map.entry("5", ClaimResponse.RemittanceOutcome.COMPLETE),
           Map.entry("9", ClaimResponse.RemittanceOutcome.COMPLETE));
 
-  /** Instantiates a new Mcs claim response transformer v2. */
-  private McsClaimResponseTransformerV2() {}
+  /**
+   * Instantiates a new Mcs claim response transformer v2. @param metricRegistry the metric registry
+   *
+   * @param metricRegistry the metric registry
+   */
+  public McsClaimResponseTransformerV2(MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
+    this.METRIC_NAME =
+        this.metricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+  }
 
   /**
    * Transforms a claim entity into a FHIR {@link ClaimResponse}.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the MCS {@link RdaMcsClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  static ClaimResponse transform(
-      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
+  public ClaimResponse transform(Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -100,7 +110,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup the {@link RdaMcsClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link RdaMcsClaim}
    */
-  private static ClaimResponse transformClaim(RdaMcsClaim claimGroup) {
+  private ClaimResponse transformClaim(RdaMcsClaim claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -131,7 +141,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @return The {@link ClaimResponse.ClaimResponseStatus} associated with the given data's status
    *     code.
    */
-  private static ClaimResponse.ClaimResponseStatus getStatus(RdaMcsClaim claimGroup) {
+  private ClaimResponse.ClaimResponseStatus getStatus(RdaMcsClaim claimGroup) {
     ClaimResponse.ClaimResponseStatus status;
 
     if (claimGroup.getIdrStatusCode() == null) {
@@ -157,7 +167,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @return The {@link ClaimResponse.RemittanceOutcome} associated with the given data's status
    *     code.
    */
-  private static ClaimResponse.RemittanceOutcome getOutcome(RdaMcsClaim claimGroup) {
+  private ClaimResponse.RemittanceOutcome getOutcome(RdaMcsClaim claimGroup) {
     ClaimResponse.RemittanceOutcome outcome;
 
     if (Strings.isNullOrEmpty(claimGroup.getIdrStatusCode())) {
@@ -178,7 +188,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup The {@link RdaMcsClaim} to pull associated data from.
    * @return A list of {@link Extension} objects build from the given {@link RdaMcsClaim} data.
    */
-  private static List<Extension> getExtension(RdaMcsClaim claimGroup) {
+  private List<Extension> getExtension(RdaMcsClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
     addExtension(extensions, BBCodingSystems.MCS.STATUS_CODE, claimGroup.getIdrStatusCode());
     addExtension(

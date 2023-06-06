@@ -56,7 +56,6 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   /**
    * Transforms a claim entity into a {@link ClaimResponse}.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
