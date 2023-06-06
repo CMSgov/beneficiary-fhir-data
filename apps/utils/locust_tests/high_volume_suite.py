@@ -60,9 +60,9 @@ class MyTaskSet(TaskSet):
     @task
     def coverage_test_id_count(self):
         """Coverage search by ID, Paginated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
-            params={"beneficiary": TaskSet.user.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary": self.user.bene_ids.pop(), "_count": "10"},
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
@@ -70,11 +70,11 @@ class MyTaskSet(TaskSet):
     @task
     def coverage_test_id_last_updated(self):
         """Coverage search by ID, Last Updated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
-                "beneficiary": TaskSet.user.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -83,10 +83,10 @@ class MyTaskSet(TaskSet):
     @task
     def coverage_test_id(self):
         """Coverage search by ID"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "beneficiary": TaskSet.user.bene_ids.pop(),
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id",
         )
@@ -95,10 +95,10 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_count(self):
         """Explanation of Benefit search by ID, Paginated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient": TaskSet.user.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_count": "10",
                 "_format": "application/fhir+json",
             },
@@ -109,11 +109,11 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_include_tax_number_last_updated(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
-                "patient": TaskSet.user.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
+                "patient": self.user.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
                 "_format": "application/fhir+json",
             },
@@ -124,9 +124,9 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id(self):
         """Explanation of Benefit search by ID"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
-            params={"patient": TaskSet.user.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={"patient": self.user.bene_ids.pop(), "_format": "application/fhir+json"},
             name="/v2/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -136,7 +136,7 @@ class MyTaskSet(TaskSet):
         """Patient search by Coverage Contract, paginated"""
 
         def make_url():
-            contract = TaskSet.user.contract_data.pop()
+            contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v2/fhir/Patient",
                 {
@@ -147,7 +147,7 @@ class MyTaskSet(TaskSet):
                 },
             )
 
-        TaskSet.user.run_task(
+        self.user.run_task(
             name="/v2/fhir/Patient search by coverage contract (all pages)",
             headers={"IncludeIdentifiers": "mbi"},
             url_callback=make_url,
@@ -162,12 +162,12 @@ class MyTaskSet(TaskSet):
             return create_url_path(
                 "/v2/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{TaskSet.user.hashed_mbis.pop()}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.user.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
 
-        TaskSet.user.run_task(
+        self.user.run_task(
             name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
             url_callback=make_url,
         )
@@ -176,13 +176,13 @@ class MyTaskSet(TaskSet):
     @task
     def patient_test_id_include_mbi_last_updated(self):
         """Patient search by ID with last updated, include MBI"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": TaskSet.user.bene_ids.pop(),
+                "_id": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
                 "_IncludeIdentifiers": "mbi",
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
             },
             name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
         )
@@ -191,10 +191,10 @@ class MyTaskSet(TaskSet):
     @task
     def patient_test_id(self):
         """Patient search by ID"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": TaskSet.user.bene_ids.pop(),
+                "_id": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/Patient search by id",
@@ -204,9 +204,9 @@ class MyTaskSet(TaskSet):
     @task
     def coverage_test_id_count_v1(self):
         """Coverage search by ID, Paginated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
-            params={"beneficiary": TaskSet.user.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary": self.user.bene_ids.pop(), "_count": "10"},
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
@@ -214,11 +214,11 @@ class MyTaskSet(TaskSet):
     @task
     def coverage_test_id_last_updated_v1(self):
         """Coverage search by ID, Last Updated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
             params={
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
-                "beneficiary": TaskSet.user.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -227,10 +227,10 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_count_type_pde_v1(self):
         """Explanation of Benefit search by ID, type PDE, paginated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": TaskSet.user.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_count": "50",
                 "_types": "PDE",
@@ -242,13 +242,13 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_last_updated_count_v1(self):
         """Explanation of Benefit search by ID, last updated, paginated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": TaskSet.user.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_count": "100",
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
         )
@@ -257,12 +257,12 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_include_tax_number_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": TaskSet.user.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeTaxNumbers": "true",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
@@ -272,12 +272,12 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": TaskSet.user.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
         )
@@ -286,9 +286,9 @@ class MyTaskSet(TaskSet):
     @task
     def eob_test_id_v1(self):
         """Explanation of Benefit search by ID"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
-            params={"patient": TaskSet.user.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={"patient": self.user.bene_ids.pop(), "_format": "application/fhir+json"},
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -298,7 +298,7 @@ class MyTaskSet(TaskSet):
         """Patient search by coverage contract (all pages)"""
 
         def make_url():
-            contract = TaskSet.user.contract_data.pop()
+            contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v1/fhir/Patient",
                 {
@@ -309,7 +309,7 @@ class MyTaskSet(TaskSet):
                 },
             )
 
-        TaskSet.user.run_task(
+        self.user.run_task(
             name="/v1/fhir/Patient search by coverage contract (all pages)",
             headers={"IncludeIdentifiers": "mbi"},
             url_callback=make_url,
@@ -324,12 +324,12 @@ class MyTaskSet(TaskSet):
             return create_url_path(
                 "/v1/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{TaskSet.user.hashed_mbis.pop()}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.user.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
 
-        TaskSet.user.run_task(
+        self.user.run_task(
             name="/v1/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
             url_callback=make_url,
         )
@@ -338,11 +338,11 @@ class MyTaskSet(TaskSet):
     @task
     def patient_test_id_last_updated_include_mbi_include_address_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
-        TaskSet.user.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
-                "_id": TaskSet.user.bene_ids.pop(),
-                "_lastUpdated": f"gt{TaskSet.user.last_updated}",
+                "_id": self.user.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeIdentifiers": "mbi",
                 "_IncludeTaxNumbers": "true",
             },
@@ -355,9 +355,9 @@ class MyTaskSet(TaskSet):
         """Patient search by ID"""
 
         def make_url():
-            return create_url_path(f"/v1/fhir/Patient/{TaskSet.user.bene_ids.pop()}", {})
+            return create_url_path(f"/v1/fhir/Patient/{self.user.bene_ids.pop()}", {})
 
-        TaskSet.user.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
+        self.user.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
 
 class HighVolumeUser(BFDUserBase):
     """High volume load test suite for V2 BFD Server endpoints.
