@@ -391,5 +391,5 @@ class HighVolumeUser(BFDUserBase):
             self.interrupt()
 
     @task
-        def frontpage(self):
-            pass
+    def frontpage(self):
+        pass
