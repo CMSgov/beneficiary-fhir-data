@@ -16,7 +16,6 @@ MASTER_BENE_IDS: List[str] = []
 MASTER_CONTRACT_DATA: List[Dict[str, str]] = []
 MASTER_HASHED_MBIS: List[str] = []
 
-
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
     if (
@@ -359,6 +358,11 @@ class MyTaskSet(TaskSet):
             return create_url_path(f"/v1/fhir/Patient/{self.user.bene_ids.pop()}", {})
 
         self.user.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
+
+    @tag("stop")
+    @task(1)
+    def stop(self):
+        self.interrupt()
 
 class HighVolumeUser(BFDUserBase):
     """High volume load test suite for V2 BFD Server endpoints.
