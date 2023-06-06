@@ -9,7 +9,7 @@ locals {
 resource "aws_cloudwatch_log_destination" "cwl_destination" {
   name       = "${local.full_name}-firehose-destination"
   role_arn   = aws_iam_role.cwl2firehose_role.arn
-  target_arn = "arn:aws:firehose:us-east-1:${local.account_id}:deliverystream/${local.full_name}"
+  target_arn = "arn:aws:firehose:${var.region}:${local.account_id}:deliverystream/${local.full_name}"
 }
 
 data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
 
     principals {
       type        = "Service"
-      identifiers = ["logs.us-east-1.amazonaws.com"]
+      identifiers = ["logs.${var.region}.amazonaws.com"]
     }
   }
 }
@@ -36,7 +36,7 @@ resource "aws_iam_role" "cwl2firehose_role" {
         {
           Action   = ["firehose:*"]
           Effect   = "Allow"
-          Resource = ["arn:aws:firehose:us-east-1:${local.account_id}:deliverystream/${local.full_name}"]
+          Resource = ["arn:aws:firehose:${var.region}:${local.account_id}:deliverystream/${local.full_name}"]
         },
       ]
     })

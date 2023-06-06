@@ -1,4 +1,4 @@
-variable "firehose_name" {
+variable "name" {
   type = string
 }
 

@@ -1,4 +1,4 @@
-variable "firehose_name" {
+variable "name" {
   type = string
 }
 
@@ -6,7 +6,15 @@ variable "table_name" {
   type = string
 }
 
+variable "lambda_name" {
+  type = string
+}
+
 variable "database" {
+  type = string
+}
+
+variable "region" {
   type = string
 }
 

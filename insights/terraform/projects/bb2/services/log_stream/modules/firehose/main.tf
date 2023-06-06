@@ -9,7 +9,7 @@ data "aws_s3_bucket" "main" {
 }
 
 locals {
-  full_name  = "bfd-insights-${var.project}-${var.firehose_name}"
+  full_name  = "bfd-insights-${var.project}-${var.name}"
   account_id = data.aws_caller_identity.current.account_id
   table      = var.table_name
 }
@@ -26,7 +26,7 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_firehose_stream" {
     compression_format  = "GZIP"
     error_output_prefix = "databases/${var.project}/events_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
     kms_key_arn         = data.aws_kms_key.bucket_cmk.arn
-    prefix              = "databases/${var.project}/events-${var.firehose_name}/dt=!{timestamp:YYYY/MM/dd/HH}/"
+    prefix              = "databases/${var.project}/events-${var.name}/dt=!{timestamp:YYYY/MM/dd/HH}/"
     role_arn            = "arn:aws:iam::${local.account_id}:role/bfd-insights-${var.project}-events"
     s3_backup_mode      = "Disabled"
 
@@ -64,7 +64,7 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_firehose_stream" {
 
       schema_configuration {
         database_name = var.project
-        region        = "us-east-1"
+        region        = var.region 
         role_arn      = "arn:aws:iam::${local.account_id}:role/bfd-insights-${var.project}-events"
         table_name    = local.table
         version_id    = "LATEST"
@@ -79,7 +79,7 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_firehose_stream" {
 
         parameters {
           parameter_name  = "LambdaArn"
-          parameter_value = "arn:aws:lambda:us-east-1:${local.account_id}:function:${var.project}-kinesis-firehose-cloudwatch-logs-processor-python:$LATEST"
+          parameter_value = "arn:aws:lambda:${var.region}:${local.account_id}:function:${var.lambda_name}:$LATEST"
         }
       }
     }
