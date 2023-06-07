@@ -108,9 +108,10 @@ locals {
   subnet_id             = data.aws_subnet.main.id
 
   # pipeline specific configrations
-  pipeline_instance_configs = {
+  pipeline_variant_configs = {
     rda = {
       enabled       = var.create_rda_pipeline
+      name          = "bfd-${local.env}-${local.service}-rda"
       instance_name = "rda"
       instance_type = local.nonsensitive_rda_service_config["instance_type"]
       tags = {
@@ -119,6 +120,7 @@ locals {
     }
     ccw = {
       enabled       = var.create_ccw_pipeline
+      name          = "bfd-${local.env}-${local.service}-ccw"
       instance_name = "ccw"
       instance_type = local.nonsensitive_ccw_service_config["instance_type"]
       tags = {
@@ -126,11 +128,146 @@ locals {
       }
     }
   }
-  pipeline_instances = { for k, v in local.pipeline_instance_configs : k => local.pipeline_instance_configs[k] if local.pipeline_instance_configs[k].enabled }
+  # TODO: Consider replacing with merged map with all variants if RDA variant is updated to be on-demand
+  rda_pipeline_config = {
+    for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
+    if local.pipeline_variant_configs[k].enabled && k == "rda"
+  }
+  # TODO: Consider replacing with merged map with all variants if RDA variant is updated to be on-demand
+  ccw_pipeline_config = {
+    for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
+    if local.pipeline_variant_configs[k].enabled && k == "ccw"
+  }
 }
 
+# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
+resource "aws_launch_template" "this" {
+  for_each = local.ccw_pipeline_config
+
+  name          = each.value.name
+  description   = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
+  key_name      = local.nonsensitive_common_config["key_pair"]
+  image_id      = local.ami_id
+  instance_type = each.value.instance_type
+
+  user_data = base64encode(templatefile("${path.module}/user-data.sh.tftpl", {
+    account_id        = local.account_id
+    env               = local.env
+    pipeline_bucket   = aws_s3_bucket.this.bucket
+    pipeline_instance = each.value.instance_name
+    writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
+  }))
+
+  instance_initiated_shutdown_behavior = "stop"
+  disable_api_termination              = false
+  ebs_optimized                        = true
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.this.name
+  }
+
+  network_interfaces {
+    associate_carrier_ip_address = false
+    security_groups              = [aws_security_group.app.id, local.vpn_security_group_id, local.ent_tools_sg_id]
+  }
+
+  placement {
+    tenancy = "default"
+  }
+
+  monitoring {
+    enabled = true
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_type           = "gp2"
+      volume_size           = 1000
+      delete_on_termination = true
+      encrypted             = true
+      kms_key_id            = local.kms_key_id
+    }
+  }
+
+  capacity_reservation_specification {
+    capacity_reservation_preference = "open"
+  }
+
+  enclave_options {
+    enabled = false
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 1
+    http_tokens                 = "required"
+  }
+
+  dynamic "tag_specifications" {
+    for_each = toset(["instance", "volume"])
+
+    content {
+      resource_type = tag_specifications.value
+      tags = merge(
+        local.default_tags,
+        {
+          Layer    = local.layer
+          role     = local.legacy_service
+          snapshot = true
+        },
+        each.value.tags
+      )
+    }
+  }
+}
+
+# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
+resource "aws_autoscaling_group" "this" {
+  for_each = local.ccw_pipeline_config
+
+  name                = each.value.name
+  vpc_zone_identifier = [data.aws_subnet.main.id]
+  # TODO: Address the desired and min capacity in BFD-2670
+  desired_capacity = 1
+  max_size         = 1
+  min_size         = 1
+
+  health_check_grace_period = 300
+  health_check_type         = "EC2"
+
+  launch_template {
+    name    = aws_launch_template.this[each.key].name
+    version = aws_launch_template.this[each.key].latest_version
+  }
+
+  instance_refresh {
+    strategy = "Rolling"
+    # NOTE: Changes in launch_template will _always_ trigger an instance refresh, and including it
+    # explicitly causes Terraform to emit a warning upon validation
+    triggers = ["tag"]
+  }
+
+  dynamic "tag" {
+    for_each = merge(
+      local.default_tags,
+      {
+        Layer = local.layer,
+        role  = local.legacy_service
+      },
+      each.value.tags
+    )
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+}
+
+# TODO: Determine if this can be consolidated with the CCW Pipeline's infrastructure
 resource "aws_instance" "pipeline" {
-  for_each = { for server in local.pipeline_instances : server.instance_name => server }
+  for_each = { for server in local.rda_pipeline_config : server.instance_name => server }
 
   ami                                  = local.ami_id
   associate_public_ip_address          = false
@@ -231,8 +368,19 @@ module "bfd_pipeline_slo_alarms" {
   warning_ok_sns_override = var.warning_ok_sns_override
 }
 
-# TODO: Remove post BFD-2554
-moved {
-  from = module.bfd_pipeline_slis
-  to = module.bfd_pipeline_slis[0]
+module "bfd_pipeline_scheduler" {
+  # For now, this module only supports the CCW-variant of the pipeline and so should not be included
+  # if the CCW pipeline is disabled
+  # TODO: Consider removing when RDA pipeline supports on-demand mechanisms
+  count = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
+
+  source = "./modules/bfd_pipeline_scheduler"
+
+  account_id     = local.account_id
+  etl_bucket_id  = aws_s3_bucket.this.id
+  env_kms_key_id = data.aws_kms_key.cmk.key_id
+  ccw_pipeline_asg_details = {
+    arn  = aws_autoscaling_group.this["ccw"].arn
+    name = aws_autoscaling_group.this["ccw"].name
+  }
 }

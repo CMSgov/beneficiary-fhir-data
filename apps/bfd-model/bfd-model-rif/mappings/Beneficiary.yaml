@@ -946,16 +946,6 @@ mappings:
       mappedBy: beneficiaryId
       orphanRemoval: false
       readOnly: true
-    - cascadeTypes:
-      - ALL
-      collectionType: Set
-      entityClass: gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory
-      fetchType: LAZY
-      fieldName: medicareBeneficiaryIdHistories
-      joinType: OneToMany
-      mappedBy: beneficiaryId
-      orphanRemoval: false
-      readOnly: true
     name: beneficiaries
     primaryKeyColumns:
     - beneficiaryId
