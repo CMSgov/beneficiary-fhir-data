@@ -13,3 +13,4 @@
 --
 drop table if exists medicare_beneficiaryid_history cascade;
 drop table if exists medicare_beneficiaryid_history_invalid_beneficiaries cascade;
+drop table if exists medicare_beneficiaryid_history_temp cascade;
