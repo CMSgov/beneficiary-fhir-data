@@ -1,5 +1,6 @@
 """High Volume Load test suite for BFD Server endpoints."""
 
+import logging
 from random import shuffle
 from typing import Dict, List
 
@@ -380,6 +381,7 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+        self.logger = logging.getLogger()
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.
@@ -391,9 +393,11 @@ class HighVolumeUser(BFDUserBase):
         self.last_updated = "2022-06-29"
 
     def schedule_task(self, task_callable, first=False):
+        self.logger.warning("Scheduling task: " + task_callable)
         try:
             super.schedule_task(self, task_callable, first)
         except Exception as e:
+            self.logger.warning("Caught exception" + str(e))
             if "No tasks defined" in str(e):
                 pass
             else:
