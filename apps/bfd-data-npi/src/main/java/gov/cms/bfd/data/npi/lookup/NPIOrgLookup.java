@@ -103,9 +103,6 @@ public class NPIOrgLookup {
               npiDataColumns[0].replace("\"", ""), npiDataColumns[1].replace("\"", ""));
         }
       }
-
-    } catch (IOException e) {
-      throw new IOException(e);
     }
 
     return npiProcessedData;

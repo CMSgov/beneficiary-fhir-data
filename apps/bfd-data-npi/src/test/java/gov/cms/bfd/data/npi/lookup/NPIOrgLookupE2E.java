@@ -44,7 +44,7 @@ public class NPIOrgLookupE2E {
 
   /** End to End test for Npi Org Data with npi number. */
   @Test
-  public void shouldReturnRealOrgNPIDataReturnsRightOrganization() throws IOException {
+  public void shouldCorrectlyReturnNpiNameObtainedFromFileStream() throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(npiOrgNumber));
     assertEquals(npiOrgName, npiOrgDisplay.get());
   }
