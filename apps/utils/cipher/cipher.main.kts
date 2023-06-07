@@ -242,23 +242,28 @@ fun loadText(file: File): Text = loadText(file.source())
 fun usage() {
     println(
         """
-        usage: $APP_NAME [options] cat|encrypt|decrypt|edit source [dest]
+        usage: $APP_NAME [options] mode source [dest]
         
-        If dest is omitted the source file will be overwritten.
+        Modes:
+          cat writes a completely decrypted version of source to stdout.
         
-        cat writes a completely decrypted version of source to stdout.
+          decrypt writes a completely decrypted version of source to dest.
         
-        decrypt writes a completely decrypted version of source to dest.
-        
-        encrypt writes a version of source with all SECURE blocks replaced by CIPHER blocks to dest.
+          encrypt writes a version of source with all secure blocks replaced by cipher blocks to dest.
           
-        edit creates a temporary file with CIPHER blocks converted to SECURE
-          blocks and opens it using the editor defined in EDITOR environment variable.
-          If the temp file is modified the SECURE blocks are converted back to CIPHER
-          blocks the result is written to the dest file.
-          Default editor is $DEFAULT_EDITOR.
+          edit creates a temporary file with cipher blocks converted to secure
+            blocks and opens it using the editor defined in EDITOR environment variable.
+            If the temp file is modified the SECURE blocks are converted back to CIPHER
+            blocks the result is written to the dest file.
+            Default editor is $DEFAULT_EDITOR.
 
-        Note: Both cat and decrypt remove the secure text delimiters so they are not reversible.
+          Note: Both cat and decrypt remove the secure text delimiters so they are not reversible.
+        
+        Arguments:
+          source is the file to process
+          dest is an optional file to write processed file to.
+
+          Note: If dest is omitted the source file will be overwritten.
         
         Options:
         --key ARN      : KMS key ARN (REQUIRED unless CIPHER_KEY is defined).
@@ -266,10 +271,18 @@ fun usage() {
         --region name  : AWS region name.  Defaults to $DEFAULT_REGION.
         
         Environment variables:
-        EDITOR           Editor used in edit mode.  Defaults to $DEFAULT_EDITOR.
-        CIPHER_KEY       Same as --key
-        CIPHER_ENDPOINT  Same as --endpoint
-        CIPHER_REGION    Same as --region
+          EDITOR           Editor used in edit mode.  Defaults to $DEFAULT_EDITOR.
+          CIPHER_KEY       Same as --key
+          CIPHER_ENDPOINT  Same as --endpoint
+          CIPHER_REGION    Same as --region
+        
+        Secure blocks are created and maintained by humans.
+        
+          ${Span.Secure.start.text}...any text you would like to have encrypted...${Span.Secure.end.text}
+        
+        Cipher blocks are created and maintained by the script.
+        
+          ${Span.Cipher.start.text}...base 64 encrypted data from a secure block...${Span.Cipher.end.text}
     """.trimIndent()
     )
 }
