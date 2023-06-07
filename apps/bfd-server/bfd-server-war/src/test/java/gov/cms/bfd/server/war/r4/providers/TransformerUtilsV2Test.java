@@ -780,8 +780,7 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     HHAClaimTransformerV2 hhaClaimTransformer =
-        new HHAClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -799,8 +798,7 @@ public class TransformerUtilsV2Test {
 
     fhirContext = FhirContext.forR4();
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     genEob = hospiceClaimTransformerV2.transform(hospiceClaim);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -837,8 +835,7 @@ public class TransformerUtilsV2Test {
 
     fhirContext = FhirContext.forR4();
     InpatientClaimTransformerV2 inpatientClaimTransformerV2 =
-        new InpatientClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new InpatientClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     genEob = inpatientClaimTransformerV2.transform(inpatientClaim);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -886,8 +883,7 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     HHAClaimTransformerV2 hhaClaimTransformer =
-        new HHAClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);

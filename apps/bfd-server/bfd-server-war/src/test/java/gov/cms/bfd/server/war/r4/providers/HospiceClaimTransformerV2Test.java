@@ -74,8 +74,7 @@ public final class HospiceClaimTransformerV2Test {
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
     hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 

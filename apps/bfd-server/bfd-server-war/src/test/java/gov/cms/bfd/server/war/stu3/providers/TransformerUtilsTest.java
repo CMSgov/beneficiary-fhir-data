@@ -298,7 +298,7 @@ public final class TransformerUtilsTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -359,7 +359,7 @@ public final class TransformerUtilsTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -382,7 +382,7 @@ public final class TransformerUtilsTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             hospiceClaim);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -405,7 +405,7 @@ public final class TransformerUtilsTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             dmeClaim);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -428,7 +428,7 @@ public final class TransformerUtilsTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             inpatientClaim);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
