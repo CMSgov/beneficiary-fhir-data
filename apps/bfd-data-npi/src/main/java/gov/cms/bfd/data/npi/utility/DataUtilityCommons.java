@@ -47,6 +47,8 @@ public class DataUtilityCommons {
    * @param outputDir the output directory
    * @param downloadUrl the downloadUrl passed in
    * @param npiFile the npi file
+   * @throws IOException if there is an issue reading file
+   * @throws IllegalStateException if there is an issue with the output directory
    */
   public static void getNPIOrgNames(String outputDir, Optional<String> downloadUrl, String npiFile)
       throws IOException, IllegalStateException {
@@ -128,6 +130,7 @@ public class DataUtilityCommons {
    * @param workingDir a directory that temporary/working files can be written to
    * @param fileName the output file/resource to produce
    * @throws IOException (any errors encountered will be bubbled up)
+   * @throws IllegalStateException if there is an issue with NPI File
    * @return path to file
    */
   public static Path getOriginalNpiDataFile(Path workingDir, String fileName)
@@ -302,7 +305,7 @@ public class DataUtilityCommons {
    * @param fields the string array of header values.
    * @return map of indexes and field names
    */
-  private static Map<String, Integer> getIndexNumbers(String[] fields) {
+  protected static Map<String, Integer> getIndexNumbers(String[] fields) {
     Map<String, Integer> indexNumbers = new HashMap<String, Integer>();
     Integer indexCounter = 0;
     for (String field : fields) {
@@ -319,7 +322,7 @@ public class DataUtilityCommons {
    * @param indexNumbers the map of header values and indexes.
    * @return int of index
    */
-  private static int getIndexNumberForField(Map<String, Integer> indexNumbers, String fieldName) {
+  protected static int getIndexNumberForField(Map<String, Integer> indexNumbers, String fieldName) {
     if (indexNumbers.containsKey(fieldName)) {
       return indexNumbers.get(fieldName);
     }

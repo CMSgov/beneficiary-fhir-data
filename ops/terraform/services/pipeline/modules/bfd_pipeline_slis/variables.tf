@@ -18,3 +18,7 @@ variable "aws_kms_key_id" {
   type        = string
 }
 
+variable "s3_events_sns_topic_name" {
+  description = "The name of current environment's SNS S3 events SNS topic for use with Lambda"
+  type        = string
+}
