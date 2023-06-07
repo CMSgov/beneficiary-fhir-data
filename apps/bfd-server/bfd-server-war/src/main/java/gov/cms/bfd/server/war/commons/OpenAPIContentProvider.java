@@ -51,7 +51,7 @@ public final class OpenAPIContentProvider {
       """
     Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
-    
+
     Examples:
       - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
       - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
@@ -103,7 +103,7 @@ public final class OpenAPIContentProvider {
   public static final String PATIENT_PARTD_CURSOR_VALUE =
       """
      Provide a pagination cursor or numeric _offset_ for processing Patient's Part D events information.
-          
+
      Examples:
         - `cursor=200` the first record is the 201st record
         - `cursor=1000` the first record is the 1001st record""";
@@ -184,31 +184,33 @@ public final class OpenAPIContentProvider {
    represents the medicare benficiary ID, or as much of that
    defined by the [FHIR specification](https://terminology.hl7.org/NamingSystem-cmsMBI.html) as:
 
-   `A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
+   ```
+   A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
    '-', with a length limit of 11 characters.
-   The MBI ID has the following characters for each position:`
+   The MBI ID has the following characters for each position:
 
-   `Position 1 - numeric values 1 through 9`
+   Position 1 - numeric values 1 through 9
 
-   `Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+   Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)
 
-   `Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`
+   Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)
 
-   `Position 4 - numeric values 0 through 9`
+   Position 4 - numeric values 0 through 9
 
-   `Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+   Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)
 
-   `Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`
+   Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)
 
-   `Position 7 - numeric values 0 through 9`
+   Position 7 - numeric values 0 through 9
 
-   `Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+   Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)
 
-   `Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)`
+   Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)
 
-   `Position 10 - numeric values 0 through 9`
+   Position 10 - numeric values 0 through 9
 
-   `Position 11 - numeric values 0 through 9`
+   Position 11 - numeric values 0 through 9
+   ```
 
    The following are all valid values for MBI, and all might
    represent the same resource:
