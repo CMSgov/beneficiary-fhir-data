@@ -200,8 +200,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(
-              shortDefinition = OpenAPIContentProvider.BENEFICIARY_SP_RES_ID_SHORT,
-              value = OpenAPIContentProvider.BENEFICIARY_SP_RES_ID_VALUE)
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           ReferenceParam beneficiary,
       @OptionalParam(name = "startIndex")
           @Description(

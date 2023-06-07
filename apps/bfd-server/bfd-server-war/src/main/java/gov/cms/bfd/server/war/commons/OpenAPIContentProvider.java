@@ -13,21 +13,22 @@ public final class OpenAPIContentProvider {
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_VALUE =
       """
+    **NOTE: THIS IS A REQUIRED FIELD**
+
     Fetch _Patient_ data using a FHIR _IdType_ identifier; an IdType
     represents the logical identity for a resource, or as much of that
     identity that is known. In FHIR, every resource must have a _logical ID_ which is
-    defined by the FHIR specification as:
+    defined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:
 
-    `<code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
+    `Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
     '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
-    or any other identifier pattern that meets these constraints.)</code>`
+    or any other identifier pattern that meets these constraints.)`
 
     This class contains that logical ID, and can optionally also contain a relative or absolute URL
     representing the resource identity; the following are all valid values for IdType, and all might
     represent the same resource:
-      - `<code>123</code> (just a resource's ID)`
-      - `<code>Patient/123</code> (a relative identity)`
-      - `<code>http://example.com/Patient/123 (an absolute identity)</code>`""";
+      - `_id=567834`
+      - `_id=1234`""";
 
   /** Open API content short description for /Patient's resource bundle offset. */
   public static final String PATIENT_START_INDEX_SHORT =
@@ -39,6 +40,7 @@ public final class OpenAPIContentProvider {
     (starting point) into the list of elements for the _Request_.
     It is optional and defaults to 1 if not supplied.
     A value 0 is not allowed and negative indices are not currently supported.
+
     Example:
        - `startIndex=100`""";
 
@@ -51,9 +53,9 @@ public final class OpenAPIContentProvider {
     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
     
     Examples:
-      - `&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
-      - `&_lastUpdated=gt2023-01-02` defines a range between the provided date and today
-      - `&_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date""";
+      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
+      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
+      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date""";
 
   /** Open API content short description for /Patient's Part D contract ID to be used. */
   public static final String PATIENT_PARTD_CONTRACT_SHORT = "Part D coverage contract identifier";
@@ -63,10 +65,13 @@ public final class OpenAPIContentProvider {
    */
   public static final String PATIENT_PARTD_CONTRACT_VALUE =
       """
+    **NOTE: THIS IS A REQUIRED FIELD**
+
     When searching for a Patient's Part D events information, this resource identifies
     the Part D contract value that will be used when determining eligibility.
+
     Example:
-       - `_has:Coverage.extension=<Part D Contract ID Here>`""";
+       - `_has:Coverage.extension=<Part D Contract ID Here>`
        - `_has:Coverage.extension=ABCD`""";
 
   /**
@@ -82,6 +87,7 @@ public final class OpenAPIContentProvider {
       """
     When searching for a Patient's Part D events information, this resource identifies
     the reference year that will be applied when determining applicable Part D events.
+
     Example:
        - `_has:Coverage.rfrncyr=2023`""";
 
@@ -101,30 +107,6 @@ public final class OpenAPIContentProvider {
      Examples:
         - `cursor=200` the first record is the 201st record
         - `cursor=1000` the first record is the 1001st record""";
-
-  /** Open API content short description for /Patient's identifier parameter. */
-  public static final String BENEFICIARY_SP_RES_ID_SHORT =
-      "Identifier resource for the covered party";
-  /** Open API content value for /Patient's identifier parameter. */
-  public static final String BENEFICIARY_SP_RES_ID_VALUE =
-      """
-    Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType
-    represents the logical identity for a resource, or as much of that.
-    identity that is known.
-
-    In FHIR, every resource must have a _logical ID_ which is defined by the FHIR specification as:
-    `<code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
-    '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
-    or any other identifier pattern that meets these constraints.)</code>`
-
-    This class contains that logical ID, and can optionally also contain a relative or absolute URL
-    representing the resource identity; the following are all valid values for IdType, and all might
-    represent the same resource
-
-    Examples:
-      - `<code>123</code> (just a resource's ID)`
-      - `<code>beneficiary/123</code> (a relative identity)`
-      - `<code>http://example.com/beneficiary/123 (an absolute identity)</code>`""";
 
   /** Open API short description for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_SHORT = "A list of BFD claim types to include";
@@ -161,10 +143,11 @@ public final class OpenAPIContentProvider {
    Only satisfy the Search request if a claim's _billable period_.
    falls within a specified _DateRange_. A DateRange can include both
    low and high date values, only a low date value, or only a high date value.
+
    Examples:
-     - `&service-date=gt2023-01-02&service-date=lt2023-05-01`
-     - `&service-date=gt2023-01-02`
-     - `&_service-date=lt2023-05-01`""";
+     - `service-date=gt2023-01-02&service-date=lt2023-05-01`
+     - `service-date=gt2023-01-02`
+     - `_service-date=lt2023-05-01`""";
 
   /** Open API short description for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_SHORT =
@@ -175,8 +158,9 @@ public final class OpenAPIContentProvider {
    The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
    is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
    Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
+
    Examples:
-      - `&excludeSAMHSA=true`""";
+      - `excludeSAMHSA=true`""";
 
   /** Open API short description for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_SHORT =
@@ -185,19 +169,20 @@ public final class OpenAPIContentProvider {
   public static final String EOB_INCLUDE_TAX_NUMBERS_VALUE =
       """
    Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
+
    Example:
-      - `&includeTaxNumbers=true`""";
+      - `includeTaxNumbers=true`""";
 
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI = "The patient identifier to search for.";
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
       """
+   **NOTE: THIS IS A REQUIRED FIELD**
+
    Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI
    represents the medicare benficiary ID, or as much of that
-   defined by the FHIR specification as:
-
-   `<code>`
+   defined by the [FHIR specification](https://terminology.hl7.org/NamingSystem-cmsMBI.html) as:
 
    `A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
    '-', with a length limit of 11 characters.
@@ -225,13 +210,11 @@ public final class OpenAPIContentProvider {
 
    `Position 11 - numeric values 0 through 9`
 
-   `</code>`
-
    The following are all valid values for MBI, and all might
    represent the same resource:
-      - `<code>9AB2WW3GR44</code> (unhashed MBI)`
-      - `<code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)`
-      - `<code>1S00E00HA26 (synthetic MBI)</code>`""";
+      - `9AB2WW3GR44 (unhashed MBI)`
+      - `82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c (hashed)`
+      - `1S00E00HA26 (synthetic MBI)`""";
 
   /**
    * Open API content short description for partially adjudicated claim MBI ID being hashed or not.
@@ -242,8 +225,9 @@ public final class OpenAPIContentProvider {
   public static final String PAC_IS_HASHED_VALUE =
       """
     Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
+
     Example:
-      - `&isHashed=true`""";
+      - `isHashed=true`""";
 
   /** Open API short description for partially adjudicated claim type parameter. */
   public static final String PAC_CLAIM_TYPE_SHORT =
@@ -277,7 +261,7 @@ public final class OpenAPIContentProvider {
     and _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
 
     Example:
-      - `&excludeSAMHSA=true`""";
+      - `excludeSAMHSA=true`""";
 
   /** Open API short description for partially adjudicated claims data. */
   public static final String PAC_SERVICE_DATE_SHORT =
@@ -290,7 +274,7 @@ public final class OpenAPIContentProvider {
     low and high date values, only a low date value, or only a high date value.
 
     Examples:
-       - `&service-date=gt2023-01-02&service-date=lt2023-05-01`
-       - `&service-date=gt2023-01-02`
-       - `&_service-date=lt2023-05-01`""";
+       - `service-date=gt2023-01-02&service-date=lt2023-05-01`
+       - `service-date=gt2023-01-02`
+       - `_service-date=lt2023-05-01`""";
 }
