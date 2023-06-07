@@ -55,7 +55,7 @@ public class FileNameCalculationTest {
 
   /** Returns the correct file name for each month. */
   @Test
-  public void returnTheCorrectFileNameForJanuary() {
+  public void returnTheCorrectFileNameForEachMonth() {
     for (int i = 0; i < 12; i++) {
       expectedFileName = FileNameCalculation.BASE_URL + months.get(i) + "_" + year + ".zip";
       String fileName = fileNameCalculation.getMonthAndYearForFile(false, i, year);
