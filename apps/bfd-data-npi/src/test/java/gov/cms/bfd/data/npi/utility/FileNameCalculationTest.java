@@ -14,10 +14,10 @@ public class FileNameCalculationTest {
   public Calendar calendar;
 
   /** The current month to use. */
-  public int currentMonth;
+  public int month;
 
   /** The current year to use. */
-  public int currentYear;
+  public int year;
 
   /** The expected file name to use. */
   public String expectedFileName;
@@ -47,35 +47,140 @@ public class FileNameCalculationTest {
   /** Setup method. */
   @BeforeEach
   public void setup() {
-    calendar = Calendar.getInstance();
-    currentMonth = calendar.get(Calendar.MONTH);
-    currentYear = calendar.get(Calendar.YEAR);
     fileNameCalculation = new FileNameCalculation();
     expectedFileName = "";
+    month = 0;
+    year = 2014;
   }
 
-  /** Happy path for file Name calculation. */
+  /** Returns the correct file name for January. */
   @Test
-  public void returnTheCorrectFileNameForCurrentMonth() {
-    String month = months.get(currentMonth);
-    expectedFileName = FileNameCalculation.BASE_URL + month + "_" + currentYear + ".zip";
-    String fileName = fileNameCalculation.getFileName(false);
+  public void returnTheCorrectFileNameForJanuary() {
+    month = 0;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
 
     assertEquals(expectedFileName, fileName);
   }
 
-  /** Returns the month before, if its January, it will return December and the year before. */
+  /** Returns the correct file name for February. */
   @Test
-  public void returnsTheCorrectMonthBefore() {
-    String month = "";
-    if (currentMonth == 0) {
-      month = months.get(11);
-      currentYear = currentYear - 1;
-    } else {
-      month = months.get(currentMonth - 1);
-    }
-    expectedFileName = FileNameCalculation.BASE_URL + month + "_" + currentYear + ".zip";
-    String fileName = fileNameCalculation.getFileName(true);
+  public void returnTheCorrectFileNameForFebruary() {
+    month = 1;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for March. */
+  @Test
+  public void returnTheCorrectFileNameForMarch() {
+    month = 2;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for April. */
+  @Test
+  public void returnTheCorrectFileNameForApril() {
+    month = 3;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for May. */
+  @Test
+  public void returnTheCorrectFileNameForMay() {
+    month = 4;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for June. */
+  @Test
+  public void returnTheCorrectFileNameForJune() {
+    month = 5;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for July. */
+  @Test
+  public void returnTheCorrectFileNameForJuly() {
+    month = 6;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for August. */
+  @Test
+  public void returnTheCorrectFileNameForAugust() {
+    month = 7;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for September. */
+  @Test
+  public void returnTheCorrectFileNameForSeptember() {
+    month = 8;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for October. */
+  @Test
+  public void returnTheCorrectFileNameForOctober() {
+    month = 9;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for November. */
+  @Test
+  public void returnTheCorrectFileNameForNovember() {
+    month = 10;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /** Returns the correct file name for December. */
+  @Test
+  public void returnTheCorrectFileNameForDecember() {
+    month = 11;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(month) + "_" + year + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(false, month, year);
+
+    assertEquals(expectedFileName, fileName);
+  }
+
+  /**
+   * Returns the correct file name for previous year and month when get previous month set to true.
+   */
+  @Test
+  public void returnTheCorrectFileNameForThePreviousMonthAndYearWhenGetPreviousMonthSetToTrue() {
+    month = 0;
+    expectedFileName = FileNameCalculation.BASE_URL + months.get(11) + "_" + (year - 1) + ".zip";
+    String fileName = fileNameCalculation.getMonthAndYearForFile(true, month, year);
 
     assertEquals(expectedFileName, fileName);
   }

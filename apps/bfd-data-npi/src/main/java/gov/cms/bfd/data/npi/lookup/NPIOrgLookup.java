@@ -61,7 +61,7 @@ public class NPIOrgLookup {
     return npiOrgLookupForProduction;
   }
 
-  /** Constructs an {@link NPIOrgLookup}. */
+  /** Constructs an {@link NPIOrgLookup} used for testing purposes only. */
   protected NPIOrgLookup() {
     npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
   }

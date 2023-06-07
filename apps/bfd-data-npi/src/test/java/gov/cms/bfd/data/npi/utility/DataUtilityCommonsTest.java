@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 /** Data Utility Commons Test. */
 public class DataUtilityCommonsTest {
 
-  /** This logic is used when parsing the header for the NPI files */
+  /** This logic is used when parsing the header for the NPI files. */
   @Test
   public void getsTheMapForTheNpiFileHeaderLine() {
     String[] fields = new String[] {"field1", "field2", "field3", "field4", "field5"};
@@ -21,7 +21,10 @@ public class DataUtilityCommonsTest {
     }
   }
 
-  /** Tests a map with indexes for each field is returned from getIndexNumbers() when a list of fields is supplied. */
+  /**
+   * Tests a map with indexes for each field is returned from getIndexNumbers() when a list of
+   * fields is supplied.
+   */
   @Test
   public void getIndexNumbersReturnsAllIndexesWhenPassedMultipleFields() {
 
@@ -39,7 +42,10 @@ public class DataUtilityCommonsTest {
         DataUtilityCommons.getIndexNumberForField(mapOfIndexResults, fieldToFind));
   }
 
-  /** This tests makes sure to return a exception when a field in a map of header fields cannot be found. */
+  /**
+   * This tests makes sure to return a exception when a field in a map of header fields cannot be
+   * found.
+   */
   @Test
   public void getExceptionWhenFieldCantBeFoundInMap() {
 

@@ -10,6 +10,25 @@ public class FileNameCalculation {
   protected static final String BASE_URL =
       "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
 
+  /** Map of months. */
+  private static final Map<Integer, String> months =
+      new HashMap<Integer, String>() {
+        {
+          put(0, "January");
+          put(1, "February");
+          put(2, "March");
+          put(3, "April");
+          put(4, "May");
+          put(5, "June");
+          put(6, "July");
+          put(7, "August");
+          put(8, "September");
+          put(9, "October");
+          put(10, "November");
+          put(11, "December");
+        }
+      };
+
   /**
    * Extracts a file name.
    *
@@ -17,45 +36,42 @@ public class FileNameCalculation {
    * @return a file name string
    */
   public static String getFileName(boolean getMonthBefore) {
-    Map<Integer, String> months =
-        new HashMap<Integer, String>() {
-          {
-            put(0, "January");
-            put(1, "February");
-            put(2, "March");
-            put(3, "April");
-            put(4, "May");
-            put(5, "June");
-            put(6, "July");
-            put(7, "August");
-            put(8, "September");
-            put(9, "October");
-            put(10, "November");
-            put(11, "December");
-          }
-        };
-
     Calendar cal = Calendar.getInstance();
-    int month = cal.get(Calendar.MONTH);
+    int currentMonth = cal.get(Calendar.MONTH);
     int currentYear = cal.get(Calendar.YEAR);
-    String currentMonth = null;
 
+    return getMonthAndYearForFile(getMonthBefore, currentMonth, currentYear);
+  }
+
+  /**
+   * Formats the file name with Month and Year.
+   *
+   * @param getMonthBefore whether to get the previous month or not
+   * @param currentMonth is the integer for month
+   * @param currentYear is the integer for year
+   * @return a file name string
+   */
+  public static String getMonthAndYearForFile(
+      boolean getMonthBefore, int currentMonth, int currentYear) {
+
+    String month = null;
+    int year = 0;
     String fileName = null;
 
     if (getMonthBefore) {
-      if (month == 0) {
-        currentMonth = months.get(11);
-        currentYear = currentYear - 1;
+      if (currentMonth == 0) {
+        month = months.get(11);
+        year = currentYear - 1;
       } else {
-        currentMonth = months.get(month - 1);
+        month = months.get(currentMonth - 1);
+        year = currentYear;
       }
 
     } else {
-      currentMonth = months.get(month);
+      month = months.get(currentMonth);
+      year = currentYear;
     }
 
-    fileName = BASE_URL + currentMonth + "_" + currentYear + ".zip";
-
-    return fileName;
+    return BASE_URL + month + "_" + String.valueOf(year) + ".zip";
   }
 }

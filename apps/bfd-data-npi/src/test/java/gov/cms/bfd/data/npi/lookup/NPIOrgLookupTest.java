@@ -3,7 +3,6 @@ package gov.cms.bfd.data.npi.lookup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class NPIOrgLookupTest {
   /** Setup Before Each test method. */
   @BeforeEach
   void setup() throws IOException {
-    npiOrgDataLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgDataLookup = new NPIOrgLookup();
     npiOrgDisplay = Optional.empty();
   }
 
@@ -45,26 +44,24 @@ public class NPIOrgLookupTest {
     assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
-  /**
-   * Should not return Org Name and NPI Number is empty.
-   */
+  /** Should not return Org Name and NPI Number is empty. */
   @Test
   public void shouldNotReturnWhenNPINumberIsEmpty() throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.empty());
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
-  /**
-   * Should not return Org Name and NPI Number is empty string.
-   */
+  /** Should not return Org Name and NPI Number is empty string. */
   @Test
-  public void shouldNotReturnWhenNPINumberIEmptyString()
-      throws IOException {
+  public void shouldNotReturnWhenNPINumberIEmptyString() throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(""));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
-  /** Should Return Map When Input Stream Is Formatted with two columns, the npi number and the npi org name. */
+  /**
+   * Should Return Map When Input Stream Is Formatted with two columns, the npi number and the npi
+   * org name.
+   */
   @Test
   public void shouldReturnMapWhenInputStreamIsFormattedCorrectly() throws IOException {
     StringBuilder initialString = new StringBuilder();
@@ -78,7 +75,7 @@ public class NPIOrgLookupTest {
     assertEquals(
         npiOrgDataLookup.FAKE_NPI_ORG_NAME, npiOrgMap.get(npiOrgDataLookup.FAKE_NPI_NUMBER));
   }
-  
+
   /**
    * Check to see if a Map is empty or null.
    *
