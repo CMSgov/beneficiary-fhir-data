@@ -95,7 +95,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
         new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
@@ -127,8 +127,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit hospiceEob =
         hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class));
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();

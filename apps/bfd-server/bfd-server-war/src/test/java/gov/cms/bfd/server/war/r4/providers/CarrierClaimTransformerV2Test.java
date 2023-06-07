@@ -92,7 +92,7 @@ public class CarrierClaimTransformerV2Test {
         new CarrierClaimTransformerV2(
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
