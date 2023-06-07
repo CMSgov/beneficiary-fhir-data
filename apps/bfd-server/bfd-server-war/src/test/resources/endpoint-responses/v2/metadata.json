@@ -35,23 +35,23 @@
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
-        "documentation" : "The `Substance Abuse and Mental Health Services Administration` (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to `true`, modifies the request to filter out all SAMSHA-related claims from the response.\n`ClaimResponse` doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between `ClaimResponse`\nand `Claim`, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.\n\nExample:\n  - `&excludeSAMHSA=true`"
+        "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n_ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_\nand _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.\n\nExample:\n  - `&excludeSAMHSA=true`"
       }, {
         "name" : "includeTaxNumbers",
         "type" : "string",
-        "documentation" : "Setting this flag to `true`, provides tax number in the EOB transformed data for the response.\nExample:\n   - `&includeTaxNumbers=true`"
+        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\nExample:\n   - `&includeTaxNumbers=true`"
       }, {
         "name" : "isHashed",
         "type" : "string",
-        "documentation" : "Setting this flag to `true`, provides tax number in the EOB transformed data for the response.\nExample:\n  - `&isHashed=true`"
+        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\nExample:\n  - `&isHashed=true`"
       }, {
         "name" : "mbi",
         "type" : "reference",
-        "documentation" : "Fetch `Beneficiary` data using a FHIR `MBI` identifier; an MBI\nrepresents the medicare benficiary ID, or as much of that\ndefined by the FHIR specification as:\n\n`<code>`\n\n`A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),`\n'-', with a length limit of 11 characters.\nThe MBI ID has the following characters for each position:`\n\n`Position 1 - numeric values 1 through 9`\n\n`Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 4 - numeric values 0 through 9`\n\n`Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 7 - numeric values 0 through 9`\n\n`Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 10 - numeric values 0 through 9`\n\n`Position 11 - numeric values 0 through 9`\n\n`</code>`\n\nThe following are all valid values for MBI, and all might\nrepresent the same resource:\n   - `<code>9AB2WW3GR44</code> (unhashed MBI)`\n   - `<code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)`\n   - `<code>1S00E00HA26 (synthetic MBI)</code>`"
+        "documentation" : "Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI\nrepresents the medicare benficiary ID, or as much of that\ndefined by the FHIR specification as:\n\n`<code>`\n\n`A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),\n'-', with a length limit of 11 characters.\nThe MBI ID has the following characters for each position:`\n\n`Position 1 - numeric values 1 through 9`\n\n`Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 4 - numeric values 0 through 9`\n\n`Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 7 - numeric values 0 through 9`\n\n`Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 10 - numeric values 0 through 9`\n\n`Position 11 - numeric values 0 through 9`\n\n`</code>`\n\nThe following are all valid values for MBI, and all might\nrepresent the same resource:\n   - `<code>9AB2WW3GR44</code> (unhashed MBI)`\n   - `<code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)`\n   - `<code>1S00E00HA26 (synthetic MBI)</code>`"
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified <i>DateRange<i/>. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n   - `&service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `&service-date=gt2023-01-02`\n   - `&_service-date=lt2023-05-01`"
+        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n   - `&service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `&service-date=gt2023-01-02`\n   - `&_service-date=lt2023-05-01`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -59,7 +59,7 @@
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of one or more comma-separated claim types to be included in the request;\nwithin BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified\nclaim types will be checked\n\nSupported Claim Type values:\n  - `fiss`\n  - `mcs`\n\nExamples:\n  - `type=fiss,mcs`\n  - `type=fiss`"
+        "documentation" : "A list of one or more comma-separated claim types to be included in the request;\nwithin BFD, the claim types represent an _OR_ inclusion logic meaning any claims matching one of the specified\nclaim types will be checked\n\nSupported Claim Type values:\n  - `fiss`\n  - `mcs`\n\nExamples:\n  - `type=fiss,mcs`\n  - `type=fiss`"
       } ]
     }, {
       "type" : "ClaimResponse",
@@ -78,23 +78,23 @@
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
-        "documentation" : "The `Substance Abuse and Mental Health Services Administration` (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to `true`, modifies the request to filter out all SAMSHA-related claims from the response.\n`ClaimResponse` doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between `ClaimResponse`\nand `Claim`, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.\n\nExample:\n  - `&excludeSAMHSA=true`"
+        "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n_ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_\nand _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.\n\nExample:\n  - `&excludeSAMHSA=true`"
       }, {
         "name" : "includeTaxNumbers",
         "type" : "string",
-        "documentation" : "Setting this flag to `true`, provides tax number in the EOB transformed data for the response.\nExample:\n   - `&includeTaxNumbers=true`"
+        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\nExample:\n   - `&includeTaxNumbers=true`"
       }, {
         "name" : "isHashed",
         "type" : "string",
-        "documentation" : "Setting this flag to `true`, provides tax number in the EOB transformed data for the response.\nExample:\n  - `&isHashed=true`"
+        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\nExample:\n  - `&isHashed=true`"
       }, {
         "name" : "mbi",
         "type" : "reference",
-        "documentation" : "Fetch `Beneficiary` data using a FHIR `MBI` identifier; an MBI\nrepresents the medicare benficiary ID, or as much of that\ndefined by the FHIR specification as:\n\n`<code>`\n\n`A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),`\n'-', with a length limit of 11 characters.\nThe MBI ID has the following characters for each position:`\n\n`Position 1 - numeric values 1 through 9`\n\n`Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 4 - numeric values 0 through 9`\n\n`Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 7 - numeric values 0 through 9`\n\n`Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 10 - numeric values 0 through 9`\n\n`Position 11 - numeric values 0 through 9`\n\n`</code>`\n\nThe following are all valid values for MBI, and all might\nrepresent the same resource:\n   - `<code>9AB2WW3GR44</code> (unhashed MBI)`\n   - `<code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)`\n   - `<code>1S00E00HA26 (synthetic MBI)</code>`"
+        "documentation" : "Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI\nrepresents the medicare benficiary ID, or as much of that\ndefined by the FHIR specification as:\n\n`<code>`\n\n`A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),\n'-', with a length limit of 11 characters.\nThe MBI ID has the following characters for each position:`\n\n`Position 1 - numeric values 1 through 9`\n\n`Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 4 - numeric values 0 through 9`\n\n`Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)`\n\n`Position 7 - numeric values 0 through 9`\n\n`Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)`\n\n`Position 10 - numeric values 0 through 9`\n\n`Position 11 - numeric values 0 through 9`\n\n`</code>`\n\nThe following are all valid values for MBI, and all might\nrepresent the same resource:\n   - `<code>9AB2WW3GR44</code> (unhashed MBI)`\n   - `<code>82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c</code> (hashed)`\n   - `<code>1S00E00HA26 (synthetic MBI)</code>`"
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified <i>DateRange<i/>. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n   - `&service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `&service-date=gt2023-01-02`\n   - `&_service-date=lt2023-05-01`"
+        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n   - `&service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `&service-date=gt2023-01-02`\n   - `&_service-date=lt2023-05-01`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -102,7 +102,7 @@
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of one or more comma-separated claim types to be included in the request;\nwithin BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified\nclaim types will be checked\n\nSupported Claim Type values:\n  - `fiss`\n  - `mcs`\n\nExamples:\n  - `type=fiss,mcs`\n  - `type=fiss`"
+        "documentation" : "A list of one or more comma-separated claim types to be included in the request;\nwithin BFD, the claim types represent an _OR_ inclusion logic meaning any claims matching one of the specified\nclaim types will be checked\n\nSupported Claim Type values:\n  - `fiss`\n  - `mcs`\n\nExamples:\n  - `type=fiss,mcs`\n  - `type=fiss`"
       } ]
     }, {
       "type" : "Coverage",
@@ -121,7 +121,7 @@
       }, {
         "name" : "beneficiary",
         "type" : "reference",
-        "documentation" : "Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that.\nidentity that is known.\n\nIn FHIR, every resource must have a _logical ID_ which is defined by the FHIR specification as:\n`<code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)</code>`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource\n\nExamples:\n  - `<code>123</code> (just a resource's ID)`\n  - `beneficiary/123</code> (a relative identity)`\n  - `<code>http://example.com/beneficiary/123 (an absolute identity)</code>`"
+        "documentation" : "Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that.\nidentity that is known.\n\nIn FHIR, every resource must have a _logical ID_ which is defined by the FHIR specification as:\n`<code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)</code>`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource\n\nExamples:\n  - `<code>123</code> (just a resource's ID)`\n  - `<code>beneficiary/123</code> (a relative identity)`\n  - `<code>http://example.com/beneficiary/123 (an absolute identity)</code>`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -148,7 +148,7 @@
       }, {
         "name" : "includeTaxNumbers",
         "type" : "string",
-        "documentation" : "Setting this flag to `true`, provides tax number in the EOB transformed data for the response.\nExample:\n   - `&includeTaxNumbers=true`"
+        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\nExample:\n   - `&includeTaxNumbers=true`"
       }, {
         "name" : "patient",
         "type" : "reference",
@@ -156,7 +156,7 @@
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's `billable period`.\nfalls within a specified <i>DateRange<i/>. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\nExamples:\n  - `&service-date=gt2023-01-02&service-date=lt2023-05-01`\n  - `&service-date=gt2023-01-02`\n  - `&_service-date=lt2023-05-01`"
+        "documentation" : "Only satisfy the Search request if a claim's _billable period_.\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\nExamples:\n  - `&service-date=gt2023-01-02&service-date=lt2023-05-01`\n  - `&service-date=gt2023-01-02`\n  - `&_service-date=lt2023-05-01`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -164,7 +164,7 @@
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.\nThis is optional and defaults to * (all types);\nSupported Claim Type values:\n   - `carrier`\n   - `inpatient`\n   - `outpatient`\n   - `hha`\n   - `hospice`\n   - `snf`\n   - `dme`\n   - `partd`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n\nExamples:\n   - `type=carrier,inpatient,snf,dme`\n   - `type=outpatient`\n   - `type=*;`"
+        "documentation" : "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.\nThis is optional and defaults to _*_ (all types);\nSupported Claim Type values:\n   - `carrier`\n   - `inpatient`\n   - `outpatient`\n   - `hha`\n   - `hospice`\n   - `snf`\n   - `dme`\n   - `partd`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n\nExamples:\n   - `type=carrier,inpatient,snf,dme`\n   - `type=outpatient`\n   - `type=*;`"
       } ]
     }, {
       "type" : "OperationDefinition",

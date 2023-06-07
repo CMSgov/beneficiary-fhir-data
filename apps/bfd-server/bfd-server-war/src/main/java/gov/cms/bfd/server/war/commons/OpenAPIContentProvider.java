@@ -83,12 +83,12 @@ public final class OpenAPIContentProvider {
        - `_has:Coverage.rfrncyr=2023`""";
 
   /**
-   * Open API short description for /Patient's Part D event data; provides a URI for the `next` set
+   * Open API short description for /Patient's Part D event data; provides a URI for the _next_ set
    * of data.
    */
   public static final String PATIENT_PARTD_CURSOR_SHORT = "The cursor used for result pagination";
   /**
-   * Open API content value for /Patient's Part D event data; provides a URI for the `next` set of
+   * Open API content value for /Patient's Part D event data; provides a URI for the _next_ set of
    * data.
    */
   public static final String PATIENT_PARTD_CURSOR_VALUE =
@@ -119,7 +119,7 @@ public final class OpenAPIContentProvider {
 
     Examples:
       - `<code>123</code> (just a resource's ID)`
-      - `beneficiary/123</code> (a relative identity)`
+      - `<code>beneficiary/123</code> (a relative identity)`
       - `<code>http://example.com/beneficiary/123 (an absolute identity)</code>`""";
 
   /** Open API short description for /ExplanationOfBenefit's EOB claim type parameter. */
@@ -128,7 +128,7 @@ public final class OpenAPIContentProvider {
   public static final String EOB_CLAIM_TYPE_VALUE =
       """
     A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.
-    This is optional and defaults to * (all types);
+    This is optional and defaults to _*_ (all types);
     Supported Claim Type values:
        - `carrier`
        - `inpatient`
@@ -150,12 +150,12 @@ public final class OpenAPIContentProvider {
 
   /** Open API short description for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_SHORT =
-      "Filter claims by the `billable period`. In other words, filter claims whose *through date* fall within the given range";
+      "Filter claims by the _billable period_. In other words, filter claims whose _through date_ fall within the given range";
   /** Open API content value for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_VALUE =
       """
-   Only satisfy the Search request if a claim's `billable period`.
-   falls within a specified <i>DateRange<i/>. A DateRange can include both
+   Only satisfy the Search request if a claim's _billable period_.
+   falls within a specified _DateRange_. A DateRange can include both
    low and high date values, only a low date value, or only a high date value.
    Examples:
      - `&service-date=gt2023-01-02&service-date=lt2023-05-01`
@@ -180,7 +180,7 @@ public final class OpenAPIContentProvider {
   /** Open API content value for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_VALUE =
       """
-   Setting this flag to `true`, provides tax number in the EOB transformed data for the response.
+   Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
    Example:
       - `&includeTaxNumbers=true`""";
 
@@ -189,13 +189,13 @@ public final class OpenAPIContentProvider {
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
       """
-   Fetch `Beneficiary` data using a FHIR `MBI` identifier; an MBI
+   Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI
    represents the medicare benficiary ID, or as much of that
    defined by the FHIR specification as:
 
    `<code>`
 
-   `A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),`
+   `A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
    '-', with a length limit of 11 characters.
    The MBI ID has the following characters for each position:`
 
@@ -237,7 +237,7 @@ public final class OpenAPIContentProvider {
   /** Open API content value for partially aducated claim MBI ID being hashed or not. */
   public static final String PAC_IS_HASHED_VALUE =
       """
-    Setting this flag to `true`, provides tax number in the EOB transformed data for the response.
+    Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
     Example:
       - `&isHashed=true`""";
 
@@ -249,7 +249,7 @@ public final class OpenAPIContentProvider {
   public static final String PAC_CLAIM_TYPE_VALUE =
       """
     A list of one or more comma-separated claim types to be included in the request;
-    within BFD, the claim types represent an <i>OR</i> inclusion logic meaning any claims matching one of the specified
+    within BFD, the claim types represent an _OR_ inclusion logic meaning any claims matching one of the specified
     claim types will be checked
 
     Supported Claim Type values:
@@ -262,15 +262,15 @@ public final class OpenAPIContentProvider {
 
   /** Open API short description for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_SHORT =
-      "If `true`, exclude any (all) SAMHSA-related claims";
+      "If _true_, exclude any (all) SAMHSA-related claims";
   /** Open API content value for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_VALUE =
       """
-    The `Substance Abuse and Mental Health Services Administration` (SAMHSA)
+    The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
     is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
-    Setting this flag to `true`, modifies the request to filter out all SAMSHA-related claims from the response.
-    `ClaimResponse` doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between `ClaimResponse`
-    and `Claim`, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
+    Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
+    _ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_
+    and _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
 
     Example:
       - `&excludeSAMHSA=true`""";
@@ -282,7 +282,7 @@ public final class OpenAPIContentProvider {
   public static final String PAC_SERVICE_DATE_VALUE =
       """
     Only satisfy the Search request if a claim's Date
-    falls within a specified <i>DateRange<i/>. A DateRange can include both
+    falls within a specified _DateRange_. A DateRange can include both
     low and high date values, only a low date value, or only a high date value.
 
     Examples:
