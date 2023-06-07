@@ -860,7 +860,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
             List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "9214", "BONE SCAN")),
-            "2016-01-16T00:00:00-08:00");
+            "2016-01-16T00:00:00+00:00");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 9214");
   }
