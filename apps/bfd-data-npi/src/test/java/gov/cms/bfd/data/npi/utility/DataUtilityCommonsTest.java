@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 /** Data Utility Commons Test. */
 public class DataUtilityCommonsTest {
 
-  /** This returns the correct map for a file header line. */
+  /** This logic is used when parsing the header for the NPI files */
   @Test
-  public void returnCorrectMapForAFileHeaderLine() {
+  public void getsTheMapForTheNpiFileHeaderLine() {
     String[] fields = new String[] {"field1", "field2", "field3", "field4", "field5"};
     Map<String, Integer> mapOfIndexResults = DataUtilityCommons.getIndexNumbers(fields);
 
@@ -21,9 +21,9 @@ public class DataUtilityCommonsTest {
     }
   }
 
-  /** This returns the correct index number for a field in a map of header fields. */
+  /** Tests a map with indexes for each field is returned from getIndexNumbers() when a list of fields is supplied. */
   @Test
-  public void returnsCorrectIndexNumberForAMapOfHeaderFields() {
+  public void getIndexNumbersReturnsAllIndexesWhenPassedMultipleFields() {
 
     String fieldToFind = "field1";
 
@@ -39,9 +39,9 @@ public class DataUtilityCommonsTest {
         DataUtilityCommons.getIndexNumberForField(mapOfIndexResults, fieldToFind));
   }
 
-  /** This returns a exception when a field in a map of header fields cannot be found. */
+  /** This tests makes sure to return a exception when a field in a map of header fields cannot be found. */
   @Test
-  public void returnsExceptionWhenFieldCantBeFoundInMap() {
+  public void getExceptionWhenFieldCantBeFoundInMap() {
 
     Map<String, Integer> mapOfIndexResults =
         new HashMap<String, Integer>() {

@@ -123,7 +123,6 @@ public class NPIOrgLookup {
       }
 
     } catch (IOException e) {
-      LOGGER.error("Unable to read NPI data:" + e.getMessage());
       throw new IOException(e);
     }
 

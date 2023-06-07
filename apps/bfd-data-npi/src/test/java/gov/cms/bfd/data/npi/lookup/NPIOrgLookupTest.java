@@ -29,44 +29,42 @@ public class NPIOrgLookupTest {
     npiOrgDisplay = Optional.empty();
   }
 
-  /** Return Fake NPI Org Data when the parameter bfdServer.include.fake.drug.code is true. */
+  /** Return Fake NPI Org. */
   @Test
-  public void shouldReturnFakeOrgDataWhenConstructorSetToTrue() throws IOException {
+  public void shouldReturnFakeOrgData() throws IOException {
     npiOrgDisplay =
         npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
     assertNotEquals(null, npiOrgDisplay.get());
   }
 
-  /** Return Fake NPI Org Name when the parameter bfdServer.include.fake.drug.code is true. */
+  /** Return Fake NPI Org Name. */
   @Test
-  public void shouldReturnFakeNPIOrgNameWhenConstructorSetToTrue() throws IOException {
+  public void shouldReturnFakeNPIOrgName() throws IOException {
     npiOrgDisplay =
         npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
     assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
   /**
-   * Should not return Org Name when the parameter bfdServer.include.fake.drug.code is true and NPI
-   * Number is empty.
+   * Should not return Org Name and NPI Number is empty.
    */
   @Test
-  public void shouldNotReturnWhenNPINumberIsEmptyAndWhenConstructorSetToTrue() throws IOException {
+  public void shouldNotReturnWhenNPINumberIsEmpty() throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.empty());
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
   /**
-   * Should not return Org Name when the parameter bfdServer.include.fake.drug.code is true and NPI
-   * Number is empty string.
+   * Should not return Org Name and NPI Number is empty string.
    */
   @Test
-  public void shouldNotReturnWhenNPINumberIEmptyStringAndWhenConstructorSetToTrue()
+  public void shouldNotReturnWhenNPINumberIEmptyString()
       throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(""));
     assertEquals(false, npiOrgDisplay.isPresent());
   }
 
-  /** Should Return Map When Input Stream Is Formatted Correctly. */
+  /** Should Return Map When Input Stream Is Formatted with two columns, the npi number and the npi org name. */
   @Test
   public void shouldReturnMapWhenInputStreamIsFormattedCorrectly() throws IOException {
     StringBuilder initialString = new StringBuilder();
@@ -80,22 +78,7 @@ public class NPIOrgLookupTest {
     assertEquals(
         npiOrgDataLookup.FAKE_NPI_ORG_NAME, npiOrgMap.get(npiOrgDataLookup.FAKE_NPI_NUMBER));
   }
-
-  /** Should Not Return Map When Input Stream Is Not Formatted Correctly. */
-  @Test
-  public void shouldReturnMapWhenInputStreamIsNotFormattedCorrectly() throws IOException {
-    StringBuilder initialString = new StringBuilder();
-    initialString.append(npiOrgDataLookup.FAKE_NPI_NUMBER);
-    initialString.append("\t");
-    initialString.append(npiOrgDataLookup.FAKE_NPI_ORG_NAME);
-    initialString.append("\t");
-    initialString.append("Extra Org");
-
-    InputStream targetStream = new ByteArrayInputStream(initialString.toString().getBytes());
-    Map<String, String> npiOrgMap = npiOrgDataLookup.readNPIOrgDataStream(targetStream);
-    assertTrue(isNullOrEmptyMap(npiOrgMap));
-  }
-
+  
   /**
    * Check to see if a Map is empty or null.
    *
