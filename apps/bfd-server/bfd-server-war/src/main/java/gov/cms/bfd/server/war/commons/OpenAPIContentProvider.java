@@ -66,6 +66,7 @@ public final class OpenAPIContentProvider {
     When searching for a Patient's Part D events information, this resource identifies
     the Part D contract value that will be used when determining eligibility.
     Example:
+       - `_has:Coverage.extension=<Part D Contract ID Here>`""";
        - `_has:Coverage.extension=ABCD`""";
 
   /**
