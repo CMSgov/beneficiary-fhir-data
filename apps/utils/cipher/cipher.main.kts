@@ -280,6 +280,8 @@ fun usage() {
         
           encrypt writes a version of source with all secure blocks replaced by cipher blocks to dest.
           
+          rewind writes a version of source with all cipher blocks replaced by secure blocks to dest.
+          
           edit creates a temporary file with cipher blocks converted to secure
             blocks and opens it using the editor defined in EDITOR environment variable.
             If the temp file is modified the SECURE blocks are converted back to CIPHER
@@ -400,6 +402,12 @@ fun main(args: Array<String>) {
             val original = loadText(inputFile)
             val decrypted = original.decrypt(cipher)
             decrypted.store(outputFile.sink())
+        }
+
+        "rewind" -> {
+            val original = loadText(inputFile)
+            val rewound = original.rewind(cipher)
+            rewound.store(outputFile.sink())
         }
 
         "edit" -> {
