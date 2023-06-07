@@ -52,36 +52,22 @@ resource "aws_s3_bucket_acl" "this" {
 }
 
 resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
+  count  = local.create_slis || local.pipeline_variant_configs.ccw.enabled ? 1 : 0
   bucket = aws_s3_bucket.this.id
 
-  # Lambda function notifications for the BFD Pipeline SLIs Lambda
-  dynamic "lambda_function" {
+  dynamic "topic" {
     for_each = {
-      for prefix in ["Incoming", "Done"] : "${prefix}/" => lower(prefix)
-      if local.create_slis # Only create notifications for SLIs lambda if it's being created
+      "Incoming"           = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
+      "Done"               = ["s3:ObjectCreated:*"]
+      "Synthetic/Incoming" = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
+      "Synthetic/Done"     = ["s3:ObjectCreated:*"]
     }
 
     content {
-      events              = ["s3:ObjectCreated:*"]
-      filter_prefix       = lambda_function.key
-      id                  = "${module.bfd_pipeline_slis[0].lambda_name}-${lambda_function.value}"
-      lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+      events        = topic.value
+      filter_prefix = "${topic.key}/"
+      id            = "${aws_sns_topic.s3_events["ccw"].name}-${lower(replace(topic.key, "/", "-"))}"
+      topic_arn     = aws_sns_topic.s3_events["ccw"].arn
     }
   }
-
-  # Lambda function notifications for the BFD Pipeline Scheduler Lambda
-  # TODO: Re-enable under BFD-2670
-  # dynamic "lambda_function" {
-  #   for_each = {
-  #     for prefix in ["Incoming", "Done", "Synthetic/Incoming", "Synthetic/Done"] : "${prefix}/" => lower(replace(prefix, "/", "-"))
-  #     if local.pipeline_variant_configs.ccw.enabled # Only create if CCW pipeline is enabled
-  #   }
-
-  #   content {
-  #     events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-  #     filter_prefix       = lambda_function.key
-  #     id                  = "${module.bfd_pipeline_scheduler[0].lambda_name}-${lambda_function.value}"
-  #     lambda_function_arn = module.bfd_pipeline_scheduler[0].lambda_arn
-  #   }
-  # }
 }
