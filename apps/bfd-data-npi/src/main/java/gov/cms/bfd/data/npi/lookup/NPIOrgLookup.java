@@ -24,26 +24,8 @@ public class NPIOrgLookup {
   /** Hashmap to keep the org names. */
   private Map<String, String> npiOrgHashMap = new HashMap<>();
 
-  /** A field to return the testing org lookup. */
-  private static NPIOrgLookup npiOrgLookupForTesting;
-
   /** A field to return the production org lookup. */
   private static NPIOrgLookup npiOrgLookupForProduction;
-
-  /**
-   * Factory method for creating a {@link NPIOrgLookup } for testing that includes the fake org
-   * name.
-   *
-   * @throws IOException if there is an issue reading file
-   * @return the {@link NPIOrgLookup }
-   */
-  public static NPIOrgLookup createNpiOrgLookupForTesting() throws IOException {
-    if (npiOrgLookupForTesting == null) {
-      npiOrgLookupForTesting = new NPIOrgLookup();
-    }
-
-    return npiOrgLookupForTesting;
-  }
 
   /**
    * Factory method for creating a {@link NPIOrgLookup } for production that does not include the
@@ -52,7 +34,7 @@ public class NPIOrgLookup {
    * @throws IOException if there is an issue reading file
    * @return the {@link NPIOrgLookup }
    */
-  public static NPIOrgLookup createNpiOrgLookupForProduction() throws IOException {
+  public static NPIOrgLookup createNpiOrgLookup() throws IOException {
     if (npiOrgLookupForProduction == null) {
       InputStream npiDataStream = getFileInputStream(App.NPI_RESOURCE);
       npiOrgLookupForProduction = new NPIOrgLookup(npiDataStream);
@@ -62,7 +44,7 @@ public class NPIOrgLookup {
   }
 
   /** Constructs an {@link NPIOrgLookup} used for testing purposes only. */
-  protected NPIOrgLookup() {
+  public NPIOrgLookup() {
     npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
   }
 
@@ -72,7 +54,7 @@ public class NPIOrgLookup {
    * @param npiDataStream input stream for npi org
    * @throws IOException if there is an issue reading file
    */
-  protected NPIOrgLookup(InputStream npiDataStream) throws IOException {
+  public NPIOrgLookup(InputStream npiDataStream) throws IOException {
     npiOrgHashMap = readNPIOrgDataStream(npiDataStream);
   }
 

@@ -52,7 +52,7 @@ public final class DMEClaimTransformerTest {
                 new MetricRegistry(),
                 Optional.of(true),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     assertMatches(claim, eob, Optional.of(true));
   }

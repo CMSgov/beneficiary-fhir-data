@@ -43,7 +43,7 @@ public final class PartDEventTransformerTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     assertMatches(claim, eob);
   }
@@ -136,7 +136,7 @@ public final class PartDEventTransformerTest {
                 new MetricRegistry(),
                 Optional.empty(),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
