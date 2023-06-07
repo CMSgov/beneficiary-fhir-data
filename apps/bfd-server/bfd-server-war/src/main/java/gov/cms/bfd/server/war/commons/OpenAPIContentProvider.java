@@ -93,10 +93,11 @@ public final class OpenAPIContentProvider {
    */
   public static final String PATIENT_PARTD_CURSOR_VALUE =
       """
-     Provide a pagination cursor for processing Patient's Part D events information; this resource identifies
-     a numeric offset into a result set.
-     Example:
-        - `cursor=200`""";
+     Provide a pagination cursor or numeric _offset_ for processing Patient's Part D events information.
+          
+     Examples:
+        - `cursor=200` the first record is the 201st record
+        - `cursor=1000` the first record is the 1001st record""";
 
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_SHORT =
