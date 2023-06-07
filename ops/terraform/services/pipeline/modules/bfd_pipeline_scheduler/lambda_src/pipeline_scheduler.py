@@ -1,5 +1,6 @@
 import calendar
 import itertools
+import json
 import os
 import re
 import sys
@@ -217,7 +218,26 @@ def handler(event: Any, context: Any):
         return
 
     try:
-        event_type_str = record["eventName"]
+        sns_message_json: str = record["Sns"]["Message"]
+        sns_message = json.loads(sns_message_json)
+    except KeyError:
+        print("No message found in SNS notification")
+        return
+    except json.JSONDecodeError:
+        print("SNS message body was not valid JSON")
+        return
+
+    try:
+        s3_event = sns_message["Records"][0]
+    except KeyError:
+        print("Invalid S3 event, no records found")
+        return
+    except IndexError:
+        print("Invalid event notification, no records found")
+        return
+
+    try:
+        event_type_str = s3_event["eventName"]
         event_type: S3EventType
         if S3EventType.OBJECT_CREATED in event_type_str:
             event_type = S3EventType.OBJECT_CREATED
@@ -231,7 +251,7 @@ def handler(event: Any, context: Any):
         return
 
     try:
-        file_key: str = record["s3"]["object"]["key"]
+        file_key: str = s3_event["s3"]["object"]["key"]
         decoded_file_key = unquote(file_key)
     except KeyError as ex:
         print(f"No bucket file found in event notification: {ex}")
