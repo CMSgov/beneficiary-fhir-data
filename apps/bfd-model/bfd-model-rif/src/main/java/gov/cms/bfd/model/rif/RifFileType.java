@@ -16,13 +16,6 @@ public enum RifFileType {
           .map(c -> ((Enum<?>) c))
           .toArray(Enum<?>[]::new),
       null),
-  /** Represents a Medicare Beneficiary Id History rif file. */
-  MEDICARE_BENEFICIARY_ID_HISTORY(
-      MedicareBeneficiaryIdHistoryColumn.class,
-      Arrays.stream(MedicareBeneficiaryIdHistoryColumn.values())
-          .map(c -> ((Enum<?>) c))
-          .toArray(Enum<?>[]::new),
-      MedicareBeneficiaryIdHistoryColumn.BENE_MBI_ID),
   /** Represents a Carrier rif file. */
   CARRIER(
       CarrierClaimColumn.class,

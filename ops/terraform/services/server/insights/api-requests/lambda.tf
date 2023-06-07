@@ -15,7 +15,7 @@ resource "aws_lambda_function" "lambda-function-format-firehose-logs" {
   filename                       = data.archive_file.zip-archive-format-firehose-logs.output_path
   handler                        = "bfd-cw-to-flattened-json.lambda_handler"
   layers                         = []
-  memory_size                    = 128
+  memory_size                    = 256
   package_type                   = "Zip"
   reserved_concurrent_executions = -1
   role                           = aws_iam_role.iam-role-firehose-lambda.arn
