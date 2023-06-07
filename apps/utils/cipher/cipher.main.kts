@@ -79,6 +79,28 @@ class ParseException(message: String) : Exception(message) {
     }
 }
 
+class CipherCache private constructor(private val map: PersistentMap<String, ByteString>) {
+    constructor() : this(persistentMapOf())
+
+    fun put(context: ByteString, secureText: ByteString, cipherText: ByteString) =
+        CipherCache(map.put(makeKey(context, secureText), cipherText))
+
+    fun get(context: ByteString, secureText: ByteString): ByteString? = map[makeKey(context, secureText)]
+
+    private fun makeKey(context: ByteString, secureText: ByteString): String {
+        val newLineString = "\n".encodeUtf8()
+        val source = context.toBuffer()
+        var newLine = source.indexOf(newLineString)
+        while (newLine >= 0) {
+            source.skip(newLine + newLineString.size)
+            newLine = source.indexOf(newLineString)
+        }
+        val keyPrefix = source.readUtf8()
+        val keySuffix = secureText.utf8()
+        return "$keyPrefix:$keySuffix"
+    }
+}
+
 fun ByteString.toBuffer(): BufferedSource =
     Buffer().readFrom(ByteArrayInputStream(toByteArray()))
 
@@ -151,19 +173,26 @@ class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
 class Text(private val bytes: ByteString) {
     fun store(sink: Sink) = sink.buffer().use { it.write(bytes) }
 
-    fun encrypt(cipher: KmsCipher): Text = transform(Span.Secure, Span.Cipher, cipher::encrypt)
-
-    fun encrypt(cipher: KmsCipher, secureBlocks: PersistentMap<ByteString, ByteString>): Text =
-        transform(Span.Secure, Span.Cipher) {
-            secureBlocks[it] ?: cipher.encrypt(it)
+    fun encrypt(cipher: KmsCipher): Text =
+        transform(Span.Secure, Span.Cipher) { _: ByteString, secureText: ByteString ->
+            cipher.encrypt(secureText)
         }
 
-    fun decrypt(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Text, cipher::decrypt)
+    fun encrypt(cipher: KmsCipher, cipherCache: CipherCache): Text =
+        transform(Span.Secure, Span.Cipher) { context: ByteString, secureText: ByteString ->
+            cipherCache.get(context, secureText) ?: cipher.encrypt(secureText)
+        }
 
-    fun rewind(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Secure, cipher::decrypt)
+    fun decrypt(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Text) { _: ByteString, secureText: ByteString ->
+        cipher.decrypt(secureText)
+    }
 
-    fun extractSecureBlocks(cipher: KmsCipher): PersistentMap<ByteString, ByteString> {
-        var map = persistentMapOf<ByteString, ByteString>()
+    fun rewind(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Secure) { _: ByteString, secureText: ByteString ->
+        cipher.decrypt(secureText)
+    }
+
+    fun extractCipherCache(cipher: KmsCipher): CipherCache {
+        var cache = CipherCache()
         bytes.toBuffer().use { source ->
             var block = source.nextBlock()
             while (block != null) {
@@ -174,18 +203,18 @@ class Text(private val bytes: ByteString) {
                     }
                     val cipherText = nextBlock.bytes
                     val plainText = cipher.decrypt(cipherText)
-                    map = map.put(plainText, cipherText)
+                    cache = cache.put(block.bytes, plainText, cipherText)
                 }
                 block = source.nextBlock()
             }
         }
-        return map
+        return cache
     }
 
     private fun transform(
         from: Span,
         to: Span,
-        op: (ByteString) -> ByteString
+        op: (ByteString, ByteString) -> ByteString
     ): Text {
         val buffer = Buffer()
         bytes.toBuffer().use { source ->
@@ -202,7 +231,7 @@ class Text(private val bytes: ByteString) {
                         throw ParseException.noEndToken(b.endToken)
                     }
                     val fromText = nextBlock.bytes
-                    val toText = op(fromText)
+                    val toText = op(b.bytes, fromText)
                     buffer.write(b.bytes)
                     buffer.write(to.start.bytes)
                     buffer.write(toText)
@@ -380,6 +409,7 @@ fun main(args: Array<String>) {
             tempFile.deleteOnExit()
             try {
                 val original = loadText(inputFile)
+                val cipherCache = original.extractCipherCache(cipher)
                 val rewound = original.rewind(cipher)
                 rewound.store(tempFile.sink())
                 ProcessBuilder(listOf(editor, tempFile.path))
@@ -394,8 +424,7 @@ fun main(args: Array<String>) {
                 } else if (modified == rewound) {
                     println("File unchanged - leaving original unchanged.")
                 } else {
-                    val oldSecureBlocks = original.extractSecureBlocks(cipher)
-                    val encrypted = modified.encrypt(cipher, oldSecureBlocks)
+                    val encrypted = modified.encrypt(cipher, cipherCache)
                     encrypted.store(outputFile.sink())
                 }
             } finally {
