@@ -171,11 +171,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
+    if (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers()) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
@@ -666,7 +663,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
 
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
@@ -852,10 +849,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM "BeneficiariesHistory" WHERE "hicn" =
      * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON matching_benes."beneficiaryId"
      * = "Beneficiaries"."beneficiaryId" LEFT JOIN "BeneficiariesHistory" ON
-     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT JOIN
-     * "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" =
-     * "MedicareBeneficiaryIdHistory"."beneficiaryId";
-     *
+     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId"
      * ... with the returned columns and JOINs being dynamic, depending on IncludeIdentifiers.
      *
      * In lieu of that, we run two queries: one to find HICN/MBI matches in BeneficiariesHistory,
@@ -906,11 +900,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
+    if (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers()) {
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
