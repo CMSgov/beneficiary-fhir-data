@@ -10,7 +10,6 @@ import com.amazonaws.encryptionsdk.CryptoResult
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
 import kotlinx.collections.immutable.PersistentMap
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import okio.*
 import okio.ByteString.Companion.EMPTY
@@ -29,7 +28,9 @@ import kotlin.io.use
 import kotlin.system.exitProcess
 
 
-val AppName = "cipher"
+val APP_NAME = "cipher"
+val DEFAULT_REGION = "us-east-1"
+val DEFAULT_EDITOR = "vi"
 
 enum class Token(val bytes: ByteString) {
     SecureStart("<<SECURE>>".encodeUtf8()),
@@ -49,33 +50,54 @@ enum class Token(val bytes: ByteString) {
     val text: String by lazy {
         bytes.utf8()
     }
+
+    val isEnd: Boolean by lazy {
+        when (this) {
+            SecureEnd -> true
+            CipherEnd -> true
+            else -> false
+        }
+    }
 }
 
-val realTokens = persistentListOf(Token.SecureStart, Token.SecureEnd, Token.CipherStart, Token.CipherEnd)
+enum class Span(val start: Token, val end: Token) {
+    Secure(Token.SecureStart, Token.SecureEnd),
+    Cipher(Token.CipherStart, Token.CipherEnd),
+    Text(Token.None, Token.None)
+}
+
+data class Block(val endToken: Token, val bytes: ByteString) {
+    override fun toString(): String = "($endToken: ${bytes.utf8()})"
+}
+
+class UsageException(message: String) : Exception(message)
+
+class ParseException(message: String) : Exception(message) {
+    companion object {
+        fun noStartToken(token: Token) = ParseException("end token has no start token: ${token.text}")
+        fun noEndToken(token: Token) = ParseException("start token has no end token: ${token.text}")
+    }
+}
 
 fun ByteString.toBuffer(): BufferedSource =
     Buffer().readFrom(ByteArrayInputStream(toByteArray()))
 
-data class BoundedBlock(val endToken: Token, val bytes: ByteString) {
-    override fun toString(): String {
-        return "($endToken: ${bytes.utf8()})"
-    }
-}
-
-fun BufferedSource.nextToken(): BoundedBlock? {
+fun BufferedSource.nextBlock(): Block? {
     if (this.exhausted()) {
         return null
     }
 
     var firstIndex = -1L
     var firstToken = Token.None
-    for (token in realTokens) {
-        val index = this.indexOf(token.bytes)
-        if (index >= 0) {
-            if (firstIndex < 0 || index < firstIndex) {
-                firstIndex = index
-                firstToken = token
+    for (token in Token.values()) {
+        if (token.bytes.size > 0) {
+            val index = this.indexOf(token.bytes)
+            if (index >= 0) {
+                if (firstIndex < 0 || index < firstIndex) {
+                    firstIndex = index
+                    firstToken = token
 //                println("$index $token")
+                }
             }
         }
     }
@@ -83,14 +105,14 @@ fun BufferedSource.nextToken(): BoundedBlock? {
 
     val result = if (firstIndex < 0L) {
         val bytes = this.readByteString()
-        BoundedBlock(Token.None, bytes)
+        Block(Token.None, bytes)
     } else if (firstIndex == 0L) {
         this.skip(firstToken.bytes.size.toLong())
-        BoundedBlock(firstToken, EMPTY)
+        Block(firstToken, EMPTY)
     } else {
         val bytes = this.readByteString(firstIndex)
         this.skip(firstToken.bytes.size.toLong())
-        BoundedBlock(firstToken, bytes)
+        Block(firstToken, bytes)
     }
 //    println(result)
     return result
@@ -104,7 +126,7 @@ class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
         .defaultRegion(Region.of(region))
         .buildStrict(keyArn)
 
-    private val context = Collections.singletonMap("Application", AppName)
+    private val context = Collections.singletonMap("Application", APP_NAME)
 
     private fun createKmsClient(region: Region): KmsClient {
         val builder = KmsClient.builder().region(region)
@@ -126,80 +148,74 @@ class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
     }
 }
 
-class ParseException(message: String) : Exception(message)
-
 class Text(private val bytes: ByteString) {
     fun store(sink: Sink) = sink.buffer().use { it.write(bytes) }
 
-    fun encrypt(cipher: KmsCipher): Text =
-        transform(Token.SecureStart, Token.SecureEnd, Token.CipherStart, Token.CipherEnd, cipher::encrypt)
+    fun encrypt(cipher: KmsCipher): Text = transform(Span.Secure, Span.Cipher, cipher::encrypt)
 
     fun encrypt(cipher: KmsCipher, secureBlocks: PersistentMap<ByteString, ByteString>): Text =
-        transform(Token.SecureStart, Token.SecureEnd, Token.CipherStart, Token.CipherEnd) {
+        transform(Span.Secure, Span.Cipher) {
             secureBlocks[it] ?: cipher.encrypt(it)
         }
 
-    fun decrypt(cipher: KmsCipher): Text =
-        transform(Token.CipherStart, Token.CipherEnd, Token.None, Token.None, cipher::decrypt)
+    fun decrypt(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Text, cipher::decrypt)
 
-    fun rewind(cipher: KmsCipher): Text =
-        transform(Token.CipherStart, Token.CipherEnd, Token.SecureStart, Token.SecureEnd, cipher::decrypt)
+    fun rewind(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Secure, cipher::decrypt)
 
     fun extractSecureBlocks(cipher: KmsCipher): PersistentMap<ByteString, ByteString> {
         var map = persistentMapOf<ByteString, ByteString>()
         bytes.toBuffer().use { source ->
-            var block = source.nextToken()
+            var block = source.nextBlock()
             while (block != null) {
                 if (block.endToken == Token.CipherStart) {
-                    val nextBlock = source.nextToken()
+                    val nextBlock = source.nextBlock()
                     if (nextBlock?.endToken != Token.CipherEnd) {
-                        throw ParseException("unclosed ${block.endToken.text}")
+                        throw ParseException.noEndToken(block.endToken)
                     }
                     val cipherText = nextBlock.bytes
                     val plainText = cipher.decrypt(cipherText)
                     map = map.put(plainText, cipherText)
                 }
-                block = source.nextToken()
+                block = source.nextBlock()
             }
         }
         return map
     }
 
     private fun transform(
-        fromStartToken: Token,
-        fromEndToken: Token,
-        toStartToken: Token,
-        toEndToken: Token,
+        from: Span,
+        to: Span,
         op: (ByteString) -> ByteString
     ): Text {
         val buffer = Buffer()
         bytes.toBuffer().use { source ->
-            var block: BoundedBlock? = source.nextToken()
+            var block: Block? = source.nextBlock()
             while (block != null) {
-                val b: BoundedBlock = block!!
-                var requiredNextToken: Token? = null
-                if (b.endToken == fromStartToken) {
-                    val nextBlock = source.nextToken()
-                    if (nextBlock?.endToken != fromEndToken) {
-                        throw ParseException("unclosed ${b.endToken.text}")
+                val b: Block = block!!
+                if (b.endToken.isEnd) {
+                    throw ParseException.noStartToken(b.endToken)
+                }
+                var requiredNextToken: Token?
+                if (b.endToken == from.start) {
+                    val nextBlock = source.nextBlock()
+                    if (nextBlock?.endToken != from.end) {
+                        throw ParseException.noEndToken(b.endToken)
                     }
                     val fromText = nextBlock.bytes
                     val toText = op(fromText)
                     buffer.write(b.bytes)
-                    buffer.write(toStartToken.bytes)
+                    buffer.write(to.start.bytes)
                     buffer.write(toText)
-                    buffer.write(toEndToken.bytes)
+                    buffer.write(to.end.bytes)
                     requiredNextToken = null
                 } else {
                     buffer.write(b.bytes)
                     buffer.write(b.endToken.bytes)
                     requiredNextToken = b.endToken.endsWith
                 }
-                block = source.nextToken()
-                if (requiredNextToken != null) {
-                    if (block == null || block!!.endToken != requiredNextToken) {
-                        throw ParseException("unclosed ${requiredNextToken.text}")
-                    }
+                block = source.nextBlock()
+                if (requiredNextToken != null && block?.endToken != requiredNextToken) {
+                    throw ParseException.noEndToken(requiredNextToken)
                 }
             }
         }
@@ -226,7 +242,7 @@ fun loadText(file: File): Text = loadText(file.source())
 fun usage() {
     println(
         """
-        usage: $AppName [options] cat|encrypt|decrypt|edit source [dest]
+        usage: $APP_NAME [options] cat|encrypt|decrypt|edit source [dest]
         
         If dest is omitted the source file will be overwritten.
         
@@ -240,14 +256,20 @@ fun usage() {
           blocks and opens it using the editor defined in EDITOR environment variable.
           If the temp file is modified the SECURE blocks are converted back to CIPHER
           blocks the result is written to the dest file.
-          Default editor is vi.
+          Default editor is $DEFAULT_EDITOR.
 
         Note: Both cat and decrypt remove the secure text delimiters so they are not reversible.
         
-        options:
-        --key arg      : KMS key ARN (REQUIRED)
-        --endpoint uri : Localhost endpoint for simulated KMS
+        Options:
+        --key ARN      : KMS key ARN (REQUIRED unless CIPHER_KEY is defined).
+        --endpoint URI : Localhost endpoint URI for localstack KMS.
+        --region name  : AWS region name.  Defaults to $DEFAULT_REGION.
         
+        Environment variables:
+        EDITOR           Editor used in edit mode.  Defaults to $DEFAULT_EDITOR.
+        CIPHER_KEY       Same as --key
+        CIPHER_ENDPOINT  Same as --endpoint
+        CIPHER_REGION    Same as --region
     """.trimIndent()
     )
 }
@@ -262,15 +284,11 @@ data class Config(
     val editor: String
 )
 
-class UsageException(message: String) : Exception(message)
-
 fun parseArgs(args: Array<String>): Config {
-    var key: String? = null
-    var endpoint: String? = null
-    var region: String = "us-east-1"
-    var mode: String? = null
-    var input: String? = null
-    var output: String? = null
+    var key: String? = System.getenv("CIPHER_KEY")
+    var endpoint: String? = System.getenv("CIPHER_ENDPOINT")
+    var region: String = System.getenv("CIPHER_REGION") ?: DEFAULT_REGION
+    val editor = System.getenv("EDITOR") ?: DEFAULT_EDITOR
 
     var i = 0
     while (i < args.size && args[i].startsWith("--")) {
@@ -297,21 +315,20 @@ fun parseArgs(args: Array<String>): Config {
         i += 1
     }
 
+    if (key == null) {
+        throw UsageException("required --key or CIPHER_KEY not provided")
+    }
+
     val remaining = args.size - i
     if (remaining < 2 || remaining > 3) {
         throw UsageException("expected 2 or 3 arguments")
-    } else {
-        mode = args[i++]
-        input = args[i++]
-        output = if (i < args.size) args[i] else input
     }
 
-    if (key == null) {
-        throw UsageException("required --key not provided")
-    }
+    val mode = args[i++]
+    val input = args[i++]
+    val output = if (i < args.size) args[i] else input
 
-    val editor = System.getenv("EDITOR") ?: "vi"
-    return Config(key!!, endpoint, region, mode!!, input!!, output!!, editor)
+    return Config(key, endpoint, region, mode, input, output, editor)
 }
 
 fun main(args: Array<String>) {
