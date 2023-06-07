@@ -69,9 +69,12 @@ public class NPIOrgLookupTest {
   /** Should Return Map When Input Stream Is Formatted Correctly. */
   @Test
   public void shouldReturnMapWhenInputStreamIsFormattedCorrectly() throws IOException {
-    String initialString =
-        npiOrgDataLookup.FAKE_NPI_NUMBER + "\t" + npiOrgDataLookup.FAKE_NPI_ORG_NAME;
-    InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
+    StringBuilder initialString = new StringBuilder();
+    initialString.append(npiOrgDataLookup.FAKE_NPI_NUMBER);
+    initialString.append("\t");
+    initialString.append(npiOrgDataLookup.FAKE_NPI_ORG_NAME);
+
+    InputStream targetStream = new ByteArrayInputStream(initialString.toString().getBytes());
     Map<String, String> npiOrgMap = npiOrgDataLookup.readNPIOrgDataStream(targetStream);
     assertFalse(isNullOrEmptyMap(npiOrgMap));
     assertEquals(
@@ -81,13 +84,14 @@ public class NPIOrgLookupTest {
   /** Should Not Return Map When Input Stream Is Not Formatted Correctly. */
   @Test
   public void shouldReturnMapWhenInputStreamIsNotFormattedCorrectly() throws IOException {
-    String initialString =
-        npiOrgDataLookup.FAKE_NPI_NUMBER
-            + "\t"
-            + npiOrgDataLookup.FAKE_NPI_ORG_NAME
-            + "\t"
-            + "Extra Org";
-    InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
+    StringBuilder initialString = new StringBuilder();
+    initialString.append(npiOrgDataLookup.FAKE_NPI_NUMBER);
+    initialString.append("\t");
+    initialString.append(npiOrgDataLookup.FAKE_NPI_ORG_NAME);
+    initialString.append("\t");
+    initialString.append("Extra Org");
+
+    InputStream targetStream = new ByteArrayInputStream(initialString.toString().getBytes());
     Map<String, String> npiOrgMap = npiOrgDataLookup.readNPIOrgDataStream(targetStream);
     assertTrue(isNullOrEmptyMap(npiOrgMap));
   }
