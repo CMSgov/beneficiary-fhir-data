@@ -48,10 +48,12 @@ public final class OpenAPIContentProvider {
   public static final String PATIENT_LAST_UPDATED_VALUE =
       """
     Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
-    A _DateRange_ can be defined by providing:
-      - both low and high date like `&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01`
-      - a _low_ date value like `&_lastUpdated=gt2023-01-02`
-      - a _high_ date value like `&_lastUpdated=lt2023-05-01`""";
+    A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
+    
+    Examples:
+      - `&_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
+      - `&_lastUpdated=gt2023-01-02` defines a range between the provided date and today
+      - `&_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date""";
 
   /** Open API content short description for /Patient's Part D contract ID to be used. */
   public static final String PATIENT_PARTD_CONTRACT_SHORT = "Part D coverage contract identifier";
