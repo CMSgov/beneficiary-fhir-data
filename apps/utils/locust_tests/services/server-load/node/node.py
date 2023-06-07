@@ -134,6 +134,7 @@ def handler(event, context):
             f"--master-port={invoke_event.locust_port}",
             "--headless",
             "--only-summary",
+            "--tags=\"eob patient\""
         ],
         cwd=locust_tests_dir,
         stderr=subprocess.STDOUT,

@@ -129,9 +129,7 @@ def _main():
             "--csv=load",
             "--headless",
         ]
-        + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
-        + ([f"--tags=\"{locust_tags}\""] if locust_tags else [])
-        + ([f"--exclude-tags={locust_tags_excluded}"] if locust_tags_excluded else []),
+        + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else []),
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
