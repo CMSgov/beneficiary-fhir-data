@@ -284,7 +284,7 @@ fun usage() {
           
           edit creates a temporary file with cipher blocks converted to secure
             blocks and opens it using the editor defined in EDITOR environment variable.
-            If the temp file is modified the SECURE blocks are converted back to CIPHER
+            If the temp file is modified the secure blocks are converted back to cipher
             blocks the result is written to the dest file.
             Default editor is $DEFAULT_EDITOR.
 
