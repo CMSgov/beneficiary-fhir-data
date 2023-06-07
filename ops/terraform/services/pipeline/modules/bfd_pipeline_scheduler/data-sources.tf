@@ -8,6 +8,10 @@ data "aws_s3_bucket" "etl" {
   bucket = var.etl_bucket_id
 }
 
+data "aws_sns_topic" "this" {
+  name = var.s3_events_sns_topic_name
+}
+
 data "archive_file" "lambda_src" {
   type        = "zip"
   output_path = "${path.module}/lambda_src/bfd_pipeline_scheduler.zip"

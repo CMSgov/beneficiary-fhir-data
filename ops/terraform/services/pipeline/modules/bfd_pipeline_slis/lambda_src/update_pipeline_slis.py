@@ -1,4 +1,5 @@
 import calendar
+import json
 import os
 import re
 from dataclasses import dataclass
@@ -8,9 +9,10 @@ from typing import Any, Type
 from urllib.parse import unquote
 
 import boto3
-from backoff_retry import backoff_retry
 from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
+
+from backoff_retry import backoff_retry
 from cw_metrics import (
     MetricDataQuery,
     gen_all_dimensioned_metrics,
@@ -31,6 +33,14 @@ BOTO_CONFIG = Config(
         "mode": "adaptive",
     },
 )
+
+
+class S3EventType(str, Enum):
+    """Represents the types of S3 events that this Lambda is invoked by and supports. The value of
+    each Enum is a substring that is matched for on the "eventName" property of an invocation
+    event"""
+
+    OBJECT_CREATED = "ObjectCreated"
 
 
 class PipelineDataStatus(str, Enum):
@@ -160,7 +170,38 @@ def handler(event: Any, context: Any):
         return
 
     try:
-        event_time_iso: str = record["eventTime"]
+        sns_message_json: str = record["Sns"]["Message"]
+        sns_message = json.loads(sns_message_json)
+    except KeyError:
+        print("No message found in SNS notification")
+        return
+    except json.JSONDecodeError:
+        print("SNS message body was not valid JSON")
+        return
+
+    try:
+        s3_event = sns_message["Records"][0]
+    except KeyError:
+        print("Invalid S3 event, no records found")
+        return
+    except IndexError:
+        print("Invalid event notification, no records found")
+        return
+
+    try:
+        event_type_str = s3_event["eventName"]
+        event_type: S3EventType
+        if S3EventType.OBJECT_CREATED in event_type_str:
+            event_type = S3EventType.OBJECT_CREATED
+        else:
+            print(f"Event type {event_type_str} is unsupported. Exiting...")
+            return
+    except KeyError as ex:
+        print(f"The incoming event record did not contain the type of S3 event: {ex}")
+        return
+
+    try:
+        event_time_iso: str = s3_event["eventTime"]
         event_timestamp = datetime.fromisoformat(event_time_iso.removesuffix("Z"))
     except KeyError as exc:
         print(f'Record did not contain any key with "eventTime": {exc}')
@@ -170,12 +211,17 @@ def handler(event: Any, context: Any):
         return
 
     try:
-        file_key: str = record["s3"]["object"]["key"]
+        file_key: str = s3_event["s3"]["object"]["key"]
+        decoded_file_key = unquote(file_key)
     except KeyError as exc:
         print(f"No bucket file found in event notification: {exc}")
         return
 
-    decoded_file_key = unquote(file_key)
+    # Log the various bits of data extracted from the invoking event to aid debugging:
+    print(f"Invoked at: {datetime.utcnow().isoformat()} UTC")
+    print(f"S3 Object Key: {decoded_file_key}")
+    print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
+
     status_group_str = "|".join([e.value for e in PipelineDataStatus])
     rif_types_group_str = "|".join([e.value for e in RifFileType])
     # The incoming file's key should match an expected format, as follows:
@@ -188,6 +234,12 @@ def handler(event: Any, context: Any):
         pipeline_data_status = PipelineDataStatus(match.group(1).lower())
         group_timestamp = match.group(2)
         rif_file_type = RifFileType(match.group(3).lower())
+
+        # Log data extracted from S3 object key now that we know this is a valid RIF file within a
+        # valid data load
+        print(f"RIF type: {rif_file_type.name}")
+        print(f"Load Status: {pipeline_data_status.name}")
+        print(f"Data Load: {group_timestamp}")
 
         rif_type_dimension = {"data_type": rif_file_type.name.lower()}
         group_timestamp_dimension = {"group_timestamp": group_timestamp}
