@@ -1,102 +1,111 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>gov.cms.bfd</groupId>
-		<artifactId>bfd-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>bfd-server-parent</artifactId>
-	<packaging>pom</packaging>
+    <artifactId>bfd-server-parent</artifactId>
+    <packaging>pom</packaging>
 
-	<description>
-		A parent POM for the bfd-server-* projects, which provide a FHIR-compliant API for querying Medicare beneficiary data.
-	</description>
+    <description>
+        A parent POM for the bfd-server-* projects, which provide a FHIR-compliant API for querying Medicare beneficiary
+        data.
+    </description>
 
-	<properties>
-		<hapi-fhir.version>6.4.4</hapi-fhir.version>
-	</properties>
+    <properties>
+        <!-- Configure the BFD Server, as it will be run via the exec
+            plugin. These settings are pulled out as POM properties so that they can
+            be adjusted via profiles. -->
+        <its.bfdServer.jvmargs>-Xmx4g</its.bfdServer.jvmargs>
 
-	<modules>
-		<module>bfd-server-launcher-sample</module>
-		<module>bfd-server-launcher</module>
-		<module>bfd-server-shared-utils</module>
-		<module>bfd-server-war</module>
-	</modules>
+        <!-- Should work out of the box on Linux, but likely needs to be customized
+            (in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
+            for details. -->
+        <bash.exe>bash</bash.exe>
+    </properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- Provides the JPA entities used to represent the Blue Button API 
-					backend's data in the database. -->
-				<groupId>gov.cms.bfd</groupId>
-				<artifactId>bfd-model-rif</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Provides the JPA entities used to represent the Blue Button API
-					backend's data in the database. -->
-				<groupId>gov.cms.bfd</groupId>
-				<artifactId>bfd-model-rda</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+    <modules>
+        <module>bfd-server-launcher-sample</module>
+        <module>bfd-server-launcher</module>
+        <module>bfd-server-shared-utils</module>
+        <module>bfd-server-war</module>
+    </modules>
 
-			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
-				<version>4.0.1</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-	<!-- Provides sample data used in tests. -->
-				<groupId>gov.cms.bfd</groupId>
-				<artifactId>bfd-model-rif-samples</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<!-- Used to load sample data in tests. -->
-				<groupId>gov.cms.bfd</groupId>
-				<artifactId>bfd-pipeline-rif-load</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency> 
-				<groupId>gov.cms.bfd.data.fda.utility</groupId> 
-				<artifactId>bfd-data-fda</artifactId> 
-				<version>1.0-SNAPSHOT</version> 
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Provides the JPA entities used to represent the Blue Button API
+                    backend's data in the database. -->
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-rif</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides the JPA entities used to represent the Blue Button API
+                    backend's data in the database. -->
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-rda</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-	<dependencies>
-		<dependency>
-			<!-- Provides utility code and dependencies that are shared by (more or
-				less) all of the other BFD modules. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-shared-utils</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency> 
-			<groupId>gov.cms.bfd.data.npi</groupId>
-			<artifactId>bfd-data-npi</artifactId> 
-			<version>1.0-SNAPSHOT</version> 
-		</dependency>
-	</dependencies>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>4.0.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <!-- Provides sample data used in tests. -->
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-rif-samples</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!-- Used to load sample data in tests. -->
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-pipeline-rif-load</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>gov.cms.bfd.data.fda.utility</groupId>
+                <artifactId>bfd-data-fda</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
-					<configuration>
-						<attachClasses>true</attachClasses>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+    <dependencies>
+        <dependency>
+            <!-- Provides utility code and dependencies that are shared by (more or
+                less) all of the other BFD modules. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-shared-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd.data.npi</groupId>
+            <artifactId>bfd-data-npi</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <configuration>
+                        <attachClasses>true</attachClasses>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

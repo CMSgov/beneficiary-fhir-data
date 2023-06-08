@@ -1,55 +1,50 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>gov.cms.bfd</groupId>
-		<artifactId>bfd-model-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-model-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>bfd-model-codegen</artifactId>
-	<packaging>jar</packaging>
+    <artifactId>bfd-model-codegen</artifactId>
+    <packaging>jar</packaging>
 
-	<description>
-		Provides a javac annotation processor that automagically generates RIF model 
-		classes and parsing code based on field layouts defined in Excel.
-	</description>
+    <description>
+        Provides a javac annotation processor that automagically generates RIF model
+        classes and parsing code based on field layouts defined in Excel.
+    </description>
 
-	<properties>
-		<auto-service.version>1.0.1</auto-service.version>
-	</properties>
+    <dependencies>
+        <dependency>
+            <!-- The annotations are in a separate project, to avoid forcing all of
+                this project's dependencies onto codegen users. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-codegen-annotations</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-	<dependencies>
-		<dependency>
-			<!-- The annotations are in a separate project, to avoid forcing all of 
-				this project's dependencies onto codegen users. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codegen-annotations</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <!-- Provides the Codebook XML and unmarshalling code for reading it. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-codebook-extractor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-		<dependency>
-			<!-- Provides the Codebook XML and unmarshalling code for reading it. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codebook-extractor</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<!-- Automatically generates META-INF/services files for service classes 
-				annotated with `@AutoService`. -->
-			<groupId>com.google.auto.service</groupId>
-			<artifactId>auto-service</artifactId>
-			<version>${auto-service.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<!-- Makes programmatically generating Java sources much simpler. -->
-			<groupId>com.squareup</groupId>
-			<artifactId>javapoet</artifactId>
-			<version>${javapoet.version}</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <!-- Automatically generates META-INF/services files for service classes
+                annotated with `@AutoService`. -->
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto-service.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- Makes programmatically generating Java sources much simpler. -->
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

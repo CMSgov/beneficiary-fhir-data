@@ -29,7 +29,6 @@ import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -207,7 +206,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     HHAClaim claim =
         loadedRecords.stream()
@@ -264,7 +263,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     HospiceClaim claim =
         loadedRecords.stream()
@@ -321,7 +320,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     InpatientClaim claim =
         loadedRecords.stream()
@@ -378,7 +377,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     OutpatientClaim claim =
         loadedRecords.stream()
@@ -526,7 +525,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     SNFClaim claim =
         loadedRecords.stream()
@@ -602,7 +601,6 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -624,7 +622,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     CarrierClaim carrierClaim =
         loadedRecords.stream()
@@ -742,7 +740,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 
@@ -757,7 +755,6 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -794,7 +791,6 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         combinedResults.size());
 
@@ -1050,7 +1046,6 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -1067,7 +1062,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     /*
      * Verify that each of the expected claims (one for every claim type) is present
@@ -1193,7 +1188,6 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -1202,7 +1196,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     /*
      * Verify that only the first and last links exist as there are no previous or

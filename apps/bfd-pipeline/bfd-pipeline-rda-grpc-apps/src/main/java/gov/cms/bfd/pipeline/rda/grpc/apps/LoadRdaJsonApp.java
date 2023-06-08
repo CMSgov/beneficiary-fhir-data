@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.apps;
 
-import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.REGION_DEFAULT;
-
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.zaxxer.hikari.HikariDataSource;
@@ -191,7 +189,7 @@ public class LoadRdaJsonApp {
 
       sinkTypePreference =
           options
-              .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference::valueOf)
+              .enumOption("job.sinkType", AbstractRdaLoadJob.SinkTypePreference.class)
               .orElse(AbstractRdaLoadJob.SinkTypePreference.PRE_PROCESSOR);
       writeThreads = options.intValue("job.writeThreads", 1);
       batchSize = options.intValue("job.batchSize", 100);
@@ -199,9 +197,7 @@ public class LoadRdaJsonApp {
       rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
-      s3Region =
-          Optional.of(
-              Region.of(options.stringOption("s3.region").orElse(REGION_DEFAULT.toString())));
+      s3Region = options.parsedOption("s3.region", Region.class, Region::of);
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
     }

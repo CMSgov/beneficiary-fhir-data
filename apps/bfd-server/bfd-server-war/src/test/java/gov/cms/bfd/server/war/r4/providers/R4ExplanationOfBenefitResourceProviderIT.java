@@ -27,7 +27,6 @@ import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -106,7 +105,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         PipelineTestUtils.get().getPipelineApplicationState().getMetrics();
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
@@ -448,7 +447,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         new OutpatientClaimTransformerV2(
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
     assertEobEquals(outpatientClaimTransformerV2.transform(claim), eob);
   }
 
@@ -657,7 +656,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -839,7 +837,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
@@ -899,7 +896,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         loadedRecords.stream()
             .filter(r -> !(r instanceof Beneficiary))
             .filter(r -> !(r instanceof BeneficiaryHistory))
-            .filter(r -> !(r instanceof MedicareBeneficiaryIdHistory))
             .count(),
         searchResults.getTotal());
 
