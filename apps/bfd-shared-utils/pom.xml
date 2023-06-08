@@ -1,46 +1,50 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>gov.cms.bfd</groupId>
-		<artifactId>bfd-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>bfd-shared-utils</artifactId>
-	<packaging>jar</packaging>
+    <artifactId>bfd-shared-utils</artifactId>
+    <packaging>jar</packaging>
 
-	<description>
-		Provides utility code and dependencies that are shared by (more or less) all of the other BFD modules.
-	</description>
+    <description>
+        Provides utility code and dependencies that are shared by (more or less) all of the other BFD modules.
+    </description>
 
-	<dependencies>
-		<dependency>
-			<!-- Just useful. -->
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
+    <dependencies>
+        <dependency>
+            <!-- Just useful. -->
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <!-- Compile time only -->
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- Provides a database schema mechanism. See the DatabaseSchemaManager
+                class. -->
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+			<!-- Used to interact with AWS' SSM service -->
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>ssm</artifactId>
 		</dependency>
-		<!-- Compile time only -->
 		<dependency>
-			<!-- this allows the construction of POJOs without a lot of boilerplate code -->
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager
-				class. -->
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>${flyway.version}</version>
-		</dependency>
-		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
-				 Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+            <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
+                 Java. -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
 
 		<!-- Provide the api and implementation for XML bind which are used by many BFD modules. -->
 		<dependency>
@@ -51,40 +55,56 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
-    
-		<!-- Testing -->
+
 		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
+			<!-- Used to parse and read hex encoded data. -->
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.newrelic.telemetry</groupId>
-			<artifactId>dropwizard-metrics-newrelic</artifactId>
-			<version>${dropwizard-metrics-newrelic.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-shared-test-utils</artifactId>
-			<version>${project.version}</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.newrelic.telemetry</groupId>
+            <artifactId>dropwizard-metrics-newrelic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-shared-test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>localstack</artifactId>
+			<version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

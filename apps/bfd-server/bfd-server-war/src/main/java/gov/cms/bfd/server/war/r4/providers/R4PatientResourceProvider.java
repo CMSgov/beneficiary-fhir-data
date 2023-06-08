@@ -193,7 +193,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
@@ -523,8 +522,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging) {
-    String joinsClause =
-        "left join fetch b.skippedRifRecords left join fetch b.medicareBeneficiaryIdHistories ";
+    String joinsClause = "left join fetch b.skippedRifRecords ";
     boolean passDistinctThrough = false;
 
     /*
@@ -612,7 +610,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids) {
-    String joinsClause = "left join fetch b.medicareBeneficiaryIdHistories ";
+    String joinsClause = "left join fetch b.beneficiaryHistories ";
     boolean passDistinctThrough = false;
 
     String query =
@@ -850,16 +848,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     /*
-     * Check both bene history and a now-defunct MBI id table for historical MBIs;
+     * Check bene history table for historical MBIs;
      * These will be used to return any historical MBIs in the response and/or find the bene_id
      * in the event that the user is searching using an old MBI value.
-     *
-     * FUTURE: The medicareBeneficiaryIdHistories was updated via a special RIF
-     * from CCW but that rif type hasnt been sent since 2019; this table should probably be merged
-     * into bene history and removed so we have one source of truth for historical MBIs.
      */
     beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
@@ -1030,7 +1023,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
     beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
-    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
     // Run the query and return the results.

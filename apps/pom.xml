@@ -1,534 +1,659 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>gov.cms.bfd</groupId>
-	<artifactId>bfd-parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<name>bfd-parent</name>
-	<description>
-			A parent POM for the CMS Beneficiary FHIR Data projects/applications.
-	</description>
-	<url>https://github.com/CMSgov/beneficiary-fhir-data</url>
-	<organization>
-		<name>Centers for Medicare &amp; Medicaid Services</name>
-	</organization>
-	<licenses>
-		<license>
-			<name>Creative Commons Zero v1.0 Universal</name>
-			<url>http://spdx.org/licenses/CC0-1.0.html</url>
-		</license>
-	</licenses>
+    <name>bfd-parent</name>
+    <description>
+        A parent POM for the CMS Beneficiary FHIR Data projects/applications.
+    </description>
+    <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
+    <organization>
+        <name>Centers for Medicare &amp; Medicaid Services</name>
+    </organization>
+    <licenses>
+        <license>
+            <name>Creative Commons Zero v1.0 Universal</name>
+            <url>http://spdx.org/licenses/CC0-1.0.html</url>
+        </license>
+    </licenses>
 
-	<issueManagement>
-		<!-- There doesn't seem to be any tooling support for this yet, but it
-			doesn't hurt to include it. -->
-		<system>JIRA</system>
-		<url>https://jira.cms.gov/browse/BLUEBUTTON</url>
-	</issueManagement>
+    <issueManagement>
+        <!-- There doesn't seem to be any tooling support for this yet, but it
+            doesn't hurt to include it. -->
+        <system>JIRA</system>
+        <url>https://jira.cms.gov/browse/BLUEBUTTON</url>
+    </issueManagement>
 
-	<ciManagement>
-		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245,
-			Sonar (at least) can use this information. -->
-		<system>jenkins</system>
-		<url>https://builds.bfd-management.oeda.cmscloud.local/jenkins</url>
-	</ciManagement>
+    <ciManagement>
+        <!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245,
+            Sonar (at least) can use this information. -->
+        <system>jenkins</system>
+        <url>https://builds.bfd-management.oeda.cmscloud.local/jenkins</url>
+    </ciManagement>
 
-	<scm>
-		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-		<connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
-		<developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
-		<url>https://github.com/CMSgov/beneficiary-fhir-data</url>
-		<tag>HEAD</tag>
-	</scm>
+    <scm>
+        <!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+        <connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
+        <developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
+        <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
+        <tag>HEAD</tag>
+    </scm>
 
-	<modules>
-		<module>bfd-shared-utils</module>
-		<module>bfd-shared-test-utils</module>
-		<module>bfd-model</module>
-		<module>bfd-pipeline</module>
-		<module>bfd-server</module>
-		<module>bfd-db-migrator</module>
-	</modules>
+    <modules>
+        <module>bfd-shared-utils</module>
+        <module>bfd-shared-test-utils</module>
+        <module>bfd-model</module>
+        <module>bfd-pipeline</module>
+        <module>bfd-server</module>
+        <module>bfd-db-migrator</module>
+    </modules>
 
-	<properties>
-		<!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
-			this property is used by many different plugins to specify the source file
-			encoding. We're forcing that to UTF-8, because it's the only sane choice. -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
+    <properties>
+        <!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
+            this property is used by many different plugins to specify the source file
+            encoding. We're forcing that to UTF-8, because it's the only sane choice. -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
-		<!-- The version of Java that we'll use for everything. -->
-		<javaSourceVersion>17</javaSourceVersion>
+        <!-- The version of Java that we'll use for everything. -->
+        <javaSourceVersion>17</javaSourceVersion>
 
-		<!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
-			they are reproducible bit-by-bit no matter when/where they are generated.
-			See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
-		<project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
+        <!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
+            they are reproducible bit-by-bit no matter when/where they are generated.
+            See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+        <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
 
-		<!-- Configure Sonar such that projects evaluated by it against it will
-			use JaCoCo to compute the code coverage of any unit and integration tests. -->
-		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
-		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <!-- Configure Sonar such that projects evaluated by it against it will
+            use JaCoCo to compute the code coverage of any unit and integration tests. -->
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<micrometer.version>1.10.6</micrometer.version>
-		<metrics.version>4.2.18</metrics.version>
-		<dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
-		<telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-		<aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
-		<aws.crt.version>0.21.17</aws.crt.version>
-		<spring-data-jpa.version>2.7.11</spring-data-jpa.version>
-		<spring-framework.version>5.3.23</spring-framework.version>
+        <micrometer.version>1.10.6</micrometer.version>
+        <metrics.version>4.2.18</metrics.version>
+        <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
+        <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
+        <aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
+        <aws.crt.version>0.21.17</aws.crt.version>
+        <spring-data-jpa.version>2.7.11</spring-data-jpa.version>
+        <spring-framework.version>5.3.23</spring-framework.version>
 
-		<!-- Newer (6.0) release versions for hibernate are available for some hibernate components
-		but not all (in particular, entity-manager does not have a 6.0 version available yet).
-		Staying on latest 5.x version until all components have 6.0 versions available. -->
-		<hibernate.version>5.6.10.Final</hibernate.version>
-		<junit.version>5.9.2</junit.version>
-		<javadoc.version>3.5.0</javadoc.version>
-		<testcontainers.version>1.18.0</testcontainers.version>
+        <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
+        but not all (in particular, entity-manager does not have a 6.0 version available yet).
+        Staying on latest 5.x version until all components have 6.0 versions available. -->
+        <hibernate.version>5.6.10.Final</hibernate.version>
+        <junit.version>5.9.2</junit.version>
+        <javadoc.version>3.5.0</javadoc.version>
+        <testcontainers.version>1.18.0</testcontainers.version>
+        <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
+        <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
+        <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
+        <maven.antrun.plugin.version>1.1</maven.antrun.plugin.version>
+        <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
+        <lifecycle.mapping.versionRange>[1.0.0,)</lifecycle.mapping.versionRange>
+        <exec.maven.plugin.version>1.6.0</exec.maven.plugin.version>
+        <exec.maven.plugin.versionRange>[1.6.0,)</exec.maven.plugin.versionRange>
 
-		<!-- Jackson versions should be kept in sync when possible but can diverge slightly
-			when vulnerabilities or other fixes affect some but not all components -->
-		<jackson-databind.version>2.15.0</jackson-databind.version>
-		<jackson-datatype-jdk8.version>2.15.0</jackson-datatype-jdk8.version>
-		<jackson-dataformat-yaml.version>2.15.0</jackson-dataformat-yaml.version>
-		<jackson-datatype-jsr310.version>2.15.0</jackson-datatype-jsr310.version>
-                <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
-                <snakeyaml.version>2.0</snakeyaml.version>
+        <!-- Jackson versions should be kept in sync when possible but can diverge slightly
+            when vulnerabilities or other fixes affect some but not all components -->
+        <jackson-databind.version>2.15.0</jackson-databind.version>
+        <jackson-datatype-jdk8.version>2.15.0</jackson-datatype-jdk8.version>
+        <jackson-dataformat-yaml.version>2.15.0</jackson-dataformat-yaml.version>
+        <jackson-datatype-jsr310.version>2.15.0</jackson-datatype-jsr310.version>
+        <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
+        <snakeyaml.version>2.0</snakeyaml.version>
 
-		<mockito.version>5.3.1</mockito.version>
-		<mockito-inline.version>5.2.0</mockito-inline.version>
-		<system-lambda-version>1.2.1</system-lambda-version>
-		<postgresql.version>42.6.0</postgresql.version>
-		<hsqldb.version>2.7.1</hsqldb.version>
-		<slf4j.version>2.0.7</slf4j.version>
-		<hikari.version>5.0.1</hikari.version>
-		<flyway.version>9.16.1</flyway.version>
-		<newrelic.agent.version>8.1.0</newrelic.agent.version>
-		<checkstyle.version>10.9.3</checkstyle.version>
-		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-		<guava.version>31.1-jre</guava.version>
-		<logback.classic.version>1.4.7</logback.classic.version>
-		<zjsonpatch.version>0.4.14</zjsonpatch.version>
-		<freemarker.version>2.3.32</freemarker.version>
+        <jakarta.xml.bind.api.version>2.3.2</jakarta.xml.bind.api.version>
+        <org.glassfish.jaxb.runtime.version>2.3.1</org.glassfish.jaxb.runtime.version>
+        <jakarta.annotation.api.version>1.3.5</jakarta.annotation.api.version>
 
-		<!--  Dependencies required for org.apache.commons -->
-		<commons.lang3.version>3.12.0</commons.lang3.version>
-		<commons.csv.version>1.10.0</commons.csv.version>
-		<commons.io.version>2.11.0</commons.io.version>
-		<commons.collections4.version>4.4</commons.collections4.version>
-		<commons-codec.version>1.15</commons-codec.version>
-		<hamcrest-library.version>2.2</hamcrest-library.version>
-		<awaitility.version>4.2.0</awaitility.version>
-		<lombok.version>1.18.26</lombok.version>
+        <logback.jackson.version>0.1.5</logback.jackson.version>
+        <logback.json.classic.version>0.1.5</logback.json.classic.version>
+        <mockito.version>5.3.1</mockito.version>
+        <mockito-inline.version>5.2.0</mockito-inline.version>
+        <system-lambda-version>1.2.1</system-lambda-version>
+        <postgresql.version>42.6.0</postgresql.version>
+        <hsqldb.version>2.7.1</hsqldb.version>
+        <slf4j.version>2.0.7</slf4j.version>
+        <hikari.version>5.0.1</hikari.version>
+        <flyway.version>9.16.1</flyway.version>
+        <newrelic.agent.version>8.1.0</newrelic.agent.version>
+        <checkstyle.version>10.9.3</checkstyle.version>
+        <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
+        <guava.version>31.1-jre</guava.version>
+        <logback.classic.version>1.4.7</logback.classic.version>
+        <zjsonpatch.version>0.4.14</zjsonpatch.version>
+        <freemarker.version>2.3.32</freemarker.version>
+        <reflections.version>0.10.2</reflections.version>
+        <itextpdf.version>5.5.13.3</itextpdf.version>
+        <auto-service.version>1.0.1</auto-service.version>
+        <maven-plugin-api.version>3.9.1</maven-plugin-api.version>
+        <maven-core.version>3.9.1</maven-core.version>
+        <maven-plugin-annotations.version>3.8.2</maven-plugin-annotations.version>
+        <maven.plugin.version>3.7.1</maven.plugin.version>
+        <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
+        <jakarta.el.version>4.0.2</jakarta.el.version>
+        <poi.version>5.2.3</poi.version>
+        <javapoet.version>1.13.0</javapoet.version>
+        <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
+        <jetty.version>10.0.14</jetty.version>
+        <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
+        <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
+        <datasource-proxy.version>1.9</datasource-proxy.version>
+        <cors.filter.version>1.0.1</cors.filter.version>
+        <org.apache.spark.version>3.4.0</org.apache.spark.version>
+        <build.helper.maven.plugin.version>1.12</build.helper.maven.plugin.version>
+        <build.helper.maven.plugin.versionRange>[1.12,)</build.helper.maven.plugin.versionRange>
+        <hapi-fhir.version>6.4.4</hapi-fhir.version>
+        <jersey.version>2.25.1</jersey.version>
 
-		<!-- Dependencies required for connecting to a gRPC API -->
-		<grpc_java.version>1.54.1</grpc_java.version>
-		<protoc.version>3.21.12</protoc.version>
-		<protobuf.version>3.22.3</protobuf.version>
+        <!--  Dependencies required for org.apache.commons -->
+        <commons.lang3.version>3.12.0</commons.lang3.version>
+        <commons.csv.version>1.10.0</commons.csv.version>
+        <commons.io.version>2.11.0</commons.io.version>
+        <commons.collections4.version>4.4</commons.collections4.version>
+        <commons-codec.version>1.15</commons-codec.version>
+        <hamcrest-library.version>2.2</hamcrest-library.version>
+        <awaitility.version>4.2.0</awaitility.version>
+        <lombok.version>1.18.26</lombok.version>
+        <jaxb.java.time.adapters.version>1.1.3</jaxb.java.time.adapters.version>
+        <javax.activation.version>1.1.1</javax.activation.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
 
-		<!-- The default DB that will be used in integration tests. -->
-		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
-			on the default 'jdbc:bfd-test:' URL here. -->
-		<its.db.url>jdbc:bfd-test:tc</its.db.url>
-		<its.db.username/>
-		<its.db.password/>
-		<its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
+        <hibernate.jpa.2.1.api.version>1.0.2.Final</hibernate.jpa.2.1.api.version>
+        <jpa.version>1.0.2.Final</jpa.version>
+        <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
 
-		<!-- Whether the partially adjudicated claims endpoints should be enabled -->
-		<local.pac.enabled>true</local.pac.enabled>
+        <!-- Dependencies required for connecting to a gRPC API -->
+        <grpc_java.version>1.54.1</grpc_java.version>
+        <protoc.version>3.21.12</protoc.version>
+        <protobuf.version>3.22.3</protobuf.version>
 
-		<!-- Whether the old MBI hash query feature should be enabled -->
-		<local.pac.oldMbiHash.enabled>true</local.pac.oldMbiHash.enabled>
+        <!-- The default DB that will be used in integration tests. -->
+        <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
+            on the default 'jdbc:bfd-test:' URL here. -->
+        <its.db.url>jdbc:bfd-test:tc</its.db.url>
+        <its.db.username/>
+        <its.db.password/>
+        <its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
 
-		<!-- The source types to enable for PAC resources -->
-		<local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
+        <!-- Whether the partially adjudicated claims endpoints should be enabled -->
+        <local.pac.enabled>true</local.pac.enabled>
 
-		<!-- Functional-reactive programming api for concurrent claim ingestion. -->
-		<reactor.version>3.5.5</reactor.version>
+        <!-- Whether the old MBI hash query feature should be enabled -->
+        <local.pac.oldMbiHash.enabled>true</local.pac.oldMbiHash.enabled>
 
-		<!-- Default number of threads that we can overridden as needed in module poms. -->
-		<compile.thread.count>4</compile.thread.count>
-		<tests.thread.count>4</tests.thread.count>
-	</properties>
+        <!-- The source types to enable for PAC resources -->
+        <local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- Functional-reactive programming api for concurrent claim ingestion. -->
-				<groupId>io.projectreactor</groupId>
-				<artifactId>reactor-core</artifactId>
-				<version>${reactor.version}</version>
-			</dependency>
-			<dependency>
-				<!-- The newrelic.jar javaagent dependency -->
-				<groupId>com.newrelic.agent.java</groupId>
-				<artifactId>newrelic-agent</artifactId>
-				<version>${newrelic.agent.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Provides a sane facade for the giant mess of incompatible logging
-					frameworks in Java. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<!-- An implementation of the JCL API that routes everything through to
-					SLF4J, instead. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<!-- An implementation of the Log4J API that routes everything through
-					to SLF4J, instead. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>log4j-over-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
-					to SLF4J, instead. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>jul-to-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
+        <!-- Functional-reactive programming api for concurrent claim ingestion. -->
+        <reactor.version>3.5.5</reactor.version>
 
-			<dependency>
-				<!-- Used as a logging backed/target for SLF4J. -->
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-				<version>${logback.classic.version}</version>
-			</dependency>
+        <!-- Default number of threads that we can overridden as needed in module poms. -->
+        <compile.thread.count>4</compile.thread.count>
+        <tests.thread.count>4</tests.thread.count>
+    </properties>
 
-			<dependency>
-				<!-- Used to measure performance and collect other runtime statistics
-					within these projects. -->
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-core</artifactId>
-				<version>${metrics.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
-					at runtime. -->
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-jvm</artifactId>
-				<version>${metrics.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
-				<groupId>io.micrometer</groupId>
-				<artifactId>micrometer-core</artifactId>
-				<version>${micrometer.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Used to transmit metrics to JMX for local testing. -->
-				<groupId>io.micrometer</groupId>
-				<artifactId>micrometer-registry-jmx</artifactId>
-				<version>${micrometer.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
-				<groupId>io.micrometer</groupId>
-				<artifactId>micrometer-registry-cloudwatch2</artifactId>
-				<version>${micrometer.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Used to transmit metrics to NewRelic for alerts and dashboards. -->
-				<groupId>io.micrometer</groupId>
-				<artifactId>micrometer-registry-newrelic</artifactId>
-				<version>${micrometer.version}</version>
-			</dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Functional-reactive programming api for concurrent claim ingestion. -->
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${reactor.version}</version>
+            </dependency>
+            <dependency>
+                <!-- The newrelic.jar javaagent dependency -->
+                <groupId>com.newrelic.agent.java</groupId>
+                <artifactId>newrelic-agent</artifactId>
+                <version>${newrelic.agent.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Adds java-8 types to jackson. -->
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jdk8</artifactId>
+                <version>${jackson-datatype-jdk8.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Adds java-8 date/time classes to jackson. -->
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson-datatype-jsr310.version}</version>
+            </dependency>
+            <dependency>
+                <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Required by logback-jackson. -->
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to create mock objects for unit tests. -->
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito-inline.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides BOMInputStream, and other basic I/O utilities. -->
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides some extra collections, e.g. the CircularFifoQueue being used in DataSetMonitorWorker. -->
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons.collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides a sane facade for the giant mess of incompatible logging
+                    frameworks in Java. -->
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <!-- An implementation of the JCL API that routes everything through to
+                    SLF4J, instead. -->
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Adds convenience features for working with mocks in tests -->
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <!-- An implementation of the Log4J API that routes everything through
+                    to SLF4J, instead. -->
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
+                    to SLF4J, instead. -->
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
 
+            <dependency>
+                <!-- Used as a logging backed/target for SLF4J. -->
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.classic.version}</version>
+            </dependency>
 
-			<!-- We lock down the versions of all the various Spring components that
-				child projects use, as incompatibility problems with Spring are common. -->
-			<dependency>
-				<!-- Lock & harmonize the versions of the various Spring Framework modules.
-					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir-base:pom:6.1.3
-					uses the 5.3.23 version of the Spring Framework. -->
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-framework-bom</artifactId>
-				<version>${spring-framework.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<!-- This is the latest release compatible with the version of Spring
-					Framework that we're using, per https://docs.spring.io/spring-data/jpa/docs/2.7.0/reference/html/#dependencies.spring-framework. -->
-				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-jpa</artifactId>
-				<version>${spring-data-jpa.version}</version>
-			</dependency>
-
-			<dependency>
-				<!-- Lock & harmonize the versions of the various AWS SDK components,
-					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
-				<!-- When checking for dependencies to upgrade, java-sdk-swf-libraries will show up, however
-				the AWS SDK Bom contains an older version for unknown reasons, so it can be ignored. -->
-				<groupId>software.amazon.awssdk</groupId>
-				<artifactId>bom</artifactId>
-				<version>${aws-java-sdk-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
-					Hibernate is used for that in our projects.) -->
-				<artifactId>hibernate-jpa-2.1-api</artifactId>
-				<groupId>org.hibernate.javax.persistence</groupId>
-				<version>1.0.2.Final</version>
-			</dependency>
-
-			<dependency>
-				<!-- Hibernate's JPA implementation is used to manage most database usage
-					in our applications. -->
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-entitymanager</artifactId>
-				<version>${hibernate.version}</version>
-			</dependency>
-			<dependency>
-				<!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
-					but may occassionally be needed separately. -->
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
-				<version>${hibernate.version}</version>
-			</dependency>
-			<dependency>
-				<!-- The Hibernate JPA Model Generator, which will produce MetaModel
-					classes for JPA entities. This happens happens automagically via javac's
-					annotation processor. -->
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-jpamodelgen</artifactId>
-				<version>${hibernate.version}</version>
-			</dependency>
-
-			<!-- JavaEE dependencies that were included in the JRE prior to Java 11 -->
-			<dependency>
-				<groupId>javax.activation</groupId>
-				<artifactId>activation</artifactId>
-				<version>1.1.1</version>
-			</dependency>
-
-			<!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
-			jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
-			and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
-			Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
-			these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
-			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>2.3.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>jakarta.annotation</groupId>
-				<artifactId>jakarta.annotation-api</artifactId>
-				<version>1.3.5</version>
-			</dependency>
-
-			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>${postgresql.version}</version>
-			</dependency>
-			<dependency>
-				<!-- In-memory database that is used in some tests to speed things up. -->
-				<groupId>org.hsqldb</groupId>
-				<artifactId>hsqldb</artifactId>
-				<version>${hsqldb.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
-					for details. -->
-				<groupId>com.zaxxer</groupId>
-				<artifactId>HikariCP</artifactId>
-				<version>${hikari.version}</version>
-			</dependency>
-
-			<dependency>
-				<!-- Used implicitly by jackson-dataformat-yaml.  -->
-				<!-- Defining it here to override older version referenced by jackson-dataformat-yaml. -->
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>${snakeyaml.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Add YAML support to jackson -->
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
-				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson-dataformat-yaml.version}</version>
-			</dependency>
-
-			<dependency>
-				<!-- Just useful. -->
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${guava.version}</version>
-			</dependency>
-
-			<dependency>
-				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
-				 <groupId>org.projectlombok</groupId>
-				 <artifactId>lombok</artifactId>
-				 <version>${lombok.version}</version>
-				 <scope>provided</scope>
-			 </dependency>
+            <dependency>
+                <!-- Used to measure performance and collect other runtime statistics
+                    within these projects. -->
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+                    at runtime. -->
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-jvm</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
+                <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to transmit metrics to JMX for local testing. -->
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-jmx</artifactId>
+                <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-cloudwatch2</artifactId>
+                <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Required by logback-json-classic. -->
+                <groupId>ch.qos.logback.contrib</groupId>
+                <artifactId>logback-jackson</artifactId>
+                <version>${logback.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides a JSON layout (i.e. output format) for Logback. Provides
+                     ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
+                <groupId>ch.qos.logback.contrib</groupId>
+                <artifactId>logback-json-classic</artifactId>
+                <version>${logback.json.classic.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to transmit metrics to NewRelic for alerts and dashboards. -->
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-newrelic</artifactId>
+                <version>${micrometer.version}</version>
+            </dependency>
 
 
-			<dependency>
-				<!-- Common utility classes -->
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>${commons.lang3.version}</version>
-			</dependency>
+            <!-- We lock down the versions of all the various Spring components that
+                child projects use, as incompatibility problems with Spring are common. -->
+            <dependency>
+                <!-- Lock & harmonize the versions of the various Spring Framework modules.
+                    We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir-base:pom:6.1.3
+                    uses the 5.3.23 version of the Spring Framework. -->
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <!-- This is the latest release compatible with the version of Spring
+                    Framework that we're using, per https://docs.spring.io/spring-data/jpa/docs/2.7.0/reference/html/#dependencies.spring-framework. -->
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-jpa</artifactId>
+                <version>${spring-data-jpa.version}</version>
+            </dependency>
 
-			<dependency>
-				<!-- Used to parse and read the RIF data files. -->
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-csv</artifactId>
-				<version>${commons.csv.version}</version>
-			</dependency>
+            <dependency>
+                <!-- Lock & harmonize the versions of the various AWS SDK components,
+                    per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
+                <!-- When checking for dependencies to upgrade, java-sdk-swf-libraries will show up, however
+                the AWS SDK Bom contains an older version for unknown reasons, so it can be ignored. -->
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws-java-sdk-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-			<dependency>
-				<!-- The test framework used for unit and integration tests. -->
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<!-- Needed for parameterized unit tests. -->
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit.version}</version>
-				<scope>test</scope>
-			</dependency>
+            <dependency>
+                <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
+                    Hibernate is used for that in our projects.) -->
+                <artifactId>hibernate-jpa-2.1-api</artifactId>
+                <groupId>org.hibernate.javax.persistence</groupId>
+                <version>${hibernate.jpa.2.1.api.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>com.newrelic.telemetry</groupId>
-				<artifactId>dropwizard-metrics-newrelic</artifactId>
-				<version>${dropwizard-metrics-newrelic.version}</version>
-			</dependency>
+            <dependency>
+                <!-- Hibernate's JPA implementation is used to manage most database usage
+                    in our applications. -->
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
+                    but may occassionally be needed separately. -->
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <!-- The Hibernate JPA Model Generator, which will produce MetaModel
+                    classes for JPA entities. This happens happens automagically via javac's
+                    annotation processor. -->
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-jpamodelgen</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>com.newrelic.telemetry</groupId>
-				<artifactId>telemetry-http-okhttp</artifactId>
-				<version>${telemetry-http-okhttp.version}</version>
-			</dependency>
+            <!-- JavaEE dependencies that were included in the JRE prior to Java 11 -->
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>${javax.activation.version}</version>
+            </dependency>
 
-			<!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-netty-shaded</artifactId>
-				<version>${grpc_java.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-protobuf</artifactId>
-				<version>${grpc_java.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-stub</artifactId>
-				<version>${grpc_java.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Provides core protobuf library.  -->
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java</artifactId>
-				<version>${protobuf.version}</version>
-			</dependency>
-			<dependency>
-				<!-- provides JsonFormat and JsonParser -->
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java-util</artifactId>
-				<version>${protobuf.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+            <!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
+            jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
+            and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
+            Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
+            these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jakarta.xml.bind.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${org.glassfish.jaxb.runtime.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta.annotation.api.version}</version>
+            </dependency>
 
-	<build>
-		<resources>
-			<resource>
-				<!-- Enable Maven's resource filtering for text files in 'src/main/resources/'.
-					This will replace properties in text files with their values, e.g. "${project.groupId}"
-					will be replaced with "gov.cms.beneficiaryfhirdata". -->
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<!-- Enable Maven's resource filtering for text files in 'src/test/resources/'.
-					This will replace properties in text files with their values, e.g. "${project.groupId}"
-					will be replaced with "gov.cms.beneficiaryfhirdata". -->
-				<directory>src/test/resources</directory>
-				<filtering>true</filtering>
-			</testResource>
-		</testResources>
-		<pluginManagement>
-			<plugins>
-				<!-- It adds a lot of noise to this file, but we specify the version
-					of all plugins used in the module builds here to help ensure that the builds
-					are always reproducible. This is actually enforced down below by the maven-enforcer-plugin
-					execution. -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4.1</version>
-				</plugin>
-				<plugin>
-					<!-- Can be used to select which JDK to use (amongst other things).
-						Options must be specified in `~/.m2/toolchains.xml`. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-toolchains-plugin</artifactId>
-					<version>1.1</version>
-					<configuration>
-						<toolchains>
-							<jdk>
-								<!-- Use a Java 17 JDK, by default. -->
-								<version>${javaSourceVersion}</version>
-							</jdk>
-						</toolchains>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.0.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<!-- Don't use 2.7, due to https://issues.apache.org/jira/browse/MRESOURCES-192. -->
-					<version>2.6</version>
-				</plugin>
-				<plugin>
-					<groupId>com.spotify.fmt</groupId>
-					<artifactId>fmt-maven-plugin</artifactId>
-					<version>2.18</version>
-				</plugin>
-				<plugin>
-					<groupId>io.github.phillipuniverse</groupId>
-					<artifactId>githook-maven-plugin</artifactId>
-					<version>1.0.4</version>
-					<configuration>
-						<hooks>
-							<pre-commit><![CDATA[
+            <dependency>
+                <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <!-- In-memory database that is used in some tests to speed things up. -->
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldb.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+                    for details. -->
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Used implicitly by jackson-dataformat-yaml.  -->
+                <!-- Defining it here to override older version referenced by jackson-dataformat-yaml. -->
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Add YAML support to jackson -->
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson-dataformat-yaml.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Just useful. -->
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Compile Time only dependency to simplify creation of simple POJOs -->
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <!-- Common utility classes -->
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons.lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Used to parse and read the RIF data files. -->
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${commons.csv.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Used to parse and read hex encoded data. -->
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- The test framework used for unit and integration tests. -->
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!-- Needed for parameterized unit tests. -->
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.newrelic.telemetry</groupId>
+                <artifactId>dropwizard-metrics-newrelic</artifactId>
+                <version>${dropwizard-metrics-newrelic.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.newrelic.telemetry</groupId>
+                <artifactId>telemetry-http-okhttp</artifactId>
+                <version>${telemetry-http-okhttp.version}</version>
+            </dependency>
+
+            <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty-shaded</artifactId>
+                <version>${grpc_java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>${grpc_java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>${grpc_java.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Provides core protobuf library.  -->
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <!-- provides JsonFormat and JsonParser -->
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <resources>
+            <resource>
+                <!-- Enable Maven's resource filtering for text files in 'src/main/resources/'.
+                    This will replace properties in text files with their values, e.g. "${project.groupId}"
+                    will be replaced with "gov.cms.beneficiaryfhirdata". -->
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <!-- Enable Maven's resource filtering for text files in 'src/test/resources/'.
+                    This will replace properties in text files with their values, e.g. "${project.groupId}"
+                    will be replaced with "gov.cms.beneficiaryfhirdata". -->
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+        <pluginManagement>
+            <plugins>
+                <!-- It adds a lot of noise to this file, but we specify the version
+                    of all plugins used in the module builds here to help ensure that the builds
+                    are always reproducible. This is actually enforced down below by the maven-enforcer-plugin
+                    execution. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.4.1</version>
+                </plugin>
+                <plugin>
+                    <!-- Can be used to select which JDK to use (amongst other things).
+                        Options must be specified in `~/.m2/toolchains.xml`. -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>1.1</version>
+                    <configuration>
+                        <toolchains>
+                            <jdk>
+                                <!-- Use a Java 17 JDK, by default. -->
+                                <version>${javaSourceVersion}</version>
+                            </jdk>
+                        </toolchains>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <!-- Don't use 2.7, due to https://issues.apache.org/jira/browse/MRESOURCES-192. -->
+                    <version>${maven.resources.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.spotify.fmt</groupId>
+                    <artifactId>fmt-maven-plugin</artifactId>
+                    <version>2.18</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.github.phillipuniverse</groupId>
+                    <artifactId>githook-maven-plugin</artifactId>
+                    <version>1.0.4</version>
+                    <configuration>
+                        <hooks>
+                            <pre-commit><![CDATA[
 #!/usr/bin/env bash
 set -e
 
@@ -564,7 +689,7 @@ checkSecretFilesForPlainText() {
 
 checkSecretFilesForPlainText
 							]]></pre-commit>
-							<pre-push><![CDATA[
+                            <pre-push><![CDATA[
 #!/usr/bin/env bash
 set -e
 
@@ -602,426 +727,427 @@ checkJavaFormat() {
 
 checkJavaFormat
 							]]>
-							</pre-push>
-						</hooks>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
-					<configuration>
-						<!-- Set the Java source version used by the compiler. -->
-						<source>${javaSourceVersion}</source>
-						<target>${javaSourceVersion}</target>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M5</version>
-					<configuration>
-						<!-- The intent here is to provide a property that can be set in `settings.xml`,
-							to specify environment-specific JVM arguments for tests. For example, one
-							might want to configure the max heap size and/or proxy server settings for
-							tests run on a system. -->
-						<argLine>${maven-test.jvm-args.env-specific}</argLine>
-						<trimStackTrace>false</trimStackTrace>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-						<!-- run ITs w/multiple threads -->
-						<useUnlimitedThreads>true</useUnlimitedThreads>
-						<parallel>all</parallel>
-						<threadCountClasses>8</threadCountClasses>
-						<threadCountMethods>10</threadCountMethods>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M9</version>
-					<configuration>
-						<!-- The intent here is to provide a property that can be set in `settings.xml`,
-							to specify environment-specific JVM arguments for tests. For example, one
-							might want to configure the max heap size and/or proxy server settings for
-							tests run on a system. -->
-						<argLine>${maven-test.jvm-args.env-specific}</argLine>
-						<trimStackTrace>false</trimStackTrace>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-						<systemPropertyVariables>
-							<its.db.url>${its.db.url}</its.db.url>
-							<its.db.username>${its.db.username}</its.db.username>
-							<its.db.password>${its.db.password}</its.db.password>
-							<its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
-						</systemPropertyVariables>
-						<includes>
-							<include>**/*IT.java</include>
-							<include>**/*E2E.java</include>
-						</includes>
+                            </pre-push>
+                        </hooks>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <!-- Set the Java source version used by the compiler. -->
+                        <source>${javaSourceVersion}</source>
+                        <target>${javaSourceVersion}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <!-- The intent here is to provide a property that can be set in `settings.xml`,
+                            to specify environment-specific JVM arguments for tests. For example, one
+                            might want to configure the max heap size and/or proxy server settings for
+                            tests run on a system. -->
+                        <argLine>${maven-test.jvm-args.env-specific}</argLine>
+                        <trimStackTrace>false</trimStackTrace>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <!-- run ITs w/multiple threads -->
+                        <useUnlimitedThreads>true</useUnlimitedThreads>
+                        <parallel>all</parallel>
+                        <threadCountClasses>8</threadCountClasses>
+                        <threadCountMethods>10</threadCountMethods>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.0.0-M9</version>
+                    <configuration>
+                        <!-- The intent here is to provide a property that can be set in `settings.xml`,
+                            to specify environment-specific JVM arguments for tests. For example, one
+                            might want to configure the max heap size and/or proxy server settings for
+                            tests run on a system. -->
+                        <argLine>${maven-test.jvm-args.env-specific}</argLine>
+                        <trimStackTrace>false</trimStackTrace>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <systemPropertyVariables>
+                            <its.db.url>${its.db.url}</its.db.url>
+                            <its.db.username>${its.db.username}</its.db.username>
+                            <its.db.password>${its.db.password}</its.db.password>
+                            <its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
+                        </systemPropertyVariables>
+                        <includes>
+                            <include>**/*IT.java</include>
+                            <include>**/*E2E.java</include>
+                        </includes>
 
-						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
-						<environmentVariables>
-							<TZ>UTC</TZ>
-						</environmentVariables>
-					</configuration>
-				</plugin>
-				<plugin>
-					<!-- A test code coverage plugin that can operate as a Java agent (and
-						thus doesn't require class file instrumentation). -->
-					<groupId>org.jacoco</groupId>
-					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.7.5.201505241946</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.2</version>
-					<configuration>
-						<!-- Add some extra information to the JAR manifests. Helpful for folks
-							looking at a JAR, trying to figure out what it is. -->
-						<archive>
-							<manifest>
-								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							</manifest>
-						</archive>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-war-plugin</artifactId>
-					<version>3.3.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>${javadoc.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.2.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>3.1.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.0.0</version>
-					<configuration>
-						<!-- Delay deployment of build artifacts until after all modules build successfully. -->
-						<deployAtEnd>true</deployAtEnd>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>3.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-scm-plugin</artifactId>
-					<version>1.9.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>2.5.3</version>
-					<configuration>
-						<!-- Require manual pushes after releases. Makes it easier to clean
-							things up if releases fail. -->
-						<pushChanges>false</pushChanges>
-						<localCheckout>true</localCheckout>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<configuration>
-						<configLocation>checkstyle.xml</configLocation>
-						<!-- Only look in source directories, basically ignores generated code -->
-						<sourceDirectories>
-							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
-						</sourceDirectories>
-					</configuration>
-					<version>${checkstyle.plugin.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>${checkstyle.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-			<!-- This plugin configuration allows us to scan all of the pom files
-				 to find any dependencies that have newer versions available
-				 that are not alpha, beta, or other commonly used pre-release version tags.
-				 To invoke this plugin to find the out of data dependencies,
-				 run: "mvn versions:display-dependency-updates" from the apps folder. -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.11.0</version>
-				<configuration>
-					<rulesUri>file://${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Use the enforcer plugin to help ensure that builds are always
-							reproducible. -->
-						<id>enforce-plugin-versions</id>
-						<inherited>true</inherited>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requirePluginVersions>
-									<message>Undefined plugin versions can lead to un-reproducible
-										builds.</message>
-									<banTimestamps>false</banTimestamps>
-									<!-- Allow SNAPSHOT version of this plugin since we build it in our own project rather than pulling from a repository. -->
-									<unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin</unCheckedPluginList>
-								</requirePluginVersions>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Activate the toolchain specified above. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-toolchains-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>toolchain-default</id>
-						<goals>
-							<goal>toolchain</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.spotify.fmt</groupId>
-				<artifactId>fmt-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<!-- Use this plugin to run https://github.com/google/google-java-format
-								on every build, which will auto-format all of our Java source code. Note
-								that we have a Git pre-commit hook that will also do this. -->
-							<goal>format</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>io.github.phillipuniverse</groupId>
-				<artifactId>githook-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<inherited>false</inherited>
-						<goals>
-							<!-- Verify source code formatting prior to commit. -->
-							<goal>install</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Always generate a source JAR. This is a best practice, but is
-							also required by OSSRH/Maven Central. -->
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<failOnWarnings>false</failOnWarnings>
-					<detectJavaApiLink>false</detectJavaApiLink>
-					<!-- Exclude javadocs on certain generated files, reduces build warnings -->
-					<excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
-					<quiet>true</quiet>
-					<!-- This notimestamp option does not make our *-javadoc.jar files completely
-						reproducible, but the option is recommended by Maven for a reproducible
-						build in general. However, we are not using the javadocs in any of the war
-						and zip artifacts that we need to be reproducible.
-						See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
-					 -->
-					<notimestamp>true</notimestamp>
-				</configuration>
-				<executions>
-					<execution>
-						<!-- Always generate a Javadoc JAR. This is a best practice, but is
-							also required by OSSRH/Maven Central. -->
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>verify</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Will run the `*IT.java` integration tests in the modules, as part
-					of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-		<extensions>
-			<extension>
-				<!-- Used by the bfd-pipeline-rda-grpc-apps and bfd-pipeline-rda-grpc modules, but
-				defined here to workaround https://issues.apache.org/jira/browse/MDEPLOY-193. -->
-				<groupId>kr.motd.maven</groupId>
-				<artifactId>os-maven-plugin</artifactId>
-				<version>1.6.2</version>
-			</extension>
-		</extensions>
-	</build>
+                        <!-- Needed to avoid test failures when comparing ETL timestamps. -->
+                        <environmentVariables>
+                            <TZ>UTC</TZ>
+                        </environmentVariables>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <!-- A test code coverage plugin that can operate as a Java agent (and
+                        thus doesn't require class file instrumentation). -->
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.7.5.201505241946</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <!-- Add some extra information to the JAR manifests. Helpful for folks
+                            looking at a JAR, trying to figure out what it is. -->
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.3.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${javadoc.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <configuration>
+                        <!-- Delay deployment of build artifacts until after all modules build successfully. -->
+                        <deployAtEnd>true</deployAtEnd>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-scm-plugin</artifactId>
+                    <version>1.9.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                    <configuration>
+                        <!-- Require manual pushes after releases. Makes it easier to clean
+                            things up if releases fail. -->
+                        <pushChanges>false</pushChanges>
+                        <localCheckout>true</localCheckout>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <configuration>
+                        <configLocation>checkstyle.xml</configLocation>
+                        <!-- Only look in source directories, basically ignores generated code -->
+                        <sourceDirectories>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                        </sourceDirectories>
+                    </configuration>
+                    <version>${checkstyle.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <!-- This plugin configuration allows us to scan all of the pom files
+                 to find any dependencies that have newer versions available
+                 that are not alpha, beta, or other commonly used pre-release version tags.
+                 To invoke this plugin to find the out of data dependencies,
+                 run: "mvn versions:display-dependency-updates" from the apps folder. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.11.0</version>
+                <configuration>
+                    <rulesUri>file://${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Use the enforcer plugin to help ensure that builds are always
+                            reproducible. -->
+                        <id>enforce-plugin-versions</id>
+                        <inherited>true</inherited>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requirePluginVersions>
+                                    <message>Undefined plugin versions can lead to un-reproducible
+                                        builds.
+                                    </message>
+                                    <banTimestamps>false</banTimestamps>
+                                    <!-- Allow SNAPSHOT version of this plugin since we build it in our own project rather than pulling from a repository. -->
+                                    <unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin</unCheckedPluginList>
+                                </requirePluginVersions>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Activate the toolchain specified above. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>toolchain-default</id>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify.fmt</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- Use this plugin to run https://github.com/google/google-java-format
+                                on every build, which will auto-format all of our Java source code. Note
+                                that we have a Git pre-commit hook that will also do this. -->
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.github.phillipuniverse</groupId>
+                <artifactId>githook-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <inherited>false</inherited>
+                        <goals>
+                            <!-- Verify source code formatting prior to commit. -->
+                            <goal>install</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Always generate a source JAR. This is a best practice, but is
+                            also required by OSSRH/Maven Central. -->
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <failOnWarnings>false</failOnWarnings>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                    <!-- Exclude javadocs on certain generated files, reduces build warnings -->
+                    <excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
+                    <quiet>true</quiet>
+                    <!-- This notimestamp option does not make our *-javadoc.jar files completely
+                        reproducible, but the option is recommended by Maven for a reproducible
+                        build in general. However, we are not using the javadocs in any of the war
+                        and zip artifacts that we need to be reproducible.
+                        See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
+                     -->
+                    <notimestamp>true</notimestamp>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Always generate a Javadoc JAR. This is a best practice, but is
+                            also required by OSSRH/Maven Central. -->
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>verify</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Will run the `*IT.java` integration tests in the modules, as part
+                    of the build. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <extensions>
+            <extension>
+                <!-- Used by the bfd-pipeline-rda-grpc-apps and bfd-pipeline-rda-grpc modules, but
+                defined here to workaround https://issues.apache.org/jira/browse/MDEPLOY-193. -->
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.2</version>
+            </extension>
+        </extensions>
+    </build>
 
-	<profiles>
-		<profile>
-			<!-- This profile will only be active for builds inside of Eclipse (managed
-				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
-			<id>m2e-manage-executions</id>
-			<activation>
-				<property>
-					<name>m2e.version</name>
-				</property>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<!--This plugin's configuration is used to store Eclipse m2e settings
-								only. It has no influence on the Maven build itself. -->
-							<groupId>org.eclipse.m2e</groupId>
-							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
-							<configuration>
-								<lifecycleMappingMetadata>
-									<pluginExecutions>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>org.apache.maven.plugins</groupId>
-												<artifactId>maven-enforcer-plugin</artifactId>
-												<versionRange>[1.0.0,)</versionRange>
-												<goals>
-													<goal>enforce</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<!-- Don't run this plugin inside m2e; necessary to disable a
-													POM warning in Eclipse. -->
-												<ignore/>
-											</action>
-										</pluginExecution>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>org.apache.maven.plugins</groupId>
-												<artifactId>maven-toolchains-plugin</artifactId>
-												<versionRange>[1.1,)</versionRange>
-												<goals>
-													<goal>toolchain</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<!-- Don't run this plugin inside m2e; necessary to disable a
-													POM warning in Eclipse. -->
-												<ignore/>
-											</action>
-										</pluginExecution>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>org.jacoco</groupId>
-												<artifactId>jacoco-maven-plugin</artifactId>
-												<versionRange>[0.6.5.201403032054,)</versionRange>
-												<goals>
-													<goal>prepare-agent</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<!-- Don't run this plugin inside m2e; necessary to disable a
-													POM warning in Eclipse. -->
-												<ignore/>
-											</action>
-										</pluginExecution>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>com.spotify.fmt</groupId>
-												<artifactId>fmt-maven-plugin</artifactId>
-												<versionRange>[2.18,)</versionRange>
-												<goals>
-													<goal>format</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<!-- Don't run this plugin automatically on every build inside m2e. -->
-												<ignore/>
-											</action>
-										</pluginExecution>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>io.github.phillipuniverse</groupId>
-												<artifactId>githook-maven-plugin</artifactId>
-												<versionRange>[1.0.4,)</versionRange>
-												<goals>
-													<goal>install</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<!-- Don't run this plugin automatically on every build inside m2e. -->
-												<ignore/>
-											</action>
-										</pluginExecution>
-									</pluginExecutions>
-								</lifecycleMappingMetadata>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <!-- This profile will only be active for builds inside of Eclipse (managed
+                by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+            <id>m2e-manage-executions</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <!--This plugin's configuration is used to store Eclipse m2e settings
+                                only. It has no influence on the Maven build itself. -->
+                            <groupId>org.eclipse.m2e</groupId>
+                            <artifactId>lifecycle-mapping</artifactId>
+                            <version>${lifecycle.mapping.version}</version>
+                            <configuration>
+                                <lifecycleMappingMetadata>
+                                    <pluginExecutions>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.apache.maven.plugins</groupId>
+                                                <artifactId>maven-enforcer-plugin</artifactId>
+                                                <versionRange>${lifecycle.mapping.versionRange}</versionRange>
+                                                <goals>
+                                                    <goal>enforce</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <!-- Don't run this plugin inside m2e; necessary to disable a
+                                                    POM warning in Eclipse. -->
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.apache.maven.plugins</groupId>
+                                                <artifactId>maven-toolchains-plugin</artifactId>
+                                                <versionRange>[1.1,)</versionRange>
+                                                <goals>
+                                                    <goal>toolchain</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <!-- Don't run this plugin inside m2e; necessary to disable a
+                                                    POM warning in Eclipse. -->
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.jacoco</groupId>
+                                                <artifactId>jacoco-maven-plugin</artifactId>
+                                                <versionRange>[0.6.5.201403032054,)</versionRange>
+                                                <goals>
+                                                    <goal>prepare-agent</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <!-- Don't run this plugin inside m2e; necessary to disable a
+                                                    POM warning in Eclipse. -->
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>com.spotify.fmt</groupId>
+                                                <artifactId>fmt-maven-plugin</artifactId>
+                                                <versionRange>[2.18,)</versionRange>
+                                                <goals>
+                                                    <goal>format</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <!-- Don't run this plugin automatically on every build inside m2e. -->
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>io.github.phillipuniverse</groupId>
+                                                <artifactId>githook-maven-plugin</artifactId>
+                                                <versionRange>[1.0.4,)</versionRange>
+                                                <goals>
+                                                    <goal>install</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <!-- Don't run this plugin automatically on every build inside m2e. -->
+                                                <ignore/>
+                                            </action>
+                                        </pluginExecution>
+                                    </pluginExecutions>
+                                </lifecycleMappingMetadata>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
