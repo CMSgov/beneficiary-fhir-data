@@ -50,7 +50,7 @@ public final class SNFClaimTransformerTest {
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     ExplanationOfBenefit eob = SNFClaimTransformer.transform(transformerContext, claim);
 

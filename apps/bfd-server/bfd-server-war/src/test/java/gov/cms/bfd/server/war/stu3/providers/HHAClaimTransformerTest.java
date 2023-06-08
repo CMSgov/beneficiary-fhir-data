@@ -47,7 +47,7 @@ public final class HHAClaimTransformerTest {
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     ExplanationOfBenefit eob = HHAClaimTransformer.transform(transformerContext, claim);
     assertMatches(claim, eob, transformerContext);

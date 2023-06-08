@@ -138,7 +138,7 @@ public final class Stu3EobSamhsaMatcherTest {
 
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-      NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+      NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -837,7 +837,7 @@ public final class Stu3EobSamhsaMatcherTest {
               sampleRifRecordForClaimType,
               Optional.empty(),
               FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-              NPIOrgLookup.createNpiOrgLookupForTesting());
+              new NPIOrgLookup());
 
       return sampleEobForClaimType;
     }
