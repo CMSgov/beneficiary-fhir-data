@@ -92,8 +92,7 @@ public final class InpatientClaimTransformerV2Test {
   @BeforeEach
   public void before() throws IOException {
     inpatientClaimTransformerV2 =
-        new InpatientClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+        new InpatientClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = inpatientClaimTransformerV2.transform(claim);
     IParser parser = fhirContext.newJsonParser();

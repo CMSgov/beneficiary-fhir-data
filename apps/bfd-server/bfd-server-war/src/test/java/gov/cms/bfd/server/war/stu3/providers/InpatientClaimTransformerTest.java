@@ -50,7 +50,7 @@ public final class InpatientClaimTransformerTest {
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     ExplanationOfBenefit eob = InpatientClaimTransformer.transform(transformerContext, claim);
     assertMatches(claim, eob, transformerContext);
