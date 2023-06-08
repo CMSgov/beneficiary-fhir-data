@@ -105,7 +105,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         PipelineTestUtils.get().getPipelineApplicationState().getMetrics();
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
@@ -447,7 +447,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         new OutpatientClaimTransformerV2(
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
     assertEobEquals(outpatientClaimTransformerV2.transform(claim), eob);
   }
 

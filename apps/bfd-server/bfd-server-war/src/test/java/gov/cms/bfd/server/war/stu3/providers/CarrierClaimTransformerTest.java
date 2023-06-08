@@ -56,7 +56,7 @@ public final class CarrierClaimTransformerTest {
                 new MetricRegistry(),
                 Optional.of(true),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
@@ -67,7 +67,7 @@ public final class CarrierClaimTransformerTest {
                 new MetricRegistry(),
                 Optional.of(true),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
@@ -99,7 +99,7 @@ public final class CarrierClaimTransformerTest {
                 new MetricRegistry(),
                 Optional.of(true),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
 
     assertEquals(2, eob.getCareTeam().size());
@@ -129,7 +129,7 @@ public final class CarrierClaimTransformerTest {
                 new MetricRegistry(),
                 Optional.of(true),
                 FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                NPIOrgLookup.createNpiOrgLookupForTesting()),
+                new NPIOrgLookup()),
             claim);
     assertMatches(claim, eob, Optional.of(true));
   }
