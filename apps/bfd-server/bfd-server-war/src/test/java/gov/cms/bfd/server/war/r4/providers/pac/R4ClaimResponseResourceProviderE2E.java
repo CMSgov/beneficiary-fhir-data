@@ -22,8 +22,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/** Integration test for the {@link R4ClaimResponseResourceProvider}. */
-public class R4ClaimResponseResourceProviderIT extends ServerRequiredTest {
+/** End-to-end test for the {@link R4ClaimResponseResourceProvider}. */
+public class R4ClaimResponseResourceProviderE2E extends ServerRequiredTest {
 
   /** Test utils. */
   private static final RDATestUtils testUtils = new RDATestUtils();

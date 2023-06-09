@@ -54,6 +54,7 @@ import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.springframework.stereotype.Component;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -61,6 +62,7 @@ import org.hl7.fhir.r4.model.Resource;
  *
  * @param <T> The specific fhir resource the concrete provider will serve.
  */
+@Component
 public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     extends AbstractResourceProvider implements IResourceProvider {
 
