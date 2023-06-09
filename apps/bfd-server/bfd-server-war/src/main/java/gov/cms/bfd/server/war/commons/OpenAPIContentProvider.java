@@ -27,8 +27,28 @@ public final class OpenAPIContentProvider {
     This class contains that logical ID, and can optionally also contain a relative or absolute URL
     representing the resource identity; the following are all valid values for IdType, and all might
     represent the same resource:
-      - `_id=567834`
-      - `_id=1234`""";
+      - `patient=567834`
+      - `patient=1234`""";
+
+  /** Open API content short description for /Patient's identifier parameter. */
+  public static final String PATIENT_SP_IDENTIFIER_SHORT = "The patient identifier to search for";
+  /** Open API content value for /Patient's identifier parameter. */
+  public static final String PATIENT_SP_IDENTIFIER_VALUE =
+      """
+    **NOTE: THIS IS A REQUIRED FIELD**
+
+    Fetch _Patient_ data using a FHIR _identifier_; an identifier contains a set of values that
+    include the logical identity for a resource. In FHIR, the _identifier_ is a parent element
+    defined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes-definitions.html#Identifier) as:
+
+    `A string, typically numeric or alphanumeric, that is associated with a single object or entity within a given system.
+    Typically, identifiers are used to connect content in resources to external content available in other frameworks or protocols.
+    Identifiers are associated with objects and may be changed or retired due to human or system process and errors.`
+
+    This class contains the identifier, which is usually represeted as an absolute URL reference to the resource identity
+    (mbi, hicn id, etc); the following are all valid values for Identifier, and all might represent the same resource:
+      - `identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169`
+      - `identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c`""";
 
   /** Open API content short description for /Patient's resource bundle offset. */
   public static final String PATIENT_START_INDEX_SHORT =
@@ -108,6 +128,27 @@ public final class OpenAPIContentProvider {
         - `cursor=200` the first record is the 201st record
         - `cursor=1000` the first record is the 1001st record""";
 
+  /** Open API content short description for /Patient's identifier parameter. */
+  public static final String BENEFICIARY_SP_RES_ID_SHORT =
+      "Identifier resource for the covered party";
+  /** Open API content value for /Patient's identifier parameter. */
+  public static final String BENEFICIARY_SP_RES_ID_VALUE =
+      """
+     Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType
+     represents the logical identity for a resource, or as much of that
+     identity that is known. In FHIR, every resource must have a _logical ID_ which is
+     defined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:
+
+     `Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
+     '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
+     or any other identifier pattern that meets these constraints.)`
+
+     This class contains that logical ID, and can optionally also contain a relative or absolute URL
+     representing the resource identity; the following are all valid values for IdType, and all might
+     represent the same resource:
+     - `beneficiary=567834`
+     - `beneficiary=1234`""";
+
   /** Open API short description for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_SHORT = "A list of BFD claim types to include";
   /** Open API content value for /ExplanationOfBenefit's EOB claim type parameter. */
@@ -132,7 +173,7 @@ public final class OpenAPIContentProvider {
     Examples:
        - `type=carrier,inpatient,snf,dme`
        - `type=outpatient`
-       - `type=*;`""";
+       - `type=*`""";
 
   /** Open API short description for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_SHORT =
@@ -147,7 +188,7 @@ public final class OpenAPIContentProvider {
    Examples:
      - `service-date=gt2023-01-02&service-date=lt2023-05-01`
      - `service-date=gt2023-01-02`
-     - `_service-date=lt2023-05-01`""";
+     - `service-date=lt2023-05-01`""";
 
   /** Open API short description for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_SHORT =
@@ -174,7 +215,8 @@ public final class OpenAPIContentProvider {
       - `includeTaxNumbers=true`""";
 
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
-  public static final String PAC_MBI = "The patient identifier to search for.";
+  public static final String PAC_MBI_SHORT =
+      "The patient medicare beneficiary identifier (MBI) to search for.";
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
       """
@@ -214,9 +256,9 @@ public final class OpenAPIContentProvider {
 
    The following are all valid values for MBI, and all might
    represent the same resource:
-      - `9AB2WW3GR44 (unhashed MBI)`
-      - `82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c (hashed)`
-      - `1S00E00HA26 (synthetic MBI)`""";
+      - `mbi=9AB2WW3GR44` (unhashed MBI)
+      - `mbi=82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c` (hashed)
+      - `mbi=1S00E00HA26` (synthetic MBI)""";
 
   /**
    * Open API content short description for partially adjudicated claim MBI ID being hashed or not.
@@ -278,5 +320,5 @@ public final class OpenAPIContentProvider {
     Examples:
        - `service-date=gt2023-01-02&service-date=lt2023-05-01`
        - `service-date=gt2023-01-02`
-       - `_service-date=lt2023-05-01`""";
+       - `service-date=lt2023-05-01`""";
 }

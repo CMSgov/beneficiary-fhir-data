@@ -668,13 +668,19 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Trace
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_IDENTIFIER_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_IDENTIFIER_VALUE)
           TokenParam identifier,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (identifier.getQueryParameterQualifier() != null) {

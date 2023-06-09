@@ -30,7 +30,7 @@
       "searchParam" : [ {
         "name" : "beneficiary",
         "type" : "reference",
-        "documentation" : "**NOTE: THIS IS A REQUIRED FIELD**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
+        "documentation" : "**NOTE: THIS IS A REQUIRED FIELD**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `patient=567834`\n  - `patient=1234`"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
@@ -53,7 +53,7 @@
       "searchParam" : [ {
         "name" : "patient",
         "type" : "reference",
-        "documentation" : "**NOTE: THIS IS A REQUIRED FIELD**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
+        "documentation" : "**NOTE: THIS IS A REQUIRED FIELD**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `patient=567834`\n  - `patient=1234`"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
@@ -69,7 +69,7 @@
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's _billable period_.\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n  - `service-date=gt2023-01-02&service-date=lt2023-05-01`\n  - `service-date=gt2023-01-02`\n  - `_service-date=lt2023-05-01`"
+        "documentation" : "Only satisfy the Search request if a claim's _billable period_.\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n  - `service-date=gt2023-01-02&service-date=lt2023-05-01`\n  - `service-date=gt2023-01-02`\n  - `service-date=lt2023-05-01`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -77,7 +77,7 @@
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.\nThis is optional and defaults to _*_ (all types);\nSupported Claim Type values:\n   - `carrier`\n   - `inpatient`\n   - `outpatient`\n   - `hha`\n   - `hospice`\n   - `snf`\n   - `dme`\n   - `partd`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n\nExamples:\n   - `type=carrier,inpatient,snf,dme`\n   - `type=outpatient`\n   - `type=*;`"
+        "documentation" : "A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.\nThis is optional and defaults to _*_ (all types);\nSupported Claim Type values:\n   - `carrier`\n   - `inpatient`\n   - `outpatient`\n   - `hha`\n   - `hospice`\n   - `snf`\n   - `dme`\n   - `partd`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n   - `inpatient`\n\nExamples:\n   - `type=carrier,inpatient,snf,dme`\n   - `type=outpatient`\n   - `type=*`"
       } ]
     }, {
       "type" : "OperationDefinition",
@@ -108,7 +108,7 @@
       }, {
         "name" : "_id",
         "type" : "token",
-        "documentation" : "**NOTE: THIS IS A REQUIRED FIELD**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
+        "documentation" : "**NOTE: THIS IS A REQUIRED FIELD**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `patient=567834`\n  - `patient=1234`"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",

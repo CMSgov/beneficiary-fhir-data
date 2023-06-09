@@ -286,7 +286,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
           @Description(
-              shortDefinition = OpenAPIContentProvider.PAC_MBI,
+              shortDefinition = OpenAPIContentProvider.PAC_MBI_SHORT,
               value = OpenAPIContentProvider.PAC_MBI_VALUE)
           ReferenceParam mbi,
       @OptionalParam(name = "type")
