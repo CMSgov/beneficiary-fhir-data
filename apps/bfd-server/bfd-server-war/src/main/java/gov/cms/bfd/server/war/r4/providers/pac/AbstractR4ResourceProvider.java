@@ -52,6 +52,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
@@ -238,28 +239,36 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    return getClaim(claimIdType, claimEntity, includeTaxNumbers);
+    return transformEntity(claimIdType, claimEntity, includeTaxNumbers);
   }
 
   /**
-   * Transforms the paca claim to the specified type.
+   * Transforms the pac claim entity to the specified type.
    *
    * @param claimIdType the claim type
    * @param claimEntity the claim entity to transform
    * @param includeTaxNumbers whether to include tax numbers
-   * @return the transformed explanation of benefit
+   * @return the transformed claim
    */
-  private T getClaim(
+  private T transformEntity(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
 
-    ClaimResponse response;
-    switch (claimIdType.getTypeLabel()) {
-      case "fiss" -> response =
-          fissClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
-      case "mcs" -> response =
-          mcsClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
-      default -> throw new IllegalStateException("Unexpected value: " + claimIdType.getTypeLabel());
+    DomainResource response;
+
+    if (claimIdType instanceof ClaimTypeV2<?> && claimIdType.getTypeLabel().equals("fiss")) {
+      response = fissClaimTransformerV2.transform(claimEntity, includeTaxNumbers);
+    } else if (claimIdType instanceof ClaimTypeV2<?> && claimIdType.getTypeLabel().equals("mcs")) {
+      response = mcsClaimTransformerV2.transform(claimEntity, includeTaxNumbers);
+    } else if (claimIdType instanceof ClaimResponseTypeV2<?>
+        && claimIdType.getTypeLabel().equals("fiss")) {
+      response = fissClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
+    } else if (claimIdType instanceof ClaimResponseTypeV2<?>
+        && claimIdType.getTypeLabel().equals("mcs")) {
+      response = mcsClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
+    } else {
+      throw new InvalidRequestException("Invalid claim id type, cannot get claim data");
     }
+
     return (T) response;
   }
 
@@ -441,7 +450,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       resources.addAll(
           entities.stream()
               .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(e))
-              .map(e -> getClaim(type, e, bundleOptions.includeTaxNumbers))
+              .map(e -> transformEntity(type, e, bundleOptions.includeTaxNumbers))
               .collect(Collectors.toList()));
     }
 
