@@ -323,7 +323,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   private long getStartingSequenceNumber(RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
     if (startingSequenceNumber.isPresent()) {
-      return startingSequenceNumber.map(x -> Math.max(MIN_SEQUENCE_NUM, x - 1)).get();
+      return startingSequenceNumber.map(x -> x - 1).get();
     } else {
       return sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
     }
