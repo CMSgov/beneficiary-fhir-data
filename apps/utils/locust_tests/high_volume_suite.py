@@ -1,20 +1,23 @@
 """High Volume Load test suite for BFD Server endpoints."""
-
 from random import shuffle
-from typing import Dict, List
+from typing import Callable, List, TypeVar, Optional, Type, Dict
 
 from locust import TaskSet, events, tag, task
 from locust.env import Environment
 
-from common import data, db, validation
+from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
+TaskT = TypeVar("TaskT", Callable[..., None], Type["TaskSet"])
 MASTER_BENE_IDS: List[str] = []
 MASTER_CONTRACT_DATA: List[Dict[str, str]] = []
 MASTER_HASHED_MBIS: List[str] = []
+DEFAULT_TASK_WEIGHT: int = 5
+TAGS: List[str] = []
+EXCLUDED_TAGS: List[str] = []
 
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
@@ -35,6 +38,18 @@ def _(environment: Environment, **kwargs):
         data_type_name="bene_ids",
     )
 
+    global TAGS
+    tags = getattr(environment.parsed_options, "tags", [])
+    if tags is not None:
+        for tag in tags:
+            TAGS.extend(tag.split())
+
+    global EXCLUDED_TAGS
+    excluded_tags = getattr(environment.parsed_options, "exclude_tags", [])
+    if excluded_tags is not None:
+        for excluded_tag in excluded_tags:
+            EXCLUDED_TAGS.extend(excluded_tag.split())
+
     global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
         environment.parsed_options,
@@ -54,199 +69,16 @@ def _(environment: Environment, **kwargs):
 class TestLoadShape(UserInitAwareLoadShape):
     pass
 
-class HighVolumeUser(BFDUserBase):
-    """High volume load test suite for V2 BFD Server endpoints.
+""" Required, otherwise the user will stay idle after executing its assigned task """
+class StopTaskSet(TaskSet):
+    @task(1)
+    def stop(self):
+        self.interrupt()
 
-    The tests in this suite generate a large volume of traffic to endpoints that are hit most
-    frequently during a peak load event.
-    """
-
-    # Do we terminate the tests when a test runs out of data and paginated URLs?
-    END_ON_NO_DATA = False
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.bene_ids = MASTER_BENE_IDS.copy()
-        self.contract_data = MASTER_CONTRACT_DATA.copy()
-        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
-
-        # Shuffle all the data around so that each HighVolumeUser is _probably_
-        # not requesting the same data.
-        shuffle(self.bene_ids)
-        shuffle(self.contract_data)
-        shuffle(self.hashed_mbis)
-
-        # Override the value for last_updated with a static value
-        self.last_updated = "2022-06-29"
-
-    @tag("global", "coverage", "coverage_test_id_count", "v2")
-    @task
-    def coverage_test_id_count(self):
-        """Coverage search by ID, Paginated"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Coverage",
-            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
-            name="/v2/fhir/Coverage search by id / count=10",
-        )
-
-    @tag("global", "coverage", "coverage_test_id_last_updated", "v2")
-    @task
-    def coverage_test_id_last_updated(self):
-        """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Coverage",
-            params={
-                "_lastUpdated": f"gt{ self.last_updated}",
-                "beneficiary":  self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
-        )
-
-    @tag("global", "coverage", "coverage_test_id", "v2")
-    @task
-    def coverage_test_id(self):
-        """Coverage search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Coverage",
-            params={
-                "beneficiary":  self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id",
-        )
-
-    @tag("global", "eob", "eob_test_id_count", "v2")
-    @task
-    def eob_test_id_count(self):
-        """Explanation of Benefit search by ID, Paginated"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/ExplanationOfBenefit",
-            params={
-                "patient":  self.bene_ids.pop(),
-                "_count": "10",
-                "_format": "application/fhir+json",
-            },
-            name="/v2/fhir/ExplanationOfBenefit search by id / count=10",
-        )
-
-    @tag("global", "eob", "eob_test_id_include_tax_number_last_updated", "v2")
-    @task
-    def eob_test_id_include_tax_number_last_updated(self):
-        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/ExplanationOfBenefit",
-            params={
-                "_lastUpdated": f"gt{ self.last_updated}",
-                "patient":  self.bene_ids.pop(),
-                "_IncludeTaxNumbers": "true",
-                "_format": "application/fhir+json",
-            },
-            name="/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
-        )
-
-    @tag("global", "eob", "eob_test_id", "v2")
-    @task
-    def eob_test_id(self):
-        """Explanation of Benefit search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/ExplanationOfBenefit",
-            params={"patient":  self.bene_ids.pop(), "_format": "application/fhir+json"},
-            name="/v2/fhir/ExplanationOfBenefit search by id",
-        )
-
-    @tag("global", "patient", "patient_test_coverage_contract", "v2")
-    @task
-    def patient_test_coverage_contract(self):
-        """Patient search by Coverage Contract, paginated"""
-
-        def make_url():
-            contract =  self.contract_data.pop()
-            return create_url_path(
-                "/v2/fhir/Patient",
-                {
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": 25,
-                    "_format": "json",
-                },
-            )
-
-        self.run_task(
-            name="/v2/fhir/Patient search by coverage contract (all pages)",
-            headers={"IncludeIdentifiers": "mbi"},
-            url_callback=make_url,
-        )
-
-    @tag("global", "patient", "patient_test_hashed_mbi", "v2")
-    @task
-    def patient_test_hashed_mbi(self):
-        """Patient search by hashed MBI, include identifiers"""
-
-        def make_url():
-            return create_url_path(
-                "/v2/fhir/Patient/",
-                {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{ self.hashed_mbis.pop()}",
-                    "_IncludeIdentifiers": "mbi",
-                },
-            )
-
-        self.run_task(
-            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
-            url_callback=make_url,
-        )
-
-    @tag("global", "patient", "patient_test_id_include_mbi_last_updated", "v2")
-    @task
-    def patient_test_id_include_mbi_last_updated(self):
-        """Patient search by ID with last updated, include MBI"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Patient",
-            params={
-                "_id":  self.bene_ids.pop(),
-                "_format": "application/fhir+json",
-                "_IncludeIdentifiers": "mbi",
-                "_lastUpdated": f"gt{ self.last_updated}",
-            },
-            name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
-        )
-
-    @tag("global", "patient", "patient_test_id", "v2")
-    @task
-    def patient_test_id(self):
-        """Patient search by ID"""
-        self.run_task_by_parameters(
-            base_path="/v2/fhir/Patient",
-            params={
-                "_id":  self.bene_ids.pop(),
-                "_format": "application/fhir+json",
-            },
-            name="/v2/fhir/Patient search by id",
-        )
-
-    @tag("global", "coverage", "coverage_test_id_count_v1", "v1")
-    @task
-    def coverage_test_id_count_v1(self):
-        """Coverage search by ID, Paginated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/Coverage",
-            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
-            name="/v1/fhir/Coverage search by id / count=10",
-        )
-
-    @tag("global", "coverage", "coverage_test_id_last_updated_v1", "v1")
-    @task
-    def coverage_test_id_last_updated_v1(self):
-        """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
-            base_path="/v1/fhir/Coverage",
-            params={
-                "_lastUpdated": f"gt{ self.last_updated}",
-                "beneficiary":  self.bene_ids.pop(),
-            },
-            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
-        )
-
-    @tag("global", "eob", "eob_test_id_count_type_pde_v1", "v1")
+EOB_TAG = "eob"
+@task(DEFAULT_TASK_WEIGHT)
+class EobTaskSet(StopTaskSet):
+    @tag(EOB_TAG, "eob_test_id_count_type_pde_v1", "v1")
     @task
     def eob_test_id_count_type_pde_v1(self):
         """Explanation of Benefit search by ID, type PDE, paginated"""
@@ -261,7 +93,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
         )
 
-    @tag("global", "eob", "eob_test_id_last_updated_count_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_last_updated_count_v1", "v1")
     @task
     def eob_test_id_last_updated_count_v1(self):
         """Explanation of Benefit search by ID, last updated, paginated"""
@@ -276,7 +108,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
         )
 
-    @tag("global", "eob", "eob_test_id_include_tax_number_last_updated_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_include_tax_number_last_updated_v1", "v1")
     @task
     def eob_test_id_include_tax_number_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
@@ -291,7 +123,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
         )
 
-    @tag("global", "eob", "eob_test_id_last_updated_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_last_updated_v1", "v1")
     @task
     def eob_test_id_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated"""
@@ -305,7 +137,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
         )
 
-    @tag("global", "eob", "eob_test_id_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_v1", "v1")
     @task
     def eob_test_id_v1(self):
         """Explanation of Benefit search by ID"""
@@ -315,7 +147,110 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
-    @tag("global", "patient", "patient_test_coverage_contract_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id", "v2")
+    @task
+    def eob_test_id(self):
+        """Explanation of Benefit search by ID"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ExplanationOfBenefit",
+            params={"patient":  self.bene_ids.pop(), "_format": "application/fhir+json"},
+            name="/v2/fhir/ExplanationOfBenefit search by id",
+        )
+
+    @tag(EOB_TAG, "eob_test_id_count", "v2")
+    @task
+    def eob_test_id_count(self):
+        """Explanation of Benefit search by ID, Paginated"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ExplanationOfBenefit",
+            params={
+                "patient":  self.bene_ids.pop(),
+                "_count": "10",
+                "_format": "application/fhir+json",
+            },
+            name="/v2/fhir/ExplanationOfBenefit search by id / count=10",
+        )
+
+    @tag(EOB_TAG, "eob_test_id_include_tax_number_last_updated", "v2")
+    @task
+    def eob_test_id_include_tax_number_last_updated(self):
+        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ExplanationOfBenefit",
+            params={
+                "_lastUpdated": f"gt{ self.last_updated}",
+                "patient":  self.bene_ids.pop(),
+                "_IncludeTaxNumbers": "true",
+                "_format": "application/fhir+json",
+            },
+            name="/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
+        )
+
+COVERAGE_TAG = "coverage"
+@task(DEFAULT_TASK_WEIGHT)
+class CoverageTaskSet(StopTaskSet):
+    @tag(COVERAGE_TAG, "coverage_test_id_count_v1", "v1")
+    @task
+    def coverage_test_id_count_v1(self):
+        """Coverage search by ID, Paginated"""
+        self.run_task_by_parameters(
+            base_path="/v1/fhir/Coverage",
+            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
+            name="/v1/fhir/Coverage search by id / count=10",
+        )
+
+    @tag(COVERAGE_TAG, "coverage_test_id_last_updated_v1", "v1")
+    @task
+    def coverage_test_id_last_updated_v1(self):
+        """Coverage search by ID, Last Updated"""
+        self.run_task_by_parameters(
+            base_path="/v1/fhir/Coverage",
+            params={
+                "_lastUpdated": f"gt{ self.last_updated}",
+                "beneficiary":  self.bene_ids.pop(),
+            },
+            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
+        )
+
+    @tag(COVERAGE_TAG, "coverage_test_id", "v2")
+    @task
+    def coverage_test_id(self):
+        """Coverage search by ID"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Coverage",
+            params={
+                "beneficiary":  self.bene_ids.pop(),
+            },
+            name="/v2/fhir/Coverage search by id",
+        )
+
+    @tag(COVERAGE_TAG, "coverage_test_id_count", "v2")
+    @task
+    def coverage_test_id_count(self):
+        """Coverage search by ID, Paginated"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Coverage",
+            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
+            name="/v2/fhir/Coverage search by id / count=10",
+        )
+
+    @tag(COVERAGE_TAG, "coverage_test_id_last_updated", "v2")
+    @task
+    def coverage_test_id_last_updated(self):
+        """Coverage search by ID, Last Updated"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Coverage",
+            params={
+                "_lastUpdated": f"gt{self.last_updated}",
+                "beneficiary":  self.bene_ids.pop(),
+            },
+            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
+        )
+
+PATIENT_TAG = "patient"
+@task(DEFAULT_TASK_WEIGHT)
+class PatientTaskSet(StopTaskSet):
+    @tag(PATIENT_TAG, "patient_test_coverage_contract_v1", "v1")
     @task
     def patient_test_coverage_contract_v1(self):
         """Patient search by coverage contract (all pages)"""
@@ -338,7 +273,7 @@ class HighVolumeUser(BFDUserBase):
             url_callback=make_url,
         )
 
-    @tag("global", "patient", "patient_test_hashed_mbi_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_hashed_mbi_v1", "v1")
     @task
     def patient_test_hashed_mbi_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -357,7 +292,7 @@ class HighVolumeUser(BFDUserBase):
             url_callback=make_url,
         )
 
-    @tag("global", "patient", "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
     @task
     def patient_test_id_last_updated_include_mbi_include_address_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -372,7 +307,7 @@ class HighVolumeUser(BFDUserBase):
             name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
         )
 
-    @tag("global", "patient", "patient_test_id_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_id_v1", "v1")
     @task
     def patient_test_id_v1(self):
         """Patient search by ID"""
@@ -381,3 +316,140 @@ class HighVolumeUser(BFDUserBase):
             return create_url_path(f"/v1/fhir/Patient/{ self.bene_ids.pop()}", {})
 
         self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
+
+    @tag(PATIENT_TAG, "patient_test_coverage_contract", "v2")
+    @task
+    def patient_test_coverage_contract(self):
+        """Patient search by Coverage Contract, paginated"""
+        def make_url():
+            contract =  self.contract_data.pop()
+            return create_url_path(
+                "/v2/fhir/Patient",
+                {
+                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                    "_count": 25,
+                    "_format": "json",
+                },
+            )
+
+        self.run_task(
+            name="/v2/fhir/Patient search by coverage contract (all pages)",
+            headers={"IncludeIdentifiers": "mbi"},
+            url_callback=make_url,
+        )
+
+    @tag(PATIENT_TAG, "patient_test_hashed_mbi", "v2")
+    @task
+    def patient_test_hashed_mbi(self):
+        """Patient search by hashed MBI, include identifiers"""
+        def make_url():
+            return create_url_path(
+                "/v2/fhir/Patient/",
+                {
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{ self.hashed_mbis.pop()}",
+                    "_IncludeIdentifiers": "mbi",
+                },
+            )
+
+        self.run_task(
+            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
+            url_callback=make_url,
+        )
+
+    @tag(PATIENT_TAG, "patient_test_id_include_mbi_last_updated", "v2")
+    @task
+    def patient_test_id_include_mbi_last_updated(self):
+        """Patient search by ID with last updated, include MBI"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Patient",
+            params={
+                "_id":  self.bene_ids.pop(),
+                "_format": "application/fhir+json",
+                "_IncludeIdentifiers": "mbi",
+                "_lastUpdated": f"gt{ self.last_updated}",
+            },
+            name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
+        )
+
+    @tag(PATIENT_TAG, "patient_test_id", "v2")
+    @task
+    def patient_test_id(self):
+        """Patient search by ID"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Patient",
+            params={
+                "_id":  self.bene_ids.pop(),
+                "_format": "application/fhir+json",
+            },
+            name="/v2/fhir/Patient search by id",
+        )
+
+""" Must be declared here due to the Type annotation requiring a class definition """
+TASK_SET_BY_TAG: Dict[str, Type[StopTaskSet]] = {
+    EOB_TAG: EobTaskSet,
+    COVERAGE_TAG: CoverageTaskSet,
+    PATIENT_TAG: PatientTaskSet
+}
+
+class HighVolumeUser(BFDUserBase):
+    """High volume load test suite for V2 BFD Server endpoints.
+
+    The tests in this suite generate a large volume of traffic to endpoints that are hit most
+    frequently during a peak load event.
+    """
+
+    # Do we terminate the tests when a test runs out of data and paginated URLs?
+    END_ON_NO_DATA = False
+
+    @staticmethod
+    def get_tasks(task_set: StopTaskSet):
+        tasks = []
+        for possible_task in task_set.__dict__.values():
+            if hasattr(possible_task, "locust_task_weight"):
+                tasks.append(possible_task)
+        return tasks
+
+    @staticmethod
+    def filter_tasks(tasks: List[TaskT], tags: List[str], exclude_tags: List[str], checked: Optional[Dict[TaskT, bool]]):
+        filtered_tasks = []
+        if checked is None:
+            checked = {}
+        for task in tasks:
+            if task in checked:
+                if checked[task]:
+                    filtered_tasks.append(task)
+                continue
+            passing = True
+            if tags is not None:
+                passing &= "locust_tag_set" in dir(task) and len(set(task.locust_tag_set) & set(tags)) > 0
+            if exclude_tags is not None:
+                passing &= "locust_tag_set" not in dir(task) or len(set(task.locust_tag_set) & set(exclude_tags)) == 0
+            if passing:
+                filtered_tasks.append(task)
+            checked[task] = passing
+
+        return filtered_tasks
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bene_ids = MASTER_BENE_IDS.copy()
+        self.contract_data = MASTER_CONTRACT_DATA.copy()
+        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+
+        tasklist = []
+        for taskset in TASK_SET_BY_TAG.values():
+            tasklist.extend(self.get_tasks(taskset))
+        if TAGS or EXCLUDED_TAGS:
+            self.tasks = self.filter_tasks(tasklist, TAGS, EXCLUDED_TAGS, None)
+        else:
+            self.tasks = tasklist
+
+        # Shuffle all the data around so that each HighVolumeUser is _probably_
+        # not requesting the same data.
+        shuffle(self.bene_ids)
+        shuffle(self.contract_data)
+        shuffle(self.hashed_mbis)
+
+        # Override the value for last_updated with a static value
+        self.last_updated = "2022-06-29"
