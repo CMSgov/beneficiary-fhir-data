@@ -199,8 +199,8 @@ public class GrpcResponseStreamTest {
   }
 
   /**
-   * Verify that close does nothing for a stream that threw an exception during {#link {@link
-   * GrpcResponseStream#next}}.
+   * Verify that close does nothing for a stream that threw an exception during {@link
+   * GrpcResponseStream#next}.
    *
    * @throws Exception pass through from method calls
    */
@@ -215,8 +215,8 @@ public class GrpcResponseStreamTest {
   }
 
   /**
-   * Verify that close does nothing for a stream that threw an exception during {#link {@link
-   * GrpcResponseStream#next}}.
+   * Verify that close does nothing for a stream that threw an exception during {@link
+   * GrpcResponseStream#next}.
    *
    * @throws Exception pass through from method calls
    */
