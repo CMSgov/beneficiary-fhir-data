@@ -2,9 +2,15 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
@@ -12,12 +18,15 @@ import io.grpc.ClientCall;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.Iterator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Unit tests for {@link GrpcResponseStream}. */
+@ExtendWith(MockitoExtension.class)
 public class GrpcResponseStreamTest {
   /** Mock iterator used by the response stream. */
   @Mock private Iterator<Integer> iterator;
@@ -29,8 +38,13 @@ public class GrpcResponseStreamTest {
   /** Sets up the test stream and mocks. */
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     stream = new GrpcResponseStream<>(clientCall, iterator);
+  }
+
+  /** Closes the stream created by {@link #setUp}. */
+  @AfterEach
+  void tearDown() {
+    stream.close();
   }
 
   /** Verify that {@link GrpcResponseStream#hasNext()} passes through non-interrupt exceptions. */
@@ -59,7 +73,11 @@ public class GrpcResponseStreamTest {
     }
   }
 
-  /** Verify that {@link GrpcResponseStream#hasNext()} wraps {@link InterruptedException}s. */
+  /**
+   * Verify that {@link GrpcResponseStream#hasNext()} wraps {@link InterruptedException}s.
+   *
+   * @throws DroppedConnectionException pass through checked exception
+   */
   @Test
   public void testThatHasNextWrapsInterrupts() throws DroppedConnectionException {
     StatusRuntimeException status =
@@ -73,7 +91,11 @@ public class GrpcResponseStreamTest {
     }
   }
 
-  /** Verify that {@link GrpcResponseStream#next()} wraps {@link InterruptedException}s. */
+  /**
+   * Verify that {@link GrpcResponseStream#next()} wraps {@link InterruptedException}s.
+   *
+   * @throws DroppedConnectionException pass through checked exception
+   */
   @Test
   public void testThatNextWrapsInterrupts() throws DroppedConnectionException {
     StatusRuntimeException status =
@@ -90,6 +112,8 @@ public class GrpcResponseStreamTest {
   /**
    * Verify that {@link GrpcResponseStream#hasNext()} wraps exceptions that indicate a supported
    * type of dropped connection.
+   *
+   * @throws StreamInterruptedException pass through checked exception
    */
   @Test
   public void testThatHasNextWrapsDroppedConnections() throws StreamInterruptedException {
@@ -108,6 +132,8 @@ public class GrpcResponseStreamTest {
   /**
    * Verify that {@link GrpcResponseStream#hasNext()} wraps exceptions that indicate a supported
    * type of dropped connection.
+   *
+   * @throws StreamInterruptedException pass through checked exception
    */
   @Test
   public void testThatNextWrapsDroppedConnections() throws StreamInterruptedException {
@@ -139,5 +165,68 @@ public class GrpcResponseStreamTest {
 
     exception = new StatusRuntimeException(Status.DEADLINE_EXCEEDED);
     assertTrue(GrpcResponseStream.isStreamResetException(exception));
+  }
+
+  /**
+   * Verify that close cancels an unfinished stream. Also that calling close multiple times does
+   * nothing after the first.
+   *
+   * @throws Exception pass through from method calls
+   */
+  @Test
+  public void testThatCloseCancelsIncompleteStream() throws Exception {
+    doReturn(true).when(iterator).hasNext();
+    stream.hasNext();
+    stream.close();
+    stream.close();
+    stream.close();
+    verify(clientCall, times(1)).cancel(anyString(), isNull());
+  }
+
+  /**
+   * Verify that close does nothing for a completed stream.
+   *
+   * @throws Exception pass through from method calls
+   */
+  @Test
+  public void testThatCloseIgnoresCompletedStream() throws Exception {
+    doReturn(false).when(iterator).hasNext();
+    stream.hasNext();
+    stream.close();
+    stream.close();
+    stream.close();
+    verify(clientCall, times(0)).cancel(anyString(), isNull());
+  }
+
+  /**
+   * Verify that close does nothing for a stream that threw an exception during {@link
+   * GrpcResponseStream#next}.
+   *
+   * @throws Exception pass through from method calls
+   */
+  @Test
+  public void testThatCloseIgnoresFailedStreamOnHasNext() throws Exception {
+    doThrow(new StatusRuntimeException(Status.ABORTED)).when(iterator).hasNext();
+    assertThrows(StatusRuntimeException.class, () -> stream.hasNext());
+    stream.close();
+    stream.close();
+    stream.close();
+    verify(clientCall, times(0)).cancel(anyString(), isNull());
+  }
+
+  /**
+   * Verify that close does nothing for a stream that threw an exception during {@link
+   * GrpcResponseStream#next}.
+   *
+   * @throws Exception pass through from method calls
+   */
+  @Test
+  public void testThatCloseIgnoresFailedStreamOnNext() throws Exception {
+    doThrow(new StatusRuntimeException(Status.ABORTED)).when(iterator).next();
+    assertThrows(StatusRuntimeException.class, () -> stream.next());
+    stream.close();
+    stream.close();
+    stream.close();
+    verify(clientCall, times(0)).cancel(anyString(), isNull());
   }
 }

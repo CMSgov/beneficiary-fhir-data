@@ -185,6 +185,7 @@ public class StandardGrpcRdaSourceTest {
     verify(sink).readMaxExistingSequenceNumber();
     verify(caller).callService(channel, CallOptions.DEFAULT, RdaChange.MIN_SEQUENCE_NUM);
     verify(responseStream).cancelStream(anyString());
+    verify(responseStream).close();
   }
 
   /**
