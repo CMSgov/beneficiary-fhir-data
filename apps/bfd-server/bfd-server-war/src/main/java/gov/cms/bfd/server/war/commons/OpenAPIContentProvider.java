@@ -45,7 +45,7 @@ public final class OpenAPIContentProvider {
     Typically, identifiers are used to connect content in resources to external content available in other frameworks or protocols.
     Identifiers are associated with objects and may be changed or retired due to human or system process and errors.`
 
-    This class contains the identifier, which is usually represeted as an absolute URL reference to the resource identity
+    This class contains the identifier, which is usually represented as an absolute URL reference to the resource identity
     (mbi, hicn id, etc); the following are all valid values for Identifier, and all might represent the same resource:
       - `identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169`
       - `identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c`""";
