@@ -59,7 +59,7 @@ public final class OutpatientClaimTransformerTest {
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(transformerContext, claim);
     assertMatches(claim, eob, transformerContext);
@@ -92,7 +92,7 @@ public final class OutpatientClaimTransformerTest {
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(transformerContext, claim);
     assertMatches(claim, eob, transformerContext);
@@ -123,7 +123,7 @@ public final class OutpatientClaimTransformerTest {
             new MetricRegistry(),
             Optional.empty(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookupForTesting());
+            new NPIOrgLookup());
 
     parsedRecords.stream()
         .filter(r -> r instanceof OutpatientClaim)

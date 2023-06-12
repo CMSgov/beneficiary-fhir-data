@@ -132,6 +132,18 @@ resource "aws_kms_key" "this" {
             "kms:GenerateDataKey*"
           ],
           "Resource" : "*"
+        },
+        {
+            "Sid" : "Allow S3 to work with encrypted queues and topics",
+            "Effect" : "Allow",
+            "Principal" : {
+                "Service" : "s3.amazonaws.com"
+            },
+            "Action" : [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+            ],
+            "Resource" : "*"
         }
       ]
   })

@@ -88,9 +88,7 @@ public class SNFClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    snfClaimTransformer =
-        new SNFClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+    snfClaimTransformer = new SNFClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
