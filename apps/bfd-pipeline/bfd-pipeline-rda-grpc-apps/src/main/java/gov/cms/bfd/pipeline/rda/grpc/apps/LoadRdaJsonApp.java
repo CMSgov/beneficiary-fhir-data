@@ -82,7 +82,7 @@ public class LoadRdaJsonApp {
 
       var serviceConfig = config.createMessageSourceFactoryConfig();
 
-      checkConnectivity(serviceConfig);
+      checkConnectivity(config, serviceConfig);
 
       RdaServer.LocalConfig.builder()
           .serviceConfig(serviceConfig)
@@ -121,17 +121,22 @@ public class LoadRdaJsonApp {
    * Checks that we can make a viable connection to each claim source. Creates a {@link
    * RdaMessageSourceFactory} then verifies that it can interact with each type of claim source.
    *
+   * @param config our configuration to get starting sequence numbers
    * @param serviceConfig used to create a {@link RdaMessageSourceFactory}
    * @throws Exception If there was an issue connecting to the message source.
    */
-  private static void checkConnectivity(RdaMessageSourceFactory.Config serviceConfig)
+  private static void checkConnectivity(Config config, RdaMessageSourceFactory.Config serviceConfig)
       throws Exception {
     try (var messageSourceFactory = serviceConfig.createMessageSourceFactory()) {
-      try (var source = messageSourceFactory.createFissMessageSource(0)) {
-        LOGGER.info("checking for FISS claims: {}", source.hasNext());
+      final long startingFissSeq = config.startingFissSequenceNumber.orElse(0L);
+      try (var source = messageSourceFactory.createFissMessageSource(startingFissSeq)) {
+        LOGGER.info(
+            "checking for FISS claims: startSeq={} found={}", startingFissSeq, source.hasNext());
       }
-      try (var source = messageSourceFactory.createMcsMessageSource(0)) {
-        LOGGER.info("checking for MCS claims: {}", source.hasNext());
+      final long startingMcsSeq = config.startingMcsSequenceNumber.orElse(0L);
+      try (var source = messageSourceFactory.createMcsMessageSource(startingMcsSeq)) {
+        LOGGER.info(
+            "checking for MCS claims: startSeq={} found={}", startingMcsSeq, source.hasNext());
       }
     }
   }
@@ -142,7 +147,7 @@ public class LoadRdaJsonApp {
    */
   private static class Config {
     /** The hash pepper. */
-    private final String hashPepper;
+    private final byte[] hashPepper;
     /** The hash iterations. */
     private final int hashIterations;
     /** The database url. */
@@ -166,8 +171,12 @@ public class LoadRdaJsonApp {
     private final String rdaVersion;
     /** The name of the FISS file to read from at the source. */
     private final Optional<File> fissFile;
+    /** The starting FISS sequence number. */
+    private final Optional<Long> startingFissSequenceNumber;
     /** The name of the MCS file to read from at the source. */
     private final Optional<File> mcsFile;
+    /** The starting MCS sequence number. */
+    private final Optional<Long> startingMcsSequenceNumber;
     /** The S3 region to use if the source is an S3 connection. */
     private final Optional<Region> s3Region;
     /** The S3 bucket to use if the source is an S3 connection. */
@@ -181,8 +190,8 @@ public class LoadRdaJsonApp {
      * @param options to load for the RDA pipeline
      */
     private Config(ConfigLoader options) {
-      hashPepper = options.stringValue("hash.pepper", "notarealpepper");
-      hashIterations = options.intValue("hash.iterations", 2);
+      hashPepper = options.hexBytes("hash.pepper");
+      hashIterations = options.intValue("hash.iterations");
       dbUrl = options.stringValue("database.url", "jdbc:hsqldb:mem:LoadRdaJsonApp");
       dbUser = options.stringValue("database.user", "");
       dbPassword = options.stringValue("database.password", "");
@@ -197,6 +206,8 @@ public class LoadRdaJsonApp {
       rdaVersion = options.stringOption("rda.version").orElse(RdaService.RDA_PROTO_VERSION);
       fissFile = options.readableFileOption("file.fiss");
       mcsFile = options.readableFileOption("file.mcs");
+      startingFissSequenceNumber = options.longOption("sequenceNumber.fiss");
+      startingMcsSequenceNumber = options.longOption("sequenceNumber.mcs");
       s3Region = options.parsedOption("s3.region", Region.class, Region::of);
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
@@ -236,6 +247,8 @@ public class LoadRdaJsonApp {
               .batchSize(batchSize)
               .sinkTypePreference(sinkTypePreference)
               .rdaVersion(RdaVersion.builder().versionString(rdaVersion).build())
+              .startingFissSeqNum(startingFissSequenceNumber.orElse(null))
+              .startingMcsSeqNum(startingMcsSequenceNumber.orElse(null))
               .build();
       final RdaSourceConfig grpcConfig =
           RdaSourceConfig.builder()

@@ -16,14 +16,11 @@ import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
-import gov.cms.mpsm.rda.v1.FissClaimChange;
-import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -62,7 +59,7 @@ public class RdaServerJobIT extends MinioTestContainer {
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
   /** only need a single instance of the S3 client. */
-  private static S3Client s3Client = createS3MinioClient();
+  private static final S3Client s3Client = createS3MinioClient();
 
   /**
    * Tests the server job in {@link RdaServerJob.Config.ServerMode#Random} configuration (generating
@@ -87,17 +84,17 @@ public class RdaServerJobIT extends MinioTestContainer {
       final ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       try {
         final FissClaimStreamCaller fissCaller = new FissClaimStreamCaller();
-        final GrpcResponseStream<FissClaimChange> fissStream =
-            fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
-        assertTrue(fissStream.hasNext());
-        RdaChange<RdaFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
-        assertMatches(
-            fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "Random:1:.*");
-        assertEquals(3L, fissChange.getSequenceNumber());
-        assertTrue(fissStream.hasNext());
-        fissChange = fissTransformer.transformClaim(fissStream.next());
-        assertEquals(4L, fissChange.getSequenceNumber());
-        assertFalse(fissStream.hasNext());
+        try (var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2)) {
+          assertTrue(fissStream.hasNext());
+          RdaChange<RdaFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
+          assertMatches(
+              fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "Random:1:.*");
+          assertEquals(3L, fissChange.getSequenceNumber());
+          assertTrue(fissStream.hasNext());
+          fissChange = fissTransformer.transformClaim(fissStream.next());
+          assertEquals(4L, fissChange.getSequenceNumber());
+          assertFalse(fissStream.hasNext());
+        }
       } finally {
         fissChannel.shutdownNow();
         fissChannel.awaitTermination(1, TimeUnit.MINUTES);
@@ -106,13 +103,14 @@ public class RdaServerJobIT extends MinioTestContainer {
       final ManagedChannel mcsChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       try {
         final McsClaimStreamCaller mcsCaller = new McsClaimStreamCaller();
-        final GrpcResponseStream<McsClaimChange> mcsStream =
-            mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 3);
-        assertTrue(mcsStream.hasNext());
-        RdaChange<RdaMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
-        assertMatches(mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "Random:1:.*");
-        assertEquals(4L, mcsChange.getSequenceNumber());
-        assertFalse(mcsStream.hasNext());
+        try (var mcsStream = mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 3)) {
+          assertTrue(mcsStream.hasNext());
+          RdaChange<RdaMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
+          assertMatches(
+              mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "Random:1:.*");
+          assertEquals(4L, mcsChange.getSequenceNumber());
+          assertFalse(mcsStream.hasNext());
+        }
       } finally {
         mcsChannel.shutdownNow();
         mcsChannel.awaitTermination(1, TimeUnit.MINUTES);
@@ -161,19 +159,20 @@ public class RdaServerJobIT extends MinioTestContainer {
         final ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
         try {
           final var fissCaller = new FissClaimStreamCaller();
-          final var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 1097);
-          assertTrue(fissStream.hasNext());
-          RdaChange<RdaFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
-          assertMatches(
-              fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
-          assertEquals(1098L, fissChange.getSequenceNumber());
-          assertTrue(fissStream.hasNext());
-          fissChange = fissTransformer.transformClaim(fissStream.next());
-          assertEquals(1099L, fissChange.getSequenceNumber());
-          assertTrue(fissStream.hasNext());
-          fissChange = fissTransformer.transformClaim(fissStream.next());
-          assertEquals(1100L, fissChange.getSequenceNumber());
-          assertFalse(fissStream.hasNext());
+          try (var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 1097)) {
+            assertTrue(fissStream.hasNext());
+            RdaChange<RdaFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
+            assertMatches(
+                fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
+            assertEquals(1098L, fissChange.getSequenceNumber());
+            assertTrue(fissStream.hasNext());
+            fissChange = fissTransformer.transformClaim(fissStream.next());
+            assertEquals(1099L, fissChange.getSequenceNumber());
+            assertTrue(fissStream.hasNext());
+            fissChange = fissTransformer.transformClaim(fissStream.next());
+            assertEquals(1100L, fissChange.getSequenceNumber());
+            assertFalse(fissStream.hasNext());
+          }
         } finally {
           fissChannel.shutdownNow();
           fissChannel.awaitTermination(1, TimeUnit.MINUTES);
@@ -181,16 +180,17 @@ public class RdaServerJobIT extends MinioTestContainer {
         final ManagedChannel mcsChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
         try {
           final var mcsCaller = new McsClaimStreamCaller();
-          final var mcsStream = mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 1098);
-          assertTrue(mcsStream.hasNext());
-          RdaChange<RdaMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
-          assertMatches(
-              mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
-          assertEquals(1099L, mcsChange.getSequenceNumber());
-          assertTrue(mcsStream.hasNext());
-          mcsChange = mcsTransformer.transformClaim(mcsStream.next());
-          assertEquals(1100L, mcsChange.getSequenceNumber());
-          assertFalse(mcsStream.hasNext());
+          try (var mcsStream = mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 1098)) {
+            assertTrue(mcsStream.hasNext());
+            RdaChange<RdaMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
+            assertMatches(
+                mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
+            assertEquals(1099L, mcsChange.getSequenceNumber());
+            assertTrue(mcsStream.hasNext());
+            mcsChange = mcsTransformer.transformClaim(mcsStream.next());
+            assertEquals(1100L, mcsChange.getSequenceNumber());
+            assertFalse(mcsStream.hasNext());
+          }
         } finally {
           mcsChannel.shutdownNow();
           mcsChannel.awaitTermination(1, TimeUnit.MINUTES);
@@ -231,9 +231,10 @@ public class RdaServerJobIT extends MinioTestContainer {
       ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       try {
         var fissCaller = new FissClaimStreamCaller();
-        var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
-        assertTrue(fissStream.hasNext());
-        assertEquals(3L, fissTransformer.transformClaim(fissStream.next()).getSequenceNumber());
+        try (var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2)) {
+          assertTrue(fissStream.hasNext());
+          assertEquals(3L, fissTransformer.transformClaim(fissStream.next()).getSequenceNumber());
+        }
       } finally {
         fissChannel.shutdownNow();
         fissChannel.awaitTermination(1, TimeUnit.MINUTES);
@@ -247,9 +248,10 @@ public class RdaServerJobIT extends MinioTestContainer {
       fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       try {
         var fissCaller = new FissClaimStreamCaller();
-        var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
-        assertTrue(fissStream.hasNext());
-        assertEquals(3L, fissTransformer.transformClaim(fissStream.next()).getSequenceNumber());
+        try (var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2)) {
+          assertTrue(fissStream.hasNext());
+          assertEquals(3L, fissTransformer.transformClaim(fissStream.next()).getSequenceNumber());
+        }
       } finally {
         fissChannel.shutdownNow();
         fissChannel.awaitTermination(1, TimeUnit.MINUTES);
