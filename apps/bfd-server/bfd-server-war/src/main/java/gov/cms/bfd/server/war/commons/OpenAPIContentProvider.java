@@ -181,14 +181,14 @@ public final class OpenAPIContentProvider {
   /** Open API content value for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_VALUE =
       """
-   Only satisfy the Search request if a claim's _billable period_.
-   falls within a specified _DateRange_. A DateRange can include both
-   low and high date values, only a low date value, or only a high date value.
+   Only satisfy the Search request if a claim's _billable period_
+   falls within a specified _DateRange_. A _DateRange_ can be 
+   defined by providing less than `lt` and/or greater than `gt` values.
 
    Examples:
-     - `service-date=gt2023-01-02&service-date=lt2023-05-01`
-     - `service-date=gt2023-01-02`
-     - `service-date=lt2023-05-01`""";
+     - `service-date=gt2023-01-02&service-date=lt2023-05-01` defines a range between two provided dates
+     - `service-date=gt2023-01-02` defines a range between the provided date and today
+     - `service-date=lt2023-05-01` defines a range from the earliest available records until the provided date""";
 
   /** Open API short description for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_SHORT =
