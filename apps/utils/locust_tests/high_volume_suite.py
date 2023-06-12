@@ -69,12 +69,6 @@ def _(environment: Environment, **kwargs):
 class TestLoadShape(UserInitAwareLoadShape):
     pass
 
-""" Required, otherwise the user will stay idle after executing its assigned task """
-class StopTaskSet(TaskSet):
-    @task
-    def stop(self):
-        pass
-
 EOB_TAG = "eob"
 @tag(EOB_TAG)
 @task(DEFAULT_TASK_WEIGHT)
