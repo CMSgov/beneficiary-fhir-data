@@ -27,8 +27,8 @@ public final class OpenAPIContentProvider {
     This class contains that logical ID, and can optionally also contain a relative or absolute URL
     representing the resource identity; the following are all valid values for IdType, and all might
     represent the same resource:
-      - `patient=567834`
-      - `patient=1234`""";
+      - `_id=567834`
+      - `_id=1234`""";
 
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String PATIENT_SP_IDENTIFIER_SHORT = "The patient identifier to search for";
