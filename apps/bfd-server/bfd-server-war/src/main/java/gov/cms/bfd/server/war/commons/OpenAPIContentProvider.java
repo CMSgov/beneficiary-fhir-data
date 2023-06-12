@@ -13,7 +13,7 @@ public final class OpenAPIContentProvider {
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_VALUE =
       """
-    **NOTE: THIS IS A REQUIRED FIELD**
+    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
 
     Fetch _Patient_ data using a FHIR _IdType_ identifier; an IdType
     represents the logical identity for a resource, or as much of that
@@ -35,7 +35,7 @@ public final class OpenAPIContentProvider {
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_IDENTIFIER_VALUE =
       """
-    **NOTE: THIS IS A REQUIRED FIELD**
+    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
 
     Fetch _Patient_ data using a FHIR _identifier_; an identifier contains a set of values that
     include the logical identity for a resource. In FHIR, the _identifier_ is a parent element
@@ -85,7 +85,7 @@ public final class OpenAPIContentProvider {
    */
   public static final String PATIENT_PARTD_CONTRACT_VALUE =
       """
-    **NOTE: THIS IS A REQUIRED FIELD**
+    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
 
     When searching for a Patient's Part D events information, this resource identifies
     the Part D contract value that will be used when determining eligibility.
@@ -179,7 +179,7 @@ public final class OpenAPIContentProvider {
   public static final String EOB_SERVICE_DATE_VALUE =
       """
    Only satisfy the Search request if a claim's _billable period_
-   falls within a specified _DateRange_. A _DateRange_ can be 
+   falls within a specified _DateRange_. A _DateRange_ can be
    defined by providing less than `lt` and/or greater than `gt` values.
 
    Examples:
@@ -217,7 +217,7 @@ public final class OpenAPIContentProvider {
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
       """
-   **NOTE: THIS IS A REQUIRED FIELD**
+    **NOTE: THIS IS A REQUIRED FIELD**
 
    Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI
    represents the medicare benficiary ID, or as much of that
@@ -226,29 +226,6 @@ public final class OpenAPIContentProvider {
    ```
    A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
    '-', with a length limit of 11 characters.
-   The MBI ID has the following characters for each position:
-
-   Position 1 - numeric values 1 through 9
-
-   Position 2 - alphabetic values A through Z (minus S, L, O, I, B, Z)
-
-   Position 3 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)
-
-   Position 4 - numeric values 0 through 9
-
-   Position 5 - alphabetic values A through Z (minus S, L, O, I, B, Z)
-
-   Position 6 - alpha-numeric values 0 through 9 and A through Z (minus S, L, O, I, B, Z)
-
-   Position 7 - numeric values 0 through 9
-
-   Position 8 - alphabetic values A through Z (minus S, L, O, I, B, Z)
-
-   Position 9 - alphabetic values A through Z (minus S, L, O, I, B, Z)
-
-   Position 10 - numeric values 0 through 9
-
-   Position 11 - numeric values 0 through 9
    ```
 
    The following are all valid values for MBI, and all might
