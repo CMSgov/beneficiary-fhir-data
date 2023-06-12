@@ -154,21 +154,18 @@ public final class OpenAPIContentProvider {
   /** Open API content value for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_VALUE =
       """
-    A list of claim types that filters the response to contain only EoBs which have any of the specified claim types.
-    This is optional and defaults to _*_ (all types);
-    Supported Claim Type values:
+    One or more comma-delimited claim types that filters the response to contain only EoBs that include the specified claim types.
+    This is optional and defaults to `*` denoting all types.
+    Supported values for claim type:
+       - `*` all types (default)
        - `carrier`
-       - `inpatient`
-       - `outpatient`
+       - `dme`
        - `hha`
        - `hospice`
-       - `snf`
-       - `dme`
+       - `inpatient`
+       - `outpatient`
        - `partd`
-       - `inpatient`
-       - `inpatient`
-       - `inpatient`
-       - `inpatient`
+       - `snf`
 
     Examples:
        - `type=carrier,inpatient,snf,dme`
