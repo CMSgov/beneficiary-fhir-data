@@ -230,60 +230,62 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
         // in order to attempt to get the claim we really want
         final long SINCE = startingSequenceNumber - 1;
 
-        final GrpcResponseStream<TMessage> responseStream =
-            caller.callService(channel, callOptionsFactory.get(), SINCE);
-        final Map<Object, TMessage> batch = new LinkedHashMap<>();
+        try (GrpcResponseStream<TMessage> responseStream =
+            caller.callService(channel, callOptionsFactory.get(), SINCE)) {
+          final Map<Object, TMessage> batch = new LinkedHashMap<>();
 
-        try {
-          if (responseStream.hasNext()) {
-            setUptimeToReceiving();
-            final TMessage result = responseStream.next();
-            metrics.getObjectsReceived().increment();
+          try {
+            if (responseStream.hasNext()) {
+              setUptimeToReceiving();
+              final TMessage result = responseStream.next();
+              metrics.getObjectsReceived().increment();
 
-            if (sequencePredicate.test(startingSequenceNumber, result)) {
-              // It's a match, so check if we can successfully process it now.
-              batch.put(sink.getClaimIdForMessage(result), result);
-              int processed = submitBatchToSink(apiVersion, sink, batch);
-              processResult.addCount(processed);
+              if (sequencePredicate.test(startingSequenceNumber, result)) {
+                // It's a match, so check if we can successfully process it now.
+                batch.put(sink.getClaimIdForMessage(result), result);
+                int processed = submitBatchToSink(apiVersion, sink, batch);
+                processResult.addCount(processed);
 
-              if (processed > 0
-                  && dao.updateState(startingSequenceNumber, type, MessageError.Status.RESOLVED)
-                      > 0) {
-                log.info(
-                    "{} claim with sequence ({}) processed successfully, marking as resolved",
-                    claimType,
-                    startingSequenceNumber);
-              }
-            } else {
-              // We didn't get the sequence number we wanted, which means it's obsolete
-              if (dao.updateState(startingSequenceNumber, type, MessageError.Status.OBSOLETE) > 0) {
-                log.info(
-                    "{} claim with sequence({}) was not returned, marking as obsolete",
-                    claimType,
-                    startingSequenceNumber);
+                if (processed > 0
+                    && dao.updateState(startingSequenceNumber, type, MessageError.Status.RESOLVED)
+                        > 0) {
+                  log.info(
+                      "{} claim with sequence ({}) processed successfully, marking as resolved",
+                      claimType,
+                      startingSequenceNumber);
+                }
               } else {
-                log.error(
-                    "{} claim with sequence({}) was not returned, but failed to mark obsolete",
-                    claimType,
-                    startingSequenceNumber);
+                // We didn't get the sequence number we wanted, which means it's obsolete
+                if (dao.updateState(startingSequenceNumber, type, MessageError.Status.OBSOLETE)
+                    > 0) {
+                  log.info(
+                      "{} claim with sequence({}) was not returned, marking as obsolete",
+                      claimType,
+                      startingSequenceNumber);
+                } else {
+                  log.error(
+                      "{} claim with sequence({}) was not returned, but failed to mark obsolete",
+                      claimType,
+                      startingSequenceNumber);
+                }
               }
             }
+            responseStream.cancelStream("No further messages need to be ingested.");
+          } catch (GrpcResponseStream.StreamInterruptedException ex) {
+            // If our thread is interrupted we cancel the stream so the server knows we're done
+            // and then shut down normally.
+            processResult.setInterrupted(true);
+            responseStream.cancelStream("shutting down due to InterruptedException");
+          } catch (Exception e) {
+            responseStream.cancelStream("shutting down due to Exception");
+            // If we failed to process the claim, it stays in the DLQ, nothing to do.
+            log.error(
+                "Failed to process "
+                    + claimType
+                    + " message with sequence: "
+                    + startingSequenceNumber,
+                e);
           }
-          responseStream.cancelStream("No further messages need to be ingested.");
-        } catch (GrpcResponseStream.StreamInterruptedException ex) {
-          // If our thread is interrupted we cancel the stream so the server knows we're done
-          // and then shut down normally.
-          responseStream.cancelStream("shutting down due to InterruptedException");
-          processResult.setInterrupted(true);
-        } catch (Exception e) {
-          responseStream.cancelStream("shutting down due to Exception");
-          // If we failed to process the claim, it stays in the DLQ, nothing to do.
-          log.error(
-              "Failed to process "
-                  + claimType
-                  + " message with sequence: "
-                  + startingSequenceNumber,
-              e);
         }
       }
 
