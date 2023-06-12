@@ -21,7 +21,7 @@
         - Field names in entities generally match corresponding field names in generated gRPC stub objects
         - Mapping ids in yaml file generally match message name in proto file
         - Entity class names generally match message name with Rda prefix
-        - RDA generally encodes dates as strings in YYYY-MM-DD format but we transform to LocalDate
+        - RDA generally encodes dates as strings in `YYYY-MM-DD` format but we transform to LocalDate
         - Fields marked as optional in proto file are mapped to nullable columns and are stored as null in database when not present in a given API message
         - RDA generally does not send optional fields that would otherwise have empty string values. We store those as null in database
         - RDA generally wraps enum fields in oneof (basically a union) along with a field to contain text value if it did not match an enum value. All oneof fields can actually have no value (i.e. all components are basically optional and protobuf does not require at least one to have a value)
