@@ -155,17 +155,16 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
           "smoke test: read RDA API version: claimType={} apiVersion={}", claimType, apiVersion);
 
       // Doesn't use startingSequenceNumber because we should not block waiting for new data.
-      final GrpcResponseStream<TMessage> responseStream =
-          caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM);
-      for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
-        final TMessage message = responseStream.next();
-        log.info(
-            "smoke test: downloaded claim: claimType={} seq={}",
-            claimType,
-            sink.getSequenceNumberForObject(message));
-      }
-      // be a nice client that lets the server know when we are leaving before the stream is done
-      if (responseStream.hasNext()) {
+      try (var responseStream =
+          caller.callService(channel, callOptionsFactory.get(), MIN_SEQUENCE_NUM)) {
+        for (int i = 1; i <= 3 && responseStream.hasNext(); ++i) {
+          final TMessage message = responseStream.next();
+          log.info(
+              "smoke test: downloaded claim: claimType={} seq={}",
+              claimType,
+              sink.getSequenceNumberForObject(message));
+        }
+        // be a nice client that lets the server know when we are leaving before the stream is done
         responseStream.cancelStream("smoke test: finished");
       }
     }
@@ -204,80 +203,80 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
           final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
           checkApiVersion(apiVersion);
 
-          final GrpcResponseStream<TMessage> responseStream =
-              caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
-          final Map<Object, TMessage> batch = new LinkedHashMap<>();
-          try {
-            while (responseStream.hasNext()) {
-              setUptimeToReceiving();
-              final TMessage result = responseStream.next();
-              metrics.getObjectsReceived().increment();
-              if (sink.isDeleteMessage(result)) {
-                metrics.getDeleteMessagesSkipped().increment();
-                log.warn(
-                    "skipping DELETE message: claimType={} claimId={} seq={}",
-                    claimType,
-                    sink.getClaimIdForMessage(result),
-                    sink.getSequenceNumberForObject(result));
-              } else if (sink.isValidMessage(result)) {
-                batch.put(sink.getClaimIdForMessage(result), result);
-                if (batch.size() >= maxPerBatch) {
-                  processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
+          try (var responseStream =
+              caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber)) {
+            final Map<Object, TMessage> batch = new LinkedHashMap<>();
+            try {
+              while (responseStream.hasNext()) {
+                setUptimeToReceiving();
+                final TMessage result = responseStream.next();
+                metrics.getObjectsReceived().increment();
+                if (sink.isDeleteMessage(result)) {
+                  metrics.getDeleteMessagesSkipped().increment();
+                  log.warn(
+                      "skipping DELETE message: claimType={} claimId={} seq={}",
+                      claimType,
+                      sink.getClaimIdForMessage(result),
+                      sink.getSequenceNumberForObject(result));
+                } else if (sink.isValidMessage(result)) {
+                  batch.put(sink.getClaimIdForMessage(result), result);
+                  if (batch.size() >= maxPerBatch) {
+                    processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
+                  }
+                  lastProcessedTime = clock.millis();
+                } else {
+                  metrics.getInvalidObjectsSkipped().increment();
+                  log.info(
+                      "skipping invalid claim: claimType={} claimId={} seq={}",
+                      claimType,
+                      sink.getClaimIdForMessage(result),
+                      sink.getSequenceNumberForObject(result));
                 }
-                lastProcessedTime = clock.millis();
+              }
+            } catch (GrpcResponseStream.StreamInterruptedException ex) {
+              log.info("shutting down due to interrupted stream");
+              flushBatch = false;
+              processResult.setInterrupted(true);
+            } catch (GrpcResponseStream.DroppedConnectionException ex) {
+              log.info("shutting down due to dropped stream");
+              if (isUnexpectedDroppedConnectionException(lastProcessedTime, ex)) {
+                processResult.setException(ex);
+              }
+            } catch (ProcessingException ex) {
+              log.info("shutting down due to ProcessingException: {}", ex.getMessage());
+              flushBatch = false;
+              processResult.addCount(ex.getProcessedCount());
+              processResult.setException(ex);
+            } catch (Exception ex) {
+              log.info("shutting down due to Exception: {}", ex.getMessage());
+              flushBatch = false;
+              processResult.setException(ex);
+            }
+
+            MultiCloser closer = new MultiCloser();
+
+            closer.close(() -> responseStream.cancelStream("shutting down"));
+
+            if (batch.size() > 0 && flushBatch) {
+              closer.close(
+                  () -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
+            }
+
+            closer.close(() -> sink.shutdown(MAX_SINK_SHUTDOWN_WAIT));
+            closer.close(() -> processResult.addCount(sink.getProcessedCount()));
+
+            try {
+              closer.finish();
+            } catch (Exception ex) {
+              if (processResult.getException() != null) {
+                processResult.getException().addSuppressed(ex);
               } else {
-                metrics.getInvalidObjectsSkipped().increment();
-                log.info(
-                    "skipping invalid claim: claimType={} claimId={} seq={}",
-                    claimType,
-                    sink.getClaimIdForMessage(result),
-                    sink.getSequenceNumberForObject(result));
+                processResult.setException(ex);
               }
             }
-          } catch (GrpcResponseStream.StreamInterruptedException ex) {
-            log.info("shutting down due to interrupted stream");
-            // If our thread is interrupted we cancel the stream so the server knows we're done
-            // and then shut down normally.
-            flushBatch = false;
-            processResult.setInterrupted(true);
-          } catch (GrpcResponseStream.DroppedConnectionException ex) {
-            log.info("shutting down due to dropped stream");
-            if (isUnexpectedDroppedConnectionException(lastProcessedTime, ex)) {
-              processResult.setException(ex);
-            }
-          } catch (ProcessingException ex) {
-            log.info("shutting down due to ProcessingException: {}", ex.getMessage());
-            flushBatch = false;
-            processResult.addCount(ex.getProcessedCount());
-            processResult.setException(ex);
-          } catch (Exception ex) {
-            log.info("shutting down due to Exception: {}", ex.getMessage());
-            flushBatch = false;
-            processResult.setException(ex);
+
+            return processResult;
           }
-
-          MultiCloser closer = new MultiCloser();
-
-          closer.close(() -> responseStream.cancelStream("shutting down"));
-
-          if (batch.size() > 0 && flushBatch) {
-            closer.close(() -> processResult.addCount(submitBatchToSink(apiVersion, sink, batch)));
-          }
-
-          closer.close(() -> sink.shutdown(MAX_SINK_SHUTDOWN_WAIT));
-          closer.close(() -> processResult.addCount(sink.getProcessedCount()));
-
-          try {
-            closer.finish();
-          } catch (Exception ex) {
-            if (processResult.getException() != null) {
-              processResult.getException().addSuppressed(ex);
-            } else {
-              processResult.setException(ex);
-            }
-          }
-
-          return processResult;
         });
   }
 
@@ -324,7 +323,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   private long getStartingSequenceNumber(RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
     if (startingSequenceNumber.isPresent()) {
-      return startingSequenceNumber.map(x -> Math.max(MIN_SEQUENCE_NUM, x - 1)).get();
+      return startingSequenceNumber.map(x -> x - 1).get();
     } else {
       return sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
     }

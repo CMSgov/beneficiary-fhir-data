@@ -61,8 +61,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     final Config config = new Config(loader);
 
     final ManagedChannel channel = createChannel(config);
-    try {
-      final GrpcResponseStream<? extends MessageOrBuilder> results = callService(config, channel);
+    try (var results = callService(config, channel)) {
       int received = 0;
       try (PrintWriter output = new PrintWriter(new FileWriter(config.outputFile))) {
         while (received < config.maxToReceive && results.hasNext()) {
