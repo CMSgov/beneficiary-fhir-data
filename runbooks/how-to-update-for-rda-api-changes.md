@@ -8,7 +8,7 @@
    3. Copy changes from RDA API proto files to BFD proto files
         - RDA API: https://github.cms.gov/medicare-payment-modernization/rda-api/tree/main/proto/src/main/proto/rda/v1
         - BFD: https://github.cms.gov/medicare-payment-modernization/rda-api/tree/main/proto/src/main/proto/rda/v1
-   3. Update VERSION.txt in BFD repo
+   4. Update VERSION.txt in BFD repo
         - https://github.com/CMSgov/beneficiary-fhir-data/tree/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/proto/rda/VERSION.txt
 2. Update RDA schema/entity mappings
    1. Diff changes between RDA and BFD proto files
