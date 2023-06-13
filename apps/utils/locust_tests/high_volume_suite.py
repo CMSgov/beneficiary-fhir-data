@@ -76,10 +76,9 @@ class StopTaskSet(TaskSet):
         self.interrupt()
 
 EOB_TAG = "eob"
-@tag(EOB_TAG)
 @task(DEFAULT_TASK_WEIGHT)
 class EobTaskSet(StopTaskSet):
-    @tag("eob_test_id_count_type_pde_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_count_type_pde_v1", "v1")
     @task
     def eob_test_id_count_type_pde_v1(self):
         """Explanation of Benefit search by ID, type PDE, paginated"""
@@ -94,7 +93,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
         )
 
-    @tag("eob_test_id_last_updated_count_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_last_updated_count_v1", "v1")
     @task
     def eob_test_id_last_updated_count_v1(self):
         """Explanation of Benefit search by ID, last updated, paginated"""
@@ -109,7 +108,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
         )
 
-    @tag("eob_test_id_include_tax_number_last_updated_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_include_tax_number_last_updated_v1", "v1")
     @task
     def eob_test_id_include_tax_number_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
@@ -124,7 +123,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
         )
 
-    @tag("eob_test_id_last_updated_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_last_updated_v1", "v1")
     @task
     def eob_test_id_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated"""
@@ -138,7 +137,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
         )
 
-    @tag("eob_test_id_v1", "v1")
+    @tag(EOB_TAG, "eob_test_id_v1", "v1")
     @task
     def eob_test_id_v1(self):
         """Explanation of Benefit search by ID"""
@@ -148,7 +147,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
-    @tag("eob_test_id", "v2")
+    @tag(EOB_TAG, "eob_test_id", "v2")
     @task
     def eob_test_id(self):
         """Explanation of Benefit search by ID"""
@@ -158,7 +157,7 @@ class EobTaskSet(StopTaskSet):
             name="/v2/fhir/ExplanationOfBenefit search by id",
         )
 
-    @tag("eob_test_id_count", "v2")
+    @tag(EOB_TAG, "eob_test_id_count", "v2")
     @task
     def eob_test_id_count(self):
         """Explanation of Benefit search by ID, Paginated"""
@@ -172,7 +171,7 @@ class EobTaskSet(StopTaskSet):
             name="/v2/fhir/ExplanationOfBenefit search by id / count=10",
         )
 
-    @tag("eob_test_id_include_tax_number_last_updated", "v2")
+    @tag(EOB_TAG, "eob_test_id_include_tax_number_last_updated", "v2")
     @task
     def eob_test_id_include_tax_number_last_updated(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
@@ -188,10 +187,9 @@ class EobTaskSet(StopTaskSet):
         )
 
 COVERAGE_TAG = "coverage"
-@tag(COVERAGE_TAG)
 @task(DEFAULT_TASK_WEIGHT)
 class CoverageTaskSet(StopTaskSet):
-    @tag("coverage_test_id_count_v1", "v1")
+    @tag(COVERAGE_TAG, "coverage_test_id_count_v1", "v1")
     @task
     def coverage_test_id_count_v1(self):
         """Coverage search by ID, Paginated"""
@@ -201,7 +199,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
-    @tag("coverage_test_id_last_updated_v1", "v1")
+    @tag(COVERAGE_TAG, "coverage_test_id_last_updated_v1", "v1")
     @task
     def coverage_test_id_last_updated_v1(self):
         """Coverage search by ID, Last Updated"""
@@ -214,7 +212,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
 
-    @tag("coverage_test_id", "v2")
+    @tag(COVERAGE_TAG, "coverage_test_id", "v2")
     @task
     def coverage_test_id(self):
         """Coverage search by ID"""
@@ -226,7 +224,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v2/fhir/Coverage search by id",
         )
 
-    @tag("coverage_test_id_count", "v2")
+    @tag(COVERAGE_TAG, "coverage_test_id_count", "v2")
     @task
     def coverage_test_id_count(self):
         """Coverage search by ID, Paginated"""
@@ -236,7 +234,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
-    @tag("coverage_test_id_last_updated", "v2")
+    @tag(COVERAGE_TAG, "coverage_test_id_last_updated", "v2")
     @task
     def coverage_test_id_last_updated(self):
         """Coverage search by ID, Last Updated"""
@@ -250,10 +248,9 @@ class CoverageTaskSet(StopTaskSet):
         )
 
 PATIENT_TAG = "patient"
-@tag(PATIENT_TAG)
 @task(DEFAULT_TASK_WEIGHT)
 class PatientTaskSet(StopTaskSet):
-    @tag("patient_test_coverage_contract_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_coverage_contract_v1", "v1")
     @task
     def patient_test_coverage_contract_v1(self):
         """Patient search by coverage contract (all pages)"""
@@ -276,7 +273,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag("patient_test_hashed_mbi_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_hashed_mbi_v1", "v1")
     @task
     def patient_test_hashed_mbi_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -295,7 +292,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag("patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
     @task
     def patient_test_id_last_updated_include_mbi_include_address_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -310,7 +307,7 @@ class PatientTaskSet(StopTaskSet):
             name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
         )
 
-    @tag("patient_test_id_v1", "v1")
+    @tag(PATIENT_TAG, "patient_test_id_v1", "v1")
     @task
     def patient_test_id_v1(self):
         """Patient search by ID"""
@@ -320,7 +317,7 @@ class PatientTaskSet(StopTaskSet):
 
         self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
 
-    @tag("patient_test_coverage_contract", "v2")
+    @tag(PATIENT_TAG, "patient_test_coverage_contract", "v2")
     @task
     def patient_test_coverage_contract(self):
         """Patient search by Coverage Contract, paginated"""
@@ -342,7 +339,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag("patient_test_hashed_mbi", "v2")
+    @tag(PATIENT_TAG, "patient_test_hashed_mbi", "v2")
     @task
     def patient_test_hashed_mbi(self):
         """Patient search by hashed MBI, include identifiers"""
@@ -360,7 +357,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag("patient_test_id_include_mbi_last_updated", "v2")
+    @tag(PATIENT_TAG, "patient_test_id_include_mbi_last_updated", "v2")
     @task
     def patient_test_id_include_mbi_last_updated(self):
         """Patient search by ID with last updated, include MBI"""
@@ -375,7 +372,7 @@ class PatientTaskSet(StopTaskSet):
             name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
         )
 
-    @tag("patient_test_id", "v2")
+    @tag(PATIENT_TAG, "patient_test_id", "v2")
     @task
     def patient_test_id(self):
         """Patient search by ID"""
