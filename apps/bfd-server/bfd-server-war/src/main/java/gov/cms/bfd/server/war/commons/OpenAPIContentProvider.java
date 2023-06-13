@@ -2,10 +2,6 @@ package gov.cms.bfd.server.war.commons;
 
 /** Open API content short and value descriptions for each BFD API endpoint. */
 public final class OpenAPIContentProvider {
-  // NOTE: As much as we'd like to use Java 17 features for string concatentation,
-  // our code formatter completely mangles MUCH of the following concatenated text
-  // strings. So we'll fal back on tried-and-true structure to avoid
-  // unpleasantness.
 
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_SHORT =
