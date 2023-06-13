@@ -486,7 +486,7 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
-        self.tasks = self.get_tasks_by_tags(TAGS, EXCLUDE_TAGS, TASK_SET_BY_TAG.values())
+        self.tasks = self.get_tasks_by_tags({"eob", "patient"}, {"patient_test_coverage_contract_v1", "eob_test_id_count_type_pde_v1"}, TASK_SET_BY_TAG.values())
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.
