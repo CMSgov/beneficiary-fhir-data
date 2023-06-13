@@ -8,7 +8,7 @@ data "aws_kms_key" "bucket_cmk" {
 data "archive_file" "zip-archive-format-firehose-logs" {
   type        = "zip"
   source_file = "${path.module}/lambda_src/lambda_function.py"
-  output_path = "${path.module}/lambda_src/lambda_function.zip"
+  output_path = "${path.module}/lambda_function.zip"
 }
 
 
