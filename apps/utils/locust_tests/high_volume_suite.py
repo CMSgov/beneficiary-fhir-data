@@ -1,6 +1,6 @@
 """High Volume Load test suite for BFD Server endpoints."""
 from random import shuffle
-from typing import Callable, List, TypeVar, Optional, Type, Dict, Set
+from typing import Callable, List, TypeVar, Optional, Type, Dict, Set, Protocol
 
 from locust import TaskSet, events, tag, task
 from locust.env import Environment
@@ -68,6 +68,9 @@ def _(environment: Environment, **kwargs):
 
 class TestLoadShape(UserInitAwareLoadShape):
     pass
+
+class TaskHolder(Protocol[TaskT]):
+    tasks: List[TaskT]
 
 """ Required, otherwise the user will stay idle after executing its assigned task """
 class StopTaskSet(TaskSet):
@@ -436,12 +439,46 @@ class HighVolumeUser(BFDUserBase):
                 filtered_tasks.append(task)
         return filtered_tasks
 
+    def filter_tasks_by_tags(
+        self,
+        task_holder: Type[TaskHolder],
+        tags: Set[str],
+        exclude_tags: Set[str],
+        checked: Optional[Dict[TaskT, bool]] = None,
+    ):
+        """
+        Function used by Environment to recursively remove any tasks/TaskSets from a TaskSet/User that
+        shouldn't be executed according to the tag options
+        """
+        new_tasks = []
+        if checked is None:
+            checked = {}
+        for task in task_holder.tasks:
+            if task in checked:
+                if checked[task]:
+                    new_tasks.append(task)
+                continue
+
+            passing = True
+            if hasattr(task, "tasks"):
+                self.filter_tasks_by_tags(task, tags, exclude_tags, checked)
+                passing = len(task.tasks) > 0
+            else:
+                if len(tags) > 0:
+                    passing &= "locust_tag_set" in dir(task) and len(task.locust_tag_set.intersection(tags)) > 0
+                if len(exclude_tags) > 0:
+                    passing &= "locust_tag_set" not in dir(task) or len(task.locust_tag_set.intersection(exclude_tags)) == 0
+
+            if passing:
+                new_tasks.append(task)
+            checked[task] = passing
+
+        return new_tasks
+
     def get_tasks_by_tags(self, tags: Set[str], exclude_tags: Set[str], task_sets: List[Type[StopTaskSet]]):
         filtered_tasks = []
         for task_set in task_sets:
-            filtered_tasks.extend(self.get_tasks_by_task_set(task_set))
-        if len(tags) > 0 or len(exclude_tags) > 0:
-            return self.filter_tasks(filtered_tasks, tags, exclude_tags)
+            filtered_tasks.extend(self.filter_tasks_by_tags(task_set, tags, exclude_tags))
         return filtered_tasks
 
     def __init__(self, *args, **kwargs):
