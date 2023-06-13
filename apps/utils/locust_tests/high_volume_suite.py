@@ -69,10 +69,16 @@ def _(environment: Environment, **kwargs):
 class TestLoadShape(UserInitAwareLoadShape):
     pass
 
+""" Required, otherwise the user will stay idle after executing its assigned task """
+class StopTaskSet(TaskSet):
+    @task(1)
+    def stop(self):
+        self.interrupt()
+
 EOB_TAG = "eob"
 @tag(EOB_TAG)
 @task(DEFAULT_TASK_WEIGHT)
-class EobTaskSet(TaskSet):
+class EobTaskSet(StopTaskSet):
     @tag("eob_test_id_count_type_pde_v1", "v1")
     @task
     def eob_test_id_count_type_pde_v1(self):
@@ -80,7 +86,7 @@ class EobTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient":  self.bene_ids.pop(),
                 "_format": "json",
                 "_count": "50",
                 "_types": "PDE",
@@ -95,7 +101,7 @@ class EobTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient":  self.bene_ids.pop(),
                 "_format": "json",
                 "_count": "100",
                 "_lastUpdated": f"gt{ self.last_updated}",
@@ -110,7 +116,7 @@ class EobTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient":  self.bene_ids.pop(),
                 "_format": "json",
                 "_lastUpdated": f"gt{ self.last_updated}",
                 "_IncludeTaxNumbers": "true",
@@ -125,7 +131,7 @@ class EobTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient":  self.bene_ids.pop(),
                 "_format": "json",
                 "_lastUpdated": f"gt{ self.last_updated}",
             },
@@ -138,7 +144,7 @@ class EobTaskSet(TaskSet):
         """Explanation of Benefit search by ID"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
-            params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={"patient":  self.bene_ids.pop(), "_format": "application/fhir+json"},
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -148,7 +154,7 @@ class EobTaskSet(TaskSet):
         """Explanation of Benefit search by ID"""
         self.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
-            params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={"patient":  self.bene_ids.pop(), "_format": "application/fhir+json"},
             name="/v2/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -159,7 +165,7 @@ class EobTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient":  self.bene_ids.pop(),
                 "_count": "10",
                 "_format": "application/fhir+json",
             },
@@ -174,7 +180,7 @@ class EobTaskSet(TaskSet):
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
                 "_lastUpdated": f"gt{ self.last_updated}",
-                "patient": self.bene_ids.pop(),
+                "patient":  self.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
                 "_format": "application/fhir+json",
             },
@@ -184,14 +190,14 @@ class EobTaskSet(TaskSet):
 COVERAGE_TAG = "coverage"
 @tag(COVERAGE_TAG)
 @task(DEFAULT_TASK_WEIGHT)
-class CoverageTaskSet(TaskSet):
+class CoverageTaskSet(StopTaskSet):
     @tag("coverage_test_id_count_v1", "v1")
     @task
     def coverage_test_id_count_v1(self):
         """Coverage search by ID, Paginated"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
-            params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
@@ -203,7 +209,7 @@ class CoverageTaskSet(TaskSet):
             base_path="/v1/fhir/Coverage",
             params={
                 "_lastUpdated": f"gt{ self.last_updated}",
-                "beneficiary": self.bene_ids.pop(),
+                "beneficiary":  self.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -215,7 +221,7 @@ class CoverageTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "beneficiary": self.bene_ids.pop(),
+                "beneficiary":  self.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id",
         )
@@ -226,7 +232,7 @@ class CoverageTaskSet(TaskSet):
         """Coverage search by ID, Paginated"""
         self.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
-            params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
@@ -237,8 +243,8 @@ class CoverageTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "_lastUpdated": f"gt{ self.last_updated}",
-                "beneficiary": self.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.last_updated}",
+                "beneficiary":  self.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -246,7 +252,7 @@ class CoverageTaskSet(TaskSet):
 PATIENT_TAG = "patient"
 @tag(PATIENT_TAG)
 @task(DEFAULT_TASK_WEIGHT)
-class PatientTaskSet(TaskSet):
+class PatientTaskSet(StopTaskSet):
     @tag("patient_test_coverage_contract_v1", "v1")
     @task
     def patient_test_coverage_contract_v1(self):
@@ -296,7 +302,7 @@ class PatientTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
-                "_id": self.bene_ids.pop(),
+                "_id":  self.bene_ids.pop(),
                 "_lastUpdated": f"gt{ self.last_updated}",
                 "_IncludeIdentifiers": "mbi",
                 "_IncludeTaxNumbers": "true",
@@ -361,7 +367,7 @@ class PatientTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": self.bene_ids.pop(),
+                "_id":  self.bene_ids.pop(),
                 "_format": "application/fhir+json",
                 "_IncludeIdentifiers": "mbi",
                 "_lastUpdated": f"gt{ self.last_updated}",
@@ -376,14 +382,14 @@ class PatientTaskSet(TaskSet):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": self.bene_ids.pop(),
+                "_id":  self.bene_ids.pop(),
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/Patient search by id",
         )
 
 """ Must be declared here due to the Type annotation requiring a class definition """
-TASK_SET_BY_TAG: Dict[str, Type[TaskSet]] = {
+TASK_SET_BY_TAG: Dict[str, Type[StopTaskSet]] = {
     EOB_TAG: EobTaskSet,
     COVERAGE_TAG: CoverageTaskSet,
     PATIENT_TAG: PatientTaskSet
@@ -399,7 +405,7 @@ class HighVolumeUser(BFDUserBase):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
 
-    def get_tasks_by_task_set(self, task_set: Type[TaskSet]):
+    def get_tasks_by_task_set(self, task_set: Type[StopTaskSet]):
         tasks = []
         for potential_task in task_set.__dict__.values():
             # All tasks in a TaskSet class are expected to have this attribute
@@ -425,7 +431,7 @@ class HighVolumeUser(BFDUserBase):
             checked[task] = passing
         return filtered_tasks
 
-    def get_tasks_by_tags(self, tags: Set[str], exclude_tags: Set[str], task_sets: List[Type[TaskSet]]):
+    def get_tasks_by_tags(self, tags: Set[str], exclude_tags: Set[str], task_sets: List[Type[StopTaskSet]]):
         filtered_tasks = []
         for task_set in task_sets:
             filtered_tasks.extend(self.get_tasks_by_task_set(task_set))
