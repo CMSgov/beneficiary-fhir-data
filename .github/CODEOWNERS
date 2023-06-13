@@ -2,12 +2,12 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
+@mackec1 @keithdadkins @lsmitchell @mjburling
 
 #BFD Pipeline and Server Codeowners
-/rfcs @cbrunefearless @mackec1 @keithdadkins @lsmitchell @mjburling
+/rfcs @mackec1 @keithdadkins @lsmitchell @mjburling
 /ops @keithdadkins @mjburling @malessi @billie-rose
-/apps @cbrunefearless @mackec1 @mjburling @lsmitchell
+/apps @mackec1 @mjburling @lsmitchell
 
 #BFD Performance Testing Utilities
 /apps/utils/locust_tests @lsmitchell @mjburling @malessi @billie-rose
