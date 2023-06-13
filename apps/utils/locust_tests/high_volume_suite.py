@@ -44,10 +44,10 @@ def _(environment: Environment, **kwargs):
     )
 
     global TAGS
-    TAGS = getattr(environment.parsed_options, "locust_tags", []).split()
+    TAGS = environment.parsed_options.locust_tags.split()
 
     global EXCLUDE_TAGS
-    EXCLUDE_TAGS = getattr(environment.parsed_options, "locust_exclude_tags", []).split()
+    EXCLUDE_TAGS = environment.parsed_options.locust_exclude_tags.split()
 
     global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
