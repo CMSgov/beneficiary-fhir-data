@@ -19,6 +19,11 @@ DEFAULT_TASK_WEIGHT: int = 5
 TAGS: Set[str] = []
 EXCLUDE_TAGS: Set[str] = []
 
+@events.init_command_line_parser.add_listener
+def _(parser):
+    parser.add_argument("--locust-tags", type=str, env_var="LOCUST_TAGS", default="", help="Custom locust tags...")
+    parser.add_argument("--locust-exclude-tags", type=str, env_var="LOCUST_EXCLUDE_TAGS", default="", help="Custom exclude locust tags...")
+
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
     if (
@@ -39,16 +44,10 @@ def _(environment: Environment, **kwargs):
     )
 
     global TAGS
-    tags = getattr(environment.parsed_options, "tags", [])
-    if tags is not None:
-        for tag in tags:
-            TAGS.extend(tag.split())
+    TAGS = getattr(environment.parsed_options, "locust_tags", []).split()
 
     global EXCLUDE_TAGS
-    exclude_tags = getattr(environment.parsed_options, "exclude_tags", [])
-    if exclude_tags is not None:
-        for excluded_tag in exclude_tags:
-            EXCLUDE_TAGS.extend(excluded_tag.split())
+    EXCLUDE_TAGS = getattr(environment.parsed_options, "locust_exclude_tags", []).split()
 
     global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
@@ -72,16 +71,11 @@ class TestLoadShape(UserInitAwareLoadShape):
 class TaskHolder(Protocol[TaskT]):
     tasks: List[TaskT]
 
-""" Required, otherwise the user will stay idle after executing its assigned task """
-class StopTaskSet(TaskSet):
-    @task(1)
-    def stop(self):
-        self.interrupt()
-
 EOB_TAG = "eob"
-@task(DEFAULT_TASK_WEIGHT)
-class EobTaskSet(StopTaskSet):
-    @tag(EOB_TAG, "eob_test_id_count_type_pde_v1", "v1")
+@tag(EOB_TAG)
+@task
+class EobTaskSet(TaskSet):
+    @tag("eob_test_id_count_type_pde_v1", "v1")
     @task
     def eob_test_id_count_type_pde_v1(self):
         """Explanation of Benefit search by ID, type PDE, paginated"""
@@ -96,7 +90,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50",
         )
 
-    @tag(EOB_TAG, "eob_test_id_last_updated_count_v1", "v1")
+    @tag("eob_test_id_last_updated_count_v1", "v1")
     @task
     def eob_test_id_last_updated_count_v1(self):
         """Explanation of Benefit search by ID, last updated, paginated"""
@@ -111,7 +105,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
         )
 
-    @tag(EOB_TAG, "eob_test_id_include_tax_number_last_updated_v1", "v1")
+    @tag("eob_test_id_include_tax_number_last_updated_v1", "v1")
     @task
     def eob_test_id_include_tax_number_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
@@ -126,7 +120,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
         )
 
-    @tag(EOB_TAG, "eob_test_id_last_updated_v1", "v1")
+    @tag("eob_test_id_last_updated_v1", "v1")
     @task
     def eob_test_id_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated"""
@@ -140,7 +134,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
         )
 
-    @tag(EOB_TAG, "eob_test_id_v1", "v1")
+    @tag("eob_test_id_v1", "v1")
     @task
     def eob_test_id_v1(self):
         """Explanation of Benefit search by ID"""
@@ -150,7 +144,7 @@ class EobTaskSet(StopTaskSet):
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
-    @tag(EOB_TAG, "eob_test_id", "v2")
+    @tag("eob_test_id", "v2")
     @task
     def eob_test_id(self):
         """Explanation of Benefit search by ID"""
@@ -160,7 +154,7 @@ class EobTaskSet(StopTaskSet):
             name="/v2/fhir/ExplanationOfBenefit search by id",
         )
 
-    @tag(EOB_TAG, "eob_test_id_count", "v2")
+    @tag("eob_test_id_count", "v2")
     @task
     def eob_test_id_count(self):
         """Explanation of Benefit search by ID, Paginated"""
@@ -174,7 +168,7 @@ class EobTaskSet(StopTaskSet):
             name="/v2/fhir/ExplanationOfBenefit search by id / count=10",
         )
 
-    @tag(EOB_TAG, "eob_test_id_include_tax_number_last_updated", "v2")
+    @tag("eob_test_id_include_tax_number_last_updated", "v2")
     @task
     def eob_test_id_include_tax_number_last_updated(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
@@ -190,9 +184,10 @@ class EobTaskSet(StopTaskSet):
         )
 
 COVERAGE_TAG = "coverage"
-@task(DEFAULT_TASK_WEIGHT)
-class CoverageTaskSet(StopTaskSet):
-    @tag(COVERAGE_TAG, "coverage_test_id_count_v1", "v1")
+@tag(COVERAGE_TAG)
+@task
+class CoverageTaskSet(TaskSet):
+    @tag("coverage_test_id_count_v1", "v1")
     @task
     def coverage_test_id_count_v1(self):
         """Coverage search by ID, Paginated"""
@@ -202,7 +197,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
-    @tag(COVERAGE_TAG, "coverage_test_id_last_updated_v1", "v1")
+    @tag("coverage_test_id_last_updated_v1", "v1")
     @task
     def coverage_test_id_last_updated_v1(self):
         """Coverage search by ID, Last Updated"""
@@ -215,7 +210,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
 
-    @tag(COVERAGE_TAG, "coverage_test_id", "v2")
+    @tag("coverage_test_id", "v2")
     @task
     def coverage_test_id(self):
         """Coverage search by ID"""
@@ -227,7 +222,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v2/fhir/Coverage search by id",
         )
 
-    @tag(COVERAGE_TAG, "coverage_test_id_count", "v2")
+    @tag("coverage_test_id_count", "v2")
     @task
     def coverage_test_id_count(self):
         """Coverage search by ID, Paginated"""
@@ -237,7 +232,7 @@ class CoverageTaskSet(StopTaskSet):
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
-    @tag(COVERAGE_TAG, "coverage_test_id_last_updated", "v2")
+    @tag("coverage_test_id_last_updated", "v2")
     @task
     def coverage_test_id_last_updated(self):
         """Coverage search by ID, Last Updated"""
@@ -251,9 +246,10 @@ class CoverageTaskSet(StopTaskSet):
         )
 
 PATIENT_TAG = "patient"
-@task(DEFAULT_TASK_WEIGHT)
-class PatientTaskSet(StopTaskSet):
-    @tag(PATIENT_TAG, "patient_test_coverage_contract_v1", "v1")
+@tag(PATIENT_TAG)
+@task
+class PatientTaskSet(TaskSet):
+    @tag("patient_test_coverage_contract_v1", "v1")
     @task
     def patient_test_coverage_contract_v1(self):
         """Patient search by coverage contract (all pages)"""
@@ -276,7 +272,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag(PATIENT_TAG, "patient_test_hashed_mbi_v1", "v1")
+    @tag("patient_test_hashed_mbi_v1", "v1")
     @task
     def patient_test_hashed_mbi_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -295,7 +291,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag(PATIENT_TAG, "patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
+    @tag("patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
     @task
     def patient_test_id_last_updated_include_mbi_include_address_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
@@ -310,7 +306,7 @@ class PatientTaskSet(StopTaskSet):
             name="/v1/fhir/Patient/id search by id / (2 weeks) / includeTaxNumbers / mbi",
         )
 
-    @tag(PATIENT_TAG, "patient_test_id_v1", "v1")
+    @tag("patient_test_id_v1", "v1")
     @task
     def patient_test_id_v1(self):
         """Patient search by ID"""
@@ -320,7 +316,7 @@ class PatientTaskSet(StopTaskSet):
 
         self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
 
-    @tag(PATIENT_TAG, "patient_test_coverage_contract", "v2")
+    @tag("patient_test_coverage_contract", "v2")
     @task
     def patient_test_coverage_contract(self):
         """Patient search by Coverage Contract, paginated"""
@@ -342,7 +338,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag(PATIENT_TAG, "patient_test_hashed_mbi", "v2")
+    @tag("patient_test_hashed_mbi", "v2")
     @task
     def patient_test_hashed_mbi(self):
         """Patient search by hashed MBI, include identifiers"""
@@ -360,7 +356,7 @@ class PatientTaskSet(StopTaskSet):
             url_callback=make_url,
         )
 
-    @tag(PATIENT_TAG, "patient_test_id_include_mbi_last_updated", "v2")
+    @tag("patient_test_id_include_mbi_last_updated", "v2")
     @task
     def patient_test_id_include_mbi_last_updated(self):
         """Patient search by ID with last updated, include MBI"""
@@ -375,7 +371,7 @@ class PatientTaskSet(StopTaskSet):
             name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
         )
 
-    @tag(PATIENT_TAG, "patient_test_id", "v2")
+    @tag("patient_test_id", "v2")
     @task
     def patient_test_id(self):
         """Patient search by ID"""
@@ -389,7 +385,7 @@ class PatientTaskSet(StopTaskSet):
         )
 
 """ Must be declared here due to the Type annotation requiring a class definition """
-TASK_SET_BY_TAG: Dict[str, Type[StopTaskSet]] = {
+TASK_SET_BY_TAG: Dict[str, Type[TaskSet]] = {
     EOB_TAG: EobTaskSet,
     COVERAGE_TAG: CoverageTaskSet,
     PATIENT_TAG: PatientTaskSet
@@ -405,40 +401,6 @@ class HighVolumeUser(BFDUserBase):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
 
-    def get_tasks_by_task_set(self, task_set: Type[StopTaskSet]):
-        """
-        Returns the list of tasks for the given TaskSet
-        :param task_set: The TaskSet whose tasks are being fetched
-        :return: The list of tasks for the given TaskSet
-        """
-        tasks = []
-        for potential_task in task_set.__dict__.values():
-            # All tasks in a TaskSet class are expected to have this attribute
-            if hasattr(potential_task, "locust_task_weight"):
-                tasks.append(potential_task)
-        return tasks
-
-    def filter_tasks(self, tasks: List[TaskT], tags: Set[str], exclude_tags: Set[str]):
-        """
-        Filter the given tasks using their @tag(s)
-        :param tasks: The original list of tasks to filter
-        :param tags: The list of tasks by @tag to include in the final list
-        :param exclude_tags: The list of tasks by @tag to exclude from the final list
-        :return: A list of filtered tasks to execute
-        """
-        filtered_tasks = []
-        for task in tasks:
-            passing = True
-            # Only include the task if any of its tags are in the tags list
-            if len(tags) > 0:
-                passing &= "locust_tag_set" in dir(task) and len(task.locust_tag_set.intersection(tags)) > 0
-            # Exclude the task if any of its tags are in the exclude_tags list
-            if len(exclude_tags) > 0:
-                passing &= "locust_tag_set" not in dir(task) or len(task.locust_tag_set.intersection(exclude_tags)) == 0
-            if passing:
-                filtered_tasks.append(task)
-        return filtered_tasks
-
     def filter_tasks_by_tags(
         self,
         task_holder: Type[TaskHolder],
@@ -447,8 +409,13 @@ class HighVolumeUser(BFDUserBase):
         checked: Optional[Dict[TaskT, bool]] = None,
     ):
         """
-        Function used by Environment to recursively remove any tasks/TaskSets from a TaskSet/User that
+        Recursively remove any tasks/TaskSets from a TaskSet/User that
         shouldn't be executed according to the tag options
+        :param task_holder: the TaskSet or User with tasks
+        :param tags: The set of tasks by @tag to include in the final list
+        :param exclude_tags: The set of tasks by @tag to exclude from the final list
+        :param checked: The running score of tasks which have or have not been processed
+        :return: A list of filtered tasks to execute
         """
         new_tasks = []
         if checked is None:
@@ -475,7 +442,7 @@ class HighVolumeUser(BFDUserBase):
 
         return new_tasks
 
-    def get_tasks_by_tags(self, tags: Set[str], exclude_tags: Set[str], task_sets: List[Type[StopTaskSet]]):
+    def get_tasks_by_tags(self, task_sets: List[Type[TaskSet]], tags: Set[str], exclude_tags: Set[str]):
         filtered_tasks = []
         for task_set in task_sets:
             filtered_tasks.extend(self.filter_tasks_by_tags(task_set, tags, exclude_tags))
@@ -486,7 +453,7 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
-        self.tasks = self.get_tasks_by_tags({"eob", "patient"}, {"patient_test_coverage_contract_v1", "eob_test_id_count_type_pde_v1"}, TASK_SET_BY_TAG.values())
+        self.tasks = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), TAGS, EXCLUDE_TAGS)
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.

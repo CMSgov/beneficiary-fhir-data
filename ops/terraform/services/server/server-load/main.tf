@@ -112,7 +112,7 @@ resource "aws_instance" "this" {
     node_lambda_name     = var.node_lambda_name
     test_host            = var.test_host
     locust_tags          = var.locust_tags
-    locust_tags_excluded = var.locust_tags_excluded
+    locust_exclude_tags  = var.locust_exclude_tags
     initial_worker_nodes = var.initial_worker_nodes
     node_spawn_time      = var.node_spawn_time
     max_spawned_nodes    = var.max_spawned_nodes

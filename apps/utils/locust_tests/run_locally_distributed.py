@@ -28,17 +28,15 @@ arg_parser.add_argument(
     default="locustfile.py",
 )
 arg_parser.add_argument(
-    "--tags",
-    "-T",
-    dest="tags",
+    "--locust-tags",
+    dest="locust-tags",
     type=str,
     help="Space-delimited. The locust tasks with ANY of the given tags will be executed",
     default=""
 )
 arg_parser.add_argument(
-    "--exclude-tags",
-    "-E",
-    dest="exclude-tags",
+    "--locust-exclude-tags",
+    dest="locust-exclude-tags",
     type=str,
     help="Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution",
     default=""
@@ -47,8 +45,8 @@ raw_args, unknown_args = arg_parser.parse_known_args()
 config = vars(raw_args)
 num_workers = config.get("workers", 1)
 locustfile = config.get("locustfile", "locustfile.py")
-tags = config.get("tags", "")
-exclude_tags = config.get("exclude-tags", "")
+tags = config.get("locust-tags", "")
+exclude_tags = config.get("locust-exclude-tags", "")
 
 master_process = subprocess.Popen(
     [
@@ -58,8 +56,8 @@ master_process = subprocess.Popen(
         "--master",
         "--headless",
         f"--expect-workers={num_workers}",
-        f"--tags={tags}",
-        f"--exclude-tags={exclude_tags}",
+        f"--locust-tags={tags}",
+        f"--locust-exclude-tags={exclude_tags}",
         *unknown_args,
     ],
     stderr=subprocess.STDOUT,

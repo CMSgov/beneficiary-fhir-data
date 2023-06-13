@@ -34,7 +34,7 @@ variable "locust_tags" {
   default     = ""
 }
 
-variable "locust_tags_excluded" {
+variable "locust_exclude_tags" {
   description = "Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution"
   type        = string
   default     = ""
