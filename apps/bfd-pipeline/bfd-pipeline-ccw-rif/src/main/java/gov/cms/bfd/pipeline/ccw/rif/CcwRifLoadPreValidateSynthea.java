@@ -92,9 +92,6 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
           + "select count(*) bene_id_count from ("
           + "select distinct bene_id, mbi_num from public.beneficiaries_history "
           + "where bene_id < 0 and mbi_num IS NOT NULL "
-          + "union "
-          + "select distinct bene_id, mbi_num from public.medicare_beneficiaryid_history "
-          + "where bene_id < 0 and mbi_num IS NOT NULL "
           + ") as foo group by mbi_num "
           + "having count(*) > 1) as s";
 

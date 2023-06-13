@@ -457,9 +457,9 @@ public class SpringConfiguration {
       @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") Boolean includeFakeOrgName)
       throws IOException {
     if (includeFakeOrgName) {
-      return NPIOrgLookup.createNpiOrgLookupForTesting();
+      return new NPIOrgLookup();
     } else {
-      return NPIOrgLookup.createNpiOrgLookupForProduction();
+      return NPIOrgLookup.createNpiOrgLookup();
     }
   }
 
