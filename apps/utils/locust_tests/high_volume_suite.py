@@ -403,6 +403,11 @@ class HighVolumeUser(BFDUserBase):
     END_ON_NO_DATA = False
 
     def get_tasks_by_task_set(self, task_set: Type[StopTaskSet]):
+        """
+        Returns the list of tasks for the given TaskSet
+        :param task_set: The TaskSet whose tasks are being fetched
+        :return: The list of tasks for the given TaskSet
+        """
         tasks = []
         for potential_task in task_set.__dict__.values():
             # All tasks in a TaskSet class are expected to have this attribute
@@ -410,30 +415,33 @@ class HighVolumeUser(BFDUserBase):
                 tasks.append(potential_task)
         return tasks
 
-    def filter_tasks(self, tasks: List[TaskT], tags: Set[str], exclude_tags: Set[str], checked: Optional[Dict[TaskT, bool]]):
+    def filter_tasks(self, tasks: List[TaskT], tags: Set[str], exclude_tags: Set[str]):
+        """
+        Filter the given tasks using their @tag(s)
+        :param tasks: The original list of tasks to filter
+        :param tags: The list of tasks by @tag to include in the final list
+        :param exclude_tags: The list of tasks by @tag to exclude from the final list
+        :return: A list of filtered tasks to execute
+        """
         filtered_tasks = []
-        if checked is None:
-            checked = {}
         for task in tasks:
-            if task in checked and checked[task]:
-                filtered_tasks.append(task)
-                continue
             passing = True
-            if tags is not None:
+            # Only include the task if any of its tags are in the tags list
+            if len(tags) > 0:
                 passing &= "locust_tag_set" in dir(task) and len(task.locust_tag_set.intersection(tags)) > 0
-            if exclude_tags is not None:
+            # Exclude the task if any of its tags are in the exclude_tags list
+            if len(exclude_tags) > 0:
                 passing &= "locust_tag_set" not in dir(task) or len(task.locust_tag_set.intersection(exclude_tags)) == 0
             if passing:
                 filtered_tasks.append(task)
-            checked[task] = passing
         return filtered_tasks
 
     def get_tasks_by_tags(self, tags: Set[str], exclude_tags: Set[str], task_sets: List[Type[StopTaskSet]]):
         filtered_tasks = []
         for task_set in task_sets:
             filtered_tasks.extend(self.get_tasks_by_task_set(task_set))
-        if tags or exclude_tags:
-            return self.filter_tasks(filtered_tasks, tags, exclude_tags, None)
+        if len(tags) > 0 or len(exclude_tags) > 0:
+            return self.filter_tasks(filtered_tasks, tags, exclude_tags)
         return filtered_tasks
 
     def __init__(self, *args, **kwargs):
