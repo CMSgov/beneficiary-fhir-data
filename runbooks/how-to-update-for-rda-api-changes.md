@@ -3,7 +3,7 @@
 1. Synch RDA API changes
    1. Clone/pull latest changes from RDA API repo
        - https://github.cms.gov/medicare-payment-modernization/rda-api
-   2. Optionally, you can download a specific release from the RDA API release page
+   2. Alternatively, you can download a specific release from the RDA API release page
       - https://github.cms.gov/medicare-payment-modernization/rda-api/releases/
    3. Copy changes from RDA API proto files to BFD proto files
         - RDA API: https://github.cms.gov/medicare-payment-modernization/rda-api/tree/main/proto/src/main/proto/rda/v1
