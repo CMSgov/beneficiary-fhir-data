@@ -1,5 +1,4 @@
 """High Volume Load test suite for BFD Server endpoints."""
-import logging
 from random import shuffle
 from typing import Callable, List, TypeVar, Optional, Type, Dict, Set, Protocol
 
@@ -34,7 +33,6 @@ def _(environment: Environment, **kwargs):
     ):
         return
 
-    logger = logging.getLogger()
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
     global MASTER_BENE_IDS
@@ -47,12 +45,10 @@ def _(environment: Environment, **kwargs):
 
     global TAGS
     TAGS = environment.parsed_options.locust_tags.split()
-    logger.debug("======================= TAGS =======================")
-    logger.debug(TAGS)
+
     global EXCLUDE_TAGS
     EXCLUDE_TAGS = environment.parsed_options.locust_exclude_tags.split()
-    logger.debug("======================= EXCLUDE_TAGS =======================")
-    logger.debug(EXCLUDE_TAGS)
+
     global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
         environment.parsed_options,
@@ -453,14 +449,11 @@ class HighVolumeUser(BFDUserBase):
         return filtered_tasks
 
     def __init__(self, *args, **kwargs):
-        logger = logging.getLogger()
         super().__init__(*args, **kwargs)
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
         self.tasks = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), TAGS, EXCLUDE_TAGS)
-        logger.debug("======================= TASKS =======================")
-        logger.debug(self.tasks)
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.
