@@ -78,25 +78,12 @@ public final class DataSetMoveTask implements Callable<Void> {
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
       targetKey = String.format("%s/%s", manifest.getManifestKeyDoneLocation(), s3KeySuffixToMove);
 
-      /*
-       * Before copying, grab the metadata of the source object to ensure
-       * that we maintain its encryption settings (by default, the copy
-       * will maintain all metadata EXCEPT: server-side-encryption,
-       * storage-class, and website-redirect-location).
-       */
-      HeadObjectRequest headObjectRequest =
-          HeadObjectRequest.builder().bucket(options.getS3BucketName()).build();
-      String sseKmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
       CopyObjectRequest.Builder copyReqBuilder =
           CopyObjectRequest.builder()
               .sourceBucket(options.getS3BucketName())
               .sourceKey(sourceKey)
               .destinationBucket(options.getS3BucketName())
               .destinationKey(targetKey);
-      if (Strings.isNotBlank(sseKmsKeyId)) {
-        LOGGER.warn("No KMS Key found when attempting move");
-        copyReqBuilder.ssekmsKeyId(sseKmsKeyId);
-      }
       Copy copy =
           s3TaskManager
               .getS3TransferManager()
