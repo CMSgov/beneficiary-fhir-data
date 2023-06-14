@@ -62,7 +62,7 @@ source "{{ server_load_dir }}/venv/bin/activate"
 {{ (server_load_locust_tags is defined) | ternary('', '#') }}export LOCUST_TAGS='{{ server_load_locust_tags | default('', true) }}'
 
 # LOCUST_EXCLUDE_TAGS defaults to '' in the server-load application
-{{ (server_load_locust_tags_excluded is defined) | ternary('', '#') }}export LOCUST_EXCLUDE_TAGS='{{ server_load_locust_tags_excluded | default('', true) }}'
+{{ (server_load_locust_exclude_tags is defined) | ternary('', '#') }}export LOCUST_EXCLUDE_TAGS='{{ server_load_locust_exclude_tags | default('', true) }}'
 
 (cd "{{ server_load_dir }}/services/server-load/controller" && \
  python3 controller.py &>> "{{ server_load_dir }}/server-load-controller.log")
