@@ -40,7 +40,7 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_ccw_rif_job_enabled: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes: true
 /bfd/${env}/pipeline/ccw/nonsensitive/data_pipeline_idempotency_required: true
-/bfd/${env}/pipeline/ccw/nonsensitive/instance_type: m6i.large
+/bfd/${env}/pipeline/ccw/nonsensitive/instance_type: c6i.4xlarge
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 7
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 5
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_thread_multiple: 3
