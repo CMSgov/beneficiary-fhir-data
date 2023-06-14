@@ -85,7 +85,7 @@ public final class DataSetMoveTask implements Callable<Void> {
        * storage-class, and website-redirect-location).
        */
       HeadObjectRequest headObjectRequest =
-          HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
+          HeadObjectRequest.builder().bucket(options.getS3BucketName()).build();
       String sseKmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
       CopyObjectRequest.Builder copyReqBuilder =
           CopyObjectRequest.builder()
@@ -94,6 +94,7 @@ public final class DataSetMoveTask implements Callable<Void> {
               .destinationBucket(options.getS3BucketName())
               .destinationKey(targetKey);
       if (Strings.isNotBlank(sseKmsKeyId)) {
+        LOGGER.warn("No KMS Key found when attempting move");
         copyReqBuilder.ssekmsKeyId(sseKmsKeyId);
       }
       Copy copy =
