@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
@@ -78,24 +77,12 @@ public final class DataSetMoveTask implements Callable<Void> {
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
       targetKey = String.format("%s/%s", manifest.getManifestKeyDoneLocation(), s3KeySuffixToMove);
 
-      /*
-       * Before copying, grab the metadata of the source object to ensure
-       * that we maintain its encryption settings (by default, the copy
-       * will maintain all metadata EXCEPT: server-side-encryption,
-       * storage-class, and website-redirect-location).
-       */
-      HeadObjectRequest headObjectRequest =
-          HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
-      String sseKmsKeyId = s3TaskManager.getS3Client().headObject(headObjectRequest).ssekmsKeyId();
       CopyObjectRequest.Builder copyReqBuilder =
           CopyObjectRequest.builder()
               .sourceBucket(options.getS3BucketName())
               .sourceKey(sourceKey)
               .destinationBucket(options.getS3BucketName())
               .destinationKey(targetKey);
-      if (Strings.isNotBlank(sseKmsKeyId)) {
-        copyReqBuilder.ssekmsKeyId(sseKmsKeyId);
-      }
       Copy copy =
           s3TaskManager
               .getS3TransferManager()
