@@ -36,8 +36,4 @@ module "event_bridge" {
   name = "bb2-lambda-create-tables-for-quicksight-${each.key}-nightly-event"
   description = "Event to schedule a nightly execution of the BB2 lambda function (${each.key} with JSON params."
   schedule = each.value
-
-  region = local.region
-  application   = local.application
-  project       = local.project
 }
