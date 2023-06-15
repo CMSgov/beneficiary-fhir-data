@@ -24,7 +24,7 @@ locals {
 
   current_eastern_tz = data.external.edt_or_est.result.timezone
   # Whenever EST (or est) is used here, it's encompassing _both_ EST and EDT
-  current_time_utc = timestamp()
+  current_time_utc = data.external.current_time_utc.result.rfc3339_timestamp
   offset_time_eastern = timeadd(
     local.current_time_utc, local.tz_to_duration_offset[local.current_eastern_tz]
   )
