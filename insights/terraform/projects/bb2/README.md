@@ -4,9 +4,9 @@
 
 The BB2 BFD-Insights AWS components are setup under this directory.
 
-The configurations for the base components are located under `base_config`. This utilizes the original modules shared with other projects under [../../../modules/](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/insights/terraform/modules).
+The configurations for the base components are located under [base_config](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/insights/terraform/projects/bb2/base_config). This utilizes the original modules shared with other projects under [../../../modules/](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/insights/terraform/modules).
 
-The BB2 specific components are setup under the following service areas:
+The BB2 custom components are setup under the following service areas:
 
 - `services/log_steam`:
   - Includes components for streaming application log events from BB2 CloudWatch through to the related Glue tables. Uses `test/impl/prod` workspaces.
