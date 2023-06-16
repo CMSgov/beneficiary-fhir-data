@@ -8,6 +8,10 @@
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def amiIds
+def gitBranchName
+def migratorAmiId
+def pipelineAmiId
+def server_ami_override
 
 pipeline {
     agent {
@@ -110,10 +114,15 @@ spec:
         steps {
           script {
             currentStage = env.STAGE_NAME
-            if (env.BRANCH_NAME.startsWith('PR')) {
-              gitBranchName = env.CHANGE_BRANCH
+            // Set git branch name to master if not building amis
+            if (!params.force_build_amis) {
+              gitBranchName = 'master'
             } else {
-              gitBranchName = env.BRANCH_NAME
+              if (env.BRANCH_NAME.startsWith('PR')) {
+                gitBranchName = env.CHANGE_BRANCH
+              } else {
+                gitBranchName = env.BRANCH_NAME
+            }
           }
         }
       }
@@ -145,17 +154,26 @@ spec:
 
           awsAuth.assumeRole()
 
-          // Find the most current AMI IDs (if any).
-          amiIds = null
-          amiIds = scriptForDeploys.findAmis(gitBranchName)
+          if (params.migrator_ami_override == null || params.server_ami_override == null|| pipeline_ami_override == null) {
+            // Find the most current AMI IDs (if any).
+            amiIds = null
+            amiIds = scriptForDeploys.findAmis(gitBranchName)
+            migratorAmiId = amiIds.bfdMigratorAmiId
+            pipelineAmiId = amiIds.bfdPipelineAmiId
+            server_ami_override = amiIds.bfdServerAmiId
+          } else {
+            migratorAmiId = params.migrator_ami_override
+            pipelineAmiId = params.pipeline_ami_override
+            server_ami_override = params.server_ami_override
+          }
 
           build job:
                 jobToRun,
                 parameters: [
                   string(name: "env", value: "${params.env}"),
-                  string(name: "migrator_ami_override", value: "${amiIds.bfdMigratorAmiId}"),
-                  string(name: "pipeline_ami_override", value: "${amiIds.bfdPipelineAmiId}"),
-                  string(name: "server_ami", value: "${amiIds.bfdServerAmiId}"),
+                  string(name: "migrator_ami_override", value: "${migratorAmiId}"),
+                  string(name: "pipeline_ami_override", value: "${pipelineAmiId}"),
+                  string(name: "server_ami", value: "${server_ami_override}"),
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
