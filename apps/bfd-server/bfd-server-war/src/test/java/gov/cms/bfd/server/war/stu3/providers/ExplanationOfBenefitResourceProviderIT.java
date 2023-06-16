@@ -1863,7 +1863,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
 
     // Build up a list of lastUpdatedURLs that return > all values values
     String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
-    String earlyDateTime = "2019-10-01T00:00:00-04:00";
+    String earlyDateTime = "2019-10-01T00:00:00+00:00";
     List<String> allUrls =
         Arrays.asList(
             "_lastUpdated=gt" + earlyDateTime,
