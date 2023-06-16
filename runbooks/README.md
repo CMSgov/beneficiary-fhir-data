@@ -8,6 +8,8 @@ Table of Contents
       * [Will the hash in each of the Dataset SQL queries below ever change? What is it used for?](./how-to-create-server-regression-dashboards.md#will-the-hash-in-each-of-the-dataset-sql-queries-below-ever-change-what-is-it-used-for)
    * [Instructions](./how-to-create-server-regression-dashboards.md#instructions)
 
+* [How to Update for RDA API Changes](./how-to-update-for-rda-api-changes.md#how-to-update-for-rda-api-changes)
+
 * [How to Re-run a Failed BFD Pipeline Load](./how-to-rerun-failed-pipeline-load.md#how-to-re-run-a-failed-bfd-pipeline-load)
 
 * [How to Clone an RDS Cluster with Terraform](./how-to-clone-rds-cluster-with-terraform.md#how-to-clone-an-rds-cluster-with-terraform)
