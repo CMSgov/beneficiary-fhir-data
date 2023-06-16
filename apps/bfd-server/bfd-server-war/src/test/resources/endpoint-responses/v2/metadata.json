@@ -31,7 +31,7 @@
       "searchParam" : [ {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
@@ -51,7 +51,7 @@
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n   - `service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `service-date=gt2023-01-02`\n   - `service-date=lt2023-05-01`"
+        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified _DateRange_. A _DateRange_ can be\ndefined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n   - `service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `service-date=gt2023-01-02`\n   - `service-date=lt2023-05-01`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -74,7 +74,7 @@
       "searchParam" : [ {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
@@ -94,7 +94,7 @@
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified _DateRange_. A DateRange can include both\nlow and high date values, only a low date value, or only a high date value.\n\nExamples:\n   - `service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `service-date=gt2023-01-02`\n   - `service-date=lt2023-05-01`"
+        "documentation" : "Only satisfy the Search request if a claim's Date\nfalls within a specified _DateRange_. A _DateRange_ can be\ndefined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n   - `service-date=gt2023-01-02&service-date=lt2023-05-01`\n   - `service-date=gt2023-01-02`\n   - `service-date=lt2023-05-01`"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -117,7 +117,7 @@
       "searchParam" : [ {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "beneficiary",
         "type" : "reference",
@@ -140,7 +140,7 @@
       "searchParam" : [ {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
@@ -156,7 +156,7 @@
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Only satisfy the Search request if a claim's _billable period_\nfalls within a specified _DateRange_. A _DateRange_ can be\ndefined by providing less than `lt` and/or greater than `gt` values.\n\nExamples:\n  - `service-date=gt2023-01-02&service-date=lt2023-05-01` defines a range between two provided dates\n  - `service-date=gt2023-01-02` defines a range between the provided date and today\n  - `service-date=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search request if a claim's _billable period_\nfalls within a specified _DateRange_. A _DateRange_ can be\ndefined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `service-date=gt2023-01-02&service-date=lt2023-05-01` defines a range between two provided dates\n  - `service-date=gt2023-01-02` defines a range between the provided date and today\n  - `service-date=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -199,7 +199,7 @@
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "cursor",
         "type" : "string",

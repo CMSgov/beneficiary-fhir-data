@@ -67,6 +67,7 @@ public final class OpenAPIContentProvider {
       """
     Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
+    This parameter can be included in a request one or more times.
 
     Examples:
       - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
@@ -177,6 +178,7 @@ public final class OpenAPIContentProvider {
    Only satisfy the Search request if a claim's _billable period_
    falls within a specified _DateRange_. A _DateRange_ can be
    defined by providing less than `lt` and/or greater than `gt` values.
+   This parameter can be included in a request one or more times.
 
    Examples:
      - `service-date=gt2023-01-02&service-date=lt2023-05-01` defines a range between two provided dates
@@ -284,8 +286,9 @@ public final class OpenAPIContentProvider {
   public static final String PAC_SERVICE_DATE_VALUE =
       """
     Only satisfy the Search request if a claim's Date
-    falls within a specified _DateRange_. A DateRange can include both
-    low and high date values, only a low date value, or only a high date value.
+    falls within a specified _DateRange_. A _DateRange_ can be
+    defined by providing less than `lt` and/or greater than `gt` values.
+    This parameter can be included in a request one or more times.
 
     Examples:
        - `service-date=gt2023-01-02&service-date=lt2023-05-01`
