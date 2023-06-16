@@ -130,8 +130,8 @@ def _main():
             "--headless",
         ]
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
-        + ([f"--locust-tags=\"{locust_tags}\""] if locust_tags else [])
-        + ([f"--locust-exclude-tags=\"{locust_exclude_tags}\""] if locust_exclude_tags else []),
+        + ([f"--locust-tags={locust_tags}"] if locust_tags else [])
+        + ([f"--locust-exclude-tags={locust_exclude_tags}"] if locust_exclude_tags else []),
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
