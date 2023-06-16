@@ -1,4 +1,5 @@
 """High Volume Load test suite for BFD Server endpoints."""
+import logging
 from random import shuffle
 from typing import Callable, List, TypeVar, Optional, Type, Dict, Set, Protocol
 
@@ -18,11 +19,6 @@ MASTER_HASHED_MBIS: List[str] = []
 DEFAULT_TASK_WEIGHT: int = 5
 TAGS: Set[str] = []
 EXCLUDE_TAGS: Set[str] = []
-
-@events.init_command_line_parser.add_listener
-def _(parser):
-    parser.add_argument("--locust-tags", type=str, env_var="LOCUST_TAGS", default="", help="Custom locust tags...")
-    parser.add_argument("--locust-exclude-tags", type=str, env_var="LOCUST_EXCLUDE_TAGS", default="", help="Custom exclude locust tags...")
 
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
@@ -453,7 +449,20 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
-        self.tasks = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), TAGS, EXCLUDE_TAGS)
+        logger = logging.getLogger()
+        logger.debug("============================")
+        logger.debug(self.tags2)
+        logger.debug(self.exclude_tags2)
+        logger.debug("============================")
+        logger.debug(TAGS)
+        logger.debug(EXCLUDE_TAGS)
+
+        if self.tags2 and self.exclude_tags2:
+            self.tasks = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(self.tags2.split()), set(self.exclude_tags2.split()))
+        elif TAGS and EXCLUDE_TAGS:
+            self.tasks = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), TAGS, EXCLUDE_TAGS)
+        else:
+            self.tasks = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), {"eob", "patient"}, {"patient_test_coverage_contract_v1", "eob_test_id_count_type_pde_v1"})
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.
