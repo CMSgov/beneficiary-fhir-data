@@ -448,6 +448,8 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+        self.tags1 = TAGS
+        self.exclude_tags1 = EXCLUDE_TAGS
         self.logger.debug("========= HIGH VOLUME SUITE =============")
         self.logger.debug("========= self.tags2 and self.exclude_tags2 ===================")
         self.logger.debug(self.tags2)
@@ -462,13 +464,17 @@ class HighVolumeUser(BFDUserBase):
         self.logger.debug("============ HARD-CODED =============")
         self.logger.debug(try_tasks_1)
 
-        if self.tags2 and self.exclude_tags2:
-            self.logger.debug("============ self.tags2 and self.exclude_tags2 =============")
-            try_tasks_2 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(self.tags2.split()), set(self.exclude_tags2.split()))
-            self.logger.debug(try_tasks_2)
-        elif TAGS and EXCLUDE_TAGS:
+        if TAGS and EXCLUDE_TAGS:
             self.logger.debug("============ TAGS and EXCLUDE_TAGS ============= 1")
-            try_tasks_3 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(TAGS), set(EXCLUDE_TAGS))
+            try_tasks_1 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(TAGS), set(EXCLUDE_TAGS))
+            self.logger.debug(try_tasks_1)
+        elif self.tags1 and self.exclude_tags1:
+            self.logger.debug("============ self.tags1 and self.exclude_tags1 ============= 1")
+            try_tasks_2 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(self.tags1), set(self.exclude_tags1))
+            self.logger.debug(try_tasks_2)
+        elif self.tags2 and self.exclude_tags2:
+            self.logger.debug("============ self.tags2 and self.exclude_tags2 =============")
+            try_tasks_3 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(self.tags2.split()), set(self.exclude_tags2.split()))
             self.logger.debug(try_tasks_3)
 
         if try_tasks_1 and len(try_tasks_1) > 0:
