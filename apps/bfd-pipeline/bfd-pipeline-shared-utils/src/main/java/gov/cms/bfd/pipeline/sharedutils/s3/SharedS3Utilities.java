@@ -20,7 +20,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.internal.crt.S3CrtAsyncClient;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
@@ -97,7 +96,9 @@ public final class SharedS3Utilities {
     if (minioConfig.useMinio) {
       return createS3AsyncMinioClient(awsS3Region, minioConfig);
     }
-    return S3CrtAsyncClient.builder().region(awsS3Region).build();
+    // Split the file download (automatically using the async client) if its >200 MB
+    long mb = 1048576L;
+    return S3AsyncClient.crtBuilder().minimumPartSizeInBytes(200 * mb).region(awsS3Region).build();
   }
 
   /**
