@@ -6,8 +6,8 @@
    2. Alternatively, you can download a specific release from the RDA API release page
       - https://github.cms.gov/medicare-payment-modernization/rda-api/releases/
    3. Copy changes from RDA API proto files to BFD proto files
-        - RDA API: https://github.cms.gov/medicare-payment-modernization/rda-api/tree/main/proto/src/main/proto/rda/v1
-        - BFD: https://github.cms.gov/medicare-payment-modernization/rda-api/tree/main/proto/src/main/proto/rda/v1
+        - RDA API proto: https://github.cms.gov/medicare-payment-modernization/rda-api/tree/main/proto/src/main/proto/rda/v1
+        - BFD PAC proto: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/proto/rda/v1
    4. Update VERSION.txt in BFD repo
         - https://github.com/CMSgov/beneficiary-fhir-data/tree/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/proto/rda/VERSION.txt
 2. Update RDA schema/entity mappings
