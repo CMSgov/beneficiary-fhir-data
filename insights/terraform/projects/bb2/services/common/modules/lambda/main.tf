@@ -40,9 +40,6 @@ resource "aws_lambda_function" "firehose_log_processor_lambda" {
 
   tags = {
     "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python",
-    # Override default ENV related tags for common lambda.
-    "Environment" = "allenv"
-    "stack" = "${var.application}-${var.project}-allenv"
   }
 
   timeout = 60

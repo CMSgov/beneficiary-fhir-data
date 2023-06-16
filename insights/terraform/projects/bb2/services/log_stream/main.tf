@@ -13,22 +13,10 @@ locals {
 
   # Shared lambda name/role (TODO: Split out by env)
   lambda_name = "bb2-kinesis-firehose-cloudwatch-logs-processor-python"
-  lambda_role = "bb2-kinesis-firehose-cloudwatch-logs-processor-pyt-role-s0acxwoq"
 
   firehose_name = "${local.env}-perf-mon"
   glue_crawler_name = "${local.env}-perf-mon"
 
-}
-
-module "lambda" {
-  source          = "./modules/lambda"
-
-  name = local.lambda_name
-  description = "An Amazon Kinesis Firehose stream processor that extracts individual log events from records sent by Cloudwatch Logs subscription filters."
-  role = local.lambda_role
-  region = local.region
-  application   = local.application
-  project       = local.project
 }
 
 module "firehose" {

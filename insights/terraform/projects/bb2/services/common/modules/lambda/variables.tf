@@ -13,11 +13,3 @@ variable "role" {
 variable "region" {
   type = string
 }
-
-variable "application" {
-  type = string
-}
-
-variable "project" {
-  type = string
-}
