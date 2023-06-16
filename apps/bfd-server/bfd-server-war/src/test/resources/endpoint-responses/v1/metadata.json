@@ -30,15 +30,15 @@
       "searchParam" : [ {
         "name" : "beneficiary",
         "type" : "reference",
-        "documentation" : "The patient identifier to search for"
+        "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset\n(starting point) into the list of elements for the _Request_.\nIt is optional and defaults to 1 if not supplied.\nA value 0 is not allowed and negative indices are not currently supported.\n\nExample:\n   - `startIndex=100`"
       } ]
     }, {
       "type" : "ExplanationOfBenefit",
@@ -53,27 +53,31 @@
       "searchParam" : [ {
         "name" : "patient",
         "type" : "reference",
-        "documentation" : "The patient identifier to search for"
+        "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
-        "documentation" : "If true, exclude all SAMHSA-related resources"
+        "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n\nExamples:\n   - `excludeSAMHSA=true`"
+      }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\n\nExample:\n   - `includeTaxNumbers=true`"
       }, {
         "name" : "service-date",
         "type" : "date",
-        "documentation" : "Include resources that completed in the given range"
+        "documentation" : "Only satisfy the Search request if a claim's _billable period_\nfalls within a specified _DateRange_. A _DateRange_ can be\ndefined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `service-date=gt2023-01-02&service-date=lt2023-05-01` defines a range between two provided dates\n  - `service-date=gt2023-01-02` defines a range between the provided date and today\n  - `service-date=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset\n(starting point) into the list of elements for the _Request_.\nIt is optional and defaults to 1 if not supplied.\nA value 0 is not allowed and negative indices are not currently supported.\n\nExample:\n   - `startIndex=100`"
       }, {
         "name" : "type",
         "type" : "token",
-        "documentation" : "A list of claim types to include"
+        "documentation" : "One or more comma-delimited claim types that filters the response to contain only EoBs that include the specified claim types.\nThis is optional and defaults to `*` denoting all types.\nSupported values for claim type:\n   - `*` all types (default)\n   - `carrier`\n   - `dme`\n   - `hha`\n   - `hospice`\n   - `inpatient`\n   - `outpatient`\n   - `partd`\n   - `snf`\n\nExamples:\n   - `type=carrier,inpatient,snf,dme`\n   - `type=outpatient`\n   - `type=*`"
       } ]
     }, {
       "type" : "OperationDefinition",
@@ -96,19 +100,19 @@
       "searchParam" : [ {
         "name" : "_has:Coverage",
         "type" : "token",
-        "documentation" : "Part D coverage type"
+        "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nWhen searching for a Patient's Part D events information, this resource identifies\nthe Part D contract value that will be used when determining eligibility.\n\nExample:\n   - `_has:Coverage.extension=<Part D Contract ID Here>`\n   - `_has:Coverage.extension=ABCD`"
       }, {
         "name" : "_has:Coverage",
         "type" : "token",
-        "documentation" : "Part D reference year"
+        "documentation" : "When searching for a Patient's Part D events information, this resource identifies\nthe reference year that will be applied when determining applicable Part D events.\n\nExample:\n   - `_has:Coverage.rfrncyr=2023`"
       }, {
         "name" : "_id",
         "type" : "token",
-        "documentation" : "The patient identifier to search for"
+        "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
@@ -116,7 +120,7 @@
       }, {
         "name" : "cursor",
         "type" : "string",
-        "documentation" : "The cursor used for result pagination"
+        "documentation" : "Provide a pagination cursor or numeric _offset_ for processing Patient's Part D events information.\n\nExamples:\n   - `cursor=200` the first record is the 201st record\n   - `cursor=1000` the first record is the 1001st record"
       }, {
         "name" : "identifier",
         "type" : "token",
@@ -124,7 +128,7 @@
       }, {
         "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset\n(starting point) into the list of elements for the _Request_.\nIt is optional and defaults to 1 if not supplied.\nA value 0 is not allowed and negative indices are not currently supported.\n\nExample:\n   - `startIndex=100`"
       }, {
         "name" : "startIndex",
         "type" : "string",

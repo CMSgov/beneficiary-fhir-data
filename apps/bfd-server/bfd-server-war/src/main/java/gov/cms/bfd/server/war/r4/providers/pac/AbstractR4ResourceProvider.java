@@ -23,6 +23,7 @@ import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
@@ -276,6 +277,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param samhsa if {@code true}, exclude all SAMHSA-related resources
    * @param lastUpdated range which to include resources last updated within
    * @param serviceDate range which to include resources completed within
+   * @param taxNumbers whether to include tax numbers in the response
    * @param requestDetails the request details
    * @return the bundle
    */
@@ -283,26 +285,45 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Trace
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_MBI_SHORT,
+              value = OpenAPIContentProvider.PAC_MBI_VALUE)
           ReferenceParam mbi,
       @OptionalParam(name = "type")
-          @Description(shortDefinition = "A list of claim types to include")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_CLAIM_TYPE_SHORT,
+              value = OpenAPIContentProvider.PAC_CLAIM_TYPE_VALUE)
           TokenAndListParam types,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "isHashed")
-          @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_IS_HASHED,
+              value = OpenAPIContentProvider.PAC_IS_HASHED_VALUE)
           String hashed,
       @OptionalParam(name = "excludeSAMHSA")
-          @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_SHORT,
+              value = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_VALUE)
           String samhsa,
       @OptionalParam(name = Constants.PARAM_LASTUPDATED)
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       @OptionalParam(name = "service-date")
-          @Description(shortDefinition = "Include resources that completed in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_SERVICE_DATE_SHORT,
+              value = OpenAPIContentProvider.PAC_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
+      @OptionalParam(name = "includeTaxNumbers")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
+              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
+          String taxNumbers,
       RequestDetails requestDetails) {
     if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
       String mbiString = mbi.getIdPart();
