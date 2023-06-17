@@ -150,6 +150,7 @@ spec:
           awsAuth.assumeRole()
 
           if (params.migrator_ami_override == null || params.server_ami_override == null|| pipeline_ami_override == null) {
+            echo "no amiIDs provided finding the latest master"
             // Find the most current AMI IDs (if any).
             amiIds = null
             amiIds = scriptForDeploys.findAmis(gitBranchName)
@@ -161,6 +162,10 @@ spec:
             pipelineAmiId = params.pipeline_ami_override
             server_ami_override = params.server_ami_override
           }
+
+          echo "Using the following migrator image: ${migratorAmiId}" 
+          echo "Using the following pipeline image: ${pipelineAmiId}" 
+          echo "Using the following server image: ${server_ami_override}" 
 
           build job:
                 jobToRun,
