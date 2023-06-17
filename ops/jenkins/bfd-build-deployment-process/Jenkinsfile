@@ -150,7 +150,7 @@ spec:
           awsAuth.assumeRole()
 
           if (params.migrator_ami_override.length() == 0 || params.server_ami_override.length() == 0 || pipeline_ami_override.length() == 0) {
-            echo "no amiIDs provided finding the latest master"
+            echo "no amiIDs provided finding the latest of ${gitBranchName}"
             // Find the most current AMI IDs (if any).
             amiIds = null
             amiIds = scriptForDeploys.findAmis(gitBranchName)
