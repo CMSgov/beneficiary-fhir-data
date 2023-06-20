@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -46,6 +47,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -58,8 +60,18 @@ public class SNFClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
   /** The transformer under test. */
-  SNFClaimTransformerV2 snfClaimTransformer;
+  ClaimTransformerInterfaceV2 claimTransformerInterface;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -88,9 +100,10 @@ public class SNFClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    snfClaimTransformer = new SNFClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+    claimTransformerInterface = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+
     claim = generateClaim();
-    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -452,7 +465,7 @@ public class SNFClaimTransformerV2Test {
             .map(r -> (SNFClaim) r)
             .findFirst()
             .get();
-    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -858,7 +871,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
             List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "9214", "BONE SCAN")),
-            "2016-01-16T00:00:00+00:00");
+            "2016-01-16T00:00:00-08:00");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 9214");
   }
@@ -1606,7 +1619,8 @@ public class SNFClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = snfClaimTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob =
+        claimTransformerInterface.transform(generateClaim(), Optional.empty());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

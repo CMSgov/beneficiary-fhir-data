@@ -13,7 +13,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.sql.Date;
@@ -24,10 +23,25 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer}. */
 public final class PartDEventTransformerTest {
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
+
   /**
    * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
@@ -38,13 +52,9 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+
     assertMatches(claim, eob);
   }
 
@@ -131,13 +141,9 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
-        PartDEventTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -161,6 +167,7 @@ public final class PartDEventTransformerTest {
 
     return claim;
   }
+
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link PartDEvent}.
@@ -198,12 +205,10 @@ public final class PartDEventTransformerTest {
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
+        drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 

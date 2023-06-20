@@ -15,7 +15,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,10 +26,25 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
 public final class CarrierClaimTransformerTest {
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
+
   /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
    * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
@@ -51,24 +65,16 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
+
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
     claim.setLastUpdated(Optional.empty());
     ExplanationOfBenefit eobWithoutLastUpdated =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
+
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
 
@@ -93,14 +99,10 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
+
     ExplanationOfBenefit eob =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -124,13 +126,9 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
+
     assertMatches(claim, eob, Optional.of(true));
   }
 

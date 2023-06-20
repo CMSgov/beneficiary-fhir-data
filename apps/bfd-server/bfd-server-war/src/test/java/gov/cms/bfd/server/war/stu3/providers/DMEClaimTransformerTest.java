@@ -15,7 +15,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +24,25 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
 public final class DMEClaimTransformerTest {
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
+
   /**
    * Verifies that {@link DMEClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
@@ -47,13 +61,9 @@ public final class DMEClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        DMEClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
+
     assertMatches(claim, eob, Optional.of(true));
   }
 
@@ -66,7 +76,7 @@ public final class DMEClaimTransformerTest {
    *     DMEClaim}@param includedTaxNumbers whether or not to include tax numbers are expected to be
    *     included in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   * false</code>)
+   * false</code> )
    * @param includedTaxNumbers the value for IncludeTaxNumbers in the request to inform the expected
    *     result
    * @throws FHIRException (indicates test failure)

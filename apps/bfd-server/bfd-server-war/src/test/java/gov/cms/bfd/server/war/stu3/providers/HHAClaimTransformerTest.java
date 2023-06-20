@@ -21,10 +21,25 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link HHAClaimTransformer}. */
 public final class HHAClaimTransformerTest {
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
+
   /**
    * Verifies that {@link HHAClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
@@ -42,14 +57,10 @@ public final class HHAClaimTransformerTest {
             .findFirst()
             .get();
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob =
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
 
-    ExplanationOfBenefit eob = HHAClaimTransformer.transform(transformerContext, claim);
     assertMatches(claim, eob, transformerContext);
   }
 
@@ -64,9 +75,7 @@ public final class HHAClaimTransformerTest {
    *     {@link HHAClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      HHAClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -88,7 +97,7 @@ public final class HHAClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
@@ -148,12 +157,14 @@ public final class HHAClaimTransformerTest {
         claimLine1.getStatusCode().get(),
         eobItem0.getRevenue());
 
-    // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
+    // test common eob information between Inpatient, HHA, Hospice and SNF claims
+    // are set as
     // expected
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(
         eob, claim.getCareStartDate(), Optional.empty(), Optional.empty());
 
-    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice
+    // and SNF match
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 

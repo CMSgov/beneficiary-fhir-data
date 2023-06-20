@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -54,8 +55,18 @@ public final class PartDEventTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The transformer under test. */
-  PartDEventTransformerV2 partDEventTransformer;
+  ClaimTransformerInterfaceV2 claimTransformerInterface;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+  }
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -86,11 +97,10 @@ public final class PartDEventTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    partDEventTransformer =
-        new PartDEventTransformerV2(
-            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+    claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, drugDisplayLookup);
+
     claim = generateClaim();
-    eob = partDEventTransformer.transform(claim);
+    eob = partDEventTransformer.transform(claim, Optional.empty());
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -1032,7 +1042,8 @@ public final class PartDEventTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = partDEventTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob =
+        claimTransformerInterface.transform(generateClaim(), Optional.empty());
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

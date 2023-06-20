@@ -15,7 +15,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -27,6 +26,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,20 @@ import org.slf4j.LoggerFactory;
 public final class OutpatientClaimTransformerTest {
   private static final org.slf4j.Logger LOGGER =
       LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
+
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
 
   /**
    * Verifies that {@link
@@ -54,15 +68,11 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob =
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
 
-    ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(transformerContext, claim);
-    assertMatches(claim, eob, transformerContext);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -87,15 +97,11 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob =
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
 
-    ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(transformerContext, claim);
-    assertMatches(claim, eob, transformerContext);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -118,13 +124,6 @@ public final class OutpatientClaimTransformerTest {
 
     List<Object> parsedRecords = ServerTestUtils.parseData(outpatientSyntheticFiles);
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
-
     parsedRecords.stream()
         .filter(r -> r instanceof OutpatientClaim)
         .map(r -> (OutpatientClaim) r)
@@ -135,8 +134,10 @@ public final class OutpatientClaimTransformerTest {
                   claim.getBeneficiaryId(),
                   claim.getClaimId());
               ExplanationOfBenefit eob =
-                  OutpatientClaimTransformer.transform(transformerContext, claim);
-              assertMatches(claim, eob, transformerContext);
+                  TransformerTestUtils.transformRifRecordToEob(
+                      claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+
+              assertMatches(claim, eob);
             });
   }
 
@@ -148,13 +149,9 @@ public final class OutpatientClaimTransformerTest {
    *     from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     OutpatientClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link OutpatientClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      OutpatientClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  static void assertMatches(OutpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -196,7 +193,7 @@ public final class OutpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        npiOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -45,6 +46,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -57,8 +59,21 @@ public final class OutpatientClaimTransformerV2Test {
   ExplanationOfBenefit eob;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
   /** The transformer under test. */
-  OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  ClaimTransformerInterfaceV2 claimTransformerInterface;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -89,13 +104,10 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    outpatientClaimTransformer =
-        new OutpatientClaimTransformerV2(
-            new MetricRegistry(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    claimTransformerInterface =
+        new OutpatientClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
     claim = generateClaim();
-    ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1464,7 +1476,8 @@ public final class OutpatientClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob =
+        claimTransformerInterface.transform(generateClaim(), Optional.empty());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

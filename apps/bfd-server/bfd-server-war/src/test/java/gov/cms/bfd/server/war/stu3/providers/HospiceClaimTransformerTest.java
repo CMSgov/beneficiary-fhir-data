@@ -12,7 +12,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -21,10 +20,25 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link HospiceClaimTransformer}. */
 public final class HospiceClaimTransformerTest {
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
+
   /**
    * Verifies that {@link HospiceClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
@@ -42,15 +56,11 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .get();
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob =
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
 
-    ExplanationOfBenefit eob = HospiceClaimTransformer.transform(transformerContext, claim);
-    assertMatches(claim, eob, transformerContext);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -60,13 +70,9 @@ public final class HospiceClaimTransformerTest {
    * @param claim the {@link HospiceClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     HospiceClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link HospiceClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      HospiceClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  static void assertMatches(HospiceClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -99,7 +105,7 @@ public final class HospiceClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
@@ -113,7 +119,8 @@ public final class HospiceClaimTransformerTest {
         claim.getFiDocumentClaimControlNumber(),
         claim.getFiOriginalClaimControlNumber());
 
-    // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
+    // test common eob information between Inpatient, HHA, Hospice and SNF claims
+    // are set as
     // expected
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(
         eob,
@@ -151,7 +158,8 @@ public final class HospiceClaimTransformerTest {
         claimLine1.getBenficiaryPaymentAmount(),
         eobItem0.getAdjudication());
 
-    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice
+    // and SNF match
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 

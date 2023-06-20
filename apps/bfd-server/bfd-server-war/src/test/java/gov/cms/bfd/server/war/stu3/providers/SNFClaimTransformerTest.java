@@ -13,7 +13,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -24,10 +23,25 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link SNFClaimTransformer}. */
 public final class SNFClaimTransformerTest {
+  /** The Metric Registry to use for the test. */
+  private static MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  @BeforeAll
+  static void setup() {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+  }
+
   /**
    * Verifies that {@link SNFClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
@@ -45,16 +59,11 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob =
+        TransformerTestUtils.transformRifRecordToEob(
+            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
 
-    ExplanationOfBenefit eob = SNFClaimTransformer.transform(transformerContext, claim);
-
-    assertMatches(claim, eob, transformerContext);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -64,13 +73,9 @@ public final class SNFClaimTransformerTest {
    * @param claim the {@link SNFClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     SNFClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link SNFClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      SNFClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -87,7 +92,8 @@ public final class SNFClaimTransformerTest {
     // test the common field provider number is set as expected in the EOB
     TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-    // test common benefit components between SNF and Inpatient claims are set as expected
+    // test common benefit components between SNF and Inpatient claims are set as
+    // expected
     TransformerTestUtils.assertCommonGroupInpatientSNF(
         eob,
         claim.getCoinsuranceDayCount(),
@@ -114,7 +120,8 @@ public final class SNFClaimTransformerTest {
           (Period) nchQlyfdStayInfo.getTiming());
     }
 
-    // test common eob information between SNF and Inpatient claims are set as expected
+    // test common eob information between SNF and Inpatient claims are set as
+    // expected
     TransformerTestUtils.assertCommonEobInformationInpatientSNF(
         eob,
         claim.getNoncoveredStayFromDate(),
@@ -128,7 +135,8 @@ public final class SNFClaimTransformerTest {
     TransformerTestUtils.assertDateEquals(
         claim.getBeneficiaryDischargeDate().get(), eob.getHospitalization().getEndElement());
 
-    // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
+    // test common eob information between Inpatient, HHA, Hospice and SNF claims
+    // are set as
     // expected
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(
         eob,
@@ -150,7 +158,7 @@ public final class SNFClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        npiOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
@@ -193,7 +201,8 @@ public final class SNFClaimTransformerTest {
         Optional.empty(),
         0 /* index */);
 
-    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice
+    // and SNF match
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 
