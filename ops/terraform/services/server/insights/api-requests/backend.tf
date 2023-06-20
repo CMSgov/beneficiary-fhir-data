@@ -1,5 +1,4 @@
 terraform {
-  required_version = "~> 1.1.9"
   # Use the common terraform bucket for all of BFD's state
   backend "s3" {
     bucket         = "bfd-tf-state"
