@@ -631,28 +631,31 @@ public class CarrierClaimTransformerV2Test {
     assertEquals(4, eob.getCareTeam().size());
   }
 
-  /** Tests that the transformer sets the expected values for the care team member entries, and does not contain
-   * duplicate entries. */
+  /**
+   * Tests that the transformer sets the expected values for the care team member entries, and does
+   * not contain duplicate entries.
+   */
   @Test
   public void shouldHaveCareTeamMembers() {
 
     // Load a claim with multiple lines, to test we dont get duplicate entries
     List<Object> parsedRecords =
-            ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
 
     CarrierClaim loadedClaim =
-            parsedRecords.stream()
-                         .filter(r -> r instanceof CarrierClaim)
-                         .map(r -> (CarrierClaim) r)
-                         .findFirst()
-                         .get();
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
     loadedClaim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
 
-
     // First member
-    CareTeamComponent member1 = TransformerTestUtilsV2.findCareTeamBySequence(1, genEob.getCareTeam());
+    CareTeamComponent member1 =
+        TransformerTestUtilsV2.findCareTeamBySequence(1, genEob.getCareTeam());
     CareTeamComponent compare1 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             1,
@@ -664,7 +667,8 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare1.equalsDeep(member1));
 
     // Second member
-    CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, genEob.getCareTeam());
+    CareTeamComponent member2 =
+        TransformerTestUtilsV2.findCareTeamBySequence(2, genEob.getCareTeam());
     CareTeamComponent compare2 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             2,
@@ -676,7 +680,8 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare2.equalsDeep(member2));
 
     //     // Third member
-    CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, genEob.getCareTeam());
+    CareTeamComponent member3 =
+        TransformerTestUtilsV2.findCareTeamBySequence(3, genEob.getCareTeam());
     CareTeamComponent compare3 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             3,
@@ -710,7 +715,8 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare3.equalsDeep(member3));
 
     // Fourth member
-    CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, genEob.getCareTeam());
+    CareTeamComponent member4 =
+        TransformerTestUtilsV2.findCareTeamBySequence(4, genEob.getCareTeam());
     CareTeamComponent compare4 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             4,
