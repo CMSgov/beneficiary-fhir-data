@@ -61,15 +61,15 @@ def register_custom_args(parser: LocustArgumentParser):
     parser.add_argument(
         "--locust-tags",
         type=str,
-        default="",
-        help='Custom locust tags (optional)',
+        help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
         dest="locust_tags",
-        env_var="LOCUST_TAGS"
+        env_var="LOCUST_TAGS",
+        default=""
     )
     parser.add_argument(
         "--locust-exclude-tags",
         type=str,
-        help='Custom locust tags (optional)',
+        help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
         dest="locust_exclude_tags",
         env_var="LOCUST_EXCLUDE_TAGS",
         default=""

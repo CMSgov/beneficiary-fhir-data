@@ -146,6 +146,7 @@ class BFDUserBase(FastHttpUser):
         # Initialize URL pools
         self.url_pools = {}
 
+        self.logger = logging.getLogger()
         self.has_reported_no_data = []
 
     def ssl_context_factory(self) -> ssl.SSLContext:

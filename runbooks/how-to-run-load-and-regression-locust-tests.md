@@ -476,8 +476,9 @@ any trailing characters after `PORT` as well.
 1. Choose the desired SDLC environment to load test from the "ENVIRONMENT" dropdown list
 1. Adjust the default parameters according to the desired load test. For this particular case, the
    default values will _need to be changed_:
-    1. Set `LOCUST_TAGS` to the space-delimited list of locust tests to run if they are
-       annotated with ANY of the given @tag(s)
+    1. Set `LOCUST_TAGS` to the space-delimited list of locust tasks to run if they are
+       annotated with ANY of the given @tag(s). Will run all tasks if not given
+    1. Set `LOCUST_EXCLUDE_TAGS` to the space-delimited list of locust tasks to exclude with ANY of the given @tag(s)
     1. Set `INITIAL_WORKER_NODES` to the number of worker nodes/Lambdas desired _in total_
     1. Set `MAX_SPAWNED_NODES` equal to `INITIAL_WORKER_NODES`
     1. Set `MAX_SPAWNED_USERS` to the desired number of simulated users _in total_

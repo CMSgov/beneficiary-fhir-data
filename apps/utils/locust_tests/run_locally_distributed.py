@@ -31,14 +31,14 @@ arg_parser.add_argument(
     "--locust-tags",
     dest="locust-tags",
     type=str,
-    help="Space-delimited. The locust tasks with ANY of the given tags will be executed",
+    help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
     default=""
 )
 arg_parser.add_argument(
     "--locust-exclude-tags",
     dest="locust-exclude-tags",
     type=str,
-    help="Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution",
+    help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
     default=""
 )
 raw_args, unknown_args = arg_parser.parse_known_args()

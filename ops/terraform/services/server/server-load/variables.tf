@@ -29,7 +29,7 @@ variable "test_host" {
 }
 
 variable "locust_tags" {
-  description = "Space-delimited. The locust tasks with ANY of the given tags will be executed"
+  description = "Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided"
   type        = string
   default     = ""
 }

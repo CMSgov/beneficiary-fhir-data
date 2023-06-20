@@ -456,6 +456,11 @@ class HighVolumeUser(BFDUserBase):
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+
+        # As of 01/20/2023 there is an unresolved locust issue [1] with the --tags/--exclude-tags command line options.
+        # Therefore, we have implemented custom arguments (--locust-tags/--locust-exclude-tags) to programmatically
+        # filter tasks by the given @tag(s) at runtime.
+        # [1] https://github.com/locustio/locust/issues/1689
         self.tasks = self.get_tasks(TAGS, EXCLUDE_TAGS)
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
