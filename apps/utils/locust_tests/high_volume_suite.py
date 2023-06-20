@@ -1,4 +1,5 @@
 """High Volume Load test suite for BFD Server endpoints."""
+import sys, inspect
 from random import shuffle
 from typing import Callable, List, TypeVar, Optional, Type, Dict, Set, Protocol
 
@@ -39,10 +40,10 @@ def _(environment: Environment, **kwargs):
     )
 
     global TAGS
-    TAGS = environment.parsed_options.locust_tags.split()
+    TAGS = environment.parsed_options.locust_tags.split() if hasattr(environment.parsed_options, "locust_tags") else []
 
     global EXCLUDE_TAGS
-    EXCLUDE_TAGS = environment.parsed_options.locust_exclude_tags.split()
+    EXCLUDE_TAGS = environment.parsed_options.locust_exclude_tags.split() if hasattr(environment.parsed_options, "locust_exclude_tags") else []
 
     global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
@@ -202,7 +203,7 @@ class CoverageTaskSet(TaskSet):
                 "_lastUpdated": f"gt{ self.last_updated}",
                 "beneficiary":  self.bene_ids.pop(),
             },
-            name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
+            name="/v1/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
 
     @tag("coverage_test_id", "v2")
@@ -251,7 +252,7 @@ class PatientTaskSet(TaskSet):
 
         def make_url():
             contract =  self.contract_data.pop()
-            return create_url_path(
+            return create_url_pth(
                 "/v1/fhir/Patient",
                 {
                     "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
@@ -379,13 +380,6 @@ class PatientTaskSet(TaskSet):
             name="/v2/fhir/Patient search by id",
         )
 
-""" Must be declared here due to the Type annotation requiring a class definition """
-TASK_SET_BY_TAG: Dict[str, Type[TaskSet]] = {
-    EOB_TAG: EobTaskSet,
-    COVERAGE_TAG: CoverageTaskSet,
-    PATIENT_TAG: PatientTaskSet
-}
-
 class HighVolumeUser(BFDUserBase):
     """High volume load test suite for V2 BFD Server endpoints.
 
@@ -412,15 +406,15 @@ class HighVolumeUser(BFDUserBase):
         :param checked: The running score of tasks which have or have not been processed
         :return: A list of filtered tasks to execute
         """
-        new_tasks = []
+
+        filtered_tasks = []
         if checked is None:
             checked = {}
         for task in task_holder.tasks:
             if task in checked:
                 if checked[task]:
-                    new_tasks.append(task)
+                    filtered_tasks.append(task)
                 continue
-
             passing = True
             if hasattr(task, "tasks"):
                 self.filter_tasks_by_tags(task, tags, exclude_tags, checked)
@@ -432,60 +426,37 @@ class HighVolumeUser(BFDUserBase):
                     passing &= "locust_tag_set" not in dir(task) or len(task.locust_tag_set.intersection(exclude_tags)) == 0
 
             if passing:
-                new_tasks.append(task)
+                filtered_tasks.append(task)
             checked[task] = passing
 
-        return new_tasks
-
-    def get_tasks_by_tags(self, task_sets: List[Type[TaskSet]], tags: Set[str], exclude_tags: Set[str]):
-        filtered_tasks = []
-        for task_set in task_sets:
-            filtered_tasks.extend(self.filter_tasks_by_tags(task_set, tags, exclude_tags))
         return filtered_tasks
+
+    def get_tasks(self, tags: Set[str], exclude_tags: Set[str]):
+        """
+        Returns the list of runnable tasks for the given user, filterable by a list of tags or exclude_tags.
+        Returns all runnable tasks if neither tags or exclude_tags contain items.
+
+        :param tags: The list of tags to filter tasks by
+        :param exclude_tags: This list of tags to exclude tasks by
+        :return: A list of tasks to run
+        """
+
+        # Filter out the class members without a tasks attribute
+        class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+        potential_tasks = list(filter(lambda potential_task: hasattr(potential_task[1], "tasks"), class_members))
+
+        # Filter each task holder's tasks by the given tags and exclude_tags
+        tasks = []
+        for task_holder in list(map(lambda task_set: task_set[1], potential_tasks)):
+            tasks.extend(self.filter_tasks_by_tags(task_holder, tags, exclude_tags))
+        return tasks
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bene_ids = MASTER_BENE_IDS.copy()
         self.contract_data = MASTER_CONTRACT_DATA.copy()
         self.hashed_mbis = MASTER_HASHED_MBIS.copy()
-        self.tags1 = TAGS
-        self.exclude_tags1 = EXCLUDE_TAGS
-        print("========= HIGH VOLUME SUITE =============")
-        print("========= self.tags2 and self.exclude_tags2 ===================")
-        print(self.tags2)
-        print(self.exclude_tags2)
-        print("============ TAGS and EXCLUDE_TAGS ================")
-        print(TAGS)
-        print(EXCLUDE_TAGS)
-        try_tasks_1 = []
-        try_tasks_2 = []
-        try_tasks_3 = []
-        try_tasks_1 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), {"eob", "patient"}, {"patient_test_coverage_contract_v1", "eob_test_id_count_type_pde_v1"})
-        print("============ HARD-CODED =============")
-        print(try_tasks_1)
-
-        if TAGS and EXCLUDE_TAGS:
-            print("============ TAGS and EXCLUDE_TAGS ============= 1")
-            try_tasks_1 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(TAGS), set(EXCLUDE_TAGS))
-            print(try_tasks_1)
-        elif self.tags1 and self.exclude_tags1:
-            print("============ self.tags1 and self.exclude_tags1 ============= 1")
-            try_tasks_2 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(self.tags1), set(self.exclude_tags1))
-            print(try_tasks_2)
-        elif self.tags2 and self.exclude_tags2:
-            print("============ self.tags2 and self.exclude_tags2 =============")
-            try_tasks_3 = self.get_tasks_by_tags(TASK_SET_BY_TAG.values(), set(self.tags2.split()), set(self.exclude_tags2.split()))
-            print(try_tasks_3)
-
-        if try_tasks_1 and len(try_tasks_1) > 0:
-            print("============ try_tasks_1 selected ============= 1")
-            self.tasks = try_tasks_1
-        elif try_tasks_2 and len(try_tasks_2) > 0:
-            print("============ try_tasks_2 selected ============= 1")
-            self.tasks = try_tasks_2
-        elif try_tasks_3 and len(try_tasks_3) > 0:
-            print("============ try_tasks_3 selected ============= 1")
-            self.tasks = try_tasks_3
+        self.tasks = self.get_tasks(TAGS, EXCLUDE_TAGS)
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.

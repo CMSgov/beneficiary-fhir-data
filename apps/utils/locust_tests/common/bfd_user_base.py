@@ -142,14 +142,7 @@ class BFDUserBase(FastHttpUser):
         self.client_cert = self.environment.parsed_options.client_cert_path
         self.server_public_key = self.environment.parsed_options.server_public_key
         self.last_updated = data.get_last_updated()
-        self.logger = logging.getLogger()
 
-        self.tags2 = self.environment.parsed_options.locust_tags
-        self.exclude_tags2 = self.environment.parsed_options.locust_exclude_tags
-        self.logger.debug("BFD USER BASE ====== self.tags2 and self.exclude_tags2 ======================")
-        self.logger.debug(self.tags2)
-        self.logger.debug(self.exclude_tags2)
-        self.logger.debug("BFD USER BASE ============================")
         # Initialize URL pools
         self.url_pools = {}
 
