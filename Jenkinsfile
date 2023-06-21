@@ -229,14 +229,13 @@ try {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_common_start')
-					println "Skipping due to BFD-2673"
-					// container('bfd-cbc-build') {
-					// 	awsAuth.assumeRole()
-					// 	terraform.deployTerraservice(
-					// 		env: bfdEnv,
-					// 		directory: "ops/terraform/services/common"
-					// 	)
-					// }
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/common"
+						)
+					}
 				}
 			}
 
@@ -381,14 +380,13 @@ try {
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_common_start')
-						println "Skipping due to BFD-2673"
-						// container('bfd-cbc-build') {
-						// 	awsAuth.assumeRole()
-						// 	terraform.deployTerraservice(
-						// 		env: bfdEnv,
-						// 		directory: "ops/terraform/services/common"
-						// 	)
-						// }
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/common"
+							)
+						}
 					}
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
@@ -523,14 +521,13 @@ try {
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
 						milestone(label: 'stage_deploy_prod_common_start')
-						println "Skipping due to BFD-2673"
-						// container('bfd-cbc-build') {
-						// 	awsAuth.assumeRole()
-						// 	terraform.deployTerraservice(
-						// 		env: bfdEnv,
-						// 		directory: "ops/terraform/services/common"
-						// 	)
-						// }
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/common"
+							)
+						}
 					}
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')

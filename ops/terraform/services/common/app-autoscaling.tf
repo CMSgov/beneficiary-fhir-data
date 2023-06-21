@@ -27,8 +27,8 @@ resource "aws_appautoscaling_scheduled_action" "scale_out" {
   service_namespace  = aws_appautoscaling_target.replicas[0].service_namespace
   resource_id        = aws_appautoscaling_target.replicas[0].resource_id
   scalable_dimension = aws_appautoscaling_target.replicas[0].scalable_dimension
-  schedule = "cron(00 07 ? * MON-FRI *)"
-  timezone = "America/New_York"
+  schedule           = "cron(00 07 ? * MON-FRI *)"
+  timezone           = "America/New_York"
 
   # NOTE: min_capacity and max_capacity will count nodes that are and
   # are not managed by app-autoscaling when calculating the desired capacity.
@@ -45,8 +45,8 @@ resource "aws_appautoscaling_scheduled_action" "scale_in" {
   service_namespace  = aws_appautoscaling_target.replicas[0].service_namespace
   resource_id        = aws_appautoscaling_target.replicas[0].resource_id
   scalable_dimension = aws_appautoscaling_target.replicas[0].scalable_dimension
-  schedule = "cron(00 19 ? * MON-FRI *)"
-  timezone = "America/New_York"
+  schedule           = "cron(00 19 ? * MON-FRI *)"
+  timezone           = "America/New_York"
 
   # NOTE: min_capacity and max_capacity only impacts nodes managed by app-autoscaling
   # when this number is fewer than the number of nodes defined by the cluster
