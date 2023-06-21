@@ -11,7 +11,7 @@ def amiIds
 def gitBranchName
 def migratorAmiId
 def pipelineAmiId
-def server_ami_override
+def serverAmiId
 
 pipeline {
     agent {
