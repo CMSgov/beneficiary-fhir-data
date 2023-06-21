@@ -400,7 +400,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   public void testFindByPatientWithPageSizeNotProvidedExpectNoPaging() {
 
     Bundle response =
-        eobProvider.findByPatient(patientParam, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
 
@@ -425,7 +425,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     assertThrows(
         InvalidRequestException.class,
         () ->
-            eobProvider.findByPatient(patientParam, null, null, null, null, null, requestDetails));
+            eobProvider.findByPatient(
+                patientParam, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -439,7 +440,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
-        eobProvider.findByPatient(patientParam, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
   }
@@ -459,7 +460,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
                     + QueryUtils.V_SNF_HAS_DATA
                     + QueryUtils.V_DME_HAS_DATA));
 
-    eobProvider.findByPatient(patientParam, null, null, "true", null, null, requestDetails);
+    eobProvider.findByPatient(patientParam, null, null, "true", null, null, null, requestDetails);
 
     // we returned three claims, so we should see three samhsa filter tests
     verify(samhsaMatcher, times(3)).test(testEob);
@@ -471,7 +472,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
    */
   @Test
   public void testFindByPatientWhenExcludeSamshaFalseExpectNoFiltering() {
-    eobProvider.findByPatient(patientParam, null, null, "false", null, null, requestDetails);
+    eobProvider.findByPatient(patientParam, null, null, "false", null, null, null, requestDetails);
 
     verify(samhsaMatcher, never()).test(testEob);
   }
@@ -489,7 +490,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(requestDetails.getHeaders(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
         .thenReturn(List.of("true"));
 
-    eobProvider.findByPatient(patientParam, null, null, null, null, null, requestDetails);
+    eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     verify(carrierClaimTransformer, times(1)).transform(any(), eq(true));
     verify(dmeClaimTransformer, times(1)).transform(any(), eq(true));
