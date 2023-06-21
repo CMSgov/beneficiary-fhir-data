@@ -181,7 +181,7 @@
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
         <its.db.username/>
         <its.db.password/>
-        <its.testcontainer.db.image>postgres:14.6-alpine</its.testcontainer.db.image>
+        <its.testcontainer.db.image>postgres:14.7-alpine</its.testcontainer.db.image>
 
         <!-- Whether the partially adjudicated claims endpoints should be enabled -->
         <local.pac.enabled>true</local.pac.enabled>
