@@ -69,7 +69,7 @@ Some additional notes:
 * The database password will need to be percent encoded if it contains special characters, e.g.:
 
     ```
-    $ python -c "import urllib, sys; print urllib.quote(sys.argv[1])" very%cool@password
+    $ python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" very%cool@password
     ```
 
 * The application will write/overwrite its output data to the specified `DB_QUERIES_OUTPUT` CSV file.
