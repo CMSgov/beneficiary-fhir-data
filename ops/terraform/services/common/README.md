@@ -39,6 +39,18 @@ For more details, see the file '.terraform-docs.yml' or
 https://terraform-docs.io/user-guide/configuration/
 -->
 
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_rds_cluster_identifier_override"></a> [rds\_cluster\_identifier\_override](#input\_rds\_cluster\_identifier\_override) | RDS Cluster Identifier Override. Defaults to cluster identifier specified in centralized environmental configuration. | `string` | `null` | no |
+
+<!-- GENERATED WITH `terraform-docs .`
+Manually updating the README.md will be overwritten.
+For more details, see the file '.terraform-docs.yml' or
+https://terraform-docs.io/user-guide/configuration/
+-->
+
 ## Resources
 
 | Name | Type |
