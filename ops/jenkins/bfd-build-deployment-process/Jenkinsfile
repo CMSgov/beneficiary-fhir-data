@@ -11,7 +11,7 @@ def amiIds
 def gitBranchName
 def migratorAmiId
 def pipelineAmiId
-def server_ami_override
+def serverAmiId
 
 
 pipeline {
@@ -150,16 +150,14 @@ spec:
           awsAuth.assumeRole()
 
           if (params.migrator_ami_override.length() == 0 || params.server_ami_override.length() == 0 || pipeline_ami_override.length() == 0) {
-            // Find the most current AMI IDs (if any).
-            amiIds = null
             amiIds = scriptForDeploys.findAmis(gitBranchName)
             migratorAmiId = amiIds.bfdMigratorAmiId
             pipelineAmiId = amiIds.bfdPipelineAmiId
-            server_ami_override = amiIds.bfdServerAmiId
+            serverAmiId = amiIds.bfdServerAmiId
           } else {
             migratorAmiId = params.migrator_ami_override
             pipelineAmiId = params.pipeline_ami_override
-            server_ami_override = params.server_ami_override
+            serverAmiId = params.server_ami_override
           }
 
           build job:
@@ -168,7 +166,7 @@ spec:
                   string(name: "env", value: "test"),
                   string(name: "migrator_ami_override", value: "${migratorAmiId}"),
                   string(name: "pipeline_ami_override", value: "${pipelineAmiId}"),
-                  string(name: "server_ami", value: "${server_ami_override}"),
+                  string(name: "server_ami", value: "${serverAmiId}"),
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
@@ -188,7 +186,7 @@ spec:
                   string(name: "env", value: "prod-sbx"),
                   string(name: "migrator_ami_override", value: "${migratorAmiId}"),
                   string(name: "pipeline_ami_override", value: "${pipelineAmiId}"),
-                  string(name: "server_ami", value: "${server_ami_override}"),
+                  string(name: "server_ami", value: "${serverAmiId}"),
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
@@ -208,7 +206,7 @@ spec:
                   string(name: "env", value: "prod"),
                   string(name: "migrator_ami_override", value: "${migratorAmiId}"),
                   string(name: "pipeline_ami_override", value: "${pipelineAmiId}"),
-                  string(name: "server_ami", value: "${server_ami_override}"),
+                  string(name: "server_ami", value: "${serverAmiId}"),
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
