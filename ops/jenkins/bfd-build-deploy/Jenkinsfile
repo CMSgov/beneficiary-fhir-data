@@ -160,7 +160,7 @@ spec:
             amiIds = scriptForDeploys.findAmis(gitBranchName)
             migratorAmiId = amiIds.bfdMigratorAmiId
             pipelineAmiId = amiIds.bfdPipelineAmiId
-            server_ami_override = amiIds.bfdServerAmiId
+            serverAmiId = amiIds.bfdServerAmiId
           } else {
             migratorAmiId = params.migrator_ami_override
             pipelineAmiId = params.pipeline_ami_override
