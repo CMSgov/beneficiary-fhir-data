@@ -164,7 +164,7 @@ spec:
           } else {
             migratorAmiId = params.migrator_ami_override
             pipelineAmiId = params.pipeline_ami_override
-            server_ami_override = params.server_ami_override
+            serverAmiId = params.server_ami_override
           }
 
           build job:
