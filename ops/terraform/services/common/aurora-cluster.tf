@@ -44,7 +44,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
   engine                              = "aurora-postgresql"
   engine_mode                         = "provisioned"
-  engine_version                      = "14.6"
+  engine_version                      = "14.7"
   iam_database_authentication_enabled = local.rds_iam_database_authentication_enabled
   kms_key_id                          = data.aws_kms_key.cmk.arn
   port                                = 5432

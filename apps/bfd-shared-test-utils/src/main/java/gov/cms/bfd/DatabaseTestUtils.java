@@ -62,7 +62,7 @@ public final class DatabaseTestUtils {
   public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
 
   /** The default test container image to use when nothing is provided. */
-  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:14.6-alpine";
+  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:14.7-alpine";
 
   /** The username used for test container database username. */
   public static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
