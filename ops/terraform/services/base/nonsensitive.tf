@@ -42,39 +42,35 @@ data "aws_ssm_parameters_by_path" "common_nonsensitive" {
 resource "aws_ssm_parameter" "common_nonsensitive" {
   for_each = local.common_nonsensitive
 
-  name           = each.key
-  overwrite      = true
-  type           = "String"
-  insecure_value = each.value
-  value          = null
+  name      = each.key
+  overwrite = true
+  type      = "String"
+  value     = each.value
 }
 
 resource "aws_ssm_parameter" "migrator_nonsensitive" {
   for_each = local.migrator_nonsensitive
 
-  name           = each.key
-  overwrite      = true
-  type           = "String"
-  insecure_value = each.value
-  value          = null
+  name      = each.key
+  overwrite = true
+  type      = "String"
+  value     = each.value
 }
 
 resource "aws_ssm_parameter" "pipeline_nonsensitive" {
   for_each = local.pipeline_nonsensitive
 
-  name           = each.key
-  overwrite      = true
-  type           = "String"
-  insecure_value = each.value
-  value          = null
+  name      = each.key
+  overwrite = true
+  type      = "String"
+  value     = each.value
 }
 
 resource "aws_ssm_parameter" "server_nonsensitive" {
   for_each = local.server_nonsensitive
 
-  name           = each.key
-  overwrite      = true
-  type           = "String"
-  insecure_value = each.value
-  value          = null
+  name      = each.key
+  overwrite = true
+  type      = "String"
+  value     = each.value
 }
