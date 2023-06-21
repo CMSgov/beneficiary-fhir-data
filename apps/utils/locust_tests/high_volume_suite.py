@@ -16,7 +16,6 @@ TaskT = TypeVar("TaskT", Callable[..., None], Type["TaskSet"])
 MASTER_BENE_IDS: List[str] = []
 MASTER_CONTRACT_DATA: List[Dict[str, str]] = []
 MASTER_HASHED_MBIS: List[str] = []
-DEFAULT_TASK_WEIGHT: int = 5
 TAGS: Set[str] = []
 EXCLUDE_TAGS: Set[str] = []
 
