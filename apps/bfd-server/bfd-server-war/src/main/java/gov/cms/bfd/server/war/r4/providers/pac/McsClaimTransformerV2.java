@@ -39,7 +39,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;

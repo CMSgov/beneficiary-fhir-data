@@ -55,7 +55,6 @@ import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.stereotype.Component;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the

@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
-import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
@@ -32,7 +31,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
