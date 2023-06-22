@@ -4,18 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
@@ -71,7 +67,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the {@link R4ExplanationOfBenefitResourceProvider}. */
-public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequiredTest {
+public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequiredTest {
 
   /** Parameter name for excluding SAMHSA. */
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
@@ -93,13 +89,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   /** The transformer for snf claims. */
   private SNFClaimTransformerV2 snfClaimTransformerV2;
 
-  /**
-   * Sets the test resources up for comparing the data.
-   *
-   * @throws IOException the io exception
-   */
+  /** Sets the test resources up for comparing the data. */
   @BeforeEach
-  public void setup() throws IOException {
+  public void setupTest() {
 
     MetricRegistry metricRegistry =
         PipelineTestUtils.get().getPipelineApplicationState().getMetrics();
@@ -152,61 +144,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * CarrierClaim}lines -derived {@link ExplanationOfBenefit} that does exist in the DB. Outputs to
-   * make sure CareTeamComponent entries and their extensions are not duplicated when there are
-   * several Carrier Claim Lines associated with a claim.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void readEobForExistingCarrierClaimForManyLines() throws FHIRException, IOException {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(
-                Arrays.asList(
-                    StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    CarrierClaim claim =
-        loadedRecords.stream()
-            .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
-            .findFirst()
-            .get();
-
-    ExplanationOfBenefit eob =
-        fhirClient
-            .read()
-            .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, claim.getClaimId()))
-            .execute();
-
-    // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords);
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingCarrierClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, 1234L))
-              .execute();
-        });
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
    * DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
@@ -235,26 +172,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     assertNotNull(eob);
     // Compare result to transformed EOB
     compareEob(ClaimTypeV2.DME, eob, loadedRecords);
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * DMEClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingDMEClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, 1234L))
-              .execute();
-        });
   }
 
   /**
@@ -291,26 +208,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
-   * HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingHHAClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, 1234L))
-              .execute();
-        });
-  }
-
-  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
    * HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
@@ -343,26 +240,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingHospiceClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, 1234L))
-              .execute();
-        });
-  }
-
-  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
    * InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
@@ -392,26 +269,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     assertNotNull(eob);
     // Compare result to transformed EOB
     compareEob(ClaimTypeV2.INPATIENT, eob, loadedRecords);
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
-   * InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingInpatientClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, 1234L))
-              .execute();
-        });
   }
 
   /**
@@ -452,26 +309,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
-   * OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingOutpatientClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, 1234L))
-              .execute();
-        });
-  }
-
-  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
    * PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
@@ -504,68 +341,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingPartDEvent() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, 1234L))
-              .execute();
-        });
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in the DB using a negative
-   * ID.
-   */
-  @Test
-  public void readEobForMissingNegativePartDEvent() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing. Tests negative ID will pass regex
-          // pattern.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, -1234L))
-              .execute();
-        });
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link
-   * PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid id parameter.
-   */
-  @Test
-  public void readEobForInvalidIdParamPartDEvent() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        InvalidRequestException.class,
-        () -> {
-          // The IdParam is not valid, so this should return an exception.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, "-1?234"))
-              .execute();
-        });
-  }
-
-  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
    * SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the DB.
    *
@@ -595,26 +370,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     assertNotNull(eob);
     // Compare result to transformed EOB
     compareEob(ClaimTypeV2.SNF, eob, loadedRecords);
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
-   * SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in the DB.
-   */
-  @Test
-  public void readEobForMissingSNFClaim() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> {
-          // No data is loaded, so this should return nothing.
-          fhirClient
-              .read()
-              .resource(ExplanationOfBenefit.class)
-              .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, 1234L))
-              .execute();
-        });
   }
 
   /**
@@ -753,7 +508,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     assertNotNull(searchResults);
 
     /*
-     * Verify that no paging links exist in the bundle.
+     * Verify that no paging links exist in the initial bundle, since no paging was requested.
      */
     assertNull(searchResults.getLink(Constants.LINK_NEXT));
     assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
@@ -761,7 +516,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     assertNull(searchResults.getLink(Constants.LINK_LAST));
 
     /*
-     * Access a created link of this bundle, providing the startIndex but not the
+     * Access the results of this bundle, providing the startIndex but not the
      * pageSize (count).
      */
     Bundle pagedResults =
@@ -791,8 +546,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} returns no paging for
    * a {@link Patient} that does exist in the DB, with paging on a page size of 0.
+   *
+   * <p>This tests a HAPI-FHIR bug and is therefore an E2E test; if/when this bug is fixed, this
+   * could be replaced by a unit test.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -914,80 +672,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
      */
 
     assertEachEob(searchResults, loadedRecords);
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
-   * a {@link Patient} that does exist in the DB, with paging, using negative values for page size
-   * and start index parameters. This test expects to receive a BadRequestException, as negative
-   * values should result in an HTTP 400.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-
-    /*
-     * FIXME: At this time we cannot check for negative page size parameters due to
-     * the same bug described in
-     * https://github.com/jamesagnew/hapi-fhir/issues/1074.
-     */
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(ExplanationOfBenefit.class)
-            .where(
-                ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-
-    /*
-     * Access a created link of this bundle, providing the startIndex but not the
-     * pageSize (count).
-     */
-    assertThrows(
-        InvalidRequestException.class,
-        () -> {
-          fhirClient
-              .loadPage()
-              .byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=-1")
-              .andReturnBundle(Bundle.class)
-              .execute();
-        });
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
-   * a {@link Patient} that does not exist in the DB.
-   */
-  @Test
-  public void searchForEobsByMissingPatient() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    // No data is loaded, so this should return 0 matches.
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(ExplanationOfBenefit.class)
-            .where(ExplanationOfBenefit.PATIENT.hasId(new IdDt("Patient", "1234")))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    assertNotNull(searchResults);
-    assertEquals(0, searchResults.getTotal());
   }
 
   /**
@@ -1244,36 +928,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
-   * <code>excludeSAMHSA=false</code> does not filter out SAMHSA-related claims.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void searchForSamhsaEobsWithExcludeSamhsaFalse() throws FHIRException {
-    Beneficiary beneficiary = loadSampleAWithSamhsa();
-
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(ExplanationOfBenefit.class)
-            .where(
-                ExplanationOfBenefit.PATIENT.hasId(
-                    TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
-            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("false"))
-            .returnBundle(Bundle.class)
-            .execute();
-    assertNotNull(searchResults);
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      // Without filtering we expect one claim for each claim type.
-      assertEquals(1, filterToClaimType(searchResults, claimType).size());
-    }
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
    * <code>excludeSAMHSA=true</code> properly returns claims that are not SAMHSA-related.
    *
    * @throws FHIRException (indicates test failure)
@@ -1306,46 +960,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
-   * <code>excludeSAMHSA=false</code> properly returns claims that are not SAMHSA-related.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void searchForNonSamhsaEobsWithExcludeSamhsaFalse() throws FHIRException {
-    // Load the SAMPLE_A resources normally.
-    Beneficiary beneficiary = loadSampleA();
-
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(ExplanationOfBenefit.class)
-            .where(
-                ExplanationOfBenefit.PATIENT.hasId(
-                    TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
-            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("false"))
-            .returnBundle(Bundle.class)
-            .execute();
-    assertNotNull(searchResults);
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      // None of the claims are SAMHSA so we expect one record per claim type in the results.
-      assertEquals(
-          1,
-          filterToClaimType(searchResults, claimType).size(),
-          String.format("Verify claims of type '%s' are present", claimType));
-    }
-  }
-
-  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} handles the {@link
    * ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} header properly.
    *
    * @throws FHIRException (indicates test failure)
    */
-  // TODO: Fix this test .. it isn't working. Tax number is not showing up.
   @Test
   public void searchForEobsIncludeTaxNumbersHandling() throws FHIRException {
     List<Object> loadedRecords =
@@ -1410,6 +1029,21 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .returnBundle(Bundle.class)
             .execute();
     assertNotNull(searchResults);
+
+    // Verify that tax numbers are present for carrier claims.
+    carrierEob = filterToClaimType(searchResults, ClaimTypeV2.CARRIER).get(0);
+    assertNotNull(carrierClaim.getLines().get(0).getProviderTaxNumber());
+    assertNull(
+        TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
+            carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
+
+    // Verify that tax numbers are present for DME claims.
+    dmeEob = filterToClaimType(searchResults, ClaimTypeV2.DME).get(0);
+    assertNotNull(dmeClaim.getLines().get(0).getProviderTaxNumber());
+    // FIXME: investigate this, careTeam for tax number doesnt seem to be added correctly for DME?
+    /*assertNotNull(
+    TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
+        dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));*/
   }
 
   /**
@@ -1594,8 +1228,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider} works as with a null lastUpdated
-   * parameter after yesterday.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider} falls back to using the correct
+   * dates for querying the database when lastUpdated is not set / null.
    *
    * @throws FHIRException (indicates test failure)
    */
