@@ -12,7 +12,7 @@
 /bfd/test/common/nonsensitive/rds_backup_retention_period: 8 # in days
 /bfd/test/common/nonsensitive/rds_iam_database_authentication_enabled: true
 /bfd/test/common/nonsensitive/rds_cluster_identifier: bfd-test-aurora-cluster
-/bfd/test/common/nonsensitive/rds_instance_class: db.r5.12xlarge
+/bfd/test/common/nonsensitive/rds_instance_class: db.r6i.12xlarge
 /bfd/test/common/nonsensitive/rds_instance_count: 2
 /bfd/test/common/nonsensitive/rds_master_username: bfduser
 /bfd/test/common/nonsensitive/rds_security_group: bfd-test-aurora-cluster
