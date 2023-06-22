@@ -2,6 +2,7 @@ formatter: markdown table
 sections:
   show:
     - requirements
+    - inputs
     - resources
     - data-sources
 
@@ -13,6 +14,14 @@ content: |-
     <!-- GENERATED WITH `terraform-docs .`
          Updates to text between BEGIN_TF_DOCS and END_TFDOCS tags
          will be overwritten.
+         For more details, see the file '.terraform-docs.yml' or
+         https://terraform-docs.io/user-guide/configuration/
+    -->
+
+    {{ .Inputs }}
+
+    <!-- GENERATED WITH `terraform-docs .`
+         Manually updating the README.md will be overwritten.
          For more details, see the file '.terraform-docs.yml' or
          https://terraform-docs.io/user-guide/configuration/
     -->
