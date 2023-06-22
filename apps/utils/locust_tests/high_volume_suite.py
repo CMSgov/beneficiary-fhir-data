@@ -250,8 +250,8 @@ class PatientTaskSet(TaskSet):
         """Patient search by coverage contract (all pages)"""
 
         def make_url():
-            contract =  self.contract_data.pop()
-            return create_url_pth(
+            contract = self.contract_data.pop()
+            return create_url_path(
                 "/v1/fhir/Patient",
                 {
                     "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
