@@ -200,6 +200,12 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3-transfer-manager</artifactId>
         </dependency>
+        <!-- Allows use of AWS common runtime client for file copying, which has improved performance -->
+        <dependency>
+            <groupId>software.amazon.awssdk.crt</groupId>
+            <artifactId>aws-crt</artifactId>
+            <version>${aws.crt.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
