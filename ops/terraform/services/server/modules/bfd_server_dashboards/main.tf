@@ -19,6 +19,9 @@ locals {
       prod_sbx = ".*ab2d-sbx-client.*"
       prod     = ".*ab2d-prod-client.*"
     }
+    ab2d_validation_client_ssl = {
+      prod     = ".*ab2d-prod-validation-client.*"
+    }
     bcda_client_ssl = {
       prod_sbx = ".*bcda-sbx-client.*"
       prod     = ".*bcda-prod-client.*"
