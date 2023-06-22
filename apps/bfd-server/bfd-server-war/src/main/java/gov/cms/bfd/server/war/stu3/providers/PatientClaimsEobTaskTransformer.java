@@ -207,6 +207,33 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     return claimTransformer.transform(claimEntity, includeTaxNumbers);
   }
 
+  /**
+   * Check if the task encountered an {@link Exception}.
+   *
+   * @return false if the task encountered an exception, true otherwise.
+   */
+  public boolean ranSuccessfully() {
+    return (taskException == null);
+  }
+
+  /**
+   * Fetch the {@link Exception} if the task encountered one.
+   *
+   * @return Exception if the task encountered one, Optional.Empty() otherwise.
+   */
+  public Optional<Exception> getFailure() {
+    return ranSuccessfully() ? Optional.empty() : Optional.of(taskException);
+  }
+
+  /**
+   * Fetch the list of {@link IBaseResource} that were created.
+   *
+   * @return {@link List} of {@link IBaseResource}
+   */
+  public List<ExplanationOfBenefit> fetchEOBs() {
+    return eobs;
+  }
+
   /** Do a db lookup using a claim type entity object. */
   private void patientRead() {
     Class<?> entityClass = claimType.getEntityClass();
@@ -236,33 +263,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       TransformerUtilsV2.recordQueryInMdc(
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
-  }
-
-  /**
-   * Check if the task encountered an {@link Exception}.
-   *
-   * @return false if the task encountered an exception, true otherwise.
-   */
-  public boolean ranSuccessfully() {
-    return (taskException == null);
-  }
-
-  /**
-   * Fetch the {@link Exception} if the task encountered one.
-   *
-   * @return Exception if the task encountered one, Optional.Empty() otherwise.
-   */
-  public Optional<Exception> getFailure() {
-    return ranSuccessfully() ? Optional.empty() : Optional.of(taskException);
-  }
-
-  /**
-   * Fetch the list of {@link IBaseResource} that were created.
-   *
-   * @return {@link List} of {@link IBaseResource}
-   */
-  public List<ExplanationOfBenefit> fetchEOBs() {
-    return eobs;
   }
 
   /**
@@ -398,7 +398,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * Removes all SAMHSA-related claims from the specified {@link List} of {@link
    * ExplanationOfBenefit} resources.
    *
-   * @param eobs the {@link List} of {@link ExplanationOfBenefit} resources (i.e. claims) to filter
+   * @param eobs the {@link List} of {@link IBaseResource} resources (i.e. ExplanationOfBenefit) to
+   *     filter
    */
   private void filterSamhsa(List<IBaseResource> eobs) {
     ListIterator<IBaseResource> eobsIter = eobs.listIterator();

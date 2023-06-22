@@ -22,10 +22,12 @@ import java.util.function.Consumer;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.stereotype.Component;
 
 /**
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
+@Component
 final class InpatientClaimTransformer implements ClaimTransformerInterface {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -115,7 +117,8 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
           claimGroup.getPatientStatusCd());
     }
 
-    // add EOB information to fields that are common between the Inpatient and SNF claim types
+    // add EOB information to fields that are common between the Inpatient and SNF
+    // claim types
     TransformerUtils.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),

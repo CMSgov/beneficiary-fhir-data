@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -345,7 +347,8 @@ public class SpringConfiguration {
               .map(String::toLowerCase)
               .collect(Collectors.toSet());
 
-      // If there are no enabled source types, this endpoint will never return anything, so don't
+      // If there are no enabled source types, this endpoint will never return
+      // anything, so don't
       // add it
       if (!allowedResourceTypes.isEmpty()) {
         r4ClaimResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
@@ -476,5 +479,17 @@ public class SpringConfiguration {
    */
   public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
     return LayeredConfiguration.createConfigLoader(Map.of(), getenv);
+  }
+
+  /**
+   * This bean provides an {@link ExecutorService} fto enable EOB claim transformers to run in
+   * parallel (threads).
+   *
+   * @return {@link ExecutorService} for the application.
+   */
+  @Bean
+  public ExecutorService executorService() {
+    return Executors.newFixedThreadPool(
+        Integer.parseInt(System.getProperty("bfdServer.executorService.threads", "100")));
   }
 }

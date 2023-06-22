@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Interface defining a transform method for claim processing. */
+@FunctionalInterface
 public interface ClaimTransformerInterfaceV2 {
   /**
    * Defines a single interface method to transform claim entities.
