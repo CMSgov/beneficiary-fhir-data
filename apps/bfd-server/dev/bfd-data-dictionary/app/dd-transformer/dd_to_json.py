@@ -20,7 +20,7 @@ print("Target: " + str(target_path))
 with open(target_path, 'w', newline='') as out_file:
     out_json = json.loads('[]')  # initialize output to an empty json array
     ct = 0
-    for file_name in source_dir.iterdir():    # loop thru source data folder, read each json file, translate to csv and write row to file
+    for file_name in sorted(source_dir.iterdir()):    # loop thru source data folder, read each json file, translate to csv and write row to file
         try:
             with open(file_name) as element_file:
                 element_json = json.load(element_file)
