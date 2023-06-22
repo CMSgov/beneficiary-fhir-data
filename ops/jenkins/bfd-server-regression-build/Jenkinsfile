@@ -63,7 +63,7 @@ spec:
 
                     // Execute the existing build-push script
                     dir('apps/utils/locust_tests') {
-                        sh 'bash ./lambda/server-regression/build-push.sh'
+                        sh 'bash ../../../ops/jenkins/bfd-server-regression-build/build-push.sh'
                     }
                 }
             }

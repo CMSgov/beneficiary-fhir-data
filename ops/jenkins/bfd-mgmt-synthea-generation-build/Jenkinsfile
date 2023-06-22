@@ -49,7 +49,7 @@ spec:
 
           // Execute the existing build-push script
           dir('ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation') {
-            sh 'bash build_docker.sh'
+            sh 'bash ../../../../jenkins/bfd-mgmt-synthea-generation-build/build_docker.sh'
           }
         }
       }
