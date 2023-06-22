@@ -63,7 +63,6 @@ import org.springframework.stereotype.Component;
  *
  * @param <T> The specific fhir resource the concrete provider will serve.
  */
-@Component
 public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     extends AbstractResourceProvider implements IResourceProvider {
 

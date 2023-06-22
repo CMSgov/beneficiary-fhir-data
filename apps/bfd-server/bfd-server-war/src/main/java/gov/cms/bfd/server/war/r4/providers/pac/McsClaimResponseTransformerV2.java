@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
@@ -30,21 +31,22 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private final MetricRegistry metricRegistry;
 
   /** The metric name. */
-  private final String METRIC_NAME;
+  private static final String METRIC_NAME =
+          MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
    * "CANCELLED". For brevity, the rest are defaulted to "ACTIVE" using {@link
    * Map#getOrDefault(Object, Object)}.
    */
-  private final Map<String, ClaimResponse.ClaimResponseStatus> STATUS_MAP =
+  private static final Map<String, ClaimResponse.ClaimResponseStatus> STATUS_MAP =
       Map.of(
           "r", ClaimResponse.ClaimResponseStatus.CANCELLED,
           "z", ClaimResponse.ClaimResponseStatus.CANCELLED,
           "9", ClaimResponse.ClaimResponseStatus.CANCELLED);
 
   /** The known MCS codes and their associated {@link ClaimResponse.RemittanceOutcome} mappings. */
-  private final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
+  private static final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
       Map.ofEntries(
           Map.entry("a", ClaimResponse.RemittanceOutcome.QUEUED),
           Map.entry("b", ClaimResponse.RemittanceOutcome.QUEUED),
@@ -82,8 +84,6 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
    */
   public McsClaimResponseTransformerV2(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
-    this.METRIC_NAME =
-        this.metricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
   }
 
   /**

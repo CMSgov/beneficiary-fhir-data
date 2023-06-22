@@ -38,7 +38,8 @@ import org.springframework.stereotype.Component;
 public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
   /** The metric name. */
-  private final String METRIC_NAME;
+  private static final String METRIC_NAME =
+          MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -64,8 +65,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    */
   public McsClaimTransformerV2(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
-    this.METRIC_NAME =
-        MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
   }
 
   /**
