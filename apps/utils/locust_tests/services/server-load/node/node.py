@@ -133,7 +133,7 @@ def handler(event, context):
             f"--master-host={invoke_event.controller_ip}",
             f"--master-port={invoke_event.locust_port}",
             "--headless",
-            "--only-summary",
+            "--only-summary"
         ],
         cwd=locust_tests_dir,
         stderr=subprocess.STDOUT,

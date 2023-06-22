@@ -27,6 +27,8 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="input_container_image_tag_node_override"></a> [container\_image\_tag\_node\_override](#input\_container\_image\_tag\_node\_override) | Overrides the Container image URI used by the built load suite worker node lambda | `string` | `null` | no |
 | <a name="input_create_locust_instance"></a> [create\_locust\_instance](#input\_create\_locust\_instance) | When true, create the locust instance | `bool` | `false` | no |
 | <a name="input_initial_worker_nodes"></a> [initial\_worker\_nodes](#input\_initial\_worker\_nodes) | The number of initial Locust worker nodes to spawn before checking for stop signals. Useful for static load tests | `number` | `0` | no |
+| <a name="input_locust_exclude_tags"></a> [locust\_exclude\_tags](#input\_locust\_exclude\_tags) | Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution | `string` | `""` | no |
+| <a name="input_locust_tags"></a> [locust\_tags](#input\_locust\_tags) | Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided | `string` | `""` | no |
 | <a name="input_max_spawned_nodes"></a> [max\_spawned\_nodes](#input\_max\_spawned\_nodes) | The maximum number of Lambda worker nodes to spawn over the lifetime of a given test run. Does not account for failed nodes or nodes that reach their Lambda timeout | `number` | `0` | no |
 | <a name="input_max_spawned_users"></a> [max\_spawned\_users](#input\_max\_spawned\_users) | The maximum number of simulated Locust users (not worker nodes) to spawn. Use this and spawn rate to constrain the load during a test run | `number` | `0` | no |
 | <a name="input_node_lambda_name"></a> [node\_lambda\_name](#input\_node\_lambda\_name) | The name of the Locust worker node Lambda function that will be executed to spawn a Locust worker instance | `string` | `"bfd-test-server-load-node"` | no |
@@ -77,6 +79,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_xray_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_kms_key.mgmt_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_launch_template.template](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/launch_template) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |

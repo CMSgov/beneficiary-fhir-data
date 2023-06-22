@@ -376,7 +376,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           transformToEobs(
               ClaimTypeV2.CARRIER,
               findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.DME) && bitSet.get(QueryUtils.DME_HAS_DATA)) {
@@ -384,7 +384,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           transformToEobs(
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HHA) && bitSet.get(QueryUtils.HHA_HAS_DATA)) {
@@ -392,7 +392,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           transformToEobs(
               ClaimTypeV2.HHA,
               findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HOSPICE) && bitSet.get(QueryUtils.HOSPICE_HAS_DATA)) {
@@ -400,7 +400,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           transformToEobs(
               ClaimTypeV2.HOSPICE,
               findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.INPATIENT) && bitSet.get(QueryUtils.INPATIENT_HAS_DATA)) {
@@ -409,7 +409,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               ClaimTypeV2.INPATIENT,
               findClaimTypeByPatient(
                   ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.OUTPATIENT) && bitSet.get(QueryUtils.OUTPATIENT_HAS_DATA)) {
@@ -418,7 +418,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               ClaimTypeV2.OUTPATIENT,
               findClaimTypeByPatient(
                   ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.PDE) && bitSet.get(QueryUtils.PART_D_HAS_DATA)) {
@@ -426,7 +426,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           transformToEobs(
               ClaimTypeV2.PDE,
               findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (claimTypes.contains(ClaimTypeV2.SNF) && bitSet.get(QueryUtils.SNF_HAS_DATA)) {
@@ -434,7 +434,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           transformToEobs(
               ClaimTypeV2.SNF,
               findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers)));
+              includeTaxNumbers));
     }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
@@ -602,9 +602,9 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    */
   @Trace
   private List<ExplanationOfBenefit> transformToEobs(
-      ClaimTypeV2 claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
+      ClaimTypeV2 claimType, List<?> claims, boolean includeTaxNumbers) {
     return claims.stream()
-        .map(c -> transformEobClaim(c, claimType, includeTaxNumbers.orElse(false)))
+        .map(c -> transformEobClaim(c, claimType, includeTaxNumbers))
         .collect(Collectors.toList());
   }
 

@@ -28,6 +28,18 @@ variable "test_host" {
   default     = "https://test.bfd.cms.gov"
 }
 
+variable "locust_tags" {
+  description = "Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided"
+  type        = string
+  default     = ""
+}
+
+variable "locust_exclude_tags" {
+  description = "Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution"
+  type        = string
+  default     = ""
+}
+
 variable "initial_worker_nodes" {
   description = "The number of initial Locust worker nodes to spawn before checking for stop signals. Useful for static load tests"
   type        = number
