@@ -6,6 +6,9 @@ set -eo pipefail
 BUILD_CONTEXT_ROOT_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
 readonly BUILD_CONTEXT_ROOT_DIR
 
+SYNTHEA_SCRIPTS_ROOT_DIR="."
+readonly SYNTHEA_SCRIPTS_ROOT_DIR
+
 SYNTHEA_PROPERTIES_RAW_URL="https://raw.githubusercontent.com/synthetichealth/synthea/master/src/main/resources/synthea.properties"
 readonly SYNTHEA_PROPERTIES_RAW_URL
 
@@ -72,19 +75,20 @@ download_mapping_files_from_s3() {
   echo "Downloading Synthea mapping files from S3 to $SYNTHEA_MAPPING_FILES_DIR"
   mkdir -p "$SYNTHEA_MAPPING_FILES_DIR"
   source .venv/bin/activate
-  python3 "$BUILD_CONTEXT_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
+  python3 "$SYNTHEA_SCRIPTS_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
   deactivate
 }
 
 download_scripts_files_from_s3() {
   echo "Downloading Synthea script files from S3 to $BUILD_CONTEXT_ROOT_DIR"
   source .venv/bin/activate
-  python3 "$BUILD_CONTEXT_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
+  python3 "$SYNTHEA_SCRIPTS_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
   deactivate
 }
 
 build_docker_image() {
   # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
+  cp ./run_synthea "$BUILD_CONTEXT_ROOT_DIR"
   DOCKER_BUILDKIT=1
   docker build -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
     -f "$DOCKERFILE_PATH" \
