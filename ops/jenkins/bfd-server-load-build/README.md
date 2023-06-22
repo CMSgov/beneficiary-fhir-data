@@ -17,5 +17,5 @@ the root.
 Ensure your current working directory is `/apps/utils/locust_tests` and run:
 
 ```bash
-docker build -f "../../../ops/jenkins/bfd-server-load-build/node.Dockerfile" -t "<your-tag>" --platform linux/amd64 .
+docker build -f "/ops/jenkins/bfd-server-load-build/node.Dockerfile" -t "<your-tag>" --platform linux/amd64 .
 ```
