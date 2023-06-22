@@ -135,7 +135,6 @@ public final class Stu3EobSamhsaMatcherTest {
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
-
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
       NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
@@ -149,9 +148,9 @@ public final class Stu3EobSamhsaMatcherTest {
                     // FIXME remove most `else if`s once filtering fully supports all claim types
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
-                    return TransformerUtils.transformRifRecordToEob(
-                        new MetricRegistry(),
+                    return TransformerTestUtils.transformRifRecordToEob(
                         r,
+                        new MetricRegistry(),
                         Optional.empty(),
                         fdaDrugCodeDisplayLookup,
                         npiOrgLookup);
@@ -832,9 +831,9 @@ public final class Stu3EobSamhsaMatcherTest {
               .findFirst()
               .get();
       ExplanationOfBenefit sampleEobForClaimType =
-          TransformerUtils.transformRifRecordToEob(
-              new MetricRegistry(),
+          TransformerTestUtils.transformRifRecordToEob(
               sampleRifRecordForClaimType,
+              new MetricRegistry(),
               Optional.empty(),
               FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
               new NPIOrgLookup());

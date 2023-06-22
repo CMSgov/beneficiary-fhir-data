@@ -35,11 +35,12 @@ public final class PartDEventTransformerTest {
   /** The NPI org lookup to use for the test. */
   private static NPIOrgLookup npiOrgLookup;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**

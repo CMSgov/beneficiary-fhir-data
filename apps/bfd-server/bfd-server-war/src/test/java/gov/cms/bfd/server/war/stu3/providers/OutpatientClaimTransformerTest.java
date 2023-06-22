@@ -43,11 +43,12 @@ public final class OutpatientClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   private static NPIOrgLookup npiOrgLookup;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -193,7 +194,7 @@ public final class OutpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        npiOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

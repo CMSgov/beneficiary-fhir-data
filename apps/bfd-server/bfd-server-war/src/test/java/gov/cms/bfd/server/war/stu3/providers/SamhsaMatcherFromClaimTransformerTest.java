@@ -21,7 +21,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -90,90 +89,58 @@ public class SamhsaMatcherFromClaimTransformerTest {
   public static Stream<Arguments> data() throws IOException {
 
     // Load and transform the various claim types for testing
-
+    ClaimTransformerInterface claimTransformerInterface =
+        new InpatientClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit inpatientEob =
-        InpatientClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(InpatientClaim.class));
-
+        claimTransformerInterface.transform(getClaim(InpatientClaim.class), Optional.empty());
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
+    claimTransformerInterface =
+        new OutpatientClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit outpatientEob =
-        OutpatientClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(OutpatientClaim.class));
-
+        claimTransformerInterface.transform(getClaim(OutpatientClaim.class), Optional.empty());
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
+    claimTransformerInterface =
+        new DMEClaimTransformer(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     ExplanationOfBenefit dmeEob =
-        DMEClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(DMEClaim.class));
-
+        claimTransformerInterface.transform(getClaim(DMEClaim.class), Optional.empty());
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
+    claimTransformerInterface = new HHAClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit hhaEob =
-        HHAClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(HHAClaim.class));
+        claimTransformerInterface.transform(getClaim(HHAClaim.class), Optional.empty());
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
+    claimTransformerInterface =
+        new HospiceClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit hospiceEob =
-        HospiceClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(HospiceClaim.class));
+        claimTransformerInterface.transform(getClaim(HospiceClaim.class), Optional.empty());
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
+    claimTransformerInterface = new SNFClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit snfEob =
-        SNFClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(SNFClaim.class));
+        claimTransformerInterface.transform(getClaim(SNFClaim.class), Optional.empty());
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
+    claimTransformerInterface =
+        new CarrierClaimTransformer(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
     ExplanationOfBenefit carrierEob =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(CarrierClaim.class));
+        claimTransformerInterface.transform(getClaim(CarrierClaim.class), Optional.empty());
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
+    claimTransformerInterface =
+        new PartDEventTransformer(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     ExplanationOfBenefit pdeEob =
-        PartDEventTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            getClaim(PartDEvent.class));
-
+        claimTransformerInterface.transform(getClaim(PartDEvent.class), Optional.empty());
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
+
+    // TODO - check why inpatient and outpatient aren't included here
     return Stream.of(
         arguments(dmeClaimType, dmeEob),
         arguments(hhaClaimType, hhaEob),
@@ -198,7 +165,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -246,7 +213,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -287,7 +254,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -314,7 +281,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -356,7 +323,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -383,7 +350,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -424,7 +391,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -464,7 +431,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
@@ -488,7 +455,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     if (PART_D_EVENT_CLAIM.equals(claimType)
         || DME_CLAIM.equals(claimType)
@@ -520,7 +487,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     if (PART_D_EVENT_CLAIM.equals(claimType)
         || DME_CLAIM.equals(claimType)
@@ -567,7 +534,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     if (PART_D_EVENT_CLAIM.equals(claimType)
         || DME_CLAIM.equals(claimType)
@@ -599,7 +566,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
     boolean expectMatch = true;
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     if (PART_D_EVENT_CLAIM.equals(claimType)
         || DME_CLAIM.equals(claimType)

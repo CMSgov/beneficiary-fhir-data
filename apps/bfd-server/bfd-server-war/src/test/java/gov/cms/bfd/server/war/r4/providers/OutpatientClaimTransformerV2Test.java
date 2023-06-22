@@ -68,11 +68,12 @@ public final class OutpatientClaimTransformerV2Test {
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -540,7 +541,7 @@ public final class OutpatientClaimTransformerV2Test {
                     "http://hl7.org/fhir/sid/icd-10",
                     "CD1YYZZ",
                     "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
-            "2016-01-16T00:00:00+00:00");
+            "2016-01-16T00:00:00-08:00");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code CD1YYZZ");
   }
@@ -551,7 +552,8 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // // Only one insurance object if there is more than we need to fix the focal
+    // set to point
     // to the correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());

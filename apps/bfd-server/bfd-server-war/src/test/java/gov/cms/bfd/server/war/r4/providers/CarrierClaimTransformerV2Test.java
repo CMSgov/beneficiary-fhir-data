@@ -49,7 +49,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-/** Tests the {@link CarrierClaimTransformerV2}. */
+/** Tests the {@link CarrierClaimTransformerV2Test}. */
 public class CarrierClaimTransformerV2Test {
   /** The claim under test. */
   CarrierClaim claim;
@@ -66,11 +66,12 @@ public class CarrierClaimTransformerV2Test {
   /** The NPI org lookup to use for the test. */
   private static NPIOrgLookup npiOrgLookup;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -114,7 +115,7 @@ public class CarrierClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformerV2#transform}
+   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.claimTransformerInterfaceV2#transform}
    * works as expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
    * InpatientClaim}.
    *
@@ -124,7 +125,7 @@ public class CarrierClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException, IOException {
     CarrierClaim claim = generateClaim();
 
-    assertMatches(claim, carrierClaimTransformer.transform(claim, Optional.ofNullable(false)));
+    assertMatches(claim, claimTransformerInterface.transform(claim, Optional.ofNullable(false)));
   }
 
   /**
@@ -137,7 +138,7 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob =
-        carrierClaimTransformer.transform(generateClaim(), Optional.ofNullable(false));
+        claimTransformerInterface.transform(generateClaim(), Optional.ofNullable(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
@@ -740,7 +741,7 @@ public class CarrierClaimTransformerV2Test {
 
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(claim, Optional.ofNullable(false));
+        claimTransformerInterface.transform(claim, Optional.ofNullable(false));
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1324,7 +1325,7 @@ public class CarrierClaimTransformerV2Test {
     claimWithoutNpi.setLastUpdated(Instant.now());
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(claimWithoutNpi, Optional.ofNullable(false));
+        claimTransformerInterface.transform(claimWithoutNpi, Optional.ofNullable(false));
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);

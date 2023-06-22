@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -15,10 +18,17 @@ import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimColumn;
 import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.PartDEvent;
+import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -515,34 +525,34 @@ public final class TransformerTestUtilsV2 {
       int index) {
     // TODO - fix this
     /*
-    if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
-      assertHasCoding(
-          TransformerConstants.CODING_SYSTEM_HCPCS,
-          "" + hcpcsYearCode.get(),
-          null,
-          hcpcsInitialModifierCode.get(),
-          item.getModifier().get(index).getCoding());
-      assertHasCoding(
-          TransformerConstants.CODING_SYSTEM_HCPCS,
-          "" + hcpcsYearCode.get(),
-          null,
-          hcpcsCode.get(),
-          item.getService().getCoding());
-    } else { // while others do not...
-      if (hcpcsInitialModifierCode.isPresent()) {
-        assertHasCoding(
-            TransformerConstants.CODING_SYSTEM_HCPCS,
-            hcpcsInitialModifierCode.get(),
-            item.getModifier().get(index).getCoding());
-      }
-      if (hcpcsCode.isPresent()) {
-        assertHasCoding(
-            TransformerConstants.CODING_SYSTEM_HCPCS,
-            hcpcsCode.get(),
-            item.getService().getCoding());
-      }
-    }
-    */
+     * if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
+     * assertHasCoding(
+     * TransformerConstants.CODING_SYSTEM_HCPCS,
+     * "" + hcpcsYearCode.get(),
+     * null,
+     * hcpcsInitialModifierCode.get(),
+     * item.getModifier().get(index).getCoding());
+     * assertHasCoding(
+     * TransformerConstants.CODING_SYSTEM_HCPCS,
+     * "" + hcpcsYearCode.get(),
+     * null,
+     * hcpcsCode.get(),
+     * item.getService().getCoding());
+     * } else { // while others do not...
+     * if (hcpcsInitialModifierCode.isPresent()) {
+     * assertHasCoding(
+     * TransformerConstants.CODING_SYSTEM_HCPCS,
+     * hcpcsInitialModifierCode.get(),
+     * item.getModifier().get(index).getCoding());
+     * }
+     * if (hcpcsCode.isPresent()) {
+     * assertHasCoding(
+     * TransformerConstants.CODING_SYSTEM_HCPCS,
+     * hcpcsCode.get(),
+     * item.getService().getCoding());
+     * }
+     * }
+     */
 
     assertFalse(hcpcsSecondModifierCode.isPresent());
   }
@@ -622,56 +632,68 @@ public final class TransformerTestUtilsV2 {
 
     // TODO - fix this
     /*
-    AdjudicationComponent adjudicationForPayment =
-        assertAdjudicationAmountEquals(
-            CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
-    assertExtensionCodingEquals(
-        CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount, item.getAdjudication());
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount, item.getAdjudication());
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT,
-        beneficiaryPartBDeductAmount,
-        item.getAdjudication());
-    assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, primaryPayerCode, item);
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT,
-        primaryPayerPaidAmount,
-        item.getAdjudication());
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount, item.getAdjudication());
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount, item.getAdjudication());
-    assertAdjudicationAmountEquals(
-        CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount, item.getAdjudication());
-    assertAdjudicationReasonEquals(
-        CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode, item.getAdjudication());
-    assertExtensionCodingEquals(
-        CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, serviceDeductibleCode, item);
-
-    assertDiagnosisLinkPresent(Diagnosis.from(diagnosisCode, diagnosisCodeVersion), eob, item);
-
-    List<Extension> hctHgbObservationExtension =
-        item.getExtensionsByUrl(
-            TransformerUtils.calculateVariableReferenceUrl(
-                CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
-    assertEquals(1, hctHgbObservationExtension.size());
-    assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
-    Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
-    assertTrue(hctHgbReference.getResource() instanceof Observation);
-    Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
-    assertHasCoding(
-        CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode, hctHgbObservation.getCode());
-    assertEquals(hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
-
-    assertExtensionCodingEquals(
-        item,
-        TransformerConstants.CODING_NDC,
-        TransformerConstants.CODING_NDC,
-        nationalDrugCode.get());
-        */
+     * AdjudicationComponent adjudicationForPayment =
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
+     * assertExtensionCodingEquals(
+     * CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount,
+     * item.getAdjudication());
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount,
+     * item.getAdjudication());
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT,
+     * beneficiaryPartBDeductAmount,
+     * item.getAdjudication());
+     * assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD,
+     * primaryPayerCode, item);
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT,
+     * primaryPayerPaidAmount,
+     * item.getAdjudication());
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount,
+     * item.getAdjudication());
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount,
+     * item.getAdjudication());
+     * assertAdjudicationAmountEquals(
+     * CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount,
+     * item.getAdjudication());
+     * assertAdjudicationReasonEquals(
+     * CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode,
+     * item.getAdjudication());
+     * assertExtensionCodingEquals(
+     * CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, serviceDeductibleCode, item);
+     *
+     * assertDiagnosisLinkPresent(Diagnosis.from(diagnosisCode,
+     * diagnosisCodeVersion), eob, item);
+     *
+     * List<Extension> hctHgbObservationExtension =
+     * item.getExtensionsByUrl(
+     * TransformerUtils.calculateVariableReferenceUrl(
+     * CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
+     * assertEquals(1, hctHgbObservationExtension.size());
+     * assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof
+     * Reference);
+     * Reference hctHgbReference = (Reference)
+     * hctHgbObservationExtension.get(0).getValue();
+     * assertTrue(hctHgbReference.getResource() instanceof Observation);
+     * Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
+     * assertHasCoding(
+     * CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode,
+     * hctHgbObservation.getCode());
+     * assertEquals(hctHgbTestResult,
+     * hctHgbObservation.getValueQuantity().getValue());
+     *
+     * assertExtensionCodingEquals(
+     * item,
+     * TransformerConstants.CODING_NDC,
+     * TransformerConstants.CODING_NDC,
+     * nationalDrugCode.get());
+     */
   }
 
   /**
@@ -892,7 +914,8 @@ public final class TransformerTestUtilsV2 {
    */
   private static void assertMoneyValue(BigDecimal expectedAmountValue, Money actualValue) {
     /*
-     * TODO: Money coding? assertEquals(TransformerConstants.CODING_MONEY, actualValue.getSystem());
+     * TODO: Money coding? assertEquals(TransformerConstants.CODING_MONEY,
+     * actualValue.getSystem());
      * assertEquals(TransformerConstants.CODED_MONEY_USD, actualValue.getCode());
      */
     assertEquivalent(expectedAmountValue, actualValue.getValue());
@@ -1037,9 +1060,12 @@ public final class TransformerTestUtilsV2 {
   static void assertLastUpdatedEquals(
       Optional<Instant> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
-      /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
+      /*
+       * Dev Note: We often run our tests in parallel, so there is subtle race
+       * condition because we
        * use one instance of an IT DB with the same resources for most tests.
-       * The actual resources a test finds may have a lastUpdated value slightly after the time the test wrote it
+       * The actual resources a test finds may have a lastUpdated value slightly after
+       * the time the test wrote it
        * because another test over wrote the same resource.
        * To handle this case, dates that are within a second of each other match.
        */
@@ -1093,20 +1119,20 @@ public final class TransformerTestUtilsV2 {
     assertExtensionCodingEquals(CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode, eob);
 
     /*
-        ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-        assertEquals(
-            TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
-            referral.getSubject().getReference());
-        assertReferenceIdentifierEquals(
-            TransformerConstants.CODING_NPI_US,
-            referringPhysicianNpi.get(),
-            referral.getRequester().getAgent());
-        assertEquals(1, referral.getRecipient().size());
-        assertReferenceIdentifierEquals(
-            TransformerConstants.CODING_NPI_US,
-            referringPhysicianNpi.get(),
-            referral.getRecipientFirstRep());
-    */
+     * ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+     * assertEquals(
+     * TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
+     * referral.getSubject().getReference());
+     * assertReferenceIdentifierEquals(
+     * TransformerConstants.CODING_NPI_US,
+     * referringPhysicianNpi.get(),
+     * referral.getRequester().getAgent());
+     * assertEquals(1, referral.getRecipient().size());
+     * assertReferenceIdentifierEquals(
+     * TransformerConstants.CODING_NPI_US,
+     * referringPhysicianNpi.get(),
+     * referral.getRecipientFirstRep());
+     */
     assertExtensionCodingEquals(CcwCodebookVariable.ASGMNTCD, providerAssignmentIndicator, eob);
 
     assertExtensionIdentifierEquals(CcwCodebookVariable.CARR_NUM, carrierNumber, eob);
@@ -1579,5 +1605,67 @@ public final class TransformerTestUtilsV2 {
             .findFirst();
 
     assertEquals(false, extensionForUrl.isPresent());
+  }
+
+  /**
+   * Transform rif record to eob explanation of benefit.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
+   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *          false</code> )
+   * @param includeTaxNumbers if tax numbers should be included in the response
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
+   */
+  static ExplanationOfBenefit transformRifRecordToEob(
+      Object rifRecord,
+      MetricRegistry metricRegistry,
+      Optional<Boolean> includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+
+    ClaimTransformerInterfaceV2 claimTransformerInterface = null;
+    if (rifRecord instanceof CarrierClaim) {
+      claimTransformerInterface =
+          new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+    } else if (rifRecord instanceof DMEClaim) {
+      claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof HHAClaim) {
+      claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof HospiceClaim) {
+      claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof InpatientClaim) {
+      claimTransformerInterface = new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof OutpatientClaim) {
+      claimTransformerInterface =
+          new OutpatientClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+    } else if (rifRecord instanceof PartDEvent) {
+      claimTransformerInterface =
+          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof SNFClaim) {
+      claimTransformerInterface = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else {
+      throw new BadCodeMonkeyException("Unhandled RifRecord type!");
+    }
+    return convertClaim(claimTransformerInterface, rifRecord, includeTaxNumbers);
+  }
+
+  /**
+   * Transform rif record to eob explanation of benefit.
+   *
+   * @param claimTransformerInterface {@link ClaimTransformerInterfaceV2} to transform the {@link
+   *     Data}
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform
+   * @param includeTaxNumbers if tax numbers should be included in the response
+   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
+   */
+  static ExplanationOfBenefit convertClaim(
+      ClaimTransformerInterfaceV2 claimTransformerInterface,
+      Object rifRecord,
+      Optional<Boolean> includeTaxNumbers) {
+    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
   }
 }

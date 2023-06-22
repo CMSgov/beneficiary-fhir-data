@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
-final class DMEClaimTransformerV2 {
+final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -49,24 +49,24 @@ final class DMEClaimTransformerV2 {
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    */
-  public DMEClaimTransformerV2(
+  DMEClaimTransformerV2(
       MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
-    requireNonNull(metricRegistry);
-    requireNonNull(drugCodeDisplayLookup);
-    this.metricRegistry = metricRegistry;
-    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
   }
 
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
+   *     response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
+  @Override
+  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -75,7 +75,8 @@ final class DMEClaimTransformerV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim(includeTaxNumbers, (DMEClaim) claim);
+    boolean incTaxNumber = includeTaxNumber.orElse(false);
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, incTaxNumber);
 
     timer.stop();
     return eob;
@@ -89,7 +90,7 @@ final class DMEClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(boolean includeTaxNumbers, DMEClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped

@@ -62,8 +62,9 @@ public final class PartDEventTransformerV2Test {
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
   }
@@ -97,10 +98,10 @@ public final class PartDEventTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, drugDisplayLookup);
+    claimTransformerInterface = new PartDEventTransformerV2(metricRegistry, drugDisplayLookup);
 
     claim = generateClaim();
-    eob = partDEventTransformer.transform(claim, Optional.empty());
+    eob = claimTransformerInterface.transform(claim, Optional.empty());
   }
 
   /** Tests that the transformer sets the expected id. */

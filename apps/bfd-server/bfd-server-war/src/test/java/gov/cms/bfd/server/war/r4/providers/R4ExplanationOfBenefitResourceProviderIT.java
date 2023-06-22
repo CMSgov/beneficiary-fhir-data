@@ -39,6 +39,7 @@ import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -77,21 +78,21 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
 
   /** The transformer for carrier claims. */
-  private CarrierClaimTransformerV2 carrierClaimTransformer;
+  private ClaimTransformerInterfaceV2 carrierClaimTransformer;
   /** The transformer for dme claims. */
-  private DMEClaimTransformerV2 dmeClaimTransformer;
+  private ClaimTransformerInterfaceV2 dmeClaimTransformer;
   /** The transformer for hha claims. */
-  private HHAClaimTransformerV2 hhaClaimTransformer;
+  private ClaimTransformerInterfaceV2 hhaClaimTransformer;
   /** The transformer for hospice claims. */
-  private HospiceClaimTransformerV2 hospiceClaimTransformer;
+  private ClaimTransformerInterfaceV2 hospiceClaimTransformer;
   /** The transformer for inpatient claims. */
-  private InpatientClaimTransformerV2 inpatientClaimTransformer;
+  private ClaimTransformerInterfaceV2 inpatientClaimTransformer;
   /** The transformer for outpatient claims. */
-  private OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  private ClaimTransformerInterfaceV2 outpatientClaimTransformer;
   /** The transformer for part D events claims. */
-  private PartDEventTransformerV2 partDEventTransformer;
+  private ClaimTransformerInterfaceV2 partDEventTransformer;
   /** The transformer for snf claims. */
-  private SNFClaimTransformerV2 snfClaimTransformerV2;
+  private ClaimTransformerInterfaceV2 snfClaimTransformer;
 
   /**
    * Sets the test resources up for comparing the data.
@@ -116,7 +117,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     partDEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
-    snfClaimTransformerV2 = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+    snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
   }
 
   /**
@@ -448,7 +449,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
-    assertEobEquals(outpatientClaimTransformerV2.transform(claim), eob);
+    assertEobEquals(outpatientClaimTransformerV2.transform(claim, Optional.empty()), eob);
   }
 
   /**
@@ -535,7 +536,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     assertThrows(
         ResourceNotFoundException.class,
         () -> {
-          // No data is loaded, so this should return nothing. Tests negative ID will pass regex
+          // No data is loaded, so this should return nothing. Tests negative ID will pass
+          // regex
           // pattern.
           fhirClient
               .read()
@@ -1297,7 +1299,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .execute();
     assertNotNull(searchResults);
     for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      // None of the claims are SAMHSA so we expect one record per claim type in the
+      // results.
       assertEquals(
           1,
           filterToClaimType(searchResults, claimType).size(),
@@ -1331,7 +1334,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .execute();
     assertNotNull(searchResults);
     for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
-      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      // None of the claims are SAMHSA so we expect one record per claim type in the
+      // results.
       assertEquals(
           1,
           filterToClaimType(searchResults, claimType).size(),
@@ -1462,11 +1466,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .get();
 
     // Compare result to transformed EOB
-    PartDEventTransformerV2 partDEventTransformer =
+    ClaimTransformerInterfaceV2 claimTransformerInterface =
         new PartDEventTransformerV2(
             new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertEobEquals(
-        partDEventTransformer.transform(partDEvent),
+        claimTransformerInterface.transform(partDEvent, Optional.empty()),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -1486,7 +1490,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
 
     // Build up a list of lastUpdatedURLs that return > all values values
     String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
-    String earlyDateTime = "2019-10-01T00:00:00+00:00";
+    String earlyDateTime = "2019-10-01T00:00:00-04:00";
     List<String> allUrls =
         Arrays.asList(
             "_lastUpdated=gt" + earlyDateTime,
@@ -1844,7 +1848,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
    * @param actual the actual
    */
   private static void assertEobEquals(ExplanationOfBenefit expected, ExplanationOfBenefit actual) {
-    // ID in the bundle will have `ExplanationOfBenefit/` in front, so make sure the last bit
+    // ID in the bundle will have `ExplanationOfBenefit/` in front, so make sure the
+    // last bit
     // matches up
     assertTrue(actual.getId().endsWith(expected.getId()));
 
@@ -1852,7 +1857,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
     actual.setId("");
     expected.setId("");
 
-    // If there are any contained resources, they might have lastupdate times in them too
+    // If there are any contained resources, they might have lastupdate times in
+    // them too
     assertEquals(expected.getContained().size(), actual.getContained().size());
     for (int i = 0; i < expected.getContained().size(); i++) {
       Resource expectedContained = expected.getContained().get(i);
@@ -1940,7 +1946,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
         AdjudicationComponent expectedAdj = expectedItem.getAdjudication().get(j);
         AdjudicationComponent actualAdj = actualItem.getAdjudication().get(j);
 
-        // Here is where we start getting into trouble with "0" vs "0.0", so we do this manually
+        // Here is where we start getting into trouble with "0" vs "0.0", so we do this
+        // manually
         if (expectedAdj.hasAmount()) {
           assertNotNull(actualAdj.getAmount());
           assertCurrencyEquals(expectedAdj.getAmount(), actualAdj.getAmount());
@@ -2058,19 +2065,57 @@ public final class R4ExplanationOfBenefitResourceProviderIT extends ServerRequir
             .findFirst()
             .get();
 
+    ClaimTransformerInterfaceV2 claimTransformerInterface = deriveTransformer(claimType);
     ExplanationOfBenefit expectedEob =
-        switch (claimType) {
-          case CARRIER -> carrierClaimTransformer.transform(claim, false);
-          case DME -> dmeClaimTransformer.transform(claim, false);
-          case HHA -> hhaClaimTransformer.transform(claim);
-          case HOSPICE -> hospiceClaimTransformer.transform(claim);
-          case INPATIENT -> inpatientClaimTransformer.transform(claim);
-          case OUTPATIENT -> outpatientClaimTransformer.transform(claim);
-          case PDE -> partDEventTransformer.transform(claim);
-          case SNF -> snfClaimTransformerV2.transform(claim);
-        };
-
+        claimTransformerInterface.transform(claim, Optional.ofNullable(false));
     assertEobEquals(expectedEob, searchResults);
+  }
+
+  /**
+   * Compares two {@link ExplanationOfBenefit} objects, one from a service response and one passed
+   * through the transformer.
+   *
+   * @param claimType the claim type
+   * @return {@link ClaimTransformerInterfaceV2}
+   */
+  public ClaimTransformerInterfaceV2 deriveTransformer(ClaimTypeV2 claimType) {
+    ClaimTransformerInterfaceV2 claimTransformerInterface = null;
+    MetricRegistry metricRegistry = new MetricRegistry();
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
+    FdaDrugCodeDisplayLookup drugDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+
+    switch (claimType) {
+      case CARRIER:
+        claimTransformerInterface =
+            new CarrierClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
+        break;
+      case DME:
+        claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugDisplayLookup);
+        break;
+      case HHA:
+        claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
+        break;
+      case HOSPICE:
+        claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
+        break;
+      case INPATIENT:
+        claimTransformerInterface = new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
+        break;
+      case OUTPATIENT:
+        claimTransformerInterface =
+            new OutpatientClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
+        break;
+      case PDE:
+        claimTransformerInterface = new PartDEventTransformerV2(metricRegistry, drugDisplayLookup);
+        break;
+      case SNF:
+        claimTransformerInterface = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+        break;
+      default:
+        throw new BadCodeMonkeyException("Invalid ClaimType specified!");
+    }
+    return claimTransformerInterface;
   }
 
   /**

@@ -18,6 +18,7 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,26 @@ public final class ExplanationOfBenefitResourceProviderTest {
   @Mock private FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** The mock npi org lookup entity. */
   @Mock private NPIOrgLookup npiOrgLookup;
+  /** The ExecutorService entity. */
+  @Mock private ExecutorService executorService;
+
+  // Mock transformers
+  /** The mock transformer for carrier claims. */
+  @Mock private CarrierClaimTransformer carrierClaimTransformer;
+  /** The mock transformer for dme claims. */
+  @Mock private DMEClaimTransformer dmeClaimTransformer;
+  /** The mock transformer for hha claims. */
+  @Mock private HHAClaimTransformer hhaClaimTransformer;
+  /** The mock transformer for hospice claims. */
+  @Mock private HospiceClaimTransformer hospiceClaimTransformer;
+  /** The mock transformer for inpatient claims. */
+  @Mock private InpatientClaimTransformer inpatientClaimTransformer;
+  /** The mock transformer for outpatient claims. */
+  @Mock private OutpatientClaimTransformer outpatientClaimTransformer;
+  /** The mock transformer for part D events claims. */
+  @Mock private PartDEventTransformer partDEventTransformer;
+  /** The mock transformer for snf claims. */
+  @Mock private SNFClaimTransformer snfClaimTransformer;
 
   /** Sets up the test class. */
   @BeforeEach
@@ -61,7 +82,16 @@ public final class ExplanationOfBenefitResourceProviderTest {
             loadedFilterManager,
             samhsaMatcher,
             drugCodeDisplayLookup,
-            npiOrgLookup);
+            npiOrgLookup,
+            executorService,
+            carrierClaimTransformer,
+            dmeClaimTransformer,
+            hhaClaimTransformer,
+            hospiceClaimTransformer,
+            inpatientClaimTransformer,
+            outpatientClaimTransformer,
+            partDEventTransformer,
+            snfClaimTransformer);
     lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
   }
 

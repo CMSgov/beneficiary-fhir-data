@@ -5,10 +5,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -49,7 +46,6 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
@@ -182,8 +178,10 @@ public final class TransformerUtils {
       Optional<? extends Number> amountValue) {
     /*
      * TODO Once we switch to STU4 (expected >= Q3 2018), remap these to the new
-     * `ExplanationOfBenefit.total` field. In anticipation of that, the CcwCodebookVariable param
-     * here is named `category`: right now it's used for the `Extension.url` but can be changed to
+     * `ExplanationOfBenefit.total` field. In anticipation of that, the
+     * CcwCodebookVariable param
+     * here is named `category`: right now it's used for the `Extension.url` but can
+     * be changed to
      * `ExplanationOfBenefit.total.category` once this mapping is moved to STU4.
      */
 
@@ -1217,7 +1215,8 @@ public final class TransformerUtils {
   private static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     /*
-     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * The code parameter is an Object to avoid needing multiple copies of this and
+     * related methods.
      * This if-else block is the price to be paid for that, though.
      */
     String codeString;
@@ -1248,7 +1247,8 @@ public final class TransformerUtils {
   private static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, String yearMonth, Object code) {
     /*
-     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * The code parameter is an Object to avoid needing multiple copies of this and
+     * related methods.
      * This if-else block is the price to be paid for that, though.
      */
     String codeString;
@@ -1289,9 +1289,12 @@ public final class TransformerUtils {
    */
   static CodeableConcept createAdjudicationCategory(CcwCodebookInterface ccwVariable) {
     /*
-     * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
-     * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
-     * Coding.code. This looks weird, but makes it easy for API developers to find more information
+     * Adjudication.category is mapped a bit differently than other
+     * Codings/CodeableConcepts: they
+     * all share the same Coding.system and use the CcwCodebookVariable reference
+     * URL as their
+     * Coding.code. This looks weird, but makes it easy for API developers to find
+     * more information
      * about what the specific adjudication they're looking at means.
      */
 
@@ -1351,11 +1354,16 @@ public final class TransformerUtils {
       throw new BadCodeMonkeyException("No display values for Variable: " + ccwVariable);
 
     /*
-     * We know that the specified CCW Variable is coded, but there's no guarantee that the Coding's
-     * code matches one of the known/allowed Variable values: data is messy. When that happens, we
-     * log the event and return normally. The log event will at least allow for further
-     * investigation, if warranted. Also, there's a chance that the CCW Variable data itself is
-     * messy, and that the Coding's code matches more than one value -- we just log those events,
+     * We know that the specified CCW Variable is coded, but there's no guarantee
+     * that the Coding's
+     * code matches one of the known/allowed Variable values: data is messy. When
+     * that happens, we
+     * log the event and return normally. The log event will at least allow for
+     * further
+     * investigation, if warranted. Also, there's a chance that the CCW Variable
+     * data itself is
+     * messy, and that the Coding's code matches more than one value -- we just log
+     * those events,
      * too.
      */
     List<Value> matchingVariableValues =
@@ -1718,8 +1726,10 @@ public final class TransformerUtils {
     // diagnosisRelatedGroupCd
     if (diagnosisRelatedGroupCd.isPresent()) {
       /*
-       * FIXME This is an invalid DiagnosisComponent, since it's missing a (required) ICD code.
-       * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
+       * FIXME This is an invalid DiagnosisComponent, since it's missing a (required)
+       * ICD code.
+       * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher
+       * uses this
        * field so if this is updated you'll need to update that as well.
        */
       int maxSequence = eob.getDiagnosis().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
@@ -1928,7 +1938,8 @@ public final class TransformerUtils {
     eob.setDisposition(claimDispositionCode);
 
     /*
-     * Referrals are represented as contained resources, since they share the lifecycle and identity
+     * Referrals are represented as contained resources, since they share the
+     * lifecycle and identity
      * of their containing EOB.
      */
     if (referringPhysicianNpi.isPresent()) {
@@ -2188,8 +2199,10 @@ public final class TransformerUtils {
 
     if (nationalDrugCodeQualifierCode.isPresent()) {
       /*
-       * TODO: Is NDC count only ever present when line quantity isn't set? Depending on that, it
-       * may be that we should stop using this as an extension and instead set the code & system on
+       * TODO: Is NDC count only ever present when line quantity isn't set? Depending
+       * on that, it
+       * may be that we should stop using this as an extension and instead set the
+       * code & system on
        * the FHIR quantity field.
        */
       // TODO Shouldn't this be part of the same Extension with the NDC code itself?
@@ -2568,7 +2581,7 @@ public final class TransformerUtils {
             })
         .forEach(diagnosis::add);
 
-    // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>
+    // Some may be empty. Convert from List<Optional<Diagnosis>> to List<Diagnosis>
     return diagnosis.stream()
         .filter(d -> d.isPresent())
         .map(d -> d.get())
@@ -2636,7 +2649,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * Seems silly, but allows the block below to be simple one-liners, rather than
+     * requiring
      * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
@@ -2726,7 +2740,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * Seems silly, but allows the block below to be simple one-liners, rather than
+     * requiring
      * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
@@ -2814,7 +2829,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * Seems silly, but allows the block below to be simple one-liners, rather than
+     * requiring
      * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
@@ -2900,7 +2916,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * Seems silly, but allows the block below to be simple one-liners, rather than
+     * requiring
      * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
@@ -3113,7 +3130,8 @@ public final class TransformerUtils {
     List<CCWProcedure> ccwProcedures = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * Seems silly, but allows the block below to be simple one-liners, rather than
+     * requiring
      * if-blocks.
      */
     Consumer<Optional<CCWProcedure>> ccwProcedureAdder =
@@ -3247,8 +3265,10 @@ public final class TransformerUtils {
     if (icdCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * There's a race condition here: we may initialize this static field more than
+     * once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the
+     * race and
      * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire ICD file the first time and put in a Map
@@ -3287,8 +3307,10 @@ public final class TransformerUtils {
         final BufferedReader icdCodesIn =
             new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
       /*
-       * We want to extract the ICD Diagnosis codes and display values and put in a map for easy
-       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code is HEADACHE
+       * We want to extract the ICD Diagnosis codes and display values and put in a
+       * map for easy
+       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code
+       * is HEADACHE
        * description)
        */
       String line = "";
@@ -3316,8 +3338,10 @@ public final class TransformerUtils {
     if (npiCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * There's a race condition here: we may initialize this static field more than
+     * once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the
+     * race and
      * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NPI file the first time and put in a Map
@@ -3398,11 +3422,16 @@ public final class TransformerUtils {
         final BufferedReader npiCodesIn =
             new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
       /*
-       * We want to extract the NPI codes and display values and put in a map for easy retrieval to
-       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the NPI
-       * Organization Code, npiColumns[8] is the NPI provider name prefix, npiColumns[6] is the NPI
-       * provider first name, npiColumns[7] is the NPI provider middle name, npiColumns[5] is the
-       * NPI provider last name, npiColumns[9] is the NPI provider suffix name, npiColumns[10] is
+       * We want to extract the NPI codes and display values and put in a map for easy
+       * retrieval to
+       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the
+       * NPI
+       * Organization Code, npiColumns[8] is the NPI provider name prefix,
+       * npiColumns[6] is the NPI
+       * provider first name, npiColumns[7] is the NPI provider middle name,
+       * npiColumns[5] is the
+       * NPI provider last name, npiColumns[9] is the NPI provider suffix name,
+       * npiColumns[10] is
        * the NPI provider credential.
        */
       String line = "";
@@ -3444,8 +3473,10 @@ public final class TransformerUtils {
     if (procedureCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * There's a race condition here: we may initialize this static field more than
+     * once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the
+     * race and
      * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire Procedure code file the first time and put in a Map
@@ -3485,8 +3516,10 @@ public final class TransformerUtils {
         final BufferedReader procedureCodesIn =
             new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
       /*
-       * We want to extract the procedure codes and display values and put in a map for easy
-       * retrieval to get the display value icdColumns[0] is PRCDR_CD; icdColumns[1] is
+       * We want to extract the procedure codes and display values and put in a map
+       * for easy
+       * retrieval to get the display value icdColumns[0] is PRCDR_CD; icdColumns[1]
+       * is
        * PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
        */
       String line = "";
@@ -3501,40 +3534,6 @@ public final class TransformerUtils {
     }
 
     return procedureCodeMap;
-  }
-
-  /**
-   * Transform rif record to eob explanation of benefit.
-   *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
-   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *          false</code>)
-   * @param includeTaxNumbers if tax numbers should be included in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
-   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
-   */
-  static ExplanationOfBenefit transformRifRecordToEob(
-      MetricRegistry metricRegistry,
-      Object rifRecord,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
-    for (ClaimType claimType : ClaimType.values()) {
-      if (claimType.getEntityClass().isInstance(rifRecord)) {
-        return claimType
-            .getTransformer()
-            .transform(
-                new TransformerContext(
-                    metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
-                rifRecord);
-      }
-    }
-
-    throw new BadCodeMonkeyException(
-        String.format("Unhandled %s: %s", ClaimType.class, rifRecord.getClass()));
   }
 
   /**
@@ -3553,7 +3552,8 @@ public final class TransformerUtils {
     if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
-       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not working
+       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
+       * working
        * correctly.
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
@@ -3571,9 +3571,12 @@ public final class TransformerUtils {
     }
 
     /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
-     * database. Because the filterManager's tracking of this timestamp is lazily updated for
-     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time
+     * for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily
+     * updated for
+     * performance reason, the resources of the bundle may be after the filter
+     * manager's version of
      * the timestamp.
      */
     Instant maxBundleDate =
@@ -3611,9 +3614,12 @@ public final class TransformerUtils {
         paging.isPagingRequested() ? new UnsignedIntType() : new UnsignedIntType(resources.size()));
 
     /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
-     * database. Because the filterManager's tracking of this timestamp is lazily updated for
-     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time
+     * for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily
+     * updated for
+     * performance reason, the resources of the bundle may be after the filter
+     * manager's version of
      * the timestamp.
      */
     Instant maxBundleDate =
@@ -3733,7 +3739,8 @@ public final class TransformerUtils {
    * @param requestDetails of a resource provider
    */
   public static void workAroundHAPIIssue1585(RequestDetails requestDetails) {
-    // The hack is to remove the _count parameter from theDetails so that total is not modified.
+    // The hack is to remove the _count parameter from theDetails so that total is
+    // not modified.
     Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
     if (params.remove(Constants.PARAM_COUNT) != null) {
       // Remove _count parameter from the current request details

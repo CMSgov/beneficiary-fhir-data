@@ -1,16 +1,18 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -20,41 +22,63 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
-final class SNFClaimTransformer {
+@Component
+public class SNFClaimTransformer implements ClaimTransformerInterface {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param npiOrgLookup the npi org lookup
+   */
+  public SNFClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+  }
+
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
    * @param claim the {@link Object} to use
+   * @param includeTaxNumber ignored; exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
+  @Override
+  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
     Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+        metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof SNFClaim)) throw new BadCodeMonkeyException();
 
     timer.stop();
-    return transformClaim((SNFClaim) claim, transformerContext);
+    return transformClaim((SNFClaim) claim);
   }
 
   /**
    * Transforms a specified {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link SNFClaim} to transform
-   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      SNFClaim claimGroup, TransformerContext transformerContext) {
+  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -82,7 +106,8 @@ final class SNFClaimTransformer {
     // set the provider number which is common among several claim types
     TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
-    // add EOB information to fields that are common between the Inpatient and SNF claim types
+    // add EOB information to fields that are common between the Inpatient and SNF
+    // claim types
     TransformerUtils.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -159,7 +184,7 @@ final class SNFClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -238,20 +263,31 @@ final class SNFClaimTransformer {
     for (Diagnosis diagnosis :
         TransformerUtils.extractExternalDiagnoses1Thru12(
             claimGroup.getDiagnosisExternalFirstCode(),
-                claimGroup.getDiagnosisExternalFirstCodeVersion(),
-            claimGroup.getDiagnosisExternal1Code(), claimGroup.getDiagnosisExternal1CodeVersion(),
-            claimGroup.getDiagnosisExternal2Code(), claimGroup.getDiagnosisExternal2CodeVersion(),
-            claimGroup.getDiagnosisExternal3Code(), claimGroup.getDiagnosisExternal3CodeVersion(),
-            claimGroup.getDiagnosisExternal4Code(), claimGroup.getDiagnosisExternal4CodeVersion(),
-            claimGroup.getDiagnosisExternal5Code(), claimGroup.getDiagnosisExternal5CodeVersion(),
-            claimGroup.getDiagnosisExternal6Code(), claimGroup.getDiagnosisExternal6CodeVersion(),
-            claimGroup.getDiagnosisExternal7Code(), claimGroup.getDiagnosisExternal7CodeVersion(),
-            claimGroup.getDiagnosisExternal8Code(), claimGroup.getDiagnosisExternal8CodeVersion(),
-            claimGroup.getDiagnosisExternal9Code(), claimGroup.getDiagnosisExternal9CodeVersion(),
-            claimGroup.getDiagnosisExternal10Code(), claimGroup.getDiagnosisExternal10CodeVersion(),
-            claimGroup.getDiagnosisExternal11Code(), claimGroup.getDiagnosisExternal11CodeVersion(),
+            claimGroup.getDiagnosisExternalFirstCodeVersion(),
+            claimGroup.getDiagnosisExternal1Code(),
+            claimGroup.getDiagnosisExternal1CodeVersion(),
+            claimGroup.getDiagnosisExternal2Code(),
+            claimGroup.getDiagnosisExternal2CodeVersion(),
+            claimGroup.getDiagnosisExternal3Code(),
+            claimGroup.getDiagnosisExternal3CodeVersion(),
+            claimGroup.getDiagnosisExternal4Code(),
+            claimGroup.getDiagnosisExternal4CodeVersion(),
+            claimGroup.getDiagnosisExternal5Code(),
+            claimGroup.getDiagnosisExternal5CodeVersion(),
+            claimGroup.getDiagnosisExternal6Code(),
+            claimGroup.getDiagnosisExternal6CodeVersion(),
+            claimGroup.getDiagnosisExternal7Code(),
+            claimGroup.getDiagnosisExternal7CodeVersion(),
+            claimGroup.getDiagnosisExternal8Code(),
+            claimGroup.getDiagnosisExternal8CodeVersion(),
+            claimGroup.getDiagnosisExternal9Code(),
+            claimGroup.getDiagnosisExternal9CodeVersion(),
+            claimGroup.getDiagnosisExternal10Code(),
+            claimGroup.getDiagnosisExternal10CodeVersion(),
+            claimGroup.getDiagnosisExternal11Code(),
+            claimGroup.getDiagnosisExternal11CodeVersion(),
             claimGroup.getDiagnosisExternal12Code(),
-                claimGroup.getDiagnosisExternal12CodeVersion()))
+            claimGroup.getDiagnosisExternal12CodeVersion()))
       TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
     for (CCWProcedure procedure :

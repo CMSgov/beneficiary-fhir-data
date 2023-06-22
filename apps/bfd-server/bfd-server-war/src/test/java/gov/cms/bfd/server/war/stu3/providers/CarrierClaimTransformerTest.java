@@ -38,11 +38,12 @@ public final class CarrierClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   private static NPIOrgLookup npiOrgLookup;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -142,7 +143,7 @@ public final class CarrierClaimTransformerTest {
    * @param includedTaxNumbers whether or not to include tax numbers are expected to be included in
    *     the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   *     false</code> )
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(

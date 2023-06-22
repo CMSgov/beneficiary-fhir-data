@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 @Component
-public class InpatientClaimTransformerV2 {
+final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -59,11 +59,13 @@ public class InpatientClaimTransformerV2 {
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
+   * @param includeTaxNumber ignored; exists to satisfy {@link ClaimTransformerInterfaceV2}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
+  @Override
+  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(

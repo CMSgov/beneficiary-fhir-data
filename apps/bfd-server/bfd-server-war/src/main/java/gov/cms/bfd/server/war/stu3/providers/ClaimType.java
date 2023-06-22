@@ -17,19 +17,20 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaim_;
-import gov.cms.bfd.server.war.commons.ClaimTypeTransformer;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
 /**
  * Enumerates the various Blue Button claim types that are supported by {@link
@@ -42,7 +43,6 @@ public enum ClaimType {
       CarrierClaim_.claimId,
       CarrierClaim_.beneficiaryId,
       (entity) -> ((CarrierClaim) entity).getDateThrough(),
-      CarrierClaimTransformer::transform,
       CarrierClaim_.lines),
   /** Represents the DME claim type. */
   DME(
@@ -50,7 +50,6 @@ public enum ClaimType {
       DMEClaim_.claimId,
       DMEClaim_.beneficiaryId,
       (entity) -> ((DMEClaim) entity).getDateThrough(),
-      DMEClaimTransformer::transform,
       DMEClaim_.lines),
   /** Represents the hha claim type. */
   HHA(
@@ -58,7 +57,6 @@ public enum ClaimType {
       HHAClaim_.claimId,
       HHAClaim_.beneficiaryId,
       (entity) -> ((HHAClaim) entity).getDateThrough(),
-      HHAClaimTransformer::transform,
       HHAClaim_.lines),
   /** Represents the hospice claim type. */
   HOSPICE(
@@ -66,7 +64,6 @@ public enum ClaimType {
       HospiceClaim_.claimId,
       HospiceClaim_.beneficiaryId,
       (entity) -> ((HospiceClaim) entity).getDateThrough(),
-      HospiceClaimTransformer::transform,
       HospiceClaim_.lines),
   /** Represents the inpatient claim type. */
   INPATIENT(
@@ -74,7 +71,6 @@ public enum ClaimType {
       InpatientClaim_.claimId,
       InpatientClaim_.beneficiaryId,
       (entity) -> ((InpatientClaim) entity).getDateThrough(),
-      InpatientClaimTransformer::transform,
       InpatientClaim_.lines),
   /** Represents the outpatient claim type. */
   OUTPATIENT(
@@ -82,22 +78,19 @@ public enum ClaimType {
       OutpatientClaim_.claimId,
       OutpatientClaim_.beneficiaryId,
       (entity) -> ((OutpatientClaim) entity).getDateThrough(),
-      OutpatientClaimTransformer::transform,
       OutpatientClaim_.lines),
   /** Represents the PDE claim type. */
   PDE(
       PartDEvent.class,
       PartDEvent_.eventId,
       PartDEvent_.beneficiaryId,
-      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate(),
-      PartDEventTransformer::transform),
+      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate()),
   /** Represents the SNF claim type. */
   SNF(
       SNFClaim.class,
       SNFClaim_.claimId,
       SNFClaim_.beneficiaryId,
       (entity) -> ((SNFClaim) entity).getDateThrough(),
-      SNFClaimTransformer::transform,
       SNFClaim_.lines);
 
   /** The entity class. */
@@ -108,10 +101,44 @@ public enum ClaimType {
   private final SingularAttribute<?, Long> entityBeneficiaryIdAttribute;
   /** The service end attribute function. */
   private final Function<Object, LocalDate> serviceEndAttributeFunction;
-  /** The claim transformer. */
-  private final ClaimTypeTransformer transformer;
   /** The entity lazy attributes. */
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
+
+  /**
+   * Returns the {@link ClaimType} that corresponds to the specified {@link Entity} {@link Class}.
+   *
+   * @param claimTypes {@link Set} set of claim identifiers requested by client
+   * @param val {@link Integer} bitmask denoting the claim types that have data
+   * @return {@link EnumSet} of claim types to process
+   */
+  public static EnumSet fetchClaimsAvailability(Set<ClaimType> claimTypes, Integer val) {
+    EnumSet availSet = EnumSet.noneOf(ClaimType.class);
+    if (claimTypes.contains(CARRIER) && (val & QueryUtils.V_CARRIER_HAS_DATA) != 0) {
+      availSet.add(CARRIER);
+    }
+    if (claimTypes.contains(DME) && (val & QueryUtils.V_DME_HAS_DATA) != 0) {
+      availSet.add(DME);
+    }
+    if (claimTypes.contains(PDE) && (val & QueryUtils.V_PART_D_HAS_DATA) != 0) {
+      availSet.add(PDE);
+    }
+    if (claimTypes.contains(INPATIENT) && (val & QueryUtils.V_INPATIENT_HAS_DATA) != 0) {
+      availSet.add(INPATIENT);
+    }
+    if (claimTypes.contains(OUTPATIENT) && (val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0) {
+      availSet.add(OUTPATIENT);
+    }
+    if (claimTypes.contains(HOSPICE) && (val & QueryUtils.V_HOSPICE_HAS_DATA) != 0) {
+      availSet.add(HOSPICE);
+    }
+    if (claimTypes.contains(SNF) && (val & QueryUtils.V_SNF_HAS_DATA) != 0) {
+      availSet.add(SNF);
+    }
+    if (claimTypes.contains(HHA) && (val & QueryUtils.V_HHA_HAS_DATA) != 0) {
+      availSet.add(HHA);
+    }
+    return availSet;
+  }
 
   /**
    * Enum constant constructor.
@@ -121,7 +148,6 @@ public enum ClaimType {
    * @param entityBeneficiaryIdAttribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
    * @param serviceEndAttributeFunction the service end attribute function
-   * @param transformer the value to use for {@link #getTransformer()}
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
   private ClaimType(
@@ -129,13 +155,11 @@ public enum ClaimType {
       SingularAttribute<?, Long> entityIdAttribute,
       SingularAttribute<?, Long> entityBeneficiaryIdAttribute,
       Function<Object, LocalDate> serviceEndAttributeFunction,
-      ClaimTypeTransformer transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
     this.serviceEndAttributeFunction = serviceEndAttributeFunction;
-    this.transformer = transformer;
     this.entityLazyAttributes =
         entityLazyAttributes != null
             ? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes))
@@ -179,16 +203,6 @@ public enum ClaimType {
    */
   public Function<Object, LocalDate> getServiceEndAttributeFunction() {
     return serviceEndAttributeFunction;
-  }
-
-  /**
-   * Gets the {@link #transformer}.
-   *
-   * @return the {@link ClaimTypeTransformer} to use to transform the JPA {@link Entity} instances
-   *     into FHIR {@link ExplanationOfBenefit} instances
-   */
-  public ClaimTypeTransformer getTransformer() {
-    return transformer;
   }
 
   /**

@@ -64,11 +64,12 @@ public final class DMEClaimTransformerV2Test {
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -100,8 +101,7 @@ public final class DMEClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    claimTransformerInterface =
-        new DMEClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
+    claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugDisplayLookup);
 
     claim = generateClaim();
     ExplanationOfBenefit genEob =
@@ -341,7 +341,8 @@ public final class DMEClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object if there is more than we need to fix the focal set to point to the
+    // Only one insurance object if there is more than we need to fix the focal set
+    // to point to the
     // correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
@@ -1253,7 +1254,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        dmeClaimTransformer.transform(generateClaim(), Optional.ofNullable(false));
+        claimTransformerInterface.transform(generateClaim(), Optional.ofNullable(false));
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

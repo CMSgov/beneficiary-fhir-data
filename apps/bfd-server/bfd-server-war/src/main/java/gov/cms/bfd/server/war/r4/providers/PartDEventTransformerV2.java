@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
-final class PartDEventTransformerV2 {
+final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -60,11 +60,13 @@ final class PartDEventTransformerV2 {
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
+   * @param includeTaxNumber ignored; exists to satisfy {@link ClaimTransformerInterfaceV2}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
+  @Override
+  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))

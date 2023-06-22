@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 @Component
-public class CarrierClaimTransformerV2 {
+final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -66,12 +66,14 @@ public class CarrierClaimTransformerV2 {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
+   *     response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
+  @Override
+  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -81,8 +83,9 @@ public class CarrierClaimTransformerV2 {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
+    boolean incTaxNumber = includeTaxNumber.orElse(false);
 
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, incTaxNumber);
 
     timer.stop();
     return eob;

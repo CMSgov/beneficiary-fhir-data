@@ -12,7 +12,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -33,11 +32,12 @@ public final class HHAClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   private static NPIOrgLookup npiOrgLookup;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -61,7 +61,7 @@ public final class HHAClaimTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
 
-    assertMatches(claim, eob, transformerContext);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -71,8 +71,6 @@ public final class HHAClaimTransformerTest {
    * @param claim the {@link HHAClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     HHAClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link HHAClaim}
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob) throws FHIRException {

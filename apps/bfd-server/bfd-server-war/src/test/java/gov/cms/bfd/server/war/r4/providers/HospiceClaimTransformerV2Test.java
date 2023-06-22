@@ -71,10 +71,11 @@ public final class HospiceClaimTransformerV2Test {
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
 
+  /** One-time setup of objects that are normally injected. */
   @BeforeAll
-  static void setup() {
+  protected static void setup() {
     metricRegistry = new MetricRegistry();
-    npiOrgLookup = NPIOrgLookup.createNpiOrgLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
   }
 
   /**
@@ -149,7 +150,8 @@ public final class HospiceClaimTransformerV2Test {
   /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
-    // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
+    // The base CanonicalType doesn't seem to compare correctly so lets convert it
+    // to a string
     assertTrue(
         eob.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
@@ -529,7 +531,7 @@ public final class HospiceClaimTransformerV2Test {
 
     assertTrue(compare2.equalsDeep(member2));
 
-    //     // Third member
+    // // Third member
     CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
 
     CareTeamComponent compare3 =
@@ -646,7 +648,8 @@ public final class HospiceClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // // Only one insurance object if there is more than we need to fix the focal
+    // set to point
     // to the correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());

@@ -26,7 +26,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -292,14 +291,9 @@ public final class TransformerUtilsTest {
     claim.setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forDstu3();
-    ExplanationOfBenefit genEob =
-        HHAClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+    ClaimTransformerInterface claimTransformerInterface =
+        new HHAClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -343,24 +337,23 @@ public final class TransformerUtilsTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim claim =
+    HHAClaim hhaClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
             .map(r -> (HHAClaim) r)
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    hhaClaim.setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forDstu3();
-    ExplanationOfBenefit genEob =
-        HHAClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+    MetricRegistry metricRegistry = new MetricRegistry();
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
+
+    ClaimTransformerInterface claimTransformerInterface =
+        new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, Optional.empty());
+
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -373,17 +366,10 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    hospiceClaim.setLastUpdated(Instant.now());
 
-    fhirContext = FhirContext.forDstu3();
-    genEob =
-        HospiceClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            hospiceClaim);
+    claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
+    genEob = claimTransformerInterface.transform(hospiceClaim, Optional.empty());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -396,17 +382,12 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    dmeClaim.setLastUpdated(Instant.now());
 
-    fhirContext = FhirContext.forDstu3();
-    genEob =
-        DMEClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            dmeClaim);
+    claimTransformerInterface =
+        new DMEClaimTransformer(
+            metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+    genEob = claimTransformerInterface.transform(dmeClaim, Optional.empty());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -419,17 +400,9 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
-
-    fhirContext = FhirContext.forDstu3();
-    genEob =
-        InpatientClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.empty(),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            inpatientClaim);
+    inpatientClaim.setLastUpdated(Instant.now());
+    claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, npiOrgLookup);
+    genEob = claimTransformerInterface.transform(inpatientClaim, Optional.empty());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
