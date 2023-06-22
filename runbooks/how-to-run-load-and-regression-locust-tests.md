@@ -4,21 +4,21 @@ Follow this runbook to run the regression and load test suites either locally or
 particular BFD Server host.
 
 - [How to Run the Regression and Load Test Suites](#how-to-run-the-regression-and-load-test-suites)
-  - [Glossary](#glossary)
-  - [FAQ](#faq)
-    - [I specified `--host` with a valid URL like so `example.com`, but my tests aren't running. What am I doing wrong?](#i-specified---host-with-a-valid-url-like-so-examplecom-but-my-tests-arent-running-what-am-i-doing-wrong)
-  - [Prerequisites](#prerequisites)
-  - [Instructions](#instructions)
-    - [How to Run the Regression Suite Locally Against a Local BFD Server](#how-to-run-the-regression-suite-locally-against-a-local-bfd-server)
-    - [How to Run the Regression Suite Locally Against any BFD Server SDLC Environment](#how-to-run-the-regression-suite-locally-against-any-bfd-server-sdlc-environment)
-    - [How to Run the Regression Suite On a Detached Instance Against any BFD Server SDLC Environment](#how-to-run-the-regression-suite-on-a-detached-instance-against-any-bfd-server-sdlc-environment)
-    - [How to Run a Scaling Load Test Using the `bfd-run-server-load` Jenkins Job](#how-to-run-a-scaling-load-test-using-the-bfd-run-server-load-jenkins-job)
-    - [How to Run a Static Load Test Using the `bfd-run-server-load` Jenkins Job](#how-to-run-a-static-load-test-using-the-bfd-run-server-load-jenkins-job)
+    - [Glossary](#glossary)
+    - [FAQ](#faq)
+        - [I specified `--host` with a valid URL like so `example.com`, but my tests aren't running. What am I doing wrong?](#i-specified---host-with-a-valid-url-like-so-examplecom-but-my-tests-arent-running-what-am-i-doing-wrong)
+    - [Prerequisites](#prerequisites)
+    - [Instructions](#instructions)
+        - [How to Run the Regression Suite Locally Against a Local BFD Server](#how-to-run-the-regression-suite-locally-against-a-local-bfd-server)
+        - [How to Run the Regression Suite Locally Against any BFD Server SDLC Environment](#how-to-run-the-regression-suite-locally-against-any-bfd-server-sdlc-environment)
+        - [How to Run the Regression Suite On a Detached Instance Against any BFD Server SDLC Environment](#how-to-run-the-regression-suite-on-a-detached-instance-against-any-bfd-server-sdlc-environment)
+        - [How to Run a Scaling Load Test Using the `bfd-run-server-load` Jenkins Job](#how-to-run-a-scaling-load-test-using-the-bfd-run-server-load-jenkins-job)
+        - [How to Run a Static Load Test Using the `bfd-run-server-load` Jenkins Job](#how-to-run-a-static-load-test-using-the-bfd-run-server-load-jenkins-job)
 
 ## Glossary
 
 |             Term             |                                    Definition                                    |
-| :--------------------------: | :------------------------------------------------------------------------------: |
+|:----------------------------:|:--------------------------------------------------------------------------------:|
 | [Locust](https://locust.io/) | A load testing library that allows for performance tests to be written in Python |
 
 ## FAQ
@@ -39,8 +39,8 @@ any trailing characters after `PORT` as well.
 - An installation of [`jq`](https://stedolan.github.io/jq/)
 - A tool for creating virtual environments (`virtualenv`s) such as
   [`virtualenv`](https://virtualenv.pypa.io/en/latest/) or [`pew`](https://github.com/berdario/pew)
-  - This runbook will assume you are using `pew` as it is fairly simple to work with and has a
-    relatively intuitive UX
+    - This runbook will assume you are using `pew` as it is fairly simple to work with and has a
+      relatively intuitive UX
 - Access to AWS
 - Access to the CMS VPN
 
@@ -77,10 +77,10 @@ any trailing characters after `PORT` as well.
    pew new -p 3.8 -a . -r requirements.txt py3.8__locust_tests
    ```
 
-   1. This will create a new virtual environment using Python 3.8 named `py3.8__locust_tests` and
-      will automatically install the necessary Python dependencies to _run_ the various Locust test
-      suites in the `locust_tests` directory. It will also associate this new virtual environment
-      to the `$BFD_ROOT/apps/utils/locust_tests` directory
+    1. This will create a new virtual environment using Python 3.8 named `py3.8__locust_tests` and
+       will automatically install the necessary Python dependencies to _run_ the various Locust test
+       suites in the `locust_tests` directory. It will also associate this new virtual environment
+       to the `$BFD_ROOT/apps/utils/locust_tests` directory
 
 5. Open a new _subshell_ that uses the `py3.8__locust_tests` virtual environment:
 
@@ -101,10 +101,10 @@ any trailing characters after `PORT` as well.
    DATABASE_CONSTR="postgres://bfd:InsecureLocalDev@localhost:5432/fhirdb"
    ```
 
-   1. Running the above command assumes you have followed the README.md's "Native Setup" section
-      and are running your local PostgreSQL instance in a Docker container with the defaults
-      provided in that section. If you are not, you will need to change the connection string above
-      to point to your local BFD database instance
+    1. Running the above command assumes you have followed the README.md's "Native Setup" section
+       and are running your local PostgreSQL instance in a Docker container with the defaults
+       provided in that section. If you are not, you will need to change the connection string above
+       to point to your local BFD database instance
 
 8. Run the Locust tests using `locust`. Replace `<NUM_USERS>` with the number of simulated users
    (amount of load) to run with, `<SPAWN_RATE>` with the rate at which you would like the simulated
@@ -141,8 +141,8 @@ any trailing characters after `PORT` as well.
    BFD_ENV="test"
    ```
 
-   1. Other valid values are `"prod-sbx"` and `"prod"`, however it is unlikely you will need to run
-      the regression suite _manually_ against environments other than `TEST`
+    1. Other valid values are `"prod-sbx"` and `"prod"`, however it is unlikely you will need to run
+       the regression suite _manually_ against environments other than `TEST`
 
 2. Navigate to the root of the `beneficiary-fhir-data` repository in any terminal application
 3. From the root of the `beneficiary-fhir-data` repository, set `BFD_ROOT` to the current working
@@ -164,10 +164,10 @@ any trailing characters after `PORT` as well.
    pew new -p 3.8 -a . -r requirements.txt py3.8__locust_tests
    ```
 
-   1. This will create a new virtual environment using Python 3.8 named `py3.8__locust_tests` and
-      will automatically install the necessary Python dependencies to _run_ the various Locust test
-      suites in the `locust_tests` directory. It will also associate this new virtual environment
-      to the `$BFD_ROOT/apps/utils/locust_tests` directory
+    1. This will create a new virtual environment using Python 3.8 named `py3.8__locust_tests` and
+       will automatically install the necessary Python dependencies to _run_ the various Locust test
+       suites in the `locust_tests` directory. It will also associate this new virtual environment
+       to the `$BFD_ROOT/apps/utils/locust_tests` directory
 
 6. Open a new _subshell_ that uses the `py3.8__locust_tests` virtual environment:
 
@@ -188,8 +188,8 @@ any trailing characters after `PORT` as well.
       --with-decryption | jq -r '.Parameter.Value' >> $HOME/bfd-test-cert.pem
    ```
 
-   1. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
-      sensitive SSM parameters in the environment under test
+    1. Running the above commands assume you have appropriate permissions to _read_ and _decrypt_
+       sensitive SSM parameters in the environment under test
 
 10. Set `CLIENT_CERT_PATH` to the downloaded testing certificate from the previous step:
 
@@ -258,26 +258,26 @@ any trailing characters after `PORT` as well.
 > before continuing.
 
 1. First, detach an instance from the desired environment under test's auto-scaling group:
-   1. Go to the AWS website and sign-in
-   2. Click Services > EC2
-   3. Click Auto scaling groups
-   4. Click an active group corresponding to the desired environment under test within this list
-      1. I.e. if `TEST` is the desired environment, click on `bfd-test-fhir...`
-   5. In the Details area below the node you clicked, click the Instance Management tab
-   6. Pick one of the instances here using the checkbox on the left
-   7. In the actions dropdown, click Detach
-   8. In the popup, check the Add a new instance to the Auto Scaling group to balance the load
-      checkbox to add a new instance in its place
-   9. Confirm the detachment by clicking Detach instance
-   10. In the list, the detached instance will still exist in the group; open the detached instance
-       in a new tab to keep track of it
-   11. Go to Services > EC2 and click Instances
-   12. Find the detached instance by comparing its ID in the tab you opened against the ID in the
-       list
-   13. Click the Edit button near the ID of the detached instance and rename it something that
-       indicates your name so the instance is marked as yours for others information
-   14. Click on the newly-created Instance ID to open a details page
-   15. Copy the private IP address from "Private IPv4 addresses"
+    1. Go to the AWS website and sign-in
+    2. Click Services > EC2
+    3. Click Auto scaling groups
+    4. Click an active group corresponding to the desired environment under test within this list
+        1. I.e. if `TEST` is the desired environment, click on `bfd-test-fhir...`
+    5. In the Details area below the node you clicked, click the Instance Management tab
+    6. Pick one of the instances here using the checkbox on the left
+    7. In the actions dropdown, click Detach
+    8. In the popup, check the Add a new instance to the Auto Scaling group to balance the load
+       checkbox to add a new instance in its place
+    9. Confirm the detachment by clicking Detach instance
+    10. In the list, the detached instance will still exist in the group; open the detached instance
+        in a new tab to keep track of it
+    11. Go to Services > EC2 and click Instances
+    12. Find the detached instance by comparing its ID in the tab you opened against the ID in the
+        list
+    13. Click the Edit button near the ID of the detached instance and rename it something that
+        indicates your name so the instance is marked as yours for others information
+    14. Click on the newly-created Instance ID to open a details page
+    15. Copy the private IP address from "Private IPv4 addresses"
 2. Ensure you are connected to the CMS VPN
 3. SSH into the detached instance using the private IP address copied from the previous step:
 
@@ -291,9 +291,9 @@ any trailing characters after `PORT` as well.
    sudo su
    ```
 
-   1. As the `root` user you are able to do many dangerous things, _especially_ if you are connected
-      to a detached instance from `PROD-SBX` or `PROD`. Be _**very**_ careful while logged-in as the
-      `root` user!
+    1. As the `root` user you are able to do many dangerous things, _especially_ if you are connected
+       to a detached instance from `PROD-SBX` or `PROD`. Be _**very**_ careful while logged-in as the
+       `root` user!
 
 5. Set `BFD_ENV` to the environment under test:
 
@@ -302,7 +302,7 @@ any trailing characters after `PORT` as well.
    ```
 
 6. Navigate to the root of the `beneficiary-fhir-data` repository in any terminal application
-   1. For detached instances, this will be at `/beneficiary-fhir-data`
+    1. For detached instances, this will be at `/beneficiary-fhir-data`
 7. From the root of the `beneficiary-fhir-data` repository, set `BFD_ROOT` to the current working
    directory:
 
@@ -322,8 +322,8 @@ any trailing characters after `PORT` as well.
    pip3 install -r requirements.txt
    ```
 
-   1. The instance comes with an installation of Python 3, and since we will be destroying the
-      instance after running the regression suite we do not need to use virtual environments
+    1. The instance comes with an installation of Python 3, and since we will be destroying the
+       instance after running the regression suite we do not need to use virtual environments
 
 10. Download and decrypt the testing certificate from SSM and store it to a local file:
 
@@ -467,66 +467,69 @@ any trailing characters after `PORT` as well.
 ### How to Run a Static Load Test Using the `bfd-run-server-load` Jenkins Job
 
 1. Ensure you are connected to the CMS VPN
-2. Navigate to the Jenkins CloudBees instance in your web browser and sign-in
-3. From the main page, select "bfd". A list of jobs should load
-4. From this list of jobs, click on "bfd-run-server-load". A new page should load showing the "Stage
+1. Navigate to the Jenkins CloudBees instance in your web browser and sign-in
+1. From the main page, select "bfd". A list of jobs should load
+1. From this list of jobs, click on "bfd-run-server-load". A new page should load showing the "Stage
    View" and a list of actions on the left side of the screen
-5. Click on "Build with Parameters" on the left side of the screen. A new page should load showing a
+1. Click on "Build with Parameters" on the left side of the screen. A new page should load showing a
    variety of input fields
-6. Choose the desired SDLC environment to load test from the "ENVIRONMENT" dropdown list
-7. Adjust the default parameters according to the desired load test. For this particular case, the
+1. Choose the desired SDLC environment to load test from the "ENVIRONMENT" dropdown list
+1. Adjust the default parameters according to the desired load test. For this particular case, the
    default values will _need to be changed_:
-   1. Set `INITIAL_WORKER_NODES` to the number of worker nodes/Lambdas desired _in total_
-   2. Set `MAX_SPAWNED_NODES` equal to `INITIAL_WORKER_NODES`
-   3. Set `MAX_SPAWNED_USERS` to the desired number of simulated users _in total_
-      1. Note that a ratio of 10 simulated users to 1 worker node should be followed for best
-         performance
-   4. Set `USER_SPAWN_RATE` equal to `MAX_SPAWNED_USERS` if no ramp-up is desired
-   5. Unselect `STOP_ON_SCALING` if the load test should _not_ stop when a scaling event is
-      encountered -- for a static test, this should probably be false
-   6. Deselect `STOP_ON_NODE_LIMIT` to ensure that the load test does not end immediately due to the
-      node limit being hit
-8. Click "Build" at the bottom of the page. The page from Step #4 should load again, however an
+    1. Set `LOCUST_TAGS` to the space-delimited list of locust tasks to run if they are
+       annotated with ANY of the given @tag(s). Will run all tasks if not given
+    1. Set `LOCUST_EXCLUDE_TAGS` to the space-delimited list of locust tasks to exclude with ANY of the given @tag(s)
+    1. Set `INITIAL_WORKER_NODES` to the number of worker nodes/Lambdas desired _in total_
+    1. Set `MAX_SPAWNED_NODES` equal to `INITIAL_WORKER_NODES`
+    1. Set `MAX_SPAWNED_USERS` to the desired number of simulated users _in total_
+    1. Note that a ratio of 10 simulated users to 1 worker node should be followed for best
+       performance
+    1. Set `USER_SPAWN_RATE` equal to `MAX_SPAWNED_USERS` if no ramp-up is desired
+    1. Unselect `STOP_ON_SCALING` if the load test should _not_ stop when a scaling event is
+       encountered -- for a static test, this should probably be false
+    1. Deselect `STOP_ON_NODE_LIMIT` to ensure that the load test does not end immediately due to the
+       node limit being hit
+1. Click "Build" at the bottom of the page. The page from Step #4 should load again, however an
    in-progress build should appear in the "Build History" list on the left side of the screen
-9. Click on the _build number_ of the in-progress build. A new page should load showing an overview
+1. Click on the _build number_ of the in-progress build. A new page should load showing an overview
    of the current build
-10. Click on "Console Output" on the left side of the screen. A new page should load showing
-    realtime log output from the job
-11. Monitor the log output until the following prompt appears in the output:
+1. Click on "Console Output" on the left side of the screen. A new page should load showing
+   realtime log output from the job
+1. Monitor the log output until the following prompt appears in the output:
 
     ```
     Once the run is finished, click either Abort or Proceed to cleanup the test
     Proceed or Abort
     ```
 
-12. Scroll up in the log output and find the line starting with:
+1. Scroll up in the log output and find the line starting with:
 
     ```
     aws_instance.this[0]: Creation complete after...
     ```
 
-13. Note the instance ID within square brackets -- use this later to follow the log output from the
-    controller in CloudWatch
-14. In your web browser, navigate to AWS and sign-in (if necessary)
-15. Navigate to Services > CloudWatch
-16. Navigate to "Log groups" by clicking on the link in the navigation tree
-17. Search for "server-load-controller.log" and select the corresponding log group in the SDLC
-    environment currently under test
-18. Refresh the log group until a log stream with the name of the instance ID noted down in Step 13
-    appears
-19. Open the log stream corresponding to the instance ID noted down in Step 13
-20. Monitor the log continuously by clicking "Resume" at the bottom of the log output. The log
-    should automatically update in realtime as the load test runs. You may need to continuously
-    scroll to view the log
-21. Wait until the load tests finish running. If at anytime something goes wrong, return to the
-    running Jenkins job and click either the "Proceed" or "Abort" prompt in the log output to
-    immediately end the test and start cleaning up
-22. Once Locust prints the summary table and has finished, indicated by the "Locust master process
-    has stopped" message, return to the Jenkins job and click "Proceed". This will cleanup the test,
-    destroying the controller instance and stopping any orphaned Lambda nodes
-23. View the stats of the run under the following log groups (the log stream corresponding to the
-    current run will be named according to the instance ID noted down in Step 13). Note
-    "{ENVIRONMENT}" should be replaced with the environment under test (i.e. "test"):
+1. Note the instance ID within square brackets -- use this later to follow the log output from the
+   controller in CloudWatch
+1. In your web browser, navigate to AWS and sign-in (if necessary)
+1. Navigate to Services > CloudWatch
+1. Navigate to "Log groups" by clicking on the link in the navigation tree
+1. Search for "server-load-controller.log" and select the corresponding log group in the SDLC
+   environment currently under test
+1. Refresh the log group until a log stream with the name of the instance ID noted down in Step 13
+   appears
+1. Open the log stream corresponding to the instance ID noted down in Step 13
+1. Monitor the log continuously by clicking "Resume" at the bottom of the log output. The log
+   should automatically update in realtime as the load test runs. You may need to continuously
+   scroll to view the log
+1. Wait until the load tests finish running. If at anytime something goes wrong, return to the
+   running Jenkins job and click either the "Proceed" or "Abort" prompt in the log output to
+   immediately end the test and start cleaning up
+1. Once Locust prints the summary table and has finished, indicated by the "Locust master process
+   has stopped" message, return to the Jenkins job and click "Proceed". This will cleanup the test,
+   destroying the controller instance and stopping any orphaned Lambda nodes
+1. View the stats of the run under the following log groups (the log stream corresponding to the
+   current run will be named according to the instance ID noted down in Step 13). Note
+   "{ENVIRONMENT}" should be replaced with the environment under test (i.e. "test"):
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_exceptions.csv
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_failures.csv
     - /bfd/{ENVIRONMENT}/bfd-server-load/load_stats.csv
