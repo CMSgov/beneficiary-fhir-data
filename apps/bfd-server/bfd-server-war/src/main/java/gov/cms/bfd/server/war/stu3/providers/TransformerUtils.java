@@ -5,6 +5,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -76,6 +78,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -3770,5 +3773,36 @@ public final class TransformerUtils {
         }
       }
     };
+  }
+
+  /**
+   * Compares {@link LocalDate} a against {@link LocalDate} using the supplied {@link
+   * ParamPrefixEnum}.
+   *
+   * @param a the first item to compare
+   * @param b the second item to compare
+   * @param prefix prefix to use. Supported: {@link ParamPrefixEnum#GREATERTHAN_OR_EQUALS}, {@link
+   *     ParamPrefixEnum#GREATERTHAN}, {@link ParamPrefixEnum#LESSTHAN_OR_EQUALS}, {@link
+   *     ParamPrefixEnum#LESSTHAN}
+   * @return true if the comparison between a and b returned true
+   * @throws IllegalArgumentException if caller supplied an unsupported prefix
+   */
+  public static boolean compareLocalDate(
+      @Nullable LocalDate a, @Nullable LocalDate b, ParamPrefixEnum prefix) {
+    if (a == null || b == null) {
+      return false;
+    }
+    switch (prefix) {
+      case GREATERTHAN_OR_EQUALS:
+        return !a.isBefore(b);
+      case GREATERTHAN:
+        return a.isAfter(b);
+      case LESSTHAN_OR_EQUALS:
+        return !a.isAfter(b);
+      case LESSTHAN:
+        return a.isBefore(b);
+      default:
+        throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
+    }
   }
 }

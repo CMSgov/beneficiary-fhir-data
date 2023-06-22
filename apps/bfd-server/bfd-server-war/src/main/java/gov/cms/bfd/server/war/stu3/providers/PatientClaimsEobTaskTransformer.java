@@ -13,7 +13,7 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+// import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -260,7 +260,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       LoggingUtils.logResourceCountToMdc(0);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
-      TransformerUtilsV2.recordQueryInMdc(
+      TransformerUtils.recordQueryInMdc(
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
   }
@@ -323,7 +323,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           lowerBound == null
               ? (date) -> true
               : (date) ->
-                  TransformerUtilsV2.compareLocalDate(
+                  TransformerUtils.compareLocalDate(
                       date,
                       lowerBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.get().getLowerBound().getPrefix());
@@ -331,7 +331,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           upperBound == null
               ? (date) -> true
               : (date) ->
-                  TransformerUtilsV2.compareLocalDate(
+                  TransformerUtils.compareLocalDate(
                       date,
                       upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.get().getUpperBound().getPrefix());
