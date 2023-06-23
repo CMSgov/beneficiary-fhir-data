@@ -76,8 +76,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
             .time();
 
     if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
-    boolean incTaxNumber = includeTaxNumber.orElse(false);
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, incTaxNumber);
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber.orElse(false));
 
     timer.stop();
     return eob;

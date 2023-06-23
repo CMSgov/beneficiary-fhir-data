@@ -75,8 +75,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    boolean incTaxNumber = includeTaxNumber.orElse(false);
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, incTaxNumber);
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumber.orElse(false));
 
     timer.stop();
     return eob;
