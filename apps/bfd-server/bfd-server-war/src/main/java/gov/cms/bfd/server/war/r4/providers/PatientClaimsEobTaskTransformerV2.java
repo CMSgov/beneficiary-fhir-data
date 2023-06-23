@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
@@ -50,8 +49,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
 
   /** capture performance metrics. */
   @Autowired private final MetricRegistry metricRegistry;
-  /** The loaded filter manager. */
-  @Autowired private final LoadedFilterManager loadedFilterManager;
   /** drug description lookup table. */
   @Autowired private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** NPI lookup table. */
@@ -99,20 +96,18 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * <p>Spring will wire this class during the initial component scan, so this constructor should
    * only be explicitly called by tests.
    *
-   * @param metricRegistry the metric registry bean
-   * @param loadedFilterManager the loaded filter manager bean
+   * @param metricRegistry the metric registry bean //* @param loadedFilterManager the loaded filter
+   *     manager bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param npiOrgLookup the npi org lookup bean
    */
   public PatientClaimsEobTaskTransformerV2(
       MetricRegistry metricRegistry,
-      LoadedFilterManager loadedFilterManager,
       R4EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
