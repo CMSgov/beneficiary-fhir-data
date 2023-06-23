@@ -1,5 +1,4 @@
 SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
-       medicarebe1_.bene_mbi_id AS bene_mbi1_28_1_,
        skippedrif2_.record_id AS record_i1_32_2_,
        beneficiar0_.age AS age2_13_0_,
        beneficiar0_.rfrnc_yr AS rfrnc_yr3_13_0_,
