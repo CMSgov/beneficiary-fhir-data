@@ -206,24 +206,6 @@ SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
        beneficiar0_.buyin_mo_cnt AS buyin_204_13_0_,
        beneficiar0_.state_code AS state_205_13_0_,
        beneficiar0_.v_dod_sw AS v_dod_206_13_0_,
-       medicarebe1_.bene_id AS bene_id2_28_1_,
-       medicarebe1_.bene_ident_cd AS bene_ide3_28_1_,
-       medicarebe1_.bene_clm_acnt_num AS bene_clm4_28_1_,
-       medicarebe1_.last_updated AS last_upd5_28_1_,
-       medicarebe1_.creat_ts AS creat_ts6_28_1_,
-       medicarebe1_.creat_user_id AS creat_us7_28_1_,
-       medicarebe1_.mbi_card_rqst_dt AS mbi_card8_28_1_,
-       medicarebe1_.bene_crnt_rec_ind_id AS bene_crn9_28_1_,
-       medicarebe1_.mbi_efctv_bgn_dt AS mbi_efc10_28_1_,
-       medicarebe1_.mbi_bgn_rsn_cd AS mbi_bgn11_28_1_,
-       medicarebe1_.mbi_efctv_end_dt AS mbi_efc12_28_1_,
-       medicarebe1_.mbi_end_rsn_cd AS mbi_end13_28_1_,
-       medicarebe1_.mbi_sqnc_num AS mbi_sqn14_28_1_,
-       medicarebe1_.updt_ts AS updt_ts15_28_1_,
-       medicarebe1_.updt_user_id AS updt_us16_28_1_,
-       medicarebe1_.mbi_num AS mbi_num17_28_1_,
-       medicarebe1_.bene_id AS bene_id2_28_0__,
-       medicarebe1_.bene_mbi_id AS bene_mbi1_28_0__,
        skippedrif2_.bene_id AS bene_id2_32_2_,
        skippedrif2_.dml_ind AS dml_ind3_32_2_,
        skippedrif2_.rif_data AS rif_data4_32_2_,
@@ -233,8 +215,6 @@ SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
        skippedrif2_.bene_id AS bene_id2_32_1__,
        skippedrif2_.record_id AS record_i1_32_1__
 FROM beneficiaries beneficiar0_
-       LEFT OUTER JOIN medicare_beneficiaryid_history medicarebe1_
-                    ON beneficiar0_.bene_id::text=medicarebe1_.bene_id::text
        LEFT OUTER JOIN skipped_rif_records skippedrif2_
                     ON beneficiar0_.bene_id::text=skippedrif2_.bene_id::text
 WHERE beneficiar0_.bene_id::text IN ($1)
