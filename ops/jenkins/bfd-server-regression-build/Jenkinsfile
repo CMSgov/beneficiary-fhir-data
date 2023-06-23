@@ -60,9 +60,11 @@ spec:
                             }
                         }
                     }
-
-                    // Execute the existing build-push script
-                    sh 'bash ./build-push.sh'
+                    
+                    dir('ops/jenkins/bfd-server-regression-build') {
+                        // Execute the existing build-push script
+                        sh 'bash build-push.sh'
+                    }
                 }
             }
         }
