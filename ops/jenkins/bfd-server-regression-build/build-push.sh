@@ -5,7 +5,7 @@ set -eou pipefail
 # directory of the Docker build context (locust_tests). This way, this script can be called from
 # _any_ directory and there will be no issues
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
-CONTEXT_DIR="$(cd "$SCRIPT_DIR"; cd ../../; pwd)"
+CONTEXT_DIR="$(cd "$SCRIPT_DIR"; cd ../../../apps/utils/locust_tests/; pwd)"
 GIT_SHORT_HASH="$(cd "$SCRIPT_DIR"; git rev-parse --short HEAD)"
 AWS_REGION="us-east-1"
 PRIVATE_REGISTRY_URI="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.$AWS_REGION.amazonaws.com"
@@ -24,7 +24,7 @@ aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS 
 
 DOCKER_BUILDKIT=1 # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
 docker build "$CONTEXT_DIR" \
-  --file "$CONTEXT_DIR/lambda/server-regression/Dockerfile" \
+  --file "$SCRIPT_DIR/Dockerfile" \
   --tag "$IMAGE_TAGGED_HASH" \
   --tag "$IMAGE_TAGGED_LATEST" \
   --platform "linux/amd64"
