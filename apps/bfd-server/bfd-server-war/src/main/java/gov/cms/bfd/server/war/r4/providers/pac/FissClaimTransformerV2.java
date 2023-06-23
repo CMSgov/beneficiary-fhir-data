@@ -58,7 +58,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   private final MetricRegistry metricRegistry;
 
   /** The METRIC_NAME constant. */
-  private final String METRIC_NAME;
+  private static final String METRIC_NAME =
+      MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.
@@ -71,8 +72,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    */
   public FissClaimTransformerV2(MetricRegistry metricRegistry) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.METRIC_NAME =
-        MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
   }
 
   /**

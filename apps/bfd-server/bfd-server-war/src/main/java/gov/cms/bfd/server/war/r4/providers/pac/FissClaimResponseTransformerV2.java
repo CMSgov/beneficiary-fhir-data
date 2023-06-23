@@ -36,7 +36,9 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private final MetricRegistry metricRegistry;
 
   /** The METRIC_NAME constant. */
-  private final String METRIC_NAME;
+  private static final String METRIC_NAME =
+      MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
+  ;
 
   /**
    * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
@@ -68,8 +70,6 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
   public FissClaimResponseTransformerV2(MetricRegistry metricRegistry) {
     requireNonNull(metricRegistry);
     this.metricRegistry = metricRegistry;
-    this.METRIC_NAME =
-        this.metricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
   }
 
   /**

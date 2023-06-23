@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** This FHIR {@link IResourceProvider} adds support for R4 {@link Claim} resources. */
@@ -33,6 +34,9 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    * @param mcsClaimTransformerV2 is the mcs claim transformer
    * @param fissClaimResponseTransformerV2 the fiss claim response transformer
    * @param mcsClaimResponseTransformerV2 the mcs claim response transformer
+   * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
+   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
+   *     org.hl7.fhir.r4.model.ClaimResponse}
    */
   public R4ClaimResourceProvider(
       MetricRegistry metricRegistry,
@@ -41,7 +45,8 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
       FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
-      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2) {
+      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
+      @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
     super(
         metricRegistry,
         samhsaMatcher,
@@ -49,7 +54,8 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
         fissClaimTransformerV2,
         mcsClaimTransformerV2,
         fissClaimResponseTransformerV2,
-        mcsClaimResponseTransformerV2);
+        mcsClaimResponseTransformerV2,
+        claimSourceTypeNames);
   }
 
   /** {@inheritDoc} */

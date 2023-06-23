@@ -33,7 +33,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,12 +41,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
@@ -89,7 +90,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private Class<T> resourceType;
 
   /** The enabled source types for this provider. */
-  private Set<String> enabledSourceTypes = new HashSet<>();
+  private final Set<String> enabledSourceTypes;
 
   /** The fiss claim transformer. */
   private final FissClaimTransformerV2 fissClaimTransformerV2;
@@ -114,6 +115,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param mcsClaimTransformerV2 is the mcs claim transformer
    * @param fissClaimResponseTransformerV2 is the fiss claim response transformer
    * @param mcsClaimResponseTransformerV2 is the mcs claim response transformer
+   * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
+   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
+   *     org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
@@ -122,7 +126,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
       FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
-      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2) {
+      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
+      String claimSourceTypeNames) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
@@ -130,6 +135,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     this.mcsClaimTransformerV2 = requireNonNull(mcsClaimTransformerV2);
     this.fissClaimResponseTransformerV2 = requireNonNull(fissClaimResponseTransformerV2);
     this.mcsClaimResponseTransformerV2 = requireNonNull(mcsClaimResponseTransformerV2);
+
+    requireNonNull(claimSourceTypeNames);
+    enabledSourceTypes =
+        Stream.of(claimSourceTypeNames.split(","))
+            .filter(Strings::isNotBlank)
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
   }
 
   /**
@@ -148,15 +160,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled);
 
     setResourceType();
-  }
-
-  /**
-   * Sets the allowed source types for this resource provider (i.e. FISS/MCS)
-   *
-   * @param enabledSourceTypes The {@link Set} of allowed source types.
-   */
-  public void setEnabledSourceTypes(Set<String> enabledSourceTypes) {
-    this.enabledSourceTypes = enabledSourceTypes;
   }
 
   /** {@inheritDoc} */
