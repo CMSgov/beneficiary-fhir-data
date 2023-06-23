@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static java.util.Objects.requireNonNull;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
@@ -265,7 +264,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
-      throw new ResourceNotFoundException(new IdDt("patient-" + id));
+      throw new ResourceNotFoundException(TransformerUtils.buildEobId(claimType, id));
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtils.recordQueryInMdc(
