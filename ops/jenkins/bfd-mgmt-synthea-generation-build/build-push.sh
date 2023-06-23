@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# The build context's directory is the directory of this script, so always ensure that the context
-# is set to the proper directory regardless of where this script is called
-BUILD_CONTEXT_ROOT_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
+# BUILD_CONTEXT_ROOT_DIR will return the directory where this script is located, and CONTEXT_DIR will be the
+# directory of the Docker build context. This way, this script can be called from _any_ directory and
+# there will be no issues
+BUILD_CONTEXT_ROOT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 readonly BUILD_CONTEXT_ROOT_DIR
 
-SYNTHEA_SCRIPTS_ROOT_DIR="."
-readonly SYNTHEA_SCRIPTS_ROOT_DIR
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+CONTEXT_DIR="${REPO_ROOT}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation/"
+readonly CONTEXT_DIR
 
 SYNTHEA_PROPERTIES_RAW_URL="https://raw.githubusercontent.com/synthetichealth/synthea/master/src/main/resources/synthea.properties"
 readonly SYNTHEA_PROPERTIES_RAW_URL
@@ -75,21 +77,18 @@ download_mapping_files_from_s3() {
   echo "Downloading Synthea mapping files from S3 to $SYNTHEA_MAPPING_FILES_DIR"
   mkdir -p "$SYNTHEA_MAPPING_FILES_DIR"
   source .venv/bin/activate
-  python3 "$SYNTHEA_SCRIPTS_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
+  python3 "$CONTEXT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$SYNTHEA_MAPPING_FILES_DIR" "download_file"
   deactivate
 }
 
 download_scripts_files_from_s3() {
   echo "Downloading Synthea script files from S3 to $BUILD_CONTEXT_ROOT_DIR"
   source .venv/bin/activate
-  python3 "$SYNTHEA_SCRIPTS_ROOT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
+  python3 "$CONTEXT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
   deactivate
 }
 
 build_docker_image() {
-  # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
-  cp ./run_synthea "$BUILD_CONTEXT_ROOT_DIR"
-  DOCKER_BUILDKIT=1
   docker build -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
     -f "$DOCKERFILE_PATH" \
     --target "dist" \

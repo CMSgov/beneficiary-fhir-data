@@ -49,9 +49,9 @@ spec:
             awsAuth.assumeRole()
           }
 
-          // Execute the existing build_docker.sh script
-          dir('ops/jenkins/bfd-availability-checker-build/docker') {
-            sh 'bash build_docker.sh'
+          // Execute the existing build-push.sh script
+          dir('ops/jenkins/bfd-availability-checker-build') {
+            sh 'bash build-push.sh'
           }
         }
       }
