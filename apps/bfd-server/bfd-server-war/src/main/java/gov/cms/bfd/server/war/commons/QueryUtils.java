@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -255,24 +254,5 @@ public class QueryUtils {
             .getResultList();
 
     return (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
-  }
-
-  /**
-   * Convert an integer value into claims data available BitSet.
-   *
-   * @param maskVal integer value suitable for decomposing into a Claims BitSet.
-   * @return {@link BitSet} denoting which claims have data.
-   */
-  public static BitSet convertClaimsBitmaskValue(int maskVal) {
-    BitSet rslt = new BitSet(maskVal);
-    rslt.set(CARRIER_HAS_DATA, (maskVal & V_CARRIER_HAS_DATA) != 0);
-    rslt.set(INPATIENT_HAS_DATA, (maskVal & V_INPATIENT_HAS_DATA) != 0);
-    rslt.set(OUTPATIENT_HAS_DATA, (maskVal & V_OUTPATIENT_HAS_DATA) != 0);
-    rslt.set(SNF_HAS_DATA, (maskVal & V_SNF_HAS_DATA) != 0);
-    rslt.set(DME_HAS_DATA, (maskVal & V_DME_HAS_DATA) != 0);
-    rslt.set(HHA_HAS_DATA, (maskVal & V_HHA_HAS_DATA) != 0);
-    rslt.set(HOSPICE_HAS_DATA, (maskVal & V_HOSPICE_HAS_DATA) != 0);
-    rslt.set(PART_D_HAS_DATA, (maskVal & V_PART_D_HAS_DATA) != 0);
-    return rslt;
   }
 }
