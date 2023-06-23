@@ -320,7 +320,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
           claimEntities == null ? 0 : claimEntities.size());
     }
 
-    if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
+    if (claimEntities != null && !serviceDate.isEmpty()) {
       final Instant lowerBound =
           serviceDate.get().getLowerBoundAsInstant() != null
               ? serviceDate.get().getLowerBoundAsInstant().toInstant()

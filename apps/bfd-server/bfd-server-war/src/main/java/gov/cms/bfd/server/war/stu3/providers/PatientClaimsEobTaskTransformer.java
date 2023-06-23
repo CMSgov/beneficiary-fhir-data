@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
@@ -51,8 +50,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
 
   /** capture performance metrics. */
   @Autowired private MetricRegistry metricRegistry;
-  /** The loaded filter manager. */
-  @Autowired private final LoadedFilterManager loadedFilterManager;
   /** drug description lookup table. */
   @Autowired private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** NPI lookup table. */
@@ -101,19 +98,16 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * only be explicitly called by tests.
    *
    * @param metricRegistry the metric registry bean
-   * @param loadedFilterManager the loaded filter manager bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param npiOrgLookup the npi org lookup bean
    */
   public PatientClaimsEobTaskTransformer(
       MetricRegistry metricRegistry,
-      LoadedFilterManager loadedFilterManager,
       Stu3EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
@@ -299,7 +293,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     // Search for a beneficiary's records. Use lastUpdated if present
     Predicate wherePredicate =
         builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), id);
-    if (lastUpdated != null && !lastUpdated.isEmpty()) {
+    if (lastUpdated.isPresent()) {
       Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdated.get());
       wherePredicate = builder.and(wherePredicate, predicate);
     }
@@ -326,7 +320,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           claimEntities == null ? 0 : claimEntities.size());
     }
 
-    if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
+    if (claimEntities != null && !serviceDate.isEmpty()) {
       final Instant lowerBound =
           serviceDate.get().getLowerBoundAsInstant() != null
               ? serviceDate.get().getLowerBoundAsInstant().toInstant()
