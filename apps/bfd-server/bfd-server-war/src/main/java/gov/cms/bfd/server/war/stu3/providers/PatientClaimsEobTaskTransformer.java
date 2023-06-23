@@ -2,18 +2,18 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-// import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -175,18 +174,14 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   @Override
   public PatientClaimsEobTaskTransformer call() {
     LOGGER.debug("TransformPatientClaimsToEobTask.call() started for {}", id);
-
     try {
       if (singlePatientRead) {
         patientRead();
       } else {
         eobs.addAll(transformToEobs(findClaimTypeByPatient()));
-        /*
-         * FIX THIS
-         * if (excludeSamhsa) {
-         * filterSamsha(eobs);
-         * }
-         */
+        if (excludeSamhsa) {
+          filterSamhsa(eobs);
+        }
       }
     } catch (Exception e) {
       // keep track of the Exception so we can provide to caller.
@@ -195,6 +190,18 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     // the countdown latch waits for all threads to complete/fail.
     countDownLatch.countDown();
     return this;
+  }
+
+  /**
+   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
+   * objects.
+   *
+   * @param claims the claims/events to transform
+   * @return the {@link ExplanationOfBenefit} instances, one per claim/event
+   */
+  @Trace
+  private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
+    return claims.stream().map(c -> transformEobClaim(c)).collect(Collectors.toList());
   }
 
   /**
@@ -258,10 +265,20 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
+      throw new ResourceNotFoundException(new IdDt("patient-" + id));
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
       TransformerUtils.recordQueryInMdc(
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
+    }
+    ExplanationOfBenefit eob = transformEobClaim(claimEntity);
+
+    if (eob != null) {
+      eobs.add(eob);
+      // Add bene_id to MDC logs
+      if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+        LoggingUtils.logBeneIdToMdc(eob.getPatient().getReference().replace("Patient/", ""));
+      }
     }
   }
 
@@ -348,61 +365,14 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
-   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
-   * objects.
-   *
-   * <p>
-   *
-   * @param claims the claims/events to transform
-   * @return the {@link ExplanationOfBenefit} instances, one per claim/event
-   */
-  @Trace
-  private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
-    return claims.stream()
-        .map(c -> claimTransformer.transform(c, includeTaxNumbers))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Compares {@link LocalDate} a against {@link LocalDate} using the supplied {@link
-   * ParamPrefixEnum}.
-   *
-   * @param a the first item to compare
-   * @param b the second item to compare
-   * @param prefix prefix to use. Supported: {@link ParamPrefixEnum#GREATERTHAN_OR_EQUALS}, {@link
-   *     ParamPrefixEnum#GREATERTHAN}, {@link ParamPrefixEnum#LESSTHAN_OR_EQUALS}, {@link
-   *     ParamPrefixEnum#LESSTHAN}
-   * @return true if the comparison between a and b returned true
-   * @throws IllegalArgumentException if caller supplied an unsupported prefix
-   */
-  private boolean compareLocalDate(
-      @Nullable LocalDate a, @Nullable LocalDate b, ParamPrefixEnum prefix) {
-    if (a == null || b == null) {
-      return false;
-    }
-    switch (prefix) {
-      case GREATERTHAN_OR_EQUALS:
-        return !a.isBefore(b);
-      case GREATERTHAN:
-        return a.isAfter(b);
-      case LESSTHAN_OR_EQUALS:
-        return !a.isAfter(b);
-      case LESSTHAN:
-        return a.isBefore(b);
-      default:
-        throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
-    }
-  }
-
-  /**
    * Removes all SAMHSA-related claims from the specified {@link List} of {@link
    * ExplanationOfBenefit} resources.
    *
    * @param eobs the {@link List} of {@link IBaseResource} resources (i.e. ExplanationOfBenefit) to
    *     filter
    */
-  private void filterSamhsa(List<IBaseResource> eobs) {
-    ListIterator<IBaseResource> eobsIter = eobs.listIterator();
+  private void filterSamhsa(List<ExplanationOfBenefit> eobs) {
+    ListIterator<ExplanationOfBenefit> eobsIter = eobs.listIterator();
     while (eobsIter.hasNext()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) eobsIter.next();
       if (samhsaMatcher.test(eob)) {

@@ -2,9 +2,12 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
@@ -28,7 +31,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,12 +178,9 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
         patientRead();
       } else {
         eobs.addAll(transformToEobs(findClaimTypeByPatient()));
-        /*
-         * FIX THIS
-         * if (excludeSamhsa) {
-         * filterSamsha(eobs);
-         * }
-         */
+        if (excludeSamhsa) {
+          filterSamhsa(eobs);
+        }
       }
     } catch (Exception e) {
       // keep track of the Exception so we can provide to caller.
@@ -193,6 +192,18 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   }
 
   /**
+   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
+   * objects.
+   *
+   * @param claims the claims/events to transform
+   * @return the {@link ExplanationOfBenefit} instances, one per claim/event
+   */
+  @Trace
+  private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
+    return claims.stream().map(c -> transformEobClaim(c)).collect(Collectors.toList());
+  }
+
+  /**
    * Transforms the eob claim to the specified type.
    *
    * @param claimEntity the claim entity to transform
@@ -200,37 +211,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    */
   private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
     return claimTransformer.transform(claimEntity, includeTaxNumbers);
-  }
-
-  /** Do a db lookup using a claim type entity object. */
-  private void patientRead() {
-    Class<?> entityClass = claimType.getEntityClass();
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery criteria = builder.createQuery(entityClass);
-    Root root = criteria.from(entityClass);
-    claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
-    criteria.select(root);
-    criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), id));
-
-    Object claimEntity = null;
-    Long eobByIdQueryNanoSeconds = null;
-    Timer.Context timerEobQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id"))
-            .time();
-    try {
-      claimEntity = entityManager.createQuery(criteria).getSingleResult();
-
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(1);
-    } catch (NoResultException e) {
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(0);
-    } finally {
-      eobByIdQueryNanoSeconds = timerEobQuery.stop();
-      TransformerUtilsV2.recordQueryInMdc(
-          "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
-    }
   }
 
   /**
@@ -258,6 +238,47 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    */
   public List<ExplanationOfBenefit> fetchEOBs() {
     return eobs;
+  }
+
+  /** Do a db lookup using a claim type entity object. */
+  private void patientRead() {
+    Class<?> entityClass = claimType.getEntityClass();
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery criteria = builder.createQuery(entityClass);
+    Root root = criteria.from(entityClass);
+    claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
+    criteria.select(root);
+    criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), id));
+
+    Object claimEntity = null;
+    Long eobByIdQueryNanoSeconds = null;
+    Timer.Context timerEobQuery =
+        metricRegistry
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id"))
+            .time();
+    try {
+      claimEntity = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
+    } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+      throw new ResourceNotFoundException(new IdDt("patient-" + id));
+    } finally {
+      eobByIdQueryNanoSeconds = timerEobQuery.stop();
+      TransformerUtilsV2.recordQueryInMdc(
+          "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
+    }
+    ExplanationOfBenefit eob = transformEobClaim(claimEntity);
+
+    if (eob != null) {
+      eobs.add(eob);
+      // Add bene_id to MDC logs
+      if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+        LoggingUtils.logBeneIdToMdc(eob.getPatient().getReference().replace("Patient/", ""));
+      }
+    }
   }
 
   /**
@@ -343,28 +364,13 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   }
 
   /**
-   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
-   * objects.
-   *
-   * @param claims the claims/events to transform
-   * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
-   *     claim/event
-   */
-  @Trace
-  private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
-    return claims.stream()
-        .map(c -> claimTransformer.transform(c, includeTaxNumbers))
-        .collect(Collectors.toList());
-  }
-
-  /**
    * Removes all SAMHSA-related claims from the specified {@link List} of {@link
    * ExplanationOfBenefit} resources.
    *
    * @param eobs the {@link List} of {@link ExplanationOfBenefit} resources (i.e. claims) to filter
    */
-  private void filterSamhsa(List<IBaseResource> eobs) {
-    ListIterator<IBaseResource> eobsIter = eobs.listIterator();
+  private void filterSamhsa(List<ExplanationOfBenefit> eobs) {
+    ListIterator<ExplanationOfBenefit> eobsIter = eobs.listIterator();
     while (eobsIter.hasNext()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) eobsIter.next();
       if (samhsaMatcher.test(eob)) {
