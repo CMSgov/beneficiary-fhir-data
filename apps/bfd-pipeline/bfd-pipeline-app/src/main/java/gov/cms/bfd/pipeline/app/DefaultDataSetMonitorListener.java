@@ -95,6 +95,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       if (failed.get()) {
         LOGGER.info("Stopping due to error.");
+        break;
       }
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
