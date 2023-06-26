@@ -3,6 +3,9 @@
 // Global variable where the terraform variable map will be stored
 def terraformVars
 
+def jobName = "${env.JOB_NAME}"
+Jenkins.instance.getItem(jobName.split('/')[0]).description = "hi"
+
 pipeline {
   agent {
     kubernetes {
