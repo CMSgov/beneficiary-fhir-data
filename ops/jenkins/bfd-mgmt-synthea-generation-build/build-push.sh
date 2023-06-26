@@ -8,7 +8,7 @@ BUILD_CONTEXT_ROOT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 readonly BUILD_CONTEXT_ROOT_DIR
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-CONTEXT_DIR="${REPO_ROOT}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation/"
+CONTEXT_DIR="${REPO_ROOT}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
 readonly CONTEXT_DIR
 
 SYNTHEA_PROPERTIES_RAW_URL="https://raw.githubusercontent.com/synthetichealth/synthea/master/src/main/resources/synthea.properties"
