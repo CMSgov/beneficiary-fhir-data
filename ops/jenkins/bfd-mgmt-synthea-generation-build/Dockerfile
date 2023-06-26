@@ -1,5 +1,4 @@
 FROM python:3-slim-bullseye as base
-
 RUN apt-get update && apt-get install -y \
     openjdk-11-jdk bc
 

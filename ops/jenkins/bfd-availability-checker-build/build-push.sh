@@ -17,7 +17,6 @@ DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"base-$ALPINE_VERSION"}"
 DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
 # Build tagged image
-DOCKER_BUILDKIT=1 # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
 docker build "$BUILD_CONTEXT_ROOT_DIR" \
   --file "$BUILD_CONTEXT_ROOT_DIR/Dockerfile" \
   --tag "${REPOSITORY_URI}:${DOCKER_TAG}" \
