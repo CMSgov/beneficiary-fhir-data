@@ -7,7 +7,7 @@ set -eou pipefail
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 CONTEXT_DIR="${REPO_ROOT}/apps/utils/locust_tests/"
-GIT_SHORT_HASH="$(cd "$SCRIPT_DIR"; git rev-parse --short HEAD)"
+GIT_SHORT_HASH="$(git rev-parse --short HEAD)"
 AWS_REGION="us-east-1"
 PRIVATE_REGISTRY_URI="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.$AWS_REGION.amazonaws.com"
 IMAGE_NAME="$PRIVATE_REGISTRY_URI/bfd-mgmt-server-regression"
