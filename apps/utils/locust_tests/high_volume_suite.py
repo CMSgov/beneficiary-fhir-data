@@ -19,6 +19,15 @@ MASTER_HASHED_MBIS: List[str] = []
 TAGS: Set[str] = []
 EXCLUDE_TAGS: Set[str] = []
 
+def get_available_locust_tags_as_str():
+    class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    potential_tasks = list(filter(lambda potential_task: hasattr(potential_task[1], "tasks"), class_members))
+    tasks = []
+    for task_holder in list(map(lambda task_set: task_set[1], potential_tasks)):
+        for task in task_holder.tasks:
+            tasks.append(task.locust_tag_set)
+    print(tasks)
+
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
     if (
@@ -449,6 +458,7 @@ class HighVolumeUser(BFDUserBase):
         for task_holder in list(map(lambda task_set: task_set[1], potential_tasks)):
             tasks.extend(self.filter_tasks_by_tags(task_holder, tags, exclude_tags))
         return tasks
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
