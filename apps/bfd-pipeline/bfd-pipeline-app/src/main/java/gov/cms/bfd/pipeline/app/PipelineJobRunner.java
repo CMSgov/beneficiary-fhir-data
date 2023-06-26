@@ -100,11 +100,11 @@ public class PipelineJobRunner implements Callable<Void> {
     /** Used to identify log lines indicating job success. */
     private static final Pattern SUCCESS_REGEX =
         Pattern.compile(
-            String.format("%s \\[id=.*outcome=([^,]+)", JobRunSummary.class.getSimpleName()));
+            String.format("%s \\[id=\\d+,.*outcome=([^,]+)", JobRunSummary.class.getSimpleName()));
     /** Used to identify log lines indicating job failure. */
     private static final Pattern FAILURE_REGEX =
         Pattern.compile(
-            String.format("%s \\[id=.*failure=([^,]+)", JobRunSummary.class.getSimpleName()));
+            String.format("%s \\[id=\\d+,.*failure=([^\\]]+)", JobRunSummary.class.getSimpleName()));
 
     /** Id for this job run. Assigned by {@link Tracker#beginningRun}. */
     private final long id;
@@ -127,7 +127,7 @@ public class PipelineJobRunner implements Callable<Void> {
      */
     public static boolean isSuccessString(String logString) {
       var m = SUCCESS_REGEX.matcher(logString);
-      return m.find() && !m.group(1).equals(".empty");
+      return m.find() && !m.group(1).equals("Optional.empty");
     }
 
     /**
@@ -137,8 +137,8 @@ public class PipelineJobRunner implements Callable<Void> {
      * @return true if the line indicates a job failed
      */
     public static boolean isFailureString(String logString) {
-      var m = SUCCESS_REGEX.matcher(logString);
-      return m.find() && !m.group(1).equals(".empty");
+      var m = FAILURE_REGEX.matcher(logString);
+      return m.find() && !m.group(1).equals("Optional.empty");
     }
 
     @Override

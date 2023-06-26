@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
@@ -349,5 +348,36 @@ public class PipelineJobRunnerTest {
                 Optional.empty(),
                 Optional.of(error)));
     assertEquals(expectedSummaries, summaries);
+  }
+
+  /** Verify that job run summaries can be recognized in log lines */
+  @Test
+  void logMessagesParsedCorrectly() {
+    final var successSummary =
+        new JobRunSummary(
+            1L,
+            job,
+            Instant.ofEpochMilli(1),
+            Instant.ofEpochMilli(2),
+            Optional.of(PipelineJobOutcome.WORK_DONE),
+            Optional.empty());
+
+    final var error = new IOException("boom!");
+    final var failureSummary =
+        new JobRunSummary(
+            3L,
+            job,
+            Instant.ofEpochMilli(5),
+            Instant.ofEpochMilli(6),
+            Optional.empty(),
+            Optional.of(error));
+
+    var successMessage = "some prefix" + successSummary + "some suffix";
+    assertTrue(JobRunSummary.isSuccessString(successMessage));
+    assertFalse(JobRunSummary.isFailureString(successMessage));
+
+    var failureMessage = "some prefix" + failureSummary + "some suffix";
+    assertFalse(JobRunSummary.isSuccessString(failureMessage));
+    assertTrue(JobRunSummary.isFailureString(failureMessage));
   }
 }
