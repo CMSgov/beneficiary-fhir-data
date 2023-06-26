@@ -74,8 +74,8 @@ download_synthea_properties() {
 }
 
 download_synthea_latest_jar() {
-  echo "Downloading latest Synthea JAR to $BUILD_CONTEXT_ROOT_DIR"
-  curl -LkSs "${SYNTHEA_LATEST_JAR_URL}" -o "$BUILD_CONTEXT_ROOT_DIR/${SYNTHEA_JAR_FILE}"
+  echo "Downloading latest Synthea JAR to $CONTEXT_DIR"
+  curl -LkSs "${SYNTHEA_LATEST_JAR_URL}" -o "$CONTEXT_DIR/${SYNTHEA_JAR_FILE}"
 }
 
 download_mapping_files_from_s3() {
@@ -87,9 +87,9 @@ download_mapping_files_from_s3() {
 }
 
 download_scripts_files_from_s3() {
-  echo "Downloading Synthea script files from S3 to $BUILD_CONTEXT_ROOT_DIR"
+  echo "Downloading Synthea script files from S3 to $CONTEXT_DIR"
   source .venv/bin/activate
-  python3 "$CONTEXT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$BUILD_CONTEXT_ROOT_DIR" "download_script"
+  python3 "$CONTEXT_DIR/$BFD_S3_UTILITIES_SCRIPT" "$CONTEXT_DIR" "download_script"
   deactivate
 }
 
