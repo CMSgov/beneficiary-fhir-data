@@ -11,6 +11,11 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 CONTEXT_DIR="${REPO_ROOT}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
 readonly CONTEXT_DIR
 
+# We want this script to be included in the Docker image while still living inside the build context,
+# so we'll pass the script as an arg into our build command
+DOCKER_ENTRYPOINT_SCRIPT="$(cat "${BUILD_CONTEXT_ROOT_DIR}/docker_entrypoint.sh")"
+readonly DOCKER_ENTRYPOINT_SCRIPT
+
 SYNTHEA_PROPERTIES_RAW_URL="https://raw.githubusercontent.com/synthetichealth/synthea/master/src/main/resources/synthea.properties"
 readonly SYNTHEA_PROPERTIES_RAW_URL
 
@@ -89,11 +94,12 @@ download_scripts_files_from_s3() {
 }
 
 build_docker_image() {
-  docker build "$CONTEXT_DIR"
-    -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
+  docker build -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
     -f "$DOCKERFILE_PATH" \
     --target "dist" \
-    --platform "linux/amd64" 
+    --platform "linux/amd64" \
+    --build-arg docker_entrypoint_sh="$DOCKER_ENTRYPOINT_SCRIPT" \
+     "$CONTEXT_DIR"
 }
 
 push_image_to_ecr() {
