@@ -156,11 +156,26 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     return error;
   }
 
+  /**
+   * OK to run unless {@link #stop} has been called or an exception has been caught.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @return true if OK for job to run
+   */
   @Override
   public synchronized boolean jobsCanRun() {
     return isRunning && error == null;
   }
 
+  /**
+   * Just logs the event and returns a unique id.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param job the job that is starting
+   * @return job id
+   */
   @Override
   public long beginningRun(PipelineJob job) {
     final var runId = idGenerator.getAndIncrement();
@@ -168,6 +183,14 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     return runId;
   }
 
+  /**
+   * Records the {@link gov.cms.bfd.pipeline.app.PipelineJobRunner.JobRunSummary} in a fixed size
+   * list.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param summary summaries the outcome of the run
+   */
   @Override
   public synchronized void completedRun(PipelineJobRunner.JobRunSummary summary) {
     log.info("job run complete: {}", summary);
@@ -177,16 +200,38 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     completedJobs.addLast(summary);
   }
 
+  /**
+   * Just logs the event.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param job the job that is sleeping
+   */
   @Override
   public void sleeping(PipelineJob job) {
     log.debug("Job sleeping: type={}", job.getType());
   }
 
+  /**
+   * Just logs the event.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param job the job that is stopping
+   */
   @Override
   public void stoppingDueToInterrupt(PipelineJob job) {
     log.info("Job interrupted: type={}", job.getType());
   }
 
+  /**
+   * Saves the exception for reporting later. This will also prevent other jobs from running.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param job the job that is stopping
+   * @param exception the exception that was thrown
+   */
   @Override
   public synchronized void stoppingDueToException(PipelineJob job, Exception exception) {
     log.error("Job execution failed: type={} exception={}", job.getType(), exception.getMessage());
@@ -197,11 +242,23 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     }
   }
 
+  /**
+   * Just logs the event.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @param job the job that is stopping
+   */
   @Override
   public void stoppingNormally(PipelineJob job) {
     log.debug("Job stopping: " + job.getType());
   }
 
+  /**
+   * Logs the event and counts down the latch to reflect that job has stopped.
+   *
+   * @param job the job that has stopped
+   */
   @Override
   public void stopped(PipelineJob job) {
     log.info("Job stopped: " + job.getType());
