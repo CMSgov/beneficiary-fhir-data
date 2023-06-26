@@ -89,11 +89,11 @@ download_scripts_files_from_s3() {
 }
 
 build_docker_image() {
-  docker build -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
+  docker build "$CONTEXT_DIR"
+    -t "$IMAGE_NAME:$DOCKER_LOCAL_VARIANT_TAG" \
     -f "$DOCKERFILE_PATH" \
     --target "dist" \
-    --platform "linux/amd64" \
-    "$BUILD_CONTEXT_ROOT_DIR"
+    --platform "linux/amd64" 
 }
 
 push_image_to_ecr() {
