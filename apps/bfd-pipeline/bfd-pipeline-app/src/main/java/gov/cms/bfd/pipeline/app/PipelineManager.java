@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import java.time.Clock;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    */
   private static final int MAX_COMPLETED_JOBS = 100;
   /** Function used to sleep. Parameterized for use by unit tests. */
-  private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
+  private final ThrowingConsumer<Long, InterruptedException> sleeper;
   /** Used to get timestamps. Parameterized for use by unit tests. */
   private final Clock clock;
   /** All of the jobs we manage. */
@@ -71,9 +71,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * @param jobs the jobs to execute
    */
   public PipelineManager(
-      ThrowingFunction<Void, Long, InterruptedException> sleeper,
-      Clock clock,
-      List<PipelineJob> jobs) {
+      ThrowingConsumer<Long, InterruptedException> sleeper, Clock clock, List<PipelineJob> jobs) {
     this.sleeper = sleeper;
     this.clock = clock;
     this.jobs = ImmutableList.copyOf(jobs);

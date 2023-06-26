@@ -3,18 +3,13 @@ package gov.cms.bfd.pipeline.app;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 import gov.cms.bfd.pipeline.app.PipelineJobRunner.JobRunSummary;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
@@ -42,7 +37,7 @@ public class PipelineJobRunnerTest {
   /** Mock clock. */
   @Mock private Clock clock;
   /** Mock sleep function. */
-  @Mock private ThrowingFunction<Void, Long, InterruptedException> sleeper;
+  @Mock private ThrowingConsumer<Long, InterruptedException> sleeper;
   /** Collects the summaries. */
   private List<JobRunSummary> summaries;
   /** The runner we are testing. */
@@ -68,7 +63,7 @@ public class PipelineJobRunnerTest {
     doAnswer(invocation -> runId.incrementAndGet()).when(tracker).beginningRun(job);
 
     // Sleeping does nothing at all but we can verify it it was called.
-    doReturn(null).when(sleeper).apply(anyLong());
+    doNothing().when(sleeper).accept(anyLong());
 
     // Collect our summaries into a list
     summaries = new ArrayList<>();
@@ -218,7 +213,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToInterrupt(any());
     verify(tracker, times(0)).stoppingDueToException(any(), any());
     verify(tracker).stopped(job);
-    verify(sleeper, times(2)).apply(repeatMills);
+    verify(sleeper, times(2)).accept(repeatMills);
 
     // Verify that the job summary matches expectations
     var expectedSummaries =
@@ -258,7 +253,7 @@ public class PipelineJobRunnerTest {
 
     // Execute the runner.  This should successfully run the job and stop.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
-    doReturn(null).doThrow(InterruptedException.class).when(sleeper).apply(any());
+    doNothing().doThrow(InterruptedException.class).when(sleeper).accept(any());
     assertNull(runner.call());
 
     // Verify expected calls were made to the tracker.
@@ -269,7 +264,7 @@ public class PipelineJobRunnerTest {
     verify(tracker).stoppingDueToInterrupt(job);
     verify(tracker, times(0)).stoppingDueToException(any(), any());
     verify(tracker).stopped(job);
-    verify(sleeper, times(2)).apply(repeatMills);
+    verify(sleeper, times(2)).accept(repeatMills);
 
     // Verify that the job summary matches expectations
     var expectedSummaries =
@@ -321,7 +316,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToInterrupt(any());
     verify(tracker).stoppingDueToException(job, error);
     verify(tracker).stopped(job);
-    verify(sleeper, times(2)).apply(repeatMills);
+    verify(sleeper, times(2)).accept(repeatMills);
 
     // Verify that the job summary matches expectations
     var expectedSummaries =
@@ -350,7 +345,7 @@ public class PipelineJobRunnerTest {
     assertEquals(expectedSummaries, summaries);
   }
 
-  /** Verify that job run summaries can be recognized in log lines */
+  /** Verify that job run summaries can be recognized in log lines. */
   @Test
   void logMessagesParsedCorrectly() {
     final var successSummary =

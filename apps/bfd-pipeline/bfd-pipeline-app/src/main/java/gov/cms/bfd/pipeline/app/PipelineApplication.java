@@ -219,14 +219,7 @@ public final class PipelineApplication {
       System.exit(EXIT_CODE_SMOKE_TEST_FAILURE);
     }
 
-    final var pipelineManager =
-        new PipelineManager(
-            millis -> {
-              Thread.sleep(millis);
-              return null;
-            },
-            Clock.systemUTC(),
-            jobs);
+    final var pipelineManager = new PipelineManager(Thread::sleep, Clock.systemUTC(), jobs);
     registerShutdownHook(appMetrics, pipelineManager);
 
     pipelineManager.start();

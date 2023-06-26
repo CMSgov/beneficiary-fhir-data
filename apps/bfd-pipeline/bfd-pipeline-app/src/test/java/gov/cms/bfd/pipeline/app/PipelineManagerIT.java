@@ -9,7 +9,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import java.time.Clock;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -25,11 +25,8 @@ import org.junit.jupiter.api.Test;
 /** Integration tests for {@link PipelineManager}. */
 public final class PipelineManagerIT {
   /** Sleep function that keeps the sleep time short for testing. */
-  private static final ThrowingFunction<Void, Long, InterruptedException> SLEEPER =
-      millis -> {
-        Thread.sleep(Math.min(5, millis));
-        return null;
-      };
+  private static final ThrowingConsumer<Long, InterruptedException> SLEEPER =
+      millis -> Thread.sleep(Math.min(5, millis));
 
   /** We don't care about timestamps in these tests so we can just use system clock. */
   private final Clock clock = Clock.systemUTC();

@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.app;
 
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
-import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -22,7 +22,7 @@ public class PipelineJobRunner implements Callable<Void> {
   /** The job we run. */
   private final PipelineJob job;
   /** Function used to sleep. Parameterized for use by unit tests. */
-  private final ThrowingFunction<Void, Long, InterruptedException> sleeper;
+  private final ThrowingConsumer<Long, InterruptedException> sleeper;
   /** Used to get timestamps. Parameterized for use by unit tests. */
   private final Clock clock;
 
@@ -48,7 +48,7 @@ public class PipelineJobRunner implements Callable<Void> {
           break;
         }
         tracker.sleeping(job);
-        sleeper.apply(repeatMillis);
+        sleeper.accept(repeatMillis);
       }
       tracker.stoppingNormally(job);
     } catch (InterruptedException ex) {
@@ -104,7 +104,8 @@ public class PipelineJobRunner implements Callable<Void> {
     /** Used to identify log lines indicating job failure. */
     private static final Pattern FAILURE_REGEX =
         Pattern.compile(
-            String.format("%s \\[id=\\d+,.*failure=([^\\]]+)", JobRunSummary.class.getSimpleName()));
+            String.format(
+                "%s \\[id=\\d+,.*failure=([^\\]]+)", JobRunSummary.class.getSimpleName()));
 
     /** Id for this job run. Assigned by {@link Tracker#beginningRun}. */
     private final long id;
