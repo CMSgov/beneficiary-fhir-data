@@ -32,8 +32,6 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    * @param oldMbiHashEnabled true if old MBI hash should be used
    * @param fissClaimTransformerV2 is the fiss claim transformer
    * @param mcsClaimTransformerV2 is the mcs claim transformer
-   * @param fissClaimResponseTransformerV2 the fiss claim response transformer
-   * @param mcsClaimResponseTransformerV2 the mcs claim response transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
    *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
    *     org.hl7.fhir.r4.model.ClaimResponse}
@@ -44,8 +42,6 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
       @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
-      FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
-      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
       @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
     super(
         metricRegistry,
@@ -53,8 +49,6 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
         oldMbiHashEnabled,
         fissClaimTransformerV2,
         mcsClaimTransformerV2,
-        fissClaimResponseTransformerV2,
-        mcsClaimResponseTransformerV2,
         claimSourceTypeNames);
   }
 

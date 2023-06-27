@@ -28,6 +28,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -53,7 +54,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -92,17 +92,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The enabled source types for this provider. */
   private final Set<String> enabledSourceTypes;
 
-  /** The fiss claim transformer. */
-  private final FissClaimTransformerV2 fissClaimTransformerV2;
-
-  /** The mcs claim transformer. */
-  private final McsClaimTransformerV2 mcsClaimTransformerV2;
-
-  /** The fiss claim response transformer. */
-  private final FissClaimResponseTransformerV2 fissClaimResponseTransformerV2;
-
-  /** The mcs claim response transformer. */
-  private final McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2;
+  /** The fiss transformer. */
+  private final ResourceTransformer<T> fissTransformer;
+  /** The mcs transformer. */
+  private final ResourceTransformer<T> mcsTransformer;
 
   /**
    * Initializes the resource provider beans via spring injection. These should be passed from the
@@ -111,10 +104,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param oldMbiHashEnabled true if old MBI hash should be used
-   * @param fissClaimTransformerV2 is the fiss claim transformer
-   * @param mcsClaimTransformerV2 is the mcs claim transformer
-   * @param fissClaimResponseTransformerV2 is the fiss claim response transformer
-   * @param mcsClaimResponseTransformerV2 is the mcs claim response transformer
+   * @param fissTransformer the fiss transformer
+   * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
    *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
    *     org.hl7.fhir.r4.model.ClaimResponse}
@@ -123,18 +114,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
       Boolean oldMbiHashEnabled,
-      FissClaimTransformerV2 fissClaimTransformerV2,
-      McsClaimTransformerV2 mcsClaimTransformerV2,
-      FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
-      McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
+      ResourceTransformer<T> fissTransformer,
+      ResourceTransformer<T> mcsTransformer,
       String claimSourceTypeNames) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
-    this.fissClaimTransformerV2 = requireNonNull(fissClaimTransformerV2);
-    this.mcsClaimTransformerV2 = requireNonNull(mcsClaimTransformerV2);
-    this.fissClaimResponseTransformerV2 = requireNonNull(fissClaimResponseTransformerV2);
-    this.mcsClaimResponseTransformerV2 = requireNonNull(mcsClaimResponseTransformerV2);
+    this.fissTransformer = requireNonNull(fissTransformer);
+    this.mcsTransformer = requireNonNull(mcsTransformer);
 
     requireNonNull(claimSourceTypeNames);
     enabledSourceTypes =
@@ -254,23 +241,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private T transformEntity(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
 
-    DomainResource response;
-
-    if (claimIdType instanceof ClaimTypeV2<?> && claimIdType.getTypeLabel().equals("fiss")) {
-      response = fissClaimTransformerV2.transform(claimEntity, includeTaxNumbers);
-    } else if (claimIdType instanceof ClaimTypeV2<?> && claimIdType.getTypeLabel().equals("mcs")) {
-      response = mcsClaimTransformerV2.transform(claimEntity, includeTaxNumbers);
-    } else if (claimIdType instanceof ClaimResponseTypeV2<?>
-        && claimIdType.getTypeLabel().equals("fiss")) {
-      response = fissClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
-    } else if (claimIdType instanceof ClaimResponseTypeV2<?>
-        && claimIdType.getTypeLabel().equals("mcs")) {
-      response = mcsClaimResponseTransformerV2.transform(claimEntity, includeTaxNumbers);
+    if (claimIdType.getTypeLabel().equals("fiss")) {
+      return fissTransformer.transform(claimEntity, includeTaxNumbers);
+    } else if (claimIdType.getTypeLabel().equals("mcs")) {
+      return mcsTransformer.transform(claimEntity, includeTaxNumbers);
     } else {
       throw new InvalidRequestException("Invalid claim id type, cannot get claim data");
     }
-
-    return (T) response;
   }
 
   /**
@@ -487,9 +464,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     Claim claim;
 
     if (entity instanceof RdaFissClaim) {
-      claim = fissClaimTransformerV2.transform(entity, false);
+      claim = (Claim) fissTransformer.transform(entity, false);
     } else if (entity instanceof RdaMcsClaim) {
-      claim = mcsClaimTransformerV2.transform(entity, false);
+      claim = (Claim) mcsTransformer.transform(entity, false);
     } else {
       throw new IllegalArgumentException(
           "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");

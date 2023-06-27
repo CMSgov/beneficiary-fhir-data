@@ -11,6 +11,7 @@ import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Comparator;
 import java.util.Date;
@@ -35,7 +36,8 @@ import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 @Component
-public class McsClaimTransformerV2 extends AbstractTransformerV2 {
+public class McsClaimTransformerV2 extends AbstractTransformerV2
+    implements ResourceTransformer<Claim> {
 
   /** The metric name. */
   private static final String METRIC_NAME =
@@ -76,7 +78,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  Claim transform(Object claimEntity, boolean includeTaxNumbers) {
+  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }

@@ -19,6 +19,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,7 +47,8 @@ import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 @Component
-public class FissClaimTransformerV2 extends AbstractTransformerV2 {
+public class FissClaimTransformerV2 extends AbstractTransformerV2
+    implements ResourceTransformer<Claim> {
 
   /** Date used to determine if an ICD code is ICD9 (before date) or ICD10 (on or after date). */
   private static final LocalDate ICD_9_CUTOFF_DATE = LocalDate.of(2015, 10, 1);
@@ -82,7 +84,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  Claim transform(Object claimEntity, boolean includeTaxNumbers) {
+  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }

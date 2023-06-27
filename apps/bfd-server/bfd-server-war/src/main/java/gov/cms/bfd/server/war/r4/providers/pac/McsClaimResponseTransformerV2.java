@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,7 +25,8 @@ import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
 @Component
-public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
+public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
+    implements ResourceTransformer<ClaimResponse> {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;

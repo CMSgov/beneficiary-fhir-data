@@ -30,8 +30,6 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param oldMbiHashEnabled true if old MBI hash should be used
-   * @param fissClaimTransformerV2 is the fiss claim transformer
-   * @param mcsClaimTransformerV2 is the mcs claim transformer
    * @param fissClaimResponseTransformerV2 the fiss claim response transformer
    * @param mcsClaimResponseTransformerV2 the mcs claim response transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
@@ -42,8 +40,6 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
       @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
-      FissClaimTransformerV2 fissClaimTransformerV2,
-      McsClaimTransformerV2 mcsClaimTransformerV2,
       FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
       McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
       @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
@@ -51,8 +47,6 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
         metricRegistry,
         samhsaMatcher,
         oldMbiHashEnabled,
-        fissClaimTransformerV2,
-        mcsClaimTransformerV2,
         fissClaimResponseTransformerV2,
         mcsClaimResponseTransformerV2,
         claimSourceTypeNames);
