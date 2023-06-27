@@ -482,7 +482,7 @@ public class SpringConfiguration {
   }
 
   /**
-   * This bean provides an {@link ExecutorService} fto enable EOB claim transformers to run in
+   * This bean provides an {@link ExecutorService} to enable EOB claim transformers to run in
    * parallel (threads).
    *
    * @return {@link ExecutorService} for the application.

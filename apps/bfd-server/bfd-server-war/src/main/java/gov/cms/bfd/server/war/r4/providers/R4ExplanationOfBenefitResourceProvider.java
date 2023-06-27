@@ -54,7 +54,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -89,7 +88,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   /** The ExecutorService entity. */
   private final ExecutorService executorService;
   /** spring application context. */
-  @Autowired private ApplicationContext appContext;
+  private final ApplicationContext appContext;
   /** The transformer for carrier claims. */
   private final CarrierClaimTransformerV2 carrierClaimTransformer;
   /** The transformer for dme claims. */
@@ -113,6 +112,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * <p>Spring will wire this class during the initial component scan, so this constructor should
    * only be explicitly called by tests.
    *
+   * @param appContext the spring application context
    * @param metricRegistry the metric registry bean
    * @param loadedFilterManager the loaded filter manager bean
    * @param samhsaMatcher the samsha matcher bean
@@ -129,6 +129,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param snfClaimTransformer the snf claim transformer v 2
    */
   public R4ExplanationOfBenefitResourceProvider(
+      ApplicationContext appContext,
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       R4EobSamhsaMatcher samhsaMatcher,
@@ -143,6 +144,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       OutpatientClaimTransformerV2 outpatientClaimTransformer,
       PartDEventTransformerV2 partDEventTransformer,
       SNFClaimTransformerV2 snfClaimTransformer) {
+    this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);

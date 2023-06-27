@@ -54,7 +54,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -82,8 +81,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   private final NPIOrgLookup npiOrgLookup;
   /** The ExecutorService entity. */
   private final ExecutorService executorService;
-  /** spring application context. */
-  @Autowired private ApplicationContext appContext;
+  /** The mock spring application context. */
+  private final ApplicationContext appContext;
   /** The transformer for carrier claims. */
   private final CarrierClaimTransformer carrierClaimTransformer;
   /** The transformer for dme claims. */
@@ -113,6 +112,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * <p>Spring will wire this class during the initial component scan, so this constructor should
    * only be explicitly called by tests.
    *
+   * @param appContext the spring application context
    * @param metricRegistry the metric registry bean
    * @param loadedFilterManager the loaded filter manager bean
    * @param samhsaMatcher the samsha matcher bean
@@ -129,6 +129,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @param snfClaimTransformer the snf claim transformer
    */
   public ExplanationOfBenefitResourceProvider(
+      ApplicationContext appContext,
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       Stu3EobSamhsaMatcher samhsaMatcher,
@@ -143,6 +144,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       OutpatientClaimTransformer outpatientClaimTransformer,
       PartDEventTransformer partDEventTransformer,
       SNFClaimTransformer snfClaimTransformer) {
+    this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
