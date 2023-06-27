@@ -112,14 +112,14 @@ resource "aws_iam_access_key" "jenkins_user_key" {
 
 resource "aws_ssm_parameter" "jenkins_user_key_secret" {
   key_id    = local.kms_key_id
-  name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_secret_key_tmp"
+  name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_secret_key"
   overwrite = true
   type      = "SecureString"
   value     = nonsensitive(aws_iam_access_key.jenkins_user_key.secret)
 }
 
 resource "aws_ssm_parameter" "jenkins_user_key_id" {
-  name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_access_id_tmp"
+  name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_access_id"
   overwrite = true
   type      = "String"
   value     = aws_iam_access_key.jenkins_user_key.id
