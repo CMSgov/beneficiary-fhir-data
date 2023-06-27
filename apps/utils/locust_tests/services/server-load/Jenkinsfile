@@ -48,7 +48,7 @@ spec:
            description: 'Space-delimited. Run only the locust tasks with ANY of the given @tag(s).  '
            + 'Will run all tasks if none are provided. Defaults to an empty string.')
 
-   string(name: 'LOCUST_EXCLUDE_TAGS',
+    string(name: 'LOCUST_EXCLUDE_TAGS',
           description: 'Space-delimited. Exclude the locust tasks with ANY of the given @tag(s). '
           + 'Defaults to an empty string.')
 
@@ -118,22 +118,6 @@ spec:
   }
 
   stages {
-      stage('Test') {
-        steps {
-          script {
-          container('bfd-cbc-build') {
-            dir('apps/utils/locust_tests') {
-                sh(script: "pip3 install -r requirements.txt")
-                test_sc = sh(script: "python -c 'from high_volume_suite import HighVolumeUser; tasks = list(map(lambda task: task.locust_tag_set, HighVolumeUser.get_tasks([],[]))); print(tasks)'", returnStdout: true)
-                echo "${test_sc}"
-            }
-          }
-          }
-        }
-      }
-    }
-
-  /* stages {
     stage('Run Load Tests') {
       steps {
         script {
@@ -199,6 +183,24 @@ spec:
           echo 'Build ended prior to node being created'
         }
       }
+      // Update the build description with the available locust tags
+      script {
+        container('bfd-cbc-build') {
+          dir('apps/utils/locust_tests') {
+            sh 'pip3 install -r requirements.txt'
+            availableLocustTags = sh script: '''
+python3 - <<EOF
+from high_volume_suite import HighVolumeUser;
+tasks = list(map(lambda x: x.locust_tag_set, HighVolumeUser.get_tasks([],[])));
+print(tasks);
+EOF
+            ''', returnStdout: true
+            currentBuild.description = '''All available locust tags at time of run:
+${availableLocustTags}
+            '''
+          }
+        }
+      }
     }
-  } */
+  }
 }
