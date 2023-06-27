@@ -26,14 +26,19 @@
     mode: 'u=rw,g=,o='
   become: true
 
-- name: Create appserver keystore from configuration
-  blockinfile:
-    create: true
+- name: Create blank appserver keystore
+  file:
+    state: touch
     path: "{{ data_server_dir }}/bluebutton-appserver-keystore.pfx"
-    block: "{{ server_keystore_base64 | b64decode }}"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=,o=
+  become: true
+
+- name: Update appserver keystore from configuration
+  copy:
+    dest: "{{ data_server_dir }}/bluebutton-appserver-keystore.pfx"
+    content: "{{ server_keystore_base64 | b64decode }}"
   become: true
 
 - name: Create BFD Server SSL Truststore Working Directory
