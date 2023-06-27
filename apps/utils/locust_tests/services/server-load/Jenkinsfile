@@ -191,7 +191,7 @@ spec:
             availableLocustTags = sh script: '''
 python3 - <<EOF
 from high_volume_suite import HighVolumeUser;
-tasks = list(map(lambda x: x.locust_tag_set, HighVolumeUser.get_tasks([],[])));
+tasks = list(map(lambda task: task.locust_tag_set, HighVolumeUser.get_tasks([],[])));
 print(tasks);
 EOF
             ''', returnStdout: true
