@@ -25,7 +25,6 @@
 		<dependencySet>
 			<outputDirectory>lib</outputDirectory>
 			<excludes>
-				<exclude>${project.groupId}:bfd-server-war:war:*</exclude>
 				<exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>
 				<!-- Exclude unused test dependencies; if you need these, remove exclusion -->
 				<exclude>org.jetbrains:annotations:jar:*</exclude>

@@ -46,15 +46,6 @@
             <artifactId>bfd-server-shared-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-server-war</artifactId>
-            <version>${project.version}</version>
-            <type>war</type>
-        </dependency>
-
         <dependency>
             <!-- Provides a sane facade for the giant mess of incompatible logging
                 frameworks in Java. -->
@@ -145,7 +136,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-	</dependencies>
+    </dependencies>
 
     <build>
         <pluginManagement>
@@ -206,27 +197,8 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
-                        <id>server-copy-war-for-testing</id>
+                        <id>server-copy-war</id>
                         <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <!-- Copy the BFD war file into a directory for use in docker build. -->
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>bfd-server-war</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>war</type>
-                                    <outputDirectory>${project.build.directory}/war-file</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                        <id>server-copy-war-for-docker</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
@@ -248,36 +220,6 @@
                         <phase>pre-integration-test</phase>
                         <goals>
                             <goal>unpack</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- Used to build docker image for the project. -->
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <container>
-                        <ports>
-                            <port>6500</port>
-                        </ports>
-                    </container>
-                    <extraDirectories>
-                        <paths>
-                            <!-- Copies war file into /app directory in container -->
-                            <path>
-                                <from>${project.build.directory}/war-file</from>
-                                <into>/app</into>
-                            </path>
-                        </paths>
-                    </extraDirectories>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>build-image</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>${jib.goal}</goal>
                         </goals>
                     </execution>
                 </executions>
