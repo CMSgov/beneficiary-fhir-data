@@ -86,7 +86,7 @@ public class PipelineJobRunnerTest {
 
     // Execute the runner.  This should successfully run the job and stop.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
-    assertNull(runner.call());
+    runner.run();
 
     // Verify expected calls were made to the tracker.
     verify(tracker).jobsCanRun();
@@ -123,7 +123,7 @@ public class PipelineJobRunnerTest {
     // Execute the runner.  Simulates job being interrupted.
     final var interrupt = new InterruptedException();
     doThrow(interrupt).when(job).call();
-    assertNull(runner.call());
+    runner.run();
 
     // Verify expected calls were made to the tracker.
     verify(tracker).jobsCanRun();
@@ -160,7 +160,7 @@ public class PipelineJobRunnerTest {
     // Execute the runner.  Simulates job throwing an exception.
     final var error = new IOException("boom!");
     doThrow(error).when(job).call();
-    assertNull(runner.call());
+    runner.run();
 
     // Verify expected calls were made to the tracker.
     verify(tracker).jobsCanRun();
@@ -203,7 +203,7 @@ public class PipelineJobRunnerTest {
 
     // Execute the runner.  This should successfully run the job and stop.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
-    assertNull(runner.call());
+    runner.run();
 
     // Verify expected calls were made to the tracker.
     verify(tracker, times(5)).jobsCanRun();
@@ -254,7 +254,7 @@ public class PipelineJobRunnerTest {
     // Execute the runner.  This should successfully run the job and stop.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
     doNothing().doThrow(InterruptedException.class).when(sleeper).accept(any());
-    assertNull(runner.call());
+    runner.run();
 
     // Verify expected calls were made to the tracker.
     verify(tracker, times(4)).jobsCanRun();
@@ -306,7 +306,7 @@ public class PipelineJobRunnerTest {
         .doThrow(error)
         .when(job)
         .call();
-    assertNull(runner.call());
+    runner.run();
 
     // Verify expected calls were made to the tracker.
     verify(tracker, times(5)).jobsCanRun();

@@ -52,7 +52,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * One {@link Future} per job. Can be used to get job result directly. Access limited to
    * synchronized methods.
    */
-  private ImmutableList<Future<Void>> runningJobFutures;
+  private ImmutableList<Future<?>> runningJobFutures;
   /** True while we're running. False when we're not. Access limited to synchronized methods. */
   @GuardedBy("this")
   private boolean isRunning;
@@ -94,7 +94,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     if (isRunning || runningJobFutures != null) {
       throw new IllegalStateException("start has already been called");
     }
-    var futures = ImmutableList.<Future<Void>>builder();
+    var futures = ImmutableList.<Future<?>>builder();
     for (PipelineJob job : jobs) {
       var jobExecutor = new PipelineJobRunner(this, job, sleeper, clock);
       var future = threadPool.submit(jobExecutor);

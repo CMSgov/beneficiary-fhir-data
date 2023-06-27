@@ -7,16 +7,18 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-/** Wrapper for a {@link PipelineJob} that runs the job on a schedule. */
+/**
+ * Wrapper for a {@link PipelineJob} that runs the job on a schedule. Implements {@link Runnable} so
+ * it can be submitted to an {@link java.util.concurrent.ExecutorService}.
+ */
 @Slf4j
 @AllArgsConstructor
-public class PipelineJobRunner implements Callable<Void> {
+public class PipelineJobRunner implements Runnable {
   /** Object that tracks the status of all job runs. */
   private final Tracker tracker;
   /** The job we run. */
@@ -31,11 +33,9 @@ public class PipelineJobRunner implements Callable<Void> {
    * Any uncaught exception thrown by the job terminates the loop. Our status is always updated in
    * the {@link Tracker} so it knows when job runs happen as well as when the loop terminates (and
    * for what reason).
-   *
-   * @return nothing
    */
   @Override
-  public Void call() {
+  public void run() {
     try {
       final var repeatMillis =
           job.getSchedule()
@@ -58,7 +58,6 @@ public class PipelineJobRunner implements Callable<Void> {
     } finally {
       tracker.stopped(job);
     }
-    return null;
   }
 
   /**
