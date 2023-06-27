@@ -63,7 +63,7 @@ public class ServerExecutor {
       // These two files are copied into server-work during build time by maven for convenience
       // from:
       // bfd-server/dev/ssl-stores
-      String keyStore = workDirectory + "/server-keystore.jks";
+      String keyStore = workDirectory + "/server-keystore.pfx";
       String trustStore = workDirectory + "/server-truststore.jks";
 
       // Validate the paths and properties needed to run the server war exist

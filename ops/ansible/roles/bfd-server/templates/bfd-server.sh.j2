@@ -2,7 +2,7 @@
 
 # The launcher picks up its config from environment variables, so set those.
 export BFD_PORT='{{ data_server_appserver_https_port }}'
-export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.jks'
+export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.pfx'
 export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.jks'
 export BFD_WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
 

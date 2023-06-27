@@ -132,7 +132,7 @@ serverPortsFile="${workDirectory}/server-ports.properties"
 serverLog="${workDirectory}/server-console.log"
 gcLog="${workDirectory}/gc.log"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
-keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.jks"
+keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.pfx"
 trustStore="${scriptDirectory}/../../../../dev/ssl-stores/server-truststore.jks"
 
 # Check for required files.
