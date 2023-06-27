@@ -121,11 +121,13 @@ spec:
       stage('Test') {
         steps {
           script {
-            //currentBuild.description = sh(script: 'python -c 'import ../high_volume_suite; high_volume_suite.get_locust_tags()', returnStdout: true).trim()
+          container('bfd-cbc-build') {
             dir('apps/utils/locust_tests') {
-                test_sc = sh(script: "python -c 'from high_volume_suite import get_available_locust_tags_as_str; get_available_locust_tags_as_str()'", returnStdout: true).trim()
+                sh(script: "pip3 install -r requirements.txt")
+                test_sc = sh(script: "python -c 'from high_volume_suite import HighVolumeUser; tasks = list(map(lambda task: task.locust_tag_set, HighVolumeUser.get_tasks([],[]))); print(tasks)'", returnStdout: true)
                 echo "${test_sc}"
             }
+          }
           }
         }
       }
