@@ -64,7 +64,7 @@ public class ServerExecutor {
       // from:
       // bfd-server/dev/ssl-stores
       String keyStore = workDirectory + "/server-keystore.pfx";
-      String trustStore = workDirectory + "/server-truststore.jks";
+      String trustStore = workDirectory + "/server-truststore.pfx";
 
       // Validate the paths and properties needed to run the server war exist
       if (!validateRequiredServerSetup(

@@ -179,7 +179,7 @@ public final class ServerProcess implements AutoCloseable {
         .put(
             AppConfiguration.ENV_VAR_KEY_TRUSTSTORE,
             AppConfigurationIT.getProjectDirectory()
-                .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.jks"))
+                .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.pfx"))
                 .toString());
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_WAR, warPath.toString());
 

@@ -49,6 +49,13 @@ For your convenience, a dev-only-really-don't-use-these-anywhere-else server key
     $ keytool -exportcert -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keystore bluebutton-server.git/dev/ssl-stores/server-keystore.jks -storepass changeit
     $ keytool -importcert -noprompt -trustcacerts -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/client-truststore.jks -storepass changeit
     ```
+    1. Similar to the above _keystore_, the _truststores_ have all been updated to use PKCS12 instead of JKS, using the following command (assuming the truststore is `server-truststore.jks`):
+
+        ```
+        keytool -importkeystore -srckeystore ./server-truststore.jks -destkeystore ./server-truststore.pfx   -srcstoretype jks -deststoretype pkcs12 -srcstorepass changeit -deststorepass changeit -srcalias client-local-dev -destalias client-local-dev -noprompt
+        ```
+
+    2. Wherever this document references `server-truststore.jks`, it can be replaced with `server-truststore.pfx`
     
 3. Generate a new client certificate that can be used in tests and place it in a new server truststore:
     

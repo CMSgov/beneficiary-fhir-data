@@ -38,7 +38,7 @@ public final class AppConfigurationIT {
     envValues.put(
         AppConfiguration.ENV_VAR_KEY_TRUSTSTORE,
         getProjectDirectory()
-            .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.jks"))
+            .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.pfx"))
             .toString());
     envValues.put(
         AppConfiguration.ENV_VAR_KEY_WAR,

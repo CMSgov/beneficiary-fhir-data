@@ -51,7 +51,7 @@ public final class AppConfiguration implements Serializable {
    */
   private final String keystore;
   /**
-   * The {@link Path} of the Java trust store ({@code .jks} file) containing the client certificates
+   * The {@link Path} of the Java trust store ({@code .pfx} file) containing the client certificates
    * to use (i.e. trust/authenticate) for this server. *
    */
   private final String truststore;
