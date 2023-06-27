@@ -195,9 +195,9 @@ tasks = list(map(lambda task: task.locust_tag_set, HighVolumeUser.get_tasks([],[
 print(tasks);
 EOF
             ''', returnStdout: true
-            currentBuild.description = '''All available locust tags at time of run:
+            currentBuild.description = """All available locust tags at time of run:
 ${availableLocustTags}
-            '''
+            """
           }
         }
       }
