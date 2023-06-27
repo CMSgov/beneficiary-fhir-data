@@ -26,17 +26,11 @@
     mode: 'u=rw,g=,o='
   become: true
 
-- name: Copy the appserver keystore
-  copy:
-    # Note: this JKS file is encrypted via the Ansible Vault
-    src: "{{ playbook_dir + '/' + data_server_appserver_keystore }}"
-    dest: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
-    force: yes # overwrite the existing keystore
-  become: true
-
-- name: Secure BFD Server SSL Keystore
-  file:
-    path: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
+- name: Create appserver keystore from configuration
+  blockinfile:
+    create: true
+    path: "{{ data_server_dir }}/bluebutton-appserver-keystore.pfx"
+    block: "{{ server_keystore_base64 | b64decode }}"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=,o=
