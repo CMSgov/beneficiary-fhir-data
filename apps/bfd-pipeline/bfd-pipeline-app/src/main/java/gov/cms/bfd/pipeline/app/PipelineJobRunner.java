@@ -173,7 +173,8 @@ public class PipelineJobRunner implements Runnable {
     boolean jobsCanRun();
 
     /**
-     * Notifies the tracker that a new job run is starting obtains unique id for the run.
+     * Notifies the tracker that a new job run is starting. Return value is a unique id assigned to
+     * this job run.
      *
      * @param job the job that is starting
      * @return unique id for this run

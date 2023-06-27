@@ -52,6 +52,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * One {@link Future} per job. Can be used to get job result directly. Access limited to
    * synchronized methods.
    */
+  @GuardedBy("this")
   private ImmutableList<Future<?>> runningJobFutures;
   /** True while we're running. False when we're not. Access limited to synchronized methods. */
   @GuardedBy("this")
@@ -64,7 +65,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
   private Exception error;
 
   /**
-   * Initializes an instance.
+   * Initializes an instance. Creates the thread pool but does not schedule any jobs yet.
    *
    * @param sleeper used by threads to wait for a set period of time
    * @param clock used to determine current time
@@ -88,7 +89,8 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
 
   /**
    * Can be called only once. Used by main thread. Starts all jobs running by adding them to the
-   * thread pool.
+   * thread pool. Since our pool automatically assigns one thread per job all of them will begin
+   * running immediately.
    */
   public synchronized void start() {
     if (isRunning || runningJobFutures != null) {
@@ -112,6 +114,8 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     if (isRunning) {
       if (interruptable) {
         var unscheduled = threadPool.shutdownNow();
+        // Just a sanity check.  We only schedule one job per pipeline job and have dedicated
+        // threads so there should never be any unscheduled jobs waiting in a queue.
         assert unscheduled.size() == 0;
       } else {
         log.info("stopping but must wait for uninterruptible jobs to complete on their own");
@@ -121,8 +125,17 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     }
   }
 
-  /** Callable by main thread to wait for all jobs to finish running. */
+  /**
+   * Callable by main thread to wait for all jobs to finish running. This is potentially an infinite
+   * loop but that's by design. We call this while the program is running to wait for it to complete
+   * and a common scenario is for the pipeline to run forever.
+   *
+   * <p>External causes like jobs completing on their own or calls to {@link #stop} from the
+   * shutdown handler will cause the pool to shut down gracefully while we wait and thus allow us to
+   * return.
+   */
   public void awaitCompletion() {
+    // Calls to the latch are automatically synchronized on the latch.
     while (latch.getCount() > 0) {
       try {
         latch.await();
@@ -134,11 +147,12 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     // just in case we somehow aren't stopped
     stop();
 
-    // should return immediately since all jobs are done according to the latch
     log.info("waiting for pool to terminate");
     boolean terminated = false;
     while (!terminated) {
       try {
+        // Should return immediately since latch indicated that all jobs are done.
+        // Calls to the pool are synchronized on the pool itself.
         terminated = threadPool.awaitTermination(30, TimeUnit.SECONDS);
       } catch (InterruptedException ex) {
         log.debug("caught interrupt - still waiting for thread pool to terminate");
@@ -225,7 +239,8 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
   }
 
   /**
-   * Saves the exception for reporting later. This will also prevent other jobs from running.
+   * Saves the exception for reporting later. This will also prevent other jobs from running so that
+   * the pipeline can shut down gracefully without a call to {@link System#exit}.
    *
    * <p>{@inheritDoc}
    *
