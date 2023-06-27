@@ -15,6 +15,13 @@
         Builds a BFD Server docker image using Jib plugin.
     </description>
 
+    <properties>
+        <!-- There is no java code to check. -->
+        <checkstyle.skip>true</checkstyle.skip>
+        <!-- There is no javadoc to generate. -->
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+    </properties>
+    
     <dependencies>
         <dependency>
             <!-- BFD WAR file is required to build the image. -->
