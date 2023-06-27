@@ -165,6 +165,7 @@ public final class DataServerLauncherApp {
     sslContextFactory.setKeyManagerPassword("changeit");
     sslContextFactory.setTrustStoreResource(Resource.newResource(appConfig.getTruststore()));
     sslContextFactory.setTrustStorePassword("changeit");
+    sslContextFactory.setTrustStoreType("PKCS12");
     sslContextFactory.setExcludeProtocols(
         "SSL", "SSLv2", "SSLv2Hello", "SSLv3", "TLSv1", "TLSv1.1");
     sslContextFactory.setIncludeCipherSuites(
