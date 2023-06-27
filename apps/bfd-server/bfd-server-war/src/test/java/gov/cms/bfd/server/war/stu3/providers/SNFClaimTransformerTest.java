@@ -23,26 +23,10 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link SNFClaimTransformer}. */
 public final class SNFClaimTransformerTest {
-  /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
-  /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-  }
-
   /**
    * Verifies that {@link SNFClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
@@ -62,7 +46,11 @@ public final class SNFClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Optional.of(true), drugDisplayLookup, npiOrgLookup);
+            claim,
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
 
     assertMatches(claim, eob);
   }
@@ -77,6 +65,12 @@ public final class SNFClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+    /*
+     * Unfortunately this method is called from outside this class; need to create
+     * a NPIOrgLookup object for this verfication test.
+     */
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
+
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,

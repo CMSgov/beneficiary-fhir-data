@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Unit tests for {@link
@@ -42,6 +43,8 @@ public final class ExplanationOfBenefitResourceProviderTest {
   /** The mocked input id value. */
   @Mock IdType eobId;
 
+  /** The mock metric registry. */
+  @Mock private ApplicationContext appContext;
   /** The mock metric registry. */
   @Mock private MetricRegistry metricRegistry;
   /** The mock samhsa matcher. */
@@ -78,6 +81,7 @@ public final class ExplanationOfBenefitResourceProviderTest {
   public void setup() {
     eobProvider =
         new ExplanationOfBenefitResourceProvider(
+            appContext,
             metricRegistry,
             loadedFilterManager,
             samhsaMatcher,

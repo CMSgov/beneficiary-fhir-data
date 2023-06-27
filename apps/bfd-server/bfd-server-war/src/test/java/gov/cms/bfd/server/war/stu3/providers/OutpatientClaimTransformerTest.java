@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -35,21 +34,6 @@ import org.slf4j.LoggerFactory;
 public final class OutpatientClaimTransformerTest {
   private static final org.slf4j.Logger LOGGER =
       LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
-
-  /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
-  /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-  }
 
   /**
    * Verifies that {@link
@@ -71,7 +55,11 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+            claim,
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
 
     assertMatches(claim, eob);
   }
@@ -100,7 +88,11 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+            claim,
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
 
     assertMatches(claim, eob);
   }
@@ -136,7 +128,11 @@ public final class OutpatientClaimTransformerTest {
                   claim.getClaimId());
               ExplanationOfBenefit eob =
                   TransformerTestUtils.transformRifRecordToEob(
-                      claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+                      claim,
+                      new MetricRegistry(),
+                      Optional.empty(),
+                      FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+                      new NPIOrgLookup());
 
               assertMatches(claim, eob);
             });
@@ -153,6 +149,12 @@ public final class OutpatientClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(OutpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+    /*
+     * Unfortunately this method is called from outside this class; need to create
+     * a NPIOrgLookup object for this verfication test.
+     */
+    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
+
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,

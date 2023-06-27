@@ -23,26 +23,10 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer}. */
 public final class PartDEventTransformerTest {
-  /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
-  /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-  }
-
   /**
    * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
@@ -54,7 +38,11 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+            claim,
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
 
     assertMatches(claim, eob);
   }
@@ -143,7 +131,11 @@ public final class PartDEventTransformerTest {
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
         TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Optional.empty(), drugDisplayLookup, npiOrgLookup);
+            claim,
+            new MetricRegistry(),
+            Optional.empty(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
 
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
@@ -179,6 +171,13 @@ public final class PartDEventTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
+    /*
+     * Unfortunately this method is called from outside this class; need to create
+     * a FdaDrugCodeDisplayLookup object for this verfication test.
+     */
+    FdaDrugCodeDisplayLookup drugDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,

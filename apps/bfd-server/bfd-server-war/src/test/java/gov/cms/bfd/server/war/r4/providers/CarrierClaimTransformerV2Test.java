@@ -44,7 +44,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -55,24 +54,16 @@ public class CarrierClaimTransformerV2Test {
   CarrierClaim claim;
   /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
-  /** The fhir context for parsing the file data. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
   /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
+  MetricRegistry metricRegistry;
   /** The FDA drug lookup to use for the test. */
-  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-  }
+  NPIOrgLookup npiOrgLookup;
+  /** The fhir context for parsing the file data. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -103,6 +94,9 @@ public class CarrierClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    npiOrgLookup = new NPIOrgLookup();
     claimTransformerInterface =
         new CarrierClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
 

@@ -26,21 +26,21 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
 public final class CarrierClaimTransformerTest {
   /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
+  private MetricRegistry metricRegistry;
   /** The FDA drug lookup to use for the test. */
-  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  private FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
+  private NPIOrgLookup npiOrgLookup;
 
   /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
+  @BeforeEach
+  protected void setup() {
     metricRegistry = new MetricRegistry();
     drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     npiOrgLookup = new NPIOrgLookup();

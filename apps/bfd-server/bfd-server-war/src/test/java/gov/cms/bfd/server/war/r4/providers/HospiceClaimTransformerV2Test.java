@@ -50,7 +50,6 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -58,25 +57,18 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link HospiceClaimTransformerV2}. */
 public final class HospiceClaimTransformerV2Test {
 
-  /** The fhir context for parsing the test file. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The EOB under test created from the {@link #claim}. */
-  private ExplanationOfBenefit eob = null;
+  ExplanationOfBenefit eob = null;
   /** The parsed claim used to generate the EOB and for validating with. */
-  private HospiceClaim claim = null;
+  HospiceClaim claim = null;
   /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
+  MetricRegistry metricRegistry;
   /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
+  NPIOrgLookup npiOrgLookup;
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    npiOrgLookup = new NPIOrgLookup();
-  }
+  /** The fhir context for parsing the test file. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -85,6 +77,8 @@ public final class HospiceClaimTransformerV2Test {
    */
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
+    metricRegistry = new MetricRegistry();
+    npiOrgLookup = new NPIOrgLookup();
     claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

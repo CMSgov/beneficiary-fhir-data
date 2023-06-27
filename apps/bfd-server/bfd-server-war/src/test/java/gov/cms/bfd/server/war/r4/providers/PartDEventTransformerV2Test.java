@@ -42,7 +42,6 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -53,21 +52,14 @@ public final class PartDEventTransformerV2Test {
   PartDEvent claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
-  /** The fhir context for parsing the test file. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
+  MetricRegistry metricRegistry;
   /** The FDA drug lookup to use for the test. */
-  private static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-  }
+  /** The fhir context for parsing the test file. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -98,8 +90,9 @@ public final class PartDEventTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    metricRegistry = new MetricRegistry();
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     claimTransformerInterface = new PartDEventTransformerV2(metricRegistry, drugDisplayLookup);
-
     claim = generateClaim();
     eob = claimTransformerInterface.transform(claim, Optional.empty());
   }

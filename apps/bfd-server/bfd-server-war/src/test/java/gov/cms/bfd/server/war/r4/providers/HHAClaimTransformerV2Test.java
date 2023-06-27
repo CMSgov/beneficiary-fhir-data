@@ -51,7 +51,6 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -62,21 +61,14 @@ public class HHAClaimTransformerV2Test {
   HHAClaim claim;
   /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
-  /** The fhir context for parsing the file data. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The Metric Registry to use for the test. */
-  private static MetricRegistry metricRegistry;
+  MetricRegistry metricRegistry;
   /** The NPI org lookup to use for the test. */
-  private static NPIOrgLookup npiOrgLookup;
+  NPIOrgLookup npiOrgLookup;
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeAll
-  protected static void setup() {
-    metricRegistry = new MetricRegistry();
-    npiOrgLookup = new NPIOrgLookup();
-  }
+  /** The fhir context for parsing the file data. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -107,6 +99,8 @@ public class HHAClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    metricRegistry = new MetricRegistry();
+    npiOrgLookup = new NPIOrgLookup();
     claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
     claim = generateClaim();
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
