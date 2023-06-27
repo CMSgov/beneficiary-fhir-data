@@ -50,27 +50,29 @@ public class PipelineJobRunnerTest {
    */
   @BeforeEach
   void setUp() throws InterruptedException {
+    // By default the job is not interruptable.
     doReturn(false).when(job).isInterruptible();
 
-    // Time for our tests increases by 1 ms on every call
+    // The clock used in tests increments time by 1 ms per call.
     final var timestampMillis = new AtomicLong();
     doAnswer(invocation -> Instant.ofEpochMilli(timestampMillis.incrementAndGet()))
         .when(clock)
         .instant();
 
-    // Run ids just start at 1 and increment
+    // Mock tracker assigns job run ids starting at 1.
     final var runId = new AtomicLong();
     doAnswer(invocation -> runId.incrementAndGet()).when(tracker).beginningRun(job);
 
-    // Sleeping does nothing at all but we can verify it it was called.
+    // Sleeping does nothing at all but the mock will allow us to verify if it was called.
     doNothing().when(sleeper).accept(anyLong());
 
-    // Collect our summaries into a list
+    // Mock tracker collects job run summaries into a list.
     summaries = new ArrayList<>();
     doAnswer(invocation -> summaries.add(invocation.getArgument(0, JobRunSummary.class)))
         .when(tracker)
         .completedRun(any());
 
+    // The runner that we'll be testing.
     runner = new PipelineJobRunner(tracker, job, sleeper, clock);
   }
 

@@ -585,16 +585,14 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     // Remove inherited environment variables that could affect the test in some local environments.
-    for (String envVarName :
-        List.of(
+    List.of(
             AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED,
             AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED,
             AppConfiguration.ENV_VAR_KEY_RDA_GRPC_HOST,
             AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT,
             AppConfiguration.ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN,
-            AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE)) {
-      appRunBuilder.environment().remove(envVarName);
-    }
+            AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE)
+        .forEach(envVarName -> appRunBuilder.environment().remove(envVarName));
 
     appRunBuilder
         .environment()
