@@ -35,7 +35,6 @@ locals {
     "/bfd/${local.env}/server/nonsensitive/asg_max_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_instance_count"
     "/bfd/${local.env}/server/nonsensitive/asg_max_warm_instance_count"              = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_warm_instance_count"
     "/bfd/${local.env}/server/nonsensitive/asg_min_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_min_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/data_server_appserver_keystore"           = "/bfd/${local.seed_env}/server/nonsensitive/data_server_appserver_keystore"
     "/bfd/${local.env}/server/nonsensitive/data_server_ssl_client_certificates_json" = "/bfd/${local.seed_env}/server/nonsensitive/data_server_ssl_client_certificates_json"
     "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"            = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
     "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb"           = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
@@ -72,40 +71,40 @@ data "aws_ssm_parameters_by_path" "seed" {
 
 # Copy targeted COMMON hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_common" {
-  for_each       = local.common_seed_paths
-  key_id         = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
-  name           = each.key
-  overwrite      = true
-  type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = local.seed[each.value]
+  for_each  = local.common_seed_paths
+  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  name      = each.key
+  overwrite = true
+  type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
+  value     = local.seed[each.value]
 }
 
 # Copy targeted MIGRATOR hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_migrator" {
-  for_each       = local.migrator_seed_paths
-  key_id         = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
-  name           = each.key
-  overwrite      = true
-  type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = local.seed[each.value]
+  for_each  = local.migrator_seed_paths
+  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  name      = each.key
+  overwrite = true
+  type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
+  value     = local.seed[each.value]
 }
 
 # Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_pipeline" {
-  for_each       = local.pipeline_seed_paths
-  key_id         = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
-  name           = each.key
-  overwrite      = true
-  type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = local.seed[each.value]
+  for_each  = local.pipeline_seed_paths
+  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  name      = each.key
+  overwrite = true
+  type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
+  value     = local.seed[each.value]
 }
 
 # Copy targeted SERVER hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_server" {
-  for_each       = local.server_seed_paths
-  key_id         = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
-  name           = each.key
-  overwrite      = true
-  type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = local.seed[each.value]
+  for_each  = local.server_seed_paths
+  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  name      = each.key
+  overwrite = true
+  type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
+  value     = local.seed[each.value]
 }
