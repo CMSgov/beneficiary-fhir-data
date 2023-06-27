@@ -159,6 +159,8 @@ public final class DataServerLauncherApp {
     SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
     sslContextFactory.setNeedClientAuth(true);
     sslContextFactory.setKeyStoreResource(Resource.newResource(appConfig.getKeystore()));
+    sslContextFactory.setKeyStoreType("PKCS12");
+    sslContextFactory.setKeyStorePassword("changeit");
     sslContextFactory.setCertAlias("server");
     sslContextFactory.setKeyManagerPassword("changeit");
     sslContextFactory.setTrustStoreResource(Resource.newResource(appConfig.getTruststore()));
