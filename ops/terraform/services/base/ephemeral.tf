@@ -108,4 +108,5 @@ resource "aws_ssm_parameter" "ephemeral_server" {
   overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
   value     = local.seed[each.value]
+  tier      = "Intelligent-Tiering"
 }
