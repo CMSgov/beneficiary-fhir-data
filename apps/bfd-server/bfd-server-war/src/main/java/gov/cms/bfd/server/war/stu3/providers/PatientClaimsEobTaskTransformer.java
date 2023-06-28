@@ -227,6 +227,16 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
+   * Fetch the claim type string.
+   *
+   * @return {@link String} identifying the {@link ClaimType} of task
+   */
+  @Override
+  public String toString() {
+    return claimType.toString();
+  }
+
+  /**
    * Find claim type by patient list.
    *
    * @param <T> the type parameter
