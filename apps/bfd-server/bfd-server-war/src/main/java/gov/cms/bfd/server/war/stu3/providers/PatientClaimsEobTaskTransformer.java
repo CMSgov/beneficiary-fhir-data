@@ -3,14 +3,11 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -119,7 +116,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param claimTransformer the {@link ClaimTransformerInterface} to run.
    * @param claimType the claim type to process.
    * @param id the beneficiary or claim identifier to process.
-   * @param singlePatientRead the id param is beneficiary ID.
    * @param lastUpdated the date range that lastUpdate falls within.
    * @param serviceDate the date range that clm_thru_dt falls within.
    * @param includeTaxNumbers whether to return tax numbers.
@@ -130,7 +126,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       ClaimTransformerInterface claimTransformer,
       ClaimType claimType,
       Long id,
-      boolean singlePatientRead,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
       Optional<Boolean> includeTaxNumbers,
@@ -140,7 +135,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     this.claimType = requireNonNull(claimType);
     this.id = requireNonNull(id);
     this.countDownLatch = requireNonNull(countDownLatch);
-    this.singlePatientRead = singlePatientRead;
     this.lastUpdated = lastUpdated;
     this.serviceDate = serviceDate;
     this.excludeSamhsa = excludeSamhsa;
@@ -168,14 +162,12 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   public PatientClaimsEobTaskTransformer call() {
     LOGGER.debug("TransformPatientClaimsToEobTask.call() started for {}", id);
     try {
-      if (singlePatientRead) {
-        patientRead();
-      } else {
-        eobs.addAll(transformToEobs(findClaimTypeByPatient()));
-        if (excludeSamhsa) {
-          filterSamhsa(eobs);
-        }
+      eobs.addAll(transformToEobs(findClaimTypeByPatient()));
+      if (excludeSamhsa) {
+        filterSamhsa(eobs);
       }
+    } catch (NoResultException e) {
+      LOGGER.error((taskException = e).getMessage(), e);
     } catch (Exception e) {
       // keep track of the Exception so we can provide to caller.
       LOGGER.error((taskException = e).getMessage(), e);
@@ -232,47 +224,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   public List<ExplanationOfBenefit> fetchEOBs() {
     return eobs;
-  }
-
-  /** Do a db lookup using a claim type entity object. */
-  private void patientRead() {
-    Class<?> entityClass = claimType.getEntityClass();
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery criteria = builder.createQuery(entityClass);
-    Root root = criteria.from(entityClass);
-    claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
-    criteria.select(root);
-    criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), id));
-
-    Object claimEntity = null;
-    Long eobByIdQueryNanoSeconds = null;
-    Timer.Context timerEobQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id"))
-            .time();
-    try {
-      claimEntity = entityManager.createQuery(criteria).getSingleResult();
-
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(1);
-    } catch (NoResultException e) {
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(0);
-      throw new ResourceNotFoundException(TransformerUtils.buildEobId(claimType, id));
-    } finally {
-      eobByIdQueryNanoSeconds = timerEobQuery.stop();
-      TransformerUtils.recordQueryInMdc(
-          "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
-    }
-    ExplanationOfBenefit eob = transformEobClaim(claimEntity);
-
-    if (eob != null) {
-      eobs.add(eob);
-      // Add bene_id to MDC logs
-      if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
-        LoggingUtils.logBeneIdToMdc(eob.getPatient().getReference().replace("Patient/", ""));
-      }
-    }
   }
 
   /**

@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
@@ -47,7 +48,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -227,35 +232,39 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     operation.setOption("by", "id");
     operation.publishOperationName();
 
-    CountDownLatch countDownLatch = new CountDownLatch(1);
-    var task = appContext.getBean(PatientClaimsEobTaskTransformer.class);
-    task.setupTaskParams(
-        deriveTransformer(eobIdType.get()),
-        eobIdType.get(),
-        Long.parseLong(eobIdClaimIdText),
-        true,
-        Optional.empty(),
-        Optional.empty(),
-        includeTaxNumbers,
-        false,
-        countDownLatch);
+    Class<?> entityClass = eobIdType.get().getEntityClass();
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery criteria = builder.createQuery(entityClass);
+    Root root = criteria.from(entityClass);
+    eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
+    criteria.select(root);
+    criteria.where(
+        builder.equal(root.get(eobIdType.get().getEntityIdAttribute()), eobIdClaimIdText));
 
-    ExplanationOfBenefit eob = null;
-    Future<PatientClaimsEobTaskTransformer> future = null;
+    Object claimEntity = null;
+    Long eobByIdQueryNanoSeconds = null;
+    Timer.Context timerEobQuery =
+        metricRegistry
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id"))
+            .time();
     try {
-      future = executorService.submit(task);
-      // Wait for the latch to reach zero
-      countDownLatch.await();
-      PatientClaimsEobTaskTransformer taskResult = future.get();
-      if (taskResult.ranSuccessfully()) {
-        List<ExplanationOfBenefit> eobs = taskResult.fetchEOBs();
-        eob = eobs.get(0);
-      } else {
-        LOGGER.error(taskResult.getFailure().get().getMessage(), taskResult.getFailure().get());
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      LOGGER.error("Error invoking executor service", e);
+      claimEntity = entityManager.createQuery(criteria).getSingleResult();
+
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(1);
+    } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+
+      throw new ResourceNotFoundException(eobId);
+    } finally {
+      eobByIdQueryNanoSeconds = timerEobQuery.stop();
+      TransformerUtils.recordQueryInMdc(
+          "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
+
+    ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
+    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -383,7 +392,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
           deriveTransformer(claimType),
           claimType,
           beneficiaryId,
-          false,
           Optional.ofNullable(lastUpdated),
           Optional.ofNullable(serviceDate),
           includeTaxNumbers,
