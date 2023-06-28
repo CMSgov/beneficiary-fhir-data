@@ -4,32 +4,20 @@
 # the repo. Unless a later match takes precedence.
 @mackec1 @keithdadkins @lsmitchell @mjburling
 
-#BFD Pipeline and Server Codeowners
+# BFD Pipeline and Server Codeowners
 /rfcs @mackec1 @keithdadkins @lsmitchell @mjburling
 /ops @keithdadkins @mjburling @malessi @billie-rose
-/apps @mackec1 @mjburling @lsmitchell
+/apps @mackec1 @mjburling @lsmitchell @brianburton
 
-#BFD Performance Testing Utilities
+# BFD Performance Testing Utilities
 /apps/utils/locust_tests @lsmitchell @mjburling @malessi @billie-rose
 
-#BFD Insights Codeowners
+# BFD Insights Codeowners
 /insights @keithdadkins @mackec1 @lsmitchell @mjburling @malessi @billie-rose
 
-#BCDA Insights Codeowners
-/insights/terraform/projects/bcda @keithdadkins @mjburling @malessi @billie-rose
-
-#AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @keithdadkins @mjburling @malessi @billie-rose
-
-#BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @mjburling @malessi @billie-rose
-
-#PACA Pipeline Codeowners
-/apps/bfd-pipeline/bfd-pipeline-rda-* @brianburton @mjburling @daryll
-#PACA Server Transformer Codeowners
-/apps/bfd-server/bfd-server-war/**/pac @brianburton @mjburling @daryll
-# PACA Models
-/apps/bfd-model/bfd-model-rda @brianburton @mjburling @daryll
-
-#GitHub Actions Workflows
+# GitHub Actions Workflows
 /.github/workflows @keithdadkins @mjburling @malessi @billie-rose
+
+# Administration
+/.github/CODEOWNERS @keithdadkins @mjburling
+
