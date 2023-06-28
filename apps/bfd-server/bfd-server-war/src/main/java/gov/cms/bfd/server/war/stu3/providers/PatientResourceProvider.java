@@ -93,6 +93,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
 
+  /** The beneficiary transformer. */
+  private final BeneficiaryTransformer beneficiaryTransformer;
+
   /** The expected coverage id length. */
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
@@ -104,13 +107,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    *
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
+   * @param beneficiaryTransformer the beneficiary transformer
    */
   public PatientResourceProvider(
-      MetricRegistry metricRegistry, LoadedFilterManager loadedFilterManager) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      BeneficiaryTransformer beneficiaryTransformer) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.beneficiaryTransformer = requireNonNull(beneficiaryTransformer);
   }
 
   /**
@@ -217,7 +222,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
+    Patient patient = beneficiaryTransformer.transform(beneficiary, requestHeader);
     return patient;
   }
 
@@ -410,7 +415,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(b -> BeneficiaryTransformer.transform(metricRegistry, b, requestHeader))
+            .map(b -> beneficiaryTransformer.transform(b, requestHeader))
             .collect(Collectors.toList());
 
     Bundle bundle =
@@ -966,8 +971,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
-    return patient;
+    return beneficiaryTransformer.transform(beneficiary, requestHeader);
   }
 
   /**
