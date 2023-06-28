@@ -38,6 +38,7 @@ locals {
     "/bfd/${local.env}/server/nonsensitive/data_server_ssl_client_certificates_json" = "/bfd/${local.seed_env}/server/nonsensitive/data_server_ssl_client_certificates_json"
     "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"            = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
     "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb"           = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
+    "/bfd/${local.env}/server/sensitive/server_keystore_base64"                      = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
     "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"            = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
     "/bfd/${local.env}/server/sensitive/data_server_db_password"                     = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
     "/bfd/${local.env}/server/sensitive/data_server_db_username"                     = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
