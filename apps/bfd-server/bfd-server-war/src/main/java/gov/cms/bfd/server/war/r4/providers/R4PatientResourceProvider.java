@@ -127,12 +127,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       BeneficiaryTransformerV2 beneficiaryTransformerV2) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    requireNonNull(beneficiaryTransformerV2);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
-    this.beneficiaryTransformerV2 = beneficiaryTransformerV2;
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.beneficiaryTransformerV2 = requireNonNull(beneficiaryTransformerV2);
   }
 
   /**
