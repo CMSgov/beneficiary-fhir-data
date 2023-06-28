@@ -36,7 +36,7 @@
   become: true
 
 - name: Update appserver keystore from configuration
-  shell: "echo \"{{ server_keystore_base64 }}\" | base64 --decode > bluebutton-appserver-keystore.pfx"
+  shell: "echo \"{{ server_keystore_base64 }}\" | base64 --decode > {{ data_server_dir }}/bluebutton-appserver-keystore.pfx"
   become: true
 
 - name: Create BFD Server SSL Truststore Working Directory
