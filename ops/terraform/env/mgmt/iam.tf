@@ -70,9 +70,9 @@ resource "aws_iam_policy" "packer_ssm" {
       ],
       "Effect": "Allow",
       "Resource": [
-        %{ for env in local.established_envs ~}
+        %{for env in local.established_envs~}
         "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${env}/common/*",
-        %{ endfor ~}
+        %{endfor~}
         "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/*"
       ],
       "Sid": "BFDProfile"
