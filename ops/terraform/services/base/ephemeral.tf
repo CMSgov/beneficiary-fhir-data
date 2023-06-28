@@ -77,8 +77,7 @@ resource "aws_ssm_parameter" "ephemeral_common" {
   name           = each.key
   overwrite      = true
   type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = contains(split("/", each.key), "sensitive") ? local.seed[each.value] : null
-  insecure_value = contains(split("/", each.key), "nonsensitive") ? local.seed[each.value] : null
+  value          = local.seed[each.value]
 }
 
 # Copy targeted MIGRATOR hierarchy paths from seed environment into requested ephemeral environment
@@ -88,8 +87,7 @@ resource "aws_ssm_parameter" "ephemeral_migrator" {
   name           = each.key
   overwrite      = true
   type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = contains(split("/", each.key), "sensitive") ? local.seed[each.value] : null
-  insecure_value = contains(split("/", each.key), "nonsensitive") ? local.seed[each.value] : null
+  value          = local.seed[each.value]
 }
 
 # Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
@@ -99,8 +97,7 @@ resource "aws_ssm_parameter" "ephemeral_pipeline" {
   name           = each.key
   overwrite      = true
   type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = contains(split("/", each.key), "sensitive") ? local.seed[each.value] : null
-  insecure_value = contains(split("/", each.key), "nonsensitive") ? local.seed[each.value] : null
+  value          = local.seed[each.value]
 }
 
 # Copy targeted SERVER hierarchy paths from seed environment into requested ephemeral environment
@@ -110,6 +107,5 @@ resource "aws_ssm_parameter" "ephemeral_server" {
   name           = each.key
   overwrite      = true
   type           = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
-  value          = contains(split("/", each.key), "sensitive") ? local.seed[each.value] : null
-  insecure_value = contains(split("/", each.key), "nonsensitive") ? local.seed[each.value] : null
+  value          = local.seed[each.value]
 }

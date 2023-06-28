@@ -48,22 +48,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-/** Tests the {@link CarrierClaimTransformerV2Test}. */
+/** Tests the {@link CarrierClaimTransformerV2}. */
 public class CarrierClaimTransformerV2Test {
   /** The claim under test. */
   CarrierClaim claim;
   /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
-  /** The transformer under test. */
-  ClaimTransformerInterfaceV2 claimTransformerInterface;
-  /** The Metric Registry to use for the test. */
-  MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  FdaDrugCodeDisplayLookup drugDisplayLookup;
-  /** The NPI org lookup to use for the test. */
-  NPIOrgLookup npiOrgLookup;
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The transformer under test. */
+  CarrierClaimTransformerV2 carrierClaimTransformer;
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -94,22 +88,20 @@ public class CarrierClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-    claimTransformerInterface =
-        new CarrierClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
-
+    carrierClaimTransformer =
+        new CarrierClaimTransformerV2(
+            new MetricRegistry(),
+            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+            new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob =
-        claimTransformerInterface.transform(claim, Optional.ofNullable(false));
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.claimTransformerInterfaceV2#transform}
+   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformerV2#transform}
    * works as expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
    * InpatientClaim}.
    *
@@ -119,7 +111,7 @@ public class CarrierClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException, IOException {
     CarrierClaim claim = generateClaim();
 
-    assertMatches(claim, claimTransformerInterface.transform(claim, Optional.ofNullable(false)));
+    assertMatches(claim, carrierClaimTransformer.transform(claim, false));
   }
 
   /**
@@ -131,8 +123,7 @@ public class CarrierClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob =
-        claimTransformerInterface.transform(generateClaim(), Optional.ofNullable(false));
+    ExplanationOfBenefit eob = carrierClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
@@ -640,11 +631,31 @@ public class CarrierClaimTransformerV2Test {
     assertEquals(4, eob.getCareTeam().size());
   }
 
-  /** Tests that the transformer sets the expected values for the care team member entries. */
+  /**
+   * Tests that the transformer sets the expected values for the care team member entries, and does
+   * not contain duplicate entries.
+   */
   @Test
   public void shouldHaveCareTeamMembers() {
+
+    // Load a claim with multiple lines, to test we dont get duplicate entries
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+
+    CarrierClaim loadedClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+    loadedClaim.setLastUpdated(Instant.now());
+
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
+
     // First member
-    CareTeamComponent member1 = TransformerTestUtilsV2.findCareTeamBySequence(1, eob.getCareTeam());
+    CareTeamComponent member1 =
+        TransformerTestUtilsV2.findCareTeamBySequence(1, genEob.getCareTeam());
     CareTeamComponent compare1 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             1,
@@ -656,7 +667,8 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare1.equalsDeep(member1));
 
     // Second member
-    CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
+    CareTeamComponent member2 =
+        TransformerTestUtilsV2.findCareTeamBySequence(2, genEob.getCareTeam());
     CareTeamComponent compare2 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             2,
@@ -667,8 +679,9 @@ public class CarrierClaimTransformerV2Test {
 
     assertTrue(compare2.equalsDeep(member2));
 
-    // // Third member
-    CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
+    //     // Third member
+    CareTeamComponent member3 =
+        TransformerTestUtilsV2.findCareTeamBySequence(3, genEob.getCareTeam());
     CareTeamComponent compare3 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             3,
@@ -702,7 +715,8 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare3.equalsDeep(member3));
 
     // Fourth member
-    CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, eob.getCareTeam());
+    CareTeamComponent member4 =
+        TransformerTestUtilsV2.findCareTeamBySequence(4, genEob.getCareTeam());
     CareTeamComponent compare4 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
             4,
@@ -713,6 +727,8 @@ public class CarrierClaimTransformerV2Test {
     compare4.getProvider().setDisplay("Fake ORG Name");
 
     assertTrue(compare4.equalsDeep(member4));
+
+    assertEquals(4, genEob.getCareTeam().size());
   }
 
   /**
@@ -734,8 +750,7 @@ public class CarrierClaimTransformerV2Test {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit genEob =
-        claimTransformerInterface.transform(claim, Optional.ofNullable(false));
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1318,8 +1333,7 @@ public class CarrierClaimTransformerV2Test {
 
     claimWithoutNpi.setLastUpdated(Instant.now());
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
-    ExplanationOfBenefit genEob =
-        claimTransformerInterface.transform(claimWithoutNpi, Optional.ofNullable(false));
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claimWithoutNpi, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1381,7 +1395,6 @@ public class CarrierClaimTransformerV2Test {
         "National Provider Identifier",
         careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
   }
-
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link InpatientClaim}.

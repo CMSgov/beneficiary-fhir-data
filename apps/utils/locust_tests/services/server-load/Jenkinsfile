@@ -44,6 +44,14 @@ spec:
            description: 'BFD Server Load Controller override ami-id. '
                         + 'Defaults to latest server-load AMI from `master`')
 
+    string(name: 'LOCUST_TAGS',
+           description: 'Space-delimited. Run only the locust tasks with ANY of the given @tag(s).  '
+           + 'Will run all tasks if none are provided. Defaults to an empty string.')
+
+   string(name: 'LOCUST_EXCLUDE_TAGS',
+          description: 'Space-delimited. Exclude the locust tasks with ANY of the given @tag(s). '
+          + 'Defaults to an empty string.')
+
     string(name: 'INITIAL_WORKER_NODES',
            defaultValue: '0',
            description: 'The number of initial Locust worker nodes to spawn before checking for '

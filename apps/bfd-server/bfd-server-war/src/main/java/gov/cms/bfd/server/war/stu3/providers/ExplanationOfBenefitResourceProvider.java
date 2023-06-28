@@ -435,7 +435,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
         if (taskResult.ranSuccessfully()) {
           eobs.addAll(taskResult.fetchEOBs());
         } else {
-          LOGGER.error(taskResult.getFailure().get().getMessage(), taskResult.getFailure().get());
+          Throwable taskError = taskResult.getFailure().get();
+          throw new RuntimeException(taskError);
         }
       } catch (InterruptedException | ExecutionException e) {
         LOGGER.error("Error getting future result", e);

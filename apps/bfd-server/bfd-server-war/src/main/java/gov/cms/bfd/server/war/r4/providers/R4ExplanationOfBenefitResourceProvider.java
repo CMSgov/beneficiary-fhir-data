@@ -132,7 +132,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param inpatientClaimTransformer the inpatient claim transformer
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
-   * @param snfClaimTransformer the snf claim transformer v 2
+   * @param snfClaimTransformer the snf claim transformer
    */
   public R4ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -402,7 +402,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * also not so inefficient that it's worth fixing.
      */
     CountDownLatch countDownLatch = new CountDownLatch(claimsToProcess.size());
-    List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks = new ArrayList<>();
+    List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks =
+        new ArrayList<>(claimsToProcess.size());
 
     claimsToProcess.forEach(
         claimType -> {
@@ -435,7 +436,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
         if (taskResult.ranSuccessfully()) {
           eobs.addAll(taskResult.fetchEOBs());
         } else {
-          LOGGER.error(taskResult.getFailure().get().getMessage(), taskResult.getFailure().get());
+          Throwable taskError = taskResult.getFailure().get();
+          throw new RuntimeException(taskError);
         }
       } catch (InterruptedException | ExecutionException e) {
         LOGGER.error("Error getting future result", e);
