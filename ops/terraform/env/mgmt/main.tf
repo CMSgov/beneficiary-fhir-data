@@ -1,6 +1,6 @@
 locals {
-  account_id              = data.aws_caller_identity.current.account_id
-  env                     = "mgmt"
+  account_id = data.aws_caller_identity.current.account_id
+  env        = "mgmt"
   established_envs = [
     "test",
     "prod-sbx",
