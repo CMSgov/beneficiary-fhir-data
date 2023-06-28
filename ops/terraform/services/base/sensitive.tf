@@ -19,7 +19,6 @@ resource "aws_ssm_parameter" "common_sensitive" {
   name      = each.key
   overwrite = true
   type      = "SecureString"
-  tier      = "Intelligent-Tiering"
   value     = each.value
 
   tags = {}
@@ -32,7 +31,6 @@ resource "aws_ssm_parameter" "migrator_sensitive" {
   name      = each.key
   overwrite = true
   type      = "SecureString"
-  tier      = "Intelligent-Tiering"
   value     = each.value
 
   tags = {}
@@ -45,7 +43,6 @@ resource "aws_ssm_parameter" "pipeline_sensitive" {
   name      = each.key
   overwrite = true
   type      = "SecureString"
-  tier      = "Intelligent-Tiering"
   value     = each.value
 
   tags = {}
@@ -71,7 +68,6 @@ resource "aws_ssm_parameter" "eft_sensitive" {
   name      = each.key
   overwrite = true
   type      = "SecureString"
-  tier      = "Intelligent-Tiering"
   value     = each.value
 
   tags = {}
