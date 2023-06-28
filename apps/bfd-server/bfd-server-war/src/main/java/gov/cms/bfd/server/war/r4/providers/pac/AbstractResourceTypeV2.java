@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
-import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Collection;
 import java.util.List;
@@ -28,8 +27,6 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   protected final String entityIdAttribute;
   /** The attribute holding the end date for range queries in the entity class. */
   protected final List<String> entityServiceDateAttributes;
-  /** The {@link ResourceTransformer} to convert an entity into a response object. */
-  protected final ResourceTransformer<TResource> transformer;
 
   /**
    * Constructor intended for use by derived classes to set values in common fields.
@@ -41,8 +38,6 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
    * @param entityIdAttribute the attribute name for the ID of the entity class
    * @param entityServiceDateAttributes the attribute name for the service end date on the entity
    *     class
-   * @param transformer the transformer used to convert from the given entity to the associated
-   *     resource type
    */
   protected AbstractResourceTypeV2(
       String nameForParsing,
@@ -50,15 +45,13 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      List<String> entityServiceDateAttributes,
-      ResourceTransformer<TResource> transformer) {
+      List<String> entityServiceDateAttributes) {
     this.nameForParsing = nameForParsing;
     this.typeLabel = typeLabel;
     this.entityClass = entityClass;
     this.entityMbiRecordAttribute = entityMbiRecordAttribute;
     this.entityIdAttribute = entityIdAttribute;
     this.entityServiceDateAttributes = entityServiceDateAttributes;
-    this.transformer = transformer;
   }
 
   @Override
@@ -84,11 +77,6 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   @Override
   public List<String> getEntityServiceDateAttributes() {
     return entityServiceDateAttributes;
-  }
-
-  @Override
-  public ResourceTransformer<TResource> getTransformer() {
-    return transformer;
   }
 
   /**

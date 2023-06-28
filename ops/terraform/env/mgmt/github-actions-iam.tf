@@ -17,8 +17,8 @@ resource "aws_iam_policy" "github_actions_s3its" {
     {
       "Action": [
         "s3:DeleteBucket",
-        "s3:HeadBucket",
-        "s3:ListBucket"
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
       ],
       "Effect": "Allow",
       "Resource": "arn:aws:s3:::bb-test-*",
