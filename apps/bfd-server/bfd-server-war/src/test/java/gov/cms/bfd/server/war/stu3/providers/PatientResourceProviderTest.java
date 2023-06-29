@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Units tests for the {@link PatientResourceProvider} that do not require a full fhir setup to
  * validate. Anything we want to validate from the fhir client level should go in {@link
- * PatientResourceProviderIT}.
+ * PatientResourceProviderE2E}.
  */
 @ExtendWith(MockitoExtension.class)
 public class PatientResourceProviderTest {
@@ -41,10 +41,14 @@ public class PatientResourceProviderTest {
   /** The mock loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
 
+  /** The mock transformer. */
+  @Mock private BeneficiaryTransformer beneficiaryTransformer;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    patientProvider = new PatientResourceProvider(metricRegistry, loadedFilterManager);
+    patientProvider =
+        new PatientResourceProvider(metricRegistry, loadedFilterManager, beneficiaryTransformer);
     lenient().when(patientId.getVersionIdPartAsLong()).thenReturn(null);
   }
 

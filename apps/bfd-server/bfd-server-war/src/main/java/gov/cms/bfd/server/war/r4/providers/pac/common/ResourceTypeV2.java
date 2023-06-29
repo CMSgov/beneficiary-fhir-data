@@ -49,12 +49,4 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
    * @return the list of attribute names
    */
   List<String> getEntityServiceDateAttributes();
-
-  /**
-   * Gets the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances into
-   * FHIR instances.
-   *
-   * @return the transformer
-   */
-  ResourceTransformer<TResource> getTransformer();
 }
