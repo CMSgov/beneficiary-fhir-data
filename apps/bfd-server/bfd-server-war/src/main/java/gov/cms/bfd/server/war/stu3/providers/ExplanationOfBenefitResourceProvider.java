@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -402,8 +401,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    CountDownLatch countDownLatch = new CountDownLatch(claimsToProcess.size());
-    List<Callable<PatientClaimsEobTaskTransformer>> callableTasks = new ArrayList<>();
+    List<Callable<PatientClaimsEobTaskTransformer>> callableTasks =
+        new ArrayList<>(claimsToProcess.size());
 
     for (ClaimType claimType : claimsToProcess) {
       var task = appContext.getBean(PatientClaimsEobTaskTransformer.class);
@@ -414,8 +413,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
           Optional.ofNullable(lastUpdated),
           Optional.ofNullable(serviceDate),
           includeTaxNumbers,
-          Boolean.parseBoolean(excludeSamhsa),
-          countDownLatch);
+          Boolean.parseBoolean(excludeSamhsa));
 
       callableTasks.add(task);
     }
@@ -423,8 +421,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     List<Future<PatientClaimsEobTaskTransformer>> futures = null;
     try {
       futures = executorService.invokeAll(callableTasks);
-      // Wait for the latch to reach zero
-      countDownLatch.await();
     } catch (InterruptedException e) {
       LOGGER.error("Error invoking executor service", e);
     }
@@ -436,6 +432,10 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
           eobs.addAll(taskResult.fetchEOBs());
         } else {
           Throwable taskError = taskResult.getFailure().get();
+          LOGGER.error(
+              "Encountered issue processing EOB thread, ClaimType {}; {}",
+              taskResult.toString(),
+              taskError.getMessage());
           throw new RuntimeException(taskError);
         }
       } catch (InterruptedException | ExecutionException e) {

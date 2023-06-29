@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -401,7 +400,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    CountDownLatch countDownLatch = new CountDownLatch(claimsToProcess.size());
+    // CountDownLatch countDownLatch = new CountDownLatch(claimsToProcess.size());
     List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks =
         new ArrayList<>(claimsToProcess.size());
 
@@ -416,8 +415,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               Optional.ofNullable(lastUpdated),
               Optional.ofNullable(serviceDate),
               includeTaxNumbers,
-              Boolean.parseBoolean(excludeSamhsa),
-              countDownLatch);
+              Boolean.parseBoolean(excludeSamhsa));
+          // countDownLatch);
           callableTasks.add(task);
         });
 
@@ -425,7 +424,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     try {
       futures = executorService.invokeAll(callableTasks);
       // Wait for the latch to reach zero
-      countDownLatch.await();
+      // countDownLatch.await();
     } catch (InterruptedException e) {
       LOGGER.error("Error invoking executor service", e);
     }
@@ -437,6 +436,10 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           eobs.addAll(taskResult.fetchEOBs());
         } else {
           Throwable taskError = taskResult.getFailure().get();
+          LOGGER.error(
+              "Encountered issue processing EOB thread, ClaimType {}; {}",
+              taskResult.toString(),
+              taskError.getMessage());
           throw new RuntimeException(taskError);
         }
       } catch (InterruptedException | ExecutionException e) {
