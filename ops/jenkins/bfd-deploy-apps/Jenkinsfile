@@ -317,7 +317,7 @@ spec:
                             */
 
                             // TODO: Better support ephemeral environments in the future as desired, post BFD-2554
-                            if (bfdEnv in ["test", "prod-sbx", "prod"]) {
+                            if (trimmedEnv in ["test", "prod-sbx", "prod"]) {
                                 // Deploy the API requests Insights Lambda
                                 awsAuth.assumeRole()
                                 terraform.deployTerraservice(
@@ -328,7 +328,7 @@ spec:
 
                             // Deploy the API regression suite
                             awsAuth.assumeRole()
-                            elbDnsName = sh(returnStdout: true, script: "aws elb describe-load-balancers --load-balancer-names bfd-${trimmedEnv}-fhir --query 'LoadBalancerDescriptions[0].DNSName'").trim()
+                            elbDnsName = sh(returnStdout: true, script: "aws elb describe-load-balancers --load-balancer-names \"bfd-${trimmedEnv}-fhir\" --query 'LoadBalancerDescriptions[0].DNSName'").trim()
                             hasRegressionRunSucceeded = serverScripts.runServerRegression(
                                 bfdEnv: trimmedEnv,
                                 elbDnsName: elbDnsName,
@@ -352,7 +352,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        //sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                     }
                 }
             }
