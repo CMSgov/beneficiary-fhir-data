@@ -126,9 +126,6 @@ public class SpringConfiguration {
    */
   public static final String PAC_OLD_MBI_HASH_ENABLED = "PacOldMbiHashEnabled";
 
-  /** The {@link Bean#name()} for the {@link ExecutorService} fixed thread pool. */
-  public static final String BFD_EXECUTOR_FIXED_THREAD_POOL = "BfdFixedThreadPool";
-
   /**
    * Exposes our {@link ConfigLoader} instance as a singleton to components in the application. If
    * one has already been created for use in a {@link ConfigPropertySource} and added to the {@link
@@ -491,7 +488,7 @@ public class SpringConfiguration {
    * @param threadCount system parameter for the number of threads in the fixed thread pool.
    * @return {@link ExecutorService} for the application.
    */
-  @Bean(name = BFD_EXECUTOR_FIXED_THREAD_POOL)
+  @Bean
   public ExecutorService executorService(
       @Value("${bfdServer.executorService.threads:100}") String threadCount) {
     return Executors.newFixedThreadPool(Integer.parseInt(threadCount));
