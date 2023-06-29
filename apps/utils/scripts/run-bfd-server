@@ -1,0 +1,276 @@
+#!/bin/bash
+# Runs the latest version of BFD server using build artifacts from your git workspace.
+# Requires a directory to copy build artifacts into and use as working directory.
+# Can run the server in remote debugging mode to enable setting breakpoints and debuging in IDEA.
+# Run with -h option to see command line options.
+
+set -e
+
+if [[ x$BFD_PATH = x ]] ; then
+  echo "Please set BFD_PATH environment variable to root of source tree." 1>&2
+  echo "It should be the directory containing the ops and apps subdirectories." 1>&1
+  exit 1
+fi
+
+if [[ x$BFD_EXEC = x ]] ; then
+  echo "Please set BFD_EXEC environment variable to a directory scripts can run in." 1>&2
+  echo "It should be outside of $BFD_PATH." 1>&2
+  exit 1
+fi
+
+##############################################################################
+#
+# BEGIN Local environment configuration.
+#
+project_dir=$BFD_PATH/apps
+
+# Directory to store binaries and data files when running.
+# Also where the script cd's to before running.
+# Should be outside of your git workspace to avoid hassles with git.
+exec_dir=$BFD_EXEC/bfd-server
+
+# Directory containing your local maven artifacts cache.
+repo_dir=$HOME/.m2/repository
+
+# Maximum heap size to use when running
+max_heap=4g
+
+# Where to store binaries extracted from build artifacts.
+bin_dir=$exec_dir/binaries
+
+# Name of the JKS files used for SSL configuration.
+truststore_file=server-truststore.jks
+keystore_file=server-keystore.jks
+
+# Runtime settings
+max_heap=4g
+bfd_port=6500
+debug_port=5005
+
+if [[ ! -d $project_dir ]] ; then
+  echo ERROR: $project_dir does not exist. 1>&2
+  echo Please set BFD_PATH to the root of the BFD source tree. 1>&2
+  exit 1
+fi
+
+if [[ ! -d $BFD_EXEC ]] ; then
+  echo ERROR: $BFD_EXEC does not exist. 1>&2
+  echo Please create it or set BFD_EXEC to a different path. 1>&2
+  exit 1
+fi
+
+if [[ ! -d $repo_dir ]] ; then
+  echo ERROR: $repo_dir does not exist. 1>&2
+  echo Please create it or modify this script with alternative path. 1>&2
+  exit 1
+fi
+
+# ensure that the bfd-server specific exec directory exists
+mkdir -p $exec_dir $bin_dir
+
+#
+# END Local environment configuration.
+#
+##############################################################################
+
+#
+# Generic code using settings begins here.
+#
+
+# Default option values.
+debug_enabled=false
+debug_suspend=n
+db_host=localhost
+db_port=5432
+install=true
+image_tag=
+image_name=bfd-server-image
+localstack_ip=localhost
+
+function usage() {
+  script_name=`basename $0`
+  cat 1>&2 <<EOF
+Runs a BFD server.  Use command line options to change behaviors.
+
+$script_name [options]
+-d db_host[:db_port]      Name of database host.  Optional :n uses port n.
+-i image_tag              Runs the server as a containing using the image with given tag.
+-l localstack_ip          Localstack IP address (for bridge networking).
+-x                        Do not install latest version before running.
+-z                        Enable debugger support but start immediately.
+-Z                        Enable debugger support and wait for debugger to connect.
+-h                        Prints this help message.
+
+Option defaults:
+  -d $db_host:$db_port
+EOF
+}
+
+while getopts "d:i:l:xzZh" option ; do
+  case $option in
+  d) IFS=':' read h p <<<"$OPTARG"
+     db_host=${h:=$db_host}
+     db_port=${p:=$db_port}
+     unset h p
+     ;;
+  i) image_tag=$OPTARG ; install=false ;;
+  l) localstack_ip=$OPTARG ;;
+  x) install=false ;;
+  z) debug_enabled=true ;;
+  Z) debug_enabled=true ; debug_suspend=y ;;
+  h) usage ; exit 0 ;;
+  ?) usage ; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# No other command line arguments are permitted.
+if [[ $# != 0 ]] ; then
+  usage
+  exit 1
+fi
+
+if [[ x$image_tag != x ]] ; then
+  echo "using docker image $image_name:$image_tag"
+fi
+
+# Autodetect if localstack is running based on whether we can connect to its port locally.
+if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
+  echo "using localstack"
+  export SSM_REGION=us-east-1
+  export SSM_ENDPOINT=http://${localstack_ip}:4566
+  export SSM_PARAMETER_PATH=/bfd-server
+fi
+
+# Either export an environment variable (if not using SSM for config) or set the appropriate
+# parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
+# SSM in the cloud.
+function setvar() {
+  name="$1"
+  value="$2"
+  if [[ -z "$SSM_REGION" ]] ; then
+    eval "export ${name}=\"${value}\""
+  else
+    echo put-parameter $name
+    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${name}" --value "${value}" > /dev/null
+  fi
+}
+
+# Either add a system property parameter (if not using SSM for config) or set the appropriate
+# parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
+# SSM in the cloud.
+properties=""
+function setprop() {
+  name="$1"
+  value="$2"
+  if [[ -z "$SSM_REGION" ]] ; then
+    properties="${properties} -D${name}=${value}"
+  else
+    echo put-parameter $name
+    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${name}" --value "${value}" > /dev/null
+  fi
+}
+
+ARGS="-Xms${max_heap} -Xmx${max_heap}"
+ARGS="$ARGS -Dorg.jboss.logging.provider=slf4j"
+
+# If debug_enabled is true an IDE can connect its debugger on port 5005 to debug the pipeline.
+# If debug_suspend is y the pipeline app will wait for a debugger to connect before doing any work.
+if [[ $debug_enabled = "true" ]] ; then
+  ARGS="$ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=${debug_suspend},address=*:5005"
+fi
+
+cd $exec_dir
+
+# Don't just assume the version will always be 1.0.0-SNAPSHOT, get it dynamically from mvn instead.
+project_version=`cd $project_dir ; mvn help:evaluate -Dexpression=project.version | grep -e '^[^\[]'`
+
+# Install has to be true at least once so that the exec_dir can be populated with runtime artifacts.
+# Subsequent runs have the option of skipping the install step for slightly faster turn around.
+# Here we just copy the application zip file and extract its contents into the exec_dir for use
+# in running the application.
+if [[ $install = "true" ]] ; then
+  launcher_dir=$project_dir/bfd-server/bfd-server-launcher/target
+  zip_file=$launcher_dir/bfd-server-launcher-${project_version}.zip
+
+  server_dir=$project_dir/bfd-server/bfd-server-war/target
+  war_file=$server_dir/bfd-server-war-${project_version}.war
+
+  unzip_dir=bfd-server-launcher-${project_version}
+
+  ssl_dir=$project_dir/bfd-server/dev/ssl-stores
+
+  for i in $zip_file $war_file $ssl_dir/$truststore_file $ssl_dir/$keystore_file $exec_dir ; do
+    if [ ! -r $i ] ; then
+      echo ERROR: missing resource $i 2>&1
+      exit 1
+    fi
+  done
+
+  unzip -o $zip_file
+  if [ ! -r $unzip_dir ] ; then
+    echo ERROR: missing unzip root dir: $unzip_dir 1>&2
+    exit 1
+  fi
+
+  rm -rf $bin_dir
+  mkdir $bin_dir
+  mkdir $bin_dir/ssl
+  mv $unzip_dir/* $bin_dir
+  cp $ssl_dir/* $bin_dir/ssl
+  cp $war_file $bin_dir
+  rmdir $unzip_dir
+fi
+
+lib_dir=${bin_dir}/lib
+launcher_jar="${bin_dir}/bfd-server-launcher-${project_version}.jar"
+if [[ ! -r $launcher_jar ]] || [[ ! -d $lib_dir ]] ; then
+  # Just check to be sure we can run without installing and fail if we can't.
+  echo "ERROR: Missing $launcher_jar or lib directory." 1>&2
+  echo "Run again without -x option to install binaries." 1>&2
+  exit 1
+fi
+
+war_file_name=bfd-server-war-${project_version}.war
+
+# Set up the configuration variables using the setvar function.
+export BFD_ENV_NAME="laptop"
+setvar BFD_PORT $bfd_port
+setvar BFD_TRUSTSTORE "$bin_dir/ssl/${truststore_file}"
+setvar BFD_KEYSTORE "$bin_dir/ssl/${keystore_file}"
+setvar BFD_WAR "$bin_dir/$war_file_name"
+
+# Set up the configuration properties using the setprop function.
+setprop bfdServer.db.url "jdbc:postgresql://${db_host}:${db_port}/bfd?user=bfd&password=InsecureLocalDev&logServerErrorDetail=false"
+setprop bfdServer.v2.enabled true
+setprop bfdServer.pac.enabled true
+setprop bfdServer.pac.claimSourceTypes "fiss,mcs"
+
+classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
+mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"
+[ -n "${JAVA_HOME}" ] && java=${JAVA_HOME}/bin/java || java=java
+
+if [[ x$image_tag = x ]] ; then
+  echo running application directly
+  export CLASSPATH="$classpath"
+  exec $java $properties $ARGS $mainClass
+else
+  ssl_mount=/home/app/ssl
+  echo running container
+  docker \
+    run \
+    --rm \
+    --name $image_name \
+    --env SSM_REGION \
+    --env SSM_ENDPOINT \
+    --env SSM_PARAMETER_PATH \
+    --env HOME=/home/app \
+    --env BFD_TRUSTSTORE=$ssl_mount/$truststore_file \
+    --env BFD_KEYSTORE=$ssl_mount/$keystore_file \
+    --env BFD_WAR=/app/$war_file_name \
+    --env BFD_ENV_NAME="$BFD_ENV_NAME" \
+    -v $bin_dir/ssl:$ssl_mount \
+    -v $HOME/.aws/credentials:/home/app/.aws/credentials:ro \
+    -p $bfd_port:$bfd_port \
+    $image_name:$image_tag
+fi
