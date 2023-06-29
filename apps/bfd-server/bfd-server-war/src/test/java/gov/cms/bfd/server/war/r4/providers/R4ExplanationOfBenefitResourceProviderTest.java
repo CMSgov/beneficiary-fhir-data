@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -24,11 +25,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.server.war.commons.LoadedFilterManager;
-import java.util.concurrent.ExecutorService;
-import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -41,6 +40,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -51,6 +51,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -96,7 +99,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The mock spring application context. */
   @Mock ApplicationContext appContext;
-  /** The mock spring application context registry. */
   /** The mocked reference param used for search by patient. */
   @Mock ReferenceParam patientParam;
   /** The mock metric registry. */
@@ -113,7 +115,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Mock ExecutorService executorService;
 
   /** The mock entity manager for mocking database calls. */
-  @Mock private EntityManager entityManager;
+  @Mock EntityManager entityManager;
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
@@ -174,13 +176,19 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Mock PartDEvent testPdeClaim;
 
   /** The mock transformer for snf claims. */
-  @Mock private SNFClaimTransformerV2 snfClaimTransformer;
+  @Mock SNFClaimTransformerV2 snfClaimTransformer;
 
   /** The SNF claim returned in tests. */
   @Mock SNFClaim testSnfClaim;
 
   /** The re-used valid bene id value. */
   public static String BENE_ID = "123456789";
+
+  /** The mock EobTaskTransformer. */
+  @Mock PatientClaimsEobTaskTransformerV2 taskTransformer;
+
+  /** The mock concurrent task future. */
+  @Mock Future<PatientClaimsEobTaskTransformerV2> futureTask;
 
   /** Sets up the test class. */
   @BeforeEach
@@ -237,14 +245,22 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
     // transformer mocking
-    when(carrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-    when(inpatientClaimTransformer.transform(any())).thenReturn(testEob);
-    when(outpatientClaimTransformer.transform(any())).thenReturn(testEob);
-    when(partDEventTransformer.transform(any())).thenReturn(testEob);
-    when(hhaClaimTransformer.transform(any())).thenReturn(testEob);
-    when(snfClaimTransformer.transform(any())).thenReturn(testEob);
-    when(hospiceClaimTransformer.transform(any())).thenReturn(testEob);
-    when(dmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(carrierClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(inpatientClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(outpatientClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(partDEventTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(hhaClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(snfClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(hospiceClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
+    when(dmeClaimTransformer.transform(any(), Optional.ofNullable(anyBoolean())))
+        .thenReturn(testEob);
 
     setupLastUpdatedMocks();
 
@@ -509,7 +525,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
     eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
-    verify(carrierClaimTransformer, times(1)).transform(any(), eq(true));
-    verify(dmeClaimTransformer, times(1)).transform(any(), eq(true));
+    verify(carrierClaimTransformer, times(1)).transform(any(), eq(Optional.ofNullable(true)));
+    verify(dmeClaimTransformer, times(1)).transform(any(), eq(Optional.ofNullable(true)));
   }
 }
