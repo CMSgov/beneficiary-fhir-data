@@ -50,7 +50,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -104,12 +103,6 @@ public final class RifLoader {
   private final int MAX_BATCH_WAIT_TIME_HOURS = 72;
 
   /**
-   * Keeps track of a fatal error during loading in one of the batch threads so we know to fail the
-   * job (and kill the pipeline).
-   */
-  private static volatile AtomicBoolean fatalFailure;
-
-  /**
    * Constructs a new {@link RifLoader} instance.
    *
    * @param options the {@link LoadAppOptions} to use
@@ -120,7 +113,6 @@ public final class RifLoader {
     this.appState = appState;
 
     idHasher = new IdHasher(options.getIdHasherConfig());
-    fatalFailure = new AtomicBoolean();
   }
 
   /**
@@ -188,7 +180,6 @@ public final class RifLoader {
       Consumer<Throwable> errorHandler,
       Consumer<RifRecordLoadResult> resultHandler) {
 
-    fatalFailure.set(false);
     BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(options);
 
     MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
