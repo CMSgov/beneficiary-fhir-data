@@ -3,7 +3,7 @@ import re
 from argparse import Namespace
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from locust.argument_parser import LocustArgumentParser
 
@@ -16,7 +16,7 @@ class StatsStorageType(str, Enum):
     S3 = "s3"
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
-StatsEnvironment = Enum('StatsEnvironment', {el: el.lower().replace('_', '-') for el in val.upper().split(" ")})
+StatsEnvironment = Type[Enum]
 
 class StatsComparisonType(str, Enum):
     """Enumeration for each possible type of stats comparison"""
@@ -237,6 +237,7 @@ class StatsConfiguration:
     @staticmethod
     def __env_from_value(val: str) -> StatsEnvironment:
         try:
+            StatsEnvironment = Enum('StatsEnvironment', {el: el.lower().replace('_', '-') for el in val.upper().split(" ")})
             return StatsEnvironment(val.lower())
         except ValueError as exc:
             raise ValueError(
