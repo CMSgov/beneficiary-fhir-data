@@ -16,10 +16,7 @@ class StatsStorageType(str, Enum):
     S3 = "s3"
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
-
-StatsEnvironment = Enum('StatsEnvironment', {el: el.lower().replace('_', '-') for el in val.upper().split(" ")},
-                        type=str)
-
+StatsEnvironment = Enum('StatsEnvironment', {el: el.lower().replace('_', '-') for el in val.upper().split(" ")}, type=str)
 
 class StatsComparisonType(str, Enum):
     """Enumeration for each possible type of stats comparison"""
