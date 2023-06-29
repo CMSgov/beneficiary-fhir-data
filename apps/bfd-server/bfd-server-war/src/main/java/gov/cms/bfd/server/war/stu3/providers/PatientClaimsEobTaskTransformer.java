@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -76,8 +75,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   private Optional<Boolean> includeTaxNumbers;
   /** whether to exclude SAMHSA claims. */
   private Boolean excludeSamhsa;
-  /** ExecutorService count down latch. */
-  private CountDownLatch countDownLatch = null;
 
   // +++++++++++++++++++++++++++++++++++
   // task properties
@@ -119,8 +116,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param lastUpdated the date range that lastUpdate falls within.
    * @param serviceDate the date range that clm_thru_dt falls within.
    * @param includeTaxNumbers whether to return tax numbers.
-   * @param excludeSamhsa if true excludes SAMHSA claims.abstract
-   * @param countDownLatch the ExecutorService count down latch.
+   * @param excludeSamhsa if true excludes SAMHSA claims.
    */
   public void setupTaskParams(
       ClaimTransformerInterface claimTransformer,
@@ -129,12 +125,10 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
       Optional<Boolean> includeTaxNumbers,
-      Boolean excludeSamhsa,
-      CountDownLatch countDownLatch) {
+      Boolean excludeSamhsa) {
     this.claimTransformer = requireNonNull(claimTransformer);
     this.claimType = requireNonNull(claimType);
     this.id = requireNonNull(id);
-    this.countDownLatch = requireNonNull(countDownLatch);
     this.lastUpdated = lastUpdated;
     this.serviceDate = serviceDate;
     this.excludeSamhsa = excludeSamhsa;
@@ -172,8 +166,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       // keep track of the Exception so we can provide to caller.
       LOGGER.error((taskException = e).getMessage(), e);
     }
-    // the countdown latch waits for all threads to complete/fail.
-    countDownLatch.countDown();
     return this;
   }
 
