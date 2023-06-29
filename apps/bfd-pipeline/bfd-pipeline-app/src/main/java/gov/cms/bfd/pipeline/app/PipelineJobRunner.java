@@ -37,7 +37,7 @@ public class PipelineJobRunner implements Runnable {
   @Override
   public void run() {
     try {
-      final var repeatMillis =
+      final Long repeatMillis =
           job.getSchedule()
               .map(s -> Duration.of(s.getRepeatDelay(), s.getRepeatDelayUnit()))
               .map(Duration::toMillis)
@@ -66,8 +66,8 @@ public class PipelineJobRunner implements Runnable {
    * @throws Exception passed through if the job terminates with an exception
    */
   private void runJob() throws Exception {
-    final var id = tracker.beginningRun(job);
-    final var startTime = clock.instant();
+    final long id = tracker.beginningRun(job);
+    final Instant startTime = clock.instant();
     PipelineJobOutcome outcome = null;
     Exception exception = null;
     try {
@@ -75,7 +75,7 @@ public class PipelineJobRunner implements Runnable {
     } catch (Exception ex) {
       exception = ex;
     }
-    final var stopTime = clock.instant();
+    final Instant stopTime = clock.instant();
     // one must be null and the other not null
     assert (outcome == null) != (exception == null);
     tracker.completedRun(

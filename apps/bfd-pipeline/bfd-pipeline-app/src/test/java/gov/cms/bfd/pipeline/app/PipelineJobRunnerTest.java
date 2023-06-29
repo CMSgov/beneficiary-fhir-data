@@ -91,11 +91,17 @@ public class PipelineJobRunnerTest {
    */
   @Test
   void noScheduleJobRunsSuccessfully() throws Exception {
+    // Job has no schedule so it should only run once.
     doReturn(Optional.empty()).when(job).getSchedule();
+
+    // Job will be allowed to run as often as it likes.  It just won't want to
+    // because it has no schedule.
     doReturn(true).when(tracker).jobsCanRun();
 
-    // Execute the runner.  This should successfully run the job and stop.
+    // Any time the job runs it will indicate success.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
+
+    // Mocks all set up - now run the job.
     runner.run();
 
     // Verify expected calls were made to the tracker.
@@ -127,12 +133,18 @@ public class PipelineJobRunnerTest {
    */
   @Test
   void noScheduleInterruptedWhileRunningJob() throws Exception {
+    // Job has no schedule so it should only run once.
     doReturn(Optional.empty()).when(job).getSchedule();
+
+    // Job will be allowed to run as often as it likes.  However, in this test
+    // it will be stopped by the InterruptedException we configure below.
     doReturn(true).when(tracker).jobsCanRun();
 
-    // Execute the runner.  Simulates job being interrupted.
+    // When the job runs it will throw an InterruptedException.
     final var interrupt = new InterruptedException();
     doThrow(interrupt).when(job).call();
+
+    // Mocks all set up - now run the job.
     runner.run();
 
     // Verify expected calls were made to the tracker.
@@ -164,12 +176,18 @@ public class PipelineJobRunnerTest {
    */
   @Test
   void noScheduleJobThrowsExceptionWhileRunning() throws Exception {
+    // Job has no schedule so it should only run once.
     doReturn(Optional.empty()).when(job).getSchedule();
+
+    // Job will be allowed to run as often as it likes.  However, in this test
+    // it will be stopped by the IOException we configure below.
     doReturn(true).when(tracker).jobsCanRun();
 
-    // Execute the runner.  Simulates job throwing an exception.
+    // Any time the job runs it will thrown an IOException.
     final var error = new IOException("boom!");
     doThrow(error).when(job).call();
+
+    // Mocks all set up - now run the job.
     runner.run();
 
     // Verify expected calls were made to the tracker.
@@ -203,16 +221,21 @@ public class PipelineJobRunnerTest {
    */
   @Test
   void runsUntilStopped() throws Exception {
+    // Job has a 5 second schedule.  We'll verify this value was passed to sleeper below.
     final var repeatMills = 5_000L;
     doReturn(Optional.of(new PipelineJobSchedule(repeatMills, ChronoUnit.MILLIS)))
         .when(job)
         .getSchedule();
 
-    // job can run twice before being told to stop
+    // Job can run twice before being told to stop.  Each run of the job calls jobsCanRun
+    // twice (at top of loop and in mid-loop if statement) so we mock two runs (allowed by true
+    // being returned four times) and a prevented third run (disallowed by false being returned).
     doReturn(true, true, true, true, false).when(tracker).jobsCanRun();
 
-    // Execute the runner.  This should successfully run the job and stop.
+    // Any time the job runs it will indicate success.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
+
+    // Mocks all set up - now run the job.
     runner.run();
 
     // Verify expected calls were made to the tracker.
@@ -253,17 +276,24 @@ public class PipelineJobRunnerTest {
    */
   @Test
   void runsUntilInterruptedBetweenRuns() throws Exception {
+    // Job has a 5 second schedule.  We'll verify this value was passed to sleeper below.
     final var repeatMills = 5_000L;
     doReturn(Optional.of(new PipelineJobSchedule(repeatMills, ChronoUnit.MILLIS)))
         .when(job)
         .getSchedule();
 
-    // job can run twice before being told to stop
+    // Job will always be allowed to run, but it will be stopped by an InterruptedException
+    // thrown by sleeper, which we configure below.
     doReturn(true).when(tracker).jobsCanRun();
 
-    // Execute the runner.  This should successfully run the job and stop.
+    // Any time the job runs it will indicate success.
     doReturn(PipelineJobOutcome.WORK_DONE).when(job).call();
+
+    // First call to sleep will work normally (doNothing) but the second call will
+    // throw an InterruptedException.
     doNothing().doThrow(InterruptedException.class).when(sleeper).accept(any());
+
+    // Mocks all set up - now run the job.
     runner.run();
 
     // Verify expected calls were made to the tracker.
@@ -304,18 +334,25 @@ public class PipelineJobRunnerTest {
    */
   @Test
   void runsUntilThrows() throws Exception {
+    // Job has a 5 second schedule.  We'll verify this value was passed to sleeper below.
     final var repeatMills = 5_000L;
     doReturn(Optional.of(new PipelineJobSchedule(repeatMills, ChronoUnit.MILLIS)))
         .when(job)
         .getSchedule();
+
+    // Job will always be allowed to run, but it will be stopped by an IOException
+    // thrown by itself, which we configure below.
     doReturn(true).when(tracker).jobsCanRun();
 
-    // Execute the runner.  Simulates job throwing an exception on third run.
+    // First two calls to the job will return success but the third time will throw
+    // an IOException.
     final var error = new IOException("boom!");
     doReturn(PipelineJobOutcome.WORK_DONE, PipelineJobOutcome.WORK_DONE)
         .doThrow(error)
         .when(job)
         .call();
+
+    // Mocks all set up - now run the job.
     runner.run();
 
     // Verify expected calls were made to the tracker.
