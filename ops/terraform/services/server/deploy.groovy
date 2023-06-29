@@ -12,6 +12,7 @@
 def runServerRegression(Map args = [:]) {
     awsRegion = args.awsRegion ?: 'us-east-1'
     bfdEnv = args.bfdEnv
+    elbDnsName = args.elbDnsName
     gitBranchName = args.gitBranchName
     heartbeatInterval = args.heartbeatInterval ?: 15
 
@@ -40,7 +41,7 @@ def runServerRegression(Map args = [:]) {
     }
 
     sqsMessage = writeJSON(returnText: true, json: [
-        'host': "https://${bfdEnv}.bfd.cms.gov",
+        'host': "https://${elbDnsName}",
         'suite_version': 'v2',
         'spawn_rate': 10,
         'users': 10,
