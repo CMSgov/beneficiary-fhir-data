@@ -16,8 +16,6 @@ class StatsStorageType(str, Enum):
     S3 = "s3"
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
-StatsEnvironment = Type[Enum]
-
 class StatsComparisonType(str, Enum):
     """Enumeration for each possible type of stats comparison"""
 
@@ -35,7 +33,7 @@ class StatsConfiguration:
 
     stats_store: Optional[StatsStorageType]
     """The storage type that the stats will be written to"""
-    stats_env: Optional[StatsEnvironment]
+    stats_env: Optional[str]
     """The test running environment from which the statistics will be collected"""
     stats_store_file_path: Optional[str]
     """The local parent directory where JSON files will be written to.
@@ -235,14 +233,8 @@ class StatsConfiguration:
         return stats_config
 
     @staticmethod
-    def __env_from_value(val: str) -> StatsEnvironment:
-        try:
-            StatsEnvironment = Enum('StatsEnvironment', {el: el.lower().replace('_', '-') for el in val.upper().split(" ")})
-            return StatsEnvironment(val.lower())
-        except ValueError as exc:
-            raise ValueError(
-                f'Value must be one of: {", ".join([e.value for e in StatsEnvironment])}'
-            ) from exc
+    def __env_from_value(val: str) -> str:
+        return val.lower()
 
     @staticmethod
     def __validate_tag(tag: str) -> str:
