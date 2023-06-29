@@ -170,6 +170,7 @@ spec:
             }
         }
 
+        /*
         stage('Deploy Base') {
             steps {
                 script {
@@ -284,7 +285,7 @@ spec:
                     }
                 }
             }
-        }
+        } */
 
         stage('Deploy Server') {
             steps {
@@ -296,13 +297,14 @@ spec:
                                                   : []
                         lock(resource: lockResource) {
                             // Deploy the Server
+
+                            /*
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server',
                                     tfVars: terraformVars
                             )
-
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
                                     env: trimmedEnv,
@@ -311,6 +313,8 @@ spec:
                                         docker_image_tag_override: params.server_regression_image_override
                                     ]
                             )
+
+                            */
 
                             // TODO: Better support ephemeral environments in the future as desired, post BFD-2554
                             if (bfdEnv in ["test", "prod-sbx", "prod"]) {
@@ -324,9 +328,10 @@ spec:
 
                             // Deploy the API regression suite
                             awsAuth.assumeRole()
+                            elbDnsName = sh(returnStdout: true, script: "aws elb describe-load-balancers --load-balancer-names bfd-${trimmedEnv}-fhir --query 'LoadBalancerDescriptions[0].DNSName'").trim()
                             hasRegressionRunSucceeded = serverScripts.runServerRegression(
                                 bfdEnv: trimmedEnv,
-                                elbDnsName: sh(returnStdout: true, script: "aws elb describe-load-balancers --load-balancer-names 'bfd-${trimmedEnv}-fhir' --query 'LoadBalancerDescriptions[0].DNSName'").trim(),
+                                elbDnsName: elbDnsName,
                                 gitBranchName: gitBranchName
                             )
                             if (hasRegressionRunSucceeded) {
