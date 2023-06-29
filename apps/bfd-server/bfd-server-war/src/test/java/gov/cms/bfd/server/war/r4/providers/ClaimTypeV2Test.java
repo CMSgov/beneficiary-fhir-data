@@ -121,6 +121,7 @@ public final class ClaimTypeV2Test {
     assertFalse(availSet.contains(ClaimTypeV2.CARRIER));
     // adjust data bit mask and try again
     testVal = testVal | QueryUtils.V_CARRIER_HAS_DATA;
+    availSet = ClaimTypeV2.fetchClaimsAvailability(someClaimSet, testVal);
     assertTrue(availSet.contains(ClaimTypeV2.CARRIER));
   }
 }
