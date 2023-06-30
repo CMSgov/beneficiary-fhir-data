@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider}. */
-public final class CoverageResourceProviderIT extends ServerRequiredTest {
+public final class CoverageResourceProviderE2E extends ServerRequiredTest {
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProviderIT.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProviderE2E.class);
 
   /**
    * Verifies that {@link
