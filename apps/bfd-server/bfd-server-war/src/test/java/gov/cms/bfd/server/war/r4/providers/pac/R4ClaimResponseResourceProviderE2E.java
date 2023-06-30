@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -22,8 +24,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/** Integration test for the {@link R4ClaimResponseResourceProvider}. */
-public class R4ClaimResponseResourceProviderIT extends ServerRequiredTest {
+/** End-to-end test for the {@link R4ClaimResponseResourceProvider}. */
+public class R4ClaimResponseResourceProviderE2E extends ServerRequiredTest {
 
   /** Test utils. */
   private static final RDATestUtils testUtils = new RDATestUtils();
@@ -113,6 +115,33 @@ public class R4ClaimResponseResourceProviderIT extends ServerRequiredTest {
     ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
 
     AssertUtils.assertJsonEquals(expected, actual, ignorePatterns);
+  }
+
+  /**
+   * Tests to see if the correct response is given when a search is done for {@link ClaimResponse}s
+   * using given mbi and excludeSAMHSA=true, since this does an extra check for samhsa data.
+   */
+  @Test
+  void shouldGetClaimResponseResourcesByMbiHashWithExcludeSamhsaTrue() {
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Bundle claimResult =
+        fhirClient
+            .search()
+            .forResource(ClaimResponse.class)
+            .where(
+                Map.of(
+                    "mbi",
+                    Collections.singletonList(new ReferenceParam(RDATestUtils.MBI_OLD_HASH)),
+                    "service-date",
+                    Arrays.asList(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-25")),
+                    "excludeSAMHSA",
+                    Collections.singletonList(new ReferenceParam("true"))))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    // Ensure we got a result and not an exception
+    assertNotNull(claimResult);
   }
 
   /**

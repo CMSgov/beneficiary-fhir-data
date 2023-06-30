@@ -11,6 +11,7 @@ import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Comparator;
 import java.util.Date;
@@ -31,13 +32,19 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
-public class McsClaimTransformerV2 extends AbstractTransformerV2 {
+@Component
+public class McsClaimTransformerV2 extends AbstractTransformerV2
+    implements ResourceTransformer<Claim> {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-      MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
 
   /** Valid ICD Types. */
   private static final List<String> VALID_ICD_TYPES = List.of("0", "9");
@@ -49,21 +56,29 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    */
   private static final List<String> CANCELED_STATUS_CODES = List.of("r", "z", "9");
 
-  /** Instantiates a new Mcs claim transformer v2. */
-  private McsClaimTransformerV2() {}
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   */
+  public McsClaimTransformerV2(MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
+  }
 
   /**
    * Transforms a given {@link RdaMcsClaim} into a FHIR {@link Claim} object, recording metrics with
    * the given {@link MetricRegistry}.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the MCS {@link RdaMcsClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  static Claim transform(
-      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
+  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -80,7 +95,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaMcsClaim}
    */
-  private static Claim transformClaim(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
+  private Claim transformClaim(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -119,7 +134,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return The generated {@link Organization} object with the parsed patient data.
    */
-  private static Resource getContainedProvider(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
+  private Resource getContainedProvider(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
     Organization organization = new Organization();
     List<Extension> extensions = organization.getExtension();
     addExtension(extensions, BBCodingSystems.MCS.BILL_PROV_TYPE, claimGroup.getIdrBillProvType());
@@ -143,7 +158,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @return The {@link Claim.ClaimStatus} that corresponds to the given {@link
    *     RdaMcsClaim#getIdrStatusCode()}.
    */
-  private static Claim.ClaimStatus getStatus(RdaMcsClaim claimGroup) {
+  private Claim.ClaimStatus getStatus(RdaMcsClaim claimGroup) {
     return claimGroup.getIdrStatusCode() == null
             || !CANCELED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
         ? Claim.ClaimStatus.ACTIVE
@@ -157,7 +172,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup the {@link RdaMcsClaim} to parse.
    * @return The list of {@link Claim.DiagnosisComponent} objects containing the diagnosis data.
    */
-  private static List<Claim.DiagnosisComponent> getDiagnosis(RdaMcsClaim claimGroup) {
+  private List<Claim.DiagnosisComponent> getDiagnosis(RdaMcsClaim claimGroup) {
     return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaMcsDiagnosisCode>of())
         .stream()
         .map(
@@ -198,7 +213,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup the {@link RdaMcsClaim} to parse.
    * @return The list of {@link Claim.ItemComponent} objects containing the line item data.
    */
-  private static List<Claim.ItemComponent> getItems(RdaMcsClaim claimGroup) {
+  private List<Claim.ItemComponent> getItems(RdaMcsClaim claimGroup) {
     return ObjectUtils.defaultIfNull(claimGroup.getDetails(), List.<RdaMcsDetail>of()).stream()
         .map(
             detail -> {
@@ -252,7 +267,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
    * @param detail the {@link RdaMcsDetail} to parse.
    * @return The list of {@link CodeableConcept} objects containing the modifier data.
    */
-  private static List<CodeableConcept> getModifiers(RdaMcsDetail detail) {
+  private List<CodeableConcept> getModifiers(RdaMcsDetail detail) {
     List<Optional<String>> mods =
         List.of(
             Optional.ofNullable(detail.getIdrModOne()),

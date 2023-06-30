@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** This FHIR {@link IResourceProvider} adds support for R4 {@link Claim} resources. */
@@ -29,12 +30,26 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param oldMbiHashEnabled true if old MBI hash should be used
+   * @param fissClaimTransformerV2 is the fiss claim transformer
+   * @param mcsClaimTransformerV2 is the mcs claim transformer
+   * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
+   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
+   *     org.hl7.fhir.r4.model.ClaimResponse}
    */
   public R4ClaimResourceProvider(
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
-      @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled) {
-    super(metricRegistry, samhsaMatcher, oldMbiHashEnabled);
+      @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
+      FissClaimTransformerV2 fissClaimTransformerV2,
+      McsClaimTransformerV2 mcsClaimTransformerV2,
+      @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
+    super(
+        metricRegistry,
+        samhsaMatcher,
+        oldMbiHashEnabled,
+        fissClaimTransformerV2,
+        mcsClaimTransformerV2,
+        claimSourceTypeNames);
   }
 
   /** {@inheritDoc} */

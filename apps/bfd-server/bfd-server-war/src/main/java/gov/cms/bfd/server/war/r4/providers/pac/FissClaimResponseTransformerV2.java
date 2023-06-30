@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -9,6 +11,7 @@ import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,9 +27,15 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
-public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
+@Component
+public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
+    implements ResourceTransformer<ClaimResponse> {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
 
   /** The metric name. */
   private static final String METRIC_NAME =
@@ -50,20 +59,29 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
           Map.entry('t', ClaimResponse.RemittanceOutcome.PARTIAL),
           Map.entry('u', ClaimResponse.RemittanceOutcome.COMPLETE));
 
-  /** Instantiates a new Fiss claim response transformer v2. */
-  private FissClaimResponseTransformerV2() {}
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   */
+  public FissClaimResponseTransformerV2(MetricRegistry metricRegistry) {
+    requireNonNull(metricRegistry);
+    this.metricRegistry = metricRegistry;
+  }
 
   /**
    * Transforms a claim entity into a {@link ClaimResponse}.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  static ClaimResponse transform(
-      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
+  public ClaimResponse transform(Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -80,7 +98,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
    *     RdaFissClaim}
    */
-  private static ClaimResponse transformClaim(RdaFissClaim claimGroup) {
+  private ClaimResponse transformClaim(RdaFissClaim claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getClaimId());
@@ -108,7 +126,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup The {@link RdaFissClaim} to pull associated data from.
    * @return A list of {@link Extension} objects build from the given {@link RdaFissClaim} data.
    */
-  private static List<Extension> getExtension(RdaFissClaim claimGroup) {
+  private List<Extension> getExtension(RdaFissClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
     addExtension(extensions, BBCodingSystems.FISS.CURR_STATUS, "" + claimGroup.getCurrStatus());
     addExtension(extensions, BBCodingSystems.FISS.RECD_DT_CYMD, claimGroup.getReceivedDate());
@@ -125,7 +143,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @param statusCode The statusCode from the {@link RdaFissClaim}.
    * @return The {@link ClaimResponse.RemittanceOutcome} associated with the given status code.
    */
-  private static ClaimResponse.RemittanceOutcome getOutcome(char statusCode) {
+  private ClaimResponse.RemittanceOutcome getOutcome(char statusCode) {
     return STATUS_TO_OUTCOME.getOrDefault(
         Character.toLowerCase(statusCode), ClaimResponse.RemittanceOutcome.PARTIAL);
   }
@@ -136,7 +154,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup The claim data to map.
    * @return The mapped FHIR objects.
    */
-  private static List<ClaimResponse.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
+  private List<ClaimResponse.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
     return claimGroup.getRevenueLines().stream()
         .sorted(Comparator.comparing(RdaFissRevenueLine::getRdaPosition))
         .map(
@@ -166,8 +184,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
    * @param code The code to use to create the component.
    * @return The created FHIR component.
    */
-  private static ClaimResponse.AdjudicationComponent getClaimItemAdjudication(
-      String system, String code) {
+  private ClaimResponse.AdjudicationComponent getClaimItemAdjudication(String system, String code) {
     ClaimResponse.AdjudicationComponent adjComponent;
 
     if (Strings.isNotBlank(code)) {

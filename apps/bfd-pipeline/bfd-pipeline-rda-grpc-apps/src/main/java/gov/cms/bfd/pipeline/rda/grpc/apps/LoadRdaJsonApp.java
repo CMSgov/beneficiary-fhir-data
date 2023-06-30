@@ -104,8 +104,8 @@ public class LoadRdaJsonApp {
                         pooledDataSource,
                         PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
                         Clock.systemUTC())) {
-                  final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
-                  for (PipelineJob<?> job : jobs) {
+                  final List<PipelineJob> jobs = config.createPipelineJobs(jobConfig, appState);
+                  for (PipelineJob job : jobs) {
                     LOGGER.info("starting job {}", job.getClass().getSimpleName());
                     job.call();
                   }
@@ -283,7 +283,7 @@ public class LoadRdaJsonApp {
      * @param appState the pipeline application state
      * @return the pipeline jobs to execute
      */
-    private List<PipelineJob<?>> createPipelineJobs(
+    private List<PipelineJob> createPipelineJobs(
         RdaLoadOptions jobConfig, PipelineApplicationState appState) {
       final var mbiCache = jobConfig.createComputedMbiCache(appState);
       return List.of(
