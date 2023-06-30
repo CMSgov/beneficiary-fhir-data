@@ -6,7 +6,6 @@ import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
@@ -27,7 +26,7 @@ import software.amazon.awssdk.regions.Region;
  * gRPC uses its own thread pool the job thread simply sleeps and waits for an interrupt to be
  * received. When the interrupt is received the server is stopped.
  */
-public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
+public class RdaServerJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaServerJob.class);
 
   /** The server configuration. */
