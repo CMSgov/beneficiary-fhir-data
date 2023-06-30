@@ -21,8 +21,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
@@ -52,7 +50,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
@@ -427,7 +424,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
-              .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(e))
+              .filter(e -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(e))
               .map(e -> transformEntity(type, e, bundleOptions.includeTaxNumbers))
               .collect(Collectors.toList()));
     }
@@ -451,28 +448,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         });
 
     return bundle;
-  }
-
-  /**
-   * Determines if there are no samhsa entries in the claim.
-   *
-   * @param entity the claim to check
-   * @return {@code true} if there are no samhsa entries in the claim
-   */
-  @VisibleForTesting
-  boolean hasNoSamhsaData(Object entity) {
-    Claim claim;
-
-    if (entity instanceof RdaFissClaim) {
-      claim = (Claim) fissTransformer.transform(entity, false);
-    } else if (entity instanceof RdaMcsClaim) {
-      claim = (Claim) mcsTransformer.transform(entity, false);
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");
-    }
-
-    return !samhsaMatcher.test(claim);
   }
 
   /** Helper class for passing bundle result options. */

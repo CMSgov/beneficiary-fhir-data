@@ -68,6 +68,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,9 +248,9 @@ public final class RifLoaderIT {
     Stream<RifFile> editedSample = editSamples(samplesStream, fileEditor);
 
     // Load the edited sample to verify that it fails, as expected.
-    IllegalStateException thrown =
+    AssertionFailedError thrown =
         assertThrows(
-            IllegalStateException.class,
+            AssertionFailedError.class,
             () -> {
               loadSample(
                   "SAMPLE_A, bene only, UPDATE",
@@ -257,7 +258,7 @@ public final class RifLoaderIT {
                   editedSample);
             });
 
-    assertTrue(thrown.getMessage().contains("Fatal error during rif file processing"));
+    assertEquals("Load errors encountered. ==> expected: <0> but was: <1>", thrown.getMessage());
   }
 
   /** Ensures that loading a single file results in a loaded file in the loaded batches. */
