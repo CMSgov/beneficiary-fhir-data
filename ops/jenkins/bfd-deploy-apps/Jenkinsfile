@@ -170,7 +170,6 @@ spec:
             }
         }
 
-        /*
         stage('Deploy Base') {
             steps {
                 script {
@@ -220,7 +219,6 @@ spec:
                 }
             }
         }
-
 
         stage('Deploy Migrator') {
             steps {
@@ -285,7 +283,7 @@ spec:
                     }
                 }
             }
-        } */
+        }
 
         stage('Deploy Server') {
             steps {
@@ -297,8 +295,6 @@ spec:
                                                   : []
                         lock(resource: lockResource) {
                             // Deploy the Server
-
-                            /*
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
                                     env: trimmedEnv,
@@ -314,17 +310,12 @@ spec:
                                     ]
                             )
 
-                            */
-
-                            // TODO: Better support ephemeral environments in the future as desired, post BFD-2554
-                            if (trimmedEnv in ["test", "prod-sbx", "prod"]) {
-                                // Deploy the API requests Insights Lambda
-                                awsAuth.assumeRole()
-                                terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/insights/api-requests'
-                                )
-                            }
+                            // Deploy the API requests Insights Lambda
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/insights/api-requests'
+                            )
 
                             // Deploy the API regression suite
                             awsAuth.assumeRole()

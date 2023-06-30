@@ -10,8 +10,6 @@
  * </ul>
 */
 def runServerRegression(Map args = [:]) {
-    println "Entering server regression script..."
-
     awsRegion = args.awsRegion ?: 'us-east-1'
     bfdEnv = args.bfdEnv
     elbDnsName = args.elbDnsName
