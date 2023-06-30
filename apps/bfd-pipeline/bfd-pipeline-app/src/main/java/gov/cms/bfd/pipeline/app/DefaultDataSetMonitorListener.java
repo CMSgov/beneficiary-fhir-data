@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
                     PipelineApplication.class.getSimpleName(), "dataSet", "processed"))
             .time();
 
+    final var failed = new AtomicBoolean(false);
     Consumer<Throwable> errorHandler =
         error -> {
           /*
@@ -74,6 +76,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
            * we stop that way for _any_ failure, but we probably want
            * to be more discriminating than that.
            */
+          failed.set(true);
           errorOccurred(error);
         };
 
@@ -90,6 +93,10 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
      * and processed by the next stage.
      */
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+      if (failed.get()) {
+        LOGGER.info("Stopping due to error.");
+        break;
+      }
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);

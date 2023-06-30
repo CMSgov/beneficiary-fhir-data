@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.r4.ClaimAdapter;
 import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
@@ -20,6 +22,47 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
+
+  /** The fiss claim transformer, used for converting resources to check for samhsa data. */
+  private final FissClaimTransformerV2 fissTransformer;
+
+  /** The mcs claim transformer, used for converting resources to check for samhsa data. */
+  private final McsClaimTransformerV2 mcsTransformer;
+
+  /**
+   * Instantiates a new samhsa matcher.
+   *
+   * <p>Resources should be instantiated by Spring, so this should only be directly called by tests.
+   *
+   * @param fissClaimTransformer the fiss claim transformer
+   * @param mcsClaimTransformer the mcs claim transformer
+   */
+  public R4ClaimSamhsaMatcher(
+      FissClaimTransformerV2 fissClaimTransformer, McsClaimTransformerV2 mcsClaimTransformer) {
+    this.mcsTransformer = mcsClaimTransformer;
+    this.fissTransformer = fissClaimTransformer;
+  }
+
+  /**
+   * Determines if there are no samhsa entries in the claim.
+   *
+   * @param entity the claim to check
+   * @return {@code true} if there are no samhsa entries in the claim
+   */
+  public boolean hasNoSamhsaData(Object entity) {
+    Claim claim;
+
+    if (entity instanceof RdaFissClaim) {
+      claim = fissTransformer.transform(entity, false);
+    } else if (entity instanceof RdaMcsClaim) {
+      claim = mcsTransformer.transform(entity, false);
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");
+    }
+
+    return !test(claim);
+  }
 
   /** {@inheritDoc} */
   @Override

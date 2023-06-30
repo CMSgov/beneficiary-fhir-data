@@ -123,7 +123,7 @@ public class RdaLoadJobIT {
                   port -> {
                     final RdaLoadOptions config = createRdaLoadOptions(port);
                     final var mbiCache = config.createComputedMbiCache(appState);
-                    final PipelineJob<?> job = config.createFissClaimsLoadJob(appState, mbiCache);
+                    final PipelineJob job = config.createFissClaimsLoadJob(appState, mbiCache);
                     job.call();
                   });
           final ImmutableList<FissClaimChange> expectedClaims =
@@ -235,7 +235,7 @@ public class RdaLoadJobIT {
                   () -> {
                     final var config = createRdaLoadOptions(-1);
                     final var mbiCache = config.createComputedMbiCache(appState);
-                    final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState, mbiCache);
+                    final PipelineJob job = config.createMcsClaimsLoadJob(appState, mbiCache);
                     job.call();
                   });
           final ImmutableList<McsClaimChange> expectedClaims =
