@@ -20,7 +20,6 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
 import java.io.IOException;
@@ -30,8 +29,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
@@ -309,12 +310,16 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
                 assertTrue(
                     hasJobRecordMatching(
-                        appRunConsumer, "processed 30 objects in", RdaFissClaimLoadJob.class),
+                        appRunConsumer,
+                        line -> line.contains("processed 30 objects in"),
+                        RdaFissClaimLoadJob.class),
                     "FISS job processed all claims");
 
                 assertTrue(
                     hasJobRecordMatching(
-                        appRunConsumer, "processed 30 objects in", RdaMcsClaimLoadJob.class),
+                        appRunConsumer,
+                        line -> line.contains("processed 30 objects in"),
+                        RdaMcsClaimLoadJob.class),
                     "MCS job processed all claims");
 
                 // Stop the application.
@@ -381,12 +386,16 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
                 assertTrue(
                     hasJobRecordMatching(
-                        appRunConsumer, "StatusRuntimeException", RdaFissClaimLoadJob.class),
+                        appRunConsumer,
+                        line -> line.contains("StatusRuntimeException"),
+                        RdaFissClaimLoadJob.class),
                     "FISS job terminated by grpc exception");
 
                 assertTrue(
                     hasJobRecordMatching(
-                        appRunConsumer, "StatusRuntimeException", RdaMcsClaimLoadJob.class),
+                        appRunConsumer,
+                        line -> line.contains("StatusRuntimeException"),
+                        RdaMcsClaimLoadJob.class),
                     "MCS job terminated by grpc exception");
 
                 // Stop the application.
@@ -433,9 +442,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    */
   private static boolean hasCcwRifLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
-        appRunConsumer,
-        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED,
-        CcwRifLoadJob.class);
+        appRunConsumer, PipelineJobRunner.JobRunSummary::isSuccessString, CcwRifLoadJob.class);
   }
 
   /**
@@ -448,7 +455,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
   private static boolean hasRdaFissLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
         appRunConsumer,
-        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED,
+        PipelineJobRunner.JobRunSummary::isSuccessString,
         RdaFissClaimLoadJob.class);
   }
 
@@ -461,9 +468,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    */
   private static boolean hasRdaMcsLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
-        appRunConsumer,
-        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED,
-        RdaMcsClaimLoadJob.class);
+        appRunConsumer, PipelineJobRunner.JobRunSummary::isSuccessString, RdaMcsClaimLoadJob.class);
   }
 
   /**
@@ -475,49 +480,21 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    */
   private static boolean hasCcwRifLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
-        appRunConsumer, PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED, CcwRifLoadJob.class);
+        appRunConsumer, PipelineJobRunner.JobRunSummary::isFailureString, CcwRifLoadJob.class);
   }
 
   /**
-   * Checks if the RDA Fiss load job has failed by checking the job records.
-   *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
-   * @return <code>true</code> if the application output indicates that data set scanning has
-   *     started, <code>false</code> if not
-   */
-  private static boolean hasRdaFissLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
-    return hasJobRecordMatching(
-        appRunConsumer,
-        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED,
-        RdaFissClaimLoadJob.class);
-  }
-
-  /**
-   * Checks if the RDA MCS load job has failed by checking the job records.
-   *
-   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
-   * @return <code>true</code> if the application output indicates that data set scanning has
-   *     started, <code>false</code> if not
-   */
-  private static boolean hasRdaMcsLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
-    return hasJobRecordMatching(
-        appRunConsumer,
-        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED,
-        RdaMcsClaimLoadJob.class);
-  }
-
-  /**
-   * Checks if a job has a job record matching a specified value.
+   * Checks if a job has a job record matching a specified predicate.
    *
    * @param appRunConsumer the job to check
-   * @param prefix the record prefix type to check for
-   * @param klass the class of the job to check
-   * @return {@code true} if the job had a record matching the specified prefix type
+   * @param matcher {@link Predicate} used to find a target string
+   * @param klass used to verify a target string contains the class name
+   * @return {@code true} if the job had a record matching the specified predicate and class name
    */
   private static boolean hasJobRecordMatching(
-      ProcessOutputConsumer appRunConsumer, String prefix, Class<?> klass) {
+      ProcessOutputConsumer appRunConsumer, Predicate<String> matcher, Class<?> klass) {
     return appRunConsumer.matches(
-        line -> line.contains(prefix) && line.contains(klass.getSimpleName()));
+        line -> matcher.test(line) && line.contains(klass.getSimpleName()));
   }
 
   /**
@@ -606,6 +583,16 @@ public final class PipelineApplicationIT extends MinioTestContainer {
 
     DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
+
+    // Remove inherited environment variables that could affect the test in some local environments.
+    List.of(
+            AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED,
+            AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED,
+            AppConfiguration.ENV_VAR_KEY_RDA_GRPC_HOST,
+            AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT,
+            AppConfiguration.ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN,
+            AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE)
+        .forEach(envVarName -> appRunBuilder.environment().remove(envVarName));
 
     appRunBuilder
         .environment()

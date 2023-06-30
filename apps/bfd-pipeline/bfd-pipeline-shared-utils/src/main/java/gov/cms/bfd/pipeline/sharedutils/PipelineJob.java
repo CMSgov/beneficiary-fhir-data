@@ -9,20 +9,16 @@ import java.util.concurrent.Callable;
  * <p>{@link PipelineJob} implementations that are meant to be triggered by other jobs
  * <strong>SHALL</strong> also provide a {@code JOB_TYPE} constant for other jobs to reference,
  * which must return the same value as {@link #getType()}.
- *
- * @param <A> the {@link PipelineJobArguments} type associated with this {@link PipelineJob}
- *     implementation (see {@link NullPipelineJobArguments} for those {@link PipelineJob}
- *     implementations which do not need arguments)
  */
-public interface PipelineJob<A extends PipelineJobArguments> extends Callable<PipelineJobOutcome> {
+public interface PipelineJob extends Callable<PipelineJobOutcome> {
   /**
    * Gets the {@link PipelineJobType} that uniquely identifies this {@link PipelineJob}
    * implementation.
    *
    * @return the pipeline job type
    */
-  default PipelineJobType<A> getType() {
-    return new PipelineJobType<>(this);
+  default PipelineJobType getType() {
+    return new PipelineJobType(this);
   }
 
   /**
