@@ -389,8 +389,8 @@ class HighVolumeUser(BFDUserBase):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
 
+    @staticmethod
     def filter_tasks_by_tags(
-        self,
         task_holder: Type[TaskHolder],
         tags: Set[str],
         exclude_tags: Set[str],
@@ -405,7 +405,6 @@ class HighVolumeUser(BFDUserBase):
         :param checked: The running score of tasks which have or have not been processed
         :return: A list of filtered tasks to execute
         """
-
         filtered_tasks = []
         if checked is None:
             checked = {}
@@ -430,7 +429,8 @@ class HighVolumeUser(BFDUserBase):
 
         return filtered_tasks
 
-    def get_tasks(self, tags: Set[str], exclude_tags: Set[str]):
+    @staticmethod
+    def get_tasks(tags: Set[str], exclude_tags: Set[str]):
         """
         Returns the list of runnable tasks for the given user, filterable by a list of tags or exclude_tags.
         Returns all runnable tasks if neither tags or exclude_tags contain items.
@@ -447,8 +447,20 @@ class HighVolumeUser(BFDUserBase):
         # Filter each task holder's tasks by the given tags and exclude_tags
         tasks = []
         for task_holder in list(map(lambda task_set: task_set[1], potential_tasks)):
-            tasks.extend(self.filter_tasks_by_tags(task_holder, tags, exclude_tags))
+            tasks.extend(HighVolumeUser.filter_tasks_by_tags(task_holder, tags, exclude_tags))
         return tasks
+
+    def get_runnable_tasks(self, tags: Set[str], exclude_tags: Set[str]):
+        """
+        Helper method to be called via the HighVolumerUser constructor.
+        Required due to python <= 3.9 not allowing direct calls to static methods.
+        Returns the list of runnable tasks.
+
+        :param tags: The list of tags to filter tasks by
+        :param exclude_tags: This list of tags to exclude tasks by
+        :return: A list of tasks to run
+        """
+        return HighVolumeUser.get_tasks(tags, exclude_tags)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -460,7 +472,7 @@ class HighVolumeUser(BFDUserBase):
         # Therefore, we have implemented custom arguments (--locust-tags/--locust-exclude-tags) to programmatically
         # filter tasks by the given @tag(s) at runtime.
         # [1] https://github.com/locustio/locust/issues/1689
-        self.tasks = self.get_tasks(TAGS, EXCLUDE_TAGS)
+        self.tasks = self.get_runnable_tasks(TAGS, EXCLUDE_TAGS)
 
         # Shuffle all the data around so that each HighVolumeUser is _probably_
         # not requesting the same data.
