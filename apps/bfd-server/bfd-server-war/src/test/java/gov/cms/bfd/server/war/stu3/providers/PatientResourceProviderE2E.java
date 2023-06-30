@@ -48,7 +48,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
-public final class PatientResourceProviderIT extends ServerRequiredTest {
+public final class PatientResourceProviderE2E extends ServerRequiredTest {
 
   /** Constant used for setting up tests with include identifiers = true. */
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;

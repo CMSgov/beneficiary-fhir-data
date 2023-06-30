@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import com.codahale.metrics.MetricRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
@@ -15,10 +14,9 @@ public interface ResourceTransformer<T extends IBaseResource> {
   /**
    * Transforms the specified into a new FHIR {@link ClaimResponse} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the FISS/MCS record to be transformed
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a new FHIR resource
    */
-  T transform(MetricRegistry metricRegistry, Object claim, boolean includeTaxNumbers);
+  T transform(Object claim, boolean includeTaxNumbers);
 }

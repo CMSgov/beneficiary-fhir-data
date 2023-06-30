@@ -186,9 +186,14 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setProcCodes(procedures);
 
-    Claim claim = FissClaimTransformerV2.transform(new MetricRegistry(), entity, true);
+    FissClaimTransformerV2 fissClaimTransformerV2 =
+        new FissClaimTransformerV2(new MetricRegistry());
+    McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
 
-    R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
+    Claim claim = fissClaimTransformerV2.transform(entity, true);
+
+    R4ClaimSamhsaMatcher matcher =
+        new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2);
 
     assertEquals(expectedResult, matcher.test(claim), testName + " " + errorMessagePostFix);
   }
@@ -280,9 +285,14 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setDetails(procedures);
 
-    Claim claim = McsClaimTransformerV2.transform(new MetricRegistry(), entity, true);
+    FissClaimTransformerV2 fissClaimTransformerV2 =
+        new FissClaimTransformerV2(new MetricRegistry());
+    McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
 
-    R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
+    Claim claim = mcsClaimTransformerV2.transform(entity, true);
+
+    R4ClaimSamhsaMatcher matcher =
+        new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2);
 
     assertEquals(expectedResult, matcher.test(claim), testName + " " + errorMessagePostFix);
   }
