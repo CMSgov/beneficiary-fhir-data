@@ -34,10 +34,14 @@ public class CoverageResourceProviderTest {
   /** The Loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
 
+  /** The mock coverage transformer. */
+  @Mock private CoverageTransformer coverageTransformer;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    coverageProvider = new CoverageResourceProvider(metricRegistry, loadedFilterManager);
+    coverageProvider =
+        new CoverageResourceProvider(metricRegistry, loadedFilterManager, coverageTransformer);
     lenient().when(coverageId.getVersionIdPartAsLong()).thenReturn(null);
   }
 
