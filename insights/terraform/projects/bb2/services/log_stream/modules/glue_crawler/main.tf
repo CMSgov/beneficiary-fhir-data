@@ -14,13 +14,13 @@ locals {
 
 # Glue crawler
 resource "aws_glue_crawler" "glue_crawler" {
-  name          = "${var.project}-${var.firehose_name}"
+  name          = "${var.project}-${var.name}"
   database_name = var.database
   role          = "bfd-insights/bfd-insights-${var.project}-glue-role"
   schedule      = var.glue_crawler_schedule
 
   s3_target {
-    path = "s3://${data.aws_s3_bucket.main.id}/databases/${var.project}/events-${var.firehose_name}"
+    path = "s3://${data.aws_s3_bucket.main.id}/databases/${var.project}/events-${var.name}"
   }
 
   configuration = jsonencode({

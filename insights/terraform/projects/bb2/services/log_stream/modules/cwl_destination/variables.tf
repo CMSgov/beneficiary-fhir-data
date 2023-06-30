@@ -6,6 +6,10 @@ variable "project" {
   type = string
 }
 
+variable "region" {
+  type = string
+}
+
 variable "bb2_acct" {
   type = string
 }
