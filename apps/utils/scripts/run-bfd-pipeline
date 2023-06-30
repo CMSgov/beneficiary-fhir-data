@@ -318,7 +318,7 @@ case $run_mode in
     setvar RDA_GRPC_SERVER_TYPE "InProcess"
     setvar RDA_GRPC_INPROC_SERVER_MODE "Random"
     setvar RDA_GRPC_INPROC_SERVER_RANDOM_SEED "42"
-    setvar RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS "150000"
+    setvar RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS "25000"
     ;;
   rda)
     setvar RDA_JOB_ENABLED "true"
