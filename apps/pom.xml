@@ -544,6 +544,30 @@
             </dependency>
 
             <dependency>
+                <!-- Used to create mock objects for unit tests. -->
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!-- Configures mockito to use the inline implementation, which allows mocking
+        of final classes, etc.  Without this, the fallback implementation results in
+        illegal reflection access (JDK9+) in certain circumstances -->
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito-inline.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!-- Adds convenience features for working with mocks in tests -->
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>com.newrelic.telemetry</groupId>
                 <artifactId>dropwizard-metrics-newrelic</artifactId>
                 <version>${dropwizard-metrics-newrelic.version}</version>

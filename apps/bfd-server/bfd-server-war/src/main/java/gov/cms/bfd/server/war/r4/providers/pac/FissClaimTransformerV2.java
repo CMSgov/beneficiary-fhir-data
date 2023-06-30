@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -17,6 +19,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,9 +43,12 @@ import org.hl7.fhir.r4.model.codesystems.ClaimInformationcategory;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
-public class FissClaimTransformerV2 extends AbstractTransformerV2 {
+@Component
+public class FissClaimTransformerV2 extends AbstractTransformerV2
+    implements ResourceTransformer<Claim> {
 
   /** Date used to determine if an ICD code is ICD9 (before date) or ICD10 (on or after date). */
   private static final LocalDate ICD_9_CUTOFF_DATE = LocalDate.of(2015, 10, 1);
@@ -50,24 +56,35 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
   /** The MEDICARE constant. */
   private static final String MEDICARE = "MEDICARE";
 
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
   /** The METRIC_NAME constant. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
 
-  /** Instantiates a new Fiss claim transformer v2. */
-  private FissClaimTransformerV2() {}
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   */
+  public FissClaimTransformerV2(MetricRegistry metricRegistry) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+  }
 
   /**
    * Transforms a claim entity into a FHIR {@link Claim}.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  static Claim transform(
-      MetricRegistry metricRegistry, Object claimEntity, boolean includeTaxNumbers) {
+  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
     if (!(claimEntity instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -84,7 +101,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaFissClaim}
    */
-  private static Claim transformClaim(RdaFissClaim claimGroup, boolean includeTaxNumbers) {
+  private Claim transformClaim(RdaFissClaim claimGroup, boolean includeTaxNumbers) {
     Claim claim = new Claim();
 
     boolean isIcd9 =
@@ -129,8 +146,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @return The {@link Claim.SupportingInformationComponent} object list created from the parsed
    *     data.
    */
-  private static List<Claim.SupportingInformationComponent> getSupportingInfo(
-      RdaFissClaim claimGroup) {
+  private List<Claim.SupportingInformationComponent> getSupportingInfo(RdaFissClaim claimGroup) {
     List<Claim.SupportingInformationComponent> supportingInfo = new ArrayList<>();
     int sequenceNumber = 1;
 
@@ -181,7 +197,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return The provider {@link Resource} object created from the parsed data.
    */
-  private static Resource getContainedProvider(RdaFissClaim claimGroup, boolean includeTaxNumbers) {
+  private Resource getContainedProvider(RdaFissClaim claimGroup, boolean includeTaxNumbers) {
     Organization organization = new Organization();
 
     if (claimGroup.getMedaProv_6() != null) {
@@ -210,7 +226,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup The {@link RdaFissClaim} object to parse data from.
    * @return The facility {@link Reference} object created from the parsed data.
    */
-  private static Reference getFacility(RdaFissClaim claimGroup) {
+  private Reference getFacility(RdaFissClaim claimGroup) {
     Reference reference;
 
     if (Strings.isNotBlank(claimGroup.getLobCd())) {
@@ -230,8 +246,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param isIcd9 if {@code true} sets the icd system to {@link IcdCode#CODING_SYSTEM_ICD_9}
    * @return The {@link Claim.DiagnosisComponent} object list created from the parsed data.
    */
-  private static List<Claim.DiagnosisComponent> getDiagnosis(
-      RdaFissClaim claimGroup, boolean isIcd9) {
+  private List<Claim.DiagnosisComponent> getDiagnosis(RdaFissClaim claimGroup, boolean isIcd9) {
     final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10_CM;
 
     return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaFissDiagnosisCode>of())
@@ -274,8 +289,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param isIcd9 if {@code true} sets the icd system to {@link IcdCode#CODING_SYSTEM_ICD_9}
    * @return The {@link Claim.ProcedureComponent} object list created from the parsed data.
    */
-  private static List<Claim.ProcedureComponent> getProcedure(
-      RdaFissClaim claimGroup, boolean isIcd9) {
+  private List<Claim.ProcedureComponent> getProcedure(RdaFissClaim claimGroup, boolean isIcd9) {
     final String icdSystem =
         isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9_MEDICARE : IcdCode.CODING_SYSTEM_ICD_10_MEDICARE;
 
@@ -296,7 +310,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup The {@link RdaFissClaim} object to parse data from.
    * @return The {@link Claim.InsuranceComponent} object list created from the parsed data.
    */
-  private static List<Claim.InsuranceComponent> getInsurance(RdaFissClaim claimGroup) {
+  private List<Claim.InsuranceComponent> getInsurance(RdaFissClaim claimGroup) {
     return ObjectUtils.defaultIfNull(claimGroup.getPayers(), List.<RdaFissPayer>of()).stream()
         .map(
             payer -> {
@@ -331,7 +345,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param claimGroup The claim data to map.
    * @return The created FHIR component with given claim data.
    */
-  private static List<Claim.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
+  private List<Claim.ItemComponent> getClaimItems(RdaFissClaim claimGroup) {
     return claimGroup.getRevenueLines().stream()
         .sorted(Comparator.comparing(RdaFissRevenueLine::getRdaPosition))
         .map(
@@ -429,7 +443,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
    * @param version The modifier version to use.
    * @return The created FHIR component for modifier data.
    */
-  private static CodeableConcept createModifierCoding(String modifierValue, String version) {
+  private CodeableConcept createModifierCoding(String modifierValue, String version) {
     CodeableConcept modifier;
 
     if (Strings.isNotBlank(modifierValue)) {

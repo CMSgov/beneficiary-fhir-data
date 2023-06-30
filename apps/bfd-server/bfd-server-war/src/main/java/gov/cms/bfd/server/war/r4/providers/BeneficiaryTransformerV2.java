@@ -54,8 +54,7 @@ public class BeneficiaryTransformerV2 {
    * @param metricRegistry the metric registry
    */
   public BeneficiaryTransformerV2(MetricRegistry metricRegistry) {
-    requireNonNull(metricRegistry);
-    this.metricRegistry = metricRegistry;
+    this.metricRegistry = requireNonNull(metricRegistry);
   }
 
   /**
