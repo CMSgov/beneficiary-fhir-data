@@ -390,6 +390,52 @@ The message `Cannot assign requested address.` is harmless as long as the script
 
 If all steps are successful the message `Database created successfully.` will be printed and the script will exit.
 
+## Conflict with Local Postgresql
+
+There is an issue with Docker Desktop on a Mac.  If you have a native postgresql running on your
+mac it will quietly shadow the docker container.  Any attempt to connect to postgresql will
+ignore the container and instead will connect to your native postgresql.
+
+The usual manifestation of this would look like this:
+
+```
+$ psql -h localhost -U bfd -d fhirdb
+psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  role "bfd" does not exist
+```
+
+The same sort of error can appear in logs when you try to run the pipeline or bfd server.
+
+To determine if this is happening, see if there is a native postgresql process running on your mac.
+For example, if you installed postgresql using homebrew you could use this command to see if it is running:
+
+```
+$ brew services -v
+Name          Status  User              File
+emacs         none                      
+postgresql@14 started yourusername ~/Library/LaunchAgents/homebrew.mxcl.postgresql@14.plist
+unbound       none         
+```
+
+In this example you can see that the database is running.  Stop the database to resolve the issue:
+
+```
+$ brew services stop postgresql
+Warning: Formula postgresql was renamed to postgresql@14.
+Stopping `postgresql@14`... (might take a while)
+==> Successfully stopped `postgresql@14` (label: homebrew.mxcl.postgresql@14)
+```
+
+With the native database stopped, the docker container should start to receive incoming connections:
+
+```
+$ psql -h localhost -U bfd -d fhirdb
+Password for user bfd: 
+psql (14.8 (Homebrew))
+Type "help" for help.
+
+fhirdb=# 
+```
+
 # Bootstrapping RDA Pipeline Testing
 
 Example flow for starting with a clean database and populating it with 10,000 random
