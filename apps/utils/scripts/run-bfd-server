@@ -39,8 +39,8 @@ max_heap=4g
 bin_dir=$exec_dir/binaries
 
 # Name of the JKS files used for SSL configuration.
-truststore_file=server-truststore.jks
-keystore_file=server-keystore.jks
+truststore_file=server-truststore.pfx
+keystore_file=server-keystore.pfx
 
 # Runtime settings
 max_heap=4g
