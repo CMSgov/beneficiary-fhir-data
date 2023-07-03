@@ -86,12 +86,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       CoverageTransformerV2 coverageTransformer) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    requireNonNull(coverageTransformer);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
-    this.coverageTransformer = coverageTransformer;
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.coverageTransformer = requireNonNull(coverageTransformer);
   }
 
   /**

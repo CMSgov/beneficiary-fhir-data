@@ -9,9 +9,9 @@ import java.nio.file.Path;
  */
 public enum ClientSslIdentity {
   /** The trusted keystore. */
-  TRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-trusted-keystore.jks")),
+  TRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-trusted-keystore.pfx")),
   /** The untrusted keystore. */
-  UNTRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-untrusted-keystore.jks"));
+  UNTRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-untrusted-keystore.pfx"));
   /** The identity keystore. */
   private final Path identityKeyStore;
 
