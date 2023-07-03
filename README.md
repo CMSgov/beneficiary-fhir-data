@@ -290,6 +290,11 @@ docker-compose -f docker-compose.yml -f docker-compose.bb2.yml -f docker-compose
 docker-compose -f docker-compose.bb2.yml exec bb2 ./docker-compose/migrate.sh
 ```
 
+### Run Scripts
+
+The `apps/utils/scripts` directory contains bash scripts that simplify running the various components of BFD on a UNIX-like system.
+Refer to the README files in that directory for detailed information about the scripts.
+
 ### Security
 
 We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
