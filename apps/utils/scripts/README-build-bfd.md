@@ -113,7 +113,7 @@ In this mode the build cache will be neither read from nor written to.
 By default maven will build every module and its dependencies.
 Sometimes you don't want to sit through a build of low level dependencies because you are focusing on the last
 couple of modules in the build.
-This option tells maven to start at the named module and build it and latest modules only.
+This option tells maven to start at the named module and build it and later modules only.
 
 For example, the `bfd-pipeline-rda-grpc` module is a dependency of several other modules.
 If you are making changes to `bfd-pipeline-rda-grpc` and want to run the tests in dependent modules
@@ -140,7 +140,7 @@ $ ./utils/scripts/build-bfd -t -r bfd-pipeline-rda-grpc
 You can see that the build started from the expected module.
 
 Obviously this will only work properly if nothing is broken in the earlier modules so its use
-is situational.  When it's need though it can save considerable time.
+is situational.  When it's needed it can save considerable time.
 
 ## Option: `-p`
 
