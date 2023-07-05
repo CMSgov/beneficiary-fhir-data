@@ -337,7 +337,7 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    * are not necessary in Cloudwatch. These need to be the base metric names, not one of the several
    * auto-generated aggregate metric names with suffixes like {@code .avg}.
    */
-  public static Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
+  public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
