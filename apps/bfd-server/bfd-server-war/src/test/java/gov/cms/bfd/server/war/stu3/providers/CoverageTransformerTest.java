@@ -18,10 +18,21 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer}. */
 public final class CoverageTransformerTest {
+
+  /** The class under test. */
+  public CoverageTransformer coverageTransformer;
+
+  /** Sets the test dependencies up. */
+  @BeforeEach
+  public void setup() {
+    coverageTransformer = new CoverageTransformer(new MetricRegistry());
+  }
+
   /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer#transform} works
    * as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
@@ -41,26 +52,22 @@ public final class CoverageTransformerTest {
             .get();
     beneficiary.setLastUpdated(Instant.now());
 
-    Coverage partACoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+    Coverage partACoverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverage);
 
-    Coverage partBCoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_B, beneficiary);
+    Coverage partBCoverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary);
     assertPartBMatches(beneficiary, partBCoverage);
 
-    Coverage partCCoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_C, beneficiary);
+    Coverage partCCoverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary);
     assertPartCMatches(beneficiary, partCCoverage);
 
-    Coverage partDCoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
+    Coverage partDCoverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary);
     assertPartDMatches(beneficiary, partDCoverage);
 
     // Test with null lastUpdated
     beneficiary.setLastUpdated(Optional.empty());
     Coverage partACoverageNullLastUpdated =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+        coverageTransformer.transform(MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverageNullLastUpdated);
   }
 
@@ -84,26 +91,22 @@ public final class CoverageTransformerTest {
     beneficiary.setLastUpdated(Instant.now());
     beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
-    Coverage partACoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+    Coverage partACoverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverage);
 
-    Coverage partBCoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_B, beneficiary);
+    Coverage partBCoverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary);
     assertPartBMatches(beneficiary, partBCoverage);
 
-    Coverage partCCoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_C, beneficiary);
+    Coverage partCCoverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary);
     assertPartCMatches(beneficiary, partCCoverage);
 
-    Coverage partDCoverage =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
+    Coverage partDCoverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary);
     assertPartDMatches(beneficiary, partDCoverage);
 
     // Test with empty lastUpdated
     beneficiary.setLastUpdated(Optional.empty());
     Coverage partACoverageNullLastUpdated =
-        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+        coverageTransformer.transform(MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverageNullLastUpdated);
   }
 

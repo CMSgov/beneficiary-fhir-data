@@ -409,8 +409,8 @@
                                 <resource>
                                     <directory>${basedir}/../dev/ssl-stores</directory>
                                     <includes>
-                                        <include>server-keystore.jks</include>
-                                        <include>server-truststore.jks</include>
+                                        <include>server-keystore.pfx</include>
+                                        <include>server-truststore.pfx</include>
                                     </includes>
                                 </resource>
                             </resources>

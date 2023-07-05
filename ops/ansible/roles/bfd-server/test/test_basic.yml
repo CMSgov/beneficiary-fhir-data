@@ -14,7 +14,6 @@
         data_server_appserver_https_port: &data_server_appserver_https_port "7443"
         data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
         data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
-        data_server_appserver_keystore: files/server-keystore.jks
         data_server_ssl_client_certificates:
           - alias: client_foo
             certificate: files/client-trusted.cer
@@ -22,6 +21,7 @@
         data_server_ssl_client_certificate_test: files/client-unsecured.pem
         data_server_db_username: bfd
         data_server_db_password: bfd
+        server_keystore_base64: "{{ lookup('file', playbook_dir + '/' + 'files/server-keystore.pfx') | b64encode }}"
         test_client_cert: "{{ lookup('file', playbook_dir + '/' + 'files/client-unsecured-cert.pem') }}"
         test_client_key: "{{ lookup('file', playbook_dir + '/' + 'files/client-unsecured-key.pem') }}"
         # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
