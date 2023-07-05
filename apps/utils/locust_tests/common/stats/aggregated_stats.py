@@ -3,7 +3,7 @@ a test run as well as the representation of those statistics via dataclasses or 
 objects"""
 import hashlib
 import time
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
