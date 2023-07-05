@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
@@ -345,6 +346,17 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * contained within requestDetails and parsed out along with other parameters
      * later.
      */
+    if (startIndex != null) {
+      int val = 0;
+      try {
+        val = Integer.parseInt(startIndex);
+      } catch (Exception e) {
+        val = -1;
+      }
+      if (val < 0) {
+        throw new InvalidRequestException("Invalid startIndex specified: + startIndex");
+      }
+    }
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimTypeV2> claimTypesRequested = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
@@ -387,8 +399,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
         ClaimTypeV2.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
 
     LOGGER.debug(
-        String.format(
-            "EnumSet for V2 claims, bene_id %d: %s", beneficiaryId, claimsToProcess.toString()));
+        String.format("EnumSet for V2 claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
 
     if (claimsToProcess.isEmpty()) {
       return TransformerUtilsV2.createBundle(
@@ -438,7 +449,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           Throwable taskError = taskResult.getFailure().get();
           LOGGER.error(
               "Encountered issue processing EOB thread, ClaimType {}; {}",
-              taskResult.toString(),
+              taskResult,
               taskError.getMessage());
           throw new RuntimeException(taskError);
         }
@@ -488,7 +499,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param eobIdType the eob claim type
    * @return the transformed explanation of benefit
    */
-  private ClaimTransformerInterfaceV2 deriveTransformer(ClaimTypeV2 eobIdType) {
+  @VisibleForTesting
+  public ClaimTransformerInterfaceV2 deriveTransformer(ClaimTypeV2 eobIdType) {
     switch (eobIdType) {
       case CARRIER:
         return carrierClaimTransformer;
