@@ -274,10 +274,10 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
     private final boolean processDLQ;
 
     /** Indicates the preferred sink type to create for created jobs. */
-    private final SinkTypePreference sinkTypePreference;
+    @Getter private final SinkTypePreference sinkTypePreference;
 
     /** Indicates the RDA Version (range) that the job is allows to process. */
-    private final RdaVersion rdaVersion;
+    @Getter private final RdaVersion rdaVersion;
 
     /**
      * Instantiates a new config.
@@ -343,15 +343,6 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
      */
     public boolean shouldProcessDLQ() {
       return processDLQ;
-    }
-
-    /**
-     * Returns the RDA API version that jobs using this config can ingest data from.
-     *
-     * @return The RDA API version that jobs using this config can ingest data from.
-     */
-    public RdaVersion getRdaVersion() {
-      return rdaVersion;
     }
   }
 
