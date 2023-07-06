@@ -20,8 +20,8 @@ To initially work with in a service area, use the following commands. For this e
 
 ```
 cd services/log_stream
-tfenv install 0.13.7 # install tf version needed
-tfenv use 0.13.7 # select tf version to use
+tfenv install 1.5.0 # install tf version needed
+tfenv use 1.5.0 # select tf version to use
 terraform init # locally initialize 
 ```
 
