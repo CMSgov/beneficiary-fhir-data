@@ -296,18 +296,10 @@ class StatsAthenaLoader(StatsLoader):
         return [(data[0]["VarCharValue"], data[1]["VarCharValue"]) for data in raw_data]
 
     def __stats_from_json_data(self, raw_json_data: List[Tuple[str, str]]) -> List[AggregatedStats]:
-        # This is bad, but Athena does not have any way to sanely export structs in such
-        # a way that we can use a standard parser (JSON, CSV, etc.); either we export in
-        # their JSON-ish proprietary format and keep the names of fields but have no way
-        # to use a standard parser AND lose type information OR we can export "as JSON" but
-        # Athena opts to export structs as JSON arrays without field names. Given that we
-        # can use a JSON parser to parse a JSON array and we can assume stable order, we are
-        # sticking with getting results as a JSON array and working from there.
-
-        # The serialization from will give a list of values, so the serialized
-        # list will be a list of lists of lists (in inner to outer order:
-        # TaskStats -> AggregatedStats -> List[AggregatedStats])
-        serialized_tuples: List[Tuple[List[Any], List[List[Any]]]] = [
+        # Deserializing from a tuple of raw JSON objects; first tuple is a raw JSON object string
+        # representing the aggregated totals and second tuple is a raw JSON list of objects
+        # representing the statistics for each task
+        serialized_tuples: List[Tuple[Dict[str, Any], List[Dict[str, Any]]]] = [
             (json.loads(raw_json_totals), json.loads(raw_json_tasks))
             for raw_json_totals, raw_json_tasks in raw_json_data
         ]
@@ -315,10 +307,10 @@ class StatsAthenaLoader(StatsLoader):
         # of the tasks we're serializing here has already been checked
         return [
             AggregatedStats(
-                totals=TaskStats.from_list(totals_as_list),
-                tasks=[TaskStats.from_list(task_vals_list) for task_vals_list in tasks_as_lists],
+                totals=TaskStats(**totals_as_dict),
+                tasks=[TaskStats(**task_vals_dict) for task_vals_dict in tasks_as_lists],
             )
-            for totals_as_list, tasks_as_lists in serialized_tuples
+            for totals_as_dict, tasks_as_lists in serialized_tuples
         ]
 
 
