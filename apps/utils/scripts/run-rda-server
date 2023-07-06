@@ -1,0 +1,228 @@
+#!/bin/bash
+# Runs the latest version of mock RDA API server using build artifacts from your git workspace.
+# Requires a directory to copy build artifacts into and use as working directory.
+
+if [[ x$BFD_PATH = x ]] ; then
+  echo "Please set BFD_PATH environment variable to root of source tree." 1>&2
+  echo "It should be the directory containing the ops and apps subdirectories." 1>&1
+  exit 1
+fi
+
+if [[ x$BFD_EXEC = x ]] ; then
+  echo "Please set BFD_EXEC environment variable to a directory scripts can run it." 1>&2
+  echo "It should be outside of $BFD_PATH." 1>&2
+  exit 1
+fi
+
+##############################################################################
+#
+# BEGIN Local environment configuration.
+#
+project_dir=$BFD_PATH/apps
+
+# Directory to store binaries and data files when running.
+# Also where the script cd's to before running.
+# Should be outside of your git workspace to avoid hassles with git.
+exec_dir=$BFD_EXEC/rda-server
+
+# Directory containing your local maven artifacts cache.
+repo_dir=$HOME/.m2/repository
+
+# Maximum heap size to use when running
+max_heap=512m
+
+if [[ ! -d $project_dir ]] ; then
+  echo ERROR: $project_dir does not exist. 1>&2
+  echo Please set BFD_PATH to the root of the BFD source. 1>&2
+  exit 1
+fi
+
+if [[ ! -d $BFD_EXEC ]] ; then
+  echo ERROR: $BFD_EXEC does not exist. 1>&2
+  echo Please create it or set BFD_EXEC to a different path. 1>&2
+  exit 1
+fi
+
+if [[ ! -d $repo_dir ]] ; then
+  echo ERROR: $repo_dir does not exist. 1>&2
+  echo Please create it or modify this script with alternative path. 1>&2
+  exit 1
+fi
+
+# ensure that the pipeline specific exec directory exists
+mkdir -p $exec_dir
+
+#
+# END Local environment configuration.
+#
+##############################################################################
+
+#
+# Generic code using settings begins here.
+#
+
+# Default option values.
+debug_enabled=false
+debug_suspend=n
+max_records=25000
+s3_mode="minio"
+s3_bucket=""
+s3_directory=""
+s3_cache=""
+error_rate=0
+seed=42
+install=true
+
+usage() {
+  (
+  cat <<EOF
+Runs mock RDA API server.  Use command line options to change behaviors.
+
+$(basename $0) [options] [-r max_records]
+-e error_rate                   Randomly make 1/error_rate claims invalid.
+-r max_records                  Maximum number of records to return to client.
+-s mode:bucket:directory:cache  S3 mode (minio or aws), bucket and directory.
+-x                              Do not install latest version before running.
+-z                              Enable debugger support but start immediately.
+-Z                              Enable debugger support and wait for debugger to connect.
+-h                              Prints this help message.
+
+Option defaults:
+  -e $error_rate
+  -r $max_records
+  -s ${s3_mode}:${s3_bucket}:${s3_directory}:${s3_cache}
+EOF
+  ) 1>&2
+}
+set -e
+
+while getopts "e:r:s:xzZh" option ; do
+  case $option in
+  e) error_rate=$OPTARG ;;
+  r) max_records=$OPTARG ;;
+  s) IFS=':' read m b d c <<<"$OPTARG"
+     s3_mode=${m:=$s3_mode}
+     s3_bucket=${b:=$s3_bucket}
+     s3_directory=${d:=$s3_directory}
+     s3_cache=${c:=$s3_cache}
+     unset m b d c
+     ;;
+  x) install=false ;;
+  z) debug_enabled=true ;;
+  Z) debug_enabled=true ; debug_suspend=y ;;
+  h) usage ; exit 0 ;;
+  *) usage ; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# No other command line arguments are permitted.
+if [[ $# != 0 ]] ; then
+  usage
+  exit 1
+fi
+
+case $s3_mode in
+  minio) ;;
+  aws) ;;
+  *) 
+    echo "error: Invalid s3_mode: ${s3_mode}." 1>&2
+    usage
+    exit 1
+    ;;
+esac
+
+if [[ $s3_directory != "" ]] && [[ $s3_bucket = "" ]] ; then
+  echo "error: using s3 directory requires an s3 bucket" 1>&2
+  usage
+  exit 1
+fi
+
+if [[ $# != 0 ]] ; then
+  usage
+  exit 1
+fi
+
+ARGS="-Xms${max_heap} -Xmx${max_heap}"
+
+# Uncomment for verbose GC logging.
+# ARGS="$ARGS -XX:+PrintGCDetails"
+
+# Uncomment to test GC string dedup mode.
+# ARGS="$ARGS -XX:+UseG1GC -XX:+UseStringDeduplication" # -XX:+PrintStringDeduplicationStatistics"
+
+# If debug_enabled is true an IDE can connect its debugger on port 5005 to debug the pipeline.
+# If debug_suspend is y the pipeline app will wait for a debugger to connect before doing any work.
+if [[ $debug_enabled = "true" ]] ; then
+  ARGS="$ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=${debug_suspend},address=*:5005"
+fi
+
+case $s3_mode in
+minio) ARGS="$ARGS -Ds3.local=true" ;;
+aws) ;;
+*) echo error: s3 mode must be '"minio" or "aws"' 1>&2 ; usage ; exit 1 ;;
+esac
+
+ARGS="$ARGS gov.cms.bfd.pipeline.rda.grpc.apps.RdaServerApp"
+ARGS="$ARGS seed:$seed"
+ARGS="$ARGS random.seed:$seed"
+ARGS="$ARGS random.errorRate:$error_rate"
+ARGS="$ARGS maxToSend:${max_records}"
+if [[ $s3_bucket != "" ]] ; then
+  ARGS="$ARGS s3.bucket:${s3_bucket} s3.directory:${s3_directory} s3.cacheDirectory:${s3_cache}"
+fi
+
+# The rda pipeline apps project will contain our runtime artifacts.
+target_name=bfd-pipeline-rda-grpc-apps
+lib_dir=${exec_dir}/lib
+
+cd $exec_dir
+
+# Don't just assume the version will always be 1.0.0-SNAPSHOT, get it dynamically from mvn instead.
+project_version=`cd $project_dir ; mvn help:evaluate -Dexpression=project.version | grep -e '^[^\[]'`
+
+if [[ $install = "true" ]] ; then
+  binaries_dir=$repo_dir/gov/cms/bfd/${target_name}/${project_version}
+  zip_file=${binaries_dir}/${target_name}-${project_version}.zip
+
+  if [[ ! -r $zip_file ]] ; then
+    echo ERROR: missing zip file: $zip_file 1>&2
+    echo Build $target_name and try again. 1>&2
+    exit 1
+  fi
+
+  app_name=`basename $zip_file .zip`
+  unzip_dir=$app_name
+
+  if [[ -r $unzip_dir ]] ; then
+    echo ERROR: unzip root dir already exists - remove it: $unzip_dir 1>&2
+    exit 1
+  fi
+
+  unzip $zip_file
+  if [[ ! -r $unzip_dir ]] ; then
+    echo ERROR: $zip_file did not contain expected root dir: $unzip_dir 1>&2
+    exit 1
+  fi
+
+  jar_file=${exec_dir}/${app_name}.jar
+  [[ -r $jar_file ]] && rm -f $jar_file
+  [[ -d $lib_dir ]] && rm -rf $lib_dir
+  mv $unzip_dir/* $exec_dir
+  rmdir $unzip_dir
+  if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then
+    echo "ERROR: Missing jar file or lib directory.  Was zip file valid? (${zip_file})" 1>&2
+    exit 1
+  fi
+else
+  jar_file=`echo ${exec_dir}/${target_name}-*.jar`
+  if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then
+    echo "ERROR: Missing $jar_file or lib directory." 1>&2
+    echo "Run again without -x option to install binaries." 1>&2
+    exit 1
+  fi
+fi
+
+export CLASSPATH="${jar_file}:${lib_dir}/*"
+
+exec java $ARGS

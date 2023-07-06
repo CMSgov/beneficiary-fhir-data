@@ -34,6 +34,10 @@ spec:
     }
     stages {
         stage('Docker Build') {
+            // Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
+            environment {
+                DOCKER_BUILDKIT = 1
+            }
             steps {
                 container('docker') {
                     // Install prerequisites
@@ -61,9 +65,9 @@ spec:
                         }
                     }
 
-                    // Execute the existing build-push script
-                    dir('apps/utils/locust_tests') {
-                        sh 'bash ./lambda/server-regression/build-push.sh'
+                    dir('ops/jenkins/bfd-server-regression-build') {
+                        // Execute the existing build-push script
+                        sh 'bash build-push.sh'
                     }
                 }
             }

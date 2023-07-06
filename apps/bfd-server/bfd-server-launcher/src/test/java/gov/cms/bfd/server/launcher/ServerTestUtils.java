@@ -116,7 +116,7 @@ public final class ServerTestUtils {
    * @return the {@link Path}
    */
   private static Path getClientTrustStorePath() {
-    Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
+    Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.pfx");
     return trustStorePath;
   }
 
