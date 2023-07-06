@@ -319,7 +319,9 @@ spec:
 
                             // Deploy the API regression suite
                             awsAuth.assumeRole()
-                            elbDnsName = sh(returnStdout: true, script: "aws elb describe-load-balancers --load-balancer-names \"bfd-${trimmedEnv}-fhir\" --query 'LoadBalancerDescriptions[0].DNSName' --output text").trim()
+                            elbDnsName = awsElb.getElbDnsName(
+                                loadBalancerName: "bfd-${trimmedEnv}-fhir"
+                            )
                             hasRegressionRunSucceeded = serverScripts.runServerRegression(
                                 bfdEnv: trimmedEnv,
                                 elbDnsName: elbDnsName,

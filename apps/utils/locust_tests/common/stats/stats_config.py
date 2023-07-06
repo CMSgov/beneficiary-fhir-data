@@ -3,7 +3,7 @@ import re
 from argparse import Namespace
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional
 
 from locust.argument_parser import LocustArgumentParser
 
@@ -93,7 +93,7 @@ class StatsConfiguration:
 
         stats_group.add_argument(
             "--stats-env",
-            type=cls.__env_from_value,
+            type=str,
             help="Specifies the test running environment which the tests are running against",
             dest="stats_env",
             env_var="LOCUST_STATS_ENVIRONMENT",
@@ -231,10 +231,6 @@ class StatsConfiguration:
             ) from exc
 
         return stats_config
-
-    @staticmethod
-    def __env_from_value(val: str) -> str:
-        return val.lower()
 
     @staticmethod
     def __validate_tag(tag: str) -> str:
