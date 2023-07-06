@@ -12,7 +12,6 @@
 def runServerRegression(Map args = [:]) {
     awsRegion = args.awsRegion ?: 'us-east-1'
     bfdEnv = args.bfdEnv
-    elbDnsName = args.elbDnsName
     gitBranchName = args.gitBranchName
     heartbeatInterval = args.heartbeatInterval ?: 15
 
@@ -40,6 +39,7 @@ def runServerRegression(Map args = [:]) {
         return false
     }
 
+    elbDnsName = awsElb.getElbDnsName(bfdEnv)
     sqsMessage = writeJSON(returnText: true, json: [
         'host': "https://${elbDnsName}",
         'suite_version': 'v2',

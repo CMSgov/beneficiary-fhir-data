@@ -319,12 +319,8 @@ spec:
 
                             // Deploy the API regression suite
                             awsAuth.assumeRole()
-                            elbDnsName = awsElb.getElbDnsName(
-                                loadBalancerName: "bfd-${trimmedEnv}-fhir"
-                            )
                             hasRegressionRunSucceeded = serverScripts.runServerRegression(
                                 bfdEnv: trimmedEnv,
-                                elbDnsName: elbDnsName,
                                 gitBranchName: gitBranchName
                             )
                             if (hasRegressionRunSucceeded) {
