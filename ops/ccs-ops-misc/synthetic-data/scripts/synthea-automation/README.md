@@ -1,8 +1,6 @@
 # Synthea Automation Scripts and Docker Image
 
-This directory contains several Synthea-related scripts pertaining to generating synthetic data
-using Synthea, as well as the definition for a Docker image (`bfd-mgmt-synthea-generation`) that
-includes said scripts.
+This directory contains several Synthea-related scripts pertaining to generating synthetic data using Synthea.
 
 ## Generating Synthea Data Using the `bfd-run-synthea-generation` Jenkins Pipeline
 

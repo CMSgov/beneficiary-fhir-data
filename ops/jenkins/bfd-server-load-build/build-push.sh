@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -eou pipefail
 
+# SCRIPT_DIR will return the directory where this script is located, and CONTEXT_DIR will be the
+# directory of the Docker build context (locust_tests). This way, this script can be called from
+# _any_ directory and there will be no issues
+SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+CONTEXT_DIR="${REPO_ROOT}/apps/utils/locust_tests/"
+
 # Constants
 GIT_SHORT_HASH="$(git rev-parse --short HEAD)"
 AWS_REGION="us-east-1"
@@ -13,9 +20,8 @@ DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$GIT_SHORT_HASH"}"
 DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
 # Build tagged node image
-DOCKER_BUILDKIT=1 # Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
-docker build . \
-  --file ./services/server-load/node/node.Dockerfile \
+docker build "$CONTEXT_DIR" \
+  --file "$SCRIPT_DIR/Dockerfile" \
   --target node \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG_LATEST}" \
