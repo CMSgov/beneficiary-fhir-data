@@ -3,7 +3,7 @@ a test run as well as the representation of those statistics via dataclasses or 
 objects"""
 import hashlib
 import time
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -142,28 +142,6 @@ class TaskStats:
             total_fails_per_sec=float(stats_entry.total_fail_per_sec),
             response_time_percentiles=cls.__get_percentiles_dict(stats_entry),
         )
-
-    @classmethod
-    def from_list(cls, values: List[Any]) -> "TaskStats":
-        """Constructs a new instance of TaskStats given a List of values in field declaration order.
-        Used primarily to construct a TaskStats from Athena queries
-
-        Args:
-            values (List[Any]): A List of TaskStats values in field declaration order
-
-        Returns:
-            TaskStats: A TaskStats instance representing the values from the given List
-        """
-        # We assume the list is in field declaration order, otherwise we cannot
-        # create a TaskStats from it
-        inter_dict = {field.name: values[i] for i, field in enumerate(fields(cls))}
-        # response_time_percentiles will be a list as well, we need to convert it to a dict
-        inter_dict["response_time_percentiles"] = {
-            str(percentile): inter_dict["response_time_percentiles"][i]
-            for i, percentile in enumerate(PERCENTILES_TO_REPORT)
-        }
-
-        return TaskStats(**inter_dict)
 
     @classmethod
     def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> ResponseTimePercentiles:
