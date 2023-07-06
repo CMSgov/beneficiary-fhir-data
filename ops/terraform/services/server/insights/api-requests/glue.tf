@@ -1414,4 +1414,8 @@ resource "aws_glue_crawler" "glue-crawler-api-requests" {
     delete_behavior = "LOG"
     update_behavior = "LOG"
   }
+
+  depends_on = [
+    module.glue-table-api-requests
+  ]
 }
