@@ -1,5 +1,4 @@
 provider "aws" {
-  version = "~> 3.66"
   region  = "us-east-1"
   default_tags {
     tags = local.tags
@@ -7,7 +6,6 @@ provider "aws" {
 }
 
 terraform {
-  required_version = "0.13.7"
 
   backend "s3" {
     bucket         = "bfd-tf-state"
