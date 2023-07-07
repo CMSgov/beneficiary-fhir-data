@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_IMAGE_DEFAULT;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.ProcessOutputConsumer;
 import java.io.IOException;
@@ -63,8 +63,8 @@ public class ServerExecutor {
       // These two files are copied into server-work during build time by maven for convenience
       // from:
       // bfd-server/dev/ssl-stores
-      String keyStore = workDirectory + "/server-keystore.jks";
-      String trustStore = workDirectory + "/server-truststore.jks";
+      String keyStore = workDirectory + "/server-keystore.pfx";
+      String trustStore = workDirectory + "/server-truststore.pfx";
 
       // Validate the paths and properties needed to run the server war exist
       if (!validateRequiredServerSetup(
@@ -108,11 +108,11 @@ public class ServerExecutor {
       }
       // Fail fast if we didn't start the server correctly
       assertFalse(
-          "Server failed to start due to an error. STDOUT: " + appRunConsumer.getStdoutContents(),
-          appRunConsumer.getStdoutContents().contains(failureMessage));
+          appRunConsumer.getStdoutContents().contains(failureMessage),
+          "Server failed to start due to an error. STDOUT: " + appRunConsumer.getStdoutContents());
       assertTrue(
-          "Did not find the server start message in STDOUT: " + appRunConsumer.getStdoutContents(),
-          appRunConsumer.getStdoutContents().contains(successMessage));
+          appRunConsumer.getStdoutContents().contains(successMessage),
+          "Did not find the server start message in STDOUT: " + appRunConsumer.getStdoutContents());
     }
     // do nothing if we've already got a server started
 

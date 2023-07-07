@@ -32,6 +32,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -92,6 +93,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
 
+  /** The beneficiary transformer. */
+  private final BeneficiaryTransformer beneficiaryTransformer;
+
   /** The expected coverage id length. */
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
@@ -103,13 +107,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    *
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
+   * @param beneficiaryTransformer the beneficiary transformer
    */
   public PatientResourceProvider(
-      MetricRegistry metricRegistry, LoadedFilterManager loadedFilterManager) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      BeneficiaryTransformer beneficiaryTransformer) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.beneficiaryTransformer = requireNonNull(beneficiaryTransformer);
   }
 
   /**
@@ -170,11 +176,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
+    if (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers()) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
@@ -219,7 +222,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
+    Patient patient = beneficiaryTransformer.transform(beneficiary, requestHeader);
     return patient;
   }
 
@@ -238,13 +241,19 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
-          @Description(shortDefinition = "Part D coverage type")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
           TokenParam coverageId,
       @OptionalParam(name = "_has:Coverage.rfrncyr")
-          @Description(shortDefinition = "Part D reference year")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_REFYR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_REFYR_VALUE)
           TokenParam referenceYear,
       @OptionalParam(name = "cursor")
-          @Description(shortDefinition = "The cursor used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
       RequestDetails requestDetails) {
     // Figure out what month they're searching for.
@@ -294,13 +303,19 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   @Trace
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           TokenParam logicalId,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (logicalId.getQueryParameterQualifier() != null)
@@ -400,7 +415,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(b -> BeneficiaryTransformer.transform(metricRegistry, b, requestHeader))
+            .map(b -> beneficiaryTransformer.transform(b, requestHeader))
             .collect(Collectors.toList());
 
     Bundle bundle =
@@ -653,7 +668,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
 
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
@@ -839,10 +854,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM "BeneficiariesHistory" WHERE "hicn" =
      * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON matching_benes."beneficiaryId"
      * = "Beneficiaries"."beneficiaryId" LEFT JOIN "BeneficiariesHistory" ON
-     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT JOIN
-     * "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" =
-     * "MedicareBeneficiaryIdHistory"."beneficiaryId";
-     *
+     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId"
      * ... with the returned columns and JOINs being dynamic, depending on IncludeIdentifiers.
      *
      * In lieu of that, we run two queries: one to find HICN/MBI matches in BeneficiariesHistory,
@@ -893,11 +905,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
+    if (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers()) {
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     }
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
@@ -962,8 +971,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
-    return patient;
+    return beneficiaryTransformer.transform(beneficiary, requestHeader);
   }
 
   /**

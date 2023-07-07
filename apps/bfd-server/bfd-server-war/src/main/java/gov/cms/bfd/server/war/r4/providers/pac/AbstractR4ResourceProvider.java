@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -19,18 +21,17 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,15 +40,16 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
@@ -85,7 +87,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private Class<T> resourceType;
 
   /** The enabled source types for this provider. */
-  private Set<String> enabledSourceTypes = new HashSet<>();
+  private final Set<String> enabledSourceTypes;
+
+  /** The fiss transformer. */
+  private final ResourceTransformer<T> fissTransformer;
+  /** The mcs transformer. */
+  private final ResourceTransformer<T> mcsTransformer;
 
   /**
    * Initializes the resource provider beans via spring injection. These should be passed from the
@@ -94,14 +101,31 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param metricRegistry the metric registry bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param oldMbiHashEnabled true if old MBI hash should be used
+   * @param fissTransformer the fiss transformer
+   * @param mcsTransformer the mcs transformer
+   * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
+   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
+   *     org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
-      Boolean oldMbiHashEnabled) {
+      Boolean oldMbiHashEnabled,
+      ResourceTransformer<T> fissTransformer,
+      ResourceTransformer<T> mcsTransformer,
+      String claimSourceTypeNames) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
+    this.fissTransformer = requireNonNull(fissTransformer);
+    this.mcsTransformer = requireNonNull(mcsTransformer);
+
+    requireNonNull(claimSourceTypeNames);
+    enabledSourceTypes =
+        Stream.of(claimSourceTypeNames.split(","))
+            .filter(Strings::isNotBlank)
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
   }
 
   /**
@@ -120,15 +144,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled);
 
     setResourceType();
-  }
-
-  /**
-   * Sets the allowed source types for this resource provider (i.e. FISS/MCS)
-   *
-   * @param enabledSourceTypes The {@link Set} of allowed source types.
-   */
-  public void setEnabledSourceTypes(Set<String> enabledSourceTypes) {
-    this.enabledSourceTypes = enabledSourceTypes;
   }
 
   /** {@inheritDoc} */
@@ -209,7 +224,27 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    return claimIdType.getTransformer().transform(metricRegistry, claimEntity, includeTaxNumbers);
+    return transformEntity(claimIdType, claimEntity, includeTaxNumbers);
+  }
+
+  /**
+   * Transforms the pac claim entity to the specified type.
+   *
+   * @param claimIdType the claim type
+   * @param claimEntity the claim entity to transform
+   * @param includeTaxNumbers whether to include tax numbers
+   * @return the transformed claim
+   */
+  private T transformEntity(
+      ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
+
+    if (claimIdType.getTypeLabel().equals("fiss")) {
+      return fissTransformer.transform(claimEntity, includeTaxNumbers);
+    } else if (claimIdType.getTypeLabel().equals("mcs")) {
+      return mcsTransformer.transform(claimEntity, includeTaxNumbers);
+    } else {
+      throw new InvalidRequestException("Invalid claim id type, cannot get claim data");
+    }
   }
 
   /**
@@ -276,6 +311,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param samhsa if {@code true}, exclude all SAMHSA-related resources
    * @param lastUpdated range which to include resources last updated within
    * @param serviceDate range which to include resources completed within
+   * @param taxNumbers whether to include tax numbers in the response
    * @param requestDetails the request details
    * @return the bundle
    */
@@ -283,26 +319,45 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Trace
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_MBI_SHORT,
+              value = OpenAPIContentProvider.PAC_MBI_VALUE)
           ReferenceParam mbi,
       @OptionalParam(name = "type")
-          @Description(shortDefinition = "A list of claim types to include")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_CLAIM_TYPE_SHORT,
+              value = OpenAPIContentProvider.PAC_CLAIM_TYPE_VALUE)
           TokenAndListParam types,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "isHashed")
-          @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_IS_HASHED,
+              value = OpenAPIContentProvider.PAC_IS_HASHED_VALUE)
           String hashed,
       @OptionalParam(name = "excludeSAMHSA")
-          @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_SHORT,
+              value = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_VALUE)
           String samhsa,
       @OptionalParam(name = Constants.PARAM_LASTUPDATED)
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       @OptionalParam(name = "service-date")
-          @Description(shortDefinition = "Include resources that completed in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PAC_SERVICE_DATE_SHORT,
+              value = OpenAPIContentProvider.PAC_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
+      @OptionalParam(name = "includeTaxNumbers")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
+              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
+          String taxNumbers,
       RequestDetails requestDetails) {
     if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
       String mbiString = mbi.getIdPart();
@@ -369,11 +424,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
-              .filter(e -> !bundleOptions.excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
-              .map(
-                  e ->
-                      type.getTransformer()
-                          .transform(metricRegistry, e, bundleOptions.includeTaxNumbers))
+              .filter(e -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(e))
+              .map(e -> transformEntity(type, e, bundleOptions.includeTaxNumbers))
               .collect(Collectors.toList()));
     }
 
@@ -396,29 +448,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         });
 
     return bundle;
-  }
-
-  /**
-   * Determines if there are no samhsa entries in the claim.
-   *
-   * @param metricRegistry the metric registry
-   * @param entity the claim to check
-   * @return {@code true} if there are no samhsa entries in the claim
-   */
-  @VisibleForTesting
-  boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
-    Claim claim;
-
-    if (entity instanceof RdaFissClaim) {
-      claim = FissClaimTransformerV2.transform(metricRegistry, entity, false);
-    } else if (entity instanceof RdaMcsClaim) {
-      claim = McsClaimTransformerV2.transform(metricRegistry, entity, false);
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");
-    }
-
-    return !samhsaMatcher.test(claim);
   }
 
   /** Helper class for passing bundle result options. */

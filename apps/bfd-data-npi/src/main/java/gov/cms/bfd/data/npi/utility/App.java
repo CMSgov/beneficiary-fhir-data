@@ -28,6 +28,8 @@ public final class App {
    *       <li><code>OUTPUT_DIR</code>: the first (and only) argument for this application, which
    *           should be the path to the project's rsource directory
    *     </ol>
+   *
+   * @throws IOException if there is an issue reading file
    */
   public static void main(String[] args) throws IOException {
     if (args.length < 1) {

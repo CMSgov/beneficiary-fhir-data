@@ -31,7 +31,7 @@ public class ServerRequiredTest {
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
-  static void setup() throws IOException {
+  protected static void setup() throws IOException {
     if (!ServerExecutor.isRunning()) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(dbUrl),

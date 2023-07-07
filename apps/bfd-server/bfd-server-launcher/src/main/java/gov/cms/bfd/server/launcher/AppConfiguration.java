@@ -46,12 +46,12 @@ public final class AppConfiguration implements Serializable {
   /** The port that the server will listen for HTTPS connections on. * */
   private final int port;
   /**
-   * The {@link Path} of the Java keystore ({@code .jks} file) containing the private key and
+   * The {@link Path} of the Java keystore ({@code .pfx} file) containing the private key and
    * certificate to use for this server. *
    */
   private final String keystore;
   /**
-   * The {@link Path} of the Java trust store ({@code .jks} file) containing the client certificates
+   * The {@link Path} of the Java trust store ({@code .pfx} file) containing the client certificates
    * to use (i.e. trust/authenticate) for this server. *
    */
   private final String truststore;

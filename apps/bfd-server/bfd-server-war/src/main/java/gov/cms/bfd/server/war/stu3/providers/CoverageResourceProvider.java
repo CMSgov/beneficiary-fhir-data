@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,6 +70,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
 
+  /** The coverage transformer. */
+  private final CoverageTransformer coverageTransformer;
+
   /**
    * Instantiates a new {@link CoverageResourceProvider}.
    *
@@ -77,13 +81,15 @@ public final class CoverageResourceProvider implements IResourceProvider {
    *
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
+   * @param coverageTransformer the coverage transformer
    */
   public CoverageResourceProvider(
-      MetricRegistry metricRegistry, LoadedFilterManager loadedFilterManager) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
+      MetricRegistry metricRegistry,
+      LoadedFilterManager loadedFilterManager,
+      CoverageTransformer coverageTransformer) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.coverageTransformer = requireNonNull(coverageTransformer);
   }
 
   /**
@@ -164,8 +170,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
     }
 
-    Coverage coverage =
-        CoverageTransformer.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
+    Coverage coverage = coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
     return coverage;
   }
 
@@ -192,20 +197,26 @@ public final class CoverageResourceProvider implements IResourceProvider {
   @Trace
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           ReferenceParam beneficiary,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
-      coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
+      coverages = coverageTransformer.transform(beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }

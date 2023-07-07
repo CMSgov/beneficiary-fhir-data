@@ -64,7 +64,7 @@ with open(target_path, 'w', newline='') as out_file:
     csv_writer = csv.writer(out_file)
     csv_writer.writerow(build_csv_header())
     ct = 0
-    for file_name in source_dir.iterdir():    # loop thru source data folder, read each json file, translate to csv and write row to file
+    for file_name in sorted(source_dir.iterdir()):    # loop thru source data folder, read each json file, translate to csv and write row to file
         try:
             with open(file_name) as element_file:
                 element_json = json.load(element_file)

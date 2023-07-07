@@ -58,5 +58,21 @@ def register_custom_args(parser: LocustArgumentParser):
         env_var="LOCUST_DATA_TABLE_SAMPLE_PERCENT",
         default=0.25,
     )
+    parser.add_argument(
+        "--locust-tags",
+        type=str,
+        help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
+        dest="locust_tags",
+        env_var="LOCUST_TAGS",
+        default=""
+    )
+    parser.add_argument(
+        "--locust-exclude-tags",
+        type=str,
+        help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
+        dest="locust_exclude_tags",
+        env_var="LOCUST_EXCLUDE_TAGS",
+        default=""
+    )
 
     StatsConfiguration.register_custom_args(parser)

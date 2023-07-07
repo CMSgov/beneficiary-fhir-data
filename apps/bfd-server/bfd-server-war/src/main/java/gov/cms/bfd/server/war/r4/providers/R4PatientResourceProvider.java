@@ -32,6 +32,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -126,12 +127,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       BeneficiaryTransformerV2 beneficiaryTransformerV2) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    requireNonNull(beneficiaryTransformerV2);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
-    this.beneficiaryTransformerV2 = beneficiaryTransformerV2;
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.beneficiaryTransformerV2 = requireNonNull(beneficiaryTransformerV2);
   }
 
   /**
@@ -193,7 +191,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
@@ -254,13 +251,19 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Trace
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
           TokenParam logicalId,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (logicalId.getQueryParameterQualifier() != null)
@@ -335,13 +338,19 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
-          @Description(shortDefinition = "Part D coverage type")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
           TokenParam coverageId,
       @OptionalParam(name = "_has:Coverage.rfrncyr")
-          @Description(shortDefinition = "Part D reference year")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_REFYR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_REFYR_VALUE)
           TokenParam referenceYear,
       @OptionalParam(name = "cursor")
-          @Description(shortDefinition = "The cursor used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
       RequestDetails requestDetails) {
 
@@ -380,7 +389,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   public Bundle searchByCoverageContractByFieldName(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      TokenParam coverageId, String cursor, RequestDetails requestDetails) {
+      @RequiredParam(name = "_has:Coverage.extension")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_SHORT,
+              value = OpenAPIContentProvider.PATIENT_PARTD_CONTRACT_VALUE)
+          TokenParam coverageId,
+      String cursor,
+      RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
@@ -523,8 +538,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging) {
-    String joinsClause =
-        "left join fetch b.skippedRifRecords left join fetch b.medicareBeneficiaryIdHistories ";
+    String joinsClause = "left join fetch b.skippedRifRecords ";
     boolean passDistinctThrough = false;
 
     /*
@@ -612,7 +626,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids) {
-    String joinsClause = "left join fetch b.medicareBeneficiaryIdHistories ";
+    String joinsClause = "left join fetch b.beneficiaryHistories ";
     boolean passDistinctThrough = false;
 
     String query =
@@ -651,13 +665,19 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Trace
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
-          @Description(shortDefinition = "The patient identifier to search for")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_SP_IDENTIFIER_SHORT,
+              value = OpenAPIContentProvider.PATIENT_SP_IDENTIFIER_VALUE)
           TokenParam identifier,
       @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
+              value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
       @OptionalParam(name = "_lastUpdated")
-          @Description(shortDefinition = "Include resources last updated in the given range")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
+              value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (identifier.getQueryParameterQualifier() != null) {
@@ -850,16 +870,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     /*
-     * Check both bene history and a now-defunct MBI id table for historical MBIs;
+     * Check bene history table for historical MBIs;
      * These will be used to return any historical MBIs in the response and/or find the bene_id
      * in the event that the user is searching using an old MBI value.
-     *
-     * FUTURE: The medicareBeneficiaryIdHistories was updated via a special RIF
-     * from CCW but that rif type hasnt been sent since 2019; this table should probably be merged
-     * into bene history and removed so we have one source of truth for historical MBIs.
      */
     beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
@@ -1030,7 +1045,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
     beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
-    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
     // Run the query and return the results.

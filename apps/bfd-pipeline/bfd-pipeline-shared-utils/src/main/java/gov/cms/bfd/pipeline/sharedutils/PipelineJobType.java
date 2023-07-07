@@ -3,12 +3,8 @@ package gov.cms.bfd.pipeline.sharedutils;
 /**
  * Uniquely identifies a type of {@link PipelineJob}, generally corresponding to the {@link
  * PipelineJob} implementation {@link Class}.
- *
- * @param <A> the {@link PipelineJobArguments} type associated with the {@link PipelineJob}
- *     implementation (see {@link NullPipelineJobArguments} for those {@link PipelineJob}
- *     implementations which do not need arguments)
  */
-public final class PipelineJobType<A extends PipelineJobArguments> {
+public final class PipelineJobType {
   /** The type id. */
   private final String typeId;
 
@@ -18,8 +14,8 @@ public final class PipelineJobType<A extends PipelineJobArguments> {
    * @param job the {@link PipelineJob} to build a {@link PipelineJobType} for
    */
   @SuppressWarnings("unchecked")
-  public PipelineJobType(PipelineJob<A> job) {
-    this((Class<PipelineJob<A>>) job.getClass());
+  public PipelineJobType(PipelineJob job) {
+    this((Class<PipelineJob>) job.getClass());
   }
 
   /**
@@ -30,7 +26,7 @@ public final class PipelineJobType<A extends PipelineJobArguments> {
    * @param jobClass the {@link PipelineJob} implementation {@link Class} build a {@link
    *     PipelineJobType} for
    */
-  public <J extends PipelineJob<A>> PipelineJobType(Class<J> jobClass) {
+  public <J extends PipelineJob> PipelineJobType(Class<J> jobClass) {
     this.typeId = jobClass.getTypeName();
   }
 

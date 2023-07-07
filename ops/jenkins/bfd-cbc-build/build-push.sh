@@ -12,7 +12,7 @@ docker build . \
   --build-arg MAVEN_VERSION="${CBC_MAVEN_VERSION:-3}" \
   --build-arg PACKER_VERSION="${CBC_PACKER_VERSION:-1.6.6}" \
   --build-arg TFENV_REPO_HASH="${CBC_TFENV_REPO_HASH:-c05c364}" \
-  --build-arg TFENV_VERSIONS="${CBC_TFENV_VERSIONS:-0.12.31 1.1.9}" \
+  --build-arg TFENV_VERSIONS="${CBC_TFENV_VERSIONS:-1.5.0}" \
   --build-arg PYTHON3_TAR_SOURCE="${CBC_PYTHON3_TAR_SOURCE:-https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz}" \
   --build-arg YQ_VERSION="${CBC_YQ_VERSION:-4}" \
   --tag "${IMAGE_NAME}:${IMAGE_TAG}" \

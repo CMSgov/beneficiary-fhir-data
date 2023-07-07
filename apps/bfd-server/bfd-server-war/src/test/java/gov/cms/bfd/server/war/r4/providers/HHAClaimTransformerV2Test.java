@@ -95,9 +95,7 @@ public class HHAClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    hhaClaimTransformer =
-        new HHAClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+    hhaClaimTransformer = new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();

@@ -18,7 +18,6 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.PartDEvent;
@@ -373,7 +372,7 @@ public final class ServerTestUtils {
    * @return the local {@link Path} to the trust store that FHIR clients should use
    */
   private static Path getClientTrustStorePath() {
-    Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
+    Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.pfx");
     return trustStorePath;
   }
 
@@ -559,7 +558,6 @@ public final class ServerTestUtils {
             CarrierClaimLine.class,
             CarrierClaim.class,
             BeneficiaryHistory.class,
-            MedicareBeneficiaryIdHistory.class,
             BeneficiaryMonthly.class,
             Beneficiary.class,
             LoadedBatch.class,

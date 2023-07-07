@@ -12,7 +12,7 @@
 /bfd/prod/common/nonsensitive/rds_backup_retention_period: 8 # in days
 /bfd/prod/common/nonsensitive/rds_iam_database_authentication_enabled: true
 /bfd/prod/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
-/bfd/prod/common/nonsensitive/rds_instance_class: db.r5.12xlarge
+/bfd/prod/common/nonsensitive/rds_instance_class: db.r6i.12xlarge
 /bfd/prod/common/nonsensitive/rds_instance_count: 4
 /bfd/prod/common/nonsensitive/rds_master_username: bfduser
 /bfd/prod/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
@@ -65,7 +65,6 @@
 /bfd/${env}/server/nonsensitive/pac_resources_enabled: true
 /bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
 ## SERVER+MTLS CONFIGURATION
-/bfd/${env}/server/nonsensitive/data_server_appserver_keystore: 'files/prod-bluebutton-appserver-keystore.jks'
 ## NOTE: data_server_ssl_client_certificates_json stores escaped json string to be pre-processed
 ##       by e.g. jq's `fromjson` method before being consumed by ansible, et al
 /bfd/${env}/server/nonsensitive/data_server_ssl_client_certificates_json: >-

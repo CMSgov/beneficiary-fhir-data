@@ -51,26 +51,23 @@ resource "aws_s3_bucket_acl" "this" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket_notification" "slis_lambda_notifications" {
-  count = local.create_slis ? 1 : 0
-
+resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
+  count  = local.create_slis || local.pipeline_variant_configs.ccw.enabled ? 1 : 0
   bucket = aws_s3_bucket.this.id
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Incoming/"
-    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-incoming"
-    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
-  }
+  dynamic "topic" {
+    for_each = {
+      "Incoming"           = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
+      "Done"               = ["s3:ObjectCreated:*"]
+      "Synthetic/Incoming" = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
+      "Synthetic/Done"     = ["s3:ObjectCreated:*"]
+    }
 
-  lambda_function {
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix       = "Done/"
-    id                  = "${module.bfd_pipeline_slis[0].lambda_name}-done"
-    lambda_function_arn = module.bfd_pipeline_slis[0].lambda_arn
+    content {
+      events        = topic.value
+      filter_prefix = "${topic.key}/"
+      id            = "${aws_sns_topic.s3_events["ccw"].name}-${lower(replace(topic.key, "/", "-"))}"
+      topic_arn     = aws_sns_topic.s3_events["ccw"].arn
+    }
   }
 }

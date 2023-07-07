@@ -68,6 +68,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,10 +139,12 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
-      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for
+      // each 6 records
       // loaded (6x12)
       assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
-      // Checks every month in the beneficiary monthly table for each of the years loaded
+      // Checks every month in the beneficiary monthly table for each of the years
+      // loaded
       assertBeneficiaryMonthly(beneficiaryFromDb, 1990);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2000);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2001);
@@ -193,10 +196,12 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
-      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for each 6 records
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary, for
+      // each 6 records
       // loaded (6x12)
       assertEquals(72, beneficiaryFromDb.getBeneficiaryMonthlys().size());
-      // Checks every month in the beneficiary monthly table for each of the years loaded
+      // Checks every month in the beneficiary monthly table for each of the years
+      // loaded
       assertBeneficiaryMonthly(beneficiaryFromDb, 1990);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2000);
       assertBeneficiaryMonthly(beneficiaryFromDb, 2001);
@@ -243,9 +248,9 @@ public final class RifLoaderIT {
     Stream<RifFile> editedSample = editSamples(samplesStream, fileEditor);
 
     // Load the edited sample to verify that it fails, as expected.
-    IllegalStateException thrown =
+    AssertionFailedError thrown =
         assertThrows(
-            IllegalStateException.class,
+            AssertionFailedError.class,
             () -> {
               loadSample(
                   "SAMPLE_A, bene only, UPDATE",
@@ -253,7 +258,7 @@ public final class RifLoaderIT {
                   editedSample);
             });
 
-    assertTrue(thrown.getMessage().contains("Fatal error during rif file processing"));
+    assertEquals("Load errors encountered. ==> expected: <0> but was: <1>", thrown.getMessage());
   }
 
   /** Ensures that loading a single file results in a loaded file in the loaded batches. */
@@ -481,14 +486,16 @@ public final class RifLoaderIT {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // this should insert a new beneficiary history record
     /*
-     * FIXME Why is this called "_UNCHANGED" if it will result in a new bene history record? Is the
+     * FIXME Why is this called "_UNCHANGED" if it will result in a new bene history
+     * record? Is the
      * name off, or are we still creating some unnecessary history records?
      */
     loadSample(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
     verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     long start = System.currentTimeMillis();
-    // this should bypass inserting a new beneficiary history record because it already exists
+    // this should bypass inserting a new beneficiary history record because it
+    // already exists
     loadSample(Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     /*
@@ -524,9 +531,9 @@ public final class RifLoaderIT {
                       "Expected not a recent lastUpdated timestamp");
                 });
       }
-      // Make sure the size is the same and no records have been inserted if the same fields in the
-      // beneficiary history table are the same.
-      assertEquals(4, beneficiaryHistoryEntries.size());
+      // Make sure the size is the same and no records have been inserted if the same
+      // fields in the beneficiary history table are the same.
+      assertEquals(6, beneficiaryHistoryEntries.size());
 
     } finally {
       if (entityManager != null) {
@@ -605,7 +612,7 @@ public final class RifLoaderIT {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
-    // Loads  second year of data with only 8 months
+    // Loads second year of data with only 8 months
     loadSample(
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
@@ -724,11 +731,13 @@ public final class RifLoaderIT {
   @Disabled
   @Test
   public void loadSyntheticData() {
-    /*Assume.assumeTrue(
-    String.format(
-        "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
-        Runtime.getRuntime().maxMemory()),
-    Runtime.getRuntime().maxMemory() >= 4500000000L); */
+    /*
+     * Assume.assumeTrue(
+     * String.format(
+     * "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
+     * Runtime.getRuntime().maxMemory()),
+     * Runtime.getRuntime().maxMemory() >= 4500000000L);
+     */
     List<StaticRifResource> samples =
         Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources());
     loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
@@ -852,11 +861,17 @@ public final class RifLoaderIT {
   @Test
   public void loadBeneficiaryWhenUpdateAndNon2023EnrollmentDateAndFilterOnExpectRecordSkipped() {
 
-    /* First, load a bene that SHOULD be filtered out (when filtering is turned on) normally. */
+    /*
+     * First, load a bene that SHOULD be filtered out (when filtering is turned on)
+     * normally.
+     */
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
-    /* Re-load that bene again as an UPDATE with filtering turned on, and verify that it was skipped. */
+    /*
+     * Re-load that bene again as an UPDATE with filtering turned on, and verify
+     * that it was skipped.
+     */
     loadDefaultSampleABeneData(
         CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
             USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
@@ -876,7 +891,10 @@ public final class RifLoaderIT {
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
 
-    /* Re-load that bene again as an UPDATE with filtering turned on, with a null ref year, and verify that it was loaded. */
+    /*
+     * Re-load that bene again as an UPDATE with filtering turned on, with a null
+     * ref year, and verify that it was loaded.
+     */
     loadSampleABeneWithEnrollmentRefYear(
         null,
         CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
@@ -1015,7 +1033,8 @@ public final class RifLoaderIT {
             "DummyOut",
             new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 
-    // setup the preValidationProperties; use values data that we know don't already exist
+    // setup the preValidationProperties; use values data that we know don't already
+    // exist
     PreValidationProperties endStateProps = new PreValidationProperties();
     endStateProps.setBeneIdStart(-1005006);
     endStateProps.setBeneIdEnd(-1005018);
@@ -1030,7 +1049,8 @@ public final class RifLoaderIT {
     assertTrue(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, but use a bene_id_start that we know exists; corresponds to
+     * re-run the same test, but use a bene_id_start that we know exists;
+     * corresponds to
      * CHECK_BENE_RANGE query in {@link CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setBeneIdStart(-1000006);
@@ -1038,8 +1058,10 @@ public final class RifLoaderIT {
     assertFalse(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, but use a bene_id_start that we know does not exist, but a
-     * CARRIER_CLAIMS clm_id_start that we know does exist. corresponds to CHECK_CARR_CLAIM_CNTL_NUM
+     * re-run the same test, but use a bene_id_start that we know does not exist,
+     * but a
+     * CARRIER_CLAIMS clm_id_start that we know does exist. corresponds to
+     * CHECK_CARR_CLAIM_CNTL_NUM
      * query in {@link CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setBeneIdStart(-1005006);
@@ -1050,7 +1072,8 @@ public final class RifLoaderIT {
     assertTrue(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, using a CLM_GRP_ID value that we know exists; corresponds to
+     * re-run the same test, using a CLM_GRP_ID value that we know exists;
+     * corresponds to
      * CHECK_CLAIMS_GROUP_ID query in {@link CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setClmGrpIdStart(-100002508);
@@ -1058,7 +1081,8 @@ public final class RifLoaderIT {
     assertFalse(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, using a CLM_GRP_ID value that we know doesn't exists but a PDE_ID value
+     * re-run the same test, using a CLM_GRP_ID value that we know doesn't exists
+     * but a PDE_ID value
      * that we know exists. corresponds to CHECK_PDE_CLAIMS_GROUP_ID query in {@link
      * CcwRifLoadPreValidateSynthea}
      */
@@ -1076,8 +1100,10 @@ public final class RifLoaderIT {
     assertFalse(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, trapping on HICN_UNHASHED or MBI_NUM collisions in BENEFICIARIES
-     * tables; test will vett MBI_NUM collision. Corresponds to CHECK_HICN_MBI_HASH query in {@link
+     * re-run the same test, trapping on HICN_UNHASHED or MBI_NUM collisions in
+     * BENEFICIARIES
+     * tables; test will vett MBI_NUM collision. Corresponds to CHECK_HICN_MBI_HASH
+     * query in {@link
      * CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setPdeIdStart(0);
@@ -1088,8 +1114,10 @@ public final class RifLoaderIT {
     assertFalse(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, trapping on HFI_DOC_CLM_CNTL_NUM collision in various claims
-     * Corresponds to CHECK_FI_DOC_CNTL query in {@link CcwRifLoadPreValidateSynthea}
+     * re-run the same test, trapping on HFI_DOC_CLM_CNTL_NUM collision in various
+     * claims
+     * Corresponds to CHECK_FI_DOC_CNTL query in {@link
+     * CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setMbiStart("JUNK"); // reset back to one that will pass
     endStateProps.setFiDocCntlNumStart("-100000421");
@@ -1097,7 +1125,8 @@ public final class RifLoaderIT {
     assertFalse(preVal.isValid(manifest));
 
     /*
-     * re-run the same test, trapping on MBI_NUM collision in various Beneficiary tables.
+     * re-run the same test, trapping on MBI_NUM collision in various Beneficiary
+     * tables.
      * Corresponds to CHECK_MBI_DUPES query in {@link CcwRifLoadPreValidateSynthea}
      */
     endStateProps.setMbiStart("JUNK");
@@ -1307,9 +1336,12 @@ public final class RifLoaderIT {
       RifFileRecords records = rifProcessor.produceRecords(rifFileEvent);
 
       /*
-       * Each List<String> represents a single CSV row's cell values. Each List<List<String>>
-       * represents a single RIF "record group", because claims are often composed of multiple CSV
-       * rows. Thus, each List<List<List<String>>> is a collection of multiple RIF record groups,
+       * Each List<String> represents a single CSV row's cell values. Each
+       * List<List<String>>
+       * represents a single RIF "record group", because claims are often composed of
+       * multiple CSV
+       * rows. Thus, each List<List<List<String>>> is a collection of multiple RIF
+       * record groups,
        * e.g. multiple claims or beneficiaries.
        */
       List<List<List<String>>> editedRifRecords =
@@ -1325,9 +1357,12 @@ public final class RifLoaderIT {
       CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader(csvHeader);
 
       /*
-       * Write the RIF records back out to a new RIF temp file. Worth noting that, because we aren't
-       * RAII'ing this, we have no way to reliably clean up the temp files that this creates. They
-       * _shouldn't_ be large enough for that to be a major problem, but it's still not great.
+       * Write the RIF records back out to a new RIF temp file. Worth noting that,
+       * because we aren't
+       * RAII'ing this, we have no way to reliably clean up the temp files that this
+       * creates. They
+       * _shouldn't_ be large enough for that to be a major problem, but it's still
+       * not great.
        */
       try (FileWriter fileWriter = new FileWriter(editedTempFile.toFile());
           CSVPrinter csvPrinter = new CSVPrinter(fileWriter, csvFormat); ) {

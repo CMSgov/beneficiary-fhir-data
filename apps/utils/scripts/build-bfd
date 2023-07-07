@@ -1,0 +1,183 @@
+#!/bin/bash
+
+set -e
+
+# Where to find maven cache and repository..
+# These are expected to be the same for everyone.
+MAVEN_ROOT=$HOME/.m2
+MAVEN_CACHE=$MAVEN_ROOT/build-cache
+MAVEN_REPO=$MAVEN_ROOT/repository
+BFD_PATH=gov/cms/bfd
+DATA_PATH=$BFD_PATH/data
+BFD_REPO=$MAVEN_REPO/$BFD_PATH
+DATA_REPO=$MAVEN_REPO/$DATA_PATH
+
+set -e
+
+# Ensure we are in the apps directory.
+if [[ -d apps/bfd-pipeline ]] ; then
+  cd apps
+elif [[ ! -d bfd-pipeline ]] ; then
+  echo "ERROR: expected a bfd-pipeline subdirectory, is this a bfd source directory?" 1>&2
+  echo "cd into your BFD source directory (either root or apps) before running this script." 1>&2
+  exit 1
+fi
+
+usage() {
+  cat <<EOF
+Runs a maven install.  Use command line options to change behaviors.
+
+build-bfd [script_options...] [maven_args...]
+
+The following options are supported.  All options start with a hypen.  Any arguments 
+after the script options are passed to maven as additional arguments.  To pass a
+hyphenated option to maven use -- to mark an end of the script options and beginning
+of maven arguments.
+
+-a          Build all. Same as -ijs.  Use before commit!
+-t          Enable unit tests.
+-i          Enable unit and IT tests.
+-j          Enable javadoc generation.
+-J          Builds docker image using jib plugin.
+-s          Enable checkstyle.
+-c          Once to use write-only build cache.  Twice to disable build cache.
+-r project  Resume from project (after failed tests for example).
+-m          Enable minio (-Ds3.local=true).
+-x          Add clean goal.
+-X          Add clean goal. Deletes cache and all repo artifacts prior to build.
+-I arg      Run the specified integration test.  Implies -i and -C.  Use with -P.
+-T arg      Run the specified unit test.  Implies -t and -C.  Use with -P.
+-p project  Only compile for project (with dependencies, can use multiple times).
+-P project  Only compile for project (no dependencies, can use multiple times).
+-z          Dry run.  Just print the maven command line without running maven.
+-d          Just print the dependency tree (no build).
+-D          Download data projects. (SLOW)
+-F          Just run code formatter and exit (no build).
+-h          Prints this help message.
+EOF
+}
+
+# Either run or print commands depending on dry_run setting.
+dry_run=false
+execute() {
+  if [[ $dry_run = "false" ]] ; then
+    echo "$@"
+    eval "$@"
+  else
+    echo "$@"
+  fi
+}
+
+run_tests=false
+run_its=false
+javadoc=false
+checkstyle=false
+cache_flag_count=0  # 0=enabled, 1=write-only, 2+=disabled
+prevent_full_cache=false
+use_minio=false
+delete_artifacts=false
+clean=false
+projects=""
+include_dependencies=false
+test_arg=""
+it_test_arg=""
+download_data=false
+run_formatter=false
+show_dependencies=false
+build_image=false
+resume_from=""
+
+while getopts "atijJscmxXp:P:I:T:r:zdDFh" option ; do
+  case $option in
+  a) run_tests=true ; run_its=true ; javadoc=true ; checkstyle=true ; prevent_full_cache=true ;;
+  t) run_tests=true ; prevent_full_cache=true ;;
+  i) run_tests=true ; run_its=true ; prevent_full_cache=true ;;
+  j) javadoc=true ; prevent_full_cache=true ;;
+  J) build_image=true ;;
+  s) checkstyle=true ; prevent_full_cache=true ;;
+  c) cache_flag_count=$(($cache_flag_count + 1)) ;;
+  m) use_minio=true ;;
+  x) clean=true ; prevent_full_cache=true ;;
+  X) clean=true ; delete_artifacts=true ;;
+  I) it_test_arg="$OPTARG" ; run_tests=true ; run_its=true ; prevent_full_cache=true ;;
+  T) test_arg="$OPTARG" ; run_tests=true ; prevent_full_cache=true ;;
+  p) projects="$projects -pl :$OPTARG" ; include_dependencies=true ;;
+  P) projects="$projects -pl :$OPTARG" ;;
+  r) resume_from=":$OPTARG" ;;
+  d) show_dependencies=true ;;
+  D) download_data=true ;;
+  F) run_formatter=true ;;
+  z) dry_run=true ;;
+  h) usage ; exit 0 ;;
+  *) usage ; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+args=""
+[[ $run_tests == "false" ]] && args="$args -DskipTests=true"
+[[ $run_its == "false" ]] && args="$args -DskipITs"
+[[ $javadoc == "false" ]] && args="$args -Dmaven.javadoc.skip=true"
+[[ $checkstyle == "false" ]] && args="$args -Dcheckstyle.skip"
+[[ $use_minio == "true" ]] && args="$args -Ds3.local=true"
+[[ $projects != "" ]] && args="$args$projects"
+[[ $include_dependencies = "true" ]] && args="$args -am"
+[[ $test_arg != "" ]] && args="$args -Dtest=\"$test_arg\""
+[[ $it_test_arg != "" ]] && args="$args -Dit.test=\"$it_test_arg\""
+[[ $resume_from != "" ]] && args="$args -rf $resume_from"
+[[ $build_image == "true" ]] && args="$args -Djib.skip=false"
+
+if [[ "$test_arg" != "" ]] || [[ "$it_test_arg" != "" ]] ; then
+  if [[ "$projects" = "" ]] || [[ $include_dependencies = "true" ]] ; then
+    echo ERROR: must use -P option with -T or -I option 1>&1
+    exit 1
+  fi
+fi
+
+# Maven skips tests, javadoc, and checkstyle when build cache is fully enabled
+# so we need to force write-only if user did not already downgrade cache level.
+[[ $prevent_full_cache = "true" ]] && [[ $cache_flag_count = 0 ]] && cache_flag_count=1
+
+# The build cache properties have unfortunate names.
+case $cache_flag_count in
+0) ;; # enabled
+1) args="$args -Dmaven.build.cache.skipCache=true" ;; # write-only
+*) args="$args -Dmaven.build.cache.enabled=false" ;;  # disabled
+esac
+
+goals="install"
+[[ $clean == "true" ]] && goals="clean $goals"
+[[ $run_formatter == "true" ]] && goals="com.spotify.fmt:fmt-maven-plugin:format"
+[[ $show_dependencies == "true" ]] && goals="dependency::tree"
+
+if [[ $delete_artifacts == "true" ]] ; then
+  backup_file=_temp_data.tar
+  restore_needed=false
+  
+  execute pushd $MAVEN_REPO
+  if [[ -d $DATA_REPO ]] ; then
+    execute tar cf $backup_file $DATA_PATH
+    restore_needed=true
+  fi
+
+  [[ -d $BFD_REPO ]] && execute rm -rf $BFD_PATH
+  
+  if [[ $restore_needed = "true" ]] ; then
+    execute tar xf $backup_file
+    execute rm $backup_file
+  fi
+  execute popd
+
+  [[ -d $MAVEN_CACHE ]] && execute rm -rf $MAVEN_CACHE
+fi
+
+for type in fda npi ; do
+  if [[ -d bfd-data-$type ]] ; then
+    if [[ $download_data = "true" ]] || [[ ! -d $DATA_REPO/$type ]] ; then
+      # disable cache so we always get the latest data
+      execute mvn install -Dmaven.build.cache.enabled=false -f bfd-data-$type
+    fi
+  fi
+done
+
+execute mvn -e $goals $args "$@"

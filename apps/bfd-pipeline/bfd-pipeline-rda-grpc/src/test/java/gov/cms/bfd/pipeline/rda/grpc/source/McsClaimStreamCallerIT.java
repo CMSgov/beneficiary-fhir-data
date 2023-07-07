@@ -42,19 +42,19 @@ public class McsClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller();
-              final GrpcResponseStream<McsClaimChange> results =
-                  caller.callService(channel, CallOptions.DEFAULT, 0L);
-              assertTrue(results.hasNext());
+              try (var results = caller.callService(channel, CallOptions.DEFAULT, 0L)) {
+                assertTrue(results.hasNext());
 
-              RdaMcsClaim claim = transform(results.next());
-              assertTrue(claim.getIdrClmHdIcn().length() > 0);
-              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertTrue(results.hasNext());
+                RdaMcsClaim claim = transform(results.next());
+                assertTrue(claim.getIdrClmHdIcn().length() > 0);
+                assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+                assertTrue(results.hasNext());
 
-              claim = transform(results.next());
-              assertTrue(claim.getIdrClmHdIcn().length() > 0);
-              assertEquals(Long.valueOf(2), claim.getSequenceNumber());
-              assertFalse(results.hasNext());
+                claim = transform(results.next());
+                assertTrue(claim.getIdrClmHdIcn().length() > 0);
+                assertEquals(Long.valueOf(2), claim.getSequenceNumber());
+                assertFalse(results.hasNext());
+              }
             });
   }
 
@@ -76,14 +76,14 @@ public class McsClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller();
-              final GrpcResponseStream<McsClaimChange> results =
-                  caller.callService(channel, CallOptions.DEFAULT, 9L);
-              assertEquals(Long.valueOf(10), transform(results.next()).getSequenceNumber());
-              assertEquals(Long.valueOf(11), transform(results.next()).getSequenceNumber());
-              assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
-              assertEquals(Long.valueOf(13), transform(results.next()).getSequenceNumber());
-              assertEquals(Long.valueOf(14), transform(results.next()).getSequenceNumber());
-              assertFalse(results.hasNext());
+              try (var results = caller.callService(channel, CallOptions.DEFAULT, 9L)) {
+                assertEquals(Long.valueOf(10), transform(results.next()).getSequenceNumber());
+                assertEquals(Long.valueOf(11), transform(results.next()).getSequenceNumber());
+                assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
+                assertEquals(Long.valueOf(13), transform(results.next()).getSequenceNumber());
+                assertEquals(Long.valueOf(14), transform(results.next()).getSequenceNumber());
+                assertFalse(results.hasNext());
+              }
             });
   }
 

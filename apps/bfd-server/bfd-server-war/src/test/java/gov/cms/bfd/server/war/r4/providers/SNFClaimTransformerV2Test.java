@@ -88,9 +88,7 @@ public class SNFClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    snfClaimTransformer =
-        new SNFClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookupForTesting());
+    snfClaimTransformer = new SNFClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
     IParser parser = fhirContext.newJsonParser();
@@ -860,7 +858,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
             List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "9214", "BONE SCAN")),
-            "2016-01-16T00:00:00-08:00");
+            "2016-01-16T00:00:00+00:00");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 9214");
   }

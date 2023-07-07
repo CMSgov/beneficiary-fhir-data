@@ -11,12 +11,18 @@ locals {
 }
 
 resource "aws_lambda_permission" "this" {
-  statement_id   = "${local.lambda_full_name}-allow-s3"
+  statement_id   = "${local.lambda_full_name}-allow-sns"
   action         = "lambda:InvokeFunction"
-  function_name  = aws_lambda_function.this.arn
-  principal      = "s3.amazonaws.com"
-  source_arn     = data.aws_s3_bucket.etl.arn
+  function_name  = aws_lambda_function.this.function_name
+  principal      = "sns.amazonaws.com"
+  source_arn     = data.aws_sns_topic.this.arn
   source_account = var.account_id
+}
+
+resource "aws_sns_topic_subscription" "this" {
+  topic_arn = data.aws_sns_topic.this.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.this.arn
 }
 
 resource "aws_lambda_function" "this" {
