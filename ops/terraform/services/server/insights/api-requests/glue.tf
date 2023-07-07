@@ -1415,7 +1415,5 @@ resource "aws_glue_crawler" "glue-crawler-api-requests" {
     update_behavior = "LOG"
   }
 
-  depends_on = [
-    module.glue-table-api-requests
-  ]
+  depends_on = [module.glue-table-api-requests]
 }

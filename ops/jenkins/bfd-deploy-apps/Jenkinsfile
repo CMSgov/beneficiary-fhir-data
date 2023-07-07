@@ -5,7 +5,6 @@
  * This script will be run by Jenkins when deploying apps and app AMIs.
  * </p>
  */
-@Library('bfd@bfd-2647-allow-regression-suite-ephemeral')
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
@@ -342,7 +341,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
-                        //sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                     }
                 }
             }
