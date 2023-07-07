@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
+import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneificiaryPerformanceSettings;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
+import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
@@ -95,10 +98,54 @@ public class AppConfigurationTest {
         testAppConfig.getDatabaseOptions().getDatabasePassword());
     assertEquals(
         Integer.parseInt(envVars.get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
-        testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().getLoaderThreads());
+        testAppConfig
+            .getCcwRifLoadOptions()
+            .get()
+            .getLoadOptions()
+            .getBeneficiaryPerformanceSettings()
+            .getLoaderThreads());
     assertEquals(
         envVars.get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED),
         "" + testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().isIdempotencyRequired());
+  }
+
+  /**
+   * Verifies that {@link AppConfiguration#loadBeneificiaryPerformanceSettings} enforces field
+   * requirements and parses settings correctly.
+   */
+  @Test
+  void testBeneficiaryPerformanceSettings() {
+    final var envVars = new HashMap<String, String>();
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
+
+    assertThrows(ConfigException.class, () -> loadBeneificiaryPerformanceSettings(configLoader));
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "10");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "11");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "12");
+    assertEquals(
+        new LoadAppOptions.PerformanceSettings(10, 11, 12),
+        loadBeneificiaryPerformanceSettings(configLoader));
+  }
+
+  /**
+   * Verifies that {@link AppConfiguration#loadClaimPerformanceSettings} uses defaults as necessary
+   * and parses settings correctly.
+   */
+  @Test
+  void testClaimPerformanceSettings() {
+    final var envVars = new HashMap<String, String>();
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
+
+    final var benePerformanceSettings = new LoadAppOptions.PerformanceSettings(1, 2, 3);
+    assertEquals(
+        benePerformanceSettings,
+        loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
+    envVars.put(AppConfiguration.ENV_VAR_KEY_CLAIM_LOADER_THREADS, "20");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_CLAIM_RIF_JOB_BATCH_SIZE, "21");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_CLAIM_RIF_JOB_QUEUE_SIZE_MULTIPLE, "22");
+    assertEquals(
+        new LoadAppOptions.PerformanceSettings(20, 21, 22),
+        loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
   }
 
   /**

@@ -118,18 +118,19 @@ public final class RifLoader {
   /**
    * Creates the load executor.
    *
-   * @param options the {@link LoadAppOptions} to use
+   * @param settings the {@link LoadAppOptions.PerformanceSettings} to use
    * @return the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    */
-  private static BlockingThreadPoolExecutor createLoadExecutor(LoadAppOptions options) {
-    final int threadPoolSize = options.getLoaderThreads();
-    final int taskQueueSize = options.getLoaderThreads() * options.getTaskQueueSizeMultiple();
+  private static BlockingThreadPoolExecutor createLoadExecutor(
+      LoadAppOptions.PerformanceSettings settings) {
+    final int threadPoolSize = settings.getLoaderThreads();
+    final int taskQueueSize = settings.getLoaderThreads() * settings.getTaskQueueSizeMultiple();
 
     LOGGER.info(
         "Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
-        options.getLoaderThreads(),
+        threadPoolSize,
         taskQueueSize,
-        options.getRecordBatchSize());
+        taskQueueSize);
 
     /*
      * I feel like a hipster using "found" code like
@@ -138,9 +139,8 @@ public final class RifLoader {
      * and allows a single producer to feed it, blocking that producer when
      * the task queue is full.
      */
-    BlockingThreadPoolExecutor loadExecutor =
-        new BlockingThreadPoolExecutor(threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
-    return loadExecutor;
+    return new BlockingThreadPoolExecutor(
+        threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -180,44 +180,41 @@ public final class RifLoader {
       Consumer<Throwable> errorHandler,
       Consumer<RifRecordLoadResult> resultHandler) {
 
-    BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(options);
+    final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
+    final LoadAppOptions.PerformanceSettings performanceSettings =
+        options.selectPerformanceSettingsForFileType(fileType);
+    final BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(performanceSettings);
 
-    MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
-    Timer.Context timerDataSetFile =
+    final MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
+    final Timer.Context timerDataSetFile =
         appState
             .getMetrics()
             .timer(MetricRegistry.name(getClass().getSimpleName(), "dataSet", "file", "processed"))
             .time();
     LOGGER.info("Processing '{}'...", dataToLoad);
 
-    dataToLoad
-        .getSourceEvent()
-        .getEventMetrics()
-        .register(
-            MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
-            new Gauge<Integer>() {
-              /**
-               * @see com.codahale.metrics.Gauge#getValue()
-               */
-              @Override
-              public Integer getValue() {
-                return loadExecutor.getQueue().size();
-              }
-            });
-    dataToLoad
-        .getSourceEvent()
-        .getEventMetrics()
-        .register(
-            MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
-            new Gauge<Integer>() {
-              /**
-               * @see com.codahale.metrics.Gauge#getValue()
-               */
-              @Override
-              public Integer getValue() {
-                return loadExecutor.getActiveCount();
-              }
-            });
+    fileEventMetrics.register(
+        MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
+        new Gauge<Integer>() {
+          /**
+           * @see com.codahale.metrics.Gauge#getValue()
+           */
+          @Override
+          public Integer getValue() {
+            return loadExecutor.getQueue().size();
+          }
+        });
+    fileEventMetrics.register(
+        MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
+        new Gauge<Integer>() {
+          /**
+           * @see com.codahale.metrics.Gauge#getValue()
+           */
+          @Override
+          public Integer getValue() {
+            return loadExecutor.getActiveCount();
+          }
+        });
 
     // Trim the LoadedFiles & LoadedBatches table
     trimLoadedFiles(errorHandler);
@@ -243,7 +240,7 @@ public final class RifLoader {
     final var error = new AtomicReference<Exception>();
 
     // Define the Consumer that will handle each batch.
-    Consumer<List<RifRecordEvent<?>>> batchProcessor =
+    final Consumer<List<RifRecordEvent<?>>> batchProcessor =
         recordsBatch -> {
           /*
            * Submit the RifRecordEvent for asynchronous processing. Note
@@ -267,20 +264,15 @@ public final class RifLoader {
     // Collect records into batches and submit each to batchProcessor.
     // Any exception will trigger a clean shutdown of the stream.
     try {
-      if (options.getRecordBatchSize() > 1) {
-        BatchSpliterator.batches(dataToLoad.getRecords(), options.getRecordBatchSize())
-            .takeWhile(record -> error.get() == null) // stop if an exception is thrown
+      if (performanceSettings.getRecordBatchSize() > 1) {
+        BatchSpliterator.batches(dataToLoad.getRecords(), performanceSettings.getRecordBatchSize())
+            .takeWhile(rifRecord -> error.get() == null) // stop if an exception is thrown
             .forEach(batchProcessor);
       } else {
         dataToLoad
             .getRecords()
-            .takeWhile(record -> error.get() == null) // stop if an exception is thrown
-            .map(
-                record -> {
-                  List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
-                  ittyBittyBatch.add(record);
-                  return ittyBittyBatch;
-                })
+            .takeWhile(rifRecord -> error.get() == null) // stop if an exception is thrown
+            .map(List::<RifRecordEvent<?>>of)
             .forEach(batchProcessor);
       }
     } catch (Exception e) {

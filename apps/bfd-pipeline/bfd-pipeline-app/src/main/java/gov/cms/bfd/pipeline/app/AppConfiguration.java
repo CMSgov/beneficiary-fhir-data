@@ -90,12 +90,22 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions.PerformanceSettings#getLoaderThreads()} value.
    *
    * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
    * depends on number of cores, cpu speed, i/o throughput, and database performance.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions.PerformanceSettings#getLoaderThreads()} value
+   * specific to processing claims data.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
+   * depends on number of cores, cpu speed, i/o throughput, and database performance.
+   */
+  public static final String ENV_VAR_KEY_CLAIM_LOADER_THREADS = "LOADER_THREADS_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -125,6 +135,17 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
   public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE";
 
   /**
+   * The name of the environment variable that should be used to provide the number of {@link
+   * RifRecordEvent}s that will be included in each processing batch specific to processing claims
+   * data. Note that larger batch sizes mean that more {@link RifRecordEvent}s will be held in
+   * memory simultaneously.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
+   * the performance boost from larger batch sizes drops off quickly.
+   */
+  public static final String ENV_VAR_KEY_CLAIM_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE_CLAIMS";
+
+  /**
    * The name of the environment variable that should be used to provide the work queue size for the
    * RIF loader's thread pool. This number is multiplied by the number of worker threads to obtain
    * the actual queue size. Lower sizes are more memory efficient but larger sizes could provide a
@@ -137,6 +158,20 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    */
   public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE =
       "RIF_JOB_QUEUE_SIZE_MULTIPLE";
+
+  /**
+   * The name of the environment variable that should be used to provide the work queue size for the
+   * RIF loader's thread pool when processing claims data. This number is multiplied by the number
+   * of worker threads to obtain the actual queue size. Lower sizes are more memory efficient but
+   * larger sizes could provide a performance improvement in some circumstances.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
+   * smaller is better. The default value provides some slack for handling intermittent database
+   * slow downs without wasting too much RAM with large numbers of objects waiting to be sent to the
+   * database.
+   */
+  public static final String ENV_VAR_KEY_CLAIM_RIF_JOB_QUEUE_SIZE_MULTIPLE =
+      "RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
@@ -450,15 +485,20 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
     byte[] hicnHashPepper = config.hexBytes(ENV_VAR_KEY_HICN_HASH_PEPPER);
     int hicnHashCacheSize = config.intValue(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE);
 
-    int loaderThreads = config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS);
-    boolean idempotencyRequired = config.booleanValue(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
-    boolean filteringNonNullAndNon2023Benes =
+    final boolean idempotencyRequired = config.booleanValue(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+    final boolean filteringNonNullAndNon2023Benes =
         config.booleanValue(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
-    int rifRecordBatchSize = config.intValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE);
-    int rifTaskQueueSizeMultiple = config.intValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE);
+
+    final var benePerformanceSettings = loadBeneificiaryPerformanceSettings(config);
+    final var claimPerformanceSettings =
+        loadClaimPerformanceSettings(config, benePerformanceSettings);
+    final int maxLoaderThreads =
+        Math.max(
+            benePerformanceSettings.getLoaderThreads(),
+            claimPerformanceSettings.getLoaderThreads());
 
     MetricOptions metricOptions = loadMetricOptions(config);
-    DatabaseOptions databaseOptions = loadDatabaseOptions(config, loaderThreads);
+    DatabaseOptions databaseOptions = loadDatabaseOptions(config, maxLoaderThreads);
 
     LoadAppOptions loadOptions =
         new LoadAppOptions(
@@ -467,16 +507,48 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
                 .hashPepper(hicnHashPepper)
                 .cacheSize(hicnHashCacheSize)
                 .build(),
-            loaderThreads,
             idempotencyRequired,
             filteringNonNullAndNon2023Benes,
-            rifRecordBatchSize,
-            rifTaskQueueSizeMultiple);
+            benePerformanceSettings,
+            claimPerformanceSettings);
 
     CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
 
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
     return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+  }
+
+  /**
+   * Loads beneficiary specific {@link LoadAppOptions.PerformanceSettings}.
+   *
+   * @param config used to load configuration values
+   * @return the loaded settings
+   */
+  static LoadAppOptions.PerformanceSettings loadBeneificiaryPerformanceSettings(
+      ConfigLoader config) {
+    return new LoadAppOptions.PerformanceSettings(
+        config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS),
+        config.intValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE),
+        config.intValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE));
+  }
+
+  /**
+   * Loads optional claim specific {@link LoadAppOptions.PerformanceSettings}.
+   *
+   * @param config used to load configuration values
+   * @param benePerformanceSettings used to get default values
+   * @return the loaded settings
+   */
+  static LoadAppOptions.PerformanceSettings loadClaimPerformanceSettings(
+      ConfigLoader config, LoadAppOptions.PerformanceSettings benePerformanceSettings) {
+    return new LoadAppOptions.PerformanceSettings(
+        config.intValue(
+            ENV_VAR_KEY_CLAIM_LOADER_THREADS, benePerformanceSettings.getLoaderThreads()),
+        config.intValue(
+            ENV_VAR_KEY_CLAIM_RIF_JOB_BATCH_SIZE, benePerformanceSettings.getRecordBatchSize()),
+        config.intValue(
+            ENV_VAR_KEY_CLAIM_RIF_JOB_QUEUE_SIZE_MULTIPLE,
+            benePerformanceSettings.getTaskQueueSizeMultiple()));
   }
 
   /**
