@@ -24,7 +24,6 @@ import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
-import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +42,7 @@ import software.amazon.awssdk.regions.Region;
  * application supports all of the mechanisms that are supported by {@link
  * DefaultCredentialsProvider}, which include environment variables, EC2 instance profiles, etc.
  */
-public final class AppConfiguration extends BaseAppConfiguration implements Serializable {
-  private static final long serialVersionUID = -6845504165285244536L;
+public final class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link

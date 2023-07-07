@@ -1,11 +1,7 @@
 package gov.cms.bfd.sharedutils.database;
 
-import java.io.Serializable;
-
 /** The user-configurable options that specify how to access the application's database. */
-public final class DatabaseOptions implements Serializable {
-  /** Serialization UID. */
-  private static final long serialVersionUID = 1L;
+public final class DatabaseOptions {
 
   /** The JDBC URL of the database. */
   private final String databaseUrl;

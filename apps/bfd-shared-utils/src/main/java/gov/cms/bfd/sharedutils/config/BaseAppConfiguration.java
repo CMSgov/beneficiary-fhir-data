@@ -1,7 +1,6 @@
 package gov.cms.bfd.sharedutils.config;
 
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
@@ -9,14 +8,8 @@ import java.util.Optional;
 /**
  * Models the common configuration options for BFD applications, should be extended by a specific
  * application.
- *
- * <p>This is serializable in order to support IT tests which deserialize the application
- * configuration to ensure the values were set correctly. Classes that extend this should also be
- * serializable if similar testing is desired, but it is not required for production functionality.
  */
-public abstract class BaseAppConfiguration implements Serializable {
-  /** Serialization UID. */
-  private static final long serialVersionUID = -6845504165285244533L;
+public abstract class BaseAppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
