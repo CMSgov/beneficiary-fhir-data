@@ -34,6 +34,10 @@ spec:
   }
   stages {
     stage('Docker Build') {
+      // Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
+      environment {
+        DOCKER_BUILDKIT = 1
+      }
       steps {
         container('docker') {
           // Install prerequisites
@@ -48,8 +52,8 @@ spec:
           }
 
           // Execute the existing build-push script
-          dir('ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation') {
-            sh 'bash build_docker.sh'
+          dir('ops/jenkins/bfd-mgmt-synthea-generation-build') {
+            sh 'bash build-push.sh'
           }
         }
       }
