@@ -254,7 +254,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
-
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
@@ -347,10 +346,9 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * later.
      */
     OffsetLinkBuilder startIx = new OffsetLinkBuilder(requestDetails, "startIndex");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimTypeV2> claimTypesRequested = parseTypeParam(type);
-    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
-
     Optional<Boolean> includeTaxNumbers =
         Optional.ofNullable(returnIncludeTaxNumbers(requestDetails));
     Optional<Boolean> filterSamhsa = Optional.ofNullable(Boolean.parseBoolean(excludeSamhsa));
@@ -386,15 +384,31 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
 
     // See if we have any claims data for the beneficiary.
     Integer claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
-    return processClaimsMask(
-        claimTypesThatHaveData,
-        claimTypesRequested,
-        beneficiaryId,
-        paging,
-        Optional.ofNullable(lastUpdated),
-        Optional.ofNullable(serviceDate),
-        filterSamhsa,
-        includeTaxNumbers);
+    org.hl7.fhir.r4.model.Bundle bundle = null;
+    if (claimTypesThatHaveData > 0) {
+      try {
+        bundle =
+            processClaimsMask(
+                claimTypesThatHaveData,
+                claimTypesRequested,
+                beneficiaryId,
+                paging,
+                Optional.ofNullable(lastUpdated),
+                Optional.ofNullable(serviceDate),
+                filterSamhsa,
+                includeTaxNumbers);
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
+    if (bundle == null) {
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      LoggingUtils.logResourceCountToMdc(0);
+      bundle =
+          TransformerUtilsV2.createBundle(
+              paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
+    }
+    return bundle;
   }
 
   /**
@@ -423,20 +437,20 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
       Optional<Boolean> excludeSamhsa,
-      Optional<Boolean> includeTaxNumbers) {
+      Optional<Boolean> includeTaxNumbers)
+      throws InterruptedException, ExecutionException {
 
     EnumSet<ClaimTypeV2> claimsToProcess =
         ClaimTypeV2.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
-
     LOGGER.debug(
         String.format("EnumSet for V2 claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
 
-    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
-
+    // OK to return null, since fallback will create bundle and log things.
     if (claimsToProcess.isEmpty()) {
-      return TransformerUtilsV2.createBundle(
-          paging, eobs, loadedFilterManager.getTransactionTime());
+      return null;
     }
+
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
@@ -461,11 +475,12 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           callableTasks.add(task);
         });
 
-    List<Future<PatientClaimsEobTaskTransformerV2>> futures = null;
+    List<Future<PatientClaimsEobTaskTransformerV2>> futures;
     try {
       futures = executorService.invokeAll(callableTasks);
     } catch (InterruptedException e) {
       LOGGER.error("Error invoking executor service", e);
+      throw e;
     }
 
     for (Future<PatientClaimsEobTaskTransformerV2> future : futures) {
@@ -483,6 +498,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
         }
       } catch (InterruptedException | ExecutionException e) {
         LOGGER.error("Error getting future result", e);
+        throw e;
       }
     }
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);

@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
@@ -32,6 +33,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.ClaimTypeV2;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -346,12 +348,13 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
      * contained within requestDetails and parsed out along with other parameters
      * later.
      */
-
+    OffsetLinkBuilder startIx = new OffsetLinkBuilder(requestDetails, "startIndex");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimType> claimTypesRequested = parseTypeParam(type);
     Optional<Boolean> includeTaxNumbers =
         Optional.ofNullable(returnIncludeTaxNumbers(requestDetails));
-    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+    Optional<Boolean> filterSamhsa = Optional.ofNullable(Boolean.parseBoolean(excludeSamhsa));
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
@@ -371,8 +374,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
         "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
     operation.publishOperationName();
 
-    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
-
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
@@ -380,21 +381,79 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
 
-      return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
+      return TransformerUtils.createBundle(
+          paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
     }
 
     // See if we have claims data for the beneficiary.
     Integer claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
+    Bundle bundle = null;
+    if (claimTypesThatHaveData > 0) {
+      try {
+        bundle =
+            processClaimsMask(
+                claimTypesThatHaveData,
+                claimTypesRequested,
+                beneficiaryId,
+                paging,
+                Optional.ofNullable(lastUpdated),
+                Optional.ofNullable(serviceDate),
+                filterSamhsa,
+                includeTaxNumbers);
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
+    if (bundle == null) {
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      LoggingUtils.logResourceCountToMdc(0);
+      bundle =
+          TransformerUtils.createBundle(
+              paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
+    }
+    return bundle;
+  }
+
+  /**
+   * Process the available claims mask value detnoting which claims to process in parallel.
+   *
+   * @param claimTypesThatHaveData an {@link Integer} denoting the claim types to process.
+   * @param claimTypesRequested a {@link Set} of {@link ClaimType} denoting requested claim types.
+   * @param beneficiaryId a {@link Long} patient bene_id value.
+   * @param paging a {@link OffsetLinkBuilder} for the startIndex (or offset) when using pagination.
+   * @param lastUpdated a {@link DateRangeParam} denoting inclusion of lastUpdated field.
+   * @param serviceDate a {@link DateRangeParam} specifying date range for the {@link
+   *     org.hl7.fhir.r4.model.ExplanationOfBenefit}s that completed.
+   * @param excludeSamhsa optional {@link Boolean} denoting use of {@link R4EobSamhsaMatcher} *
+   *     filtering of all SAMHSA-related claims from the results.
+   * @param includeTaxNumbers an {@link Optional} boolean denoting includsio/exclusion of tax
+   *     numbers in the response,
+   * @return Returns a {@link org.hl7.fhir.stu3.model.Bundle} of {@link
+   *     org.hl7.fhir.stu3.model.ExplanationOfBenefit}s, which may contain multiple matching
+   *     resources, or may also be empty.
+   */
+  @VisibleForTesting
+  private org.hl7.fhir.dstu3.model.Bundle processClaimsMask(
+      Integer claimTypesThatHaveData,
+      Set<ClaimType> claimTypesRequested,
+      long beneficiaryId,
+      OffsetLinkBuilder paging,
+      Optional<DateRangeParam> lastUpdated,
+      Optional<DateRangeParam> serviceDate,
+      Optional<Boolean> excludeSamhsa,
+      Optional<Boolean> includeTaxNumbers)
+      throws InterruptedException, ExecutionException {
+
     EnumSet<ClaimType> claimsToProcess =
         ClaimType.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
-
     LOGGER.debug(
-        String.format(
-            "EnumSet for V1 claims, bene_id %d: %s", beneficiaryId, claimsToProcess.toString()));
+        String.format("EnumSet for claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
 
+    // OK to return null, since fallback will create bundle and log things.
     if (claimsToProcess.isEmpty()) {
-      return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
+      return null;
     }
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
@@ -404,25 +463,27 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     List<Callable<PatientClaimsEobTaskTransformer>> callableTasks =
         new ArrayList<>(claimsToProcess.size());
 
-    for (ClaimType claimType : claimsToProcess) {
-      var task = appContext.getBean(PatientClaimsEobTaskTransformer.class);
-      task.setupTaskParams(
-          deriveTransformer(claimType),
-          claimType,
-          beneficiaryId,
-          Optional.ofNullable(lastUpdated),
-          Optional.ofNullable(serviceDate),
-          includeTaxNumbers,
-          Boolean.parseBoolean(excludeSamhsa));
+    claimsToProcess.forEach(
+        claimType -> {
+          PatientClaimsEobTaskTransformer task =
+              appContext.getBean(PatientClaimsEobTaskTransformer.class);
+          task.setupTaskParams(
+              deriveTransformer(claimType),
+              claimType,
+              beneficiaryId,
+              lastUpdated,
+              serviceDate,
+              includeTaxNumbers,
+              excludeSamhsa);
+          callableTasks.add(task);
+        });
 
-      callableTasks.add(task);
-    }
-
-    List<Future<PatientClaimsEobTaskTransformer>> futures = null;
+    List<Future<PatientClaimsEobTaskTransformer>> futures;
     try {
       futures = executorService.invokeAll(callableTasks);
     } catch (InterruptedException e) {
       LOGGER.error("Error invoking executor service", e);
+      throw e;
     }
 
     for (Future<PatientClaimsEobTaskTransformer> future : futures) {
@@ -434,20 +495,19 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
           Throwable taskError = taskResult.getFailure().get();
           LOGGER.error(
               "Encountered issue processing EOB thread, ClaimType {}; {}",
-              taskResult.toString(),
+              taskResult,
               taskError.getMessage());
           throw new RuntimeException(taskError);
         }
       } catch (InterruptedException | ExecutionException e) {
         LOGGER.error("Error getting future result", e);
+        throw e;
       }
     }
-
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
-
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
 
@@ -484,6 +544,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @param eobIdType the eob claim type
    * @return the transformed explanation of benefit
    */
+  @VisibleForTesting
   private ClaimTransformerInterface deriveTransformer(ClaimType eobIdType) {
     switch (eobIdType) {
       case CARRIER:
@@ -510,16 +571,17 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * Parses the claim types to return in the search by parsing out the type tokens parameters.
    *
    * @param type a {@link TokenAndListParam} for the "type" field in a search
-   * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
+   * @return The {@link ClaimTypeV2}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param
    */
-  static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
-    if (type == null)
+  public static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
+    if (type == null) {
       type =
           new TokenAndListParam()
               .addAnd(
                   new TokenOrListParam()
                       .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
+    }
 
     /*
      * This logic kinda' stinks, but HAPI forces us to handle some odd query
@@ -534,9 +596,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
        */
       Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
       for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
-        if (codingToken.getModifier() != null) {
-          throw new InvalidRequestException("Cannot set modifier on field 'type'");
-        }
+        if (codingToken.getModifier() != null) throw new IllegalArgumentException();
 
         /*
          * Per the FHIR spec (https://www.hl7.org/fhir/search.html), there are lots of
@@ -548,13 +608,16 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
             codingToken.getValue() != null
                 ? ClaimType.parse(codingToken.getValue().toLowerCase())
                 : Optional.empty();
+
         if (codingToken.getSystem() != null
             && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
             && !claimType.isPresent()) {
           claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
         } else if (codingToken.getSystem() == null
             || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
-          if (claimType.isPresent()) claimTypesInner.add(claimType.get());
+          if (claimType.isPresent()) {
+            claimTypesInner.add(claimType.get());
+          }
         }
       }
 
@@ -563,7 +626,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
        */
       claimTypes.retainAll(claimTypesInner);
     }
-
     return claimTypes;
   }
 }
