@@ -336,15 +336,12 @@ public final class TransformerTestUtilsV2 {
         actualCode.stream()
             .anyMatch(
                 c -> {
-                  if (!expectedSystem.equals(c.getSystem())
-                      || (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
-                      || (expectedDisplay != null && !expectedDisplay.equals(c.getDisplay()))
-                      || !expectedCode.equals(c.getCode())) {
-                    return false;
-                  }
-                  return true;
+                  return expectedSystem.equals(c.getSystem())
+                      && (expectedVersion == null || expectedVersion.equals(c.getVersion()))
+                      && (expectedDisplay == null || expectedDisplay.equals(c.getDisplay()))
+                      && expectedCode.equals(c.getCode());
                 }),
-        "No matching Coding found: " + actualCode.toString());
+        "No matching Coding found: " + actualCode);
   }
 
   /**
@@ -523,8 +520,6 @@ public final class TransformerTestUtilsV2 {
       Optional<String> hcpcsSecondModifierCode,
       Optional<Character> hcpcsYearCode,
       int index) {
-    // TODO - fix this
-    /*
     if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
       assertHasCoding(
           TransformerConstants.CODING_SYSTEM_HCPCS,
@@ -537,7 +532,7 @@ public final class TransformerTestUtilsV2 {
           "" + hcpcsYearCode.get(),
           null,
           hcpcsCode.get(),
-          item.getService().getCoding());
+          item.getProductOrService().getCoding());
     } else { // while others do not...
       if (hcpcsInitialModifierCode.isPresent()) {
         assertHasCoding(
@@ -549,11 +544,9 @@ public final class TransformerTestUtilsV2 {
         assertHasCoding(
             TransformerConstants.CODING_SYSTEM_HCPCS,
             hcpcsCode.get(),
-            item.getService().getCoding());
+            item.getProductOrService().getCoding());
       }
     }
-    */
-
     assertFalse(hcpcsSecondModifierCode.isPresent());
   }
 
@@ -739,9 +732,7 @@ public final class TransformerTestUtilsV2 {
             c -> {
               if (!codingSystem.equals(c.getSystem())) return false;
               if (codingVersion != null && !codingVersion.equals(c.getVersion())) return false;
-              if (!codingCode.equals(c.getCode())) return false;
-
-              return true;
+              return codingCode.equals(c.getCode());
             });
   }
 
