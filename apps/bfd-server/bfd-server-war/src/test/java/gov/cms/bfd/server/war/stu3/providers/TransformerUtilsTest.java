@@ -1,13 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -26,14 +18,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -45,6 +29,23 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link TransformerUtils}. Not to be confused with {@link TransformerTestUtils},
@@ -281,14 +282,10 @@ public final class TransformerUtilsTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
-            .findFirst()
-            .get();
+    Object claim =
+        parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
 
-    claim.setLastUpdated(Instant.now());
+    ((HHAClaim) claim).setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forDstu3();
     ClaimTransformerInterface claimTransformerInterface =
@@ -337,14 +334,10 @@ public final class TransformerUtilsTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim hhaClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
-            .findFirst()
-            .get();
+    Object hhaClaim =
+        parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
 
-    hhaClaim.setLastUpdated(Instant.now());
+    ((HHAClaim) hhaClaim).setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forDstu3();
     MetricRegistry metricRegistry = new MetricRegistry();
@@ -359,14 +352,10 @@ public final class TransformerUtilsTest {
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    HospiceClaim hospiceClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HospiceClaim)
-            .map(r -> (HospiceClaim) r)
-            .findFirst()
-            .get();
+    Object hospiceClaim =
+        parsedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> r).findFirst().get();
 
-    hospiceClaim.setLastUpdated(Instant.now());
+    ((HospiceClaim) hospiceClaim).setLastUpdated(Instant.now());
 
     claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
     genEob = claimTransformerInterface.transform(hospiceClaim, Optional.empty());
@@ -375,14 +364,10 @@ public final class TransformerUtilsTest {
 
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    DMEClaim dmeClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
-            .findFirst()
-            .get();
+    Object dmeClaim =
+        parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
 
-    dmeClaim.setLastUpdated(Instant.now());
+    ((DMEClaim) dmeClaim).setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new DMEClaimTransformer(
@@ -393,14 +378,14 @@ public final class TransformerUtilsTest {
 
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    InpatientClaim inpatientClaim =
+    Object inpatientClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(r -> r)
             .findFirst()
             .get();
 
-    inpatientClaim.setLastUpdated(Instant.now());
+    ((InpatientClaim) inpatientClaim).setLastUpdated(Instant.now());
     claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, npiOrgLookup);
     genEob = claimTransformerInterface.transform(inpatientClaim, Optional.empty());
     parser = fhirContext.newJsonParser();
@@ -420,8 +405,6 @@ public final class TransformerUtilsTest {
    * @return {@code true} if the coding list is null or empty
    */
   private boolean isCodingListNullOrEmpty(List<Coding> coding) {
-    if (coding == null || coding.isEmpty() || coding.size() == 0) return true;
-
-    return false;
+    return (coding == null || coding.isEmpty() || coding.size() == 0);
   }
 }
