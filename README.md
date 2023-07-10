@@ -44,6 +44,14 @@ resources like the [development environment setup guide](https://github.com/CMSg
 
 Also for maintainers, the full set of runbooks for various scenarios can be found in [runbooks](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/runbooks).
 
+## Security
+
+We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
+
+If you believe you’ve found or been made aware of a security vulnerability, please refer to 
+the CMS Vulnerability Disclosure Policy (here is a [link](https://www.cms.gov/Research-Statistics-Data-and-Systems/CMS-Information-Technology/CIO-Directives-and-Policies/Downloads/CMS-Vulnerability-Disclosure-Policy.pdf) 
+to the most recent version as of the time of this commit.
+
 ## License
 
 This project is in the worldwide [public domain](LICENSE.md). As stated in [LICENSE](LICENSE.md):
