@@ -85,6 +85,12 @@ install=true
 image_tag=
 image_name=bfd-pipeline-app
 localstack_ip=localhost
+bene_threads=
+bene_batch_size=
+bene_queue_multiple=
+claim_threads=
+claim_batch_size=
+claim_queue_multiple=
 
 usage() {
   cat 1>&2 <<EOF
@@ -106,6 +112,14 @@ $(basename $0) [options] run_mode
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
 
+Supported long options:
+
+--bene-load-options threads:batch_size:queue_multiple
+  Sets the RifLoader settings to use for beneficiary data.
+
+--claim-load-options: threads:batch_size:queue_multiple
+  Sets the RifLoader settings to use for claim data.
+
 Run mode options: 
   rif     RIF pipeline only.
   random  RDA pipeline only.  Using in-process random API server.
@@ -124,7 +138,7 @@ Option defaults:
 EOF
 }
 
-while getopts "b:c:d:i:Il:r:R:s:t:xzZh" option ; do
+while getopts "b:c:d:i:Il:r:R:s:t:xzZh-:" option ; do
   case $option in
   b) batch_size=$OPTARG ;;
   c) cache_size=$OPTARG ;;
@@ -153,6 +167,26 @@ while getopts "b:c:d:i:Il:r:R:s:t:xzZh" option ; do
   x) install=false ;;
   z) debug_enabled=true ;;
   Z) debug_enabled=true ; debug_suspend=y ;;
+  -) echo $OPTARG
+     case $OPTARG in
+       bene-load-options)
+         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+         IFS=':' read t b q <<<"$val"
+         bene_threads=$t
+         bene_batch_size=$b
+         bene_queue_multiple=$q
+         unset t b q
+         ;;
+       claim-load-options)
+         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+         IFS=':' read t b q <<<"$val"
+         claim_threads=$t
+         claim_batch_size=$b
+         claim_queue_multiple=$q
+         ;;
+       *) usage ; exit 1
+     esac
+     ;;
   h) usage ; exit 0 ;;
   *) usage ; exit 1 ;;
   esac
@@ -286,10 +320,23 @@ setvar FILTERING_NON_NULL_AND_NON_2023_BENES "false"
 #setvar NEW_RELIC_METRIC_PATH "-- data_pipeline_new_relic_metric_path --"
 #setvar NEW_RELIC_METRIC_KEY "-- data_pipeline_new_relic_metric_key --"
 
-# For testing RIF performance, RIF_JOB_BATCH_SIZE is not in master branch
-setvar LOADER_THREADS "$threads"
-setvar RIF_JOB_BATCH_SIZE "$batch_size"
-setvar RIF_JOB_QUEUE_SIZE_MULTIPLE "2"
+# For testing RIF performance.
+if [[ x$bene_threads = x ]] ; then
+  setvar LOADER_THREADS "$threads"
+  setvar RIF_JOB_BATCH_SIZE "$batch_size"
+  setvar RIF_JOB_QUEUE_SIZE_MULTIPLE "2"
+else
+  setvar LOADER_THREADS "$bene_threads"
+  setvar RIF_JOB_BATCH_SIZE "$bene_batch_size"
+  setvar RIF_JOB_QUEUE_SIZE_MULTIPLE "$bene_queue_multiple"
+fi
+
+if [[ x$claim_threads != x ]] ; then
+  setvar LOADER_THREADS_CLAIMS "$claim_threads"
+  setvar RIF_JOB_BATCH_SIZE_CLAIMS "$claim_batch_size"
+  setvar RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS "$claim_queue_multiple"
+fi
+
 setvar HICN_HASH_CACHE_SIZE "$cache_size"
 setvar IDEMPOTENCY_REQUIRED "$idempotency_mode"
 
