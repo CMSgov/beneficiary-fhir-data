@@ -20,7 +20,8 @@
         "HCPCS_4TH_MDFR_CD"
     ],
     "cclfMapping": [
-        "CCLF2.HCPCS_4_MDFR_CD"
+        "CCLF2.HCPCS_4_MDFR_CD",
+        "CCLF5.HCPCS_4_MDFR_CD"
     ],
     "fhirMapping": [
         {

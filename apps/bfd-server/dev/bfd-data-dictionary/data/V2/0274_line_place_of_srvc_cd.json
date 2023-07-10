@@ -22,7 +22,8 @@
         "LINE_PLACE_OF_SRVC_CD"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_POS_CD"
+        "CCLF5.CLM_POS_CD",
+        "CCLF6.CLM_POS_CD"
     ],
     "fhirMapping": [
         {
