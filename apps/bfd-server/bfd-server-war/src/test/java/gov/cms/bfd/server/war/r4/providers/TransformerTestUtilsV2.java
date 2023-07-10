@@ -525,34 +525,34 @@ public final class TransformerTestUtilsV2 {
       int index) {
     // TODO - fix this
     /*
-     * if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
-     * assertHasCoding(
-     * TransformerConstants.CODING_SYSTEM_HCPCS,
-     * "" + hcpcsYearCode.get(),
-     * null,
-     * hcpcsInitialModifierCode.get(),
-     * item.getModifier().get(index).getCoding());
-     * assertHasCoding(
-     * TransformerConstants.CODING_SYSTEM_HCPCS,
-     * "" + hcpcsYearCode.get(),
-     * null,
-     * hcpcsCode.get(),
-     * item.getService().getCoding());
-     * } else { // while others do not...
-     * if (hcpcsInitialModifierCode.isPresent()) {
-     * assertHasCoding(
-     * TransformerConstants.CODING_SYSTEM_HCPCS,
-     * hcpcsInitialModifierCode.get(),
-     * item.getModifier().get(index).getCoding());
-     * }
-     * if (hcpcsCode.isPresent()) {
-     * assertHasCoding(
-     * TransformerConstants.CODING_SYSTEM_HCPCS,
-     * hcpcsCode.get(),
-     * item.getService().getCoding());
-     * }
-     * }
-     */
+    if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
+      assertHasCoding(
+          TransformerConstants.CODING_SYSTEM_HCPCS,
+          "" + hcpcsYearCode.get(),
+          null,
+          hcpcsInitialModifierCode.get(),
+          item.getModifier().get(index).getCoding());
+      assertHasCoding(
+          TransformerConstants.CODING_SYSTEM_HCPCS,
+          "" + hcpcsYearCode.get(),
+          null,
+          hcpcsCode.get(),
+          item.getService().getCoding());
+    } else { // while others do not...
+      if (hcpcsInitialModifierCode.isPresent()) {
+        assertHasCoding(
+            TransformerConstants.CODING_SYSTEM_HCPCS,
+            hcpcsInitialModifierCode.get(),
+            item.getModifier().get(index).getCoding());
+      }
+      if (hcpcsCode.isPresent()) {
+        assertHasCoding(
+            TransformerConstants.CODING_SYSTEM_HCPCS,
+            hcpcsCode.get(),
+            item.getService().getCoding());
+      }
+    }
+    */
 
     assertFalse(hcpcsSecondModifierCode.isPresent());
   }
@@ -632,68 +632,56 @@ public final class TransformerTestUtilsV2 {
 
     // TODO - fix this
     /*
-     * AdjudicationComponent adjudicationForPayment =
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
-     * assertExtensionCodingEquals(
-     * CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount,
-     * item.getAdjudication());
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount,
-     * item.getAdjudication());
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT,
-     * beneficiaryPartBDeductAmount,
-     * item.getAdjudication());
-     * assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD,
-     * primaryPayerCode, item);
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT,
-     * primaryPayerPaidAmount,
-     * item.getAdjudication());
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount,
-     * item.getAdjudication());
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount,
-     * item.getAdjudication());
-     * assertAdjudicationAmountEquals(
-     * CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount,
-     * item.getAdjudication());
-     * assertAdjudicationReasonEquals(
-     * CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode,
-     * item.getAdjudication());
-     * assertExtensionCodingEquals(
-     * CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, serviceDeductibleCode, item);
-     *
-     * assertDiagnosisLinkPresent(Diagnosis.from(diagnosisCode,
-     * diagnosisCodeVersion), eob, item);
-     *
-     * List<Extension> hctHgbObservationExtension =
-     * item.getExtensionsByUrl(
-     * TransformerUtils.calculateVariableReferenceUrl(
-     * CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
-     * assertEquals(1, hctHgbObservationExtension.size());
-     * assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof
-     * Reference);
-     * Reference hctHgbReference = (Reference)
-     * hctHgbObservationExtension.get(0).getValue();
-     * assertTrue(hctHgbReference.getResource() instanceof Observation);
-     * Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
-     * assertHasCoding(
-     * CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode,
-     * hctHgbObservation.getCode());
-     * assertEquals(hctHgbTestResult,
-     * hctHgbObservation.getValueQuantity().getValue());
-     *
-     * assertExtensionCodingEquals(
-     * item,
-     * TransformerConstants.CODING_NDC,
-     * TransformerConstants.CODING_NDC,
-     * nationalDrugCode.get());
-     */
+    AdjudicationComponent adjudicationForPayment =
+        assertAdjudicationAmountEquals(
+            CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
+    assertExtensionCodingEquals(
+        CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT,
+        beneficiaryPartBDeductAmount,
+        item.getAdjudication());
+    assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, primaryPayerCode, item);
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT,
+        primaryPayerPaidAmount,
+        item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount, item.getAdjudication());
+    assertAdjudicationReasonEquals(
+        CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode, item.getAdjudication());
+    assertExtensionCodingEquals(
+        CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, serviceDeductibleCode, item);
+
+    assertDiagnosisLinkPresent(Diagnosis.from(diagnosisCode, diagnosisCodeVersion), eob, item);
+
+    List<Extension> hctHgbObservationExtension =
+        item.getExtensionsByUrl(
+            TransformerUtils.calculateVariableReferenceUrl(
+                CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
+    assertEquals(1, hctHgbObservationExtension.size());
+    assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
+    Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
+    assertTrue(hctHgbReference.getResource() instanceof Observation);
+    Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
+    assertHasCoding(
+        CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode, hctHgbObservation.getCode());
+    assertEquals(hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
+
+    assertExtensionCodingEquals(
+        item,
+        TransformerConstants.CODING_NDC,
+        TransformerConstants.CODING_NDC,
+        nationalDrugCode.get());
+        */
   }
 
   /**
