@@ -11,15 +11,15 @@ variable "firehose_s3_buffer_interval" {
 }
 
 variable "bb2_acct" {
-  type        = string
+  type = string
 }
 
 variable "glue_crawler_schedules" {
   description = "Map of crawler schedules for envs"
-  type        = map
-  default     = {
-    "test"  = "cron(00 09 ? * MON *)"
-    "impl"  = "cron(30 08 ? * MON *)"
-    "prod"  = "cron(00 08 ? * MON *)"
+  type        = map(any)
+  default = {
+    "test" = "cron(00 09 ? * MON *)"
+    "impl" = "cron(30 08 ? * MON *)"
+    "prod" = "cron(00 08 ? * MON *)"
   }
 }

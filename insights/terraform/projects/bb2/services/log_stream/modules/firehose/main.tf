@@ -21,8 +21,8 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_firehose_stream" {
 
   extended_s3_configuration {
     bucket_arn          = data.aws_s3_bucket.main.arn
-    buffering_interval     = var.firehose_s3_buffer_interval
-    buffering_size         = var.firehose_s3_buffer_size
+    buffering_interval  = var.firehose_s3_buffer_interval
+    buffering_size      = var.firehose_s3_buffer_size
     compression_format  = "GZIP"
     error_output_prefix = "databases/${var.project}/events_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
     kms_key_arn         = data.aws_kms_key.bucket_cmk.arn
