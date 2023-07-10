@@ -9,10 +9,8 @@ from typing import List
 import boto3
 from botocore.config import Config
 
-# TODO: environment may be "prod-sbx" or "prod_sbx" depending on context (specifically, Glue Table
-# partition columns) so a better way of handling its string representation should be considered.
-# For now, "prod-sbx" is the only string representation expected to be encountered by this code
-# and other contexts
+# The environment may be test, prod-sbx, or prod, or any ephemeral environment whose name ends with one of those values,
+# e.g [TICKET_NUM]-test. Case-insensitive.
 environment = os.environ.get("BFD_ENVIRONMENT", "test").lower()
 s3_bucket = os.environ.get("INSIGHTS_BUCKET_NAME")
 sqs_pipeline_signal = os.environ.get("SQS_PIPELINE_SIGNAL_NAME")
