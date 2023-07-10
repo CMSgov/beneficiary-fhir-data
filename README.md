@@ -1,350 +1,53 @@
-# Beneficiary FHIR Data Server (BFD)
+Beneficiary FHIR Data Server (BFD)
 ====================================
 
 ## About
 
-Beneficiary FHIR Data (BFD) Server: The BFD Server is an internal backend system used at CMS to represent Medicare beneficiaries' demographic, enrollment, and claims data in [FHIR](https://www.hl7.org/fhir/overview.html) format.
+This project contains modules and documentation in support of the Beneficiary FHIR Data (BFD) Server. 
+The BFD Server is an API designed to serve Medicare beneficiaries' demographic, enrollment, and claims data in [FHIR](https://www.hl7.org/fhir/overview.html) format.
 
-### DASG Mission
-Drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
+It's the vision of this project to provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data.
+This aligns with the overarching mission to enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they
+need to make informed decisions about their healthcare.
 
-### BFD Mission
-Enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
+The high-level purpose and location of each piece of the project is listed below.
 
-### BFD Vision
-Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data.
+* [apps](apps) - contains the source code for each of the deployed BFD applications
+  * [bfd-data-fda](apps/bfd-data-fda) - downloads FDA Drug code names into a resource used during BFD drug code name lookups
+  * [bfd-data-npi](apps/bfd-data-npi) - downloads CMS NPI (National Provider Identification) names into a resource used during BFD NPI lookups
+  * [bfd-db-migrator](apps/bfd-db-migrator) - application for safely applying schema updates and data migrations to the BFD database
+  * [bfd-model](apps/bfd-model) - contains data models used throughout the BFD project
+  * [bfd-pipeline](apps/bfd-pipeline) - application for loading claim data from the provider into the BFD database
+  * [bfd-server](apps/bfd-server) - application for serving the BFD database data in FHIR format to users via the BFD API
+  * [bfd-shared-test-utils](apps/bfd-shared-test-utils) - utilities shared across BFD projects used in testing
+  * [bfd-shared-utils](apps/bfd-shared-utils) - utilities shared across BFD projects used in the application code
+  * [utils](apps/utils) - non-application scripts used for testing, development, and database management
+* [insights](insights) - contains documentation and resources for maintaining BFD Insights, a platform using AWS Cloudwatch to provide analytics and metrics for BFD applications
+* [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
+* [rfcs](rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
+* [runbooks](runbooks) - contains maintenance documents for executing and troubleshooting various BFD scenarios 
 
-### License
+## Documentation
+
+### Users
+
+Many useful guides and documentation items can be found on the [BFD Wiki](https://github.com/CMSgov/beneficiary-fhir-data/wiki), hosted in this repo.
+
+This includes information about [making requests to bfd](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Making-Requests-to-BFD), 
+[synthetic data](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide), and more.
+
+### Contributors and Maintainers
+
+The [BFD Wiki](https://github.com/CMSgov/beneficiary-fhir-data/wiki) contains useful
+resources like the [development environment setup guide](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Local-Environment-Setup-for-BFD-Development),
+[style guide](https://github.com/CMSgov/beneficiary-fhir-data/wiki/BFD-Code-Style-Guide), and more.
+
+Also for maintainers, the full set of runbooks for various scenarios can be found in [runbooks](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/runbooks).
+
+## License
 
 This project is in the worldwide [public domain](LICENSE.md). As stated in [LICENSE](LICENSE.md):
 
 > This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
-
-## BFD User Documentation
-
-The following provide information on how to use BFD:
-
-* [Request Audit Headers](./docs/request-audit-headers.md):
-  This document details the HTTP headers that should be included when calling BFD,
-    to ensure that proper audit information is available to the BFD team.
-* [Request Options](./docs/request-options.md):
-  This document details the request options that can be used when calling BFD.
-
-## BFD Developer Documentation
-
-The following provide information on how to develop BFD:
-
-* [Sample Data Sets](./apps/bfd-model/bfd-model-rif-samples/dev/design-sample-data-sets.md):
-  This document details the various sample/test data sets available for use with the Blue Button Data/backend systems.
-
-## Development Environment Setup
-
-### AWS Credentials
-
-Many of the automated tests associated with the Blue Button framework use AWS resources.  Before running a build using Maven or importing projects into your Eclipse IDE, which will run a build automatically, please ensure the appropriate accounts and credentials are configured within your environment.  **This is necessary to prevent incurring unwanted charges on the wrong AWS account**.
-
-Below are links to detailed instructions on configuring your AWS credentials for your environment:
-
-  * [Configuration and Credential Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html)
-
-### Github Configuration
-
-You will need to configure an SSH credential in order to clone the Blue Button repositories.  Instructions are thoroughly documented on Github but for convenience here are the relevant links:
-
-  * [Connecting to Github with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
-  * [Generating a new SSH key and adding it to the ssh-agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
-  * [Adding a new SSH key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
-  * [Testing your SSH connection](https://help.github.com/articles/testing-your-ssh-connection/)
-
-### Cloning the Repository
-
-Clone the repository:
-```
-mkdir -p ~/workspaces/bfd/
-git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/beneficiary-fhir-data.git
-```
-
-### Initializing the Repository
-1. Install JDK 17. You'll need Java 17 to run BFD. You can install OpenJDK 17 however you prefer, however [Corretto 17](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/macos-install.html) is recommended.
-1. Install Maven 3 (Ideally 3.90+ for [build caching](./apps/.mvn/extensions.xml)). Project tasks are handled by Apache Maven. Install it however you prefer.
-1. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following (change the jdkHome appropriately):
-    ```xml
-    <?xml version="1.0" encoding="UTF8"?>
-    <toolchains>
-      <!-- JDK toolchains -->
-      <toolchain>
-        <type>jdk</type>
-        <provides>
-          <version>11</version>
-          <vendor>sun</vendor>
-        </provides>
-        <configuration>
-          <jdkHome>/path/to/your/jdk</jdkHome>
-        </configuration>
-      </toolchain>
-    </toolchains>
-    ```
-1. Install pre-commit and pre-push hooks `mvn -f apps/ -Dmaven.build.cache.enabled=false initialize`
-
-### Native Setup
-1. Change to the `apps/bfd-data-fda` directory and run `mvn clean install`. 
-2. Change to the `apps/bfd-data-npi` directory and run `mvn clean install`.
-3. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-4. Set up a Postgres 14 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
-    ```sh
-    docker run \
-      -d \
-      --name 'bfd-db' \
-      -e 'POSTGRES_DB=fhirdb' \
-      -e 'POSTGRES_USER=bfd' \
-      -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
-      -p '5432:5432' \
-      -v 'bfd_pgdata:/var/lib/postgresql/data' \
-      postgres:14 -c max_connections=200
-    ```
-5. Set up a local S3 using Minio Docker Container
-    ```sh
-    docker run \
-      -p 9000:9000 \
-      -p 9001:9001 -d  --name 'minio' \
-      -e "MINIO_ROOT_USER=bfdLocalS3Dev" \
-      -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
-      minio/minio server /data --console-address ":9001"
-    ```
-6. In order to run bfd locally using test containers for integration tests, Docker for Desktop (https://www.docker.com/products/docker-desktop/) or Podman must be installed. Docker for desktop is recommended
-   since test containers will automatically detect and launch containers for integration tests.  
-   TODO: Podman is supported as well.
-   If you rather use HSQL instead of test containers, add the parameter -Dits.db.url=jdbc:bfd-test:hsqldb:mem to your mvn clean install command. 
-  
-   Run mvn install with the following to run integration tests with test containers.
-    ```
-     mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
-    ```
-   If you want to run integration tests with HSQL only, run mvn install with the following
-    ```
-     mvn -Dits.db.url=jdbc:bfd-test:hsqldb:mem -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
-    ```
-   You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
-   
-   If you want to disable the maven cache on the maven run, run mvn install with the following
-   ```
-     mvn  -Dmaven.build.cache.enabled=false -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
-    ```
-
-### Loading Beneficiary
-1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
-    ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify
-    ```
-    This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with:
-    ```
-    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/fhirdb' -c 'SELECT "bene_id" FROM "beneficiaries" LIMIT 1;'
-    ```
-1. Run `export BFD_PORT=6500`. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later. This can be set in your shell profile but note that when running the integration tests through maven, the BFD_PORT needs to be unset from the environment.
-1. Now it's time to start the server up. Change to `apps/bfd-server` and run:
-    ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
-    ```
-    After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`
-1. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command:
-    ```
-    curl --silent --insecure --cert $BFD_PATH/apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://localhost:$BFD_PORT/v2/fhir/ExplanationOfBenefit/?patient=567834&_format=json"
-    ```
-    where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
-1. Total success (probably)!. You have a working call. To stop the server run this from the `apps/bfd-server` directory:
-    ```
-    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/fhirdb?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
-    ```
-
-### Adding Reference to AWS CodeArtifact 
-(This step is optional, if you want to not use AWS Code artifact, you need to run the bfd-data-fda project first by changing to the `apps/bfd-data-fda` directory and running `mvn clean install`.)
-1.  In your bash_profile or your preferred shell script: add the following line to export a CodeArtifact authorization token for authorization to your repository from your preferred shell (token expires in 12 hours or you will experience a 401 unauthorized error from AWS CodeArtifact).  Replace {aws account id goes here} with the aws account id
-
-'''sh
-export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain bfd-mgmt --domain-owner {aws account id goes here} --query authorizationToken --output text`
-'''
-
-2.  For your settings settings.xml file add the following (Replace {aws account id goes here} with the aws account id):
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-
-  <!-- servers
-   | This is a list of authentication profiles, keyed by the server-id used within the system.
-   | Authentication profiles can be used whenever maven must make a connection to a remote server.
-   |-->
-  <servers>
-    <server>
-      <id>bfd-mgmt-bfd-mgmt</id>
-      <username>aws</username>
-      <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
-    </server>
-  </servers>
-
-  <profiles>
-   <profile>
-      <id>bfd-mgmt-bfd-mgmt</id>
-      <activation>
-      <activeByDefault>true</activeByDefault>
-      </activation>
-      <repositories>
-          <repository>
-            <id>bfd-mgmt-bfd-mgmt</id>
-            <url>https://bfd-mgmt-{aws account id goes here}.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-mgmt/</url>
-            <releases>
-              <enabled>false</enabled>
-            </releases>
-          </repository>
-      </repositories>
-    </profile>
-  </profiles>
-</settings>
-```
-
-### Certificates
-
-The FHIR server should now be reachable from the browser at https://localhost:6500. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
-
-In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one.
-
-Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application.
-
-#### Integration with a downstream system
-
-An example of connecting http://github.com/cmsgov/bluebutton-web-server to the local BFD.
-
-`.env`
-```
-BB20_CONTEXT=../../bluebutton-web-server
-CERTSTORE=../../bb.dev/certstore
-BFD_DIR=../
-SYNTHETIC_DATA=./synthetic-data
-```
-
-`docker-compose.bb2.yml`
-
-```
-version: '3.3'
-
-services:
-  bbdb:
-    image: postgres
-    environment:
-      - POSTGRES_DB=bluebutton
-      - POSTGRES_PASSWORD=toor
-  bb20:
-    build:
-      context: ${BB20_CONTEXT}
-      dockerfile: Dockerfile
-    command: python3 manage.py runserver 0.0.0.0:8000
-    environment:
-      - DJANGO_SETTINGS_MODULE=hhs_oauth_server.settings.dev
-      - DJANGO_FHIR_CERTSTORE=/certstore
-      - DATABASES_CUSTOM=postgres://postgres:toor@bbdb:5432/bluebutton
-      - OAUTHLIB_INSECURE_TRANSPORT=true
-      - DJANGO_DEFAULT_SAMPLE_FHIR_ID="20140000008325"
-      - DJANGO_SECURE_SESSION=False
-      - DJANGO_MEDICARE_LOGIN_URI=http://127.0.0.1:8080?scope=openid%20profile&client_id=bluebutton
-      - DJANGO_SLS_USERINFO_ENDPOINT=http://msls:8080/userinfo
-      - DJANGO_SLS_TOKEN_ENDPOINT=http://msls:8080/token
-      - FHIR_URL=https://bfd.local:9954/v1/fhir/
-    ports:
-      - "8000:8000"
-    links:
-      - "bfd:bfd.local"
-    volumes:
-      - ${BB20_CONTEXT}:/code
-      - ${CERTSTORE}:/certstore
-    depends_on:
-      - bbdb
-```
-
-The BlueButton 2 system also requires an Identity Provider
-`docker-compose.msls.yml`
-```
-version: '3.3'
-
-services:
-
-  msls:
-    build:
-      context: ../../bb.dev/msls
-      dockerfile: Dockerfile
-    command: msls
-    ports:
-      - "8080:8080"
-```
-
-Bringing these systems up together:
-
-```
-docker-compose -f docker-compose.yml -f docker-compose.bb2.yml -f docker-compose.msls.yml up -d
-```
-
-```
-docker-compose -f docker-compose.bb2.yml exec bb2 ./docker-compose/migrate.sh
-```
-
-### Run Scripts
-
-The `apps/utils/scripts` directory contains bash scripts that simplify running the various components of BFD on a UNIX-like system.
-Refer to the README files in that directory for detailed information about the scripts.
-
-### Security
-
-We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
-
-If you believe you’ve found or been made aware of a security vulnerability, please refer to the CMS Vulnerability Disclosure Policy (here is a [link](https://www.cms.gov/Research-Statistics-Data-and-Systems/CMS-Information-Technology/CIO-Directives-and-Policies/Downloads/CMS-Vulnerability-Disclosure-Policy.pdf) to the most recent version as of the time of this commit.
-
-### Eclipse Configuration
-
-The following instructions are to be executed from within the Eclipse IDE application to ensure proper configuration.
-
-#### Eclipse JDK
-
-Verify Eclipse is using the correct Java 17 JDK.
-
-1. Open **Window > Preferences**.
-1. Select **Java > Installed JREs**.
-1. If your JDK does not appear in the **Installed JREs** table add it by clicking the **Add** button, select **Standard VM** and locate your installation using the **Directory...** button.
-1. Ensure your JDK is selected in the **Installed JREs** table by checking the checkbox next to the JDK you wish to use.
-
-#### Eclipse Preferences
-
-If you're using Eclipse for development, you'll want to configure its preferences, as follows:
-
-1. Open **Window > Preferences**.
-1. Select **Maven**.
-    1. Enable **Download Artifact Sources**.
-    1. Enable **Download Artifact JavaDoc**.
-1. Select **Maven > Annotation Processing**.
-    1. Enable the **Automatically configure JDT APT** option.
-1. Select **Java > Code Style > Code Templates**.
-    1. Click **Import...** and select this project's [eclipse-codetemplates.xml](docs/assets/eclipse-codetemplates.xml) file.
-        * This configures the file, class, method, etc. comments on new items such that they match the existing style used in these projects.
-    1. Enable the **Automatically add comments for new methods and types** option.
-1. Select **Java > Code Style > Formatter**.
-    1. Click **Import...** and select this project's [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file.
-        * This configures the Eclipse autoformatter (`ctrl+shift+f`) to (mostly) match the one used by the autoformatter that is applied during Maven builds.
-        * The [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file was originally acquired from here: <https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml>.
-1. Select **Java > Editor > Save Actions**.
-    1. Enable the **Perform the selected actions on save** option.
-    1. Enable the **Format source code** option.
-1. Click **OK**.
-
-#### Importing Maven Projects into Eclipse
-
-The repository can easily be added to your Eclipse workspace using the **Import** feature.
-
-1. Open **File > Import...**.
-1. Select **Existing Maven Projects**.
-1. Specify the **Root Directory** using the **Browse...** button or by typing in a path: `~/workspaces/bfd/beneficiary-fhir-data.git`.
-1. Verify that it found the projects in the **Projects** table.
-1. Click **Finish**.
-1. The projects and packages you selected will now appear in the **Project Explorer** window.
-
