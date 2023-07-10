@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -8,20 +10,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -31,8 +19,19 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-
-import static java.util.Objects.requireNonNull;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /** Java Callable class that will create a list of patient claims for a given claim type. */
 @Component
