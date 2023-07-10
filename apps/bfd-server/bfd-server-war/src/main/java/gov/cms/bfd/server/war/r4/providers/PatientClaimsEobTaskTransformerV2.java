@@ -1,14 +1,27 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static java.util.Objects.requireNonNull;
-
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -18,19 +31,8 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 /** Java Callable class that will create a list of patient claims for a given claim type. */
 @Component
@@ -71,7 +73,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /** whether to return tax numbers. */
   private Optional<Boolean> includeTaxNumbers;
   /** whether to exclude SAMHSA claims. */
-  private Boolean excludeSamhsa;
+  private Optional<Boolean> excludeSamhsa;
 
   // +++++++++++++++++++++++++++++++++++
   // task properties
@@ -79,8 +81,10 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
 
   /** capture exception if thrown. */
   private Exception taskException = null;
+  /** keep track of SAMHSA removals. */
+  private int samhsaRemovedCount = 0;
   /** the list of EOBs that we'll return. */
-  private List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
+  private final List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
 
   /**
    * Constructor for TransformPatientClaimsToEobTask.
@@ -123,7 +127,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
       Optional<Boolean> includeTaxNumbers,
-      Boolean excludeSamhsa) {
+      Optional<Boolean> excludeSamhsa) {
     this.claimTransformer = requireNonNull(claimTransformer);
     this.claimType = requireNonNull(claimType);
     this.id = requireNonNull(id);
@@ -155,7 +159,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     LOGGER.debug("TransformPatientClaimsToEobTaskV2.call() started for {}", id);
     try {
       eobs.addAll(transformToEobs(findClaimTypeByPatient()));
-      if (excludeSamhsa) {
+      if (excludeSamhsa.isPresent() && excludeSamhsa.get()) {
         filterSamhsa(eobs);
       }
     } catch (NoResultException e) {
@@ -183,8 +187,9 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * Transforms the eob claim to the specified type.
    *
    * @param claimEntity the claim entity to transform
-   * @return the transformed explanation of benefit
+   * @return the {@link ExplanationOfBenefit} result
    */
+  @VisibleForTesting
   private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
     return claimTransformer.transform(claimEntity, includeTaxNumbers);
   }
@@ -196,6 +201,15 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    */
   public boolean ranSuccessfully() {
     return (taskException == null);
+  }
+
+  /**
+   * Fetch count of EOBs that were removed by SAMHSA filter.
+   *
+   * @return number of EOBs removed by SAMHSA filter.
+   */
+  public int eobsRemovedBySamhsaFilter() {
+    return samhsaRemovedCount;
   }
 
   /**
@@ -317,9 +331,10 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   private void filterSamhsa(List<ExplanationOfBenefit> eobs) {
     ListIterator<ExplanationOfBenefit> eobsIter = eobs.listIterator();
     while (eobsIter.hasNext()) {
-      ExplanationOfBenefit eob = (ExplanationOfBenefit) eobsIter.next();
+      ExplanationOfBenefit eob = eobsIter.next();
       if (samhsaMatcher.test(eob)) {
         eobsIter.remove();
+        samhsaRemovedCount++;
       }
     }
   }

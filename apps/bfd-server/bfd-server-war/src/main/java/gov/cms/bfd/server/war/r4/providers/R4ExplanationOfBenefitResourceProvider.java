@@ -346,22 +346,15 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * contained within requestDetails and parsed out along with other parameters
      * later.
      */
-    if (startIndex != null) {
-      int val = 0;
-      try {
-        val = Integer.parseInt(startIndex);
-      } catch (Exception e) {
-        val = -1;
-      }
-      if (val < 0) {
-        throw new InvalidRequestException("Invalid startIndex specified: + startIndex");
-      }
-    }
+    OffsetLinkBuilder startIx = new OffsetLinkBuilder(requestDetails, "startIndex");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimTypeV2> claimTypesRequested = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
     Optional<Boolean> includeTaxNumbers =
         Optional.ofNullable(returnIncludeTaxNumbers(requestDetails));
+    Optional<Boolean> filterSamhsa = Optional.ofNullable(Boolean.parseBoolean(excludeSamhsa));
+
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_EOB);
     operation.setOption("by", "patient");
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers.get());
@@ -380,8 +373,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
         "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
     operation.publishOperationName();
 
-    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
-
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
@@ -390,16 +381,57 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       LoggingUtils.logResourceCountToMdc(0);
 
       return TransformerUtilsV2.createBundle(
-          paging, eobs, loadedFilterManager.getTransactionTime());
+          paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
     }
 
     // See if we have any claims data for the beneficiary.
     Integer claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
+    return processClaimsMask(
+        claimTypesThatHaveData,
+        claimTypesRequested,
+        beneficiaryId,
+        paging,
+        Optional.ofNullable(lastUpdated),
+        Optional.ofNullable(serviceDate),
+        filterSamhsa,
+        includeTaxNumbers);
+  }
+
+  /**
+   * Process the available claims mask value detnoting which claims to process in parallel.
+   *
+   * @param claimTypesThatHaveData an {@link Integer} denoting the claim types to process.
+   * @param claimTypesRequested a {@link Set} of {@link ClaimTypeV2} denoting requested claim types.
+   * @param beneficiaryId a {@link Long} patient bene_id value.
+   * @param paging a {@link OffsetLinkBuilder} for the startIndex (or offset) when using pagination.
+   * @param lastUpdated a {@link DateRangeParam} denoting inclusion of lastUpdated field.
+   * @param serviceDate a {@link DateRangeParam} specifying date range for the {@link
+   *     ExplanationOfBenefit}s that completed.
+   * @param excludeSamhsa optional {@link Boolean} denoting use of {@link R4EobSamhsaMatcher} *
+   *     filtering of all SAMHSA-related claims from the results.
+   * @param includeTaxNumbers an {@link Optional} boolean denoting includsio/exclusion of tax
+   *     numbers in the response,
+   * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
+   *     matching resources, or may also be empty.
+   */
+  @VisibleForTesting
+  private Bundle processClaimsMask(
+      Integer claimTypesThatHaveData,
+      Set<ClaimTypeV2> claimTypesRequested,
+      long beneficiaryId,
+      OffsetLinkBuilder paging,
+      Optional<DateRangeParam> lastUpdated,
+      Optional<DateRangeParam> serviceDate,
+      Optional<Boolean> excludeSamhsa,
+      Optional<Boolean> includeTaxNumbers) {
+
     EnumSet<ClaimTypeV2> claimsToProcess =
         ClaimTypeV2.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
 
     LOGGER.debug(
         String.format("EnumSet for V2 claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
+
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
     if (claimsToProcess.isEmpty()) {
       return TransformerUtilsV2.createBundle(
@@ -411,7 +443,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    // CountDownLatch countDownLatch = new CountDownLatch(claimsToProcess.size());
     List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks =
         new ArrayList<>(claimsToProcess.size());
 
@@ -423,19 +454,16 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               deriveTransformer(claimType),
               claimType,
               beneficiaryId,
-              Optional.ofNullable(lastUpdated),
-              Optional.ofNullable(serviceDate),
+              lastUpdated,
+              serviceDate,
               includeTaxNumbers,
-              Boolean.parseBoolean(excludeSamhsa));
-          // countDownLatch);
+              excludeSamhsa);
           callableTasks.add(task);
         });
 
     List<Future<PatientClaimsEobTaskTransformerV2>> futures = null;
     try {
       futures = executorService.invokeAll(callableTasks);
-      // Wait for the latch to reach zero
-      // countDownLatch.await();
     } catch (InterruptedException e) {
       LOGGER.error("Error invoking executor service", e);
     }
@@ -500,7 +528,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @return the transformed explanation of benefit
    */
   @VisibleForTesting
-  public ClaimTransformerInterfaceV2 deriveTransformer(ClaimTypeV2 eobIdType) {
+  private ClaimTransformerInterfaceV2 deriveTransformer(ClaimTypeV2 eobIdType) {
     switch (eobIdType) {
       case CARRIER:
         return carrierClaimTransformer;
@@ -529,7 +557,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @return The {@link ClaimTypeV2}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param
    */
-  static Set<ClaimTypeV2> parseTypeParam(TokenAndListParam type) {
+  public static Set<ClaimTypeV2> parseTypeParam(TokenAndListParam type) {
     if (type == null) {
       type =
           new TokenAndListParam()

@@ -769,14 +769,10 @@ public class TransformerUtilsV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim hhaClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
-            .findFirst()
-            .get();
+    Object hhaClaim =
+        parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
 
-    hhaClaim.setLastUpdated(Instant.now());
+    ((HHAClaim) hhaClaim).setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
@@ -787,14 +783,10 @@ public class TransformerUtilsV2Test {
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    HospiceClaim hospiceClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HospiceClaim)
-            .map(r -> (HospiceClaim) r)
-            .findFirst()
-            .get();
+    Object hospiceClaim =
+        parsedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> r).findFirst().get();
 
-    hospiceClaim.setLastUpdated(Instant.now());
+    ((HospiceClaim) hospiceClaim).setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
@@ -803,14 +795,10 @@ public class TransformerUtilsV2Test {
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    DMEClaim dmeClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
-            .findFirst()
-            .get();
+    Object dmeClaim =
+        parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
 
-    dmeClaim.setLastUpdated(Instant.now());
+    ((DMEClaim) dmeClaim).setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new DMEClaimTransformerV2(
@@ -820,14 +808,14 @@ public class TransformerUtilsV2Test {
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    InpatientClaim inpatientClaim =
+    Object inpatientClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(r -> r)
             .findFirst()
             .get();
 
-    inpatientClaim.setLastUpdated(Instant.now());
+    ((InpatientClaim) inpatientClaim).setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new InpatientClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
@@ -866,14 +854,10 @@ public class TransformerUtilsV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim hhaClaim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
-            .findFirst()
-            .get();
+    Object hhaClaim =
+        parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
 
-    hhaClaim.setLastUpdated(Instant.now());
+    ((HHAClaim) hhaClaim).setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =

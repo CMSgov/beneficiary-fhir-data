@@ -1,27 +1,25 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -54,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import javax.persistence.EntityManager;
@@ -73,6 +71,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,8 +105,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Mock ReferenceParam patientParam;
   /** The mock metric registry. */
   @Mock MetricRegistry metricRegistry;
-  /** The mock samhsa matcher. */
-  @Mock R4EobSamhsaMatcher samhsaMatcher;
   /** The mock loaded filter manager. */
   @Mock LoadedFilterManager loadedFilterManager;
   /** The mock executor service. */
@@ -115,12 +112,15 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The mock entity manager for mocking database calls. */
   @Mock EntityManager entityManager;
+  /** The mock entity manager for CarrierClaim calls. */
+  @Mock EntityManager carrierEntityManager;
+  /** The mock entity manager for SNFClaim calls. */
+  @Mock EntityManager snfEntityManager;
+  /** The mock entity manager for DMEClaim calls. */
+  @Mock EntityManager dmeEntityManager;
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
-
-  /** The test data bene. */
-  Beneficiary testBene;
 
   /** The mock EOB returned from a transformer. */
   @Mock ExplanationOfBenefit testEob;
@@ -131,6 +131,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
+  /** The mock samhsa matcher. */
+  R4EobSamhsaMatcher samhsaMatcher;
+
+  /** The test data bene. */
+  Beneficiary testBene;
   /** The carrier claim returned in tests. */
   CarrierClaim testCarrierClaim;
   /** The carrier claim returned in tests. */
@@ -166,9 +171,9 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   SNFClaimTransformerV2 snfClaimTransformer;
 
   /** The NPI Org lookup. */
-  NPIOrgLookup npiOrgLookup;
+  @Mock NPIOrgLookup npiOrgLookup;
   /** The FDA drug display lookup. */
-  FdaDrugCodeDisplayLookup drugDisplayLookup;
+  static FdaDrugCodeDisplayLookup drugDisplayLookup;
 
   /** The re-used valid bene id value. */
   public static String BENE_ID = "123456789";
@@ -176,13 +181,18 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mock concurrent task future. */
   @Mock Future<PatientClaimsEobTaskTransformerV2> futureTask;
 
+  /** one-time setup for entire test class. */
+  @BeforeAll
+  public static void setupFda() {
+    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+  }
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-
     setupTransformers();
+
+    samhsaMatcher = new R4EobSamhsaMatcher();
 
     eobProvider =
         new R4ExplanationOfBenefitResourceProvider(
@@ -230,6 +240,9 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
+    // NPI and FDA drug mocking
+    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.empty());
+
     setupLastUpdatedMocks();
 
     mockHeaders();
@@ -239,17 +252,17 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   private void setupTransformers() {
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
+    partDEventTransformer = new PartDEventTransformerV2(metricRegistry, drugDisplayLookup);
     dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, drugDisplayLookup);
     hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
     hospiceClaimTransformer = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
     inpatientClaimTransformer = new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(metricRegistry, drugDisplayLookup, npiOrgLookup);
-    partDEventTransformer = new PartDEventTransformerV2(metricRegistry, drugDisplayLookup);
     snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
   }
 
-  /** sets up calim entities. */
+  /** sets up claim entities. */
   private void setupEntities() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -451,7 +464,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Test
   public void testReadWhenNegativeIdExpectEobReturned() {
     when(eobId.getIdPart()).thenReturn("pde--123456789");
-    when(mockQuery.getSingleResult()).thenReturn((Object) testPdeClaim);
+    when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
 
     ExplanationOfBenefit eob = eobProvider.read(eobId, requestDetails);
 
@@ -475,44 +488,228 @@ public class R4ExplanationOfBenefitResourceProviderTest {
    */
   @Test
   public void testFindByPatientWithPageSizeNotProvidedExpectNoPaging() {
-    EntityManager em = mock(EntityManager.class);
-    CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
-    Root<CarrierClaim> clmRoot = mock(Root.class);
-
-    setupClaimEntity(em, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
-    PatientClaimsEobTaskTransformerV2 task =
-        new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
-    assertNotNull(task);
-    task.setEntityManager(em);
-    List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks = new ArrayList<>(1);
-    callableTasks.add(task);
-    when(appContext.getBean(PatientClaimsEobTaskTransformerV2.class)).thenReturn(task);
-
-    TokenParam tokenParam =
-        new TokenParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, "carrier");
-    TokenAndListParam listParam = new TokenAndListParam();
-    listParam.addAnd(tokenParam);
-
-    List<Future<PatientClaimsEobTaskTransformerV2>> taskList = new ArrayList();
-    try {
-      Future<PatientClaimsEobTaskTransformerV2> mockedFuture = mock(Future.class);
-      when(mockedFuture.get()).thenReturn(task);
-      taskList.add(mockedFuture);
-      when(executorService.invokeAll(callableTasks)).thenReturn(taskList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
-        eobProvider.findByPatient(
-            patientParam, listParam, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertNull(response.getLink(Constants.LINK_NEXT));
     assertNull(response.getLink(Constants.LINK_PREVIOUS));
     assertNull(response.getLink(Constants.LINK_FIRST));
     assertNull(response.getLink(Constants.LINK_LAST));
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
+   * when using negative values for page size and start index parameters. This test expects to
+   * receive a InvalidRequestException, as negative values should result in an HTTP 400.
+   */
+  @Test
+  public void testFindByPatientWithNegativeStartIndexExpectException() {
+    // Set paging params to page size 0
+    Map<String, String[]> params = new HashMap<>();
+    params.put("startIndex", new String[] {"-1"});
+    when(requestDetails.getParameters()).thenReturn(params);
+
+    assertThrows(
+        InvalidRequestException.class,
+        () ->
+            eobProvider.findByPatient(
+                patientParam, null, null, null, null, null, null, requestDetails));
+  }
+
+  /**
+   * Tests that {@link ExplanationOfBenefitResourceProvider#findByPatient} returns a bundle of size
+   * 0 if no claims are found.
+   */
+  @Test
+  public void testFindByPatientWhenNoClaimsFoundExpectEmptyBundle() {
+    // mock no result when making JPA call
+    when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
+    when(mockQuery.getResultList()).thenReturn(List.of(0));
+
+    Bundle response =
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
+
+    assertEquals(0, response.getTotal());
+  }
+
+  /**
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=true</code> calls the samhsa matcher to determine if items should be removed.
+   */
+  @Test
+  public void testFindByPatientWhenExcludeSamshaTrueExpectFilterMatcherCalled() {
+    // mock CarrierClaim data
+    CriteriaQuery<CarrierClaim> carrierMockCriteria = mock(CriteriaQuery.class);
+    Root<CarrierClaim> carrierRoot = mock(Root.class);
+    setupClaimEntity(carrierEntityManager, ClaimTypeV2.CARRIER, carrierMockCriteria, carrierRoot);
+
+    // mock DMEClaim data
+    CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
+    Root<DMEClaim> dmeRoot = mock(Root.class);
+    setupClaimEntity(dmeEntityManager, ClaimTypeV2.DME, dmeMockCriteria, dmeRoot);
+
+    // mock SNFClaim data
+    CriteriaQuery<SNFClaim> snfMockCriteria = mock(CriteriaQuery.class);
+    Root<SNFClaim> snfRoot = mock(Root.class);
+    setupClaimEntity(snfEntityManager, ClaimTypeV2.SNF, snfMockCriteria, snfRoot);
+
+    PatientClaimsEobTaskTransformerV2 carrierTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+    carrierTask.setupTaskParams(
+        carrierClaimTransformer,
+        ClaimTypeV2.CARRIER,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.ofNullable(true));
+    carrierTask.setEntityManager(carrierEntityManager);
+    carrierTask.call();
+    assertTrue(carrierTask.ranSuccessfully());
+    assertTrue(carrierTask.eobsRemovedBySamhsaFilter() < 1);
+
+    PatientClaimsEobTaskTransformerV2 dmeTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+    dmeTask.setupTaskParams(
+        dmeClaimTransformer,
+        ClaimTypeV2.DME,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.ofNullable(true));
+    dmeTask.setEntityManager(dmeEntityManager);
+    dmeTask.call();
+    assertTrue(dmeTask.ranSuccessfully());
+    assertTrue(dmeTask.eobsRemovedBySamhsaFilter() < 1);
+
+    PatientClaimsEobTaskTransformerV2 snfTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+    snfTask.setupTaskParams(
+        snfClaimTransformer,
+        ClaimTypeV2.SNF,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.ofNullable(true));
+    snfTask.setEntityManager(snfEntityManager);
+    snfTask.call();
+    assertTrue(snfTask.ranSuccessfully());
+    assertTrue(snfTask.eobsRemovedBySamhsaFilter() < 1);
+  }
+
+  /**
+   * Verifies that processing multiple {@link PatientClaimsEobTaskTransformerV2} tasks with <code>
+   * excludeSAMHSA=false</code> does not call the filter for SAMHSA-related claims.
+   */
+  @Test
+  public void testFindByPatientWhenExcludeSamshaFalseExpectNoFiltering() {
+    CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
+    Root<CarrierClaim> clmRoot = mock(Root.class);
+    setupClaimEntity(carrierEntityManager, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
+
+    CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
+    Root<DMEClaim> dmeRoot = mock(Root.class);
+    setupClaimEntity(dmeEntityManager, ClaimTypeV2.DME, dmeMockCriteria, dmeRoot);
+
+    PatientClaimsEobTaskTransformerV2 carrierTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+    carrierTask.setupTaskParams(
+        carrierClaimTransformer,
+        ClaimTypeV2.CARRIER,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.empty());
+    carrierTask.setEntityManager(carrierEntityManager);
+    carrierTask.call();
+    assertTrue(carrierTask.ranSuccessfully());
+    assertTrue(carrierTask.eobsRemovedBySamhsaFilter() == 0);
+
+    PatientClaimsEobTaskTransformerV2 dmeTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+    dmeTask.setupTaskParams(
+        dmeClaimTransformer,
+        ClaimTypeV2.DME,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.empty());
+    dmeTask.setEntityManager(dmeEntityManager);
+    dmeTask.call();
+    assertTrue(dmeTask.ranSuccessfully());
+    assertTrue(dmeTask.eobsRemovedBySamhsaFilter() == 0);
+  }
+
+  /**
+   * Verifies that {@link PatientClaimsEobTaskTransformerV2} tasks successfully processes
+   * includeTaxNumbers value to the transformer for each claim type that uses the value (currently
+   * only carrier and DME).
+   */
+  @Test
+  public void testFindByPatientIncludeTaxNumberPassedToTransformer() {
+    CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
+    Root<CarrierClaim> clmRoot = mock(Root.class);
+    setupClaimEntity(carrierEntityManager, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
+
+    PatientClaimsEobTaskTransformerV2 carrierTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+
+    carrierTask.setupTaskParams(
+        carrierClaimTransformer,
+        ClaimTypeV2.CARRIER,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.ofNullable(true));
+    carrierTask.setEntityManager(carrierEntityManager);
+    carrierTask.call();
+    assertTrue(carrierTask.ranSuccessfully());
+
+    CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
+    Root<DMEClaim> dmeRoot = mock(Root.class);
+    setupClaimEntity(dmeEntityManager, ClaimTypeV2.DME, dmeMockCriteria, dmeRoot);
+
+    PatientClaimsEobTaskTransformerV2 dmeTask =
+        new PatientClaimsEobTaskTransformerV2(
+            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+    dmeTask.setupTaskParams(
+        dmeClaimTransformer,
+        ClaimTypeV2.DME,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.ofNullable(true));
+    dmeTask.setEntityManager(dmeEntityManager);
+    dmeTask.call();
+    assertTrue(dmeTask.ranSuccessfully());
+
+    // test asserting that invalid task params results in a failed task
+    dmeTask.setupTaskParams(
+        carrierClaimTransformer,
+        ClaimTypeV2.DME,
+        Long.parseLong(BENE_ID),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(true),
+        Optional.ofNullable(true));
+    dmeTask.setEntityManager(dmeEntityManager);
+    dmeTask.call();
+    assertFalse(dmeTask.ranSuccessfully());
   }
 
   /**
@@ -561,189 +758,42 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * when using negative values for page size and start index parameters. This test expects to
-   * receive a InvalidRequestException, as negative values should result in an HTTP 400.
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#parseTypeParam} returns a {@link
+   * Set} of valid {@link ClaimTypeV2} values.
    */
   @Test
-  public void testFindByPatientWithNegativeStartIndexExpectException() {
-    // Set paging params to page size 0
-    Map<String, String[]> params = new HashMap<>();
-    params.put("startIndex", new String[] {"-1"});
-    when(requestDetails.getParameters()).thenReturn(params);
+  public void testClaimTypesRequestAndMaskProcessing() {
+    TokenAndListParam listParam = createClaimsTokenAndListParam(Arrays.asList("carrier", "dme"));
 
-    TokenParam tokenParam =
-        new TokenParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, "carrier");
-    TokenAndListParam listParam = new TokenAndListParam();
-    listParam.addAnd(tokenParam);
+    Set<ClaimTypeV2> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(listParam);
+    assertEquals(2, result.size());
+    assertTrue(result.contains(ClaimTypeV2.CARRIER));
+    assertTrue(result.contains(ClaimTypeV2.DME));
+    assertFalse(result.contains(ClaimTypeV2.SNF));
 
-    assertThrows(
-        InvalidRequestException.class,
-        () ->
-            eobProvider.findByPatient(
-                patientParam, listParam, null, null, null, null, null, requestDetails));
+    listParam = createClaimsTokenAndListParam(Arrays.asList("carrier", "dme", "snf"));
+    result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(listParam);
+    assertEquals(3, result.size());
+    assertTrue(result.contains(ClaimTypeV2.SNF));
   }
 
   /**
-   * Tests that {@link ExplanationOfBenefitResourceProvider#findByPatient} returns a bundle of size
-   * 0 if no claims are found.
+   * Helper routine to build a FHIR {@link TokenAndListParam}.
+   *
+   * @param claimsList a {@link List} of claim {@link String} identifiers
+   * @return a {@link TokenAndListParam}
    */
-  @Test
-  public void testFindByPatientWhenNoClaimsFoundExpectEmptyBundle() {
-    // mock no result when making JPA call
-    when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
-    when(mockQuery.getResultList()).thenReturn(List.of(0));
-
-    Bundle response =
-        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
-
-    assertEquals(0, response.getTotal());
-  }
-
-  /**
-   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} with <code>
-   * excludeSAMHSA=true</code> calls the samhsa matcher to determine if items should be removed.
-   */
-  @Test
-  public void testFindByPatientWhenExcludeSamshaTrueExpectFilterMatcherCalled() {
-    // the bitmask determines which claims get returned for the test, so return three
-    when(mockQuery.getResultList())
-        .thenReturn(
-            List.of(
-                QueryUtils.V_CARRIER_HAS_DATA
-                    + QueryUtils.V_SNF_HAS_DATA
-                    + QueryUtils.V_DME_HAS_DATA));
-
-    EntityManager em = mock(EntityManager.class);
-    CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
-    Root<CarrierClaim> clmRoot = mock(Root.class);
-
-    setupClaimEntity(em, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
-    PatientClaimsEobTaskTransformerV2 task =
-        new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
-    assertNotNull(task);
-
-    task.setEntityManager(em);
-    List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks = new ArrayList<>(1);
-    callableTasks.add(task);
-    when(appContext.getBean(PatientClaimsEobTaskTransformerV2.class)).thenReturn(task);
-
-    TokenParam tokenParam =
-        new TokenParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, "carrier");
+  private TokenAndListParam createClaimsTokenAndListParam(List<String> claimsList) {
     TokenAndListParam listParam = new TokenAndListParam();
-    listParam.addAnd(tokenParam);
-
-    List<Future<PatientClaimsEobTaskTransformerV2>> taskList = new ArrayList();
-    try {
-      Future<PatientClaimsEobTaskTransformerV2> mockedFuture = mock(Future.class);
-      when(mockedFuture.get()).thenReturn(task);
-      taskList.add(mockedFuture);
-      when(executorService.invokeAll(callableTasks)).thenReturn(taskList);
-    } catch (Exception e) {
-      e.printStackTrace();
+    if (claimsList.isEmpty()) {
+      return listParam;
     }
-
-    eobProvider.findByPatient(patientParam, null, null, "true", null, null, null, requestDetails);
-
-    // we returned three claims, so we should see three samhsa filter tests
-    verify(samhsaMatcher, times(3)).test(testEob);
-  }
-
-  /**
-   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} with <code>
-   * excludeSAMHSA=false</code> does not call the filter for SAMHSA-related claims.
-   */
-  @Test
-  public void testFindByPatientWhenExcludeSamshaFalseExpectNoFiltering() {
-    // the bitmask determines which claims get returned for the test, so return three
-    when(mockQuery.getResultList())
-        .thenReturn(
-            List.of(
-                QueryUtils.V_CARRIER_HAS_DATA
-                    + QueryUtils.V_SNF_HAS_DATA
-                    + QueryUtils.V_DME_HAS_DATA));
-
-    EntityManager em = mock(EntityManager.class);
-    CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
-    Root<CarrierClaim> clmRoot = mock(Root.class);
-
-    setupClaimEntity(em, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
-    PatientClaimsEobTaskTransformerV2 task =
-        new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
-    assertNotNull(task);
-
-    task.setEntityManager(em);
-    List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks = new ArrayList<>(1);
-    callableTasks.add(task);
-    when(appContext.getBean(PatientClaimsEobTaskTransformerV2.class)).thenReturn(task);
-
-    TokenParam tokenParam =
-        new TokenParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, "carrier");
-    TokenAndListParam listParam = new TokenAndListParam();
-    listParam.addAnd(tokenParam);
-
-    List<Future<PatientClaimsEobTaskTransformerV2>> taskList = new ArrayList();
-    try {
-      Future<PatientClaimsEobTaskTransformerV2> mockedFuture = mock(Future.class);
-      when(mockedFuture.get()).thenReturn(task);
-      taskList.add(mockedFuture);
-      when(executorService.invokeAll(callableTasks)).thenReturn(taskList);
-    } catch (Exception e) {
-      e.printStackTrace();
+    TokenOrListParam orParam =
+        new TokenOrListParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE);
+    for (String val : claimsList) {
+      orParam.add(val.toLowerCase());
     }
-
-    eobProvider.findByPatient(patientParam, null, null, "false", null, null, null, requestDetails);
-
-    verify(samhsaMatcher, never()).test(testEob);
-  }
-
-  /**
-   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} passes the
-   * includeTaxNumbers value to the transformer for each claim type that uses the value (currently
-   * only carrier and DME).
-   */
-  @Test
-  public void testFindByPatientIncludeTaxNumberPassedToTransformer() {
-    EntityManager em = mock(EntityManager.class);
-    CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
-    Root<CarrierClaim> clmRoot = mock(Root.class);
-
-    setupClaimEntity(em, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
-    PatientClaimsEobTaskTransformerV2 task =
-        new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
-    assertNotNull(task);
-
-    task.setEntityManager(em);
-    List<Callable<PatientClaimsEobTaskTransformerV2>> callableTasks = new ArrayList<>(1);
-    callableTasks.add(task);
-    when(appContext.getBean(PatientClaimsEobTaskTransformerV2.class)).thenReturn(task);
-
-    TokenParam tokenParam =
-        new TokenParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, "carrier");
-    TokenAndListParam listParam = new TokenAndListParam();
-    listParam.addAnd(tokenParam);
-
-    List<Future<PatientClaimsEobTaskTransformerV2>> taskList = new ArrayList();
-    try {
-      Future<PatientClaimsEobTaskTransformerV2> mockedFuture = mock(Future.class);
-      when(mockedFuture.get()).thenReturn(task);
-      taskList.add(mockedFuture);
-      when(executorService.invokeAll(callableTasks)).thenReturn(taskList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("true");
-    when(requestDetails.getHeaders(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn(List.of("true"));
-
-    eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
-
-    verify(carrierClaimTransformer, times(1)).transform(any(), eq(Optional.ofNullable(true)));
-    verify(dmeClaimTransformer, times(1)).transform(any(), eq(Optional.ofNullable(true)));
+    listParam.addAnd(orParam);
+    return listParam;
   }
 }
