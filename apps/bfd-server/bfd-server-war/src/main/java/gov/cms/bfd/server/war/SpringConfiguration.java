@@ -485,12 +485,18 @@ public class SpringConfiguration {
    * This bean provides an {@link ExecutorService} to enable EOB claim transformers to run in
    * parallel (threads).
    *
+   * <p>Using a fixed thread pool as ExplanationOfBenefit processing is broken into thread tasks,
+   * one per claim type; threads run concurrently, with each running in generally less than a
+   * second. So, while a fixed thread pool might represent wasted resources (memory allocated per
+   * thread at time of thread pool creation), retrieving EOB claims represents a high-volume service
+   * that will make good use of allocated threads.
+   *
    * @param threadCount system parameter for the number of threads in the fixed thread pool.
    * @return {@link ExecutorService} for the application.
    */
   @Bean
   public ExecutorService executorService(
-      @Value("${bfdServer.executorService.threads:100}") String threadCount) {
-    return Executors.newFixedThreadPool(Integer.parseInt(threadCount));
+      @Value("${bfdServer.executorService.threads:80}") Integer threadCount) {
+    return Executors.newFixedThreadPool(threadCount);
   }
 }
