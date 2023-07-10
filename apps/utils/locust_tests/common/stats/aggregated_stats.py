@@ -34,7 +34,9 @@ class StatsCollector(object):
             locust_env (Environment): Current Locust environment
             stats_tag (str): A string which tags the output JSON; used to distinguish between
             separate test runs
-            running_env (str): A string which represents the current testing environment
+            running_env (str): A string which represents the current testing environment. May be test, prod-sbx,
+            prod, or any ephemeral environment whose name ends with one of those values, e.g [TICKET_NUM]-test.
+            Case-insensitive.
         """
         super().__init__()
 

@@ -9,8 +9,6 @@ from typing import List
 import boto3
 from botocore.config import Config
 
-# The environment may be test, prod-sbx, or prod, or any ephemeral environment whose name ends with one of those values,
-# e.g [TICKET_NUM]-test. Case-insensitive.
 environment = os.environ.get("BFD_ENVIRONMENT", "test").lower()
 s3_bucket = os.environ.get("INSIGHTS_BUCKET_NAME")
 sqs_pipeline_signal = os.environ.get("SQS_PIPELINE_SIGNAL_NAME")
