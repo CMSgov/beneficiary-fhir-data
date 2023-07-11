@@ -35,7 +35,7 @@ terraform workspace select "$bfdEnv" -no-color
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
         // Gathering terraform plan
-        sh "terraform plan ${terraformVariables} -no-color -out=tfplan"
+        sh "terraform plan $terraformVariables -no-color -out=tfplan"
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
