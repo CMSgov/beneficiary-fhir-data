@@ -59,6 +59,7 @@ void destroyTerraservice(Map args = [:]) {
     serviceDirectory = args.directory
     tfVars = args.tfVars ?: [:]
 
+    // Additional protection against accidentally destroying core environments
     if (bfdEnv.toLowerCase() in ["test", "prod-sbx", "prod"]) {
         return
     }
@@ -74,7 +75,7 @@ void destroyTerraservice(Map args = [:]) {
         // Initilize terraform
         sh 'terraform init -no-color'
 
-        // - Attempt to destroy the desired workspace
+        // Select the targeted environment's workspace
         // NOTE: this is the terraform concept of workspace **NOT** Jenkins
         sh "terraform workspace select $bfdEnv -no-color"
 
@@ -86,14 +87,13 @@ void destroyTerraservice(Map args = [:]) {
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
         // Apply Terraform plan
-        //sh 'terraform apply -no-color tfplan'
+        sh 'terraform apply -no-color tfplan'
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-/*
+
         sh """
 terraform workspace select default -no-color
 terraform workspace delete $bfdEnv
 """
- */
     }
 }

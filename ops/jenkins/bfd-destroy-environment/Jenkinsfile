@@ -11,6 +11,7 @@
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
 def trimmedEnv
+def forceStageApproval
 def lockResource
 
 // send notifications to slack, email, etc
@@ -98,19 +99,25 @@ spec:
             name: 'env',
             description: 'The BFD ephemeral Environment to destroy'
         )
+        booleanParam(
+            name: 'force_stage_approval',
+            description: 'When true, forces the operator to approve each stage',
+            defaultValue: false
+        )
     }
 
     stages {
         stage('Validate parameters') {
             when {
                 expression {
+                    // Check that the environment is ephemeral and not protected
+                    forceStageApproval = params.force_stage_approval
                     trimmedEnv = params.env.trim().toLowerCase()
-                    // Only run this stage if the environment is not ephemeral
                     return ['test', 'prod-sbx', 'prod_sbx', 'prod'].contains(trimmedEnv)
                 }
             }
             steps {
-                // Abort the build, skipping subsequent stages
+                // Trying to destroy a protected environment; abort the build and skip subsequent stages
                 error("Restricted target environment: ${trimmedEnv}")
             }
         }
@@ -156,25 +163,26 @@ spec:
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/server'
                             )
-
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/server/server-regression'
                             )
-
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/server/insights/api-requests'
                             )
+                            if (forceStageApproval) {
+                                input "Approval is required before the pipeline may proceed"
+                            }
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         throw e
                     } catch (ex) {
-                        currentBuild.result = 'FAILURE'
-                        throw ex
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -191,6 +199,9 @@ spec:
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/pipeline'
                             )
+                        }
+                        if (forceStageApproval) {
+                            input "Approval is required before the pipeline may proceed"
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
@@ -216,6 +227,9 @@ spec:
                                 directory: "ops/terraform/services/migrator"
                             )
                         }
+                        if (forceStageApproval) {
+                            input "Approval is required before the pipeline may proceed"
+                        }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
@@ -237,9 +251,12 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/common'
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/common'
                             )
+                        }
+                        if (forceStageApproval) {
+                            input "Approval is required before the pipeline may proceed"
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
@@ -265,6 +282,9 @@ spec:
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/base'
                             )
+                        }
+                        if (forceStageApproval) {
+                            input "Approval is required before the pipeline may proceed"
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
