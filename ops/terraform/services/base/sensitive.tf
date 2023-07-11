@@ -55,6 +55,7 @@ resource "aws_ssm_parameter" "server_sensitive" {
   name      = each.key
   overwrite = true
   type      = "SecureString"
+  tier      = "Intelligent-Tiering"
   value     = each.value
 
   tags = {}

@@ -89,7 +89,7 @@ def _(environment: Environment, **kwargs) -> None:
                 )
         except Exception as exc:
             compare_result = FinalCompareResult.FAILED
-            logger.error("Stat comparison was not able to complete; err: %s", str(exc))
+            logger.error("Stat comparison was not able to complete; err: %s", repr(exc))
 
         stats.metadata.compare_result = compare_result
         stats.metadata.validation_result = validation_result

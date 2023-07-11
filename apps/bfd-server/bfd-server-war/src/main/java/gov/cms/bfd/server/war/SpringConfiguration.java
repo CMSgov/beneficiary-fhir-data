@@ -38,8 +38,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -47,7 +45,6 @@ import javax.persistence.PersistenceUnit;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.apache.logging.log4j.util.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -321,9 +318,6 @@ public class SpringConfiguration {
    * @param r4ClaimResponseResourceProvider the r4 claim response resource provider
    * @param pacEnabled Determines if the fhir resources related to partially adjudicated claims data
    *     should be accessible via the fhir api service.
-   * @param claimSourceTypeNames Determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}.
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
@@ -333,30 +327,17 @@ public class SpringConfiguration {
       R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
       R4ClaimResourceProvider r4ClaimResourceProvider,
       R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider,
-      @Value("${bfdServer.pac.enabled:false}") Boolean pacEnabled,
-      @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
+      @Value("${bfdServer.pac.enabled:false}") Boolean pacEnabled) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
     if (pacEnabled) {
-      Set<String> allowedResourceTypes =
-          Stream.of(claimSourceTypeNames.split(","))
-              .filter(Strings::isNotBlank)
-              .map(String::toLowerCase)
-              .collect(Collectors.toSet());
-
-      // If there are no enabled source types, this endpoint will never return
-      // anything, so don't
-      // add it
-      if (!allowedResourceTypes.isEmpty()) {
-        r4ClaimResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
-        r4ResourceProviders.add(r4ClaimResourceProvider);
-        r4ClaimResponseResourceProvider.setEnabledSourceTypes(allowedResourceTypes);
-        r4ResourceProviders.add(r4ClaimResponseResourceProvider);
-      }
+      r4ResourceProviders.add(r4ClaimResourceProvider);
+      r4ResourceProviders.add(r4ClaimResponseResourceProvider);
     }
+
     return r4ResourceProviders;
   }
 

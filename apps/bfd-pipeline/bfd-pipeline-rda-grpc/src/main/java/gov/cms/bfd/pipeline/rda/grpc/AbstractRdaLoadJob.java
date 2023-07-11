@@ -6,7 +6,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
@@ -36,8 +35,7 @@ import org.slf4j.Logger;
  * will do any work. The other threads will all immediately return with an indication that they have
  * no work to do.
  */
-public abstract class AbstractRdaLoadJob<TResponse, TClaim>
-    implements PipelineJob<NullPipelineJobArguments> {
+public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJob {
 
   /**
    * Denotes the preferred execution of a sink.

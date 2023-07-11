@@ -39,8 +39,9 @@ def runServerRegression(Map args = [:]) {
         return false
     }
 
+    elbDnsName = awsElb.getElbDnsName(bfdEnv)
     sqsMessage = writeJSON(returnText: true, json: [
-        'host': "https://${bfdEnv}.bfd.cms.gov",
+        'host': "https://${elbDnsName}",
         'suite_version': 'v2',
         'spawn_rate': 10,
         'users': 10,

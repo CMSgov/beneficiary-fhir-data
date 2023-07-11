@@ -18,59 +18,69 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
+@Component
 final class CoverageTransformer {
+
+  /** Helper to record metric information. */
+  private final MetricRegistry metricRegistry;
+
+  /**
+   * Instantiates a new {@link CoverageTransformer}.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   */
+  public CoverageTransformer(MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
+  }
+
   /**
    * Transforms a beneficiary and medicare segment into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param medicareSegment the {@link MedicareSegment} to generate a {@link Coverage} resource for
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
    * @return the {@link Coverage} resource that was generated
    */
   @Trace
-  public static Coverage transform(
-      MetricRegistry metricRegistry, MedicareSegment medicareSegment, Beneficiary beneficiary) {
+  public Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
     Objects.requireNonNull(medicareSegment);
 
-    if (medicareSegment == MedicareSegment.PART_A)
-      return transformPartA(metricRegistry, beneficiary);
-    else if (medicareSegment == MedicareSegment.PART_B)
-      return transformPartB(metricRegistry, beneficiary);
-    else if (medicareSegment == MedicareSegment.PART_C)
-      return transformPartC(metricRegistry, beneficiary);
-    else if (medicareSegment == MedicareSegment.PART_D)
-      return transformPartD(metricRegistry, beneficiary);
+    if (medicareSegment == MedicareSegment.PART_A) return transformPartA(beneficiary);
+    else if (medicareSegment == MedicareSegment.PART_B) return transformPartB(beneficiary);
+    else if (medicareSegment == MedicareSegment.PART_C) return transformPartC(beneficiary);
+    else if (medicareSegment == MedicareSegment.PART_D) return transformPartD(beneficiary);
     else throw new BadCodeMonkeyException();
   }
 
   /**
    * Transforms a beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
   @Trace
-  public static List<IBaseResource> transform(
-      MetricRegistry metricRegistry, Beneficiary beneficiary) {
+  public List<IBaseResource> transform(Beneficiary beneficiary) {
     return Arrays.stream(MedicareSegment.values())
-        .map(s -> transform(metricRegistry, s, beneficiary))
+        .map(s -> transform(s, beneficiary))
         .collect(Collectors.toList());
   }
 
   /**
    * Transforms a Medicare part A beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_A} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_A} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartA(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+  private Coverage transformPartA(Beneficiary beneficiary) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -146,13 +156,12 @@ final class CoverageTransformer {
   /**
    * Transforms a Medicare part B beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_B} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_B} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartB(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+  private Coverage transformPartB(Beneficiary beneficiary) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -212,13 +221,12 @@ final class CoverageTransformer {
   /**
    * Transforms a Medicare part C beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_C} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartC(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+  private Coverage transformPartC(Beneficiary beneficiary) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -266,13 +274,12 @@ final class CoverageTransformer {
   /**
    * Transforms a Medicare part D beneficiary into a {@link Coverage} resource.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
    *     Coverage} resource for
    * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private static Coverage transformPartD(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+  private Coverage transformPartD(Beneficiary beneficiary) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -373,7 +380,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
+  private void transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
     if (beneficiary.getHmoIndicatorJanInd().isPresent()) {
       coverage.addExtension(
@@ -444,7 +451,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartCPbpNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -515,7 +522,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
     if (beneficiary.getPartCPlanTypeJanCode().isPresent()) {
       coverage.addExtension(
@@ -610,7 +617,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
     if (beneficiary.getPartCContractNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -705,8 +712,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformEntitlementBuyInIndicators(
-      Coverage coverage, Beneficiary beneficiary) {
+  private void transformEntitlementBuyInIndicators(Coverage coverage, Beneficiary beneficiary) {
 
     // Medicare Entitlement Buy In Indicator
     if (beneficiary.getEntitlementBuyInJanInd().isPresent()) {
@@ -778,7 +784,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformMedicaidDualEligibility(Coverage coverage, Beneficiary beneficiary) {
+  private void transformMedicaidDualEligibility(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
       coverage.addExtension(
@@ -873,7 +879,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     if (beneficiary.getPartDContractNumberJanId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
@@ -967,7 +973,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartDPbpNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -1038,7 +1044,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
     if (beneficiary.getPartDSegmentNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -1109,8 +1115,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartDLowIncomeCostShareGroup(
-      Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDLowIncomeCostShareGroup(Coverage coverage, Beneficiary beneficiary) {
     // Monthly cost sharing group
     if (beneficiary.getPartDLowIncomeCostShareGroupJanCode().isPresent()) {
       coverage.addExtension(
@@ -1205,7 +1210,7 @@ final class CoverageTransformer {
    * @param coverage the {@link Coverage} to generate extensions for
    * @param beneficiary the {@link Beneficiary} to get information from
    */
-  private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
+  private void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Part D Retiree Drug Subsidy Indicators
     if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent()) {
       coverage.addExtension(

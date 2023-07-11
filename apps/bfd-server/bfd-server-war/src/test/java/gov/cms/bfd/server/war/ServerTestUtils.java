@@ -372,7 +372,7 @@ public final class ServerTestUtils {
    * @return the local {@link Path} to the trust store that FHIR clients should use
    */
   private static Path getClientTrustStorePath() {
-    Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
+    Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.pfx");
     return trustStorePath;
   }
 
