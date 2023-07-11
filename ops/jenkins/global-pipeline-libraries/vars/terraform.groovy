@@ -1,3 +1,5 @@
+@Library("bfd-2646-support-ephemeral-environment-destruction")
+
 #!/usr/bin/env groovy
 // terraform.groovy contains global method for managing various terraservice
 
