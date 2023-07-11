@@ -83,10 +83,11 @@ void destroyTerraservice(Map args = [:]) {
         //sh 'terraform apply -no-color tfplan'
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-
+/*
         sh """
 terraform workspace select default -no-color
 terraform workspace delete $bfdEnv
 """
+ */
     }
 }
