@@ -10,7 +10,6 @@ import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.File;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
@@ -58,7 +57,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
    */
   @Builder
   @Slf4j
-  class Config implements Serializable {
+  class Config {
     /** The {@link RandomClaimGeneratorConfig} to use for random claim generation. */
     @Builder.Default
     private final RandomClaimGeneratorConfig randomClaimConfig =

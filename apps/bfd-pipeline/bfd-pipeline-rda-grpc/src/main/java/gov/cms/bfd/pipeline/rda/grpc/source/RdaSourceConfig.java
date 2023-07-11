@@ -9,7 +9,6 @@ import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -27,9 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @EqualsAndHashCode
-public class RdaSourceConfig implements Serializable {
-
-  private static final long serialVersionUID = 6667857735839524L;
+public class RdaSourceConfig {
 
   /** The type of RDA API server to connect to. */
   private final ServerType serverType;

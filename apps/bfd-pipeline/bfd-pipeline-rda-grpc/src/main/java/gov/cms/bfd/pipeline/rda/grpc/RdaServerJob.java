@@ -9,7 +9,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -105,8 +104,7 @@ public class RdaServerJob implements PipelineJob {
 
   /** Configuration for the server job. */
   @EqualsAndHashCode
-  public static class Config implements Serializable {
-    private static final long serialVersionUID = 9653997632697744L;
+  public static class Config {
 
     /** Default name used by the in-process gRPC server. */
     public static final String DEFAULT_SERVER_NAME = "mock-rda-server";
