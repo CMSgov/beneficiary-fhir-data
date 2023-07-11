@@ -80,7 +80,7 @@ void destroyTerraservice(Map args = [:]) {
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
         // Apply Terraform plan
-        sh 'terraform apply -no-color tfplan'
+        //sh 'terraform apply -no-color tfplan'
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
