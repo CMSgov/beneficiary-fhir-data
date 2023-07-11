@@ -195,26 +195,10 @@ public final class RifLoader {
 
     fileEventMetrics.register(
         MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
-        new Gauge<Integer>() {
-          /**
-           * @see com.codahale.metrics.Gauge#getValue()
-           */
-          @Override
-          public Integer getValue() {
-            return loadExecutor.getQueue().size();
-          }
-        });
+        (Gauge<Integer>) () -> loadExecutor.getQueue().size());
     fileEventMetrics.register(
         MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
-        new Gauge<Integer>() {
-          /**
-           * @see com.codahale.metrics.Gauge#getValue()
-           */
-          @Override
-          public Integer getValue() {
-            return loadExecutor.getActiveCount();
-          }
-        });
+        (Gauge<Integer>) () -> loadExecutor.getActiveCount());
 
     // Trim the LoadedFiles & LoadedBatches table
     trimLoadedFiles(errorHandler);
