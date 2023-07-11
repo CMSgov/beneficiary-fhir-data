@@ -531,7 +531,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Loads optional claim specific {@link LoadAppOptions.PerformanceSettings}.
+   * Loads optional claim specific {@link LoadAppOptions.PerformanceSettings}. Uses the provided
+   * beneficiary settings to obtain values if the claim specific settings are not present in the
+   * {@link ConfigLoader}.
    *
    * @param config used to load configuration values
    * @param benePerformanceSettings used to get default values
