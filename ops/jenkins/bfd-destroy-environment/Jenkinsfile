@@ -151,7 +151,6 @@ spec:
                     currentStage = env.STAGE_NAME
                     try {
                         lock(resource: lockResource) {
-                            // Deploy the Server
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
                                 env: trimmedEnv,
@@ -188,7 +187,7 @@ spec:
                     try {
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
-                            terraform.deployTerraservice(
+                            terraform.destroyTerraservice(
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/pipeline'
                             )
@@ -237,7 +236,7 @@ spec:
                     try {
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
-                            terraform.deployTerraservice(
+                            terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/common'
                             )
