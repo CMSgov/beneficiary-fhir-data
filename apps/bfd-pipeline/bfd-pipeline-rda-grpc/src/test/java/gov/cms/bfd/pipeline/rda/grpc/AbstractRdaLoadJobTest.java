@@ -11,11 +11,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -324,30 +320,6 @@ public class AbstractRdaLoadJobTest {
     assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
     assertMeterReading(0, "failures", job.getMetrics().getFailures());
     assertMeterReading(100, "processed", job.getMetrics().getProcessed());
-  }
-
-  /**
-   * Tests that the {@link AbstractRdaLoadJob.Config} is serializable.
-   *
-   * @throws Exception If there was an issue executing the logic.
-   */
-  @Test
-  public void configIsSerializable() throws Exception {
-    final AbstractRdaLoadJob.Config original =
-        AbstractRdaLoadJob.Config.builder()
-            .runInterval(Duration.ofSeconds(1))
-            .batchSize(45)
-            .build();
-    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-      out.writeObject(original);
-    }
-    AbstractRdaLoadJob.Config loaded;
-    try (ObjectInputStream inp =
-        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-      loaded = (Config) inp.readObject();
-    }
-    assertEquals(original, loaded);
   }
 
   /** Test class used to perform the associated {@link AbstractRdaLoadJob} testing. */

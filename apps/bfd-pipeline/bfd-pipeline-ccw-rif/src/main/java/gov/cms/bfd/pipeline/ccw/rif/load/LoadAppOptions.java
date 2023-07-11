@@ -3,17 +3,9 @@ package gov.cms.bfd.pipeline.ccw.rif.load;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import java.io.Serializable;
 
 /** Models the user-configurable application options. */
-public final class LoadAppOptions implements Serializable {
-  /*
-   * This class is marked Serializable purely to help keep
-   * AppConfigurationTest simple. Unfortunately, Path implementations aren't
-   * also Serializable, so we have to store Strings here, instead.
-   */
-
-  private static final long serialVersionUID = 2884121140016566847L;
+public final class LoadAppOptions {
 
   /**
    * A reasonable (though not terribly performant) suggested default value for {@link

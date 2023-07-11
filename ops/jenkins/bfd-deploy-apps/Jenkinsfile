@@ -220,7 +220,6 @@ spec:
             }
         }
 
-
         stage('Deploy Migrator') {
             steps {
                 script {
@@ -302,7 +301,6 @@ spec:
                                     directory: 'ops/terraform/services/server',
                                     tfVars: terraformVars
                             )
-
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
                                     env: trimmedEnv,
@@ -312,30 +310,27 @@ spec:
                                     ]
                             )
 
-                            // TODO: Better support ephemeral environments in the future as desired, post BFD-2554
-                            if (bfdEnv in ["test", "prod-sbx", "prod"]) {
-                                // Deploy the API requests Insights Lambda
-                                awsAuth.assumeRole()
-                                terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/insights/api-requests'
-                                )
+                            // Deploy the API requests Insights Lambda
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/insights/api-requests'
+                            )
 
-                                // Deploy the API regression suite
-                                awsAuth.assumeRole()
-                                hasRegressionRunSucceeded = serverScripts.runServerRegression(
-                                    bfdEnv: trimmedEnv,
-                                    gitBranchName: gitBranchName
-                                )
-                                if (hasRegressionRunSucceeded) {
-                                    println 'Regression suite passed, proceeding to next stage...'
-                                } else {
-                                    try {
-                                        input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
-                                        echo "Regression suite failure in '${trimmedEnv}' has been accepted by operator. Proceeding to next stage..."
-                                    } catch (err) {
-                                        error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
-                                    }
+                            // Deploy the API regression suite
+                            awsAuth.assumeRole()
+                            hasRegressionRunSucceeded = serverScripts.runServerRegression(
+                                bfdEnv: trimmedEnv,
+                                gitBranchName: gitBranchName
+                            )
+                            if (hasRegressionRunSucceeded) {
+                                println 'Regression suite passed, proceeding to next stage...'
+                            } else {
+                                try {
+                                    input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
+                                    echo "Regression suite failure in '${trimmedEnv}' has been accepted by operator. Proceeding to next stage..."
+                                } catch (err) {
+                                    error "Operator opted to fail deployment due to regression suite failure in '${trimmedEnv}'"
                                 }
                             }
                         }

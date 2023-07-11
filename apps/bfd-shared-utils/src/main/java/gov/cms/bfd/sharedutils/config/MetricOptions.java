@@ -1,14 +1,12 @@
 package gov.cms.bfd.sharedutils.config;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 /**
  * Models the user-configurable options for sending telemetry to New Relic. TODO: BFD-1558 Move this
  * class into a common location to be used here and pipeline
  */
-public final class MetricOptions implements Serializable {
-  private static final long serialVersionUID = 1L;
+public final class MetricOptions {
 
   /** The secret key granting access to the New Relic Metric API. */
   private final String newRelicMetricKey;
