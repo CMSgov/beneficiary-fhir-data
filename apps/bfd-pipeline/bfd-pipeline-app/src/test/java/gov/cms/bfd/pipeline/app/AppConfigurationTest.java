@@ -130,9 +130,9 @@ public class AppConfigurationTest {
     assertEquals(
         benePerformanceSettings,
         loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
-    envVars.put(AppConfiguration.ENV_VAR_KEY_CLAIM_LOADER_THREADS, "20");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_CLAIM_RIF_JOB_BATCH_SIZE, "21");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_CLAIM_RIF_JOB_QUEUE_SIZE_MULTIPLE, "22");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "20");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "21");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "22");
     assertEquals(
         new LoadAppOptions.PerformanceSettings(20, 21, 22),
         loadClaimPerformanceSettings(configLoader, benePerformanceSettings));

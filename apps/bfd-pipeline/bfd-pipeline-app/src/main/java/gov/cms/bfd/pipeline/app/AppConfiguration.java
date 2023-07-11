@@ -103,7 +103,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
    * depends on number of cores, cpu speed, i/o throughput, and database performance.
    */
-  public static final String ENV_VAR_KEY_CLAIM_LOADER_THREADS = "LOADER_THREADS_CLAIMS";
+  public static final String ENV_VAR_KEY_LOADER_THREADS_CLAIMS = "LOADER_THREADS_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -141,7 +141,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
    * the performance boost from larger batch sizes drops off quickly.
    */
-  public static final String ENV_VAR_KEY_CLAIM_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE_CLAIMS";
+  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS = "RIF_JOB_BATCH_SIZE_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to provide the work queue size for the
@@ -168,7 +168,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * slow downs without wasting too much RAM with large numbers of objects waiting to be sent to the
    * database.
    */
-  public static final String ENV_VAR_KEY_CLAIM_RIF_JOB_QUEUE_SIZE_MULTIPLE =
+  public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS =
       "RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS";
 
   /**
@@ -541,11 +541,11 @@ public final class AppConfiguration extends BaseAppConfiguration {
       ConfigLoader config, LoadAppOptions.PerformanceSettings benePerformanceSettings) {
     return new LoadAppOptions.PerformanceSettings(
         config.intValue(
-            ENV_VAR_KEY_CLAIM_LOADER_THREADS, benePerformanceSettings.getLoaderThreads()),
+            ENV_VAR_KEY_LOADER_THREADS_CLAIMS, benePerformanceSettings.getLoaderThreads()),
         config.intValue(
-            ENV_VAR_KEY_CLAIM_RIF_JOB_BATCH_SIZE, benePerformanceSettings.getRecordBatchSize()),
+            ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, benePerformanceSettings.getRecordBatchSize()),
         config.intValue(
-            ENV_VAR_KEY_CLAIM_RIF_JOB_QUEUE_SIZE_MULTIPLE,
+            ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS,
             benePerformanceSettings.getTaskQueueSizeMultiple()));
   }
 
