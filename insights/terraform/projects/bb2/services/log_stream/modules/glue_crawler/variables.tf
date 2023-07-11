@@ -1,4 +1,4 @@
-variable "firehose_name" {
+variable "name" {
   type = string
 }
 
@@ -7,5 +7,9 @@ variable "project" {
 }
 
 variable "database" {
+  type = string
+}
+
+variable "glue_crawler_schedule" {
   type = string
 }

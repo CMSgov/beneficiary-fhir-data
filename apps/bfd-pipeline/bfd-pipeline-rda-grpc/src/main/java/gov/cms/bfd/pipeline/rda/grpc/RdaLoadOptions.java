@@ -20,7 +20,6 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -29,8 +28,7 @@ import java.util.concurrent.Callable;
  * A single combined configuration object to hold the configuration settings for the various
  * components of the RDA load job.
  */
-public class RdaLoadOptions implements Serializable {
-  private static final long serialVersionUID = 7635897362336183L;
+public class RdaLoadOptions {
 
   /** The job configuration. */
   private final AbstractRdaLoadJob.Config jobConfig;

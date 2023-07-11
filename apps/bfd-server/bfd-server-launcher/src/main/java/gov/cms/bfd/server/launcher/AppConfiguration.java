@@ -2,14 +2,12 @@ package gov.cms.bfd.server.launcher;
 
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
 /** Models the configuration options for the launcher. */
-public final class AppConfiguration implements Serializable {
-  private static final long serialVersionUID = 1L;
+public final class AppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getHost()}

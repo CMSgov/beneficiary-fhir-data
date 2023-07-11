@@ -7,16 +7,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,33 +19,6 @@ import org.slf4j.LoggerFactory;
 
 /** Tests for the {@link RdaSourceConfig} class. */
 public class RdaSourceConfigIT {
-
-  /**
-   * Verify the {@link RdaSourceConfig} class is serializable.
-   *
-   * @throws Exception required in signature because tested method has checked exceptions
-   */
-  @Test
-  public void configIsSerializable() throws Exception {
-    final RdaSourceConfig original =
-        RdaSourceConfig.builder()
-            .serverType(RdaSourceConfig.ServerType.Remote)
-            .host("localhost")
-            .port(5432)
-            .maxIdle(Duration.ofMinutes(59))
-            .authenticationToken("secret")
-            .build();
-    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-      out.writeObject(original);
-    }
-    RdaSourceConfig loaded;
-    try (ObjectInputStream inp =
-        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-      loaded = (RdaSourceConfig) inp.readObject();
-    }
-    assertEquals(original, loaded);
-  }
 
   /**
    * Parameters for the {@link RdaSourceConfigIT#grpcCallLogMessages(String, boolean, Level, String,

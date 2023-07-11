@@ -4,19 +4,11 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import java.io.Serializable;
 import lombok.Data;
 import lombok.Getter;
 
 /** Models the user-configurable application options. */
-public final class LoadAppOptions implements Serializable {
-  /*
-   * This class is marked Serializable purely to help keep
-   * AppConfigurationTest simple. Unfortunately, Path implementations aren't
-   * also Serializable, so we have to store Strings here, instead.
-   */
-
-  private static final long serialVersionUID = 2884121140016566847L;
+public final class LoadAppOptions {
 
   /**
    * A reasonable (though not terribly performant) suggested default value for {@link
@@ -112,7 +104,7 @@ public final class LoadAppOptions implements Serializable {
 
   /** Settings used for performance tuning of the {@link RifLoader}. */
   @Data
-  public static class PerformanceSettings implements Serializable {
+  public static class PerformanceSettings {
     /** The number of loader threads. */
     private final int loaderThreads;
 

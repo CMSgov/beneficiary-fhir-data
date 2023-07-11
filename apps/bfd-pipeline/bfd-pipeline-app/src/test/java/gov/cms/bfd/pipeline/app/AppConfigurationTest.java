@@ -16,11 +16,6 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.core.instrument.config.validate.ValidationException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.HashMap;
 import org.apache.commons.codec.binary.Hex;
@@ -51,13 +46,8 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
     envVars.put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
     final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
-    final var encodedBytes = loadAndWriteConfig(configLoader);
+    AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
-    // NOTE: Retained the serialize/deserialize step even though it's not necessary
-    // when values are loaded from a map.  The reason is that it provides a test that
-    // the configuration objects are actually serializable.
-    ObjectInputStream testAppOutput = new ObjectInputStream(new ByteArrayInputStream(encodedBytes));
-    AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
     assertNotNull(testAppConfig);
     assertEquals(
         envVars.get(AppConfiguration.ENV_VAR_KEY_BUCKET),
@@ -155,7 +145,7 @@ public class AppConfigurationTest {
   @Test
   public void noEnvVarsSpecified() {
     final var configLoader = ConfigLoader.builder().build();
-    assertThrows(ConfigException.class, () -> loadAndWriteConfig(configLoader));
+    assertThrows(ConfigException.class, () -> AppConfiguration.loadConfig(configLoader));
   }
 
   /** Verifies that micrometer settings are correctly extracted using environment variable names. */
@@ -179,24 +169,5 @@ public class AppConfigurationTest {
     assertTrue(config.enabled());
     assertEquals(Duration.ofSeconds(28), config.step());
     assertEquals("my-namespace", config.namespace());
-  }
-
-  /**
-   * Calls {@link AppConfiguration#loadConfig} and serializes the resulting {@link AppConfiguration}
-   * instance out an array of bytes.
-   *
-   * @param configLoader used to load the app config
-   * @return the decoded bytes
-   * @throws IOException if serializing the config failed
-   */
-  private byte[] loadAndWriteConfig(ConfigLoader configLoader) throws IOException {
-    AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
-
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    // Serialize data object to a file
-    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-      out.writeObject(appConfig);
-    }
-    return bytes.toByteArray();
   }
 }
