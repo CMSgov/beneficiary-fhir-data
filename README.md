@@ -3,7 +3,7 @@ Beneficiary FHIR Data System (BFD)
 
 ## About
 
-This project contains modules and documentation in support of the Beneficiary FHIR Data (BFD) System. 
+This project contains modules and documentation in support of the Beneficiary FHIR Data (BFD) Server. 
 The BFD Server is an API designed to serve Medicare beneficiaries' demographic, enrollment, and claims data using the [HL7® FHIR® Standard](https://www.hl7.org/fhir/overview.html) format.
 
 It's the vision of this project to provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data.
