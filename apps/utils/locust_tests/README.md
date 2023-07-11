@@ -78,6 +78,11 @@ Tests are run by invoking Locust locally, either via the `locust` binary or via 
 
 > **Note 3:** `--host`, a Locust-provided parameter, _must_ include the protocol (i.e. HTTP/HTTPS), port. For example, `https://google.com` is a _valid_ value for `--host` whereas `google.com/` **is not**!
 
+> **Note 4:** If an environment is delimited by either `-` or `_` depending on context (e.g., `prod-sbx` or 
+> `prod_sbx` re: Glue Table partition columns) a better way of handling its string representation may need to be 
+> considered. For now, `prod-sbx` is the only string representation expected to be encountered by this code
+> and other contexts.
+
 | Command Line | Environment Variable | Config File | Required? | Default Value | Description |
 | - | - | - | - | - | - |
 | `--client-cert-path` | `LOCUST_BFD_CLIENT_CERT_PATH` | `client-cert-path` | Yes | N/A |  The path to the PEM file we copied/modified earlier |
@@ -86,8 +91,8 @@ Tests are run by invoking Locust locally, either via the `locust` binary or via 
 | `--server-public-key` | `LOCUST_BFD_SERVER_PUBLIC_KEY` | `server-public-key` | No | `""` | To allow the tests to trust the server responses, you can add the path to the public certificate here. This is not required to run the tests successfully, and may not be needed as a parameter at all. Does not cause any issues if omitted
 | `--table-sample-percent` | `LOCUST_DATA_TABLE_SAMPLE_PERCENT` | `table-sample-percent` | No | `0.25` | Determines how big a slice of the Beneficiaries table we want to use when finding endpoints for testing. Defaults to 0.25 (one-quarter of one percent), which is plenty for production databases with millions of rows. Note that this is only meant to randomize and streamline the data query, but if this option is set too small, it would act as a cap on the number of rows available. For the Test environment or local testing, it might be best to set to 100, which will effectively *not* use table sampling
 | `--stats-store-file` | `LOCUST_STATS_STORE_TO_FILE` | `stats-store-file` | No, _but is required when specifying other --stats* flags_ | `False` | Specifies that JSON stats will be stored to a file. Note that the `file` `store` is primarily meant for _local debugging_ purposes and should not be used when running these tests as part of a process where the performance statistics should be stored for later retrieval. **Cannot be specified with `--stats-store-s3`** 
-| `--stats-store-s3` | `LOCUST_STATS_STORE_TO_S3` | `stats-store-s3` | No, _but is required when specifying other --stats* flags_ | `False` | Specifies that JSON stats will be stored to S3. If specified, `--stats-store-s3-bucket`, `--stats-store-s3-database`, and `--stats-store-s3-table` _must_ be specified. **Cannot be specified with `--stats-store-file`** 
-| `--stats-env` | `LOCUST_STATS_ENVIRONMENT` | `stats-env` | No, _but is required when specifying other --stats* flags_ | `None` | Specifies the test running environment which the tests are running against. Must be any of `test`, `prod-sbx`, or `prod`, case-insensitive
+| `--stats-store-s3` | `LOCUST_STATS_STORE_TO_S3` | `stats-store-s3` | No, _but is required when specifying other --stats* flags_ | `False` | Specifies that JSON stats will be stored to S3. If specified, `--stats-store-s3-bucket`, `--stats-store-s3-database`, and `--stats-store-s3-table` _must_ be specified. **Cannot be specified with `--stats-store-file`**
+| `--stats-env` | `LOCUST_STATS_ENVIRONMENT` | `stats-env` | No, _but is required when specifying other --stats* flags_ | `None` | Specifies the test running environment which the tests are running against. May be any of `test`, `prod-sbx`, or `prod`, or any ephemeral environment whose name ends with one of those values, e.g `[TICKET_NUM]-test`. Case-insensitive.
 | `--stats-store-tag` | `LOCUST_STATS_STORE_TAG` | `stats-store-tag` | No, _but is required when specifying other --stats* flags_ | `[]` | Specifies the tags under which collected statistics will be stored. Can be specified multiple times to store stats under multiple tags
 | `--stats-store-file-path` | `LOCUST_STATS_STORE_FILE_PATH` | `stats-store-file-path` | No | `./` | Specifies the parent directory where JSON stats will be written to. _Only used if `--stats-store-file` is specified_
 | `--stats-store-s3-bucket` | `LOCUST_STATS_STORE_S3_BUCKET` | `stats-store-s3-bucket` | No, _but is required when specifying `--stats-store-s3`_ | `None` | Specifies the S3 bucket that JSON stats will be written to. _Only used if `--stats-store-s3` is specified_

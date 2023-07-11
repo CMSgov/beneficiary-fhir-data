@@ -26,20 +26,17 @@
     mode: 'u=rw,g=,o='
   become: true
 
-- name: Copy the appserver keystore
-  copy:
-    # Note: this JKS file is encrypted via the Ansible Vault
-    src: "{{ playbook_dir + '/' + data_server_appserver_keystore }}"
-    dest: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
-    force: yes # overwrite the existing keystore
-  become: true
-
-- name: Secure BFD Server SSL Keystore
+- name: Create blank appserver keystore
   file:
-    path: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
+    state: touch
+    path: "{{ data_server_dir }}/bluebutton-appserver-keystore.pfx"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=,o=
+  become: true
+
+- name: Update appserver keystore from configuration
+  shell: "echo \"{{ server_keystore_base64 }}\" | base64 --decode > {{ data_server_dir }}/bluebutton-appserver-keystore.pfx"
   become: true
 
 - name: Create BFD Server SSL Truststore Working Directory
@@ -54,8 +51,8 @@
 - name: Create Empty App Server SSL Truststore Working Copy
   command: "{{ item }}"
   with_items:
-    - "keytool -genkeypair -alias fake -dname cn=fake -keyalg RSA -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
-    - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit -keypass changeit"
+    - "keytool -genkeypair -alias fake -dname cn=fake -storetype PKCS12 -keyalg RSA -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.pfx -storepass changeit"
+    - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.pfx -storepass changeit -keypass changeit"
   changed_when: false
   become: true
 
@@ -72,7 +69,7 @@
     cert_alias: "{{ item.alias }}"
     cert_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
     keystore_pass: changeit
-    keystore_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
+    keystore_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.pfx"
   with_items: "{{ data_server_ssl_client_certificates }}"
   changed_when: false
   become: true
@@ -80,8 +77,8 @@
 - name: Update App Server SSL Truststore
   copy:
     remote_src: true
-    src: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
-    dest: "{{ data_server_dir }}/bluebutton-appserver-truststore.jks"
+    src: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.pfx"
+    dest: "{{ data_server_dir }}/bluebutton-appserver-truststore.pfx"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=rw,o=r
