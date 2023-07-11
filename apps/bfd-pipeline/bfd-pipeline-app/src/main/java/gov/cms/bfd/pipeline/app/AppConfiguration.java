@@ -616,40 +616,40 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
    *
    * @param config used to load configuration values
    * @param grpcConfig settings for communicating with RDA API
-   * @param mockServerConfig used to construct the config settings
+   * @param serverJobConfigBuilder used to construct the config settings
    * @return a valid RdaServerJob.Config
    */
   @VisibleForTesting
   static RdaServerJob.Config loadRdaServerJobConfig(
       ConfigLoader config,
       RdaSourceConfig grpcConfig,
-      RdaServerJob.Config.ConfigBuilder mockServerConfig) {
-    mockServerConfig.serverMode(
+      RdaServerJob.Config.ConfigBuilder serverJobConfigBuilder) {
+    serverJobConfigBuilder.serverMode(
         config
             .enumOption(
                 ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
             .orElse(RdaServerJob.Config.ServerMode.Random));
-    mockServerConfig.serverName(grpcConfig.getInProcessServerName());
+    serverJobConfigBuilder.serverName(grpcConfig.getInProcessServerName());
     config
         .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
         .map(Duration::ofSeconds)
-        .ifPresent(mockServerConfig::runInterval);
+        .ifPresent(serverJobConfigBuilder::runInterval);
     config
         .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED)
-        .ifPresent(mockServerConfig::randomSeed);
+        .ifPresent(serverJobConfigBuilder::randomSeed);
     config
         .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
-        .ifPresent(mockServerConfig::randomMaxClaims);
+        .ifPresent(serverJobConfigBuilder::randomMaxClaims);
     config
         .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
-        .ifPresent(mockServerConfig::s3Region);
+        .ifPresent(serverJobConfigBuilder::s3Region);
     config
         .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
-        .ifPresent(mockServerConfig::s3Bucket);
+        .ifPresent(serverJobConfigBuilder::s3Bucket);
     config
         .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
-        .ifPresent(mockServerConfig::s3Directory);
-    return mockServerConfig.build();
+        .ifPresent(serverJobConfigBuilder::s3Directory);
+    return serverJobConfigBuilder.build();
   }
 
   /**
@@ -670,11 +670,12 @@ public final class AppConfiguration extends BaseAppConfiguration implements Seri
 
     final AbstractRdaLoadJob.Config jobConfig = loadRdaLoadJobConfigOptions(config);
     final RdaSourceConfig grpcConfig = loadRdaSourceConfig(config);
-    final RdaServerJob.Config mockServerConfig =
+    final RdaServerJob.Config serverJobConfigBuilder =
         loadRdaServerJobConfig(config, grpcConfig, RdaServerJob.Config.builder());
 
     final int errorLimit = config.intValue(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT, 0);
-    return new RdaLoadOptions(jobConfig, grpcConfig, mockServerConfig, errorLimit, idHasherConfig);
+    return new RdaLoadOptions(
+        jobConfig, grpcConfig, serverJobConfigBuilder, errorLimit, idHasherConfig);
   }
 
   /**
