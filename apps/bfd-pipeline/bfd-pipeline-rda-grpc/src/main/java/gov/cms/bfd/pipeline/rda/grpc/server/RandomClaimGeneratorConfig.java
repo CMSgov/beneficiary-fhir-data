@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import java.io.Serializable;
 import java.time.Clock;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @Builder(toBuilder = true)
-public class RandomClaimGeneratorConfig implements Serializable {
+public class RandomClaimGeneratorConfig {
   /** The base seed value used for all generated random values. */
   private final long seed;
 
