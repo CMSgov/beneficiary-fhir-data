@@ -165,6 +165,11 @@ spec:
                             )
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/server-load '
+                            )
+                            awsAuth.assumeRole()
+                            terraform.destroyTerraservice(
                                 env: trimmedEnv,
                                 directory: 'ops/terraform/services/server/server-regression'
                             )
