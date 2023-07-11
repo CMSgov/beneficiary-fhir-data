@@ -167,8 +167,7 @@ while getopts "b:c:d:i:Il:r:R:s:t:xzZh-:" option ; do
   x) install=false ;;
   z) debug_enabled=true ;;
   Z) debug_enabled=true ; debug_suspend=y ;;
-  -) echo $OPTARG
-     case $OPTARG in
+  -) case $OPTARG in
        bene-load-options)
          val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
          IFS=':' read t b q <<<"$val"
