@@ -274,7 +274,7 @@ Supported long options:
 --bene-load-options threads:batch_size:queue_multiple
   Sets the RifLoader settings to use for beneficiary data.
 
---claim-load-options: threads:batch_size:queue_multiple
+--claim-load-options threads:batch_size:queue_multiple
   Sets the RifLoader settings to use for claim data.
 
 Run mode options: 
