@@ -57,9 +57,15 @@ terraform workspace select "$bfdEnv" -no-color
 void destroyTerraservice(Map args = [:]) {
     bfdEnv = args.env.trim()
     serviceDirectory = args.directory
+    tfVars = args.tfVars ?: [:]
+
     if (bfdEnv.toLowerCase() in ["test", "prod-sbx", "prod"]) {
         return
     }
+
+    // format terraform variables
+    terraformVariables = tfVars.findAll { it.value != '' && it.value != null }
+        .collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
 
     dir("${workspace}/${serviceDirectory}") {
         // Debug output terraform version
