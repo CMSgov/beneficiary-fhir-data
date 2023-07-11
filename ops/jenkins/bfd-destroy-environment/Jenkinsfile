@@ -97,7 +97,7 @@ spec:
     parameters {
         string(
             name: 'env',
-            description: 'The BFD ephemeral Environment to destroy'
+            description: 'The BFD ephemeral environment to destroy'
         )
         booleanParam(
             name: 'force_stage_approval',
@@ -203,14 +203,9 @@ spec:
                         if (forceStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw e
                     } catch (ex) {
-                        currentBuild.result = 'FAILURE'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw ex
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -235,9 +230,8 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        currentBuild.result = 'FAILURE'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw ex
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -263,9 +257,8 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        currentBuild.result = 'FAILURE'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw ex
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }

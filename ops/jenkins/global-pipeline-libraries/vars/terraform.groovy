@@ -35,7 +35,7 @@ terraform workspace select "$bfdEnv" -no-color
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
         // Gathering terraform plan
-        sh "terraform plan $terraformVariables -no-color -out=tfplan"
+        sh "terraform plan ${terraformVariables} -no-color -out=tfplan"
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
@@ -55,12 +55,12 @@ terraform workspace select "$bfdEnv" -no-color
  * </ul>
 */
 void destroyTerraservice(Map args = [:]) {
-    bfdEnv = args.env.trim()
+    bfdEnv = args.env.trim().toLowerCase()
     serviceDirectory = args.directory
     tfVars = args.tfVars ?: [:]
 
-    // Additional protection against accidentally destroying core environments
-    if (bfdEnv.toLowerCase() in ["test", "prod-sbx", "prod"]) {
+    // Do not destroy protected environments
+    if (bfdEnv in ["test", "prod-sbx", "prod_sbx", "prod"]) {
         return
     }
 
