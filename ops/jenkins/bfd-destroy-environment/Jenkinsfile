@@ -1,0 +1,284 @@
+#!/usr/bin/env groovy
+
+/**
+ * <p>
+ * This script will be run by Jenkins to aide in destroying ephemeral environments.
+ * </p>
+ */
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def gitBranchName
+def trimmedEnv
+def lockResource
+
+// send notifications to slack, email, etc
+def sendNotifications(String environment = '', String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {
+    // buildStatus of NULL means success
+    if (!buildStatus) {
+        buildStatus = 'SUCCESS'
+    }
+
+    // build colors
+    def colorMap = [:]
+    colorMap['STARTED']  = '#0000FF'
+    colorMap['SUCCESS']  = '#00FF00'
+    colorMap['ABORTED']  = '#6A0DAD'
+    colorMap['UNSTABLE'] = '#FFFF00'
+    colorMap['FAILED']   = '#FF0000'
+    def buildColor = colorMap[buildStatus]
+    buildColor = buildColor ?: '#FF0000' // default to red
+
+    def branchUrl = "https://github.com/CMSgov/beneficiary-fhir-data/tree/${env.BRANCH_NAME}"
+
+    def msg = ''
+    switch (buildStatus) {
+        case 'UNSTABLE':
+        case 'SUCCESS':
+            msg = 'COMPLETED SUCCESSFULLY: DESTROYED BFD EPHEMERAL ENVIRONMENT'
+            break
+        case 'FAILED':
+        case 'FAILURE':
+            msg = "FAILED ON ${stageName.toUpperCase()} STAGE ON BRANCH <${branchUrl}|${env.BRANCH_NAME.toUpperCase()}>"
+            break
+        case 'STARTED':
+            msg = 'HAS STARTED'
+            break
+        case 'ABORTED':
+            msg = 'WAS ABORTED'
+            break
+        default:
+            msg = "${buildStatus.toUpperCase()}"
+            break
+    }
+
+    // build slack message
+    def slackMsg = ''
+    if (buildStatus == 'UNSTABLE') {
+        slackMsg = "UNSTABLE BFD EPHEMERAL ENVIRONMENT DESTROY <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${env.BRANCH_NAME.toUpperCase()}> ${msg} \n"
+    } else {
+        slackMsg = "BFD EPHEMERAL ENVIRONMENT DESTROY <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ON BRANCH <${branchUrl}|${env.BRANCH_NAME.toUpperCase()}> FOR ${environment.toUpperCase()} ENVIRONMENT ${msg} \n"
+    }
+    slackMsg += "\tJob '${env.JOB_NAME}' \n"
+
+    // send Slack messages
+    slackSend(color: buildColor, message: slackMsg)
+}
+
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-latest'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
+        }
+    }
+
+    parameters {
+        string(
+            name: 'env',
+            description: 'The BFD ephemeral Environment to destroy'
+        )
+    }
+
+    stages {
+        stage('Validate parameters') {
+            when {
+                expression {
+                    trimmedEnv = params.env.trim().toLowerCase()
+                    // Only run this stage if the environment is not ephemeral
+                    return ['test', 'prod-sbx', 'prod_sbx', 'prod'].contains(trimmedEnv)
+                }
+            }
+            steps {
+                // Abort the build, skipping subsequent stages
+                error("Restricted target environment: ${trimmedEnv}")
+            }
+        }
+
+        stage('Prepare') {
+            steps {
+                script {
+                    // Address limitations resulting from CVE-2022-24767
+                    sh 'git config --global --add safe.directory "$WORKSPACE"'
+
+                    // Get the current commit id
+                    gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+                    // Get the remote repo url. This assumes we are using git+https not git+ssh.
+                    gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/, '')
+
+                    lockResource = "env_${trimmedEnv}"
+                }
+            }
+        }
+
+        stage('Set Branch Name') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    if (env.BRANCH_NAME.startsWith('PR')) {
+                        gitBranchName = env.CHANGE_BRANCH
+                    } else {
+                        gitBranchName = env.BRANCH_NAME
+                    }
+                }
+            }
+        }
+
+        stage('Destroy Server') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            // Deploy the Server
+                            awsAuth.assumeRole()
+                            terraform.destroyTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server'
+                            )
+
+                            awsAuth.assumeRole()
+                            terraform.destroyTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/server-regression'
+                            )
+
+                            awsAuth.assumeRole()
+                            terraform.destroyTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/insights/api-requests'
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        throw ex
+                    }
+                }
+            }
+        }
+
+        stage('Destroy Pipeline') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/pipeline'
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
+                    }
+                }
+            }
+        }
+
+        stage('Destroy Migrator') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            terraform.destroyTerraservice(
+                                env: trimmedEnv,
+                                directory: "ops/terraform/services/migrator"
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
+                    }
+                }
+            }
+        }
+
+        stage('Destroy Common') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/common'
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
+                    }
+                }
+            }
+        }
+
+        stage('Destroy Base') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            awsAuth.assumeRole()
+                            terraform.destroyTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/base'
+                            )
+                        }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
+                    } catch (ex) {
+                        currentBuild.result = 'FAILURE'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw ex
+                    } finally {
+                        //sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                    }
+                }
+            }
+        }
+
+    }
+}
