@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -89,8 +88,7 @@ public class IdHasher {
   /** Configuration options that encapsulates the settings for computing a hash. */
   @Builder(toBuilder = true)
   @AllArgsConstructor
-  public static class Config implements Serializable {
-    private static final long serialVersionUID = 4911655334835485L;
+  public static class Config {
     /** The default cache size. */
     private static final int DEFAULT_CACHE_SIZE = 100;
 

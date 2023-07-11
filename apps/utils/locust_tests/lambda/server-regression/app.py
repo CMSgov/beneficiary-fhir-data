@@ -9,7 +9,7 @@ from typing import List
 import boto3
 from botocore.config import Config
 
-environment = os.environ.get("BFD_ENVIRONMENT", "test")
+environment = os.environ.get("BFD_ENVIRONMENT", "test").lower()
 s3_bucket = os.environ.get("INSIGHTS_BUCKET_NAME")
 sqs_pipeline_signal = os.environ.get("SQS_PIPELINE_SIGNAL_NAME")
 

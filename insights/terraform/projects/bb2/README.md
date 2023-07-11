@@ -1,27 +1,42 @@
-# BB2 extended setup for BFD insights
-Configuration for BB2 custom Firehose data streams.
+# BB2 Setup for BFD Insights
 
-## Setup
-The custom (extended) setup requires Terraform >= v0.13 to allow for_each modular development. Terraform v0.13.7 was used here.
+## Overview
 
-To setup a new firehose data stream, add a variable map to variables.tf with custom settings.
+The BB2 BFD-Insights AWS components are setup under this directory.
 
-Example:
+The configurations for the base components are located under `base_config`. This utilizes the original modules shared with other projects under `../../../modules/`.
+
+The BB2 specific components are setup under the following service areas:
+
+- `services/analytics`:
+  - Includes components used for reporting via QuickSight.
+
+- `services/log_steam`:
+  - Includes components for streaming application log events from BB2 CloudWatch through to the related Glue tables.
+
+## Usage
+
+To initially work with in a service area, use the following commands. For this example, the `log_stream` service is used:
+
 ```
-variable "firehose" {
-  description = "Environments you wish to create a firehose"
-  type        = map
-  default     = {
-    # add a map for each firehose to be created
-    # the firehose name should be used as the key for each firehose
-    firehose-name = {
-      table_name = "events_firehose_name"
-      project = "bb2"
-      database = "bb2"
-    }
-  }
-}
+cd services/log_stream
+tfenv install 1.5.0 # install tf version needed
+tfenv use 1.5.0 # select tf version to use
+terraform init # locally initialize 
 ```
 
-Terraform Apply will create/update firehose, glue crawler and cloudwatch log destination for each map in the firehose variable settings.
+There is a `terraform.tfvars` file that contains sensitive variables. It is located under the default state path for the service. In this example, it is located in the main S3 bucket under this path:  `bfd-insights/bb2/services/log_stream/terraform.tfvars`.
 
+Copy this file in to the current working directory.
+
+The Terraform workspaces feature is used for switching between `test/impl/prod` environments.
+
+The following is an example of working with in the `test` environment:
+
+```
+terraform workspace list # to see the list of envs available
+terraform workspace select test # to switch to test env
+
+terraform plan # to see the plan for changes
+terraform apply # to apply changes after review
+```

@@ -16,23 +16,6 @@ class StatsStorageType(str, Enum):
     S3 = "s3"
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
-
-class StatsEnvironment(str, Enum):
-    """Enumeration for each possible test running environment"""
-
-    TEST = "test"
-    """Indicates that the running environment is in the TEST environment"""
-
-    # TODO: PROD_SBX may be "prod-sbx" or "prod_sbx" depending on context (specifically, Glue Table
-    # partition columns) so a better way of handling its string representation should be considered.
-    # For now, "prod-sbx" is the only string representation expected to be encountered by this code
-    # and other contexts
-    PROD_SBX = "prod-sbx"
-    """Indicates that the running environment is in the PROD-SBX environment"""
-    PROD = "prod"
-    """Indicates that the running environment is in the PROD environment"""
-
-
 class StatsComparisonType(str, Enum):
     """Enumeration for each possible type of stats comparison"""
 
@@ -50,7 +33,7 @@ class StatsConfiguration:
 
     stats_store: Optional[StatsStorageType]
     """The storage type that the stats will be written to"""
-    stats_env: Optional[StatsEnvironment]
+    stats_env: Optional[str]
     """The test running environment from which the statistics will be collected"""
     stats_store_file_path: Optional[str]
     """The local parent directory where JSON files will be written to.
@@ -110,7 +93,7 @@ class StatsConfiguration:
 
         stats_group.add_argument(
             "--stats-env",
-            type=cls.__env_from_value,
+            type=str,
             help="Specifies the test running environment which the tests are running against",
             dest="stats_env",
             env_var="LOCUST_STATS_ENVIRONMENT",
@@ -248,15 +231,6 @@ class StatsConfiguration:
             ) from exc
 
         return stats_config
-
-    @staticmethod
-    def __env_from_value(val: str) -> StatsEnvironment:
-        try:
-            return StatsEnvironment(val.lower())
-        except ValueError as exc:
-            raise ValueError(
-                f'Value must be one of: {", ".join([e.value for e in StatsEnvironment])}'
-            ) from exc
 
     @staticmethod
     def __validate_tag(tag: str) -> str:
