@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional, Union
 from locust.env import Environment
 from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
 
-from common.stats.stats_config import StatsEnvironment
 from common.validation import ValidationResult
 
 ResponseTimePercentiles = Dict[str, Union[int, float]]
@@ -26,7 +25,7 @@ class StatsCollector(object):
         self,
         locust_env: Environment,
         stats_tags: List[str],
-        running_env: StatsEnvironment,
+        running_env: str,
     ) -> None:
         """Creates a new instance of StatsCollector given the current Locust environment and a list
         of percentiles to report.
@@ -35,8 +34,9 @@ class StatsCollector(object):
             locust_env (Environment): Current Locust environment
             stats_tag (str): A string which tags the output JSON; used to distinguish between
             separate test runs
-            running_env (StatsEnvironment): A StatsEnvironment enum which represents the
-            current testing environment; either TEST, PROD or PROD_SBX
+            running_env (str): A string which represents the current testing environment. May be test, prod-sbx,
+            prod, or any ephemeral environment whose name ends with one of those values, e.g [TICKET_NUM]-test.
+            Case-insensitive.
         """
         super().__init__()
 
@@ -194,7 +194,7 @@ class StatsMetadata:
     """A timestamp indicating the time a stats snapshot was collected"""
     tags: List[str]
     """A list of simple string tags that partition or bucket emitted statistics"""
-    environment: StatsEnvironment
+    environment: str
     """The environment that the stats were collected from"""
     stats_reset_after_spawn: bool
     """Indicates whether the test run's stats were reset after all users were spawned"""
@@ -224,7 +224,7 @@ class StatsMetadata:
         cls,
         timestamp: int,
         tags: List[str],
-        environment: StatsEnvironment,
+        environment: str,
         tasks_names: List[str],
         locust_env: Environment,
     ) -> "StatsMetadata":
@@ -234,7 +234,7 @@ class StatsMetadata:
         Args:
             timestamp (int): A Unix timestamp indicating the time that the stats were collected
             tag (str): A simple string tag that is used as a partitioning tag
-            environment (StatsEnvironment): The environment that the test run was started in
+            environment (str): The environment that the test run was started in
             tasks_names (str): A List of the names of all of the tasks that ran
             locust_env (Environment): The current Locust environment
 
@@ -293,7 +293,7 @@ class StatsMetadata:
         requested_runtime: int,
         spawn_rate: int,
         stats_reset_after_spawn: bool,
-        environment: StatsEnvironment,
+        environment: str,
     ):
         # Generate a SHA256 hash string from various bits of information
         str_to_hash = "".join(
