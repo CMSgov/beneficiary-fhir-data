@@ -118,7 +118,7 @@ spec:
             }
             steps {
                 // Tried to destroy a protected environment; abort the build and skip subsequent stages
-                error("Restricted target environment: ${trimmedEnv}")
+                error("Unable to destroy the restricted target environment: '${trimmedEnv}', aborting build")
             }
         }
 
