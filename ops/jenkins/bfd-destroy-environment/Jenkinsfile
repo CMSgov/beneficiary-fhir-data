@@ -186,6 +186,7 @@ spec:
                         currentBuild.result = 'ABORTED'
                         throw e
                     } catch (ex) {
+                        currentBuild.result = 'UNSTABLE'
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
@@ -208,7 +209,11 @@ spec:
                         if (forceStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        throw e
                     } catch (ex) {
+                        currentBuild.result = 'UNSTABLE'
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
@@ -235,6 +240,7 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
+                        currentBuild.result = 'UNSTABLE'
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
@@ -262,6 +268,7 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
+                        currentBuild.result = 'UNSTABLE'
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
