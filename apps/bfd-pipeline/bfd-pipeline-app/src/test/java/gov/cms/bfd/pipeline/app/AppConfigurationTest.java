@@ -21,7 +21,7 @@ import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_STAR
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_WRITE_THREADS;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_VERSION;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneificiaryPerformanceSettings;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneficiaryPerformanceSettings;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -137,7 +137,7 @@ public class AppConfigurationTest {
   }
 
   /**
-   * Verifies that {@link AppConfiguration#loadBeneificiaryPerformanceSettings} enforces field
+   * Verifies that {@link AppConfiguration#loadBeneficiaryPerformanceSettings} enforces field
    * requirements and parses settings correctly.
    */
   @Test
@@ -145,25 +145,25 @@ public class AppConfigurationTest {
     final var envVars = new HashMap<String, String>();
     final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
 
-    assertThrows(ConfigException.class, () -> loadBeneificiaryPerformanceSettings(configLoader));
+    assertThrows(ConfigException.class, () -> loadBeneficiaryPerformanceSettings(configLoader));
 
     // verify values must be positive
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "0");
-    assertThatThrownBy(() -> loadBeneificiaryPerformanceSettings(configLoader))
+    assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
         .isInstanceOf(ConfigException.class)
         .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "10");
 
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "-1");
-    assertThatThrownBy(() -> loadBeneificiaryPerformanceSettings(configLoader))
+    assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
         .isInstanceOf(ConfigException.class)
         .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "11");
 
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "0");
-    assertThatThrownBy(() -> loadBeneificiaryPerformanceSettings(configLoader))
+    assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
         .isInstanceOf(ConfigException.class)
         .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
@@ -172,7 +172,7 @@ public class AppConfigurationTest {
     // verify values are parsed correctly when present
     assertEquals(
         new LoadAppOptions.PerformanceSettings(10, 11, 12),
-        loadBeneificiaryPerformanceSettings(configLoader));
+        loadBeneficiaryPerformanceSettings(configLoader));
   }
 
   /**

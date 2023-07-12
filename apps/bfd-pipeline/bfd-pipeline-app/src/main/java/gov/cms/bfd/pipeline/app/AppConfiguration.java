@@ -489,7 +489,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
     final boolean filteringNonNullAndNon2023Benes =
         config.booleanValue(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
 
-    final var benePerformanceSettings = loadBeneificiaryPerformanceSettings(config);
+    final var benePerformanceSettings = loadBeneficiaryPerformanceSettings(config);
     final var claimPerformanceSettings =
         loadClaimPerformanceSettings(config, benePerformanceSettings);
     final int maxLoaderThreads =
@@ -524,7 +524,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @param config used to load configuration values
    * @return the loaded settings
    */
-  static LoadAppOptions.PerformanceSettings loadBeneificiaryPerformanceSettings(
+  static LoadAppOptions.PerformanceSettings loadBeneficiaryPerformanceSettings(
       ConfigLoader config) {
     return new LoadAppOptions.PerformanceSettings(
         config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS),
