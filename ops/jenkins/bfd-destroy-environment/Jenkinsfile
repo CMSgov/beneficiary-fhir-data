@@ -12,6 +12,7 @@
 def gitBranchName
 def trimmedEnv
 def bypassStageApproval
+def bypassPlanApproval
 def lockResource
 
 // send notifications to slack, email, etc
@@ -96,13 +97,18 @@ spec:
 
     parameters {
         string(
-                name: 'env',
-                description: 'The BFD ephemeral environment to destroy'
+            name: 'env',
+            description: 'The BFD ephemeral environment to destroy'
         )
         booleanParam(
-                name: 'bypass_stage_approval',
-                description: 'When true, allow the operator to bypass each stage approval',
-                defaultValue: false
+            name: 'bypass_plan_approval',
+            description: 'When true, allow the operator to automatically apply each tfplan',
+            defaultValue: false
+        )
+        booleanParam(
+            name: 'bypass_stage_approval',
+            description: 'When true, allow the operator to bypass each stage approval',
+            defaultValue: false
         )
     }
 
@@ -111,6 +117,7 @@ spec:
             when {
                 expression {
                     bypassStageApproval = params.bypass_stage_approval
+                    bypassPlanApproval = params.bypass_plan_approval
                     trimmedEnv = params.env.trim().toLowerCase()
                     // Check that the environment is ephemeral and not protected before proceeding
                     return ['madeup', 'test', 'prod-sbx', 'prod'].contains(trimmedEnv)
@@ -154,37 +161,56 @@ spec:
 
         stage('Destroy Server') {
             steps {
-                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
-                    script {
-                        currentStage = env.STAGE_NAME
-                        try {
-                            lock(resource: lockResource) {
+                script {
+                    currentStage = env.STAGE_NAME
+                    try {
+                        lock(resource: lockResource) {
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server", catchInterruptions: false) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/server'
-                                )
-                                awsAuth.assumeRole()
-                                terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/server/server-load '
-                                )
-                                awsAuth.assumeRole()
-                                terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/server/server-regression'
-                                )
-                                awsAuth.assumeRole()
-                                terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/server/insights/api-requests'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server',
+                                    autoApprove: bypassPlanApproval
                                 )
                             }
-                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                            currentBuild.result = 'ABORTED'
-                            sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                            throw e
+                            if (!bypassStageApproval) {
+                                input "Approval is required before the pipeline may proceed"
+                            }
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server load", catchInterruptions: false) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/server-load',
+                                    autoApprove: bypassPlanApproval
+                                )
+                            }
+                            if (!bypassStageApproval) {
+                                input "Approval is required before the pipeline may proceed"
+                            }
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server regression", catchInterruptions: false) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/server-regression',
+                                    autoApprove: bypassPlanApproval
+                                )
+                            }
+                            if (!bypassStageApproval) {
+                                input "Approval is required before the pipeline may proceed"
+                            }
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server insights api requests", catchInterruptions: false) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/insights/api-requests',
+                                    autoApprove: bypassPlanApproval
+                                )
+                            }
                         }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
                     }
                 }
             }
@@ -202,8 +228,9 @@ spec:
                             lock(resource: lockResource) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/pipeline'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/pipeline',
+                                    autoApprove: bypassPlanApproval
                                 )
                             }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -227,8 +254,9 @@ spec:
                         try {
                             lock(resource: lockResource) {
                                 terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: "ops/terraform/services/migrator"
+                                    env: trimmedEnv,
+                                    directory: "ops/terraform/services/migrator",
+                                    autoApprove: bypassPlanApproval
                                 )
                             }
                             if (forceStageApproval) {
@@ -256,8 +284,9 @@ spec:
                             lock(resource: lockResource) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/common'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/common',
+                                    autoApprove: bypassPlanApproval
                                 )
                             }
                             if (forceStageApproval) {
@@ -285,8 +314,9 @@ spec:
                             lock(resource: lockResource) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
-                                        env: trimmedEnv,
-                                        directory: 'ops/terraform/services/base'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/base',
+                                    autoApprove: bypassPlanApproval
                                 )
                             }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {

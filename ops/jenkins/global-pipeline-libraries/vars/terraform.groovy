@@ -47,22 +47,23 @@ terraform workspace select "$bfdEnv" -no-color
 }
 
 /* Destroys the specified terraservice
- * @param args a {@link Map} must include `env`, `directory`
+ * @param args a {@link Map} must include `env`, `directory`, `autoApprove`
  * <ul>
  * <li>env string represents the targeted BFD SDLC Environment
  * <li>directory string relative path to terraservice module directory
+ * <li>autoApprove boolean represents whether the tfplan should be applied automatically
  * <li>tfVars optional map represents module's terraform input variables and their respective values
  * </ul>
 */
 void destroyTerraservice(Map args = [:]) {
     bfdEnv = args.env.trim().toLowerCase()
     serviceDirectory = args.directory
+    autoApprove = args.autoApprove
     tfVars = args.tfVars ?: [:]
 
     // Do not destroy protected environments
     if (bfdEnv in ["madeup", "madeup2", "test", "prod-sbx", "prod"]) {
-        return
-        //throw new Exception("Unable to destroy the restricted target environment: '${bfdEnv}'")
+        throw new Exception("Unable to destroy the restricted target environment: '${bfdEnv}'")
     }
 
     // format terraform variables
@@ -86,6 +87,10 @@ void destroyTerraservice(Map args = [:]) {
         sh "terraform plan ${terraformVariables} -destroy -no-color -out=tfplan"
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+
+        if (!autoApprove) {
+            input "Proceed with executing the terraform destroy plan?"
+        }
 
         // Apply Terraform plan
         sh 'terraform apply -no-color tfplan'
