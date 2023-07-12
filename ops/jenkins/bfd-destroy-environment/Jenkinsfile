@@ -68,6 +68,13 @@ def sendNotifications(String environment = '', String buildStatus = '', String s
     slackSend(color: buildColor, message: slackMsg)
 }
 
+// Prompt the operator for approval before proceeding
+def checkBypassStageApproval(boolean bypassStageApproval) {
+    if (!bypassStageApproval) {
+        input "Approval is required before the pipeline may proceed"
+    }
+}
+
 pipeline {
     agent {
         kubernetes {
@@ -174,9 +181,7 @@ spec:
                                     autoApprove: bypassPlanApproval
                                 )
                             }
-                            if (!bypassStageApproval) {
-                                input "Approval is required before the pipeline may proceed"
-                            }
+                            checkBypassStageApproval(bypassStageApproval)
                             warnError(message: "Error occurred during ${currentStage} - Destroy server load",
                                     catchInterruptions: false) {
                                 awsAuth.assumeRole()
@@ -186,9 +191,7 @@ spec:
                                     autoApprove: bypassPlanApproval
                                 )
                             }
-                            if (!bypassStageApproval) {
-                                input "Approval is required before the pipeline may proceed"
-                            }
+                            checkBypassStageApproval(bypassStageApproval)
                             warnError(message: "Error occurred during ${currentStage} - Destroy server regression",
                                     catchInterruptions: false) {
                                 awsAuth.assumeRole()
@@ -198,9 +201,7 @@ spec:
                                     autoApprove: bypassPlanApproval
                                 )
                             }
-                            if (!bypassStageApproval) {
-                                input "Approval is required before the pipeline may proceed"
-                            }
+                            checkBypassStageApproval(bypassStageApproval)
                             warnError(message: "Error occurred during ${currentStage} - Destroy server insights api requests",
                                     catchInterruptions: false) {
                                 awsAuth.assumeRole()
@@ -223,9 +224,7 @@ spec:
         stage('Destroy Pipeline') {
             steps {
                 script {
-                    if (!bypassStageApproval) {
-                        input "Approval is required before the pipeline may proceed"
-                    }
+                    checkBypassStageApproval(bypassStageApproval)
                     currentStage = env.STAGE_NAME
                     warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
@@ -250,9 +249,7 @@ spec:
         stage('Destroy Migrator') {
             steps {
                 script {
-                    if (!bypassStageApproval) {
-                        input "Approval is required before the pipeline may proceed"
-                    }
+                    checkBypassStageApproval(bypassStageApproval)
                     currentStage = env.STAGE_NAME
                     warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
@@ -279,9 +276,7 @@ spec:
         stage('Destroy Common') {
             steps {
                 script {
-                    if (!bypassStageApproval) {
-                        input "Approval is required before the pipeline may proceed"
-                    }
+                    checkBypassStageApproval(bypassStageApproval)
                     currentStage = env.STAGE_NAME
                     warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
@@ -309,9 +304,7 @@ spec:
         stage('Destroy Base') {
             steps {
                 script {
-                    if (!bypassStageApproval) {
-                        input "Approval is required before the pipeline may proceed"
-                    }
+                    checkBypassStageApproval(bypassStageApproval)
                     currentStage = env.STAGE_NAME
                     warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
