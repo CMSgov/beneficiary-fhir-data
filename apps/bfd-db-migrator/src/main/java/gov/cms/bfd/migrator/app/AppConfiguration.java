@@ -18,11 +18,16 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 
 /** Models the configuration options for the application. */
 public class AppConfiguration extends BaseAppConfiguration {
+  /** Name of setting containing name of SQS queue to which progress messages can be sent. */
   public static final String ENV_VAR_KEY_SQS_QUEUE_NAME = "DB_MIGRATOR_SQS_QUEUE";
+  /** Name of setting containing alternative endpoint URL for SQS service. */
   public static final String ENV_VAR_KEY_SQS_ENDPOINT = "DB_MIGRATOR_SQS_ENDPOINT";
+  /** Name of setting containing region name for SQS service queue. */
   public static final String ENV_VAR_KEY_SQS_REGION = "DB_MIGRATOR_SQS_REGION";
+  /** Name of setting containing access key for SQS service. */
   public static final String ENV_VAR_KEY_SQS_ACCESS_KEY = "DB_MIGRATOR_SQS_ACCESS_KEY";
-  public static final String ENV_VAR_KEY_SQS_SECRET_KEY = "DB_MIGRATOR_SQS_ACCESS_KEY";
+  /** Name of setting containing secret key for SQS service. */
+  public static final String ENV_VAR_KEY_SQS_SECRET_KEY = "DB_MIGRATOR_SQS_SECRET_KEY";
 
   /**
    * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
@@ -32,8 +37,16 @@ public class AppConfiguration extends BaseAppConfiguration {
    */
   @Getter private final String flywayScriptLocationOverride;
 
+  /**
+   * Used to communicate with SQS for sending progress messages. Null if SQS progress tracking has
+   * not been enabled.
+   */
   @Nullable @Getter private final SqsClient sqsClient;
 
+  /**
+   * Name of SQS queue to send progress messages to. Empty string if SQS progress tracking has not
+   * been enabled.
+   */
   @Getter private final String sqsQueueName;
 
   /**
@@ -43,7 +56,8 @@ public class AppConfiguration extends BaseAppConfiguration {
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param flywayScriptLocationOverride if non-empty, will override the default location that
    *     flyway looks for migration scripts
-   * @param sqsQueueName
+   * @param sqsClient null or a valid {@link SqsClient}
+   * @param sqsQueueName name of queue to post progress to (empty if none)
    */
   private AppConfiguration(
       MetricOptions metricOptions,
@@ -63,28 +77,6 @@ public class AppConfiguration extends BaseAppConfiguration {
     builder.append(", flywayScriptLocationOverride=");
     builder.append(flywayScriptLocationOverride);
     return builder.toString();
-  }
-
-  static SqsClient createSqsClient(ConfigLoader configLoader) {
-    final var clientBuilder = SqsClient.builder();
-    // either region or endpoint can be set on ssmClient but not both
-    if (configLoader.stringOption(ENV_VAR_KEY_SQS_ENDPOINT).isPresent()) {
-      // region is required when defining endpoint
-      clientBuilder
-          .region(configLoader.parsedValue(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of))
-          .endpointOverride(URI.create(configLoader.stringValue(ENV_VAR_KEY_SQS_ENDPOINT)));
-    } else if (configLoader.stringOption(ENV_VAR_KEY_SQS_REGION).isPresent()) {
-      clientBuilder.region(
-          configLoader.parsedValue(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of));
-    }
-    if (configLoader.stringOption(ENV_VAR_KEY_SQS_ACCESS_KEY).isPresent()) {
-      clientBuilder.credentialsProvider(
-          StaticCredentialsProvider.create(
-              AwsBasicCredentials.create(
-                  configLoader.stringValue(ENV_VAR_KEY_SQS_ACCESS_KEY),
-                  configLoader.stringValue(ENV_VAR_KEY_SQS_SECRET_KEY))));
-    }
-    return clientBuilder.build();
   }
 
   /**
@@ -110,5 +102,33 @@ public class AppConfiguration extends BaseAppConfiguration {
 
     return new AppConfiguration(
         metricOptions, databaseOptions, flywayScriptLocation, sqsClient, sqsQueueName);
+  }
+
+  /**
+   * Creates a {@link SqsClient} instance using settings from the provided {@link ConfigLoader}.
+   *
+   * @param configLoader used to load configuration values
+   * @return the {@link SqsClient}
+   */
+  static SqsClient createSqsClient(ConfigLoader configLoader) {
+    final var clientBuilder = SqsClient.builder();
+    // either region or endpoint can be set on ssmClient but not both
+    if (configLoader.stringOption(ENV_VAR_KEY_SQS_ENDPOINT).isPresent()) {
+      // region is required when defining endpoint
+      clientBuilder
+          .region(configLoader.parsedValue(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of))
+          .endpointOverride(URI.create(configLoader.stringValue(ENV_VAR_KEY_SQS_ENDPOINT)));
+    } else if (configLoader.stringOption(ENV_VAR_KEY_SQS_REGION).isPresent()) {
+      clientBuilder.region(
+          configLoader.parsedValue(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of));
+    }
+    if (configLoader.stringOption(ENV_VAR_KEY_SQS_ACCESS_KEY).isPresent()) {
+      clientBuilder.credentialsProvider(
+          StaticCredentialsProvider.create(
+              AwsBasicCredentials.create(
+                  configLoader.stringValue(ENV_VAR_KEY_SQS_ACCESS_KEY),
+                  configLoader.stringValue(ENV_VAR_KEY_SQS_SECRET_KEY))));
+    }
+    return clientBuilder.build();
   }
 }

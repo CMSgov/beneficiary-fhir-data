@@ -31,15 +31,7 @@ class SqsDaoIT {
   /** Create the {@link SqsDao} connected to our localstack SQS service. */
   @BeforeEach
   void setUp() {
-    SqsClient client =
-        SqsClient.builder()
-            .region(Region.of(localstack.getRegion()))
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SSM))
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.getAccessKey(), localstack.getSecretKey())))
-            .build();
+    SqsClient client = createSqsClientForLocalStack(localstack);
     dao = new SqsDao(client);
   }
 
@@ -75,5 +67,22 @@ class SqsDaoIT {
         .isInstanceOf(QueueDoesNotExistException.class);
     assertThatThrownBy(() -> dao.nextMessage("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
+  }
+
+  /**
+   * Create a {@link SqsClient} configured for the SQS service in the provided {@link
+   * LocalStackContainer}.
+   *
+   * @param localstack the container info
+   * @return the client
+   */
+  static SqsClient createSqsClientForLocalStack(LocalStackContainer localstack) {
+    return SqsClient.builder()
+        .region(Region.of(localstack.getRegion()))
+        .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SQS))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
+        .build();
   }
 }
