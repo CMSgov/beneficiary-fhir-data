@@ -120,7 +120,7 @@ spec:
                     bypassPlanApproval = params.bypass_plan_approval
                     trimmedEnv = params.env.trim().toLowerCase()
                     // Check that the environment is ephemeral and not protected before proceeding
-                    return ['madeup', 'test', 'prod-sbx', 'prod'].contains(trimmedEnv)
+                    return ['test', 'prod-sbx', 'prod'].contains(trimmedEnv)
                 }
             }
             steps {
@@ -165,7 +165,8 @@ spec:
                     currentStage = env.STAGE_NAME
                     try {
                         lock(resource: lockResource) {
-                            warnError(message: "Error occurred during ${currentStage} - Destroy server", catchInterruptions: false) {
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server",
+                                    catchInterruptions: false) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
@@ -176,7 +177,8 @@ spec:
                             if (!bypassStageApproval) {
                                 input "Approval is required before the pipeline may proceed"
                             }
-                            warnError(message: "Error occurred during ${currentStage} - Destroy server load", catchInterruptions: false) {
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server load",
+                                    catchInterruptions: false) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
@@ -187,7 +189,8 @@ spec:
                             if (!bypassStageApproval) {
                                 input "Approval is required before the pipeline may proceed"
                             }
-                            warnError(message: "Error occurred during ${currentStage} - Destroy server regression", catchInterruptions: false) {
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server regression",
+                                    catchInterruptions: false) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
@@ -198,7 +201,8 @@ spec:
                             if (!bypassStageApproval) {
                                 input "Approval is required before the pipeline may proceed"
                             }
-                            warnError(message: "Error occurred during ${currentStage} - Destroy server insights api requests", catchInterruptions: false) {
+                            warnError(message: "Error occurred during ${currentStage} - Destroy server insights api requests",
+                                    catchInterruptions: false) {
                                 awsAuth.assumeRole()
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
@@ -218,12 +222,12 @@ spec:
 
         stage('Destroy Pipeline') {
             steps {
-                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
-                    script {
-                        if (!bypassStageApproval) {
-                            input "Approval is required before the pipeline may proceed"
-                        }
-                        currentStage = env.STAGE_NAME
+                script {
+                    if (!bypassStageApproval) {
+                        input "Approval is required before the pipeline may proceed"
+                    }
+                    currentStage = env.STAGE_NAME
+                    warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
                             lock(resource: lockResource) {
                                 awsAuth.assumeRole()
@@ -245,12 +249,12 @@ spec:
 
         stage('Destroy Migrator') {
             steps {
-                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
-                    script {
-                        if (!bypassStageApproval) {
-                            input "Approval is required before the pipeline may proceed"
-                        }
-                        currentStage = env.STAGE_NAME
+                script {
+                    if (!bypassStageApproval) {
+                        input "Approval is required before the pipeline may proceed"
+                    }
+                    currentStage = env.STAGE_NAME
+                    warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
                             lock(resource: lockResource) {
                                 terraform.destroyTerraservice(
@@ -274,12 +278,12 @@ spec:
 
         stage('Destroy Common') {
             steps {
-                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
-                    script {
-                        if (!bypassStageApproval) {
-                            input "Approval is required before the pipeline may proceed"
-                        }
-                        currentStage = env.STAGE_NAME
+                script {
+                    if (!bypassStageApproval) {
+                        input "Approval is required before the pipeline may proceed"
+                    }
+                    currentStage = env.STAGE_NAME
+                    warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
                             lock(resource: lockResource) {
                                 awsAuth.assumeRole()
@@ -304,12 +308,12 @@ spec:
 
         stage('Destroy Base') {
             steps {
-                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
-                    script {
-                        if (!bypassStageApproval) {
-                            input "Approval is required before the pipeline may proceed"
-                        }
-                        currentStage = env.STAGE_NAME
+                script {
+                    if (!bypassStageApproval) {
+                        input "Approval is required before the pipeline may proceed"
+                    }
+                    currentStage = env.STAGE_NAME
+                    warnError(message: "Error occurred during ${currentStage}", catchInterruptions: false) {
                         try {
                             lock(resource: lockResource) {
                                 awsAuth.assumeRole()
@@ -330,6 +334,5 @@ spec:
                 }
             }
         }
-
     }
 }

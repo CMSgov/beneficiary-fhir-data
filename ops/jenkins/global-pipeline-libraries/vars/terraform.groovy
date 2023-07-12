@@ -62,7 +62,7 @@ void destroyTerraservice(Map args = [:]) {
     tfVars = args.tfVars ?: [:]
 
     // Do not destroy protected environments
-    if (bfdEnv in ["madeup", "madeup2", "test", "prod-sbx", "prod"]) {
+    if (bfdEnv in ["test", "prod-sbx", "prod"]) {
         throw new Exception("Unable to destroy the restricted target environment: '${bfdEnv}'")
     }
 
