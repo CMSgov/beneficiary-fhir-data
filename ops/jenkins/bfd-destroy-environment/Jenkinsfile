@@ -11,7 +11,7 @@
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
 def trimmedEnv
-def forceStageApproval
+def bypassStageApproval
 def lockResource
 
 // send notifications to slack, email, etc
@@ -100,8 +100,8 @@ spec:
                 description: 'The BFD ephemeral environment to destroy'
         )
         booleanParam(
-                name: 'force_stage_approval',
-                description: 'When true, forces the operator to approve each stage',
+                name: 'bypass_stage_approval',
+                description: 'When true, allow the operator to bypass each stage approval',
                 defaultValue: false
         )
     }
@@ -110,7 +110,7 @@ spec:
         stage('Validate parameters') {
             when {
                 expression {
-                    forceStageApproval = params.force_stage_approval
+                    bypassStageApproval = params.bypass_stage_approval
                     trimmedEnv = params.env.trim().toLowerCase()
                     // Check that the environment is ephemeral and not protected before proceeding
                     return ['madeup', 'test', 'prod-sbx', 'prod'].contains(trimmedEnv)
@@ -154,41 +154,37 @@ spec:
 
         stage('Destroy Server') {
             steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    try {
-                        lock(resource: lockResource) {
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server'
-                            )
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/server-load '
-                            )
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/server-regression'
-                            )
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/insights/api-requests'
-                            )
-                            if (forceStageApproval) {
-                                input "Approval is required before the pipeline may proceed"
+                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
+                    script {
+                        currentStage = env.STAGE_NAME
+                        try {
+                            lock(resource: lockResource) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/server'
+                                )
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/server/server-load '
+                                )
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/server/server-regression'
+                                )
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/server/insights/api-requests'
+                                )
                             }
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            currentBuild.result = 'ABORTED'
+                            sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                            throw e
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        throw e
-                    } catch (ex) {
-                        currentBuild.result = 'UNSTABLE'
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -196,26 +192,25 @@ spec:
 
         stage('Destroy Pipeline') {
             steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    try {
-                        lock(resource: lockResource) {
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/pipeline'
-                            )
-                        }
-                        if (forceStageApproval) {
+                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
+                    script {
+                        if (!bypassStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        throw e
-                    } catch (ex) {
-                        currentBuild.result = 'UNSTABLE'
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        currentStage = env.STAGE_NAME
+                        try {
+                            lock(resource: lockResource) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/pipeline'
+                                )
+                            }
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            currentBuild.result = 'ABORTED'
+                            sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                            throw e
+                        }
                     }
                 }
             }
@@ -223,26 +218,27 @@ spec:
 
         stage('Destroy Migrator') {
             steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    try {
-                        lock(resource: lockResource) {
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: "ops/terraform/services/migrator"
-                            )
-                        }
-                        if (forceStageApproval) {
+                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
+                    script {
+                        if (!bypassStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw e
-                    } catch (ex) {
-                        currentBuild.result = 'UNSTABLE'
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        currentStage = env.STAGE_NAME
+                        try {
+                            lock(resource: lockResource) {
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: "ops/terraform/services/migrator"
+                                )
+                            }
+                            if (forceStageApproval) {
+                                input "Approval is required before the pipeline may proceed"
+                            }
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            currentBuild.result = 'ABORTED'
+                            sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                            throw e
+                        }
                     }
                 }
             }
@@ -250,27 +246,28 @@ spec:
 
         stage('Destroy Common') {
             steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    try {
-                        lock(resource: lockResource) {
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/common'
-                            )
-                        }
-                        if (forceStageApproval) {
+                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
+                    script {
+                        if (!bypassStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw e
-                    } catch (ex) {
-                        currentBuild.result = 'UNSTABLE'
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        currentStage = env.STAGE_NAME
+                        try {
+                            lock(resource: lockResource) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/common'
+                                )
+                            }
+                            if (forceStageApproval) {
+                                input "Approval is required before the pipeline may proceed"
+                            }
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            currentBuild.result = 'ABORTED'
+                            sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                            throw e
+                        }
                     }
                 }
             }
@@ -278,26 +275,27 @@ spec:
 
         stage('Destroy Base') {
             steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    try {
-                        lock(resource: lockResource) {
-                            awsAuth.assumeRole()
-                            terraform.destroyTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/base'
-                            )
+                warnError(message: "Error occurred during ${env.STAGE_NAME}", catchInterruptions: false) {
+                    script {
+                        if (!bypassStageApproval) {
+                            input "Approval is required before the pipeline may proceed"
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw e
-                    } catch (ex) {
-                        currentBuild.result = 'FAILURE'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw ex
-                    } finally {
-                        //sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        currentStage = env.STAGE_NAME
+                        try {
+                            lock(resource: lockResource) {
+                                awsAuth.assumeRole()
+                                terraform.destroyTerraservice(
+                                        env: trimmedEnv,
+                                        directory: 'ops/terraform/services/base'
+                                )
+                            }
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            currentBuild.result = 'ABORTED'
+                            sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                            throw e
+                        } finally {
+                            //sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        }
                     }
                 }
             }
