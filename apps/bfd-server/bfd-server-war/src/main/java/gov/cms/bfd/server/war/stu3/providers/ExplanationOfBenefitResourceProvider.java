@@ -78,14 +78,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   private EntityManager entityManager;
   /** The metric registry. */
   private final MetricRegistry metricRegistry;
-  /** The samhsa matcher. */
-  private final Stu3EobSamhsaMatcher samhsaMatcher;
   /** The loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
-  /** The drug code display lookup entity. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-  /** The npi org lookup entity. */
-  private final NPIOrgLookup npiOrgLookup;
   /** The ExecutorService entity. */
   private final ExecutorService executorService;
   /** The mock spring application context. */
@@ -122,9 +116,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @param appContext the spring application context
    * @param metricRegistry the metric registry bean
    * @param loadedFilterManager the loaded filter manager bean
-   * @param samhsaMatcher the samsha matcher bean
-   * @param drugCodeDisplayLookup the drug code display lookup bean
-   * @param npiOrgLookup the npi org lookup bean
    * @param executorService thread pool for running queries in parallel
    * @param carrierClaimTransformer the carrier claim transformer
    * @param dmeClaimTransformer the dme claim transformer
@@ -139,9 +130,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       ApplicationContext appContext,
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
-      Stu3EobSamhsaMatcher samhsaMatcher,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       ExecutorService executorService,
       CarrierClaimTransformer carrierClaimTransformer,
       DMEClaimTransformer dmeClaimTransformer,
@@ -154,9 +142,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
-    this.samhsaMatcher = requireNonNull(samhsaMatcher);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.executorService = requireNonNull(executorService);
     this.carrierClaimTransformer = requireNonNull(carrierClaimTransformer);
     this.dmeClaimTransformer = requireNonNull(dmeClaimTransformer);
@@ -348,7 +333,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
      * contained within requestDetails and parsed out along with other parameters
      * later.
      */
-    OffsetLinkBuilder startIx = new OffsetLinkBuilder(requestDetails, "startIndex");
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimType> claimTypesRequested = parseTypeParam(type);
