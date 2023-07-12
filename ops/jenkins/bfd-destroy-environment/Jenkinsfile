@@ -67,6 +67,18 @@ def sendNotifications(String environment = '', String buildStatus = '', String s
     slackSend(color: buildColor, message: slackMsg)
 }
 
+// Prompt the operator to proceed or abort the build
+def promptToProcced(String stage) {
+    try {
+        input "The ${stage} stage failed. Should the pipeline proceed?"
+        echo "Stage failure in '${stage}' has been accepted by operator. Proceeding to next stage..."
+    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+        currentBuild.result = 'FAILURE'
+        //sendNotifications(trimmedEnv, currentBuild.currentResult, stage, gitCommitId, gitRepoUrl)
+        throw e
+    }
+}
+
 pipeline {
     agent {
         kubernetes {
@@ -160,8 +172,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/server'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server'
                             )
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
@@ -170,13 +182,13 @@ spec:
                             )
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/server/server-regression'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/server-regression'
                             )
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/server/insights/api-requests'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/server/insights/api-requests'
                             )
                             if (forceStageApproval) {
                                 input "Approval is required before the pipeline may proceed"
@@ -186,8 +198,7 @@ spec:
                         currentBuild.result = 'ABORTED'
                         throw e
                     } catch (ex) {
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        promptToProcced(currentStage)
                     }
                 }
             }
@@ -213,8 +224,7 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        promptToProcced(currentStage)
                     }
                 }
             }
@@ -239,8 +249,7 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        promptToProcced(currentStage)
                     }
                 }
             }
@@ -266,8 +275,7 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
-                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        promptToProcced(currentStage)
                     }
                 }
             }

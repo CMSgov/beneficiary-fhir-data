@@ -61,7 +61,7 @@ void destroyTerraservice(Map args = [:]) {
 
     // Do not destroy protected environments
     if (bfdEnv in ["madeup", "madeup2", "test", "prod-sbx", "prod"]) {
-        error("Unable to destroy the restricted target environment: '${bfdEnv}'")
+        throw new Exception("Unable to destroy the restricted target environment: '${bfdEnv}'")
     }
 
     // format terraform variables
