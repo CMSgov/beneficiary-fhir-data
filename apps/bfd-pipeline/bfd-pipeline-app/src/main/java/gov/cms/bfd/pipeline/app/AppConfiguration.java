@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
@@ -11,6 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
+import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
@@ -368,7 +370,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * are not necessary in Cloudwatch. These need to be the base metric names, not one of the several
    * auto-generated aggregate metric names with suffixes like {@code .avg}.
    */
-  public static Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
+  public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
@@ -621,7 +623,109 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Loads the configuration settings related to the RDA gRPC API data load jobs. Ths job and most
+   * Loads the common configuration settings used by various implementations of the {@link
+   * AbstractRdaLoadJob} abstract class.
+   *
+   * @param config used to load configuration values
+   * @return a valid AbstractRdaLoadJob.Config
+   */
+  @VisibleForTesting
+  static AbstractRdaLoadJob.Config loadRdaLoadJobConfigOptions(ConfigLoader config) {
+    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)))
+            .batchSize(config.intValue(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE))
+            .writeThreads(config.intValue(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS));
+    config
+        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM)
+        .map(seq -> Math.max(1L, seq))
+        .ifPresent(jobConfig::startingFissSeqNum);
+    config
+        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM)
+        .map(seq -> Math.max(1L, seq))
+        .ifPresent(jobConfig::startingMcsSeqNum);
+    config.booleanOption(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    // Default to the hardcoded RDA version in RdaService, restricted to major version
+    jobConfig.rdaVersion(
+        RdaVersion.builder()
+            .versionString(
+                config
+                    .stringOption(ENV_VAR_KEY_RDA_VERSION)
+                    .orElse("^" + RdaService.RDA_PROTO_VERSION))
+            .build());
+    jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
+    return jobConfig.build();
+  }
+
+  /**
+   * Loads the common configuration settings used by various implementations of the {@link
+   * RdaSource} interface.
+   *
+   * @param config used to load configuration values
+   * @return a valid RdaSourceConfig
+   */
+  @VisibleForTesting
+  static RdaSourceConfig loadRdaSourceConfig(ConfigLoader config) {
+    return RdaSourceConfig.builder()
+        .serverType(
+            config.enumValue(ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.class))
+        .host(config.stringValue(ENV_VAR_KEY_RDA_GRPC_HOST))
+        .port(config.intValue(ENV_VAR_KEY_RDA_GRPC_PORT))
+        .inProcessServerName(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME))
+        .maxIdle(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)))
+        .minIdleTimeBeforeConnectionDrop(
+            Duration.ofSeconds(
+                config.intValue(ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
+        .authenticationToken(
+            config.stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN).orElse(null))
+        .messageErrorExpirationDays(
+            config.intOption(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
+        .build();
+  }
+
+  /**
+   * Loads configuration settings used by {@link RdaServerJob}.
+   *
+   * @param config used to load configuration values
+   * @param grpcConfig settings for communicating with RDA API
+   * @param serverJobConfigBuilder used to construct the config settings
+   * @return a valid RdaServerJob.Config
+   */
+  @VisibleForTesting
+  static RdaServerJob.Config loadRdaServerJobConfig(
+      ConfigLoader config,
+      RdaSourceConfig grpcConfig,
+      RdaServerJob.Config.ConfigBuilder serverJobConfigBuilder) {
+    serverJobConfigBuilder.serverMode(
+        config
+            .enumOption(
+                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
+            .orElse(RdaServerJob.Config.ServerMode.Random));
+    serverJobConfigBuilder.serverName(grpcConfig.getInProcessServerName());
+    config
+        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
+        .map(Duration::ofSeconds)
+        .ifPresent(serverJobConfigBuilder::runInterval);
+    config
+        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED)
+        .ifPresent(serverJobConfigBuilder::randomSeed);
+    config
+        .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
+        .ifPresent(serverJobConfigBuilder::randomMaxClaims);
+    config
+        .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
+        .ifPresent(serverJobConfigBuilder::s3Region);
+    config
+        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
+        .ifPresent(serverJobConfigBuilder::s3Bucket);
+    config
+        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
+        .ifPresent(serverJobConfigBuilder::s3Directory);
+    return serverJobConfigBuilder.build();
+  }
+
+  /**
+   * Loads the configuration settings related to the RDA gRPC API data load jobs. This job and most
    * of its settings are optional. Because the API may exist in some environments but not others a
    * separate environment variable indicates whether the settings should be loaded.
    *
@@ -635,74 +739,15 @@ public final class AppConfiguration extends BaseAppConfiguration {
     if (!enabled) {
       return null;
     }
-    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
-        AbstractRdaLoadJob.Config.builder()
-            .runInterval(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)))
-            .batchSize(config.intValue(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE))
-            .writeThreads(config.intValue(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS));
-    config
-        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM)
-        .ifPresent(jobConfig::startingFissSeqNum);
-    config
-        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM)
-        .ifPresent(jobConfig::startingMcsSeqNum);
-    config.booleanOption(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
-    // Default to the hardcoded RDA version in RdaService, restricted to major version
-    jobConfig.rdaVersion(
-        RdaVersion.builder()
-            .versionString(
-                config
-                    .stringOption(ENV_VAR_KEY_RDA_VERSION)
-                    .orElse("^" + RdaService.RDA_PROTO_VERSION))
-            .build());
-    jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
-    final RdaSourceConfig grpcConfig =
-        RdaSourceConfig.builder()
-            .serverType(
-                config.enumValue(
-                    ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.class))
-            .host(config.stringValue(ENV_VAR_KEY_RDA_GRPC_HOST))
-            .port(config.intValue(ENV_VAR_KEY_RDA_GRPC_PORT))
-            .inProcessServerName(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME))
-            .maxIdle(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)))
-            .minIdleTimeBeforeConnectionDrop(
-                Duration.ofSeconds(
-                    config.intValue(ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
-            .authenticationToken(
-                config.stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN).orElse(null))
-            .messageErrorExpirationDays(
-                config.intOption(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
-            .build();
-    final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
-    mockServerConfig.serverMode(
-        config
-            .enumOption(
-                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
-            .orElse(RdaServerJob.Config.ServerMode.Random));
-    mockServerConfig.serverName(grpcConfig.getInProcessServerName());
-    config
-        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
-        .map(Duration::ofSeconds)
-        .ifPresent(mockServerConfig::runInterval);
-    config
-        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED)
-        .ifPresent(mockServerConfig::randomSeed);
-    config
-        .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
-        .ifPresent(mockServerConfig::randomMaxClaims);
-    config
-        .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
-        .ifPresent(mockServerConfig::s3Region);
-    config
-        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
-        .ifPresent(mockServerConfig::s3Bucket);
-    config
-        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
-        .ifPresent(mockServerConfig::s3Directory);
-    final int errorLimit = config.intValue(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT, 0);
 
+    final AbstractRdaLoadJob.Config jobConfig = loadRdaLoadJobConfigOptions(config);
+    final RdaSourceConfig grpcConfig = loadRdaSourceConfig(config);
+    final RdaServerJob.Config serverJobConfigBuilder =
+        loadRdaServerJobConfig(config, grpcConfig, RdaServerJob.Config.builder());
+
+    final int errorLimit = config.intValue(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT, 0);
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, mockServerConfig.build(), errorLimit, idHasherConfig);
+        jobConfig, grpcConfig, serverJobConfigBuilder, errorLimit, idHasherConfig);
   }
 
   /**
