@@ -8,6 +8,7 @@ import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.net.URI;
 import java.util.Map;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -90,12 +91,13 @@ public class AppConfiguration extends BaseAppConfiguration {
    * Read configuration variables from a layered {@link ConfigLoader} and build an {@link
    * AppConfiguration} instance from them.
    *
+   * @param getenv function used to access environment variables (provided explicitly for testing)
    * @return instance representing the configuration provided to this application via the
    *     environment variables
    * @throws ConfigException if the configuration passed to the application is invalid
    */
-  public static AppConfiguration loadConfig() {
-    final var configLoader = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
+  public static AppConfiguration loadConfig(Function<String, String> getenv) {
+    final var configLoader = LayeredConfiguration.createConfigLoader(Map.of(), getenv);
 
     MetricOptions metricOptions = loadMetricOptions(configLoader);
     DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
