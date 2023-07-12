@@ -5,7 +5,7 @@ checkSecretFilesForPlainText() {
   echo 'Verifying secret files are not in plaintext...'
   set +e
   # read list of files containing secrets
-  IFS=$'\n' read -d '' -r -a secrets < ../resources/.sensitive-files
+  IFS=$'\n' read -d '' -r -a secrets < .github/resources/.sensitive-files
 
   # make list of files to be committed by printing out a newline
   # separated list of files staged for commit to a temporary file
@@ -32,4 +32,3 @@ checkSecretFilesForPlainText() {
 }
 
 checkSecretFilesForPlainText
- 
