@@ -281,9 +281,6 @@ spec:
                                 directory: 'ops/terraform/services/base'
                             )
                         }
-                        if (forceStageApproval) {
-                            input "Approval is required before the pipeline may proceed"
-                        }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
