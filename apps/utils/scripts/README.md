@@ -253,8 +253,6 @@ The pipeline app supports all of the standard options plus several unique to its
 
 ```
 $ ./utils/scripts/run-bfd-pipeline -h
-Runs a BFD pipeline.  Use command line options to change behaviors.
-
 run-bfd-pipeline [options] run_mode
 -b batch_size             Number of entities per batch.
 -c cache_size             Size of hicn/mbi cache.
@@ -270,6 +268,14 @@ run-bfd-pipeline [options] run_mode
 -z                        Enable debugger support but start immediately.
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
+
+Supported long options:
+
+--bene-load-options threads:batch_size:queue_multiple
+  Sets the RifLoader settings to use for beneficiary data.
+
+--claim-load-options threads:batch_size:queue_multiple
+  Sets the RifLoader settings to use for claim data.
 
 Run mode options: 
   rif     RIF pipeline only.
@@ -290,14 +296,16 @@ Option defaults:
 
 The non-standard options are:
 
-| Option | Argument        | Description                                                                         | Config Setting                                          |
-|--------|-----------------|-------------------------------------------------------------------------------------|---------------------------------------------------------|
-| `-b`   | batch_size      | Used to set the batch size used by the pipeline job.                                | `RIF_JOB_BATCH_SIZE`, `RDA_JOB_BATCH_SIZE`              |
-| `-c`   | cache_size      | Used to set the number of entries in the HICN/MBI cache.                            | `HICN_HASH_CACHE_SIZE`                                  |
-| `-I`   |                 | Sets RIF pipeline to idempotent mode.                                               | `IDEMPOTENCY_REQUIRED`                                  |
-| `-r`   | run_interval    | Sets the job schedule/interval in seconds for RDA jobs.                             | `RDA_JOB_INTERVAL_SECONDS`                              |
-| `-R`   | host:port:token | Sets the hostname, port, and auth token used to connect to a remote RDA API server. | `RDA_GRPC_HOST`, `RDA_GRPC_PORT`, `RDA_GRPC_AUTH_TOKEN` |
-| `-t`   | threads         | Number of writer threads used by jobs.                                              | `LOADER_THREADS`, `RDA_JOB_WRITE_THREADS`               |
+| Option                 | Argument                          | Description                                                                         | Config Setting                                                                             |
+|------------------------|-----------------------------------|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| `-b`                   | batch_size                        | Used to set the batch size used by the pipeline job.                                | `RIF_JOB_BATCH_SIZE`, `RDA_JOB_BATCH_SIZE`                                                 |
+| `-c`                   | cache_size                        | Used to set the number of entries in the HICN/MBI cache.                            | `HICN_HASH_CACHE_SIZE`                                                                     |
+| `-I`                   |                                   | Sets RIF pipeline to idempotent mode.                                               | `IDEMPOTENCY_REQUIRED`                                                                     |
+| `-r`                   | run_interval                      | Sets the job schedule/interval in seconds for RDA jobs.                             | `RDA_JOB_INTERVAL_SECONDS`                                                                 |
+| `-R`                   | host:port:token                   | Sets the hostname, port, and auth token used to connect to a remote RDA API server. | `RDA_GRPC_HOST`, `RDA_GRPC_PORT`, `RDA_GRPC_AUTH_TOKEN`                                    |
+| `-t`                   | threads                           | Number of writer threads used by jobs.                                              | `LOADER_THREADS`, `RDA_JOB_WRITE_THREADS`                                                  |
+| `--bene-load-options`  | threads:batch_size:queue_multiple | Sets beneficiary specific settings for RIF pipeline                                 | `LOADER_THREADS`,  `RIF_JOB_BATCH_SIZE`, `RIF_JOB_QUEUE_SIZE_MULTIPLE`                     |
+| `--claim-load-options` | threads:batch_size:queue_multiple | Sets claim specific settings for RIF pipeline                                       | `LOADER_THREADS_CLAIMS`, `RIF_JOB_BATCH_SIZE_CLAIMS`, `RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS` |
 
 ## Running Mock RDA API Server
 

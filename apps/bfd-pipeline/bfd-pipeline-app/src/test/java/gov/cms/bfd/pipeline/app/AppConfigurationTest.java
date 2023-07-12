@@ -21,6 +21,9 @@ import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_STAR
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_WRITE_THREADS;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_VERSION;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneficiaryPerformanceSettings;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,6 +38,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
+import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
@@ -121,10 +125,97 @@ public class AppConfigurationTest {
         testAppConfig.getDatabaseOptions().getDatabasePassword());
     assertEquals(
         Integer.parseInt(envVars.get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
-        testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().getLoaderThreads());
+        testAppConfig
+            .getCcwRifLoadOptions()
+            .get()
+            .getLoadOptions()
+            .getBeneficiaryPerformanceSettings()
+            .getLoaderThreads());
     assertEquals(
         envVars.get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED),
         "" + testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().isIdempotencyRequired());
+  }
+
+  /**
+   * Verifies that {@link AppConfiguration#loadBeneficiaryPerformanceSettings} enforces field
+   * requirements and parses settings correctly.
+   */
+  @Test
+  void testBeneficiaryPerformanceSettings() {
+    final var envVars = new HashMap<String, String>();
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
+
+    assertThrows(ConfigException.class, () -> loadBeneficiaryPerformanceSettings(configLoader));
+
+    // verify values must be positive
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "0");
+    assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "10");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "-1");
+    assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "11");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "0");
+    assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "12");
+
+    // verify values are parsed correctly when present
+    assertEquals(
+        new LoadAppOptions.PerformanceSettings(10, 11, 12),
+        loadBeneficiaryPerformanceSettings(configLoader));
+  }
+
+  /**
+   * Verifies that {@link AppConfiguration#loadClaimPerformanceSettings} uses defaults as necessary
+   * and parses settings correctly.
+   */
+  @Test
+  void testClaimPerformanceSettings() {
+    final var envVars = new HashMap<String, String>();
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
+
+    // verify defaults are used as expected
+    final var benePerformanceSettings = new LoadAppOptions.PerformanceSettings(1, 2, 3);
+    assertEquals(
+        benePerformanceSettings,
+        loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
+
+    // verify values must be positive
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "0");
+    assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "20");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "-1");
+    assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "21");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "0");
+    assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "22");
+
+    // verify values are parsed correctly when present
+    assertEquals(
+        new LoadAppOptions.PerformanceSettings(20, 21, 22),
+        loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
   }
 
   /**

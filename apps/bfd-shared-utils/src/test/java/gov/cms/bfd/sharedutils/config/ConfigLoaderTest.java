@@ -203,6 +203,12 @@ public class ConfigLoaderTest {
     assertException("c", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("c"));
     assertException("d", values, NOT_VALID_INTEGER, () -> loader.positiveIntValue("d"));
     assertException("z", null, NOT_PROVIDED, () -> loader.positiveIntValue("z"));
+
+    assertEquals(10, loader.positiveIntValue("a"));
+    assertException("b", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("b", 42));
+    assertException("c", values, NOT_POSITIVE_INTEGER, () -> loader.positiveIntValue("c", 42));
+    assertException("d", values, NOT_VALID_INTEGER, () -> loader.positiveIntValue("d", 42));
+    assertEquals(42, loader.positiveIntValue("z", 42));
   }
 
   /** Validates all cases for positive int values when zero is allowed. */
