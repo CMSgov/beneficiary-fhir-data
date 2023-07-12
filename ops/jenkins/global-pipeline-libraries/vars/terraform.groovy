@@ -60,7 +60,7 @@ void destroyTerraservice(Map args = [:]) {
     tfVars = args.tfVars ?: [:]
 
     // Do not destroy protected environments
-    if (bfdEnv in ["test", "prod-sbx", "prod_sbx", "prod"]) {
+    if (bfdEnv in ["madeup", "madeup2", "test", "prod-sbx", "prod"]) {
         return
     }
 

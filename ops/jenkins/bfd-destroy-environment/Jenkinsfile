@@ -110,14 +110,14 @@ spec:
         stage('Validate parameters') {
             when {
                 expression {
-                    // Check that the environment is ephemeral and not protected
                     forceStageApproval = params.force_stage_approval
                     trimmedEnv = params.env.trim().toLowerCase()
-                    return ['test', 'prod-sbx', 'prod_sbx', 'prod'].contains(trimmedEnv)
+                    // Check that the environment is ephemeral and not protected before proceeding
+                    return ['madeup', 'test', 'prod-sbx', 'prod'].contains(trimmedEnv)
                 }
             }
             steps {
-                // Trying to destroy a protected environment; abort the build and skip subsequent stages
+                // Tried to destroy a protected environment; abort the build and skip subsequent stages
                 error("Restricted target environment: ${trimmedEnv}")
             }
         }
