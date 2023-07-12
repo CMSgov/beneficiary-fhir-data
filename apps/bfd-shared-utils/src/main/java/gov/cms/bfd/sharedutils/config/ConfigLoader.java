@@ -37,7 +37,7 @@ public class ConfigLoader {
   @VisibleForTesting static final String NOT_PROVIDED = "required option not provided";
 
   /** Error message for non-positive integer. */
-  @VisibleForTesting static final String NOT_POSITIVE_INTEGER = "not a positive integer";
+  public static final String NOT_POSITIVE_INTEGER = "not a positive integer";
 
   /** Error message for invalid hex strings. */
   @VisibleForTesting static final String NOT_VALID_HEX = "invalid hex string";
@@ -225,6 +225,18 @@ public class ConfigLoader {
    */
   public int positiveIntValue(String name) {
     return positiveIntOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  }
+
+  /**
+   * Gets an optional positive integer configuration value or a defaultValue if there is no value.
+   *
+   * @param name name of configuration value
+   * @param defaultValue the default value
+   * @return either the integer value or defaultValue
+   * @throws ConfigException if a value existed but was not a valid positive integer
+   */
+  public int positiveIntValue(String name, int defaultValue) {
+    return positiveIntOption(name).orElse(defaultValue);
   }
 
   /**
