@@ -1,21 +1,30 @@
 package gov.cms.bfd.migrator.app;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
+import java.io.IOException;
 import javax.annotation.Nullable;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.services.sqs.model.SqsException;
 
+/**
+ * Uses an {@link SqsDao} to post JSON messages to an SQS queue for each {@link MigratorProgress}.
+ */
 @RequiredArgsConstructor
-public class SqsProgessReporter {
+public class SqsProgressReporter {
+  /**
+   * Used to serialize the messages. Using Jackson for this is a little slower than building up the
+   * JSON directly but is less error prone.
+   */
   private final ObjectMapper objectMapper =
       JsonMapper.builder()
           .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
@@ -24,29 +33,61 @@ public class SqsProgessReporter {
           .addModule(new JavaTimeModule())
           .serializationInclusion(JsonInclude.Include.NON_NULL)
           .build();
+
+  /** Used to communicate with SQS. */
   private final SqsDao sqsDao;
+  /** URL of the queue we post messages to. */
   private final String queueUrl;
 
+  /**
+   * Intended to be used as an argument when creating a {@link MigratorProgressTracker}.
+   *
+   * @param progress the progress to report
+   * @throws SqsException if SQS message send failed
+   * @throws UncheckedIOException if conversion to JSON fails
+   */
   public void reportMigratorProgress(MigratorProgress progress) {
+    final long pid = getPid();
     final var message =
-        new SqsProgressMessage(
-            ProcessHandle.current().pid(), progress.getStage(), progress.getMigrationProgress());
+        new SqsProgressMessage(pid, progress.getStage(), progress.getMigrationProgress());
     final var messageText = convertMessageToJson(message);
     sqsDao.sendMessage(queueUrl, messageText);
   }
 
+  /**
+   * Looks up the process id. Visible here to allow test to mock the call.
+   *
+   * @return process id
+   */
+  @VisibleForTesting
+  long getPid() {
+    return ProcessHandle.current().pid();
+  }
+
+  /**
+   * Does the conversion and wraps any checked exception in an unchecked one.
+   *
+   * @param message object to convert into JSON
+   * @return converted JSON string
+   */
   private String convertMessageToJson(SqsProgressMessage message) {
     try {
       return objectMapper.writeValueAsString(message);
-    } catch (JsonProcessingException ex) {
+    } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
   }
 
+  /** Java object from which the JSON message is constructed. */
   @Data
   public static class SqsProgressMessage {
+    /** Our process id. */
     private final long pid;
+
+    /** Stage of app processing. */
     private final MigratorProgress.Stage appStage;
+
+    /** Migration stage if appropriate. */
     @Nullable private final DatabaseMigrationStage migrationStage;
   }
 }

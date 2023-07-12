@@ -7,13 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for {@link MigratorProgressTracker}.
- */
+/** Unit tests for {@link MigratorProgressTracker}. */
 class MigratorProgressTrackerTest {
-  /**
-   * Calls all possible methods and ensures they are passed on to the reporter as expected.
-   */
+  /** Calls all possible methods and ensures they are passed on to the reporter as expected. */
   @Test
   void testAllMethods() {
     var progressList = new ArrayList<MigratorProgress>();
