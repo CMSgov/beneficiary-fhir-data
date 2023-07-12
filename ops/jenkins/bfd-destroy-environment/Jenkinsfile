@@ -67,18 +67,6 @@ def sendNotifications(String environment = '', String buildStatus = '', String s
     slackSend(color: buildColor, message: slackMsg)
 }
 
-// Prompt the operator to proceed or abort the build
-def promptToProcced(String stage) {
-    try {
-        input "The ${stage} stage failed. Should the pipeline proceed?"
-        echo "Stage failure in '${stage}' has been accepted by operator. Proceeding to next stage..."
-    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-        currentBuild.result = 'FAILURE'
-        //sendNotifications(trimmedEnv, currentBuild.currentResult, stage, gitCommitId, gitRepoUrl)
-        throw e
-    }
-}
-
 pipeline {
     agent {
         kubernetes {
@@ -108,13 +96,13 @@ spec:
 
     parameters {
         string(
-            name: 'env',
-            description: 'The BFD ephemeral environment to destroy'
+                name: 'env',
+                description: 'The BFD ephemeral environment to destroy'
         )
         booleanParam(
-            name: 'force_stage_approval',
-            description: 'When true, forces the operator to approve each stage',
-            defaultValue: false
+                name: 'force_stage_approval',
+                description: 'When true, forces the operator to approve each stage',
+                defaultValue: false
         )
     }
 
@@ -198,7 +186,8 @@ spec:
                         currentBuild.result = 'ABORTED'
                         throw e
                     } catch (ex) {
-                        promptToProcced(currentStage)
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -212,19 +201,16 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/pipeline'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/pipeline'
                             )
                         }
                         if (forceStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
-                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                        currentBuild.result = 'ABORTED'
-                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
-                        throw e
                     } catch (ex) {
-                        promptToProcced(currentStage)
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -237,8 +223,8 @@ spec:
                     try {
                         lock(resource: lockResource) {
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: "ops/terraform/services/migrator"
+                                    env: trimmedEnv,
+                                    directory: "ops/terraform/services/migrator"
                             )
                         }
                         if (forceStageApproval) {
@@ -249,7 +235,8 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        promptToProcced(currentStage)
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -263,8 +250,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/common'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/common'
                             )
                         }
                         if (forceStageApproval) {
@@ -275,7 +262,8 @@ spec:
                         sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                         throw e
                     } catch (ex) {
-                        promptToProcced(currentStage)
+                        input "The ${currentStage} stage failed. Should the pipeline proceed?"
+                        echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
                     }
                 }
             }
@@ -289,8 +277,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.destroyTerraservice(
-                                env: trimmedEnv,
-                                directory: 'ops/terraform/services/base'
+                                    env: trimmedEnv,
+                                    directory: 'ops/terraform/services/base'
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
