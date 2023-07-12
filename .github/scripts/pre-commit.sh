@@ -16,7 +16,7 @@ checkSecretFilesForPlainText() {
 
   # for all files to be committed which are a secret file,
   # grep for the header "$ANSIBLE_VAULT;1.1;AES256"
-  # if it's not there, abort.
+  # if it's not there, abort
   for commitFile in ${commits[@]}; do
     for secretFile in ${secrets[@]}; do
       if [ $commitFile == $secretFile ]; then
