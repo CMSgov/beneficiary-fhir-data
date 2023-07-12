@@ -528,8 +528,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
       ConfigLoader config) {
     return new LoadAppOptions.PerformanceSettings(
         config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS),
-        config.intValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE),
-        config.intValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE));
+        config.positiveIntValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE),
+        config.positiveIntValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE));
   }
 
   /**
@@ -544,11 +544,11 @@ public final class AppConfiguration extends BaseAppConfiguration {
   static LoadAppOptions.PerformanceSettings loadClaimPerformanceSettings(
       ConfigLoader config, LoadAppOptions.PerformanceSettings benePerformanceSettings) {
     return new LoadAppOptions.PerformanceSettings(
-        config.intValue(
+        config.positiveIntValue(
             ENV_VAR_KEY_LOADER_THREADS_CLAIMS, benePerformanceSettings.getLoaderThreads()),
-        config.intValue(
+        config.positiveIntValue(
             ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, benePerformanceSettings.getRecordBatchSize()),
-        config.intValue(
+        config.positiveIntValue(
             ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS,
             benePerformanceSettings.getTaskQueueSizeMultiple()));
   }

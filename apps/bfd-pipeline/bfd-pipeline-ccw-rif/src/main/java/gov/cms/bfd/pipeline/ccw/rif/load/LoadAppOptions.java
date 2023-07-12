@@ -117,20 +117,5 @@ public final class LoadAppOptions {
 
     /** The maximum size (per thread) of the task queue used to process batches. */
     private final int taskQueueSizeMultiple;
-
-    /**
-     * Initializes an instance.
-     *
-     * @param loaderThreads the value to use for {@link #loaderThreads}
-     * @param recordBatchSize the load batch size
-     * @param taskQueueSizeMultiple the task queue size multiple
-     */
-    public PerformanceSettings(int loaderThreads, int recordBatchSize, int taskQueueSizeMultiple) {
-      if (loaderThreads < 1) throw new IllegalArgumentException();
-      if (taskQueueSizeMultiple < 1) throw new IllegalArgumentException();
-      this.loaderThreads = loaderThreads;
-      this.recordBatchSize = recordBatchSize;
-      this.taskQueueSizeMultiple = taskQueueSizeMultiple;
-    }
   }
 }

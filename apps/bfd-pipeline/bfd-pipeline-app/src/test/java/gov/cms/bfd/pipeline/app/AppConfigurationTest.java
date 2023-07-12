@@ -23,6 +23,7 @@ import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_WRIT
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_VERSION;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneificiaryPerformanceSettings;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -145,9 +146,30 @@ public class AppConfigurationTest {
     final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
 
     assertThrows(ConfigException.class, () -> loadBeneificiaryPerformanceSettings(configLoader));
+
+    // verify values must be positive
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "0");
+    assertThatThrownBy(() -> loadBeneificiaryPerformanceSettings(configLoader))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "10");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "-1");
+    assertThatThrownBy(() -> loadBeneificiaryPerformanceSettings(configLoader))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "11");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "0");
+    assertThatThrownBy(() -> loadBeneificiaryPerformanceSettings(configLoader))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "12");
+
+    // verify values are parsed correctly when present
     assertEquals(
         new LoadAppOptions.PerformanceSettings(10, 11, 12),
         loadBeneificiaryPerformanceSettings(configLoader));
@@ -162,13 +184,35 @@ public class AppConfigurationTest {
     final var envVars = new HashMap<String, String>();
     final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
 
+    // verify defaults are used as expected
     final var benePerformanceSettings = new LoadAppOptions.PerformanceSettings(1, 2, 3);
     assertEquals(
         benePerformanceSettings,
         loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
+
+    // verify values must be positive
+    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "0");
+    assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "20");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "-1");
+    assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "21");
+
+    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "0");
+    assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
+        .isInstanceOf(ConfigException.class)
+        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS)
+        .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
     envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "22");
+
+    // verify values are parsed correctly when present
     assertEquals(
         new LoadAppOptions.PerformanceSettings(20, 21, 22),
         loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
