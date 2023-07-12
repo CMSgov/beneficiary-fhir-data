@@ -684,9 +684,9 @@
                     <version>3.4.1</version>
                     <configuration>
                         <installHooks>
-                            <!-- The location of a git hook to install into the default hooks directory. -->
-                            <pre-commit>scripts/pre-commit.sh</pre-commit>
-                            <pre-push>scripts/pre-push.sh</pre-push>
+                            <!-- Install git hooks; this only works from the top apps directory during an install (build). -->
+                            <pre-commit>../.github/scripts/pre-commit.sh</pre-commit>
+                            <pre-push>../.github/scripts/pre-push.sh</pre-push>
                         </installHooks>
                     </configuration>
                     <executions>
