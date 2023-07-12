@@ -188,7 +188,6 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
-                        throw ex
                     }
                 }
             }
@@ -216,7 +215,6 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
-                        throw ex
                     }
                 }
             }
@@ -243,7 +241,6 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
-                        throw ex
                     }
                 }
             }
@@ -271,7 +268,6 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
-                        throw ex
                     }
                 }
             }
