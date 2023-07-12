@@ -188,6 +188,7 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        throw ex
                     }
                 }
             }
@@ -208,9 +209,14 @@ spec:
                         if (forceStageApproval) {
                             input "Approval is required before the pipeline may proceed"
                         }
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        currentBuild.result = 'ABORTED'
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        throw e
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        throw ex
                     }
                 }
             }
@@ -237,6 +243,7 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        throw ex
                     }
                 }
             }
@@ -264,6 +271,7 @@ spec:
                     } catch (ex) {
                         input "The ${currentStage} stage failed. Should the pipeline proceed?"
                         echo "Stage failure in '${currentStage}' has been accepted by operator. Proceeding to next stage..."
+                        throw ex
                     }
                 }
             }
