@@ -16,6 +16,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,23 +80,30 @@ public final class MigratorApp {
       exitApp(EXIT_CODE_BAD_CONFIG);
     }
 
+    MigratorProgressTracker progressTracker = createProgressTracker(appConfig);
+    progressTracker.appStarted();
+
     MetricRegistry appMetrics = setupMetrics(appConfig);
 
     // Create a data source for use by createOrUpdateSchema
     HikariDataSource pooledDataSource =
         createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+    progressTracker.appConnected();
 
     // run migration
     boolean migrationSuccess;
     try {
       migrationSuccess =
           DatabaseSchemaManager.createOrUpdateSchema(
-              pooledDataSource, appConfig.getFlywayScriptLocationOverride());
+              pooledDataSource,
+              appConfig.getFlywayScriptLocationOverride(),
+              progressTracker::migrating);
     } finally {
       pooledDataSource.close();
     }
 
     if (!migrationSuccess) {
+      progressTracker.appFailed();
       LOGGER.error("Migration failed, shutting down");
       exitApp(EXIT_CODE_FAILED_MIGRATION);
     }
@@ -114,12 +122,28 @@ public final class MigratorApp {
     }
 
     if (!validationSuccess) {
+      progressTracker.appFailed();
       LOGGER.error("Validation failed, shutting down");
       exitApp(EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
     }
 
     LOGGER.info("Migration and validation passed, shutting down");
+    progressTracker.appFinished();
     exitApp(EXIT_CODE_SUCCESS);
+  }
+
+  static MigratorProgressTracker createProgressTracker(AppConfiguration appConfig) {
+    Consumer<MigratorProgress> progressConsumer;
+    final var sqsClient = appConfig.getSqsClient();
+    if (sqsClient == null) {
+      progressConsumer = progress -> LOGGER.info("progress: {}", progress);
+    } else {
+      final var sqsDao = new SqsDao(sqsClient);
+      final var queueUrl = sqsDao.lookupQueueUrl(appConfig.getSqsQueueName());
+      final var sqsProgressReporter = new SqsProgessReporter(sqsDao, queueUrl);
+      progressConsumer = sqsProgressReporter::reportMigratorProgress;
+    }
+    return new MigratorProgressTracker(progressConsumer);
   }
 
   /**

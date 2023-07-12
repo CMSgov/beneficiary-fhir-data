@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
@@ -35,7 +37,7 @@ public final class DatabaseSchemaManager {
    * @return {@code true} if the migration was successful
    */
   public static boolean createOrUpdateSchema(DataSource dataSource) {
-    return createOrUpdateSchema(dataSource, null);
+    return createOrUpdateSchema(dataSource, null, null);
   }
 
   /**
@@ -49,12 +51,14 @@ public final class DatabaseSchemaManager {
    * @return {@code true} if the migration was successful
    */
   public static boolean createOrUpdateSchema(
-      DataSource dataSource, String flywayScriptLocationOverride) {
+      DataSource dataSource,
+      String flywayScriptLocationOverride,
+      @Nullable Consumer<DatabaseMigrationStage> progressConsumer) {
     LOGGER.info("Schema create/upgrade: running...");
 
     Flyway flyway;
     try {
-      flyway = createFlyway(dataSource, flywayScriptLocationOverride);
+      flyway = createFlyway(dataSource, flywayScriptLocationOverride, progressConsumer);
       flyway.migrate();
     } catch (FlywaySqlScriptException sqlException) {
       LOGGER.error("SQL Exception when running migration: ", sqlException);
@@ -83,7 +87,10 @@ public final class DatabaseSchemaManager {
    *     override
    * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
-  private static Flyway createFlyway(DataSource dataSource, String flywayScriptLocationOverride) {
+  private static Flyway createFlyway(
+      DataSource dataSource,
+      String flywayScriptLocationOverride,
+      @Nullable Consumer<DatabaseMigrationStage> progressConsumer) {
     FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
     flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 
@@ -119,6 +126,10 @@ public final class DatabaseSchemaManager {
         .getPluginRegister()
         .getPlugin(PostgreSQLConfigurationExtension.class)
         .setTransactionalLock(false);
+
+    if (progressConsumer != null) {
+      flywayBuilder.callbacks(new FlywayProgressCallback(progressConsumer));
+    }
 
     return flywayBuilder.load();
   }
