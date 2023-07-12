@@ -1,0 +1,27 @@
+@startuml
+title BFD-Pipeline-CCW Ingestion of Beneficiary/Claim Data Sequence
+participant CCW
+database S3
+participant Slack
+participant "bfd-pipeline"
+database "BFD-DB"
+CCW -> S3: Timestamped folder with: \n RIF files for a resource, manifest.xml \n placed in 'bfd-prod-etl' S3 bucket  
+S3 -> S3: Timestamped folder moved to \n 'Incoming' folder of bucket
+S3 -> Slack: Data discovery status sent \n to #BFD-notices channel
+Slack --> S3
+S3 --> "bfd-pipeline": ETL/RIF Loader process triggered
+group ETL
+"bfd-pipeline" -> "bfd-pipeline": datasetMonitorListener interface instantiated \n in CcwRifLoadJob class to manage ETL
+"bfd-pipeline" -> "bfd-pipeline": ETL process parses manifest.xml file \n for specific resource data \n and checks for DB operation \n denoted  in manifest i.e. INSERT/UPDATE
+"bfd-pipeline" -> "BFD-DB": DB operations applied for resource \n based on column and rif layout fhir mappings
+"BFD-DB" --> "bfd-pipeline"
+"bfd-pipeline" -> "bfd-pipeline": Process marked as 'complete'
+end
+"bfd-pipeline" -> S3: Load status sent to S3
+S3 -> Slack: status sent \n to #BFD-notices channel
+Slack --> S3
+S3 -> S3: Timestamped folder for resource moved \n from 'Incoming' to the 'Done' folder
+S3 --> "bfd-pipeline": ETL process continues if more \n resources still in 'Incoming' folder
+"bfd-pipeline" --> S3
+S3--> CCW
+@enduml
