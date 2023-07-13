@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Defines a RDA version in the format of [major].[minor].[patch], with optional range modifier for
@@ -16,6 +18,8 @@ import java.util.regex.Pattern;
  *   <li>^0.10.1 - Must be a 0.x.x version equal to or higher than 0.10.1
  * </ul>
  */
+@EqualsAndHashCode
+@ToString
 public class RdaVersion {
 
   /** Name for the type group of the RegEx. */
