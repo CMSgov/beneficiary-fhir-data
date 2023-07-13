@@ -70,9 +70,9 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /** date range that clm_thru_dt falls within. */
   private Optional<DateRangeParam> serviceDate;
   /** whether to return tax numbers. */
-  private Optional<Boolean> includeTaxNumbers;
+  private boolean includeTaxNumbers;
   /** whether to exclude SAMHSA claims. */
-  private Optional<Boolean> excludeSamhsa;
+  private boolean excludeSamhsa;
 
   // +++++++++++++++++++++++++++++++++++
   // task properties
@@ -125,8 +125,8 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       Long id,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
-      Optional<Boolean> includeTaxNumbers,
-      Optional<Boolean> excludeSamhsa) {
+      boolean includeTaxNumbers,
+      boolean excludeSamhsa) {
     this.claimTransformer = requireNonNull(claimTransformer);
     this.claimType = requireNonNull(claimType);
     this.id = requireNonNull(id);
@@ -158,7 +158,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     LOGGER.debug("TransformPatientClaimsToEobTaskV2.call() started for {}", id);
     try {
       eobs.addAll(transformToEobs(findClaimTypeByPatient()));
-      if (excludeSamhsa.isPresent() && excludeSamhsa.get()) {
+      if (excludeSamhsa) {
         filterSamhsa(eobs);
       }
     } catch (NoResultException e) {
@@ -190,7 +190,10 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    */
   @VisibleForTesting
   private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
-    return claimTransformer.transform(claimEntity, includeTaxNumbers);
+    if (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.DME) {
+      return claimTransformer.transform(claimEntity, includeTaxNumbers);
+    }
+    return claimTransformer.transform(claimEntity);
   }
 
   /**

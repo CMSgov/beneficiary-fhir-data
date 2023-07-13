@@ -70,9 +70,9 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /** date range that clm_thru_dt falls within. */
   private Optional<DateRangeParam> serviceDate;
   /** whether to return tax numbers. */
-  private Optional<Boolean> includeTaxNumbers;
+  private boolean includeTaxNumbers;
   /** whether to exclude SAMHSA claims. */
-  private Optional<Boolean> excludeSamhsa;
+  private boolean excludeSamhsa;
 
   // +++++++++++++++++++++++++++++++++++
   // task properties
@@ -125,8 +125,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       Long id,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
-      Optional<Boolean> includeTaxNumbers,
-      Optional<Boolean> excludeSamhsa) {
+      boolean includeTaxNumbers,
+      boolean excludeSamhsa) {
     this.claimTransformer = requireNonNull(claimTransformer);
     this.claimType = requireNonNull(claimType);
     this.id = requireNonNull(id);
@@ -158,7 +158,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     LOGGER.debug("TransformPatientClaimsToEobTaskpwd.call() started for {}", id);
     try {
       eobs.addAll(transformToEobs(findClaimTypeByPatient()));
-      if (excludeSamhsa.isPresent() && excludeSamhsa.get()) {
+      if (excludeSamhsa) {
         filterSamhsa(eobs);
       }
     } catch (NoResultException e) {
@@ -171,8 +171,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
-   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
-   * objects.
+   * Transform a list of claims to a list of {@link ExplanationOfBenefit} objects.
    *
    * @param claims the claims/events to transform
    * @return the {@link ExplanationOfBenefit} instances, one per claim/event
@@ -190,7 +189,10 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   @VisibleForTesting
   private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
-    return claimTransformer.transform(claimEntity, includeTaxNumbers);
+    if (claimType == ClaimType.CARRIER || claimType == ClaimType.DME) {
+      return claimTransformer.transform(claimEntity, includeTaxNumbers);
+    }
+    return claimTransformer.transform(claimEntity);
   }
 
   /**
