@@ -1,6 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
-import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
+import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import java.util.function.Consumer;
 import lombok.Data;
 
@@ -42,7 +42,7 @@ public class MigratorProgressTracker {
    *
    * @param migrationStage migration stage just completed
    */
-  public void migrating(DatabaseMigrationStage migrationStage) {
+  public void migrating(DatabaseMigrationProgress migrationStage) {
     var progress = new MigratorProgress(MigratorProgress.Stage.Migrating, migrationStage);
     progressReporter.accept(progress);
   }

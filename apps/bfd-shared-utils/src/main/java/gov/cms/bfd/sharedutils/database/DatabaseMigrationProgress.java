@@ -12,7 +12,7 @@ import org.flywaydb.core.api.callback.Context;
 /** Embodies migration progress. Sent to a callback during flyway migration. */
 @Data
 @AllArgsConstructor
-public class DatabaseMigrationStage {
+public class DatabaseMigrationProgress {
   /** Current stage of processing. */
   public enum Stage {
     /** Before any migration has been executed. */
@@ -48,8 +48,8 @@ public class DatabaseMigrationStage {
    * @param stage value for {@link #stage}
    * @param migrationInfo used to extract values for {@link #version} and {@link #migrationFile}
    */
-  public DatabaseMigrationStage(
-      DatabaseMigrationStage.Stage stage, @Nullable MigrationInfo migrationInfo) {
+  public DatabaseMigrationProgress(
+      DatabaseMigrationProgress.Stage stage, @Nullable MigrationInfo migrationInfo) {
     this.stage = stage;
     version =
         (migrationInfo == null || migrationInfo.getVersion() == null)

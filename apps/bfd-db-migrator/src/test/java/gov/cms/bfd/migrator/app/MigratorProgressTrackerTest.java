@@ -2,7 +2,7 @@ package gov.cms.bfd.migrator.app;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
+import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -20,9 +20,9 @@ class MigratorProgressTrackerTest {
     tracker.appFailed();
 
     final var migration1 =
-        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Preparing, "1", null);
+        new DatabaseMigrationProgress(DatabaseMigrationProgress.Stage.Preparing, "1", null);
     final var migration2 =
-        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, null, "finished");
+        new DatabaseMigrationProgress(DatabaseMigrationProgress.Stage.Completed, null, "finished");
 
     tracker.migrating(migration1);
     tracker.migrating(migration2);

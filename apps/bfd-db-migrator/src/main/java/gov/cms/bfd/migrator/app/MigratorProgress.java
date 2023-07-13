@@ -1,6 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
-import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
+import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import javax.annotation.Nullable;
 import lombok.Data;
 
@@ -25,5 +25,5 @@ public class MigratorProgress {
   private final Stage stage;
 
   /** Optional details when {@link #stage} is {@link Stage#Migrating}. */
-  @Nullable private final DatabaseMigrationStage migrationProgress;
+  @Nullable private final DatabaseMigrationProgress migrationProgress;
 }

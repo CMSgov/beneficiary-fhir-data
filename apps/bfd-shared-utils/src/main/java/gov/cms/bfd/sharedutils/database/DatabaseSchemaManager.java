@@ -53,19 +53,19 @@ public final class DatabaseSchemaManager {
   public static boolean createOrUpdateSchema(
       DataSource dataSource,
       String flywayScriptLocationOverride,
-      Consumer<DatabaseMigrationStage> progressConsumer) {
+      Consumer<DatabaseMigrationProgress> progressConsumer) {
     LOGGER.info("Schema create/upgrade: running...");
 
     Flyway flyway;
     try {
       flyway = createFlyway(dataSource, flywayScriptLocationOverride, progressConsumer);
       progressConsumer.accept(
-          new DatabaseMigrationStage(
-              DatabaseMigrationStage.Stage.BeforeMigration, flyway.info().current()));
+          new DatabaseMigrationProgress(
+              DatabaseMigrationProgress.Stage.BeforeMigration, flyway.info().current()));
       flyway.migrate();
       progressConsumer.accept(
-          new DatabaseMigrationStage(
-              DatabaseMigrationStage.Stage.AfterMigration, flyway.info().current()));
+          new DatabaseMigrationProgress(
+              DatabaseMigrationProgress.Stage.AfterMigration, flyway.info().current()));
     } catch (FlywaySqlScriptException sqlException) {
       LOGGER.error("SQL Exception when running migration: ", sqlException);
       return false;
@@ -97,7 +97,7 @@ public final class DatabaseSchemaManager {
   private static Flyway createFlyway(
       DataSource dataSource,
       String flywayScriptLocationOverride,
-      Consumer<DatabaseMigrationStage> progressConsumer) {
+      Consumer<DatabaseMigrationProgress> progressConsumer) {
     FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
     flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 

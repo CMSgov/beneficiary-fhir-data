@@ -4,7 +4,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
+import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,7 +23,8 @@ class SqsProgressReporterTest {
     final var migratorProgress =
         new MigratorProgress(
             MigratorProgress.Stage.Migrating,
-            new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "1", "detail"));
+            new DatabaseMigrationProgress(
+                DatabaseMigrationProgress.Stage.Completed, "1", "detail"));
     final var queueUrl = "queue-url";
     final var messageGroupId = "group-id";
     final var reporter = spy(new SqsProgressReporter(sqsDao, queueUrl, messageGroupId));

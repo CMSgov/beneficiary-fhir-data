@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
+import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.IOException;
 import java.util.UUID;
@@ -119,6 +119,6 @@ public class SqsProgressReporter {
     private final MigratorProgress.Stage appStage;
 
     /** Migration stage if appropriate. */
-    @Nullable private final DatabaseMigrationStage migrationStage;
+    @Nullable private final DatabaseMigrationProgress migrationStage;
   }
 }
