@@ -7,6 +7,7 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -50,24 +51,37 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
+   * DMEClaimTransformer#transform} method that takes the includeTaxNumber parameter.
+   *
+   * @param claim the {@link Object} to use
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     CarrierClaim}
+   */
+  @Trace
+  @Override
+  public ExplanationOfBenefit transform(Object claim) {
+    throw new BadCodeMonkeyException();
+  }
+
+  /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
-   *     response
+   * @param includeTaxNumber Boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumber.orElse(false));
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumber);
 
     timer.stop();
     return eob;
@@ -207,12 +221,11 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
         boolean performingHasMatchingExtension =
-            (claimLine.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtils.careTeamHasMatchingExtension(
+            claimLine.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtils.careTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode()))
-                : false;
+                    String.valueOf(claimLine.getProviderParticipatingIndCode()));
 
         if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(

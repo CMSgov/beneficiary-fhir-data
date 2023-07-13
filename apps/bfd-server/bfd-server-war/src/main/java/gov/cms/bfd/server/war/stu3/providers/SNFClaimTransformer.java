@@ -50,16 +50,29 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
+   * SNFClaimTransformer#transform} method that does not take the includeTaxNumber parameter.
+   *
+   * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     SNFClaim}
+   */
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    throw new BadCodeMonkeyException();
+  }
+
+  /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber ignored; exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform"))

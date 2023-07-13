@@ -56,6 +56,19 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
+   * Override required interface method; throws {@link BadCodeMonkeyException} since callers should
+   * use the method that supports tax number.
+   *
+   * @param claim the {@link Object} to use
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     DMEClaim}
+   */
+  @Override
+  public ExplanationOfBenefit transform(Object claim) {
+    throw new BadCodeMonkeyException();
+  }
+
+  /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
@@ -66,7 +79,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -75,7 +88,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumber.orElse(false));
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumber);
 
     timer.stop();
     return eob;
@@ -244,12 +257,11 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
         boolean performingHasMatchingExtension =
-            (line.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+            line.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtilsV2.careTeamHasMatchingExtension(
                     performing.get(),
                     TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(line.getProviderParticipatingIndCode().get()))
-                : false;
+                    String.valueOf(line.getProviderParticipatingIndCode().get()));
 
         if (!performingHasMatchingExtension) {
           performing

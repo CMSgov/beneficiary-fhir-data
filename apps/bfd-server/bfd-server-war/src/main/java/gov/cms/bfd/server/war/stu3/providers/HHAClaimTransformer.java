@@ -45,17 +45,31 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
   }
+
+  /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
+   * HHAClaimTransformer#transform} method that does not take the includeTaxNumber parameter.
+   *
+   * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     HHAClaim}
+   */
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    throw new BadCodeMonkeyException();
+  }
+
   /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber ignored; exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform"))

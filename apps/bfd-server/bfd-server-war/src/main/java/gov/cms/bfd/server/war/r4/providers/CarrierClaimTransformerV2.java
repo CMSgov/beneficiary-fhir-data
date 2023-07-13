@@ -63,6 +63,19 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
+   * CarrierClaimTransformerV2#transform} method that takes the includeTaxNumber parameter.
+   *
+   * @param claim the {@link Object} to use
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     CarrierClaim}
+   */
+  @Override
+  public ExplanationOfBenefit transform(Object claim) {
+    throw new BadCodeMonkeyException();
+  }
+
+  /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
@@ -73,7 +86,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -83,7 +96,8 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber.orElse(false));
+
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
 
     timer.stop();
     return eob;
@@ -274,12 +288,11 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         }
 
         performingHasMatchingExtension =
-            (line.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+            line.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtilsV2.careTeamHasMatchingExtension(
                     performing.get(),
                     TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(line.getProviderParticipatingIndCode().get()))
-                : false;
+                    String.valueOf(line.getProviderParticipatingIndCode().get()));
 
         if (!performingHasMatchingExtension) {
           // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension

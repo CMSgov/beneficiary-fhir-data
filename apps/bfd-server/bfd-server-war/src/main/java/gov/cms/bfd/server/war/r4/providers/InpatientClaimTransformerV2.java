@@ -56,16 +56,30 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
+   * InpatientClaimTransformerV2#transform} method that does not take the includeTaxNumber
+   * parameter.
+   *
+   * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     InpatientClaim}
+   */
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    throw new BadCodeMonkeyException();
+  }
+
+  /**
    * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber ignored; exists to satisfy {@link ClaimTransformerInterfaceV2}
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim) {
     Timer.Context timer =
         metricRegistry
             .timer(

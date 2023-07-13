@@ -23,8 +23,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -209,11 +207,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
-
-    Optional<Boolean> includeTaxNumbers =
-        Optional.ofNullable(returnIncludeTaxNumbers(requestDetails));
+    ClaimType claimType = eobIdType.get();
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     String eobIdClaimIdText = eobIdMatcher.group(2);
-
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("by", "id");
@@ -225,8 +221,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     Root root = criteria.from(entityClass);
     eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
     criteria.select(root);
-    criteria.where(
-        builder.equal(root.get(eobIdType.get().getEntityIdAttribute()), eobIdClaimIdText));
+    criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), eobIdClaimIdText));
 
     Object claimEntity = null;
     Long eobByIdQueryNanoSeconds = null;
@@ -251,7 +246,10 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     }
 
     ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
-    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        (claimType == ClaimType.CARRIER || claimType == ClaimType.CARRIER)
+            ? transformer.transform(claimEntity, includeTaxNumbers)
+            : transformer.transform(claimEntity);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -336,9 +334,13 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimType> claimTypesRequested = parseTypeParam(type);
-    Optional<Boolean> includeTaxNumbers =
-        Optional.ofNullable(returnIncludeTaxNumbers(requestDetails));
-    Optional<Boolean> filterSamhsa = Optional.ofNullable(Boolean.parseBoolean(excludeSamhsa));
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
+    boolean filterSamhsa = false;
+    try {
+      filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
+    } catch (Exception e) {
+      LOGGER.error("Invalid SAMHSA boolean {}, defaulting to FALSE", excludeSamhsa);
+    }
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
@@ -407,29 +409,29 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @param paging a {@link OffsetLinkBuilder} for the startIndex (or offset) when using pagination.
    * @param lastUpdated a {@link DateRangeParam} denoting inclusion of lastUpdated field.
    * @param serviceDate a {@link DateRangeParam} specifying date range for the {@link
-   *     org.hl7.fhir.r4.model.ExplanationOfBenefit}s that completed.
-   * @param excludeSamhsa optional {@link Boolean} denoting use of {@link R4EobSamhsaMatcher} *
+   *     ExplanationOfBenefit}s that completed.
+   * @param excludeSamhsa optional {@link Boolean} denoting use of {@link Stu3EobSamhsaMatcher} *
    *     filtering of all SAMHSA-related claims from the results.
    * @param includeTaxNumbers an {@link Optional} boolean denoting includsio/exclusion of tax
    *     numbers in the response,
-   * @return Returns a {@link org.hl7.fhir.stu3.model.Bundle} of {@link
-   *     org.hl7.fhir.stu3.model.ExplanationOfBenefit}s, which may contain multiple matching
-   *     resources, or may also be empty.
+   * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
+   *     matching resources, or may also be empty.
    */
   @VisibleForTesting
-  private org.hl7.fhir.dstu3.model.Bundle processClaimsMask(
+  private Bundle processClaimsMask(
       Integer claimTypesThatHaveData,
       Set<ClaimType> claimTypesRequested,
       long beneficiaryId,
       OffsetLinkBuilder paging,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
-      Optional<Boolean> excludeSamhsa,
-      Optional<Boolean> includeTaxNumbers)
+      boolean excludeSamhsa,
+      boolean includeTaxNumbers)
       throws InterruptedException, ExecutionException {
 
     EnumSet<ClaimType> claimsToProcess =
-        ClaimType.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
+        TransformerUtils.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
+
     LOGGER.debug(
         String.format("EnumSet for claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
 

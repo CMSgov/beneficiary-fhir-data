@@ -59,24 +59,37 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
+   * CarrierClaimTransformer#transform} method that takes the includeTaxNumber parameter.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
-   *     response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, Optional<Boolean> includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claim) {
+    throw new BadCodeMonkeyException();
+  }
+
+  /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
+   * @param claim the {@link Object} to use
+   * @param includeTaxNumber Boolean denoting whether to include tax numbers in the response
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     CarrierClaim}
+   */
+  @Trace
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber.orElse(false));
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
 
     timer.stop();
     return eob;
@@ -201,12 +214,11 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
         }
 
         performingHasMatchingExtension =
-            (claimLine.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtils.careTeamHasMatchingExtension(
+            claimLine.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtils.careTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()))
-                : false;
+                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()));
 
         if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(
@@ -222,7 +234,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
               TransformerUtils.careTeamHasMatchingExtension(
                   performingCareTeamMember,
                   TransformerConstants.CODING_NPI_US,
-                  String.valueOf(claimLine.getOrganizationNpi().get()));
+                  claimLine.getOrganizationNpi().get());
 
           if (!performingHasMatchingExtension) {
             TransformerUtils.addExtensionCoding(
