@@ -46,6 +46,7 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
@@ -65,6 +66,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -913,9 +915,7 @@ public final class TransformerUtils {
             c -> {
               if (!codingSystem.equals(c.getSystem())) return false;
               if (codingVersion != null && !codingVersion.equals(c.getVersion())) return false;
-              if (!codingCode.equals(c.getCode())) return false;
-
-              return true;
+              return codingCode.equals(c.getCode());
             });
   }
 
@@ -2577,7 +2577,7 @@ public final class TransformerUtils {
         .mapToObj(
             i -> {
               return extractDiagnosis(
-                  "External" + String.valueOf(i),
+                  "External" + i,
                   claim,
                   Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
                   DiagnosisLabel.EXTERNAL);
@@ -3319,7 +3319,7 @@ public final class TransformerUtils {
       String line = "";
       icdCodesIn.readLine();
       while ((line = icdCodesIn.readLine()) != null) {
-        String icdColumns[] = line.split("\t");
+        String[] icdColumns = line.split("\t");
         icdDiagnosisMap.put(icdColumns[0], icdColumns[1]);
       }
       icdCodesIn.close();
@@ -3358,9 +3358,7 @@ public final class TransformerUtils {
     }
 
     // log which NPI codes we couldn't find a match for in our downloaded NPI file
-    if (!npiCodeLookupMissingFailures.contains(npiCode)) {
-      npiCodeLookupMissingFailures.add(npiCode);
-    }
+    npiCodeLookupMissingFailures.add(npiCode);
 
     return null;
   }
@@ -3440,7 +3438,7 @@ public final class TransformerUtils {
       String line = "";
       npiCodesIn.readLine();
       while ((line = npiCodesIn.readLine()) != null) {
-        String npiColumns[] = line.split("\t");
+        String[] npiColumns = line.split("\t");
         if (npiColumns[4].isEmpty()) {
           String npiDisplayName =
               npiColumns[8].trim()
@@ -3528,7 +3526,7 @@ public final class TransformerUtils {
       String line = "";
       procedureCodesIn.readLine();
       while ((line = procedureCodesIn.readLine()) != null) {
-        String icdColumns[] = line.split("\t");
+        String[] icdColumns = line.split("\t");
         procedureCodeMap.put(icdColumns[0], icdColumns[1]);
       }
       procedureCodesIn.close();
@@ -3804,5 +3802,44 @@ public final class TransformerUtils {
       default:
         throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
     }
+  }
+
+  /**
+   * Process a {@link Set} of {@link ClaimType} entries and build an {@link EnumSet} of {@link
+   * ClaimType} entries that meet the criteria of having claims data (derived from {@link Integer}
+   * bitmask) and match claim(s) requested by caller.
+   *
+   * @param claimTypes {@link Set} set of {@link ClaimType} identifiers requested by client
+   * @param val {@link Integer} bitmask denoting the claim types that have data
+   * @return {@link EnumSet} of {@link ClaimType} types to process.
+   */
+  public static EnumSet fetchClaimsAvailability(Set<ClaimType> claimTypes, Integer val) {
+    EnumSet availSet = EnumSet.noneOf(ClaimType.class);
+    if (claimTypes.contains(ClaimType.CARRIER) && (val & QueryUtils.V_CARRIER_HAS_DATA) != 0) {
+      availSet.add(ClaimType.CARRIER);
+    }
+    if (claimTypes.contains(ClaimType.DME) && (val & QueryUtils.V_DME_HAS_DATA) != 0) {
+      availSet.add(ClaimType.DME);
+    }
+    if (claimTypes.contains(ClaimType.PDE) && (val & QueryUtils.V_PART_D_HAS_DATA) != 0) {
+      availSet.add(ClaimType.PDE);
+    }
+    if (claimTypes.contains(ClaimType.INPATIENT) && (val & QueryUtils.V_INPATIENT_HAS_DATA) != 0) {
+      availSet.add(ClaimType.INPATIENT);
+    }
+    if (claimTypes.contains(ClaimType.OUTPATIENT)
+        && (val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0) {
+      availSet.add(ClaimType.OUTPATIENT);
+    }
+    if (claimTypes.contains(ClaimType.HOSPICE) && (val & QueryUtils.V_HOSPICE_HAS_DATA) != 0) {
+      availSet.add(ClaimType.HOSPICE);
+    }
+    if (claimTypes.contains(ClaimType.SNF) && (val & QueryUtils.V_SNF_HAS_DATA) != 0) {
+      availSet.add(ClaimType.SNF);
+    }
+    if (claimTypes.contains(ClaimType.HHA) && (val & QueryUtils.V_HHA_HAS_DATA) != 0) {
+      availSet.add(ClaimType.HHA);
+    }
+    return availSet;
   }
 }
