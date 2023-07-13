@@ -23,7 +23,7 @@ class SqsProgressReporterTest {
     final var migratorProgress =
         new MigratorProgress(
             MigratorProgress.Stage.Migrating,
-            new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "detail"));
+            new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "1", "detail"));
     final var queueUrl = "queue-url";
     final var messageGroupId = "group-id";
     final var reporter = spy(new SqsProgressReporter(sqsDao, queueUrl, messageGroupId));
@@ -37,6 +37,6 @@ class SqsProgressReporterTest {
             queueUrl,
             messageGroupId,
             "2",
-            "{\"appStage\":\"Migrating\",\"migrationStage\":{\"detail\":\"detail\",\"stage\":\"Completed\"},\"pid\":5046}");
+            "{\"appStage\":\"Migrating\",\"migrationStage\":{\"migrationFile\":\"detail\",\"stage\":\"Completed\",\"version\":\"1\"},\"pid\":5046}");
   }
 }

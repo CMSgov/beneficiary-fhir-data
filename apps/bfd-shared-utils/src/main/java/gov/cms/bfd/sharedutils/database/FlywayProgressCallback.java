@@ -4,6 +4,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Set;
 import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
+import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.callback.Context;
 import org.flywaydb.core.api.callback.Event;
@@ -66,17 +67,20 @@ public class FlywayProgressCallback implements Callback {
    * @return the converted object
    */
   DatabaseMigrationStage createProgress(Event event, Context context) {
+    final MigrationInfo migrationInfo = context.getMigrationInfo();
     return switch (event) {
-      case BEFORE_MIGRATE -> new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Preparing, "");
-      case AFTER_MIGRATE -> new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "");
+      case BEFORE_MIGRATE -> new DatabaseMigrationStage(
+          DatabaseMigrationStage.Stage.Preparing, migrationInfo);
+      case AFTER_MIGRATE -> new DatabaseMigrationStage(
+          DatabaseMigrationStage.Stage.Completed, migrationInfo);
       case BEFORE_EACH_MIGRATE -> new DatabaseMigrationStage(
-          DatabaseMigrationStage.Stage.BeforeFile, context.getMigrationInfo().getScript());
+          DatabaseMigrationStage.Stage.BeforeFile, migrationInfo);
       case AFTER_EACH_MIGRATE -> new DatabaseMigrationStage(
-          DatabaseMigrationStage.Stage.AfterFile, context.getMigrationInfo().getScript());
+          DatabaseMigrationStage.Stage.AfterFile, migrationInfo);
       case BEFORE_VALIDATE -> new DatabaseMigrationStage(
-          DatabaseMigrationStage.Stage.BeforeValidate, "");
+          DatabaseMigrationStage.Stage.BeforeValidate, migrationInfo);
       case AFTER_VALIDATE -> new DatabaseMigrationStage(
-          DatabaseMigrationStage.Stage.AfterValidate, "");
+          DatabaseMigrationStage.Stage.AfterValidate, migrationInfo);
       default -> throw new BadCodeMonkeyException("unsupported Event type: " + event);
     };
   }

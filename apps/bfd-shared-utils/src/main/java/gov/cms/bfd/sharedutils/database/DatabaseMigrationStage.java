@@ -1,12 +1,22 @@
 package gov.cms.bfd.sharedutils.database;
 
+import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.callback.Callback;
+import org.flywaydb.core.api.callback.Context;
 
 /** Embodies migration progress. Sent to a callback during flyway migration. */
 @Data
+@AllArgsConstructor
 public class DatabaseMigrationStage {
   /** Current stage of processing. */
   public enum Stage {
+    /** Before any migration has been executed. */
+    BeforeMigration,
     /** Preparing to start. */
     Preparing,
     /** About to process a file. */
@@ -18,11 +28,36 @@ public class DatabaseMigrationStage {
     /** Finished validating schema. */
     AfterValidate,
     /** Migration complete. */
-    Completed
+    Completed,
+    /** After all migrations (if any) have been executed. */
+    AfterMigration
   }
 
   /** Stage of processing. */
   private final Stage stage;
-  /** Any detail or empty string. Currently just the current migration file name. */
-  private final String detail;
+  /** Current version string reported by Flyway, if available. */
+  @Nullable private final String version;
+  /** Migration file name, if relevant to the stage. */
+  @Nullable private final String migrationFile;
+
+  /**
+   * This constructor initializes an instance using the {@link MigrationInfo} from either a {@link
+   * Context} passed to a Flyway {@link Callback} or a {@link MigrationInfoService} returned by
+   * {@link Flyway#info}.
+   *
+   * @param stage value for {@link #stage}
+   * @param migrationInfo used to extract values for {@link #version} and {@link #migrationFile}
+   */
+  public DatabaseMigrationStage(
+      DatabaseMigrationStage.Stage stage, @Nullable MigrationInfo migrationInfo) {
+    this.stage = stage;
+    version =
+        (migrationInfo == null || migrationInfo.getVersion() == null)
+            ? null
+            : migrationInfo.getVersion().getVersion();
+    migrationFile =
+        (migrationInfo == null || migrationInfo.getScript() == null)
+            ? null
+            : migrationInfo.getScript();
+  }
 }

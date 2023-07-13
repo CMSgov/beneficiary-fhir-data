@@ -20,9 +20,9 @@ class MigratorProgressTrackerTest {
     tracker.appFailed();
 
     final var migration1 =
-        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Preparing, "preparing");
+        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Preparing, "1", null);
     final var migration2 =
-        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "finished");
+        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, null, "finished");
 
     tracker.migrating(migration1);
     tracker.migrating(migration2);
