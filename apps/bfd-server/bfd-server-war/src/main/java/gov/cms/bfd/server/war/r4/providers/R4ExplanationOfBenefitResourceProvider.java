@@ -23,7 +23,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -84,8 +83,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   private final MetricRegistry metricRegistry;
   /** The loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
-  /** The drug code display lookup entity. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** The ExecutorService entity. */
   private final ExecutorService executorService;
   /** spring application context. */
@@ -116,7 +113,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param appContext the spring application context
    * @param metricRegistry the metric registry bean
    * @param loadedFilterManager the loaded filter manager bean
-   * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param executorService thread pool for running queries in parallel
    * @param carrierClaimTransformer the carrier claim transformer
    * @param dmeClaimTransformer the dme claim transformer
@@ -131,7 +127,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       ApplicationContext appContext,
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       ExecutorService executorService,
       CarrierClaimTransformerV2 carrierClaimTransformer,
       DMEClaimTransformerV2 dmeClaimTransformer,
@@ -144,7 +139,6 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.executorService = requireNonNull(executorService);
     this.carrierClaimTransformer = requireNonNull(carrierClaimTransformer);
     this.dmeClaimTransformer = requireNonNull(dmeClaimTransformer);
@@ -251,7 +245,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
 
     ClaimTransformerInterfaceV2 transformer = deriveTransformer(claimType);
     ExplanationOfBenefit eob =
-        (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.CARRIER)
+        (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.DME)
             ? transformer.transform(claimEntity, includeTaxNumbers)
             : transformer.transform(claimEntity);
 
@@ -377,7 +371,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
 
     // See if we have any claims data for the beneficiary.
     Integer claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
-    org.hl7.fhir.r4.model.Bundle bundle = null;
+    Bundle bundle = null;
     if (claimTypesThatHaveData > 0) {
       try {
         bundle =
@@ -457,14 +451,19 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
         claimType -> {
           PatientClaimsEobTaskTransformerV2 task =
               appContext.getBean(PatientClaimsEobTaskTransformerV2.class);
+
           task.setupTaskParams(
               deriveTransformer(claimType),
               claimType,
               beneficiaryId,
               lastUpdated,
               serviceDate,
-              includeTaxNumbers,
               excludeSamhsa);
+
+          // only CARRIER & DME claims support NPI tax info
+          if (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.DME) {
+            task.setIncludeTaxNumbers(includeTaxNumbers);
+          }
           callableTasks.add(task);
         });
 

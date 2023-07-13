@@ -247,7 +247,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
     ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
     ExplanationOfBenefit eob =
-        (claimType == ClaimType.CARRIER || claimType == ClaimType.CARRIER)
+        (claimType == ClaimType.CARRIER || claimType == ClaimType.DME)
             ? transformer.transform(claimEntity, includeTaxNumbers)
             : transformer.transform(claimEntity);
 
@@ -453,14 +453,19 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
         claimType -> {
           PatientClaimsEobTaskTransformer task =
               appContext.getBean(PatientClaimsEobTaskTransformer.class);
+
           task.setupTaskParams(
               deriveTransformer(claimType),
               claimType,
               beneficiaryId,
               lastUpdated,
               serviceDate,
-              includeTaxNumbers,
               excludeSamhsa);
+
+          // only CARRIER & DME claims support NPI tax info
+          if (claimType == ClaimType.CARRIER || claimType == ClaimType.DME) {
+            task.setIncludeTaxNumbers(includeTaxNumbers);
+          }
           callableTasks.add(task);
         });
 
