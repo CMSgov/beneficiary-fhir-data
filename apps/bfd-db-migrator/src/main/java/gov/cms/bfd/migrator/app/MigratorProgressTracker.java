@@ -27,7 +27,7 @@ public class MigratorProgressTracker {
 
   /** Report app has finished without errors. */
   public void appFinished() {
-    var progress = new MigratorProgress(MigratorProgress.Stage.Connected, null);
+    var progress = new MigratorProgress(MigratorProgress.Stage.Finished, null);
     progressReporter.accept(progress);
   }
 

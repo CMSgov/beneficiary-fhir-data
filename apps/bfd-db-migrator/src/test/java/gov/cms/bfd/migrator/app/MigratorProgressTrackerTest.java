@@ -22,7 +22,7 @@ class MigratorProgressTrackerTest {
     final var migration1 =
         new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Preparing, "preparing");
     final var migration2 =
-        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Finished, "finished");
+        new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "finished");
 
     tracker.migrating(migration1);
     tracker.migrating(migration2);
@@ -31,7 +31,7 @@ class MigratorProgressTrackerTest {
         List.of(
             new MigratorProgress(MigratorProgress.Stage.Started, null),
             new MigratorProgress(MigratorProgress.Stage.Connected, null),
-            new MigratorProgress(MigratorProgress.Stage.Connected, null),
+            new MigratorProgress(MigratorProgress.Stage.Finished, null),
             new MigratorProgress(MigratorProgress.Stage.Failed, null),
             new MigratorProgress(MigratorProgress.Stage.Migrating, migration1),
             new MigratorProgress(MigratorProgress.Stage.Migrating, migration2)),

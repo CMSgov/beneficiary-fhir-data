@@ -45,7 +45,7 @@ public final class MigratorAppIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
 
   /** Name of SQS queue created in localstack to receive progress messages via SQS. */
-  private static final String SQS_QUEUE_NAME = "migrator-progress";
+  private static final String SQS_QUEUE_NAME = "migrator-progress.fifo";
 
   /** Automatically creates and destroys a localstack SQS service container. */
   @Container
@@ -105,7 +105,7 @@ public final class MigratorAppIT {
   @BeforeEach
   void createQueue() {
     sqsDao = new SqsDao(SqsDaoIT.createSqsClientForLocalStack(localstack));
-    sqsDao.createQueue(SQS_QUEUE_NAME);
+    sqsDao.createFifoQueue(SQS_QUEUE_NAME);
   }
 
   /**
@@ -170,6 +170,10 @@ public final class MigratorAppIT {
           .hasAtLeastOneElementOfType(String.class)
           .asString()
           .contains(MigratorProgress.Stage.Migrating.name());
+      assertThat(progressMessages)
+          .last()
+          .asString()
+          .contains(MigratorProgress.Stage.Finished.name());
 
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(

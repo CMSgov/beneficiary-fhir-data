@@ -11,6 +11,8 @@ import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.database.DatabaseMigrationStage;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,34 @@ public class SqsProgressReporter {
   private final SqsDao sqsDao;
   /** URL of the queue we post messages to. */
   private final String queueUrl;
+  /** Applied to every message to identify a specific sequence for FIFO purposes. */
+  private final String messageGroupId;
+  /** Applied to every message to uniquely identify a message within a specific sequence. */
+  private final AtomicInteger nextMessageId;
+
+  /**
+   * Initialize a new instance using UUID for {@link #messageGroupId}.
+   *
+   * @param sqsDao used to communicate with SQS
+   * @param queueUrl identifies the queue to which progress updates are sent
+   */
+  public SqsProgressReporter(SqsDao sqsDao, String queueUrl) {
+    this(sqsDao, queueUrl, UUID.randomUUID().toString());
+  }
+
+  /**
+   * Initialize a new instance using UUID for {@link #messageGroupId}.
+   *
+   * @param sqsDao used to communicate with SQS
+   * @param queueUrl identifies the queue to which progress updates are sent
+   * @param messageGroupId assigned to every message sent to queue to identify the sequence
+   */
+  public SqsProgressReporter(SqsDao sqsDao, String queueUrl, String messageGroupId) {
+    this.sqsDao = sqsDao;
+    this.queueUrl = queueUrl;
+    this.messageGroupId = messageGroupId;
+    this.nextMessageId = new AtomicInteger(1);
+  }
 
   /**
    * Intended to be used as an argument when creating a {@link MigratorProgressTracker}.
@@ -50,8 +80,9 @@ public class SqsProgressReporter {
     final long pid = getPid();
     final var message =
         new SqsProgressMessage(pid, progress.getStage(), progress.getMigrationProgress());
+    final var messageId = String.valueOf(nextMessageId.getAndIncrement());
     final var messageText = convertMessageToJson(message);
-    sqsDao.sendMessage(queueUrl, messageText);
+    sqsDao.sendMessage(queueUrl, messageGroupId, messageId, messageText);
   }
 
   /**

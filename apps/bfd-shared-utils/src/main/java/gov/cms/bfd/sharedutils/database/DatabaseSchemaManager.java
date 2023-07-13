@@ -48,6 +48,7 @@ public final class DatabaseSchemaManager {
    *     or updated
    * @param flywayScriptLocationOverride the flyway script location override, can be null if no
    *     override
+   * @param progressConsumer null or a function to receive migration status updates
    * @return {@code true} if the migration was successful
    */
   public static boolean createOrUpdateSchema(
@@ -85,6 +86,7 @@ public final class DatabaseSchemaManager {
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
    * @param flywayScriptLocationOverride the flyway script location override, can be null if no
    *     override
+   * @param progressConsumer null or a function to receive migration status updates
    * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
   private static Flyway createFlyway(

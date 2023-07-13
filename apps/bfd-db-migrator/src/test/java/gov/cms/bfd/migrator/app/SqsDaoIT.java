@@ -38,8 +38,8 @@ class SqsDaoIT {
   /** Test creating a queue. */
   @Test
   void createQueue() {
-    String queueName = "my-created-queue";
-    String createdQueueUri = dao.createQueue(queueName);
+    String queueName = "my-created-queue.fifo";
+    String createdQueueUri = dao.createFifoQueue(queueName);
     String lookupQueueUri = dao.lookupQueueUrl(queueName);
     assertEquals(createdQueueUri, lookupQueueUri);
   }
@@ -47,12 +47,13 @@ class SqsDaoIT {
   /** Test sending and receiving. */
   @Test
   void sendAndReceiveMessages() {
-    String queueName = "my-test-queue";
-    String queueUri = dao.createQueue(queueName);
+    String queueName = "my-test-queue.fifo";
+    String queueUri = dao.createFifoQueue(queueName);
+    String messageGroupId = "sendAndReceiveMessages";
     String message1 = "this is a first message";
     String message2 = "this is a second message";
-    dao.sendMessage(queueUri, message1);
-    dao.sendMessage(queueUri, message2);
+    dao.sendMessage(queueUri, messageGroupId, "1", message1);
+    dao.sendMessage(queueUri, messageGroupId, "2", message2);
     assertEquals(Optional.of(message1), dao.nextMessage(queueUri));
     assertEquals(Optional.of(message2), dao.nextMessage(queueUri));
     assertEquals(Optional.empty(), dao.nextMessage(queueUri));
@@ -63,7 +64,8 @@ class SqsDaoIT {
   void variousNonExistentQueueScenarios() {
     assertThatThrownBy(() -> dao.lookupQueueUrl("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
-    assertThatThrownBy(() -> dao.sendMessage("no-such-queue-exists", "not gonna make it there"))
+    assertThatThrownBy(
+            () -> dao.sendMessage("no-such-queue-exists", "g1", "m1", "not gonna make it there"))
         .isInstanceOf(QueueDoesNotExistException.class);
     assertThatThrownBy(() -> dao.nextMessage("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);

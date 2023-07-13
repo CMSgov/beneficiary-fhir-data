@@ -23,16 +23,20 @@ class SqsProgressReporterTest {
     final var migratorProgress =
         new MigratorProgress(
             MigratorProgress.Stage.Migrating,
-            new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Finished, "detail"));
+            new DatabaseMigrationStage(DatabaseMigrationStage.Stage.Completed, "detail"));
     final var queueUrl = "queue-url";
-    final var reporter = spy(new SqsProgressReporter(sqsDao, queueUrl));
+    final var messageGroupId = "group-id";
+    final var reporter = spy(new SqsProgressReporter(sqsDao, queueUrl, messageGroupId));
     doReturn(5046L).when(reporter).getPid();
     reporter.reportMigratorProgress(appProgress);
     reporter.reportMigratorProgress(migratorProgress);
-    verify(sqsDao).sendMessage(queueUrl, "{\"appStage\":\"Started\",\"pid\":5046}");
+    verify(sqsDao)
+        .sendMessage(queueUrl, messageGroupId, "1", "{\"appStage\":\"Started\",\"pid\":5046}");
     verify(sqsDao)
         .sendMessage(
             queueUrl,
-            "{\"appStage\":\"Migrating\",\"migrationStage\":{\"detail\":\"detail\",\"stage\":\"Finished\"},\"pid\":5046}");
+            messageGroupId,
+            "2",
+            "{\"appStage\":\"Migrating\",\"migrationStage\":{\"detail\":\"detail\",\"stage\":\"Completed\"},\"pid\":5046}");
   }
 }

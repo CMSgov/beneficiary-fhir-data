@@ -280,6 +280,7 @@ public final class MigratorApp {
 
   /** Thrown to inform {@link #main} that app should be shut down with a specific exit code. */
   private static class FatalErrorException extends Exception {
+    /** Code to pass to {@link System#exit}. */
     @Getter private final int exitCode;
 
     /**

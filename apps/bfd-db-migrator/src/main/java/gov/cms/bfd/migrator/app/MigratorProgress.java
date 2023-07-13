@@ -7,6 +7,7 @@ import lombok.Data;
 /** Embodies facts related to completion of some milestone or stage of processing by the app. */
 @Data
 public class MigratorProgress {
+  /** Stage of processing in the app itself. */
   enum Stage {
     /** App has started but hasn't done anything yet. */
     Started,
