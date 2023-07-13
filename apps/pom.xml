@@ -117,6 +117,7 @@
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
         <mockito.version>5.3.1</mockito.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
+        <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
         <postgresql.version>42.6.0</postgresql.version>
         <hsqldb.version>2.7.1</hsqldb.version>
@@ -270,6 +271,12 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-inline</artifactId>
                 <version>${mockito-inline.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to write fluent assertions in unit tests. -->
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
             </dependency>
             <dependency>
                 <!-- Provides BOMInputStream, and other basic I/O utilities. -->

@@ -28,11 +28,12 @@ public final class RifLoaderTest {
     options =
         new LoadAppOptions(
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
-            options.getLoaderThreads(),
             options.isIdempotencyRequired(),
             false,
-            100,
-            3);
+            new LoadAppOptions.PerformanceSettings(
+                options.getBeneficiaryPerformanceSettings().getLoaderThreads(), 100, 3),
+            new LoadAppOptions.PerformanceSettings(
+                options.getBeneficiaryPerformanceSettings().getLoaderThreads(), 100, 3));
     LOGGER.info("salt/pepper: {}", Arrays.toString(options.getIdHasherConfig().getHashPepper()));
     LOGGER.info("hash iterations: {}", options.getIdHasherConfig().getHashIterations());
     IdHasher hasher = new IdHasher(options.getIdHasherConfig());
@@ -59,11 +60,12 @@ public final class RifLoaderTest {
     options =
         new LoadAppOptions(
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
-            options.getLoaderThreads(),
             options.isIdempotencyRequired(),
             false,
-            100,
-            3);
+            new LoadAppOptions.PerformanceSettings(
+                options.getBeneficiaryPerformanceSettings().getLoaderThreads(), 100, 3),
+            new LoadAppOptions.PerformanceSettings(
+                options.getBeneficiaryPerformanceSettings().getLoaderThreads(), 100, 3));
     LOGGER.info("salt/pepper: {}", Arrays.toString(options.getIdHasherConfig().getHashPepper()));
     LOGGER.info("hash iterations: {}", options.getIdHasherConfig().getHashIterations());
 

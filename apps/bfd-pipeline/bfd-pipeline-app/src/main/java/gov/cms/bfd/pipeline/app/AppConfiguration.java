@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
@@ -11,6 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
+import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
@@ -88,12 +90,22 @@ public final class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions.PerformanceSettings#getLoaderThreads()} value.
    *
    * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
    * depends on number of cores, cpu speed, i/o throughput, and database performance.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions.PerformanceSettings#getLoaderThreads()} value
+   * specific to processing claims data.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
+   * depends on number of cores, cpu speed, i/o throughput, and database performance.
+   */
+  public static final String ENV_VAR_KEY_LOADER_THREADS_CLAIMS = "LOADER_THREADS_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -123,6 +135,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE";
 
   /**
+   * The name of the environment variable that should be used to provide the number of {@link
+   * RifRecordEvent}s that will be included in each processing batch specific to processing claims
+   * data. Note that larger batch sizes mean that more {@link RifRecordEvent}s will be held in
+   * memory simultaneously.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
+   * the performance boost from larger batch sizes drops off quickly.
+   */
+  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS = "RIF_JOB_BATCH_SIZE_CLAIMS";
+
+  /**
    * The name of the environment variable that should be used to provide the work queue size for the
    * RIF loader's thread pool. This number is multiplied by the number of worker threads to obtain
    * the actual queue size. Lower sizes are more memory efficient but larger sizes could provide a
@@ -135,6 +158,20 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE =
       "RIF_JOB_QUEUE_SIZE_MULTIPLE";
+
+  /**
+   * The name of the environment variable that should be used to provide the work queue size for the
+   * RIF loader's thread pool when processing claims data. This number is multiplied by the number
+   * of worker threads to obtain the actual queue size. Lower sizes are more memory efficient but
+   * larger sizes could provide a performance improvement in some circumstances.
+   *
+   * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
+   * smaller is better. The default value provides some slack for handling intermittent database
+   * slow downs without wasting too much RAM with large numbers of objects waiting to be sent to the
+   * database.
+   */
+  public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS =
+      "RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
@@ -333,7 +370,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * are not necessary in Cloudwatch. These need to be the base metric names, not one of the several
    * auto-generated aggregate metric names with suffixes like {@code .avg}.
    */
-  public static Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
+  public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
@@ -448,15 +485,20 @@ public final class AppConfiguration extends BaseAppConfiguration {
     byte[] hicnHashPepper = config.hexBytes(ENV_VAR_KEY_HICN_HASH_PEPPER);
     int hicnHashCacheSize = config.intValue(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE);
 
-    int loaderThreads = config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS);
-    boolean idempotencyRequired = config.booleanValue(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
-    boolean filteringNonNullAndNon2023Benes =
+    final boolean idempotencyRequired = config.booleanValue(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+    final boolean filteringNonNullAndNon2023Benes =
         config.booleanValue(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
-    int rifRecordBatchSize = config.intValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE);
-    int rifTaskQueueSizeMultiple = config.intValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE);
+
+    final var benePerformanceSettings = loadBeneficiaryPerformanceSettings(config);
+    final var claimPerformanceSettings =
+        loadClaimPerformanceSettings(config, benePerformanceSettings);
+    final int maxLoaderThreads =
+        Math.max(
+            benePerformanceSettings.getLoaderThreads(),
+            claimPerformanceSettings.getLoaderThreads());
 
     MetricOptions metricOptions = loadMetricOptions(config);
-    DatabaseOptions databaseOptions = loadDatabaseOptions(config, loaderThreads);
+    DatabaseOptions databaseOptions = loadDatabaseOptions(config, maxLoaderThreads);
 
     LoadAppOptions loadOptions =
         new LoadAppOptions(
@@ -465,16 +507,50 @@ public final class AppConfiguration extends BaseAppConfiguration {
                 .hashPepper(hicnHashPepper)
                 .cacheSize(hicnHashCacheSize)
                 .build(),
-            loaderThreads,
             idempotencyRequired,
             filteringNonNullAndNon2023Benes,
-            rifRecordBatchSize,
-            rifTaskQueueSizeMultiple);
+            benePerformanceSettings,
+            claimPerformanceSettings);
 
     CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
 
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
     return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+  }
+
+  /**
+   * Loads beneficiary specific {@link LoadAppOptions.PerformanceSettings}.
+   *
+   * @param config used to load configuration values
+   * @return the loaded settings
+   */
+  static LoadAppOptions.PerformanceSettings loadBeneficiaryPerformanceSettings(
+      ConfigLoader config) {
+    return new LoadAppOptions.PerformanceSettings(
+        config.positiveIntValue(ENV_VAR_KEY_LOADER_THREADS),
+        config.positiveIntValue(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE),
+        config.positiveIntValue(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE));
+  }
+
+  /**
+   * Loads optional claim specific {@link LoadAppOptions.PerformanceSettings}. Uses the provided
+   * beneficiary settings to obtain values if the claim specific settings are not present in the
+   * {@link ConfigLoader}.
+   *
+   * @param config used to load configuration values
+   * @param benePerformanceSettings used to get default values
+   * @return the loaded settings
+   */
+  static LoadAppOptions.PerformanceSettings loadClaimPerformanceSettings(
+      ConfigLoader config, LoadAppOptions.PerformanceSettings benePerformanceSettings) {
+    return new LoadAppOptions.PerformanceSettings(
+        config.positiveIntValue(
+            ENV_VAR_KEY_LOADER_THREADS_CLAIMS, benePerformanceSettings.getLoaderThreads()),
+        config.positiveIntValue(
+            ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, benePerformanceSettings.getRecordBatchSize()),
+        config.positiveIntValue(
+            ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS,
+            benePerformanceSettings.getTaskQueueSizeMultiple()));
   }
 
   /**
@@ -547,7 +623,109 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Loads the configuration settings related to the RDA gRPC API data load jobs. Ths job and most
+   * Loads the common configuration settings used by various implementations of the {@link
+   * AbstractRdaLoadJob} abstract class.
+   *
+   * @param config used to load configuration values
+   * @return a valid AbstractRdaLoadJob.Config
+   */
+  @VisibleForTesting
+  static AbstractRdaLoadJob.Config loadRdaLoadJobConfigOptions(ConfigLoader config) {
+    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)))
+            .batchSize(config.intValue(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE))
+            .writeThreads(config.intValue(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS));
+    config
+        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM)
+        .map(seq -> Math.max(1L, seq))
+        .ifPresent(jobConfig::startingFissSeqNum);
+    config
+        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM)
+        .map(seq -> Math.max(1L, seq))
+        .ifPresent(jobConfig::startingMcsSeqNum);
+    config.booleanOption(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    // Default to the hardcoded RDA version in RdaService, restricted to major version
+    jobConfig.rdaVersion(
+        RdaVersion.builder()
+            .versionString(
+                config
+                    .stringOption(ENV_VAR_KEY_RDA_VERSION)
+                    .orElse("^" + RdaService.RDA_PROTO_VERSION))
+            .build());
+    jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
+    return jobConfig.build();
+  }
+
+  /**
+   * Loads the common configuration settings used by various implementations of the {@link
+   * RdaSource} interface.
+   *
+   * @param config used to load configuration values
+   * @return a valid RdaSourceConfig
+   */
+  @VisibleForTesting
+  static RdaSourceConfig loadRdaSourceConfig(ConfigLoader config) {
+    return RdaSourceConfig.builder()
+        .serverType(
+            config.enumValue(ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.class))
+        .host(config.stringValue(ENV_VAR_KEY_RDA_GRPC_HOST))
+        .port(config.intValue(ENV_VAR_KEY_RDA_GRPC_PORT))
+        .inProcessServerName(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME))
+        .maxIdle(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)))
+        .minIdleTimeBeforeConnectionDrop(
+            Duration.ofSeconds(
+                config.intValue(ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
+        .authenticationToken(
+            config.stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN).orElse(null))
+        .messageErrorExpirationDays(
+            config.intOption(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
+        .build();
+  }
+
+  /**
+   * Loads configuration settings used by {@link RdaServerJob}.
+   *
+   * @param config used to load configuration values
+   * @param grpcConfig settings for communicating with RDA API
+   * @param serverJobConfigBuilder used to construct the config settings
+   * @return a valid RdaServerJob.Config
+   */
+  @VisibleForTesting
+  static RdaServerJob.Config loadRdaServerJobConfig(
+      ConfigLoader config,
+      RdaSourceConfig grpcConfig,
+      RdaServerJob.Config.ConfigBuilder serverJobConfigBuilder) {
+    serverJobConfigBuilder.serverMode(
+        config
+            .enumOption(
+                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
+            .orElse(RdaServerJob.Config.ServerMode.Random));
+    serverJobConfigBuilder.serverName(grpcConfig.getInProcessServerName());
+    config
+        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
+        .map(Duration::ofSeconds)
+        .ifPresent(serverJobConfigBuilder::runInterval);
+    config
+        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED)
+        .ifPresent(serverJobConfigBuilder::randomSeed);
+    config
+        .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
+        .ifPresent(serverJobConfigBuilder::randomMaxClaims);
+    config
+        .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
+        .ifPresent(serverJobConfigBuilder::s3Region);
+    config
+        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
+        .ifPresent(serverJobConfigBuilder::s3Bucket);
+    config
+        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
+        .ifPresent(serverJobConfigBuilder::s3Directory);
+    return serverJobConfigBuilder.build();
+  }
+
+  /**
+   * Loads the configuration settings related to the RDA gRPC API data load jobs. This job and most
    * of its settings are optional. Because the API may exist in some environments but not others a
    * separate environment variable indicates whether the settings should be loaded.
    *
@@ -561,74 +739,15 @@ public final class AppConfiguration extends BaseAppConfiguration {
     if (!enabled) {
       return null;
     }
-    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
-        AbstractRdaLoadJob.Config.builder()
-            .runInterval(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)))
-            .batchSize(config.intValue(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE))
-            .writeThreads(config.intValue(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS));
-    config
-        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM)
-        .ifPresent(jobConfig::startingFissSeqNum);
-    config
-        .longOption(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM)
-        .ifPresent(jobConfig::startingMcsSeqNum);
-    config.booleanOption(ENV_VAR_KEY_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
-    // Default to the hardcoded RDA version in RdaService, restricted to major version
-    jobConfig.rdaVersion(
-        RdaVersion.builder()
-            .versionString(
-                config
-                    .stringOption(ENV_VAR_KEY_RDA_VERSION)
-                    .orElse("^" + RdaService.RDA_PROTO_VERSION))
-            .build());
-    jobConfig.sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE);
-    final RdaSourceConfig grpcConfig =
-        RdaSourceConfig.builder()
-            .serverType(
-                config.enumValue(
-                    ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.class))
-            .host(config.stringValue(ENV_VAR_KEY_RDA_GRPC_HOST))
-            .port(config.intValue(ENV_VAR_KEY_RDA_GRPC_PORT))
-            .inProcessServerName(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME))
-            .maxIdle(Duration.ofSeconds(config.intValue(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)))
-            .minIdleTimeBeforeConnectionDrop(
-                Duration.ofSeconds(
-                    config.intValue(ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
-            .authenticationToken(
-                config.stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN).orElse(null))
-            .messageErrorExpirationDays(
-                config.intOption(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
-            .build();
-    final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
-    mockServerConfig.serverMode(
-        config
-            .enumOption(
-                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
-            .orElse(RdaServerJob.Config.ServerMode.Random));
-    mockServerConfig.serverName(grpcConfig.getInProcessServerName());
-    config
-        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
-        .map(Duration::ofSeconds)
-        .ifPresent(mockServerConfig::runInterval);
-    config
-        .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED)
-        .ifPresent(mockServerConfig::randomSeed);
-    config
-        .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
-        .ifPresent(mockServerConfig::randomMaxClaims);
-    config
-        .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
-        .ifPresent(mockServerConfig::s3Region);
-    config
-        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
-        .ifPresent(mockServerConfig::s3Bucket);
-    config
-        .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
-        .ifPresent(mockServerConfig::s3Directory);
-    final int errorLimit = config.intValue(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT, 0);
 
+    final AbstractRdaLoadJob.Config jobConfig = loadRdaLoadJobConfigOptions(config);
+    final RdaSourceConfig grpcConfig = loadRdaSourceConfig(config);
+    final RdaServerJob.Config serverJobConfigBuilder =
+        loadRdaServerJobConfig(config, grpcConfig, RdaServerJob.Config.builder());
+
+    final int errorLimit = config.intValue(ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT, 0);
     return new RdaLoadOptions(
-        jobConfig.build(), grpcConfig, mockServerConfig.build(), errorLimit, idHasherConfig);
+        jobConfig, grpcConfig, serverJobConfigBuilder, errorLimit, idHasherConfig);
   }
 
   /**
