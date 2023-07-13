@@ -17,14 +17,11 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaim_;
-import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -105,42 +102,6 @@ public enum ClaimType {
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
   /**
-   * Returns the {@link ClaimType} that corresponds to the specified {@link Entity} {@link Class}.
-   *
-   * @param claimTypes {@link Set} set of claim identifiers requested by client
-   * @param val {@link Integer} bitmask denoting the claim types that have data
-   * @return {@link EnumSet} of claim types to process
-   */
-  public static EnumSet fetchClaimsAvailability(Set<ClaimType> claimTypes, Integer val) {
-    EnumSet availSet = EnumSet.noneOf(ClaimType.class);
-    if (claimTypes.contains(CARRIER) && (val & QueryUtils.V_CARRIER_HAS_DATA) != 0) {
-      availSet.add(CARRIER);
-    }
-    if (claimTypes.contains(DME) && (val & QueryUtils.V_DME_HAS_DATA) != 0) {
-      availSet.add(DME);
-    }
-    if (claimTypes.contains(PDE) && (val & QueryUtils.V_PART_D_HAS_DATA) != 0) {
-      availSet.add(PDE);
-    }
-    if (claimTypes.contains(INPATIENT) && (val & QueryUtils.V_INPATIENT_HAS_DATA) != 0) {
-      availSet.add(INPATIENT);
-    }
-    if (claimTypes.contains(OUTPATIENT) && (val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0) {
-      availSet.add(OUTPATIENT);
-    }
-    if (claimTypes.contains(HOSPICE) && (val & QueryUtils.V_HOSPICE_HAS_DATA) != 0) {
-      availSet.add(HOSPICE);
-    }
-    if (claimTypes.contains(SNF) && (val & QueryUtils.V_SNF_HAS_DATA) != 0) {
-      availSet.add(SNF);
-    }
-    if (claimTypes.contains(HHA) && (val & QueryUtils.V_HHA_HAS_DATA) != 0) {
-      availSet.add(HHA);
-    }
-    return availSet;
-  }
-
-  /**
    * Enum constant constructor.
    *
    * @param entityClass the value to use for {@link #getEntityClass()}
@@ -150,7 +111,7 @@ public enum ClaimType {
    * @param serviceEndAttributeFunction the service end attribute function
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
-  private ClaimType(
+  ClaimType(
       Class<?> entityClass,
       SingularAttribute<?, Long> entityIdAttribute,
       SingularAttribute<?, Long> entityBeneficiaryIdAttribute,
