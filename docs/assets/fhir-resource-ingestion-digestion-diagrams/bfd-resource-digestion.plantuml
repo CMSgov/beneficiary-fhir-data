@@ -1,0 +1,15 @@
+@startuml
+title BFD-Server FHIR Resource Digestion Sequence
+participant client
+participant endpoint
+participant "resource-provider"
+database db
+participant "fhir-transformer"
+client -> endpoint: Endpoint for a resource called \n e.g. '/v2/fhir/ExplanationOfBenefit' 
+endpoint -> "resource-provider": Resource provider 'read' OR 'search' method called \n (Depending on params; See OpenAPI Docs)
+"resource-provider" -> db: A single resource (for read) or collection of resources (for search) queried from the db
+db --> "resource-provider"
+"resource-provider" -> "fhir-transformer": Transformer method for resource is retrieved and invoked to generate: \n a single FHIR resource (for read) or a FHIR bundle(for search)
+"fhir-transformer" --> endpoint
+endpoint -> client: Serialized FHIR data (Plus a pointer if returning bundle) sent as a response
+@enduml

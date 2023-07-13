@@ -1,11 +1,11 @@
 @startuml
 title BFD-Pipeline-CCW Ingestion of Beneficiary/Claim Data Sequence
-participant CCW
+participant RDA
 database S3
 participant Slack
 participant "bfd-pipeline"
 database "BFD-DB"
-CCW -> S3: Timestamped folder with: \n RIF files for a resource, manifest.xml \n placed in 'bfd-prod-etl' S3 bucket  
+RDA -> S3: Timestamped folder with: \n RIF files for a resource, manifest.xml \n placed in 'bfd-prod-etl' S3 bucket  
 S3 -> S3: Timestamped folder moved to \n 'Incoming' folder of bucket
 S3 -> Slack: Data discovery status sent \n to #BFD-notices channel
 Slack --> S3
@@ -23,5 +23,5 @@ Slack --> S3
 S3 -> S3: Timestamped folder for resource moved \n from 'Incoming' to the 'Done' folder
 S3 --> "bfd-pipeline": ETL process continues if more \n resources still in 'Incoming' folder
 "bfd-pipeline" --> S3
-S3--> CCW
+S3--> RDA
 @enduml
