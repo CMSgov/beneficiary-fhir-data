@@ -70,7 +70,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /** date range that clm_thru_dt falls within. */
   private Optional<DateRangeParam> serviceDate;
   /** whether to return tax numbers. */
-  private boolean includeTaxNumbers;
+  private boolean includeTaxNumbers = false;
   /** whether to exclude SAMHSA claims. */
   private boolean excludeSamhsa;
 
@@ -116,7 +116,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * @param id the beneficiary or claim identifier to process.
    * @param lastUpdated the date range that lastUpdate falls within.
    * @param serviceDate the date range that clm_thru_dt falls within.
-   * @param includeTaxNumbers whether to return tax numbers.
    * @param excludeSamhsa if true excludes SAMHSA claims.
    */
   public void setupTaskParams(
@@ -125,7 +124,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       Long id,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
-      boolean includeTaxNumbers,
       boolean excludeSamhsa) {
     this.claimTransformer = requireNonNull(claimTransformer);
     this.claimType = requireNonNull(claimType);
@@ -133,7 +131,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     this.lastUpdated = lastUpdated;
     this.serviceDate = serviceDate;
     this.excludeSamhsa = excludeSamhsa;
-    this.includeTaxNumbers = includeTaxNumbers;
   }
 
   /**
@@ -146,6 +143,15 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   @Scope("prototype")
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
+  }
+
+  /**
+   * Sets the {@link #includeTaxNumbers} which will turn on processing of NPI tax number info.
+   *
+   * @param includeTaxNumbers {@link boolean} to enable/disable NPI tax number processing.
+   */
+  public void setIncludeTaxNumbers(boolean includeTaxNumbers) {
+    this.includeTaxNumbers = includeTaxNumbers;
   }
 
   /**
