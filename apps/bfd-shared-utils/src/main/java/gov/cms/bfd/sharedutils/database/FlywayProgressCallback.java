@@ -18,7 +18,7 @@ import org.flywaydb.core.api.callback.Event;
 public class FlywayProgressCallback implements Callback {
   /**
    * We only care about events that we report on. All others will be ignored. This maps each
-   * supported event to its equivalent {@link DatabaseMigrationProgress}.
+   * supported event to its equivalent {@link DatabaseMigrationProgress.Stage}.
    */
   @VisibleForTesting
   static final Map<Event, DatabaseMigrationProgress.Stage> SUPPORTED_EVENTS_MAPPING =

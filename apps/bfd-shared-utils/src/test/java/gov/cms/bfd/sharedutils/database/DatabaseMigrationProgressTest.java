@@ -22,19 +22,19 @@ class DatabaseMigrationProgressTest {
         new DatabaseMigrationProgress(stage, null, null),
         new DatabaseMigrationProgress(stage, null));
 
-    // with no script or version sets fields to null
+    // info with no script or version sets fields to null
     assertEquals(
         new DatabaseMigrationProgress(stage, null, null),
         new DatabaseMigrationProgress(stage, info));
 
-    // with script and null version just sets filename
+    // info with script and null version just sets filename
     doReturn(version).when(info).getVersion();
     doReturn("filename").when(info).getScript();
     assertEquals(
         new DatabaseMigrationProgress(stage, null, "filename"),
         new DatabaseMigrationProgress(stage, info));
 
-    // with script and version just sets filename and version
+    // info with script and version just sets filename and version
     doReturn(version).when(info).getVersion();
     doReturn("100").when(version).getVersion();
     assertEquals(
