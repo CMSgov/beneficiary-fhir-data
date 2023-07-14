@@ -12,7 +12,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -234,8 +233,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
   @EqualsAndHashCode
-  public static final class Config implements Serializable {
-    private static final long serialVersionUID = 1823137784819917L;
+  public static final class Config {
 
     /**
      * runInterval specifies how often the job should be scheduled. It is used to create a return
@@ -274,10 +272,10 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
     private final boolean processDLQ;
 
     /** Indicates the preferred sink type to create for created jobs. */
-    private final SinkTypePreference sinkTypePreference;
+    @Getter private final SinkTypePreference sinkTypePreference;
 
     /** Indicates the RDA Version (range) that the job is allows to process. */
-    private final RdaVersion rdaVersion;
+    @Getter private final RdaVersion rdaVersion;
 
     /**
      * Instantiates a new config.
@@ -343,15 +341,6 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
      */
     public boolean shouldProcessDLQ() {
       return processDLQ;
-    }
-
-    /**
-     * Returns the RDA API version that jobs using this config can ingest data from.
-     *
-     * @return The RDA API version that jobs using this config can ingest data from.
-     */
-    public RdaVersion getRdaVersion() {
-      return rdaVersion;
     }
   }
 

@@ -16,7 +16,7 @@ public final class CcwRifLoadTestUtils {
   /** The value to use for {@link IdHasher.Config#getHashPepper()} in tests. */
   public static final byte[] HICN_HASH_PEPPER = "nottherealpepper".getBytes(StandardCharsets.UTF_8);
 
-  /** The value to use for {@link LoadAppOptions#isIdempotencyRequired()}. */
+  /** The value to use for {@link LoadAppOptions#idempotencyRequired}. */
   public static final boolean IDEMPOTENCY_REQUIRED = true;
 
   /** The default batch size to use for testing. */
@@ -34,11 +34,16 @@ public final class CcwRifLoadTestUtils {
   public static LoadAppOptions getLoadOptions() {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
-        LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED,
         false,
-        DEFAULT_LOAD_BATCH_SIZE,
-        DEFAULT_QUEUE_SIZE_MULTIPLE);
+        new LoadAppOptions.PerformanceSettings(
+            LoadAppOptions.DEFAULT_LOADER_THREADS,
+            DEFAULT_LOAD_BATCH_SIZE,
+            DEFAULT_QUEUE_SIZE_MULTIPLE),
+        new LoadAppOptions.PerformanceSettings(
+            LoadAppOptions.DEFAULT_LOADER_THREADS,
+            DEFAULT_LOAD_BATCH_SIZE,
+            DEFAULT_QUEUE_SIZE_MULTIPLE));
   }
 
   /**
@@ -47,8 +52,8 @@ public final class CcwRifLoadTestUtils {
    * @param idempotencyRequired if idempotency is required; affects the LoadStrategy that gets used
    *     when loading
    * @return Same as {@link #getLoadOptions()}, but with {@link
-   *     LoadAppOptions#isFilteringNonNullAndNon2023Benes()} set to <code>true</code>. Should only
-   *     be used in those test cases looking to test that filtering capability.
+   *     LoadAppOptions#filteringNonNullAndNon2023Benes} set to {@code true}. Should only be used in
+   *     those test cases looking to test that filtering capability.
    */
   public static LoadAppOptions getLoadOptionsWithFilteringOfNon2023BenesEnabled(
       boolean idempotencyRequired) {
@@ -68,11 +73,16 @@ public final class CcwRifLoadTestUtils {
       boolean idempotencyRequired, boolean filterNon2023benes) {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
-        LoadAppOptions.DEFAULT_LOADER_THREADS,
         idempotencyRequired,
         filterNon2023benes,
-        DEFAULT_LOAD_BATCH_SIZE,
-        DEFAULT_QUEUE_SIZE_MULTIPLE);
+        new LoadAppOptions.PerformanceSettings(
+            LoadAppOptions.DEFAULT_LOADER_THREADS,
+            DEFAULT_LOAD_BATCH_SIZE,
+            DEFAULT_QUEUE_SIZE_MULTIPLE),
+        new LoadAppOptions.PerformanceSettings(
+            LoadAppOptions.DEFAULT_LOADER_THREADS,
+            DEFAULT_LOAD_BATCH_SIZE,
+            DEFAULT_QUEUE_SIZE_MULTIPLE));
   }
 
   /**
@@ -84,10 +94,11 @@ public final class CcwRifLoadTestUtils {
   public static LoadAppOptions getLoadOptionsWithBatchSize(int batchSize) {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
-        LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED,
         false,
-        batchSize,
-        DEFAULT_QUEUE_SIZE_MULTIPLE);
+        new LoadAppOptions.PerformanceSettings(
+            LoadAppOptions.DEFAULT_LOADER_THREADS, batchSize, DEFAULT_QUEUE_SIZE_MULTIPLE),
+        new LoadAppOptions.PerformanceSettings(
+            LoadAppOptions.DEFAULT_LOADER_THREADS, batchSize, DEFAULT_QUEUE_SIZE_MULTIPLE));
   }
 }

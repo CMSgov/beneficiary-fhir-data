@@ -2,11 +2,9 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import java.io.Serializable;
 
 /** Models the (mostly) user-configurable options for the {@link CcwRifLoadJob}. */
-public final class CcwRifLoadOptions implements Serializable {
-  private static final long serialVersionUID = 1L;
+public final class CcwRifLoadOptions {
 
   /** The data extraction options. */
   private final ExtractionOptions extractionOptions;
