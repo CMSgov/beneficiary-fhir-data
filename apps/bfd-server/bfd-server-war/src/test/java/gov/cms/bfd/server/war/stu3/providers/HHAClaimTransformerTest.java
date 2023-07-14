@@ -45,7 +45,7 @@ public final class HHAClaimTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim,
             new MetricRegistry(),
-            Optional.empty(),
+            false,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 

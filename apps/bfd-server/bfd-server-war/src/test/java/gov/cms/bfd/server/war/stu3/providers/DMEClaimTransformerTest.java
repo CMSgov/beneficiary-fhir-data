@@ -49,11 +49,11 @@ public final class DMEClaimTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim,
             new MetricRegistry(),
-            Optional.of(true),
+            Boolean.TRUE,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 
-    assertMatches(claim, eob, Optional.of(true));
+    assertMatches(claim, eob, true);
   }
 
   /**
@@ -70,8 +70,7 @@ public final class DMEClaimTransformerTest {
    *     result
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      DMEClaim claim, ExplanationOfBenefit eob, Optional<Boolean> includedTaxNumbers)
+  static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob, Boolean includedTaxNumbers)
       throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
@@ -135,7 +134,7 @@ public final class DMEClaimTransformerTest {
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers.orElse(false)) {
+    if (includedTaxNumbers) {
       assertNotNull(taxNumberCareTeamEntry);
     } else {
       assertNull(taxNumberCareTeamEntry);

@@ -45,7 +45,7 @@ public final class HospiceClaimTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim,
             new MetricRegistry(),
-            Optional.empty(),
+            Boolean.FALSE,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 

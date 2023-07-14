@@ -774,15 +774,12 @@ final class TransformerTestUtils {
         actualCode.stream()
             .anyMatch(
                 c -> {
-                  if (!expectedSystem.equals(c.getSystem())
-                      || (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
-                      || (expectedDisplay != null && !expectedDisplay.equals(c.getDisplay()))
-                      || !expectedCode.equals(c.getCode())) {
-                    return false;
-                  }
-                  return true;
+                  return expectedSystem.equals(c.getSystem())
+                      && (expectedVersion == null || expectedVersion.equals(c.getVersion()))
+                      && (expectedDisplay == null || expectedDisplay.equals(c.getDisplay()))
+                      && expectedCode.equals(c.getCode());
                 }),
-        "No matching Coding found: " + actualCode.toString());
+        "No matching Coding found: " + actualCode);
   }
 
   /**
@@ -1241,9 +1238,7 @@ final class TransformerTestUtils {
             c -> {
               if (!codingSystem.equals(c.getSystem())) return false;
               if (codingVersion != null && !codingVersion.equals(c.getVersion())) return false;
-              if (!codingCode.equals(c.getCode())) return false;
-
-              return true;
+              return codingCode.equals(c.getCode());
             });
   }
 
@@ -1269,9 +1264,7 @@ final class TransformerTestUtils {
             c -> {
               if (!CCWUtils.calculateVariableReferenceUrl(ccwVariable).equals(c.getSystem()))
                 return false;
-              if (!expectedCodeString.equals(c.getCode())) return false;
-
-              return true;
+              return expectedCodeString.equals(c.getCode());
             });
   }
 
@@ -2250,17 +2243,20 @@ final class TransformerTestUtils {
   static ExplanationOfBenefit transformRifRecordToEob(
       Object rifRecord,
       MetricRegistry metricRegistry,
-      Optional<Boolean> includeTaxNumbers,
+      Boolean includeTaxNumbers,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup) {
 
     ClaimTransformerInterface claimTransformerInterface = null;
-    if (rifRecord instanceof CarrierClaim) {
+    if (rifRecord instanceof CarrierClaim || rifRecord instanceof DMEClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformer(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
-    } else if (rifRecord instanceof DMEClaim) {
-      claimTransformerInterface = new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup);
-    } else if (rifRecord instanceof HHAClaim) {
+          rifRecord instanceof CarrierClaim
+              ? new CarrierClaimTransformer(metricRegistry, drugCodeDisplayLookup, npiOrgLookup)
+              : new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup);
+
+      return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    }
+    if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
     } else if (rifRecord instanceof HospiceClaim) {
       claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
@@ -2273,25 +2269,8 @@ final class TransformerTestUtils {
     } else if (rifRecord instanceof SNFClaim) {
       claimTransformerInterface = new SNFClaimTransformer(metricRegistry, npiOrgLookup);
     } else {
-      throw new BadCodeMonkeyException(
-          String.format("Unhandled %s: %s", ClaimType.class, rifRecord.getClass()));
+      throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
-    return convertClaim(claimTransformerInterface, rifRecord, includeTaxNumbers);
-  }
-
-  /**
-   * Transform rif record to eob explanation of benefit.
-   *
-   * @param claimTransformerInterface {@link ClaimTransformerInterface} to transform the {@link
-   *     Data}
-   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform
-   * @param includeTaxNumbers if tax numbers should be included in the response
-   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
-   */
-  static ExplanationOfBenefit convertClaim(
-      ClaimTransformerInterface claimTransformerInterface,
-      Object rifRecord,
-      Optional<Boolean> includeTaxNumbers) {
-    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    return claimTransformerInterface.transform(rifRecord);
   }
 }

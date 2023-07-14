@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -114,38 +113,33 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
 
     ExplanationOfBenefit inpatientEob =
-        inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class), Optional.empty());
+        inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class));
     String inpatientClaimType = TransformerUtilsV2.getClaimType(inpatientEob).toString();
 
     ExplanationOfBenefit outpatientEob =
-        outpatientClaimTransformerV2.transform(getClaim(OutpatientClaim.class), Optional.empty());
+        outpatientClaimTransformerV2.transform(getClaim(OutpatientClaim.class));
     String outpatientClaimType = TransformerUtilsV2.getClaimType(outpatientEob).toString();
 
-    ExplanationOfBenefit dmeEob =
-        dmeClaimTransformerV2.transform(getClaim(DMEClaim.class), Optional.ofNullable(false));
+    ExplanationOfBenefit dmeEob = dmeClaimTransformerV2.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtilsV2.getClaimType(dmeEob).toString();
 
-    ExplanationOfBenefit hhaEob =
-        hhaClaimTransformerV2.transform(getClaim(HHAClaim.class), Optional.empty());
+    ExplanationOfBenefit hhaEob = hhaClaimTransformerV2.transform(getClaim(HHAClaim.class));
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
         new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit hospiceEob =
-        hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class), Optional.empty());
+        hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class));
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();
 
-    ExplanationOfBenefit snfEob =
-        snfClaimTransformerV2.transform(getClaim(SNFClaim.class), Optional.empty());
+    ExplanationOfBenefit snfEob = snfClaimTransformerV2.transform(getClaim(SNFClaim.class));
     String snfClaimType = TransformerUtilsV2.getClaimType(snfEob).toString();
 
     ExplanationOfBenefit carrierEob =
-        carrierClaimTransformerV2.transform(
-            getClaim(CarrierClaim.class), Optional.ofNullable(false));
+        carrierClaimTransformerV2.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
-    ExplanationOfBenefit pdeEob =
-        partDEventTransformer.transform(getClaim(PartDEvent.class), Optional.empty());
+    ExplanationOfBenefit pdeEob = partDEventTransformer.transform(getClaim(PartDEvent.class));
 
     String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();
 
@@ -174,12 +168,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndMatchingCptExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForItemWithSingleCoding(
         TransformerConstants.CODING_SYSTEM_HCPCS,
@@ -243,12 +234,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleKnownCodesAndOneHasBlacklistedCptExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForItemWithMultiCoding(
         CODING_SYSTEM_HCPCS_CD,
@@ -273,12 +261,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndOneUnknownCodeAndNonSamhsaCptExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForItemWithMultiCoding(
         "unknown/system/code",
@@ -302,12 +287,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndAllUnknownCodesExpectFallbackMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForItemWithMultiCoding(
         "unknown/system/code",
@@ -351,12 +333,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForItemWithSingleCoding(
         "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
@@ -392,12 +371,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd9CodeExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_9,
@@ -419,12 +395,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd9SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForDiagnosisIcd(
         "not valid icd9 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
@@ -462,12 +435,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd10CodeExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_10,
@@ -489,12 +459,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd10SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForDiagnosisIcd(
         "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
@@ -530,12 +497,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithBlacklistedDrgCodeExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForDiagnosisPackage(
         DRG_SYSTEM, BLACKLISTED_DRG_DIAGNOSIS_CODE, expectMatch, loadedExplanationOfBenefit);
@@ -570,12 +534,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithUnknownPackageSystemExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
-    if (PART_D_EVENT_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForDiagnosisPackage(
         "UNKNOWN", NON_BLACKLISTED_DRG_DIAGNOSIS_CODE, expectMatch, loadedExplanationOfBenefit);
@@ -594,17 +555,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd9CodeExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch =
+        !PART_D_EVENT_CLAIM.equals(claimType)
+            && !DME_CLAIM.equals(claimType)
+            && !HHA_CLAIM.equals(claimType)
+            && !HOSPICE_CLAIM.equals(claimType)
+            && !CARRIER_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (PART_D_EVENT_CLAIM.equals(claimType)
-        || DME_CLAIM.equals(claimType)
-        || HHA_CLAIM.equals(claimType)
-        || HOSPICE_CLAIM.equals(claimType)
-        || CARRIER_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_9,
@@ -626,17 +585,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd9SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch =
+        !PART_D_EVENT_CLAIM.equals(claimType)
+            && !DME_CLAIM.equals(claimType)
+            && !HHA_CLAIM.equals(claimType)
+            && !HOSPICE_CLAIM.equals(claimType)
+            && !CARRIER_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (PART_D_EVENT_CLAIM.equals(claimType)
-        || DME_CLAIM.equals(claimType)
-        || HHA_CLAIM.equals(claimType)
-        || HOSPICE_CLAIM.equals(claimType)
-        || CARRIER_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForProcedureIcd(
         "not valid icd9 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
@@ -674,17 +631,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd10CodeExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch =
+        !PART_D_EVENT_CLAIM.equals(claimType)
+            && !DME_CLAIM.equals(claimType)
+            && !HHA_CLAIM.equals(claimType)
+            && !HOSPICE_CLAIM.equals(claimType)
+            && !CARRIER_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (PART_D_EVENT_CLAIM.equals(claimType)
-        || DME_CLAIM.equals(claimType)
-        || HHA_CLAIM.equals(claimType)
-        || HOSPICE_CLAIM.equals(claimType)
-        || CARRIER_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_10,
@@ -706,17 +661,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd10SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    boolean expectMatch = true;
+    boolean expectMatch =
+        !PART_D_EVENT_CLAIM.equals(claimType)
+            && !DME_CLAIM.equals(claimType)
+            && !HHA_CLAIM.equals(claimType)
+            && !HOSPICE_CLAIM.equals(claimType)
+            && !CARRIER_CLAIM.equals(claimType);
 
     // PDE has no SAMHSA, so expect no match on SAMHSA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (PART_D_EVENT_CLAIM.equals(claimType)
-        || DME_CLAIM.equals(claimType)
-        || HHA_CLAIM.equals(claimType)
-        || HOSPICE_CLAIM.equals(claimType)
-        || CARRIER_CLAIM.equals(claimType)) {
-      expectMatch = false;
-    }
 
     verifySamhsaMatcherForProcedureIcd(
         "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);

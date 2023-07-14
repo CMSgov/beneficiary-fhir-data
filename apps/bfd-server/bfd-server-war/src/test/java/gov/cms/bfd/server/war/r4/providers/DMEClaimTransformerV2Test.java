@@ -8,7 +8,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -21,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -52,12 +50,6 @@ public final class DMEClaimTransformerV2Test {
   DMEClaim claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
-  /** The Metric Registry to use for the test. */
-  MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  FdaDrugCodeDisplayLookup drugDisplayLookup;
-  /** The NPI org lookup to use for the test. */
-  NPIOrgLookup npiOrgLookup;
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
   /** The fhir context for parsing the test file. */
@@ -92,14 +84,11 @@ public final class DMEClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
-    claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugDisplayLookup);
-
+    claimTransformerInterface =
+        new DMEClaimTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    ExplanationOfBenefit genEob =
-        claimTransformerInterface.transform(claim, Optional.ofNullable(false));
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Boolean.FALSE);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1247,8 +1236,7 @@ public final class DMEClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
-    ExplanationOfBenefit eob =
-        claimTransformerInterface.transform(generateClaim(), Optional.ofNullable(false));
+    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim(), false);
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

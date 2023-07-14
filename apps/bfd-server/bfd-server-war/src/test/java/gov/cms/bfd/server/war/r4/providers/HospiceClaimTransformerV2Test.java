@@ -61,10 +61,6 @@ public final class HospiceClaimTransformerV2Test {
   ExplanationOfBenefit eob = null;
   /** The parsed claim used to generate the EOB and for validating with. */
   HospiceClaim claim = null;
-  /** The Metric Registry to use for the test. */
-  MetricRegistry metricRegistry;
-  /** The NPI org lookup to use for the test. */
-  NPIOrgLookup npiOrgLookup;
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
   /** The fhir context for parsing the test file. */
@@ -77,9 +73,8 @@ public final class HospiceClaimTransformerV2Test {
    */
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
-    metricRegistry = new MetricRegistry();
-    npiOrgLookup = new NPIOrgLookup();
-    claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
+    claimTransformerInterface =
+        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -100,7 +95,7 @@ public final class HospiceClaimTransformerV2Test {
    * @throws IOException if there is an issue reading the test file
    */
   private void createEOB() throws IOException {
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -126,7 +121,7 @@ public final class HospiceClaimTransformerV2Test {
    */
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
-    assertMatches(claim, claimTransformerInterface.transform(claim, Optional.empty()));
+    assertMatches(claim, claimTransformerInterface.transform(claim));
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -437,7 +432,7 @@ public final class HospiceClaimTransformerV2Test {
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Optional.empty());
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

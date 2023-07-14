@@ -48,7 +48,7 @@ public final class InpatientClaimTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim,
             new MetricRegistry(),
-            Optional.empty(),
+            Boolean.FALSE,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 

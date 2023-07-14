@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -149,11 +148,7 @@ public final class Stu3EobSamhsaMatcherTest {
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
                     return TransformerTestUtils.transformRifRecordToEob(
-                        r,
-                        new MetricRegistry(),
-                        Optional.empty(),
-                        fdaDrugCodeDisplayLookup,
-                        npiOrgLookup);
+                        r, new MetricRegistry(), false, fdaDrugCodeDisplayLookup, npiOrgLookup);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -834,7 +829,7 @@ public final class Stu3EobSamhsaMatcherTest {
           TransformerTestUtils.transformRifRecordToEob(
               sampleRifRecordForClaimType,
               new MetricRegistry(),
-              Optional.empty(),
+              false,
               FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
               new NPIOrgLookup());
 

@@ -70,7 +70,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Meta;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,7 +130,7 @@ public class ExplanationOfBenefitResourceProviderTest {
   @Mock Timer.Context mockTimerContext;
 
   /** The mock samhsa matcher. */
-  Stu3EobSamhsaMatcher samhsaMatcher;
+  @Mock Stu3EobSamhsaMatcher mockSamhsaMatcher;
 
   /** The test data bene. */
   Beneficiary testBene;
@@ -170,9 +169,9 @@ public class ExplanationOfBenefitResourceProviderTest {
   SNFClaimTransformer snfClaimTransformer;
 
   /** The NPI Org lookup. */
-  @Mock NPIOrgLookup npiOrgLookup;
+  @Mock NPIOrgLookup mockNpiOrgLookup;
   /** The FDA drug display lookup. */
-  static FdaDrugCodeDisplayLookup drugDisplayLookup;
+  @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
 
   /** The re-used valid bene id value. */
   public static String BENE_ID = "123456789";
@@ -180,27 +179,16 @@ public class ExplanationOfBenefitResourceProviderTest {
   /** The mock concurrent task future. */
   @Mock Future<PatientClaimsEobTaskTransformer> futureTask;
 
-  /** one-time setup for entire test class. */
-  @BeforeAll
-  public static void setupFda() {
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-  }
-
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
     setupTransformers();
-
-    samhsaMatcher = new Stu3EobSamhsaMatcher();
 
     eobProvider =
         new ExplanationOfBenefitResourceProvider(
             appContext,
             metricRegistry,
             loadedFilterManager,
-            samhsaMatcher,
-            drugDisplayLookup,
-            npiOrgLookup,
             executorService,
             carrierClaimTransformer,
             dmeClaimTransformer,
@@ -240,7 +228,8 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
     // NPI and FDA drug mocking
-    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.empty());
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.empty());
+    when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
 
     setupLastUpdatedMocks();
 
@@ -250,15 +239,15 @@ public class ExplanationOfBenefitResourceProviderTest {
   /** Sets up claim transformers. */
   private void setupTransformers() {
     carrierClaimTransformer =
-        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, npiOrgLookup);
-    partDEventTransformer = new PartDEventTransformer(metricRegistry, drugDisplayLookup);
-    dmeClaimTransformer = new DMEClaimTransformer(metricRegistry, drugDisplayLookup);
-    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
-    hospiceClaimTransformer = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
-    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, npiOrgLookup);
-    outpatientClaimTransformer = new OutpatientClaimTransformer(metricRegistry, npiOrgLookup);
+        new CarrierClaimTransformer(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
+    partDEventTransformer = new PartDEventTransformer(metricRegistry, mockDrugDisplayLookup);
+    dmeClaimTransformer = new DMEClaimTransformer(metricRegistry, mockDrugDisplayLookup);
+    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    hospiceClaimTransformer = new HospiceClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    outpatientClaimTransformer = new OutpatientClaimTransformer(metricRegistry, mockNpiOrgLookup);
 
-    snfClaimTransformer = new SNFClaimTransformer(metricRegistry, npiOrgLookup);
+    snfClaimTransformer = new SNFClaimTransformer(metricRegistry, mockNpiOrgLookup);
   }
 
   /** sets up claim entities. */
@@ -544,12 +533,10 @@ public class ExplanationOfBenefitResourceProviderTest {
     CriteriaQuery<CarrierClaim> carrierMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> carrierRoot = mock(Root.class);
     setupClaimEntity(carrierEntityManager, ClaimType.CARRIER, carrierMockCriteria, carrierRoot);
-
     // mock DMEClaim data
     CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> dmeRoot = mock(Root.class);
     setupClaimEntity(dmeEntityManager, ClaimType.DME, dmeMockCriteria, dmeRoot);
-
     // mock SNFClaim data
     CriteriaQuery<SNFClaim> snfMockCriteria = mock(CriteriaQuery.class);
     Root<SNFClaim> snfRoot = mock(Root.class);
@@ -557,48 +544,47 @@ public class ExplanationOfBenefitResourceProviderTest {
 
     PatientClaimsEobTaskTransformer carrierTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    carrierTask.setEntityManager(carrierEntityManager);
     carrierTask.setupTaskParams(
         carrierClaimTransformer,
         ClaimType.CARRIER,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.ofNullable(true));
-    carrierTask.setEntityManager(carrierEntityManager);
+        true);
+    carrierTask.setIncludeTaxNumbers(true);
     carrierTask.call();
     assertTrue(carrierTask.ranSuccessfully());
     assertTrue(carrierTask.eobsRemovedBySamhsaFilter() < 1);
 
     PatientClaimsEobTaskTransformer dmeTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    dmeTask.setEntityManager(dmeEntityManager);
     dmeTask.setupTaskParams(
         dmeClaimTransformer,
         ClaimType.DME,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.ofNullable(true));
-    dmeTask.setEntityManager(dmeEntityManager);
+        true);
+    dmeTask.setIncludeTaxNumbers(true);
     dmeTask.call();
     assertTrue(dmeTask.ranSuccessfully());
     assertTrue(dmeTask.eobsRemovedBySamhsaFilter() < 1);
 
     PatientClaimsEobTaskTransformer snfTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    snfTask.setEntityManager(snfEntityManager);
     snfTask.setupTaskParams(
         snfClaimTransformer,
         ClaimType.SNF,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.ofNullable(true));
-    snfTask.setEntityManager(snfEntityManager);
+        false);
     snfTask.call();
     assertTrue(snfTask.ranSuccessfully());
     assertTrue(snfTask.eobsRemovedBySamhsaFilter() < 1);
@@ -620,32 +606,32 @@ public class ExplanationOfBenefitResourceProviderTest {
 
     PatientClaimsEobTaskTransformer carrierTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    carrierTask.setEntityManager(carrierEntityManager);
     carrierTask.setupTaskParams(
         carrierClaimTransformer,
         ClaimType.CARRIER,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.empty());
-    carrierTask.setEntityManager(carrierEntityManager);
+        true);
+    carrierTask.setIncludeTaxNumbers(false);
     carrierTask.call();
     assertTrue(carrierTask.ranSuccessfully());
     assertTrue(carrierTask.eobsRemovedBySamhsaFilter() == 0);
 
     PatientClaimsEobTaskTransformer dmeTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    dmeTask.setEntityManager(dmeEntityManager);
     dmeTask.setupTaskParams(
         dmeClaimTransformer,
         ClaimType.DME,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.empty());
-    dmeTask.setEntityManager(dmeEntityManager);
+        true);
+    dmeTask.setIncludeTaxNumbers(false);
     dmeTask.call();
     assertTrue(dmeTask.ranSuccessfully());
     assertTrue(dmeTask.eobsRemovedBySamhsaFilter() == 0);
@@ -664,17 +650,16 @@ public class ExplanationOfBenefitResourceProviderTest {
 
     PatientClaimsEobTaskTransformer carrierTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
-
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    carrierTask.setEntityManager(carrierEntityManager);
     carrierTask.setupTaskParams(
         carrierClaimTransformer,
         ClaimType.CARRIER,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.ofNullable(true));
-    carrierTask.setEntityManager(carrierEntityManager);
+        true);
+    carrierTask.setIncludeTaxNumbers(true);
     carrierTask.call();
     assertTrue(carrierTask.ranSuccessfully());
 
@@ -684,16 +669,16 @@ public class ExplanationOfBenefitResourceProviderTest {
 
     PatientClaimsEobTaskTransformer dmeTask =
         new PatientClaimsEobTaskTransformer(
-            metricRegistry, samhsaMatcher, drugDisplayLookup, npiOrgLookup);
+            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
+    dmeTask.setEntityManager(dmeEntityManager);
     dmeTask.setupTaskParams(
         dmeClaimTransformer,
         ClaimType.DME,
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.ofNullable(true));
-    dmeTask.setEntityManager(dmeEntityManager);
+        true);
+    carrierTask.setIncludeTaxNumbers(true);
     dmeTask.call();
     assertTrue(dmeTask.ranSuccessfully());
 
@@ -704,8 +689,9 @@ public class ExplanationOfBenefitResourceProviderTest {
         Long.parseLong(BENE_ID),
         Optional.empty(),
         Optional.empty(),
-        Optional.ofNullable(true),
-        Optional.ofNullable(true));
+        true);
+    dmeTask.setIncludeTaxNumbers(true);
+    dmeTask.call();
     dmeTask.setEntityManager(dmeEntityManager);
     dmeTask.call();
     assertFalse(dmeTask.ranSuccessfully());

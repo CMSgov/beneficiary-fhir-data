@@ -1602,17 +1602,20 @@ public final class TransformerTestUtilsV2 {
   static ExplanationOfBenefit transformRifRecordToEob(
       Object rifRecord,
       MetricRegistry metricRegistry,
-      Optional<Boolean> includeTaxNumbers,
+      boolean includeTaxNumbers,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup) {
 
     ClaimTransformerInterfaceV2 claimTransformerInterface = null;
-    if (rifRecord instanceof CarrierClaim) {
+    if (rifRecord instanceof CarrierClaim || rifRecord instanceof DMEClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
-    } else if (rifRecord instanceof DMEClaim) {
-      claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup);
-    } else if (rifRecord instanceof HHAClaim) {
+          rifRecord instanceof CarrierClaim
+              ? new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup)
+              : new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup);
+
+      return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    }
+    if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
     } else if (rifRecord instanceof HospiceClaim) {
       claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
@@ -1629,22 +1632,6 @@ public final class TransformerTestUtilsV2 {
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
-    return convertClaim(claimTransformerInterface, rifRecord, includeTaxNumbers);
-  }
-
-  /**
-   * Transform rif record to eob explanation of benefit.
-   *
-   * @param claimTransformerInterface {@link ClaimTransformerInterfaceV2} to transform the {@link
-   *     Data}
-   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform
-   * @param includeTaxNumbers if tax numbers should be included in the response
-   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
-   */
-  static ExplanationOfBenefit convertClaim(
-      ClaimTransformerInterfaceV2 claimTransformerInterface,
-      Object rifRecord,
-      Optional<Boolean> includeTaxNumbers) {
-    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    return claimTransformerInterface.transform(rifRecord);
   }
 }

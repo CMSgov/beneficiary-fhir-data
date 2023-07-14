@@ -40,7 +40,7 @@ public final class PartDEventTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim,
             new MetricRegistry(),
-            Optional.empty(),
+            Boolean.FALSE,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 
@@ -133,7 +133,7 @@ public final class PartDEventTransformerTest {
         TransformerTestUtils.transformRifRecordToEob(
             claim,
             new MetricRegistry(),
-            Optional.empty(),
+            false,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 

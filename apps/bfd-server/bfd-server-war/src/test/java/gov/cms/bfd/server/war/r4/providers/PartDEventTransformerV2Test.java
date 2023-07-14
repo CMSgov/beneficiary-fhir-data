@@ -52,10 +52,6 @@ public final class PartDEventTransformerV2Test {
   PartDEvent claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
-  /** The Metric Registry to use for the test. */
-  MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 claimTransformerInterface;
   /** The fhir context for parsing the test file. */
@@ -90,11 +86,11 @@ public final class PartDEventTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    claimTransformerInterface = new PartDEventTransformerV2(metricRegistry, drugDisplayLookup);
+    claimTransformerInterface =
+        new PartDEventTransformerV2(
+            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    eob = claimTransformerInterface.transform(claim, Optional.empty());
+    eob = claimTransformerInterface.transform(claim);
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -1036,8 +1032,7 @@ public final class PartDEventTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob =
-        claimTransformerInterface.transform(generateClaim(), Optional.empty());
+    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim());
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

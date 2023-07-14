@@ -87,7 +87,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .execute();
 
     assertNotNull(eob);
-    CarrierClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
+    CarrierClaimTransformerTest.assertMatches(claim, eob, false);
   }
 
   /**
@@ -161,7 +161,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .execute();
 
     assertNotNull(eob);
-    DMEClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
+    DMEClaimTransformerTest.assertMatches(claim, eob, false);
   }
 
   /**
@@ -586,7 +586,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .get();
     assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
-        carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), Optional.empty());
+        carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), false);
 
     DMEClaim dmeClaim =
         loadedRecords.stream()
@@ -595,7 +595,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .findFirst()
             .get();
     DMEClaimTransformerTest.assertMatches(
-        dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0), Optional.empty());
+        dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0), false);
 
     HHAClaim hhaClaim =
         loadedRecords.stream()
@@ -748,9 +748,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .get();
     assertEquals(1, filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
-        carrierClaim,
-        filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).get(0),
-        Optional.empty());
+        carrierClaim, filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).get(0), false);
 
     DMEClaim dmeClaim =
         loadedRecords.stream()
@@ -759,9 +757,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .findFirst()
             .get();
     DMEClaimTransformerTest.assertMatches(
-        dmeClaim,
-        filterToClaimTypeFromList(combinedResults, ClaimType.DME).get(0),
-        Optional.empty());
+        dmeClaim, filterToClaimTypeFromList(combinedResults, ClaimType.DME).get(0), false);
 
     HHAClaim hhaClaim =
         loadedRecords.stream()
@@ -1001,7 +997,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .get();
     assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
-        carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), Optional.empty());
+        carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), false);
 
     DMEClaim dmeClaim =
         loadedRecords.stream()
@@ -1010,7 +1006,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .findFirst()
             .get();
     DMEClaimTransformerTest.assertMatches(
-        dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0), Optional.empty());
+        dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0), false);
 
     HHAClaim hhaClaim =
         loadedRecords.stream()
@@ -1131,7 +1127,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .get();
     assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
     CarrierClaimTransformerTest.assertMatches(
-        carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), Optional.empty());
+        carrierClaim, filterToClaimType(searchResults, ClaimType.CARRIER).get(0), false);
 
     DMEClaim dmeClaim =
         loadedRecords.stream()
@@ -1140,7 +1136,7 @@ public final class ExplanationOfBenefitResourceProviderIT extends ServerRequired
             .findFirst()
             .get();
     DMEClaimTransformerTest.assertMatches(
-        dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0), Optional.empty());
+        dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0), false);
 
     HHAClaim hhaClaim =
         loadedRecords.stream()
