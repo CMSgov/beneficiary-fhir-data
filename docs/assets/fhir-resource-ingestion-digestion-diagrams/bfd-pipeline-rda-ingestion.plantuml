@@ -10,21 +10,24 @@ note over "rda-streaming-api": Runs every 5 min in prod \n 1 hr in test
 "rda-pipeline-source" -> "rda-db": Smoke test to determine connectivity
 "rda-streaming-api" --> "rda-pipeline-source"  
 "rda-db" --> "rda-pipeline-source"
-"rda-pipeline-source" -> "rda-db": Dead Letter Queue (DLQ) Processing
+"rda-pipeline-source" -> "rda-db": Dead Letter Queue (DLQ) Processing: \n Read failed claims from DLQ table
 "rda-db" --> "rda-pipeline-source"
-"rda-pipeline-source" -> "rda-streaming-api": Run 'DLQGrpcRdaSource' job if needed
+"rda-pipeline-source" -> "rda-streaming-api": Dead Letter Queue (DLQ) Processing: \n For each failed claim, process each claim individually \n via the Process 'DLQGrpcRdaSource' job
 "rda-streaming-api" -> "rda-pipeline-source"
-"rda-pipeline-source" -> "rda-streaming-api": GetVersion: stream of current API version
-"rda-streaming-api" --> "rda-pipeline-source"
-"rda-pipeline-source" -> "rda-db": Get starting sequence number to process claims
+"rda-pipeline-source" -> "rda-db": Dead Letter Queue (DLQ) Processing: \n Update error state in db for each claim as RESOLVED/OBSOLETE
 "rda-db" --> "rda-pipeline-source"
+"rda-pipeline-source" -> "rda-streaming-api": Get Version: receive RDA API version and verify compatibility with BFD pipeline
+"rda-streaming-api" --> "rda-pipeline-source"
+"rda-pipeline-source" -> "bfd-db": Get starting sequence number to process claims
+"bfd-db" --> "rda-pipeline-source"
 "rda-pipeline-source" -> "rda-streaming-api": Open stream, and receive messages for processing/to ingest claims \n via RdaFissClaimLoadJob and RdaMcsClaimLoadJob
 "rda-streaming-api" --> "rda-pipeline-source"
 "rda-pipeline-source" -> "rda-pipeline-sink": Send data to sink for storage
-"rda-pipeline-sink" -> "bfd-db": Store fiss and mcs claim data for BFD consumption
+"rda-pipeline-sink" -> "bfd-db": Store fiss and mcs claim data for BFD consumption \n and update starting sequence number value for future runs.
 "bfd-db" --> "rda-pipeline-sink"
 "rda-pipeline-sink" --> "rda-pipeline-source"
+"rda-pipeline-source" -> "rda-db": Any messages that can't be processed written to DLQ table
+"rda-db" --> "rda-pipeline-source"
 "rda-pipeline-source" -> "rda-streaming-api": Stop processing and close stream if: \n no more claims to process or there is an error 
 "rda-streaming-api"--> "rda-pipeline-source"
-"rda-pipeline-source" -> "rda-db": Any messages that can't be processed written to DLQ table
 @enduml
