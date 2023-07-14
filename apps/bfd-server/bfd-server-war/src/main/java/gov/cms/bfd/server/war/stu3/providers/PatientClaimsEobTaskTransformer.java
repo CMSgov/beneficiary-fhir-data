@@ -29,7 +29,6 @@ import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -45,13 +44,13 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   // +++++++++++++++++++++++++++++++++++
 
   /** capture performance metrics. */
-  @Autowired private final MetricRegistry metricRegistry;
+  private final MetricRegistry metricRegistry;
   /** drug description lookup table. */
-  @Autowired private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
   /** NPI lookup table. */
-  @Autowired private final NPIOrgLookup npiOrgLookup;
+  private final NPIOrgLookup npiOrgLookup;
   /** The samhsa matcher. */
-  @Autowired private final Stu3EobSamhsaMatcher samhsaMatcher;
+  private final Stu3EobSamhsaMatcher samhsaMatcher;
   /** Database entity manager. */
   private EntityManager entityManager;
 
