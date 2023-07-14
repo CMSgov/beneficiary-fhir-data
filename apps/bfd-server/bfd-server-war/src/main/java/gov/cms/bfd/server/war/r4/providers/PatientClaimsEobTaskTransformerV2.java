@@ -32,7 +32,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/** Java Callable class that will create a list of patient claims for a given claim type. */
+/**
+ * Java Callable class that will create a list of patient claims for a given claim type. There are
+ * some pertinent info for developers to grasp especially in understanding that each instance of
+ * this class will most likely be running concurrently with other claim tasks. This class is a
+ * non-singleton spring-managed bean; each task requires its own unique instance of a {@link
+ * EntityManager} since processing requires fetching data from a database and requires its own db
+ * connection to operate independently of other concurrent claim tasks. All BFD db connections are
+ * injected by a Spring-managed {@link com.zaxxer.hikari.HikariDataSource}.
+ *
+ * <p>To achieve a unique {@link EntityManager}, this class defines its scope as "prototype", which
+ * identifies its need have its own unique instance of the {@link EntityManager}.
+ *
+ * <p>Once Spring has created the class, the caller then sets up the task parameters that define the
+ * operating constraints {@link PatientClaimsEobTaskTransformerV2#setupTaskParams}. In addition,
+ * some claim tasks require an additional property denoting how NPI tax number is processed; this
+ * property is set using the {@link PatientClaimsEobTaskTransformerV2#setIncludeTaxNumbers}; the
+ * default property value for inclusion of NPI tax info is FALSE (do not include NPI tax info).
+ */
 @Component
 @Scope("prototype")
 public class PatientClaimsEobTaskTransformerV2 implements Callable {
